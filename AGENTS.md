@@ -9,6 +9,10 @@ Go/Gin 版兽剧聚合平台后端，前端零改动对接。
 ## Commands
 
 ```bash
+make build                         # = go build -o bin/server ./cmd/server 的便捷入口
+make run / test / vet / fmt / docs / clean
+nmake /f Makefile.win              # Windows 等价（build/run/test/vet/fmt/docs/clean）
+
 go build ./...                    # 编译全部
 go build -o bin/server ./cmd/server
 go vet ./...                      # 静态检查

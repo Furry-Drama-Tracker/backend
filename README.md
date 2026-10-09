@@ -20,7 +20,7 @@
 ## 快速开始
 
 ```bash
-go build -o bin/furry-drama-be-neo ./cmd/server
+make build                        # 或：go build -o bin/furry-drama-be-neo ./cmd/server
 # 开发（.env 自动加载，无需 --config）
 ./bin/furry-drama-be-neo
 # 或开发（env 覆盖）
@@ -31,6 +31,16 @@ JWT_SECRET=... MONGO_URI=mongodb://127.0.0.1:27017/furry_drama_tracker NODE_ENV=
 # Unix socket
 ./bin/furry-drama-be-neo --config=/etc/furry-drama-tracker/backend.ini --listen=unix:/run/furry-drama-be-neo.sock
 ```
+
+常用命令（`make -n <target>` 预览；Windows 用 `nmake /f Makefile.win`）：
+
+| 目标 | 作用 |
+|---|---|
+| `make build` | 编译到 `bin/furry-drama-be-neo` |
+| `make run` | `go run ./cmd/server` |
+| `make test` / `make vet` / `make fmt` | 测试 / 静态检查 / 格式化 |
+| `make docs` | 重新生成 Swagger 产物（需要 swag） |
+| `make clean` | 清理构建产物 |
 
 ## 配置
 

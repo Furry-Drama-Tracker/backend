@@ -1,0 +1,32 @@
+# Windows NMAKE makefile — furry-drama-be-neo 后端
+# 用法：nmake /f Makefile.win [all|build|run|test|vet|fmt|docs|clean]
+# Unix/Linux 请使用 GNU make 与 Makefile。
+# 注意：NMAKE 不支持 .PHONY，此处依赖目标与文件名不冲突，可重复执行。
+
+BINARY = bin\furry-drama-be-neo.exe
+PKG    = .\cmd\server
+SWAG   = swag
+
+all: build
+
+build:
+	go build -o $(BINARY) $(PKG)
+
+run:
+	go run $(PKG)
+
+test:
+	go test ./...
+
+vet:
+	go vet ./...
+
+fmt:
+	gofmt -l -w .
+
+# 重新生成 Swagger 产物（需要 swag，安装：go install github.com/swaggo/swag/cmd/swag@latest）
+docs:
+	$(SWAG) init -g cmd/server/main.go --output docs
+
+clean:
+	if exist $(BINARY) del /q $(BINARY)
