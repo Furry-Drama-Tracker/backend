@@ -7,7 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// CORS 白名单跨域中间件，对齐 Express cors 包行为（src/index.js:198-225）：
+// CORS 白名单跨域中间件（固定行为契约）：
 //   - 无 Origin（服务器间请求/curl）→ 放行，不设 ACAO 头
 //   - Origin 在白名单 → 设 ACAO/ACAC；预检（OPTIONS + Access-Control-Request-Method）204 短路
 //   - Origin 不在白名单 → 403 {"message":"CORS policy denied"}（走全局错误语义）

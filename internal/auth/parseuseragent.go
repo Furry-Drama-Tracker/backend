@@ -8,7 +8,7 @@ import (
 	"github.com/xiedada05/furry-drama-be-neo/internal/model"
 )
 
-// ParsedUA 是设备信息解析结果（对齐 helpers.js parseUserAgent）。
+// ParsedUA 是设备信息解析结果。
 type ParsedUA struct {
 	Browser        string
 	BrowserVersion string
@@ -18,7 +18,7 @@ type ParsedUA struct {
 	DeviceModel    string
 }
 
-// 正则（对齐 helpers.js parseUserAgent）。
+// 正则（UA 解析规则固定，勿随意改——影响设备信息统计口径）。
 var (
 	reMobile       = regexp.MustCompile(`(?i)Mobile|Android|iPhone`)
 	reTablet       = regexp.MustCompile(`(?i)iPad|Tablet`)
@@ -43,7 +43,7 @@ var (
 	reModelSkip    = regexp.MustCompile(`(?i)^(Mozilla|Compatible|Windows|Mac|Linux|Android|iPhone|iPad)`)
 )
 
-// ParseUserAgent 解析 UA 字符串（对齐 helpers.js parseUserAgent）。
+// ParseUserAgent 解析 UA 字符串（解析规则固定，勿随意改）。
 func ParseUserAgent(ua string) ParsedUA {
 	r := ParsedUA{DeviceType: "desktop"}
 	if ua == "" {
@@ -136,8 +136,8 @@ func ParseUserAgent(ua string) ParsedUA {
 	return r
 }
 
-// BuildDeviceInfo 合并客户端上报 deviceInfo、UA 解析结果与 accept-language。
-// 对齐 helpers.js buildDeviceInfo。
+// BuildDeviceInfo 合并客户端上报 deviceInfo、UA 解析结果与 accept-language
+// （合并规则固定，勿随意改）。
 func BuildDeviceInfo(deviceInfo *DeviceInfoPayload, parsed ParsedUA, ua, acceptLang string) model.DeviceInfo {
 	di := model.DeviceInfo{}
 	if deviceInfo != nil {

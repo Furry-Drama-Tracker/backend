@@ -12,16 +12,16 @@ import (
 	"strings"
 )
 
-// fieldcrypto 实现字段级对称加密，对齐 Express utils/crypto.js：
+// fieldcrypto 实现字段级对称加密，格式为固定契约：
 //   - AES-256-CBC，key = sha256(ENCRYPTION_KEY 或 JWT_SECRET)（二选一，非拼接）
 //   - 输出格式 "enc:<iv hex>:<ct hex>"（iv 16 随机字节）
 //   - 已有 "enc:" 前缀或空值原样返回（不重复加密）
 //
 // 用途：twoFactorSecret / twoFactorBackupCodes / SiteContent email.pass。
-// 必须兼容解密旧数据——算法与 key 派生与原实现一致。
+// 必须兼容解密既有加密数据——算法与 key 派生固定，勿改（改了旧数据将无法解密）。
 
 // FieldKey 派生 32 字节 AES key：sha256(encryptionKey 或 jwtSecret) 的 hex 表示。
-// 与原实现一致：优先 ENCRYPTION_KEY，缺省回退 JWT_SECRET。
+// key 派生固定为：优先 ENCRYPTION_KEY，缺省回退 JWT_SECRET，勿改。
 func FieldKey(encryptionKey, jwtSecret string) string {
 	src := jwtSecret
 	if encryptionKey != "" {
@@ -104,7 +104,7 @@ func DecryptArray(list []string, keyHex string) []string {
 	return out
 }
 
-// pkcs7Pad 标准 PKCS#7 填充（对齐 Node crypto 默认）。
+// pkcs7Pad 标准 PKCS#7 填充。
 func pkcs7Pad(data []byte, blockSize int) []byte {
 	padLen := blockSize - len(data)%blockSize
 	pad := bytes.Repeat([]byte{byte(padLen)}, padLen)

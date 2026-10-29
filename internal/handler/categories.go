@@ -12,7 +12,7 @@ import (
 	"github.com/xiedada05/furry-drama-be-neo/internal/repository"
 )
 
-// 本文件实现 /api/categories 子域（行为逐分支照抄 backend/routes/categories.js）。
+// 本文件实现 /api/categories 子域。
 
 // Categories 是 /api/categories 域 handler 容器。
 type Categories struct {
@@ -27,10 +27,10 @@ func NewCategories(repos *repository.Repos, cfg *config.Config, amw *middleware.
 	return &Categories{Repos: repos, Config: cfg, AuthMW: amw, RL: rl}
 }
 
-// Register 挂载 /api/categories 全部端点（不含 /api 前缀；路径对齐 categories.js 子路径）。
+// Register 挂载 /api/categories 全部端点（不含 /api 前缀）。
 // GET 公开；POST/PUT/DELETE 为 adminOnlyProtect（admin/superadmin）。
 // GET/POST 同时注册 "" 与 "/"：gin 默认会对 /api/categories 尾斜杠缺失发起 307 重定向，
-// 而 Express（strict routing 关闭）直接匹配，需消除该差异。
+// 而接口契约要求带与不带尾斜杠都直接匹配（无重定向），需消除该差异。
 func (h *Categories) Register(g *gin.RouterGroup) {
 	adminOnly := []string{middleware.RoleAdmin, middleware.RoleSuperAdmin}
 	g.GET("", h.List)
@@ -79,7 +79,7 @@ func (h *Categories) Create(c *gin.Context) {
 		c.JSON(400, gin.H{"message": "该分类已存在"})
 		return
 	}
-	// name 缺失/为空 → mongoose required ValidationError → catch-all 500。
+	// name 必填（固定契约）：缺失/为空 → 500 Server error（catch-all）。
 	if name == "" {
 		serverError(c)
 		return
@@ -122,7 +122,7 @@ func (h *Categories) Update(c *gin.Context) {
 		return
 	}
 	body := cmsReadBody(c)
-	// 对齐 categories.js：name 仅 truthy 时更新；nameEn/nameJa/order 仅 !== undefined 时更新。
+	// 更新语义（固定契约）：name 仅 truthy 时更新；nameEn/nameJa/order 仅 !== undefined 时更新。
 	if n := asString(body["name"]); n != "" {
 		cat.Name = n
 	}
@@ -170,7 +170,7 @@ func (h *Categories) Delete(c *gin.Context) {
 	c.JSON(200, gin.H{"message": "分类已删除"})
 }
 
-// categoryJSON 组装分类响应对象（对齐 mongoose 文档 toJSON：_id hex、时间 RFC3339、含 __v）。
+// categoryJSON 组装分类响应对象（与既有集合数据形态一致：_id hex、时间 RFC3339、含 __v）。
 func categoryJSON(cat *model.Category) gin.H {
 	return gin.H{
 		"_id":       cat.ID.Hex(),

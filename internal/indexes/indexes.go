@@ -1,6 +1,7 @@
-// Package indexes 在启动时为所有集合幂等建立索引（对齐 backend/src/indexes.js 与各 mongoose schema）。
+// Package indexes 在启动时为所有集合幂等建立索引。
 //
-// 幂等策略：先按索引名（对齐 mongoose 自动命名约定）判断是否已存在，存在则跳过；
+// 幂等策略：先按索引名（沿用字段+方向的自动命名约定，如 email_1、userId_1_isActive_1）
+// 判断是否已存在，存在则跳过；
 // 创建时若报"already exists"（同名但键/选项冲突）同样视为已建立，不阻断启动。
 package indexes
 
@@ -42,7 +43,7 @@ func (s indexSpec) options() *options.IndexOptions {
 
 // Ensure 幂等地为全部集合建立索引。
 //
-// 清单（键与 TTL 秒数对齐 src/indexes.js + mongoose schema）：
+// 清单（键与 TTL 秒数）：
 //
 //	users:            email 唯一, accountId 唯一
 //	usersessions:     userId+isActive, isActive+lastActiveAt, refreshTokenHash 唯一 sparse
@@ -106,7 +107,7 @@ func ensureIndex(ctx context.Context, coll *mongo.Collection, spec indexSpec) er
 	}
 	_, err := coll.Indexes().CreateOne(ctx, mongo.IndexModel{Keys: spec.keys, Options: spec.options()})
 	if err != nil {
-		// 并发创建或同名但键/选项冲突：视为已建立（对齐 src/indexes.js 的 already exists 容错）
+		// 并发创建或同名但键/选项冲突：视为已建立（already exists 容错）
 		if strings.Contains(err.Error(), "already exists") {
 			return nil
 		}

@@ -10,7 +10,7 @@
 //
 // @title 兽剧聚合平台 API
 // @version 1.0.0
-// @description 兽剧内容聚合平台后端服务 API 文档（neo-server，行为对齐 Express 版）
+// @description 兽剧内容聚合平台后端服务 API 文档（neo-server）
 // @host localhost:5000
 // @BasePath /api
 // @securityDefinitions.apikey bearerAuth
@@ -80,10 +80,10 @@ func main() {
 
 	srv := &http.Server{
 		Handler:           app,
-		ReadHeaderTimeout: 65 * time.Second, // 对齐 Express headersTimeout
-		ReadTimeout:       30 * time.Second, // 对齐 requestTimeout
+		ReadHeaderTimeout: 65 * time.Second, // 慢客户端防护：读头超时
+		ReadTimeout:       30 * time.Second, // 请求读超时
 		WriteTimeout:      30 * time.Second,
-		IdleTimeout:       5 * time.Second, // 对齐 keepAliveTimeout
+		IdleTimeout:       5 * time.Second, // 空闲连接超时
 	}
 
 	serveErr := make(chan error, 1)
@@ -91,7 +91,7 @@ func main() {
 		serveErr <- srv.Serve(ln)
 	}()
 
-	// 优雅关停：SIGTERM/SIGINT，10s 兜底强退（对齐 src/index.js:479-503）。
+	// 优雅关停：SIGTERM/SIGINT，10s 兜底强退。
 	stop := make(chan os.Signal, 1)
 	signal.Notify(stop, syscall.SIGTERM, syscall.SIGINT)
 	select {

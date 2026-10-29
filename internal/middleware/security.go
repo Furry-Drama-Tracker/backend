@@ -14,8 +14,7 @@ import (
 	"github.com/xiedada05/furry-drama-be-neo/internal/security"
 )
 
-// SanitizeInput 对齐 Express middlewares/security.js 的 sanitizeInput：
-// 递归清洗请求 body（JSON）、query 与 params 中的字符串值；剥离以 $ 开头或含 . 的键
+// SanitizeInput 清洗输入：递归清洗请求 body（JSON）、query 与 params 中的字符串值；剥离以 $ 开头或含 . 的键
 // （防 NoSQL 注入）；密码类字段值不做 XSS 转义。
 //
 // body 处理：读取 c.Request.Body → 以 json.Decoder.UseNumber 解析（保留数字字面量）
@@ -34,9 +33,9 @@ func SanitizeInput() gin.HandlerFunc {
 	}
 }
 
-// SanitizeHeaders 对齐 Express middlewares/security.js 的 sanitizeHeaders：
+// SanitizeHeaders 清洗响应回显头：
 // 仅清洗可能回显到响应中的 referer 头（XSS 转义）。
-// 刻意不碰 x-forwarded-for / x-real-ip：它们被 req.ip 与限流 keyGenerator 使用，
+// 刻意不碰 x-forwarded-for / x-real-ip：它们被客户端 IP 解析与限流 keyGenerator 使用，
 // 清洗会改变原始内容并干扰 IP 限流；其可信度由信任代理配置与反向代理覆盖策略负责。
 func SanitizeHeaders() gin.HandlerFunc {
 	return func(c *gin.Context) {

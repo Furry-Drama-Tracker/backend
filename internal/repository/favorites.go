@@ -15,7 +15,7 @@ import (
 // 方法名统一 Favorite 前缀，避免与其它域 agent 添加的方法重名。
 
 // FavoriteInsert 插入收藏记录；userId+episodeId 唯一键冲突返回 errDuplicateKey
-// （对齐 favorites.js 的 error.code===11000 → 'Already favorited'）。
+// （E11000 → 409 'Already favorited'，消费方依赖该错误信息）。
 func (r *FavoriteRepo) FavoriteInsert(ctx context.Context, f *model.Favorite) error {
 	ctx, cancel := context.WithTimeout(ctx, contextTimeout)
 	defer cancel()
@@ -26,7 +26,7 @@ func (r *FavoriteRepo) FavoriteInsert(ctx context.Context, f *model.Favorite) er
 	return err
 }
 
-// FavoriteDeleteOne 删除用户对某剧集的收藏。不存在也返回成功（对齐 deleteOne 幂等语义）。
+// FavoriteDeleteOne 删除用户对某剧集的收藏。不存在也返回成功（deleteOne 幂等语义）。
 func (r *FavoriteRepo) FavoriteDeleteOne(ctx context.Context, userID, episodeID any) error {
 	ctx, cancel := context.WithTimeout(ctx, contextTimeout)
 	defer cancel()
@@ -34,15 +34,15 @@ func (r *FavoriteRepo) FavoriteDeleteOne(ctx context.Context, userID, episodeID 
 	return err
 }
 
-// FavoriteCount 按筛选条件统计收藏数（对齐 countDocuments(filter)）。
+// FavoriteCount 按筛选条件统计收藏数（countDocuments(filter)）。
 func (r *FavoriteRepo) FavoriteCount(ctx context.Context, filter bson.M) (int64, error) {
 	ctx, cancel := context.WithTimeout(ctx, contextTimeout)
 	defer cancel()
 	return r.coll.CountDocuments(ctx, filter)
 }
 
-// FavoriteListPaged 分页查询收藏，按 updatedAt 倒序（对齐 favorites.js GET /list
-// 默认分支的 sort({updatedAt:-1}).skip().limit()）。
+// FavoriteListPaged 分页查询收藏，按 updatedAt 倒序
+// （GET /list 默认分支：sort({updatedAt:-1}).skip().limit()）。
 func (r *FavoriteRepo) FavoriteListPaged(ctx context.Context, filter bson.M, page, limit int) ([]model.Favorite, error) {
 	ctx, cancel := context.WithTimeout(ctx, contextTimeout)
 	defer cancel()
@@ -62,8 +62,8 @@ func (r *FavoriteRepo) FavoriteListPaged(ctx context.Context, filter bson.M, pag
 	return list, nil
 }
 
-// FavoriteListLimited 取前 limit 条收藏、不排序（对齐 favorites.js name/rating/lastWatched
-// 分支的 find(filter).limit(maxItems)，内存排序后再切片）。
+// FavoriteListLimited 取前 limit 条收藏、不排序（name/rating/lastWatched 分支：
+// find(filter).limit(maxItems)，由调用方内存排序后再切片）。
 func (r *FavoriteRepo) FavoriteListLimited(ctx context.Context, filter bson.M, limit int64) ([]model.Favorite, error) {
 	ctx, cancel := context.WithTimeout(ctx, contextTimeout)
 	defer cancel()
@@ -79,7 +79,7 @@ func (r *FavoriteRepo) FavoriteListLimited(ctx context.Context, filter bson.M, l
 	return list, nil
 }
 
-// FavoriteFindByUserEpisode 查用户对某剧集的收藏（对齐 findOne({userId, episodeId})）；
+// FavoriteFindByUserEpisode 查用户对某剧集的收藏（findOne({userId, episodeId})）；
 // 不存在返回 ErrNotFound。
 func (r *FavoriteRepo) FavoriteFindByUserEpisode(ctx context.Context, userID, episodeID any) (*model.Favorite, error) {
 	ctx, cancel := context.WithTimeout(ctx, contextTimeout)

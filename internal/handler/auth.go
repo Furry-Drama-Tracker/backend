@@ -210,7 +210,7 @@ func (h *Auth) Refresh(c *gin.Context) {
 	res, err := h.Svc.VerifyRefreshToken(c.Request.Context(), refreshToken)
 	if err != nil {
 		if appErr, ok := err.(*errors.AppError); ok && appErr.Status == 409 {
-			// 并发刷新：不清 cookie 不吊销（对齐 authFactory.js）。
+			// 并发刷新：不清 cookie 不吊销（固定契约，勿改）。
 			errors.AbortWithAppError(c, err, h.Config.IsDev)
 			return
 		}

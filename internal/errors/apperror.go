@@ -1,8 +1,8 @@
-// Package errors 提供与 Express 后端等价的应用错误类型与全局错误处理中间件。
+// Package errors 提供应用错误类型与全局错误处理中间件。
 //
-// 设计对齐 Express 的 src/index.js:414-432 内联错误处理中间件：
+// 全局错误响应规则：
 //   - CORS 拒绝 → 403 {"message":"CORS policy denied"}
-//   - MulterError 等价 → 400 {"message":"文件上传错误: <msg>"}
+//   - 文件上传错误（大小/类型超限等）→ 400 {"message":"文件上传错误: <msg>"}
 //   - 其它 → err.Status || 500；生产环境 5xx 不泄露内部 message（"服务器内部错误"）
 //   - 开发环境响应体附带 stack
 package errors
@@ -15,8 +15,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// AppError 是领域层抛出的可操作错误，等价于 Express 的 AppError 类
-// （utils/errorHandler.js）：携带 HTTP 状态码与可选的 messageKey（前端 i18n 键）。
+// AppError 是领域层抛出的可操作错误：携带 HTTP 状态码与可选的 messageKey（前端 i18n 键）。
 type AppError struct {
 	Message    string
 	Status     int
@@ -68,8 +67,8 @@ func IsNotFound(err error) bool {
 	return errors.As(err, &ae) && ae.Status == http.StatusNotFound
 }
 
-// UploadError 是文件上传错误，等价于 multer 的 MulterError
-// （LIMIT_FILE_SIZE / LIMIT_FILE_TYPE 等），由上传中间件抛给全局处理器。
+// UploadError 是文件上传错误（LIMIT_FILE_SIZE / LIMIT_FILE_TYPE 等），
+// 由上传中间件抛给全局处理器。
 type UploadError struct {
 	Code    string // "LIMIT_FILE_SIZE" | "LIMIT_FILE_TYPE" | ...
 	Message string
@@ -100,7 +99,7 @@ func AbortWithAppError(c *gin.Context, err error, isDev bool) {
 	abortAppError(c, &AppError{Message: err.Error(), Status: http.StatusInternalServerError}, isDev)
 }
 
-// abortAppError 写 AppError 响应，复刻 Express 的消息规则。
+// abortAppError 写 AppError 响应，遵循包注释声明的统一消息规则。
 func abortAppError(c *gin.Context, ae *AppError, isDev bool) {
 	status := ae.Status
 	if status == 0 {
@@ -129,8 +128,8 @@ func abortAppError(c *gin.Context, ae *AppError, isDev bool) {
 	c.AbortWithStatusJSON(status, body)
 }
 
-// Handler 是全局错误处理中间件，必须最后注册（gin 会捕获后续 handler 的 panic）。
-// 对应 Express 内联 4 参错误中间件。
+// Handler 是全局错误处理中间件，必须最后注册（gin 会捕获后续 handler 的 panic），
+// 统一兜底渲染为 {"message": ...} JSON 响应。
 func Handler(isDev func() bool) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.Next()

@@ -6,8 +6,8 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-// Category 分类文档（models/Category.js → categories 集合）。
-// 逐字段对齐 mongoose schema；字段默认值由仓储 Create 在写入前补齐。
+// Category 分类文档（categories 集合）。
+// 逐字段与既有集合数据形态一致（勿改 bson 标签）；字段默认值由仓储 Create 在写入前补齐。
 type Category struct {
 	ID        primitive.ObjectID `bson:"_id,omitempty" json:"_id"`
 	Name      string             `bson:"name" json:"name"`
@@ -15,12 +15,12 @@ type Category struct {
 	NameJa    string             `bson:"nameJa" json:"nameJa"`
 	Order     int                `bson:"order" json:"order"`
 	CreatedAt time.Time          `bson:"createdAt" json:"createdAt"`
-	// VersionKey 是 mongoose 的 __v（每次 save() 自增）。
+	// VersionKey 是文档版本键 __v（整文档覆盖保存时自增）。
 	VersionKey int `bson:"__v,omitempty" json:"__v"`
 }
 
-// Banner 轮播图文档（models/Banner.js → banners 集合）。
-// 逐字段对齐 mongoose schema；字段默认值由仓储 Create 在写入前补齐。
+// Banner 轮播图文档（banners 集合）。
+// 逐字段与既有集合数据形态一致（勿改 bson 标签）；字段默认值由仓储 Create 在写入前补齐。
 type Banner struct {
 	ID         primitive.ObjectID `bson:"_id,omitempty" json:"_id"`
 	Title      string             `bson:"title" json:"title"`
@@ -34,6 +34,6 @@ type Banner struct {
 	Order      int                `bson:"order" json:"order"`
 	Active     bool               `bson:"active" json:"active"`
 	CreatedAt  time.Time          `bson:"createdAt" json:"createdAt"`
-	// VersionKey 是 mongoose 的 __v（每次 save() 自增）。
+	// VersionKey 是文档版本键 __v（整文档覆盖保存时自增）。
 	VersionKey int `bson:"__v,omitempty" json:"__v"`
 }

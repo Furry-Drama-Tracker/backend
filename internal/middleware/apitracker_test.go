@@ -66,7 +66,7 @@ func TestAPITrackerFlushAggregates(t *testing.T) {
 		t.Fatalf("date = %q, want 2026-08-08", c.date)
 	}
 	if c.method != "" {
-		t.Fatalf("method = %q, want ''（对齐 Express 不写 method 字段）", c.method)
+		t.Fatalf("method = %q, want ''（不写 method 字段）", c.method)
 	}
 }
 

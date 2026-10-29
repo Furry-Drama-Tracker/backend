@@ -1,10 +1,10 @@
 package auth
 
-// TOTP 基于时间的一次性口令，基于 pquerna/otp 的 hotp 实现，行为对齐 Express
-// utils/helpers.js verifyTOTP / generateTOTPSecret / generateBackupCodes：
+// TOTP 基于时间的一次性口令，基于 pquerna/otp 的 hotp 实现，参数为固定契约
+// （verifyTOTP / generateTOTPSecret / generateBackupCodes 同一套参数，勿改）：
 //   - HMAC-SHA1、30 秒步长、6 位数字码
 //   - 验证窗口 ±1（允许时钟偏移一个步长）
-//   - secret 为 RFC 4648 标准 base64（20 字节，保持 Express 存储格式）
+//   - secret 为 RFC 4648 标准 base64（20 字节，既有存储格式，勿改）
 //   - pquerna hotp 期望 base32 secret：内部把字节重新编码为 base32（保字节不变）
 //   - 备用码为 10 个 8 字节（64 位熵）hex 字符串（16 字符）
 
@@ -20,7 +20,7 @@ import (
 )
 
 const (
-	// TimeStep 是 TOTP 时间步长（秒），对齐 30s。
+	// TimeStep 是 TOTP 时间步长（秒），固定 30s，勿改。
 	TimeStep int64 = 30
 	// TOTPWindow 是验证窗口（±1 步长）。
 	TOTPWindow = 1
@@ -28,8 +28,7 @@ const (
 	totpSecretLen = 20
 )
 
-// GenerateTOTPSecret 生成 2FA secret：20 随机字节的标准 base64 字符串，
-// 对齐 utils/helpers.js generateTOTPSecret（crypto.randomBytes(20).toString('base64')）。
+// GenerateTOTPSecret 生成 2FA secret：20 随机字节的标准 base64 字符串（固定格式）。
 func GenerateTOTPSecret() string {
 	buf := make([]byte, totpSecretLen)
 	if _, err := rand.Read(buf); err != nil {
@@ -44,7 +43,7 @@ func GenerateSecret() string {
 }
 
 // GenerateBackupCodes 生成 10 个 2FA 备用码，每个为 8 字节（64 位熵）的
-// hex 字符串（16 字符），对齐 utils/helpers.js generateBackupCodes。
+// hex 字符串（16 字符，固定格式）。
 func GenerateBackupCodes() []string {
 	codes := make([]string, 10)
 	for i := range codes {
@@ -68,7 +67,7 @@ func VerifyTOTPAt(secret, token string, at time.Time) bool {
 	return verifyTOTPAt(secret, token, at)
 }
 
-// verifyTOTPAt 对齐 helpers.js verifyTOTP 的逐字段行为，用 pquerna hotp 计算：
+// verifyTOTPAt 的逐字段行为是固定契约，用 pquerna hotp 计算：
 //   - token 非 6 位数字字符串 → false
 //   - secret 按标准 base64 解码（解码失败 → false）
 //   - 字节重新编码为 base32（保字节）供 pquerna 使用
@@ -93,7 +92,7 @@ func verifyTOTPAt(secret, token string, at time.Time) bool {
 	return false
 }
 
-// isSixDigit 校验 token 恰好为 6 位十进制数字（对齐 /^\d{6}$/）。
+// isSixDigit 校验 token 恰好为 6 位十进制数字（等价 /^\d{6}$/）。
 func isSixDigit(token string) bool {
 	if len(token) != 6 {
 		return false

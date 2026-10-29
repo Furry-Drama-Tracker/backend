@@ -74,7 +74,7 @@ func newAdminTestEnv(t *testing.T) *adminTestEnv {
 	return &adminTestEnv{r: r, db: db, signer: signer, cfg: cfg}
 }
 
-// insertUser 直接插入一个用户（密码经 bcrypt 哈希，对齐 mongoose 行为）。
+// insertUser 直接插入一个用户（密码经 bcrypt 哈希，与生产写入形态一致）。
 func (e *adminTestEnv) insertUser(t *testing.T, accountID, username, email, role, password string) primitive.ObjectID {
 	t.Helper()
 	hash, err := auth.Hash(password)
@@ -303,7 +303,7 @@ func TestAdminRegisterAndRoleFlow(t *testing.T) {
 		t.Fatalf("creator profile not created on role change, count=%d", profileCount2)
 	}
 
-	// 不能删除自己的账号（self-check 先于"最后一个超管"检查，对齐 Express 分支顺序）。
+	// 不能删除自己的账号（self-check 先于"最后一个超管"检查，分支顺序是固定契约，勿重排）。
 	w, data = e.do(t, "DELETE", "/api/admin/"+superID.Hex(), nil, e.token(t, superID), false)
 	if w.Code != 400 {
 		t.Fatalf("delete self status=%d body=%s want 400", w.Code, string(data))
@@ -448,7 +448,7 @@ func TestAdminCreatorsAndProfiles(t *testing.T) {
 		t.Fatalf("creators unexpected: %v", creators)
 	}
 
-	// 创作者主页列表：creatorId 已 populate。
+	// 创作者主页列表：creatorId 已关联查询展开。
 	w, data = e.do(t, "GET", "/api/admin/creator-profiles", nil, e.token(t, superID), false)
 	if w.Code != 200 {
 		t.Fatalf("profiles status=%d body=%s want 200", w.Code, string(data))
@@ -460,7 +460,7 @@ func TestAdminCreatorsAndProfiles(t *testing.T) {
 	}
 	ref, ok := profiles[0]["creatorId"].(map[string]any)
 	if !ok || ref["email"] != "creator@test.com" {
-		t.Fatalf("profile creatorId not populated: %v", profiles[0]["creatorId"])
+		t.Fatalf("profile creatorId not expanded: %v", profiles[0]["creatorId"])
 	}
 
 	// 主页详情。

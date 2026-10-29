@@ -1,4 +1,4 @@
-// Package logging 提供基于 slog 的结构化日志，等价于 Express 后端用 console 输出的两级日志。
+// Package logging 提供基于 slog 的两级（dev/prod）结构化日志。
 //
 // 级别策略：开发环境 Debug 级（含慢请求/错误堆栈），生产环境 Info 级。
 package logging

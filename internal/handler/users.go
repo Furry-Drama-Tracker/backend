@@ -110,7 +110,7 @@ func (h *Auth) ExportMyData(c *gin.Context) {
 
 // ---- helpers ----
 
-// abortUploadError 渲染上传错误（对齐 Express 上传端点文案）。
+// abortUploadError 渲染上传错误（错误文案是固定契约，勿改）。
 func (h *Auth) abortUploadError(c *gin.Context, err error, maxMB int) {
 	if err == upload.ErrNoFile {
 		c.JSON(400, gin.H{"message": "请选择要上传的图片"})

@@ -18,7 +18,7 @@ import (
 	"github.com/xiedada05/furry-drama-be-neo/internal/repository"
 )
 
-// SSE 连接管理常量（逐项对齐 routes/notifications.js 顶部）。
+// SSE 连接管理常量（固定契约，勿调）。
 const (
 	maxSSEConnections    = 500 // MAX_SSE_CONNECTIONS
 	maxSSEPerIP          = 10  // MAX_SSE_PER_IP
@@ -32,8 +32,7 @@ type sseClient struct {
 	cancel context.CancelFunc
 }
 
-// Notifications 是通知域（/api/notifications）handler 容器，行为逐端点对齐
-// backend/routes/notifications.js。12 个端点通过 Register 挂载到
+// Notifications 是通知域（/api/notifications）handler 容器。12 个端点通过 Register 挂载到
 // /api/notifications（server.RegisterRoutes 的 MountDual 双版本镜像）。
 type Notifications struct {
 	Repos  *repository.Repos
@@ -44,7 +43,7 @@ type Notifications struct {
 	// PushSubs 推送订阅仓储（pushsubscriptions 集合；repos.go 未注册，本域独占）。
 	PushSubs *repository.PushSubscriptionRepo
 
-	// SSE 连接簿（对齐 Express sseClients/IP 计数/总数，互斥保护）。
+	// SSE 连接簿（用户连接列表/IP 计数/全局总数，互斥保护）。
 	sseMu       sync.Mutex
 	sseClients  map[string][]*sseClient // userId → 连接列表
 	sseTotal    int
@@ -66,8 +65,8 @@ func NewNotifications(repos *repository.Repos, cfg *config.Config, amw *middlewa
 	}
 }
 
-// Register 挂载 /api/notifications 全部端点（不含 /api 前缀；顺序对齐
-// routes/notifications.js：/stream 公开，其余 protect）。
+// Register 挂载 /api/notifications 全部端点（不含 /api 前缀；
+// /stream 公开，其余 protect，勿变）。
 func (h *Notifications) Register(g *gin.RouterGroup) {
 	g.GET("/stream", h.Stream)
 	g.POST("/subscribe-reminder", h.AuthMW.Protect(), h.SubscribeReminder)
@@ -131,7 +130,7 @@ func (h *Notifications) Stream(c *gin.Context) {
 		}
 	}()
 
-	// IP 级别限制（对齐 /stream 顶部：先查再自增，超限直接结束）。
+	// IP 级别限制（先查再自增，超限直接结束）。
 	h.sseMu.Lock()
 	ipCount := h.sseIPCounts[ip]
 	if ipCount >= maxSSEPerIP {
@@ -144,7 +143,7 @@ func (h *Notifications) Stream(c *gin.Context) {
 	ipAdded = true
 	h.sseMu.Unlock()
 
-	// 已通过 IP 校验：写头 + connected 事件（对齐 writeHead + res.write connected）。
+	// 已通过 IP 校验：写头 + connected 事件（顺序固定）。
 	h.writeSSEHeaders(c)
 	h.writeSSEEvent(c, `{"type":"connected"}`)
 
@@ -152,14 +151,14 @@ func (h *Notifications) Stream(c *gin.Context) {
 	defer cancel()
 	client = &sseClient{cancel: cancel}
 
-	// 全局限 500 条：超过则发送 error 后结束（connected 已发，对齐 Express 顺序）。
+	// 全局限 500 条：超过则发送 error 后结束（此时 connected 事件已发，顺序是固定契约）。
 	h.sseMu.Lock()
 	if h.sseTotal >= maxSSEConnections {
 		h.sseMu.Unlock()
 		h.writeSSEEvent(c, `{"type":"error","message":"Too many connections"}`)
 		return
 	}
-	// 每用户最多 5 条：超出驱逐最旧连接（对齐 shift + oldest.end()）。
+	// 每用户最多 5 条：超出驱逐最旧连接。
 	clients := h.sseClients[userID]
 	if len(clients) >= maxSSEClientsPerUser {
 		oldest := clients[0]
@@ -396,7 +395,7 @@ func (h *Notifications) Delete(c *gin.Context) {
 }
 
 // VapidPublicKey GET /api/notifications/vapid-public-key（公开）：返回 Web Push
-// VAPID 公钥。未配置时输出 null（对齐 process.env.VAPID_PUBLIC_KEY 为 undefined）。
+// VAPID 公钥。未配置时输出 null（固定契约）。
 // @Summary VAPID 公钥
 // @Tags 通知
 // @Success 200 {object} map[string]any "publicKey"
@@ -470,7 +469,7 @@ type pushSubscriptionBody struct {
 	Keys     map[string]any `json:"keys"`
 }
 
-// keys 提取 {p256dh, auth}（缺失返回空串，对齐 mongoose 宽松 cast）。
+// keys 提取 {p256dh, auth}（缺失返回空串，宽松转换）。
 func (b *pushSubscriptionBody) keys() model.PushSubscriptionKeys {
 	return model.PushSubscriptionKeys{
 		P256DH: asString(b.Keys["p256dh"]),
@@ -478,7 +477,7 @@ func (b *pushSubscriptionBody) keys() model.PushSubscriptionKeys {
 	}
 }
 
-// verifySSETicket 校验 SSE ticket（对齐 /stream 顶部 verifyJwt + purpose 检查）。
+// verifySSETicket 校验 SSE ticket（verifyJwt + purpose 检查）。
 // 失败时已写入 401 响应，返回 ok=false。
 func (h *Notifications) verifySSETicket(c *gin.Context) (string, bool) {
 	ticket := c.Query("ticket")
@@ -498,7 +497,7 @@ func (h *Notifications) verifySSETicket(c *gin.Context) (string, bool) {
 	return claims.ID, true
 }
 
-// writeSSEHeaders 写 SSE 响应头（对齐 Express writeHead(200, {...})）。
+// writeSSEHeaders 写 SSE 响应头（200 + 事件流四件套头，固定契约）。
 func (h *Notifications) writeSSEHeaders(c *gin.Context) {
 	c.Writer.Header().Set("Content-Type", "text/event-stream")
 	c.Writer.Header().Set("Cache-Control", "no-cache")
@@ -507,7 +506,7 @@ func (h *Notifications) writeSSEHeaders(c *gin.Context) {
 	c.Writer.WriteHeader(200)
 }
 
-// writeSSEEvent 写一条 SSE data 事件并立即 flush（对齐 res.write('data: ...\n\n')）。
+// writeSSEEvent 写一条 SSE data 事件并立即 flush（"data: " 前缀 + 双换行结尾，固定契约）。
 func (h *Notifications) writeSSEEvent(c *gin.Context, payload string) {
 	_, _ = c.Writer.WriteString("data: " + payload + "\n\n")
 	c.Writer.Flush()
@@ -522,7 +521,7 @@ func (h *Notifications) decSSEIPLocked(ip string) {
 	}
 }
 
-// clientIP 提取客户端 IP（生产信任 X-Forwarded-For 首值，对齐 req.ip）。
+// clientIP 提取客户端 IP（生产信任 X-Forwarded-For 首值）。
 func (h *Notifications) clientIP(c *gin.Context) string {
 	if !h.Config.IsDev {
 		if xff := c.GetHeader("X-Forwarded-For"); xff != "" {
@@ -538,8 +537,8 @@ func (h *Notifications) clientIP(c *gin.Context) string {
 	return host
 }
 
-// notificationsPageLimit 对齐 routes/notifications.js 内联分页：
-// page = Math.max(1, parseInt(page)||1)；limit = Math.min(100, Math.max(1, parseInt(limit)||20))。
+// notificationsPageLimit 分页参数钳制（固定契约）：
+// page = max(1, parseInt(page)||1)；limit = min(100, max(1, parseInt(limit)||20))。
 func notificationsPageLimit(c *gin.Context) (int, int) {
 	page := 1
 	if p, err := strconv.Atoi(c.Query("page")); err == nil && p > 0 {
@@ -559,7 +558,7 @@ func notificationsPageLimit(c *gin.Context) (int, int) {
 	return page, limit
 }
 
-// notificationJSON 组装单条通知响应（对齐 mongoose toJSON：
+// notificationJSON 组装单条通知响应（与既有集合数据形态一致：
 // _id/userId 输出 hex，episodeId 无值时输出 null，metadata 空输出 {}）。
 func notificationJSON(n *model.Notification) gin.H {
 	var episodeID any

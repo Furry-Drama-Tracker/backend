@@ -1,4 +1,4 @@
-// Package ipregion 解析 IP 地域，对齐 Express utils/ipRegion.js：
+// Package ipregion 解析 IP 地域：
 //   - 本地 IP（127.0.0.1 / ::1 / ::ffff:127.0.0.1）直接返回 "本地"
 //   - 否则外呼 https://ipapi.co/<ip>/json/（5s 超时），拼接 country_name · region · city
 //   - 缓存用 hashicorp/golang-lru（上限 1000 条）+ 24h TTL（过期条目在命中时淘汰）
@@ -17,10 +17,10 @@ import (
 // cacheTTL 是地域缓存有效期。
 const cacheTTL = 24 * time.Hour
 
-// cacheMax 是地域缓存上限（对齐 IP_REGION_CACHE_MAX）。
+// cacheMax 是地域缓存上限。
 const cacheMax = 1000
 
-// localIPs 是视为本地的 IP（对齐 ipRegion.js）。
+// localIPs 是视为本地的 IP。
 var localIPs = map[string]bool{
 	"127.0.0.1":        true,
 	"::1":              true,

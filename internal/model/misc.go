@@ -6,7 +6,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-// Follow 追番记录（models/Follow.js）。
+// Follow 追番记录（follows 集合）。
 type Follow struct {
 	ID                 primitive.ObjectID `bson:"_id,omitempty" json:"_id"`
 	UserID             primitive.ObjectID `bson:"userId" json:"userId"`
@@ -16,7 +16,7 @@ type Follow struct {
 	CreatedAt          time.Time          `bson:"createdAt" json:"createdAt"`
 }
 
-// History 观看历史（models/History.js，lastWatched 建 365 天 TTL 索引）。
+// History 观看历史（histories 集合，lastWatched 建 365 天 TTL 索引）。
 type History struct {
 	ID                      primitive.ObjectID `bson:"_id,omitempty" json:"_id"`
 	UserID                  primitive.ObjectID `bson:"userId" json:"userId"`
@@ -27,7 +27,7 @@ type History struct {
 	CreatedAt               time.Time          `bson:"createdAt" json:"createdAt"`
 }
 
-// Favorite 收藏记录（models/Favorite.js）。
+// Favorite 收藏记录（favorites 集合）。
 type Favorite struct {
 	ID        primitive.ObjectID  `bson:"_id,omitempty" json:"_id"`
 	UserID    primitive.ObjectID  `bson:"userId" json:"userId"`
@@ -37,7 +37,7 @@ type Favorite struct {
 	UpdatedAt time.Time           `bson:"updatedAt" json:"updatedAt"`
 }
 
-// Rating 评分记录（models/Rating.js，score 1-5）。
+// Rating 评分记录（ratings 集合，score 1-5）。
 type Rating struct {
 	ID        primitive.ObjectID `bson:"_id,omitempty" json:"_id"`
 	UserID    primitive.ObjectID `bson:"userId" json:"userId"`
@@ -47,7 +47,7 @@ type Rating struct {
 	UpdatedAt time.Time          `bson:"updatedAt" json:"updatedAt"`
 }
 
-// Report 举报记录（models/Report.js）。
+// Report 举报记录（reports 集合）。
 type Report struct {
 	ID          primitive.ObjectID  `bson:"_id,omitempty" json:"_id"`
 	ReporterID  primitive.ObjectID  `bson:"reporterId" json:"reporterId"`
@@ -62,7 +62,7 @@ type Report struct {
 	UpdatedAt   time.Time           `bson:"updatedAt" json:"updatedAt"`
 }
 
-// Feedback 反馈记录（models/Feedback.js）。
+// Feedback 反馈记录（feedbacks 集合）。
 type Feedback struct {
 	ID        primitive.ObjectID `bson:"_id,omitempty" json:"_id"`
 	UserID    primitive.ObjectID `bson:"userId" json:"userId"`
@@ -72,11 +72,11 @@ type Feedback struct {
 	Status    string             `bson:"status" json:"status"`
 	Reply     string             `bson:"reply" json:"reply"`
 	CreatedAt time.Time          `bson:"createdAt" json:"createdAt"`
-	// VersionKey 是 mongoose 的 __v。
+	// VersionKey 是文档版本键 __v。
 	VersionKey int `bson:"__v,omitempty" json:"__v"`
 }
 
-// CreatorProfile 创作者资料（models/CreatorProfile.js，曾名 adminId 已迁移为 creatorId）。
+// CreatorProfile 创作者资料（creatorprofiles 集合，曾名 adminId 已迁移为 creatorId）。
 type CreatorProfile struct {
 	ID             primitive.ObjectID `bson:"_id,omitempty" json:"_id"`
 	CreatorID      primitive.ObjectID `bson:"creatorId" json:"creatorId"`
@@ -90,6 +90,6 @@ type CreatorProfile struct {
 	PendingChanges primitive.M        `bson:"pendingChanges" json:"pendingChanges"`
 	CreatedAt      time.Time          `bson:"createdAt" json:"createdAt"`
 	UpdatedAt      time.Time          `bson:"updatedAt" json:"updatedAt"`
-	// VersionKey 是 mongoose 的 __v。
+	// VersionKey 是文档版本键 __v。
 	VersionKey int `bson:"__v,omitempty" json:"__v"`
 }

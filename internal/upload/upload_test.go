@@ -172,7 +172,7 @@ func TestSaveImageOversize(t *testing.T) {
 func TestSaveImageExactBoundary(t *testing.T) {
 	setupTest(t)
 	// 文件内容恰为 maxBytes：multipart 开销计入体上限但不算文件大小，
-	// 应放行（对齐 multer fileSize 只统计文件内容）。
+	// 应放行（大小限制只统计文件内容，固定语义）。
 	content := append([]byte{0xFF, 0xD8, 0xFF}, bytes.Repeat([]byte{0x00}, 100)...) // 103 字节
 	req := multipartRequest(t, "image", "photo.jpg", "image/jpeg", content)
 	url, err := SaveImage(newGinContext(req), "image", "avatar", int64(len(content)))

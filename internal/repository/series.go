@@ -13,22 +13,22 @@ import (
 	"github.com/xiedada05/furry-drama-be-neo/internal/model"
 )
 
-// SeriesRepo 剧集系列仓储（collection 名 series，对齐 mongoose 默认小写复数）。
+// SeriesRepo 剧集系列仓储（collection 名 series）。
 type SeriesRepo struct{ coll *mongo.Collection }
 
 // NewSeriesRepo 构造剧集系列仓储。
 func NewSeriesRepo(coll *mongo.Collection) *SeriesRepo { return &SeriesRepo{coll: coll} }
 
-// Count 统计系列总数（对齐 series.js GET / 的 Series.countDocuments()）。
+// Count 统计系列总数（countDocuments()）。
 func (r *SeriesRepo) Count(ctx context.Context) (int64, error) {
 	ctx, cancel := context.WithTimeout(ctx, contextTimeout)
 	defer cancel()
 	return r.coll.CountDocuments(ctx, bson.M{})
 }
 
-// FindPage 分页查询系列并按 updatedAt 倒序（对齐 series.js GET / 的
-// find().sort({updatedAt:-1}).skip((page-1)*limit).limit(limit)）。
-// page 默认 1；limit 默认 50（series.js 的默认值与共享 paginate 不同，勿用
+// FindPage 分页查询系列并按 updatedAt 倒序
+// （find().sort({updatedAt:-1}).skip((page-1)*limit).limit(limit)）。
+// page 默认 1；limit 默认 50（本域默认值与共享 paginate 不同，勿用
 // pagination 包的 20），上限 100。
 func (r *SeriesRepo) FindPage(ctx context.Context, page, limit int) ([]model.Series, error) {
 	ctx, cancel := context.WithTimeout(ctx, contextTimeout)
@@ -58,7 +58,7 @@ func (r *SeriesRepo) FindPage(ctx context.Context, page, limit int) ([]model.Ser
 	return list, nil
 }
 
-// FindByID 按 ID 查询系列；不存在返回 ErrNotFound（对齐 series.js findById）。
+// FindByID 按 ID 查询系列；不存在返回 ErrNotFound。
 func (r *SeriesRepo) FindByID(ctx context.Context, id any) (*model.Series, error) {
 	ctx, cancel := context.WithTimeout(ctx, contextTimeout)
 	defer cancel()
@@ -70,8 +70,8 @@ func (r *SeriesRepo) FindByID(ctx context.Context, id any) (*model.Series, error
 	return s, err
 }
 
-// Create 插入系列并回填 _id；补 createdAt/updatedAt 默认值（对齐 mongoose
-// default: Date.now）。
+// Create 插入系列并回填 _id；补 createdAt/updatedAt 默认值
+// （与既有集合文档的默认值形态一致）。
 func (r *SeriesRepo) Create(ctx context.Context, s *model.Series) error {
 	ctx, cancel := context.WithTimeout(ctx, contextTimeout)
 	defer cancel()
@@ -91,8 +91,8 @@ func (r *SeriesRepo) Create(ctx context.Context, s *model.Series) error {
 	return nil
 }
 
-// UpdateByID 按 ID 更新并返回更新后的文档（对齐 findByIdAndUpdate(id, patch,
-// {new:true})）；patch 是 $set 内容。文档不存在返回 ErrNotFound。
+// UpdateByID 按 ID 更新并返回更新后的文档；patch 是 $set 内容。
+// 文档不存在返回 ErrNotFound。
 func (r *SeriesRepo) UpdateByID(ctx context.Context, id any, patch bson.M) (*model.Series, error) {
 	ctx, cancel := context.WithTimeout(ctx, contextTimeout)
 	defer cancel()
@@ -106,8 +106,7 @@ func (r *SeriesRepo) UpdateByID(ctx context.Context, id any, patch bson.M) (*mod
 	return s, err
 }
 
-// DeleteByID 按 ID 删除系列（对齐 findByIdAndDelete；目标不存在也视为成功，
-// Express 仍返回 200）。
+// DeleteByID 按 ID 删除系列（目标不存在也视为成功，端点仍返回 200，勿改）。
 func (r *SeriesRepo) DeleteByID(ctx context.Context, id any) error {
 	ctx, cancel := context.WithTimeout(ctx, contextTimeout)
 	defer cancel()

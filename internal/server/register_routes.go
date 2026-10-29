@@ -78,7 +78,7 @@ func RegisterRoutes(d Deps, api *gin.RouterGroup, opts middleware.RateLimitOpts)
 		g.GET("/export-my-data", amw.Protect(), rl(ratelimit.ExportSpec), h.ExportMyData)
 	})
 
-	// ---- 内容域（挂载前缀对照 backend/src/index.js routeMounts）----
+	// ---- 内容域（挂载前缀为固定路由表，勿改）----
 	ep := handler.NewEpisodes(d.Repos, d.Config, amw, rl, mail)
 	router.MountDual(api, "/episodes", ep.Register)
 
@@ -103,7 +103,7 @@ func RegisterRoutes(d Deps, api *gin.RouterGroup, opts middleware.RateLimitOpts)
 	ra := handler.NewRatings(d.Repos, d.Config, amw, rl)
 	router.MountDual(api, "/ratings", ra.Register)
 
-	// ---- CMS 域（公告/壁纸/友链，挂载前缀对照 backend/src/index.js routeMounts）----
+	// ---- CMS 域（公告/壁纸/友链，挂载前缀为固定路由表，勿改）----
 	an := handler.NewAnnouncements(d.Repos, d.Config, amw, rl, mail)
 	router.MountDual(api, "/announcements", an.Register)
 
@@ -131,7 +131,7 @@ func RegisterRoutes(d Deps, api *gin.RouterGroup, opts middleware.RateLimitOpts)
 	nt := handler.NewNotifications(d.Repos, d.Config, amw, rl, d.DB)
 	router.MountDual(api, "/notifications", nt.Register)
 
-	// ---- 统计 / 举报 / 审核域（挂载前缀对照 backend/src/index.js routeMounts）----
+	// ---- 统计 / 举报 / 审核域（挂载前缀为固定路由表，勿改）----
 	st := handler.NewStats(d.Repos, d.Config, amw, rl)
 	router.MountDual(api, "/stats", st.Register)
 
@@ -158,7 +158,7 @@ func RegisterRoutes(d Deps, api *gin.RouterGroup, opts middleware.RateLimitOpts)
 	vs := handler.NewVersions(d.Repos, d.Config, amw, rl)
 	router.MountDual(api, "/versions", vs.Register)
 
-	// ---- RSS 订阅 / 翻译 / 数据备份域（挂载前缀对照 backend/src/index.js routeMounts）----
+	// ---- RSS 订阅 / 翻译 / 数据备份域（挂载前缀为固定路由表，勿改）----
 	rs := handler.NewRSS(d.Repos, d.Config, amw, rl)
 	router.MountDual(api, "/rss", rs.Register)
 
@@ -169,7 +169,7 @@ func RegisterRoutes(d Deps, api *gin.RouterGroup, opts middleware.RateLimitOpts)
 	router.MountDual(api, "/backup", bk.Register)
 
 	// ---- 创作者中心 / 创作者主页 / 站点内容 / 反馈 / 动态流域
-	// （挂载前缀对照 backend/src/index.js routeMounts）----
+	// （挂载前缀为固定路由表，勿改）----
 	cr := handler.NewCreator(d.Repos, d.Config, amw, rl)
 	router.MountDual(api, "/creator", cr.Register)
 

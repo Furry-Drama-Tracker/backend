@@ -8,11 +8,11 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-// 本文件为 episodes 域（routes/episodes.js GET / 与 GET /:id 的
-// populate('createdBy'/'allowedEditors'/'customAuthors', 'accountId username')）
-// 跨集合批量查用户的方法，挂到已有 *UserRepo 类型上。
+// 本文件为 episodes 域列表/详情端点把 createdBy/allowedEditors/customAuthors
+// 批量展开为用户摘要（_id + accountId + username）所需的
+// 跨集合批量查用户方法，挂到已有 *UserRepo 类型上。
 
-// EpisodesUserRef 是 populate 输出的用户引用视图（_id + accountId + username）。
+// EpisodesUserRef 是用户引用视图（_id + accountId + username）。
 type EpisodesUserRef struct {
 	ID        primitive.ObjectID `bson:"_id" json:"_id"`
 	AccountID string             `bson:"accountId" json:"accountId"`
@@ -20,8 +20,8 @@ type EpisodesUserRef struct {
 }
 
 // EpisodesFindUserRefsByIDs 批量查用户引用，返回 hex → EpisodesUserRef 的映射。
-// 对齐 mongoose populate('createdBy', 'accountId username') 的 join 语义：
-// 只取 _id + accountId + username；不存在的用户不出现在映射中（调用方渲染 null）。
+// 关联语义与既有集合查询一致：只取 _id + accountId + username；
+// 不存在的用户不出现在映射中（调用方渲染 null）。
 func (r *UserRepo) EpisodesFindUserRefsByIDs(ctx context.Context, ids []primitive.ObjectID) (map[string]EpisodesUserRef, error) {
 	ctx, cancel := context.WithTimeout(ctx, contextTimeout)
 	defer cancel()
@@ -57,9 +57,8 @@ type EpisodesMailTarget struct {
 }
 
 // EpisodesFindMailTargetsByIDs 批量查邮件收件人（email + isEmailVerified +
-// emailNotificationPrefs.episodeUpdate）。对齐 notifyHelper.js 的
-// User.find({_id:{$in}}).select('email isEmailVerified emailNotificationPrefs')：
-// 偏好键缺失（nil）视为未关闭（允许发送），仅显式 false 才跳过。
+// emailNotificationPrefs.episodeUpdate；select email/isEmailVerified/
+// emailNotificationPrefs）：偏好键缺失（nil）视为未关闭（允许发送），仅显式 false 才跳过。
 func (r *UserRepo) EpisodesFindMailTargetsByIDs(ctx context.Context, ids []primitive.ObjectID) (map[string]EpisodesMailTarget, error) {
 	ctx, cancel := context.WithTimeout(ctx, contextTimeout)
 	defer cancel()

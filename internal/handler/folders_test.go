@@ -173,7 +173,7 @@ func TestFolderCreateValidateListUpdate(t *testing.T) {
 		t.Fatalf("bad type: %d body=%s", code, body)
 	}
 
-	// 列表：userId 被 populate 成 {_id, username} 对象。
+	// 列表：userId 被关联查询展开成 {_id, username} 对象。
 	code, body = folderDo(t, env.router, "GET", "/api/folders", nil, tok)
 	if code != 200 {
 		t.Fatalf("list: %d", code)
@@ -185,7 +185,7 @@ func TestFolderCreateValidateListUpdate(t *testing.T) {
 	}
 	uidObj, ok := list[0]["userId"].(map[string]any)
 	if !ok || uidObj["username"] != "alice" || uidObj["_id"] != u.ID.Hex() {
-		t.Fatalf("list userId populate=%v", list[0]["userId"])
+		t.Fatalf("list userId expanded=%v", list[0]["userId"])
 	}
 
 	// type 过滤：follow 应返回空数组 []。
@@ -288,7 +288,7 @@ func TestFolderShareFlowAndPublic(t *testing.T) {
 	var folder map[string]any
 	_ = json.Unmarshal(body, &folder)
 	folderID, _ := primitive.ObjectIDFromHex(folder["_id"].(string))
-	// 对齐 Express POST /：description 不入库，需经 PUT /:id 设置。
+	// 固定契约：POST / 不入库 description，需经 PUT /:id 设置。
 	if code, _ := folderDo(t, env.router, "PUT", "/api/folders/"+folderID.Hex(), map[string]any{"description": "描述"}, tok); code != 200 {
 		t.Fatalf("set description: %d", code)
 	}
@@ -406,7 +406,7 @@ func TestSavedFolders(t *testing.T) {
 	var folder map[string]any
 	_ = json.Unmarshal(body, &folder)
 	folderID := folder["_id"].(string)
-	// 对齐 Express POST /：description 需经 PUT 设置。
+	// 固定契约：POST / 不入库 description，需经 PUT 设置。
 	if code, _ := folderDo(t, env.router, "PUT", "/api/folders/"+folderID, map[string]any{"description": "描述"}, creatorTok); code != 200 {
 		t.Fatalf("set description: %d", code)
 	}
@@ -543,7 +543,7 @@ func TestFolderReorder(t *testing.T) {
 	if len(list) != 3 || list[0]["_id"] != ids[2] || list[2]["_id"] != ids[0] {
 		t.Fatalf("reorder list=%v", list)
 	}
-	// 非法 folderId → 500（对齐 bulkWrite CastError）。
+	// 非法 folderId → 500（固定契约）。
 	if code, body := folderDo(t, env.router, "PUT", "/api/folders/reorder", map[string]any{"folderIds": []string{"badid"}}, tok); code != 500 || string(body) != `{"message":"Server error"}` {
 		t.Fatalf("reorder invalid id: %d body=%s", code, body)
 	}

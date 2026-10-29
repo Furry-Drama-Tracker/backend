@@ -11,11 +11,11 @@ import (
 	"github.com/xiedada05/furry-drama-be-neo/internal/repository"
 )
 
-// 接口调用统计缓冲参数（对齐 middlewares/apiTracker.js）。
+// 接口调用统计缓冲参数（固定值，勿随意改——影响统计口径）。
 const (
 	maxBufferSize = 50               // 满 50 条请求即 flush
 	flushInterval = 60 * time.Second // 兜底每 60s flush
-	dateLayout    = "2006-01-02"     // UTC 日期（对齐 toISOString().split('T')[0]）
+	dateLayout    = "2006-01-02"     // UTC 日期（YYYY-MM-DD）
 	usageItemSep  = "|"
 	usageFlushCtx = 5 * time.Second
 )
@@ -53,7 +53,7 @@ func newUsageTracker(repo usageRepo) *apiUsageTracker {
 
 // APITracker 构造接口调用统计中间件：响应完成后把 {method, path} 计入缓冲，
 // 满 50 条或每 60s 批量 upsert 到 ApiUsage（endpoint+date 聚合，$inc）。
-// 对齐 middlewares/apiTracker.js + src/index.js:285。失败静默（不阻断业务）。
+// 失败静默（不阻断业务）。
 func APITracker(repo *repository.ApiUsageRepo) gin.HandlerFunc {
 	t := newUsageTracker(repo)
 	go t.flushLoop()
@@ -69,8 +69,8 @@ func (t *apiUsageTracker) flushLoop() {
 	}
 }
 
-// handle 是 Gin 中间件：只在路径以 /api/ 开头时计数（对齐 req.path.startsWith('/api/')）。
-// endpoint 为 "<METHOD> <path>"（对齐 `${req.method} ${req.route.path}`）。
+// handle 是 Gin 中间件：只在路径以 /api/ 开头时计数。
+// endpoint 为 "<METHOD> <path>"（固定存储格式契约）。
 func (t *apiUsageTracker) handle(c *gin.Context) {
 	c.Next()
 	path := c.Request.URL.Path
@@ -85,7 +85,7 @@ func (t *apiUsageTracker) handle(c *gin.Context) {
 }
 
 // add 把一条请求计入缓冲；达到 maxBufferSize 时异步 flush。
-// endpoint 已含 "<METHOD> <path>"（对齐 Express 存储格式）。
+// endpoint 已含 "<METHOD> <path>"（固定存储格式）。
 func (t *apiUsageTracker) add(endpoint string) {
 	t.mu.Lock()
 	date := t.now().UTC().Format(dateLayout)
@@ -106,7 +106,7 @@ func (t *apiUsageTracker) add(endpoint string) {
 }
 
 // flush 取走全部缓冲并批量 upsert（endpoint+date 聚合，$inc）。
-// 单个失败静默忽略（对齐 flushBuffer 的 .catch(()=>{})）。
+// 单个失败静默忽略（不阻断业务）。
 func (t *apiUsageTracker) flush() {
 	t.mu.Lock()
 	if len(t.counts) == 0 {
@@ -124,7 +124,7 @@ func (t *apiUsageTracker) flush() {
 	ctx, cancel := context.WithTimeout(context.Background(), usageFlushCtx)
 	defer cancel()
 	for _, it := range items {
-		// method 传空串：对齐 Express（flushBuffer 的 upsert 从不写 method 字段，
+		// method 传空串：固定契约，勿改（upsert 从不写 method 字段，
 		// 由 schema 默认值 '' 填充）。
 		_ = t.repo.UpsertInc(ctx, it.endpoint, "", it.date, int64(it.count))
 	}

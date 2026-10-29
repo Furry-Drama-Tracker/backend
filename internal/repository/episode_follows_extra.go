@@ -8,11 +8,11 @@ import (
 	"github.com/xiedada05/furry-drama-be-neo/internal/model"
 )
 
-// 本文件为 episodes 域（routes/episodes.js）跨集合访问 Follow 集合的方法，
+// 本文件为 episodes 域跨集合访问 Follow 集合的方法，
 // 挂到已有 *FollowRepo 类型上。方法统一以 Episodes 前缀命名，避免与其它域 agent 重名。
 
-// EpisodesFindByEpisode 查询某剧集全部追番记录（对齐 Follow.find({episodeId})，
-// 供新增单集/单集转可观看/集数变更时的通知、推送与邮件收件人查询）。
+// EpisodesFindByEpisode 查询某剧集全部追番记录（find({episodeId})），
+// 供新增单集/单集转可观看/集数变更时的通知、推送与邮件收件人查询。
 func (r *FollowRepo) EpisodesFindByEpisode(ctx context.Context, episodeID any) ([]model.Follow, error) {
 	ctx, cancel := context.WithTimeout(ctx, contextTimeout)
 	defer cancel()
@@ -28,7 +28,7 @@ func (r *FollowRepo) EpisodesFindByEpisode(ctx context.Context, episodeID any) (
 	return list, nil
 }
 
-// EpisodesDeleteManyByEpisode 删除某剧集全部追番（对齐 DELETE /:id 的 Follow.deleteMany）。
+// EpisodesDeleteManyByEpisode 删除某剧集全部追番（删除剧集时清理）。
 func (r *FollowRepo) EpisodesDeleteManyByEpisode(ctx context.Context, episodeID any) error {
 	ctx, cancel := context.WithTimeout(ctx, contextTimeout)
 	defer cancel()

@@ -17,7 +17,7 @@ type DeletionResult struct {
 }
 
 // RequestDeletion POST /api/auth/request-deletion（protect）。
-// 对齐 account.js L45-77：置 deletionRequestedAt + audit。
+// 置 deletionRequestedAt + audit（流程固定）。
 func (s *AuthService) RequestDeletion(ctx context.Context, user *model.User) (*DeletionResult, error) {
 	if user.DeletionRequestedAt != nil {
 		return nil, errors.New(400, "已提交过注销申请")
@@ -30,7 +30,7 @@ func (s *AuthService) RequestDeletion(ctx context.Context, user *model.User) (*D
 }
 
 // CancelDeletion POST /api/auth/cancel-deletion（protect）。
-// 对齐 account.js L79-106：清除申请 + audit。
+// 清除申请 + audit（流程固定）。
 func (s *AuthService) CancelDeletion(ctx context.Context, user *model.User) error {
 	if user.DeletionRequestedAt == nil {
 		return errors.New(400, "没有注销申请")
@@ -41,8 +41,7 @@ func (s *AuthService) CancelDeletion(ctx context.Context, user *model.User) erro
 	return nil
 }
 
-// DeletionStatus GET /api/auth/deletion-status（protect）。
-// 对齐 account.js L108-120。
+// DeletionStatus GET /api/auth/deletion-status（protect，响应契约固定）。
 func (s *AuthService) DeletionStatus(user *model.User) gin.H {
 	if user.DeletionRequestedAt == nil {
 		return gin.H{"requested": false}

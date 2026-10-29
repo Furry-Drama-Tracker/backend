@@ -16,7 +16,7 @@ import (
 )
 
 // ChangeEmail PUT /api/auth/change-email（superAdminProtect，超管强制改邮箱）。
-// 对齐 email.js L49-117。
+// 流程为固定契约，勿重排。
 func (s *AuthService) ChangeEmail(c *gin.Context, userID interface{}, newEmail, password string) error {
 	ctx := c.Request.Context()
 	newEmail = strings.ToLower(strings.TrimSpace(newEmail))
@@ -53,7 +53,7 @@ func (s *AuthService) ChangeEmail(c *gin.Context, userID interface{}, newEmail, 
 	return nil
 }
 
-// EmailNotificationPrefsKeys 是偏好白名单（对齐 email.js）。
+// EmailNotificationPrefsKeys 是偏好白名单（固定集合，勿增删）。
 var EmailNotificationPrefsKeys = []string{
 	"episodeUpdate", "newDeviceLogin", "feedbackReply", "friendLinkStatus",
 	"friendLinkApply", "announcement", "reviewResult",
@@ -84,7 +84,7 @@ func (s *AuthService) UpdateEmailNotificationPrefs(ctx context.Context, userID i
 	return user.EmailNotificationPrefs, nil
 }
 
-// VerifyEmail POST /api/auth/verify-email。对齐 email.js L145-190。
+// VerifyEmail POST /api/auth/verify-email（流程为固定契约）。
 func (s *AuthService) VerifyEmail(ctx context.Context, verifyCode, emailOpt string) error {
 	if verifyCode == "" {
 		return errors.New(400, "请输入验证码")
@@ -140,7 +140,7 @@ func (s *AuthService) ResendVerification(ctx context.Context, user *model.User) 
 }
 
 // ResendVerificationByEmail POST /api/auth/resend-verification-by-email。
-// 对齐 email.js L222-258：统一文案（不泄露）。
+// 统一文案（不泄露账号是否存在），固定契约勿改。
 func (s *AuthService) ResendVerificationByEmail(ctx context.Context, emailAddr, altcha, devToken string) (string, error) {
 	unified := "如果该邮箱已注册且未验证，验证码已发送"
 	if emailAddr == "" {
@@ -170,7 +170,7 @@ func (s *AuthService) ResendVerificationByEmail(ctx context.Context, emailAddr, 
 }
 
 // RequestEmailChange POST /api/auth/request-email-change（protect）。
-// 对齐 email.js L260-336：锁定感知 + 发确认邮件（链接 1h 有效）。
+// 锁定感知 + 发确认邮件（链接 1h 有效），流程为固定契约。
 func (s *AuthService) RequestEmailChange(c *gin.Context, userID interface{}, password, newEmail, altcha string) error {
 	ctx := c.Request.Context()
 	if password == "" || newEmail == "" {
@@ -226,7 +226,7 @@ func (s *AuthService) RequestEmailChange(c *gin.Context, userID interface{}, pas
 	return nil
 }
 
-// VerifyEmailChange POST /api/auth/verify-email-change。对齐 email.js L337-378。
+// VerifyEmailChange POST /api/auth/verify-email-change（流程为固定契约）。
 func (s *AuthService) VerifyEmailChange(ctx context.Context, token string) (string, error) {
 	if token == "" {
 		return "", errors.New(400, "缺少验证令牌")

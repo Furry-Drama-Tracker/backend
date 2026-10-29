@@ -1,4 +1,4 @@
-// Package migrate 实现启动时的一次性数据迁移（对齐 backend/src/index.js L84-177）。
+// Package migrate 实现启动时执行的一次性数据迁移（accountId/role/creatorProfile 回填）。
 //
 // 每个迁移由 settings 集合的标记（value: {done:true}）控制，幂等可重入：
 //   - accountId_migration_v1：为缺少 accountId 的旧用户按规则回填
@@ -32,8 +32,8 @@ const (
 // nonWordRegex 对应 JS 的 /[^\w]/g（\w = [A-Za-z0-9_]）。
 var nonWordRegex = regexp.MustCompile(`[^\w]`)
 
-// generateAccountID 按 Express 规则由 username 生成 accountId：
-// username.replace(/[^\w]/g, '_').toLowerCase()（models/User.js 回填逻辑）。
+// generateAccountID 由 username 生成 accountId（与既有 accountId 数据形态兼容）：
+// username.replace(/[^\w]/g, '_').toLowerCase()。
 func generateAccountID(username string) string {
 	return strings.ToLower(nonWordRegex.ReplaceAllString(username, "_"))
 }
@@ -98,7 +98,7 @@ func migrateAccountID(ctx context.Context, repos *repository.Repos) error {
 
 // migrateRole 迁移 adminAccess 布尔字段 → role 字符串角色。
 // 对 adminAccess=true 且 role 为 user/空/缺失（排除 superadmin）的用户置 role='admin'，
-// 随后清除所有用户的 adminAccess 字段（对齐 src/index.js 的逐文档判断 + updateMany $unset）。
+// 随后清除所有用户的 adminAccess 字段（先逐文档判断更新 role，再 updateMany $unset）。
 func migrateRole(ctx context.Context, db *mongo.Database, repos *repository.Repos) error {
 	done, err := repos.Settings.GetFlag(ctx, keyRoleMigration)
 	if err != nil {
@@ -211,7 +211,7 @@ func migrateCreatorProfile(ctx context.Context, db *mongo.Database, repos *repos
 			SocialLinks: map[string]string{},
 		}
 		if err := repos.CreatorProfiles.Create(ctx, p); err != nil {
-			// 并发/重复创建则跳过（幂等），对齐 Express 捕获 11000 的语义
+			// 并发/重复创建（duplicate key 11000）则跳过（幂等）
 			if repository.IsDuplicateKey(err) {
 				continue
 			}

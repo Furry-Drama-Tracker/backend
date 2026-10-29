@@ -11,17 +11,17 @@ import (
 	"github.com/xiedada05/furry-drama-be-neo/internal/model"
 )
 
-// 本文件为 /api/activity 域（routes/activity.js）跨集合访问 SingleEpisode /
+// 本文件为 /api/activity 域跨集合访问 SingleEpisode /
 // Rating 集合的方法，挂到已有 *SingleEpisodeRepo / *RatingRepo 类型上。
 // 方法统一以 Activity 前缀命名，避免与其它域 agent 新增方法重名。
 //
-// 注意：Express activity.js 并没有独立 Activity collection——动态流由
+// 注意：没有独立 Activity collection——动态流由
 // Follow/SingleEpisode/Episode/Rating 实时聚合计算。故此处仅补充查询方法，
 // 不创建新集合（repos.go 亦未注册 ActivityRepo，按约束不改动 repos.go）。
 
-// ActivitySinglesFollowedNew 查询追番剧集近期发布的新单集（对齐 activity.js
-// GET / 的 SingleEpisode.find({episodeId:{$in}, releaseDate:{$gte}})
-// .sort({releaseDate:-1})，不设 limit 返回全部）。
+// ActivitySinglesFollowedNew 查询追番剧集近期发布的新单集
+// （episodeId ∈ 给定集合且 releaseDate >= since，
+// 按 releaseDate 倒序，不设 limit 返回全部）。
 func (r *SingleEpisodeRepo) ActivitySinglesFollowedNew(ctx context.Context, episodeIDs []primitive.ObjectID, since time.Time) ([]model.SingleEpisode, error) {
 	ctx, cancel := context.WithTimeout(ctx, contextTimeout)
 	defer cancel()
@@ -40,8 +40,9 @@ func (r *SingleEpisodeRepo) ActivitySinglesFollowedNew(ctx context.Context, epis
 	return list, nil
 }
 
-// ActivitySinglesRecent 查询全站近期发布的新单集（对齐 activity.js GET /public
-// 的 SingleEpisode.find({releaseDate:{$gte}}).sort({releaseDate:-1}).limit(30)）。
+// ActivitySinglesRecent 查询全站近期发布的新单集
+// （releaseDate >= since，按 releaseDate 倒序，limit 由调用方传入，
+// /public 端点传 30）。
 func (r *SingleEpisodeRepo) ActivitySinglesRecent(ctx context.Context, since time.Time, limit int64) ([]model.SingleEpisode, error) {
 	ctx, cancel := context.WithTimeout(ctx, contextTimeout)
 	defer cancel()
@@ -58,9 +59,9 @@ func (r *SingleEpisodeRepo) ActivitySinglesRecent(ctx context.Context, since tim
 	return list, nil
 }
 
-// ActivityHighRatings 查询追番剧集近期的高评分记录（对齐 activity.js GET / 的
-// Rating.find({episodeId:{$in}, score:{$gte:4}, createdAt:{$gte}})
-// .sort({createdAt:-1}).limit(50)）。
+// ActivityHighRatings 查询追番剧集近期的高评分记录
+// （episodeId ∈ 给定集合、score >= 4、createdAt >= since，
+// 按 createdAt 倒序；limit 由调用方传入，/activity 端点传 50）。
 func (r *RatingRepo) ActivityHighRatings(ctx context.Context, episodeIDs []primitive.ObjectID, since time.Time, limit int64) ([]model.Rating, error) {
 	ctx, cancel := context.WithTimeout(ctx, contextTimeout)
 	defer cancel()

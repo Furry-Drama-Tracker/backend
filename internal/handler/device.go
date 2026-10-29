@@ -57,7 +57,7 @@ func (h *Auth) ConfirmDeviceLogin(c *gin.Context) {
 			"twoFactorChallenge": res.TwoFactorChallenge,
 		})
 	case res.User != nil:
-		// 对齐 device.js L149-152：仅这些字段。
+		// 登录响应仅含这些字段（固定契约，勿增删）。
 		c.JSON(200, gin.H{
 			"_id":             res.User.ID.Hex(),
 			"accountId":       res.User.AccountID,

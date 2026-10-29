@@ -1481,7 +1481,7 @@ var SwaggerInfo = &swag.Spec{
 	BasePath:         "/api",
 	Schemes:          []string{},
 	Title:            "兽剧聚合平台 API",
-	Description:      "兽剧内容聚合平台后端服务 API 文档（neo-server，行为对齐 Express 版）",
+	Description:      "兽剧内容聚合平台后端服务 API 文档（neo-server）",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",

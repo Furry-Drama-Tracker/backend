@@ -6,9 +6,9 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-// Series 系列文档（models/Series.js）。
+// Series 系列文档（series 集合）。
 // episodes 保存系列引用的剧集 ID 数组；handler 在响应中将其填充为剧集对象
-// （对齐 Express 的 .populate('episodes', ...)）。
+// （关联查询语义与既有接口一致）。
 type Series struct {
 	ID            primitive.ObjectID   `bson:"_id,omitempty" json:"_id"`
 	Name          string               `bson:"name" json:"name"`
@@ -23,9 +23,9 @@ type Series struct {
 	UpdatedAt     time.Time            `bson:"updatedAt" json:"updatedAt"`
 }
 
-// SeriesEpisodeList 是系列列表端点内嵌的剧集对象（对齐 series.js GET /
-// 的 populate select：title coverImage currentEpisodes totalEpisodes status
-// averageRating）。数字字段用 float64 兼容 BSON double/int 两种存储。
+// SeriesEpisodeList 是系列列表端点内嵌的剧集对象（列表接口选定的投影字段：
+// title coverImage currentEpisodes totalEpisodes status averageRating）。
+// 数字字段用 float64 兼容 BSON double/int 两种存储。
 type SeriesEpisodeList struct {
 	ID              primitive.ObjectID `bson:"_id" json:"_id"`
 	Title           string             `bson:"title" json:"title"`
@@ -36,8 +36,8 @@ type SeriesEpisodeList struct {
 	AverageRating   float64            `bson:"averageRating" json:"averageRating"`
 }
 
-// SeriesEpisodeDetail 是系列详情端点内嵌的剧集对象（对齐 series.js GET /:id
-// 的 populate select：列表字段 + description category tags views）。
+// SeriesEpisodeDetail 是系列详情端点内嵌的剧集对象（详情接口选定的投影字段：
+// 列表字段 + description category tags views）。
 type SeriesEpisodeDetail struct {
 	ID              primitive.ObjectID `bson:"_id" json:"_id"`
 	Title           string             `bson:"title" json:"title"`

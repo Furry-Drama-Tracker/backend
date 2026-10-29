@@ -32,7 +32,7 @@ type RegisterResult struct {
 	NeedVerification bool
 }
 
-// Register 注册流程，对齐 routes/auth/session.js L154-247。
+// Register 注册流程（校验顺序为固定契约，勿重排）。
 // 返回错误时是 *errors.AppError（handler 用 AbortWithAppError 渲染）。
 func (s *AuthService) Register(ctx context.Context, in RegisterInput) (*RegisterResult, error) {
 	accountID := strings.TrimSpace(in.AccountID)
@@ -128,7 +128,7 @@ func (s *AuthService) Register(ctx context.Context, in RegisterInput) (*Register
 	return &RegisterResult{Email: user.Email, NeedVerification: true}, nil
 }
 
-// ValidatePassword 校验密码规则，返回错误文案或空串（对齐 middlewares/security.js validatePassword）。
+// ValidatePassword 校验密码规则，返回错误文案或空串（文案为固定契约，勿本地化/勿改）。
 func ValidatePassword(p string) string {
 	if len([]rune(p)) < 8 {
 		return "密码长度至少8位"

@@ -1,4 +1,4 @@
-// Package email 封装 SMTP 邮件发送，对齐 Express utils/email.js。
+// Package email 封装 SMTP 邮件发送。
 //
 // 配置来源：ini [email] 段 + 环境变量 EMAIL_*（不再读取 SiteContent email 数据库配置）。
 // 目标邮箱限流：每收件邮箱 1 小时最多 10 封（内存窗口）。
@@ -134,7 +134,7 @@ func (c *Client) GetSiteAbout(ctx context.Context) siteAbout {
 	return a
 }
 
-// Send 发送邮件：目标限流 → SMTP；未配置或失败返回 false（对齐 Express 返回 bool）。
+// Send 发送邮件：目标限流 → SMTP；未配置或失败返回 false（返回 bool，不返回错误）。
 // 三种失败均记日志，避免静默：限流/未配置记 Warn，SMTP 发送失败记 Error（含 err 与 host:port，不含 pass）。
 func (c *Client) Send(ctx context.Context, to, subject, html string) bool {
 	to = toLowerTrim(to)
@@ -227,7 +227,7 @@ func toLowerTrim(s string) string {
 	return string(out)
 }
 
-// isLocalhost 判断主机是否为本地（email.js requireTLS 排除）。
+// isLocalhost 判断主机是否为本地（本地主机不强制 TLS）。
 func isLocalhost(host string) bool {
 	switch host {
 	case "localhost", "127.0.0.1", "::1":

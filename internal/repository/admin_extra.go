@@ -15,15 +15,14 @@ import (
 	"github.com/xiedada05/furry-drama-be-neo/internal/model"
 )
 
-// 本文件为 /api/admin 与 /api/audit-logs 域（backend/routes/admin.js、
-// routes/auditLogs.js）跨域补充的管理方法。所有方法统一以 Admin 前缀命名，
+// 本文件为 /api/admin 与 /api/audit-logs 域跨域补充的管理方法。所有方法统一以 Admin 前缀命名，
 // 避免与其它域 agent 在各自 repo 文件里新增的方法重名。绝不修改 repos.go。
 
 // ---- UserRepo 扩展 ----
 
 // AdminFindByIdentifierWithAuth 按 邮箱或 accountId 二选一查找，附带密码哈希与
-// 锁定字段（对齐 admin.js POST /login 的 findOne({$or:[{email},{accountId}]})
-// .select('+loginAttempts +lockUntil +password')）。排除 2FA 密文。
+// 锁定字段（findOne({$or:[{email},{accountId}]})，
+// 含 loginAttempts/lockUntil/password 投影）。排除 2FA 密文。
 func (r *UserRepo) AdminFindByIdentifierWithAuth(ctx context.Context, identifier string) (*model.User, error) {
 	ctx, cancel := r.newCtx(ctx)
 	defer cancel()
@@ -33,17 +32,16 @@ func (r *UserRepo) AdminFindByIdentifierWithAuth(ctx context.Context, identifier
 	}}, bson.M{"twoFactorSecret": 0, "twoFactorBackupCodes": 0})
 }
 
-// AdminCountRoles 统计角色属于 roles 集合的用户数（对齐 /list 的
-// countDocuments({role:{$in:[admin,superadmin,creator]}})）。
+// AdminCountRoles 统计角色属于 roles 集合的用户数
+// （countDocuments({role:{$in:roles}})）。
 func (r *UserRepo) AdminCountRoles(ctx context.Context, roles []string) (int64, error) {
 	ctx, cancel := r.newCtx(ctx)
 	defer cancel()
 	return r.coll.CountDocuments(ctx, bson.M{"role": bson.M{"$in": roles}})
 }
 
-// AdminFindRoles 分页查询指定角色的用户，createdAt 倒序（对齐 /list 的
-// find({role:{$in}}).select('-password').sort({createdAt:-1}).skip().limit()）。
-// skip 恒设置（含负值）：负 skip 由 mongo 拒绝 → 500（对齐 Express 行为）。
+// AdminFindRoles 分页查询指定角色的用户，createdAt 倒序，排除 password 字段。
+// skip 恒设置（含负值）：负 skip 由 mongo 拒绝 → 500（page<1 时的报错路径，勿改）。
 func (r *UserRepo) AdminFindRoles(ctx context.Context, roles []string, page, limit int) ([]model.User, error) {
 	ctx, cancel := r.newCtx(ctx)
 	defer cancel()
@@ -64,8 +62,8 @@ func (r *UserRepo) AdminFindRoles(ctx context.Context, roles []string, page, lim
 	return list, nil
 }
 
-// adminUserSearchFilter 组装 /users 的搜索条件（对齐 admin.js GET /users：
-// accountId/username/email 三字段正则，escapeRegex 后 $options i）。
+// adminUserSearchFilter 组装 /users 的搜索条件：
+// accountId/username/email 三字段正则，escapeRegex 后 $options i。
 func adminUserSearchFilter(search string) bson.M {
 	if search == "" {
 		return bson.M{}
@@ -113,8 +111,8 @@ func (r *UserRepo) AdminCountRole(ctx context.Context, role string) (int64, erro
 	return r.coll.CountDocuments(ctx, bson.M{"role": role})
 }
 
-// AdminFindByIDAndSetRole 按 ID 更新角色并返回新文档（对齐 /role/:id 的
-// findByIdAndUpdate(id,{role},{new:true}).select('-password')）。不存在返回 ErrNotFound。
+// AdminFindByIDAndSetRole 按 ID 更新角色并返回更新后的文档（$set role，
+// 排除 password 投影）。不存在返回 ErrNotFound。
 func (r *UserRepo) AdminFindByIDAndSetRole(ctx context.Context, id, role string) (*model.User, error) {
 	ctx, cancel := r.newCtx(ctx)
 	defer cancel()
@@ -128,8 +126,7 @@ func (r *UserRepo) AdminFindByIDAndSetRole(ctx context.Context, id, role string)
 	return u, err
 }
 
-// AdminSetRole 定点更新角色（对齐 /user-admin-access/:id 的 user.role = x; user.save()
-// 语义——仅改 role，不动其它字段）。
+// AdminSetRole 定点更新角色（仅 $set role，不动其它字段）。
 func (r *UserRepo) AdminSetRole(ctx context.Context, id any, role string) error {
 	ctx, cancel := r.newCtx(ctx)
 	defer cancel()
@@ -137,8 +134,8 @@ func (r *UserRepo) AdminSetRole(ctx context.Context, id any, role string) error 
 	return err
 }
 
-// AdminUpdateLastLogin 更新最近登录时间与 IP（对齐 admin.js POST /login 的
-// user.lastLoginAt = new Date(); user.lastLoginIp = ip; user.save()）。
+// AdminUpdateLastLogin 更新最近登录时间与 IP（admin 登录成功时调用，
+// $set lastLoginAt/lastLoginIp 两字段）。
 func (r *UserRepo) AdminUpdateLastLogin(ctx context.Context, id any, lastLoginAt time.Time, ip string) error {
 	ctx, cancel := r.newCtx(ctx)
 	defer cancel()
@@ -147,7 +144,7 @@ func (r *UserRepo) AdminUpdateLastLogin(ctx context.Context, id any, lastLoginAt
 	return err
 }
 
-// AdminUserRef 是 creatorId populate 需要的用户摘要（{_id, accountId, username, email}）。
+// AdminUserRef 是创作者资料 creatorId 关联展示所需的用户摘要（{_id, accountId, username, email}）。
 type AdminUserRef struct {
 	ID        primitive.ObjectID `bson:"_id"`
 	AccountID string             `bson:"accountId"`
@@ -155,8 +152,8 @@ type AdminUserRef struct {
 	Email     string             `bson:"email"`
 }
 
-// AdminFindUserRefsByIDs 批量查用户摘要（对齐 CreatorProfile.find().populate(
-// 'creatorId','accountId username email') 的 join 语义；不存在的用户不进映射）。
+// AdminFindUserRefsByIDs 批量查用户摘要（只取 accountId/username/email；
+// 不存在的用户不进映射，调用方渲染 null）。
 func (r *UserRepo) AdminFindUserRefsByIDs(ctx context.Context, ids []primitive.ObjectID) (map[string]AdminUserRef, error) {
 	ctx, cancel := r.newCtx(ctx)
 	defer cancel()
@@ -194,7 +191,7 @@ func (r *UserRepo) AdminDeletePushSubscriptionsByUser(ctx context.Context, userI
 
 // ---- FolderRepo 扩展 ----
 
-// AdminDeleteManyByUser 删除用户全部收藏夹（注销级联的 Folder.deleteMany({userId})）。
+// AdminDeleteManyByUser 删除用户全部收藏夹（注销级联，deleteMany({userId})）。
 func (r *FolderRepo) AdminDeleteManyByUser(ctx context.Context, userID any) error {
 	ctx, cancel := context.WithTimeout(ctx, contextTimeout)
 	defer cancel()
@@ -205,7 +202,7 @@ func (r *FolderRepo) AdminDeleteManyByUser(ctx context.Context, userID any) erro
 // ---- EpisodeRepo 扩展 ----
 
 // AdminCountPendingReview 统计待审核剧集（reviewStatus=pending 或 hasPendingChanges=true；
-// 对齐 /pending-counts 的 Episode.countDocuments 条件）。
+// /pending-counts 使用）。
 func (r *EpisodeRepo) AdminCountPendingReview(ctx context.Context) (int64, error) {
 	ctx, cancel := context.WithTimeout(ctx, contextTimeout)
 	defer cancel()
@@ -216,7 +213,7 @@ func (r *EpisodeRepo) AdminCountPendingReview(ctx context.Context) (int64, error
 }
 
 // AdminRebuildEpisodeRatings 删除用户评分后重算受影响剧集的平均分/评分人数，
-// 并批量写回（对齐 admin.js DELETE /users/:id 的 Rating.aggregate + Episode.bulkWrite）。
+// 并批量写回（注销级联使用）。
 // 对每部受影响剧集：若无剩余评分 → averageRating 0 / ratingCount 0；否则取
 // $avg 四舍五入到 1 位小数（Math.round(avg*10)/10）。
 func (r *EpisodeRepo) AdminRebuildEpisodeRatings(ctx context.Context, episodeIDs []primitive.ObjectID) error {
@@ -281,9 +278,9 @@ func (r *ReportRepo) AdminCountStatus(ctx context.Context, status string) (int64
 }
 
 // AdminDeleteReportsByLegacyReporter 按 legacy 的 reporter 字段删除举报
-// （对齐 admin.js DELETE /users/:id 的 Report.deleteMany({ reporter: id })——
-// 注意 Express 用的是 reporter 而非 schema 的 reporterId，为保持 1:1 行为照抄，
-// 对 schema 正确的文档实为无匹配的 no-op）。
+// （deleteMany({ reporter: id })——注意查询键是有意沿用历史数据里的 reporter
+// 字段而非文档实际的 reporterId，勿改成 reporterId：该查询对按 schema 写入的
+// 文档实为无匹配的 no-op，消费方依赖此行为）。
 func (r *ReportRepo) AdminDeleteReportsByLegacyReporter(ctx context.Context, reporterID any) error {
 	ctx, cancel := context.WithTimeout(ctx, contextTimeout)
 	defer cancel()
@@ -307,8 +304,7 @@ func (r *FriendLinkRepo) AdminCountStatus(ctx context.Context, status string) (i
 
 // ---- CreatorProfileRepo 扩展 ----
 
-// AdminFindAllProfiles 查询全部创作者主页，updatedAt 倒序（对齐
-// CreatorProfile.find().sort({updatedAt:-1})）。
+// AdminFindAllProfiles 查询全部创作者主页，updatedAt 倒序。
 func (r *CreatorProfileRepo) AdminFindAllProfiles(ctx context.Context) ([]model.CreatorProfile, error) {
 	ctx, cancel := context.WithTimeout(ctx, contextTimeout)
 	defer cancel()
@@ -336,9 +332,9 @@ func (r *CreatorProfileRepo) AdminFindProfileByID(ctx context.Context, id any) (
 	return p, err
 }
 
-// AdminUpdateProfile 按 ID 定点更新并返回新文档（对齐 findByIdAndUpdate(id, update,
-// {new:true})）。bumpVersion 为 true 时额外 $inc __v（对齐 approve/reject 的
-// profile.save() 版本号自增；PUT /:id 用 findByIdAndUpdate 不增）。
+// AdminUpdateProfile 按 ID 定点更新并返回更新后的文档。
+// bumpVersion 为 true 时额外 $inc __v（approve/reject 走整文档保存语义、版本号自增；
+// PUT /:id 定点更新不增）。
 func (r *CreatorProfileRepo) AdminUpdateProfile(ctx context.Context, id any, set bson.M, bumpVersion bool) (*model.CreatorProfile, error) {
 	ctx, cancel := context.WithTimeout(ctx, contextTimeout)
 	defer cancel()
@@ -357,15 +353,14 @@ func (r *CreatorProfileRepo) AdminUpdateProfile(ctx context.Context, id any, set
 
 // ---- AuditLogRepo 扩展 ----
 
-// AdminCount 按过滤条件统计审计日志数（auditLogs.js GET / 的 total）。
+// AdminCount 按过滤条件统计审计日志数（/audit-logs 列表的 total）。
 func (r *AuditLogRepo) AdminCount(ctx context.Context, filter bson.M) (int64, error) {
 	ctx, cancel := context.WithTimeout(ctx, contextTimeout)
 	defer cancel()
 	return r.coll.CountDocuments(ctx, filter)
 }
 
-// AdminFindPaged 分页查询审计日志，createdAt 倒序（对齐 auditLogs.js GET / 的
-// find(query).sort({createdAt:-1}).skip().limit()）。
+// AdminFindPaged 分页查询审计日志，createdAt 倒序（filter + sort + skip/limit 分页）。
 func (r *AuditLogRepo) AdminFindPaged(ctx context.Context, filter bson.M, page, limit int) ([]model.AuditLog, error) {
 	ctx, cancel := context.WithTimeout(ctx, contextTimeout)
 	defer cancel()
@@ -385,7 +380,7 @@ func (r *AuditLogRepo) AdminFindPaged(ctx context.Context, filter bson.M, page, 
 	return list, nil
 }
 
-// adminEscapeRegex 转义正则特殊字符（对齐 utils/helpers.js escapeRegex）。
+// adminEscapeRegex 转义正则特殊字符（搜索条件构造共用）。
 func adminEscapeRegex(s string) string {
 	var b strings.Builder
 	for _, ch := range s {

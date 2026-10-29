@@ -6,8 +6,8 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-// Announcement 公告文档（models/Announcement.js → announcements 集合）。
-// 逐字段对齐 mongoose schema；字段默认值由仓储 Create 在写入前补齐。
+// Announcement 公告文档（announcements 集合）。
+// 逐字段与既有集合数据形态一致（勿改 bson 标签）；字段默认值由仓储 Create 在写入前补齐。
 type Announcement struct {
 	ID               primitive.ObjectID  `bson:"_id,omitempty" json:"_id"`
 	Title            string              `bson:"title" json:"title"`
@@ -32,6 +32,6 @@ type Announcement struct {
 	CreatedBy        *primitive.ObjectID `bson:"createdBy" json:"createdBy"`
 	CreatedAt        time.Time           `bson:"createdAt" json:"createdAt"`
 	UpdatedAt        time.Time           `bson:"updatedAt" json:"updatedAt"`
-	// VersionKey 是 mongoose 的 __v（每次 save() 自增；findByIdAndUpdate 不变）。
+	// VersionKey 是文档版本键 __v（整文档覆盖保存时自增；定点更新不变）。
 	VersionKey int `bson:"__v,omitempty" json:"__v"`
 }

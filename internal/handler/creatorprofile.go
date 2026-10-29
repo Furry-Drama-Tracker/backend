@@ -16,9 +16,9 @@ import (
 	"github.com/xiedada05/furry-drama-be-neo/internal/repository"
 )
 
-// 本文件实现 /api/creator-profile 子域（行为逐分支照抄 backend/routes/creatorProfiles.js）。
+// 本文件实现 /api/creator-profile 子域。
 //
-// Express 只有 4 个端点（GET/PUT /my-profile 为 creatorProtect，即
+// 4 个端点（GET/PUT /my-profile 为 creatorProtect，即
 // creator/admin/superadmin；GET /public/:id 与 GET /by-creator/:creatorId 公开）。
 
 // CreatorProfiles 是 /api/creator-profile 域 handler 容器。
@@ -34,8 +34,7 @@ func NewCreatorProfiles(repos *repository.Repos, cfg *config.Config, amw *middle
 	return &CreatorProfiles{Repos: repos, Config: cfg, AuthMW: amw, RL: rl}
 }
 
-// Register 挂载 /api/creator-profile 全部端点（不含 /api 前缀；路径对齐
-// creatorProfiles.js 子路径）。
+// Register 挂载 /api/creator-profile 全部端点（不含 /api 前缀）。
 func (h *CreatorProfiles) Register(g *gin.RouterGroup) {
 	creatorRoles := []string{middleware.RoleCreator, middleware.RoleAdmin, middleware.RoleSuperAdmin}
 	g.GET("/my-profile", h.AuthMW.Protect(creatorRoles...), h.MyProfile)
@@ -130,7 +129,7 @@ func (h *CreatorProfiles) UpdateMyProfile(c *gin.Context) {
 func (h *CreatorProfiles) PublicProfile(c *gin.Context) {
 	oid, err := primitive.ObjectIDFromHex(c.Param("id"))
 	if err != nil {
-		// 对齐 Express 非法 ID → CastError → catch → 500。
+		// 固定契约：非法 ID → 500 Server error。
 		errors.AbortWithAppError(c, errors.New(500, "Server error"), h.Config.IsDev)
 		return
 	}
@@ -163,7 +162,7 @@ func (h *CreatorProfiles) PublicProfile(c *gin.Context) {
 func (h *CreatorProfiles) ByCreator(c *gin.Context) {
 	creatorID, err := primitive.ObjectIDFromHex(c.Param("creatorId"))
 	if err != nil {
-		// 对齐 Express findOne({creatorId}) 非法 ID → CastError → catch → 500。
+		// 固定契约：creatorId 非法 → 查询空结果 → 500 Server error。
 		errors.AbortWithAppError(c, errors.New(500, "Server error"), h.Config.IsDev)
 		return
 	}
@@ -196,9 +195,9 @@ func (h *CreatorProfiles) profileBody(c *gin.Context) map[string]any {
 	return body
 }
 
-// creatorEpisodes 查询某创作者的全部已审核剧集（对齐 creatorProfiles.js 的
-// Episode.find({$or:[{createdBy, hideCreator:{$ne:true}},{allowedEditors},
-// {customAuthors}], reviewStatus:'approved'}).sort({createdAt:-1})）。
+// creatorEpisodes 查询某创作者的全部已审核剧集（可见性规则是固定契约：
+// 本人未隐藏 / 被允许编辑 / 自定义作者 三者其一，且 reviewStatus 为已审核，
+// 按 createdAt 倒序）。
 func (h *CreatorProfiles) creatorEpisodes(ctx context.Context, creatorID primitive.ObjectID) ([]gin.H, error) {
 	filter := bson.M{
 		"$or": bson.A{
@@ -220,8 +219,8 @@ func (h *CreatorProfiles) creatorEpisodes(ctx context.Context, creatorID primiti
 }
 
 // creatorProfileJSON 组装创作者主页完整文档（创作者视角，含待审核字段）。
-// 对齐 mongoose toObject：缺失字段回填 schema 默认值（avatar/qqGroupLink ''、
-// reviewStatus 'approved'、pendingChanges 嵌套默认对象、__v 0）。
+// 缺失字段回填默认值（avatar/qqGroupLink ''、
+// reviewStatus 'approved'、pendingChanges 嵌套默认对象、__v 0），与既有集合数据形态一致。
 func creatorProfileJSON(p *model.CreatorProfile) gin.H {
 	social := p.SocialLinks
 	if social == nil {
@@ -259,7 +258,7 @@ func creatorProfileJSON(p *model.CreatorProfile) gin.H {
 }
 
 // publicCreatorProfileJSON 组装公开创作者主页（剥离 pendingChanges/reviewNote/
-// reviewStatus，避免泄露待审核字段；对齐 toPublicProfile）。
+// reviewStatus，避免泄露待审核字段，固定契约）。
 func publicCreatorProfileJSON(p *model.CreatorProfile) gin.H {
 	social := p.SocialLinks
 	if social == nil {
@@ -279,9 +278,9 @@ func publicCreatorProfileJSON(p *model.CreatorProfile) gin.H {
 	}
 }
 
-// episodeDocJSON 组装完整剧集文档（未 populate 场景，ref 字段输出 hex 字符串）。
+// episodeDocJSON 组装完整剧集文档（未关联查询场景，ref 字段输出 hex 字符串）。
 // 字段集与 episodes.go episodeJSON(users=nil) 一致，供 creator / creator-profile
-// 等未 populate 的列表/详情复用。
+// 等未关联查询的列表/详情复用。
 func episodeDocJSON(e *model.Episode) gin.H {
 	var totalEpisodes any
 	if e.TotalEpisodes != nil {

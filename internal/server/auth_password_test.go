@@ -8,9 +8,9 @@ import (
 )
 
 // TestChangePassword 验证登录后修改密码的完整流程（改密成功 + 新密码可登录）。
-// 差分场景 change-password 的 neo 侧覆盖：差分脚本中该场景因两端 register/
-// passwordReset 限流(3/h)计数不同步（Express 常驻进程 vs neo 重启清零）而级联分叉
-// （register 429→login 400→改密 429），顺序已对齐（rl 前置），行为由本测试锁定。
+// 补充覆盖：该流程受 register/passwordReset 限流(3/h)影响，单独环境重启后计数清零，
+// 对跑验证在该场景不稳定（register 429→login 400→改密 429），顺序已对齐（rl 前置），
+// 行为由本测试锁定。
 func TestChangePassword(t *testing.T) {
 	ts := registerTestServer(t)
 	c := newClient(t, ts.URL)

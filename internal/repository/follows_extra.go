@@ -11,12 +11,12 @@ import (
 	"github.com/xiedada05/furry-drama-be-neo/internal/model"
 )
 
-// 本文件为收藏夹域（folders.js）跨域访问 Follow/Favorite 集合的查询方法。
+// 本文件为收藏夹域跨域访问 Follow/Favorite 集合的查询方法。
 // 方法统一以 Folder 前缀命名，避免与其它域新增方法冲突；挂到已有的
 // FollowRepo / FavoriteRepo 类型上，不修改其它文件。
 
-// folderClearByFolder 通用：把某收藏夹下所有条目的 folderId 置空。
-// 对齐 folders.js DELETE /:id 的 Model.updateMany({ folderId }, { $set: { folderId: null } })。
+// folderClearByFolder 通用：把某收藏夹下所有条目的 folderId 置空
+// （updateMany({ folderId }, { $set: { folderId: null } })，删除收藏夹时调用）。
 func folderClearByFolder(ctx context.Context, coll *mongo.Collection, folderID any) error {
 	ctx, cancel := context.WithTimeout(ctx, contextTimeout)
 	defer cancel()
@@ -24,8 +24,8 @@ func folderClearByFolder(ctx context.Context, coll *mongo.Collection, folderID a
 	return err
 }
 
-// folderFindByUserEpisode 通用：按 userId+episodeId 查条目。
-// 对齐 folders.js POST /:id/items 的 Model.findOne({ userId, episodeId })；不存在返回 ErrNotFound。
+// folderFindByUserEpisode 通用：按 userId+episodeId 查条目
+// （findOne({ userId, episodeId })）；不存在返回 ErrNotFound。
 func folderFindByUserEpisode(ctx context.Context, coll *mongo.Collection, userID, episodeID any, out any) error {
 	ctx, cancel := context.WithTimeout(ctx, contextTimeout)
 	defer cancel()
@@ -36,9 +36,8 @@ func folderFindByUserEpisode(ctx context.Context, coll *mongo.Collection, userID
 	return err
 }
 
-// folderRemoveItem 通用：把某用户某剧集的 folderId 从指定收藏夹移除。
-// 对齐 folders.js DELETE /:id/items/:episodeId 的
-// Model.updateOne({ userId, episodeId, folderId }, { $set: { folderId: null } })。
+// folderRemoveItem 通用：把某用户某剧集的 folderId 从指定收藏夹移除
+// （updateOne({ userId, episodeId, folderId }, { $set: { folderId: null } })）。
 func folderRemoveItem(ctx context.Context, coll *mongo.Collection, userID, episodeID, folderID any) error {
 	ctx, cancel := context.WithTimeout(ctx, contextTimeout)
 	defer cancel()
@@ -47,7 +46,7 @@ func folderRemoveItem(ctx context.Context, coll *mongo.Collection, userID, episo
 	return err
 }
 
-// folderSave 通用：整文档覆盖保存（对齐 item.save()）。
+// folderSave 通用：整文档覆盖保存（ReplaceOne 全量替换）。
 func folderSave(ctx context.Context, coll *mongo.Collection, id any, doc any) error {
 	ctx, cancel := context.WithTimeout(ctx, contextTimeout)
 	defer cancel()
@@ -55,8 +54,8 @@ func folderSave(ctx context.Context, coll *mongo.Collection, id any, doc any) er
 	return err
 }
 
-// folderFindShared 通用：查分享收藏夹条目（folders.js GET /shared/:shareToken）。
-// 对齐 Model.find(filter).sort({ createdAt: -1 })；返回非 nil 空切片。
+// folderFindShared 通用：查分享收藏夹条目（GET /shared/:shareToken 使用）。
+// find(filter).sort({ createdAt: -1 })；返回非 nil 空切片。
 func folderFindShared(ctx context.Context, coll *mongo.Collection, filter bson.M, decode func(bson.Raw) error) error {
 	ctx, cancel := context.WithTimeout(ctx, contextTimeout)
 	defer cancel()
@@ -73,14 +72,14 @@ func folderFindShared(ctx context.Context, coll *mongo.Collection, filter bson.M
 	return cur.Err()
 }
 
-// FolderClearByFolderID 清空某收藏夹下全部追番条目的 folderId（folders.js DELETE /:id）。
+// FolderClearByFolderID 清空某收藏夹下全部追番条目的 folderId（删除收藏夹时调用）。
 func (r *FollowRepo) FolderClearByFolderID(ctx context.Context, folderID any) error {
 	ctx, cancel := context.WithTimeout(ctx, contextTimeout)
 	defer cancel()
 	return folderClearByFolder(ctx, r.coll, folderID)
 }
 
-// FolderFindByUserEpisode 查用户的某条追番（folders.js POST /:id/items）；不存在返回 ErrNotFound。
+// FolderFindByUserEpisode 查用户的某条追番（收藏夹条目操作使用）；不存在返回 ErrNotFound。
 func (r *FollowRepo) FolderFindByUserEpisode(ctx context.Context, userID, episodeID any) (*model.Follow, error) {
 	ctx, cancel := context.WithTimeout(ctx, contextTimeout)
 	defer cancel()
@@ -91,21 +90,21 @@ func (r *FollowRepo) FolderFindByUserEpisode(ctx context.Context, userID, episod
 	return item, nil
 }
 
-// FolderRemoveItem 把某追番移出收藏夹（folders.js DELETE /:id/items/:episodeId）。
+// FolderRemoveItem 把某追番移出收藏夹（DELETE /:id/items/:episodeId 使用）。
 func (r *FollowRepo) FolderRemoveItem(ctx context.Context, userID, episodeID, folderID any) error {
 	ctx, cancel := context.WithTimeout(ctx, contextTimeout)
 	defer cancel()
 	return folderRemoveItem(ctx, r.coll, userID, episodeID, folderID)
 }
 
-// FolderSave 保存追番条目（对齐 item.save()；folders.js POST /:id/items）。
+// FolderSave 保存追番条目（整文档覆盖；POST /:id/items 使用）。
 func (r *FollowRepo) FolderSave(ctx context.Context, item *model.Follow) error {
 	ctx, cancel := context.WithTimeout(ctx, contextTimeout)
 	defer cancel()
 	return folderSave(ctx, r.coll, item.ID, item)
 }
 
-// FolderFindShared 查分享收藏夹的追番条目（folders.js GET /shared/:shareToken）。
+// FolderFindShared 查分享收藏夹的追番条目（GET /shared/:shareToken 使用）。
 // 按 createdAt 倒序返回；items 为空返回非 nil 空切片。
 func (r *FollowRepo) FolderFindShared(ctx context.Context, filter bson.M) ([]model.Follow, error) {
 	ctx, cancel := context.WithTimeout(ctx, contextTimeout)
@@ -124,14 +123,14 @@ func (r *FollowRepo) FolderFindShared(ctx context.Context, filter bson.M) ([]mod
 	return items, nil
 }
 
-// FolderClearByFolderID 清空某收藏夹下全部收藏条目的 folderId（folders.js DELETE /:id）。
+// FolderClearByFolderID 清空某收藏夹下全部收藏条目的 folderId（删除收藏夹时调用）。
 func (r *FavoriteRepo) FolderClearByFolderID(ctx context.Context, folderID any) error {
 	ctx, cancel := context.WithTimeout(ctx, contextTimeout)
 	defer cancel()
 	return folderClearByFolder(ctx, r.coll, folderID)
 }
 
-// FolderFindByUserEpisode 查用户的某条收藏（folders.js POST /:id/items）；不存在返回 ErrNotFound。
+// FolderFindByUserEpisode 查用户的某条收藏（收藏夹条目操作使用）；不存在返回 ErrNotFound。
 func (r *FavoriteRepo) FolderFindByUserEpisode(ctx context.Context, userID, episodeID any) (*model.Favorite, error) {
 	ctx, cancel := context.WithTimeout(ctx, contextTimeout)
 	defer cancel()
@@ -142,21 +141,21 @@ func (r *FavoriteRepo) FolderFindByUserEpisode(ctx context.Context, userID, epis
 	return item, nil
 }
 
-// FolderRemoveItem 把某收藏移出收藏夹（folders.js DELETE /:id/items/:episodeId）。
+// FolderRemoveItem 把某收藏移出收藏夹（DELETE /:id/items/:episodeId 使用）。
 func (r *FavoriteRepo) FolderRemoveItem(ctx context.Context, userID, episodeID, folderID any) error {
 	ctx, cancel := context.WithTimeout(ctx, contextTimeout)
 	defer cancel()
 	return folderRemoveItem(ctx, r.coll, userID, episodeID, folderID)
 }
 
-// FolderSave 保存收藏条目（对齐 item.save()；folders.js POST /:id/items）。
+// FolderSave 保存收藏条目（整文档覆盖；POST /:id/items 使用）。
 func (r *FavoriteRepo) FolderSave(ctx context.Context, item *model.Favorite) error {
 	ctx, cancel := context.WithTimeout(ctx, contextTimeout)
 	defer cancel()
 	return folderSave(ctx, r.coll, item.ID, item)
 }
 
-// FolderFindShared 查分享收藏夹的收藏条目（folders.js GET /shared/:shareToken）。
+// FolderFindShared 查分享收藏夹的收藏条目（GET /shared/:shareToken 使用）。
 // 按 createdAt 倒序返回；items 为空返回非 nil 空切片。
 func (r *FavoriteRepo) FolderFindShared(ctx context.Context, filter bson.M) ([]model.Favorite, error) {
 	ctx, cancel := context.WithTimeout(ctx, contextTimeout)

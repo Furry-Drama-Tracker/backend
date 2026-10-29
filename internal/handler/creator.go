@@ -13,7 +13,7 @@ import (
 	"github.com/xiedada05/furry-drama-be-neo/internal/repository"
 )
 
-// 本文件实现 /api/creator 子域（行为逐分支照抄 backend/routes/creator.js）。
+// 本文件实现 /api/creator 子域。
 // 只有 2 个端点（GET /my-episodes 与 GET /editable，均 creatorProtect 即
 // creator/admin/superadmin），返回创作者本人参与创作的剧集列表。
 
@@ -30,7 +30,7 @@ func NewCreator(repos *repository.Repos, cfg *config.Config, amw *middleware.Aut
 	return &Creator{Repos: repos, Config: cfg, AuthMW: amw, RL: rl}
 }
 
-// Register 挂载 /api/creator 全部端点（不含 /api 前缀；路径对齐 creator.js 子路径）。
+// Register 挂载 /api/creator 全部端点（不含 /api 前缀）。
 func (h *Creator) Register(g *gin.RouterGroup) {
 	creatorRoles := []string{middleware.RoleCreator, middleware.RoleAdmin, middleware.RoleSuperAdmin}
 	g.GET("/my-episodes", h.AuthMW.Protect(creatorRoles...), h.MyEpisodes)
@@ -82,8 +82,7 @@ func (h *Creator) Editable(c *gin.Context) {
 	h.creatorEpisodeList(c, filter, page, limit)
 }
 
-// creatorEpisodeList 按过滤条件分页返回剧集列表（对齐 creator.js 两个端点的
-// countDocuments + find().sort({updatedAt:-1}).skip().limit()）。
+// creatorEpisodeList 按过滤条件分页返回剧集列表（count + updatedAt 倒序 + 分页）。
 func (h *Creator) creatorEpisodeList(c *gin.Context, filter bson.M, page, limit int) {
 	ctx := c.Request.Context()
 	total, err := h.Repos.Episodes.CountDocuments(ctx, filter)
@@ -110,8 +109,8 @@ func (h *Creator) creatorEpisodeList(c *gin.Context, filter bson.M, page, limit 
 	})
 }
 
-// creatorPage 解析创作中心分页参数（对齐 creator.js 内联逻辑）：
-// page 默认 1（parseInt，无最小钳制）；limit 默认 20，上限 100（Math.min(parseInt,100)）。
+// creatorPage 解析创作中心分页参数（固定契约）：
+// page 默认 1（parseInt，无最小钳制）；limit 默认 20，上限 100（min(parseInt,100)）。
 func creatorPage(c *gin.Context) (page, limit int) {
 	page = 1
 	if p, err := strconv.Atoi(c.Query("page")); err == nil {
@@ -127,7 +126,7 @@ func creatorPage(c *gin.Context) (page, limit int) {
 	return page, limit
 }
 
-// creatorTotalPages 计算总页数（对齐 Math.ceil(total/limit)，total==0 → 0）。
+// creatorTotalPages 计算总页数（ceil(total/limit)，total==0 → 0）。
 func creatorTotalPages(total int64, limit int) int {
 	if total == 0 {
 		return 0

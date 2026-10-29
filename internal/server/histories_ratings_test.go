@@ -200,7 +200,7 @@ func TestHistoriesRecordListCheckDelete(t *testing.T) {
 	if row["__v"].(float64) != 2 {
 		t.Fatalf("cw __v: %v", row["__v"])
 	}
-	// lastWatched 必须为 UTC（Z 后缀，对齐 mongoose toISOString，差分归一化依赖）
+	// lastWatched 必须为 UTC（Z 后缀）格式，消费方依赖此格式
 	if lw, _ := row["lastWatched"].(string); !strings.HasSuffix(lw, "Z") {
 		t.Fatalf("cw lastWatched not UTC: %v", row["lastWatched"])
 	}
@@ -235,12 +235,12 @@ func TestHistoriesRecordListCheckDelete(t *testing.T) {
 	if len(lst) != 1 {
 		t.Fatalf("list NaN len: %d", len(lst))
 	}
-	// list limit=200 → 不钳制（对齐 histories.js 自解析）
+	// list limit=200 → 不钳制（limit 自解析，固定行为）
 	resp, data = doReq(t, ts.URL, "GET", "/api/histories/list?limit=200", tok, nil)
 	if decodeObj(t, data)["limit"].(float64) != 200 {
 		t.Fatalf("list limit=200: %s", data)
 	}
-	// list page=0&limit=1 → 负 skip → 500（对齐 Express skip(-1) 抛错）
+	// list page=0&limit=1 → 负 skip → 500（固定契约）
 	resp, data = doReq(t, ts.URL, "GET", "/api/histories/list?page=0&limit=1", tok, nil)
 	if resp.StatusCode != 500 {
 		t.Fatalf("list page=0: %d %s", resp.StatusCode, data)

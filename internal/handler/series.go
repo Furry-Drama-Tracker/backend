@@ -18,7 +18,7 @@ import (
 	"github.com/xiedada05/furry-drama-be-neo/internal/repository"
 )
 
-// 本文件实现 /api/series 子域（行为逐分支照抄 backend/routes/series.js）。
+// 本文件实现 /api/series 子域。
 
 // Series 是 /api/series 域 handler 容器。
 type Series struct {
@@ -33,12 +33,12 @@ func NewSeries(repos *repository.Repos, cfg *config.Config, amw *middleware.Auth
 	return &Series{Repos: repos, Config: cfg, AuthMW: amw, RL: rl}
 }
 
-// Register 挂载 /api/series 全部端点（不含 /api 前缀；路径对齐 series.js 子路径）。
-// Express 对 series 仅施加全局限流（/api 组级），无 per-endpoint 限流器；
-// POST/PUT/DELETE 的 creatorProtect 与 adminProtect 在 authFactory.js 中角色
-// 集合相同（creator/admin/superadmin），故共用同一 Protect。
+// Register 挂载 /api/series 全部端点（不含 /api 前缀）。
+// series 域仅施加全局限流（/api 组级），无 per-endpoint 限流器（固定契约）；
+// POST/PUT/DELETE 的创作者与管理员保护角色集合相同（creator/admin/superadmin），
+// 故共用同一 Protect。
 // GET/POST 同时注册 "" 与 "/"：gin 默认会对 /api/series 尾斜杠缺失发起 307 重定向，
-// 而 Express（strict routing 关闭）直接匹配，需消除该差异。
+// 而接口契约要求直接匹配（无重定向），需消除该差异。
 func (h *Series) Register(g *gin.RouterGroup) {
 	protect := h.AuthMW.Protect(middleware.RoleCreator, middleware.RoleAdmin, middleware.RoleSuperAdmin)
 	g.GET("/", h.List)
@@ -50,7 +50,7 @@ func (h *Series) Register(g *gin.RouterGroup) {
 	g.DELETE("/:id", protect, h.Delete)
 }
 
-// seriesPage 解析系列列表的分页参数（对齐 series.js GET / 内联逻辑）：
+// seriesPage 解析系列列表的分页参数（固定契约）：
 // page 默认 1 最小 1；limit 默认 50（注意与共享 paginate 的 20 不同），
 // 钳制 [1,100]。
 func seriesPage(c *gin.Context) (page, limit int) {
@@ -74,9 +74,8 @@ func seriesPage(c *gin.Context) (page, limit int) {
 	return page, limit
 }
 
-// seriesResponse 是系列响应的 JSON 形状（对齐 series.js 各端点 toJSON 文档，
-// 不含 __v——与全局约定一致）。episodes 为已 populate 的剧集对象切片或原始
-// 剧集 ID 数组。
+// seriesResponse 是系列响应的 JSON 形状（各端点统一，不含 __v——与全局约定一致）。
+// episodes 为已关联查询的剧集对象切片或原始剧集 ID 数组。
 type seriesResponse struct {
 	ID            primitive.ObjectID  `json:"_id"`
 	Name          string              `json:"name"`
@@ -109,8 +108,8 @@ func seriesJSON(s *model.Series, episodes any) seriesResponse {
 	}
 }
 
-// seriesEpisodeHexes 把剧集 ID 数组转为 hex 字符串数组（对齐 create/update
-// 响应中未 populate 的 episodes 输出）。
+// seriesEpisodeHexes 把剧集 ID 数组转为 hex 字符串数组（create/update
+// 响应中未关联查询的 episodes 输出形态）。
 func seriesEpisodeHexes(ids []primitive.ObjectID) []string {
 	out := make([]string, 0, len(ids))
 	for _, id := range ids {
@@ -151,8 +150,8 @@ func (h *Series) fetchSeriesEpisodes(c *gin.Context, ids []primitive.ObjectID) (
 	return m, nil
 }
 
-// seriesListEpisodesView 按系列 episodes 数组顺序组装列表视图；被删除的剧集
-// 跳过（mongoose populate 对已删除 ref 在数组中留空）。
+// seriesListEpisodesView 按系列 episodes 数组顺序组装列表视图；已不存在的剧集
+// 跳过（关联查询对已删除引用在数组中留空，固定契约）。
 func seriesListEpisodesView(epMap map[primitive.ObjectID]*model.SeriesEpisodeDetail, ids []primitive.ObjectID) []model.SeriesEpisodeList {
 	out := make([]model.SeriesEpisodeList, 0, len(ids))
 	for _, oid := range ids {
@@ -184,7 +183,7 @@ func seriesDetailEpisodesView(epMap map[primitive.ObjectID]*model.SeriesEpisodeD
 	return out
 }
 
-// List GET /api/series：系列分页列表，episodes 为已 populate 的剧集摘要。
+// List GET /api/series：系列分页列表，episodes 为已关联查询的剧集摘要。
 // @Summary 获取所有系列
 // @Tags 系列
 // @Param page query int false "页码（默认 1）"
@@ -204,8 +203,8 @@ func (h *Series) List(c *gin.Context) {
 		errors.AbortWithAppError(c, errors.New(500, "Server error"), h.Config.IsDev)
 		return
 	}
-	// populate episodes（对齐 .populate('episodes', 'title coverImage currentEpisodes
-	// totalEpisodes status averageRating')）。
+	// 关联查询 episodes（输出 title/coverImage/currentEpisodes/totalEpisodes/
+	// status/averageRating 字段）。
 	epMap, err := h.fetchSeriesEpisodes(c, collectSeriesEpisodeIDs(seriesList))
 	if err != nil {
 		errors.AbortWithAppError(c, errors.New(500, "Server error"), h.Config.IsDev)
@@ -225,7 +224,7 @@ func (h *Series) List(c *gin.Context) {
 	})
 }
 
-// Detail GET /api/series/:id：系列详情，episodes 为已 populate 的剧集完整字段。
+// Detail GET /api/series/:id：系列详情，episodes 为已关联查询的剧集完整字段。
 // @Summary 根据ID获取系列详情
 // @Tags 系列
 // @Param id path string true "系列 ID"
@@ -235,7 +234,7 @@ func (h *Series) List(c *gin.Context) {
 func (h *Series) Detail(c *gin.Context) {
 	id, err := primitive.ObjectIDFromHex(c.Param("id"))
 	if err != nil {
-		// 对齐 Express 非法 ID → CastError → 500。
+		// 固定契约：非法 ID → 500 Server error。
 		errors.AbortWithAppError(c, errors.New(500, "Server error"), h.Config.IsDev)
 		return
 	}
@@ -281,7 +280,7 @@ func (h *Series) Create(c *gin.Context) {
 	for _, s := range req.Episodes {
 		oid, err := primitive.ObjectIDFromHex(s)
 		if err != nil {
-			// 对齐 Express episodes 含非法 ID → CastError → 500。
+			// 固定契约：episodes 含非法 ID → 500 Server error。
 			errors.AbortWithAppError(c, errors.New(500, "Server error"), h.Config.IsDev)
 			return
 		}
@@ -327,7 +326,7 @@ func (h *Series) Update(c *gin.Context) {
 		errors.AbortWithAppError(c, errors.New(500, "Server error"), h.Config.IsDev)
 		return
 	}
-	// 归属校验（对齐 series.js）：非 superadmin/admin 且 createdBy 非空且非本人 → 403。
+	// 归属校验：非 superadmin/admin 且 createdBy 非空且非本人 → 403。
 	if user.Role != middleware.RoleSuperAdmin && user.Role != middleware.RoleAdmin &&
 		existing.CreatedBy != nil && existing.CreatedBy.Hex() != user.ID.Hex() {
 		c.JSON(403, gin.H{"message": "无权修改此系列"})
@@ -356,7 +355,7 @@ func (h *Series) Update(c *gin.Context) {
 	if raw, ok := body["episodes"]; ok {
 		v, ok2 := bsonEpisodesOrNull(raw)
 		if !ok2 {
-			// 对齐 Express episodes 含非法 ID 或非数组形态 → CastError → 500。
+			// 固定契约：episodes 含非法 ID 或非数组形态 → 500 Server error。
 			errors.AbortWithAppError(c, errors.New(500, "Server error"), h.Config.IsDev)
 			return
 		}
@@ -365,7 +364,7 @@ func (h *Series) Update(c *gin.Context) {
 	}
 	updated, err := h.Repos.Series.UpdateByID(c.Request.Context(), id, patch)
 	if repository.IsNotFound(err) {
-		// 竞态：existing 校验后文档被删，findByIdAndUpdate 返回 null → res.json(null)。
+		// 竞态：existing 校验后文档被删，更新返回 null → 响应体为 null（固定契约）。
 		c.JSON(200, nil)
 		return
 	}
@@ -380,7 +379,7 @@ func (h *Series) Update(c *gin.Context) {
 	c.JSON(200, seriesJSON(updated, episodesOut))
 }
 
-// Delete DELETE /api/series/:id（creator/admin/superadmin；Express 的
+// Delete DELETE /api/series/:id（creator/admin/superadmin；
 // adminProtect 与 creatorProtect 角色集合相同）。
 // @Summary 删除系列（需要管理员权限）
 // @Tags 系列
@@ -401,10 +400,9 @@ func (h *Series) Delete(c *gin.Context) {
 	c.JSON(200, gin.H{"message": "Deleted"})
 }
 
-// bsonStringOrNull 把请求体字段的原始 JSON 转成 BSON 可写入值，对齐 mongoose
-// String 类型的宽松 cast：
-//   - 字符串 → 字符串；null → BSON null；数字/布尔 → JS String() 等价字符串；
-//   - 数组/对象等不可 cast 值 → ok=false（调用方按 CastError → 500 处理）。
+// bsonStringOrNull 把请求体字段的原始 JSON 转成 BSON 可写入值（字符串类型宽松转换）：
+//   - 字符串 → 字符串；null → BSON null；数字/布尔 → 等价字符串；
+//   - 数组/对象等不可转换值 → ok=false（调用方按 500 Server error 处理）。
 func bsonStringOrNull(raw json.RawMessage) (any, bool) {
 	var v any
 	if err := json.Unmarshal(raw, &v); err != nil {
@@ -425,7 +423,7 @@ func bsonStringOrNull(raw json.RawMessage) (any, bool) {
 
 // bsonEpisodesOrNull 把请求体 episodes 字段的原始 JSON 转成 BSON 数组：
 //   - 字符串数组 → []primitive.ObjectID；null → BSON null（value 为 nil）；
-//   - 含非法 hex 或非数组形态 → ok=false（对齐 mongoose CastError → 500）。
+//   - 含非法 hex 或非数组形态 → ok=false（调用方按 500 Server error 处理）。
 func bsonEpisodesOrNull(raw json.RawMessage) (any, bool) {
 	var nilCheck any
 	if err := json.Unmarshal(raw, &nilCheck); err == nil && nilCheck == nil {

@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-// EmailButton 生成邮件按钮（对齐 email.js emailButton）。
+// EmailButton 生成邮件按钮。
 func EmailButton(text, url, variant string) string {
 	styles := map[string]string{
 		"primary":   "background-color:#6366f1;color:#ffffff;",
@@ -21,7 +21,7 @@ func EmailButton(text, url, variant string) string {
 	return fmt.Sprintf(`<a href="%s" style="display:inline-block;padding:12px 28px;%stext-decoration:none;border-radius:10px;font-size:14px;font-weight:600;letter-spacing:0.01em;">%s</a>`, url, s, text)
 }
 
-// EmailInfoBox 生成信息框（对齐 email.js emailInfoBox）。
+// EmailInfoBox 生成信息框。
 func EmailInfoBox(content, variant string) string {
 	styles := map[string][3]string{
 		"info":    {"#f0f4ff", "#6366f1", "#3730a3"},
@@ -36,7 +36,7 @@ func EmailInfoBox(content, variant string) string {
 	return fmt.Sprintf(`<table role="presentation" width="100%%" cellpadding="0" cellspacing="0" style="background-color:%s;border-left:4px solid %s;border-radius:8px;margin:16px 0;"><tr><td style="padding:14px 18px;color:%s;font-size:14px;line-height:1.6;">%s</td></tr></table>`, s[0], s[1], s[2], content)
 }
 
-// BuildEmailHTML 组装完整邮件 HTML（品牌栏 + 内容 + 页脚），对齐 email.js buildEmailHTML。
+// BuildEmailHTML 组装完整邮件 HTML（品牌栏 + 内容 + 页脚）。
 // 站点名/logo 优先取 SiteContent 'settings'，页脚 ICP/公安备案/版本号取 'about'（均带缓存）。
 func (c *Client) BuildEmailHTML(ctx context.Context, siteName, siteURL, bodyContent, preheader string) string {
 	settings := c.GetSiteSettings(ctx)

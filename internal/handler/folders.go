@@ -31,16 +31,16 @@ func NewFolders(repos *repository.Repos, cfg *config.Config, amw *middleware.Aut
 	return &Folders{Repos: repos, Config: cfg, AuthMW: amw, RL: rl}
 }
 
-// Register 挂载 /folders 全部路由（不含 /api 前缀）。对齐 folders.js 中间件顺序：
+// Register 挂载 /folders 全部路由（不含 /api 前缀）。中间件顺序是固定契约：
 // 除 GET /shared/:shareToken（公开）外全部 protect。收藏夹路由无 per-endpoint 限流。
-// 根路径同时注册 "" 与 "/"（Express 路由器同时匹配 /api/folders 与 /api/folders/，
+// 根路径同时注册 "" 与 "/"（契约要求 /api/folders 与 /api/folders/ 都直接匹配，
 // Gin 默认会对无尾斜杠发 301 重定向，故需显式双注册）。
 func (h *Folders) Register(g *gin.RouterGroup) {
 	g.GET("", h.AuthMW.Protect(), h.ListFolders)
 	g.GET("/", h.AuthMW.Protect(), h.ListFolders)
 	g.POST("", h.AuthMW.Protect(), h.CreateFolder)
 	g.POST("/", h.AuthMW.Protect(), h.CreateFolder)
-	// 静态路径需在 :id 之前注册避免被通配吞掉（Gin 静态优先，此处显式保序对齐 Express）。
+	// 静态路径需在 :id 之前注册避免被通配吞掉（Gin 静态优先，注册顺序是固定契约）。
 	g.PUT("/reorder", h.AuthMW.Protect(), h.ReorderFolders)
 	g.POST("/share-unclassified", h.AuthMW.Protect(), h.ShareUnclassified)
 	g.PUT("/:id", h.AuthMW.Protect(), h.UpdateFolder)
@@ -66,7 +66,7 @@ func NewSavedFolders(repos *repository.Repos, cfg *config.Config, amw *middlewar
 }
 
 // Register 挂载 /saved-folders 全部路由（不含 /api 前缀）。全部 protect。
-// 根路径同时注册 "" 与 "/"（对齐 Express 对无尾斜杠路径的匹配）。
+// 根路径同时注册 "" 与 "/"（契约要求无尾斜杠路径直接匹配，无重定向）。
 func (h *SavedFolders) Register(g *gin.RouterGroup) {
 	g.GET("", h.AuthMW.Protect(), h.ListSavedFolders)
 	g.GET("/", h.AuthMW.Protect(), h.ListSavedFolders)
@@ -78,7 +78,7 @@ func (h *SavedFolders) Register(g *gin.RouterGroup) {
 // ---- shared helpers ----
 
 // requireObjectID 解析路径 ID 为 ObjectID；非法 hex 写 500 并返回 false。
-// 对齐 mongoose 对非法 _id 的 CastError → catch → 500 'Server error'。
+// 固定契约：非法 _id → 500 'Server error'。
 func (h *Folders) requireObjectID(c *gin.Context, param string) (primitive.ObjectID, bool) {
 	id, err := primitive.ObjectIDFromHex(c.Param(param))
 	if err != nil {
@@ -98,7 +98,7 @@ func (h *SavedFolders) requireObjectID(c *gin.Context, param string) (primitive.
 	return id, true
 }
 
-// newShareToken 生成分享令牌，对齐 crypto.randomBytes(12).toString('hex')。
+// newShareToken 生成分享令牌（24 hex 字符，等价 randomBytes(12).toString('hex')）。
 func newShareToken() string {
 	buf := make([]byte, 12)
 	if _, err := rand.Read(buf); err != nil {
@@ -108,8 +108,8 @@ func newShareToken() string {
 	return hex.EncodeToString(buf)
 }
 
-// folderListJSON 组装 GET / 响应：对齐 .populate('userId','username')，
-// userId 输出 { _id, username } 对象而非 hex 字符串。
+// folderListJSON 组装 GET / 响应：userId 关联查询后
+// 输出 { _id, username } 对象而非 hex 字符串（固定契约）。
 func folderListJSON(f *model.Folder, username string) gin.H {
 	return gin.H{
 		"_id":         f.ID.Hex(),
@@ -211,12 +211,12 @@ func (h *Folders) ReorderFolders(c *gin.Context) {
 	for i, id := range req.FolderIDs {
 		oid, err := primitive.ObjectIDFromHex(id)
 		if err != nil {
-			// 对齐 bulkWrite 中非法 _id 的 CastError → 500。
+			// 固定契约：非法 _id → 500 Server error。
 			c.JSON(500, gin.H{"message": "Server error"})
 			return
 		}
 		// 必须转成 ObjectID：字符串 _id 在 Mongo 查询中不匹配 ObjectID 文档
-		// （对齐 mongoose 对 bulkWrite 参数的自动 cast）。
+		// （批量写入参数须为强类型，与既有集合写入形态一致）。
 		ids[i] = oid
 	}
 	if err := h.Repos.Folders.Reorder(c.Request.Context(), user.ID, ids); err != nil {
@@ -350,7 +350,7 @@ func (h *Folders) AddFolderItem(c *gin.Context) {
 	_ = c.ShouldBindJSON(&req)
 	episodeID, err := primitive.ObjectIDFromHex(req.EpisodeID)
 	if err != nil {
-		// 对齐 findOne({ episodeId }) 的 CastError → 500。
+		// 固定契约：episodeId 非法 → 500 Server error。
 		c.JSON(500, gin.H{"message": "Server error"})
 		return
 	}
@@ -617,7 +617,7 @@ func (h *Folders) SharedFolder(c *gin.Context) {
 }
 
 // buildSharedEpisodes 按条目顺序（createdAt 倒序）组装剧集数组，过滤已删除 /
-// pending / rejected 的剧集（对齐 folders.js 的 filter + map）。
+// pending / rejected 的剧集（filter + map 语义，固定契约）。
 func (h *Folders) buildSharedEpisodes(ctx context.Context, episodeIDs []primitive.ObjectID, cap int) ([]model.FolderItem, error) {
 	items, err := h.Repos.Episodes.FindFolderItemsByIDs(ctx, episodeIDs)
 	if err != nil {
@@ -725,7 +725,7 @@ func (h *SavedFolders) CreateSavedFolder(c *gin.Context) {
 		sf.FolderName = "默认收藏夹"
 	}
 	if err := h.Repos.SavedFolders.Create(c.Request.Context(), sf); err != nil {
-		// 并发重复收藏：唯一键冲突 → Express create 抛 E11000 → 500。
+		// 并发重复收藏：唯一键冲突（E11000）→ 500。
 		c.JSON(500, gin.H{"message": "Server error"})
 		return
 	}

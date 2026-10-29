@@ -60,7 +60,7 @@ func NewAuthService(cfg *config.Config, repos *repository.Repos, signer *auth.Si
 }
 
 // AltchaHMACSecret 派生 altcha HMAC 签名密钥字符串：优先配置，
-// 缺省 sha256("altcha-"+JWT_SECRET) 的 hex（对齐 utils/altcha.js:8）。
+// 缺省 sha256("altcha-"+JWT_SECRET) 的 hex（固定派生规则，勿改）。
 func (s *AuthService) AltchaHMACSecret() string {
 	if k := s.Config.JWT.AltchaHMACKey; k != "" {
 		return k
@@ -70,7 +70,7 @@ func (s *AuthService) AltchaHMACSecret() string {
 }
 
 // VerifyAltcha 校验 altcha payload（官方 altcha-lib-go）；DEV_API_TOKEN 配置且
-// x-dev-token 匹配时直接通过。对齐 utils/altcha.js verifyAltcha。
+// x-dev-token 匹配时直接通过（固定行为）。
 func (s *AuthService) VerifyAltcha(payload, devToken string) bool {
 	if s.Config.JWT.DevAPIToken != "" && devToken == s.Config.JWT.DevAPIToken {
 		return true
@@ -96,7 +96,7 @@ func (s *AuthService) VerifyAltcha(payload, devToken string) bool {
 }
 
 // CreateCaptcha 生成 altcha 挑战（官方库；SHA-256, cost 10000, keyPrefix "00", 5min 过期）。
-// 对齐 routes/auth/session.js L76-90 与 node 挑战参数。
+// 挑战参数为固定契约，勿改（前端求解器按同参数求解）。
 func (s *AuthService) CreateCaptcha() (altchalib.Challenge, error) {
 	expires := time.Now().Add(5 * time.Minute)
 	return altchalib.CreateChallenge(altchalib.CreateChallengeOptions{
@@ -110,8 +110,8 @@ func (s *AuthService) CreateCaptcha() (altchalib.Challenge, error) {
 	})
 }
 
-// SkipVerification 判断是否跳过邮箱/设备验证：仅非生产且邮箱在 DEMO_EMAILS 中。
-// 对齐 authHelpers.js skipVerification。
+// SkipVerification 判断是否跳过邮箱/设备验证：仅非生产且邮箱在 DEMO_EMAILS 中
+// （固定行为）。
 func (s *AuthService) SkipVerification(u *model.User) bool {
 	if s.Config.IsDev && containsFoldSlice(s.Config.JWT.DemoEmails, strings.ToLower(u.Email)) {
 		return true
@@ -124,7 +124,7 @@ func (s *AuthService) ForceEmailChange(u *model.User) bool {
 	return u.Role == "superadmin" && u.Email == DefaultSuperAdminEmail
 }
 
-// SessionUserJSON 组装登录/refresh 响应的用户对象（对齐 session.js login 成功响应）。
+// SessionUserJSON 组装登录/refresh 响应的用户对象（字段集为固定契约，勿增删）。
 func (s *AuthService) SessionUserJSON(u *model.User) gin.H {
 	return gin.H{
 		"_id":              u.ID.Hex(),
@@ -139,7 +139,7 @@ func (s *AuthService) SessionUserJSON(u *model.User) gin.H {
 	}
 }
 
-// MeJSON 组装 /me 响应（对齐 session.js GET /me）。
+// MeJSON 组装 /me 响应（字段集为固定契约，勿增删）。
 func (s *AuthService) MeJSON(u *model.User) gin.H {
 	return gin.H{
 		"_id":                   u.ID.Hex(),
@@ -155,7 +155,7 @@ func (s *AuthService) MeJSON(u *model.User) gin.H {
 	}
 }
 
-// nonNilWallpapers 把 nil 墙纸数组归一化为空数组（对齐 Express 输出 []）。
+// nonNilWallpapers 把 nil 墙纸数组归一化为空数组（输出恒为数组，固定契约）。
 func nonNilWallpapers(w []model.Wallpaper) []model.Wallpaper {
 	if w == nil {
 		return []model.Wallpaper{}
@@ -163,14 +163,13 @@ func nonNilWallpapers(w []model.Wallpaper) []model.Wallpaper {
 	return w
 }
 
-// IssueSession 签发双 token、创建会话、设置 cookie 并写审计日志。
-// 对齐 session.js 登录成功路径 L427-453。
+// IssueSession 签发双 token、创建会话、设置 cookie 并写审计日志（登录成功路径）。
 func (s *AuthService) IssueSession(c *gin.Context, u *model.User, deviceInfo model.DeviceInfo, ip string, action string) error {
 	accessToken, err := s.Signer.Sign(u.ID.Hex(), "access", s.Config.JWT.AccessTTL, nil)
 	if err != nil {
 		return err
 	}
-	// refresh 带随机 jti（对齐 helpers.js createRefreshToken），保证每次轮换生成唯一令牌。
+	// refresh 带随机 jti（固定规则，勿改——jti 用于会话轮换标识），保证每次轮换生成唯一令牌。
 	refreshToken, err := s.Signer.Sign(u.ID.Hex(), "refresh", s.Config.JWT.RefreshTTL, map[string]string{"jti": auth.RandomHex(24)})
 	if err != nil {
 		return err
@@ -210,7 +209,7 @@ func (s *AuthService) Audit(ctx context.Context, u *model.User, action, target, 
 	})
 }
 
-// ClientIP 提取客户端 IP（对齐 helpers.js getClientIp：req.ip 或 XFF 首值）。
+// ClientIP 提取客户端 IP（优先单值头/XFF 首值，规则固定）。
 func (s *AuthService) ClientIP(c *gin.Context) string {
 	if s.Config.IsDev {
 		return clientIPFromRequest(c)

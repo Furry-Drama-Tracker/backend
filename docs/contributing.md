@@ -30,12 +30,9 @@ NODE_ENV=development DEV_API_TOKEN=test-dev-token SKIP_RATE_LIMIT=1 \
 go test ./...          # 单元 + 集成测试（需 mongod；集成测试用 neo_integration_test 库）
 go vet ./...           # 静态检查
 go build ./...         # 编译检查
-
-# 差分测试（行为回归闸门）：需要旧 Express 于 :5000 + neo 于 :5001 同时运行
-node scripts/differential/run.js
 ```
 
-**差分测试是行为一致性的 ground truth**。改了任何影响 HTTP 响应的代码后必须跑，保持 26/26 全绿（第一段范围）。集成测试覆盖关键流程（登录/2FA/refresh 重用）。
+**`go test ./...` 是行为回归闸门**。改了任何影响 HTTP 响应的代码后必须跑全绿。集成测试覆盖关键流程（登录/2FA/refresh 重用）。
 
 ## 扩展标准模式
 
@@ -64,7 +61,7 @@ node scripts/differential/run.js
 
 ### 加一个 collection（三步）
 
-1. `internal/model/` 加 struct（bson 标签对齐 Mongoose schema）。
+1. `internal/model/` 加 struct（bson 标签与既有集合数据形态一致）。
 2. `internal/repository/` 加 repo 文件 + 方法；在 `Repos` 聚合（`repos.go`）注册：`NewXxxRepo(db.Collection("xxx"))`。
 3. `repository.NewRepos` 把新 repo 挂到 `Repos` 结构体（service/handler 通过 `Deps.Repos` 访问）。
 
@@ -80,7 +77,7 @@ node scripts/differential/run.js
 
 1. **godoc 注释**：每个导出类型/函数写注释（审计/回归手搓要用）。已覆盖 275 个导出符号。
 2. **错误处理**：领域错误用 `errors.New(status, message)` / `errors.NewKey(status, message, key)`（key 是前端 i18n 键，不能随便改）；HTTP 层用 `AbortWithAppError`。
-3. **行为铁律**（`AGENTS.md`）：双 token、419 语义、refresh 重用、CSRF 三态、登录分支顺序、AES 兼容、限流挂载不对称——改之前先读，改之后跑差分。
+3. **行为铁律**（`AGENTS.md`）：双 token、419 语义、refresh 重用、CSRF 三态、登录分支顺序、AES 兼容、限流挂载不对称——改之前先读，改之后跑 `go test ./...`。
 4. **依赖方向**：只允许向下（middleware → handler → service → repository → model），禁止反向。
 5. **ID 查询**：用 `repository.ToObjectID`（hex → ObjectID），不要直接传字符串查 `_id`。
 6. **不引入新的"自造轮子"**：能用成熟库用库（见 decisions.md ADR-008）；自实现需在 decisions.md 记录理由。
@@ -94,12 +91,11 @@ node scripts/differential/run.js
 | refresh 返回 409 | 并发刷新宽限（30s 内旧 token 再用）——正常行为，非错误 |
 | 429 过早触发 | 限流窗口/计数；dev 环境设 `SKIP_RATE_LIMIT=1` 跳过 auth 限流 |
 | 邮箱验证码收不到 | 检查 SMTP 配置（ini [email] 或 env EMAIL_*）；目标邮箱限流 10 封/h；dev 用 `DEV_API_TOKEN` + `x-dev-token` 头绕过 |
-| 2FA 验证失败 | secret 是 base64（Express 旧数据兼容），`internal/auth/totp.go` 内部转 base32 用 pquerna；确认 ENCRYPTION_KEY 或 JWT_SECRET 与存储时一致 |
-| 差分测试 FAIL | 用 `docs/behavior-baseline.md` + Express 实际响应对比；先归一化（`scripts/differential/normalize.js`）区分"真实差异"与"合法变化（随机值/时间戳）" |
+| 2FA 验证失败 | secret 是 base64（既有数据兼容），`internal/auth/totp.go` 内部转 base32 用 pquerna；确认 ENCRYPTION_KEY 或 JWT_SECRET 与存储时一致 |
+| 集成测试 FAIL | 先区分"真实回归"与"环境问题"：mongod 未启动、或测试库残留脏数据（测试用独立库如 `neo_integration_test`，必要时 drop 后重跑） |
 
 ## 发布流程
 
 1. `go build ./... && go vet ./... && go test ./...`
-2. 跑差分（需 Express oracle 在 :5000）
-3. 更新 `CHANGELOG.md`（新增/修复/重构条目）
-4. `git push origin main`
+2. 更新 `CHANGELOG.md`（新增/修复/重构条目）
+3. `git push origin main`

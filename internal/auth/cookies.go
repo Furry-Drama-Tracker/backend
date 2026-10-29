@@ -9,7 +9,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// Cookie 名称（对齐 Express）。
+// Cookie 名称（固定契约，勿改——改动会使已签发的会话 cookie 失效）。
 const (
 	CookieAccessToken  = "accessToken"
 	CookieRefreshToken = "refreshToken"
@@ -19,13 +19,13 @@ const (
 	CSRFMaxAgeHours = 24
 )
 
-// access/refresh 有效期（对齐 utils/helpers.js 常量）。
+// access/refresh 有效期（固定契约：access 15m，refresh 7d，勿改）。
 const (
 	AccessTTL  = 15 * time.Minute
 	RefreshTTL = 7 * 24 * time.Hour
 )
 
-// sameSite 帮助：Express 生产用 strict，开发用 lax（清除 cookie 时）。
+// sameSite 帮助：生产用 strict，开发用 lax（清除 cookie 时，固定行为）。
 func sameSite(isProd bool) http.SameSite {
 	if isProd {
 		return http.SameSiteStrictMode
@@ -33,7 +33,7 @@ func sameSite(isProd bool) http.SameSite {
 	return http.SameSiteLaxMode
 }
 
-// rawSetCookie 直接写 Set-Cookie 响应头（完全控制属性，对齐 Express cookie 输出）。
+// rawSetCookie 直接写 Set-Cookie 响应头（完全控制属性）。
 func rawSetCookie(c *gin.Context, name, value string, maxAge time.Duration, path string, httpOnly, secure bool, sameSite http.SameSite) {
 	http.SetCookie(c.Writer, &http.Cookie{
 		Name:     name,
@@ -47,7 +47,7 @@ func rawSetCookie(c *gin.Context, name, value string, maxAge time.Duration, path
 }
 
 // SetCSRFCookie 签发 CSRF cookie：非 httpOnly（前端 JS 需读取放回头部）、
-// sameSite strict、24h、path=/。对齐 src/index.js:255-265。
+// sameSite strict、24h、path=/（属性固定，勿改）。
 func SetCSRFCookie(c *gin.Context, isProd bool, maxAgeHours int) string {
 	if maxAgeHours <= 0 {
 		maxAgeHours = CSRFMaxAgeHours
@@ -84,7 +84,7 @@ func SetAuthCookies(c *gin.Context, accessToken, refreshToken string, isProd boo
 }
 
 // ClearAuthCookies 清除 accessToken(path=/)、refreshToken(path=/api/auth)、
-// 兼容旧 token(path=/)。sameSite：生产 strict，否则 lax。对齐 setAuthCookies 清除语义。
+// 兼容旧 token(path=/)。sameSite：生产 strict，否则 lax（清除语义固定）。
 func ClearAuthCookies(c *gin.Context, isProd bool) {
 	ss := sameSite(isProd)
 	clearCookie(c, CookieAccessToken, "/", ss)
@@ -102,8 +102,8 @@ func clearCookie(c *gin.Context, name, path string, ss http.SameSite) {
 	})
 }
 
-// GetAccessToken 从请求提取 access token：Authorization Bearer → accessToken cookie → 旧 token cookie。
-// 对齐 authFactory.js:14-26。
+// GetAccessToken 从请求提取 access token：Authorization Bearer → accessToken cookie → 旧 token cookie
+//（提取顺序为固定契约，勿重排）。
 func GetAccessToken(c *gin.Context) string {
 	if h := c.GetHeader("Authorization"); len(h) > 7 && h[:7] == "Bearer " {
 		return h[7:]

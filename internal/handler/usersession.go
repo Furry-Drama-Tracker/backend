@@ -12,7 +12,7 @@ import (
 	"github.com/xiedada05/furry-drama-be-neo/internal/model"
 )
 
-// sessionJSON 组装会话对象（对齐 userSessions.js toObject + isCurrent）。
+// sessionJSON 组装会话对象（含 isCurrent 标记）。
 func sessionJSON(s *model.UserSession, isCurrent bool) gin.H {
 	return gin.H{
 		"_id":              s.ID.Hex(),

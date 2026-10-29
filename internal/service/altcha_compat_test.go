@@ -20,8 +20,8 @@ func altchaTestSvc() *AuthService {
 }
 
 // TestAltchaOfficialRoundtrip 官方库自生成挑战 → 官方库求解 → 官方库验证。
-// 另已手动跨生态验证：官方库生成挑战 → node altcha 求解器（前端 widget 同款
-// sha.deriveKey）求解 → 官方库验证 verified=true（KDF 完全一致）。
+// 另已手动跨实现验证：官方库生成的挑战可被独立求解器求解（KDF 与前端 widget
+// 的 sha.deriveKey 一致）→ 官方库验证 verified=true。
 func TestAltchaOfficialRoundtrip(t *testing.T) {
 	svc := altchaTestSvc()
 	ch, err := svc.CreateCaptcha()
@@ -75,7 +75,7 @@ func TestAltchaDevTokenBypass(t *testing.T) {
 	}
 }
 
-// TestAltchaHMACSecretDerivation 验证 HMAC secret 派生（对齐 utils/altcha.js:8）。
+// TestAltchaHMACSecretDerivation 验证 HMAC secret 派生（sha256("altcha-"+JWT_SECRET) 固定派生规则，勿改）。
 func TestAltchaHMACSecretDerivation(t *testing.T) {
 	cfg := &config.Config{}
 	cfg.JWT.Secret = "my-jwt-secret"

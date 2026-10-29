@@ -20,10 +20,10 @@ import (
 	"github.com/xiedada05/furry-drama-be-neo/internal/repository"
 )
 
-// 本文件实现 /api/review 子域（行为逐分支照抄 backend/routes/review.js）。
+// 本文件实现 /api/review 子域。
 // 6 个端点：GET /pending、GET /all、PUT /approve/:id、PUT /reject/:id、
 // PUT /assign-editor/:episodeId、PUT /remove-editor/:episodeId。
-// 角色：Express 为 adminProtect（creator/admin/superadmin）+ adminOnly 内联校验
+// 角色：adminProtect（creator/admin/superadmin）+ adminOnly 内联校验
 // （仅 admin/superadmin），故最终仅 admin/superadmin 可访问，creator 命中
 // adminOnly 的 403 需要管理员权限。
 
@@ -35,7 +35,7 @@ type Review struct {
 	RL     func(ratelimit.Spec) gin.HandlerFunc
 	Mail   *email.Client
 
-	// emailLog 集数变更邮件去重（对齐 utils/episodeNotify.js shouldSendEpisodeEmail 1h）。
+	// emailLog 集数变更邮件去重（1h 冷却，固定契约）。
 	emailMu  sync.Mutex
 	emailLog map[string]time.Time
 }
@@ -46,7 +46,7 @@ func NewReview(repos *repository.Repos, cfg *config.Config, amw *middleware.Auth
 	return &Review{Repos: repos, Config: cfg, AuthMW: amw, RL: rl, Mail: mail, emailLog: map[string]time.Time{}}
 }
 
-// Register 挂载 /api/review 全部端点（不含 /api 前缀；路径对齐 review.js 子路径）。
+// Register 挂载 /api/review 全部端点（不含 /api 前缀）。
 func (h *Review) Register(g *gin.RouterGroup) {
 	protect := h.AuthMW.Protect(middleware.RoleCreator, middleware.RoleAdmin, middleware.RoleSuperAdmin)
 	g.GET("/pending", protect, adminOnlyReview, h.Pending)
@@ -57,7 +57,7 @@ func (h *Review) Register(g *gin.RouterGroup) {
 	g.PUT("/remove-editor/:episodeId", protect, adminOnlyReview, h.RemoveEditor)
 }
 
-// adminOnlyReview 对齐 review.js 内联 adminOnly：非 admin/superadmin → 403 需要管理员权限。
+// adminOnlyReview 内联校验：非 admin/superadmin → 403 需要管理员权限。
 func adminOnlyReview(c *gin.Context) {
 	user, ok := middleware.GetUser(c)
 	if ok && (user.Role == middleware.RoleAdmin || user.Role == middleware.RoleSuperAdmin) {
@@ -67,7 +67,7 @@ func adminOnlyReview(c *gin.Context) {
 	c.AbortWithStatusJSON(403, gin.H{"message": "需要管理员权限"})
 }
 
-// reviewPage 解析审核列表分页参数（对齐 review.js 内联逻辑）：
+// reviewPage 解析审核列表分页参数（固定契约）：
 // page 默认 1（不钳制最小，负值由 mongo skip 拒绝 → 500）；limit 默认 20，上限 100。
 func reviewPage(c *gin.Context) (pageNum, limitNum int) {
 	pageNum = 1
@@ -309,7 +309,7 @@ func (h *Review) Reject(c *gin.Context) {
 // @Security bearerAuth
 // @Param episodeId path string true "剧集 ID"
 // @Param body body object true "editorId"
-// @Success 200 {object} map[string]any "剧集对象（createdBy/allowedEditors 已 populate）"
+// @Success 200 {object} map[string]any "剧集对象（createdBy/allowedEditors 已关联展开）"
 // @Failure 404 {object} map[string]string "Editor not found / Episode not found"
 // @Router /review/assign-editor/{episodeId} [put]
 func (h *Review) AssignEditor(c *gin.Context) {
@@ -373,7 +373,7 @@ func (h *Review) AssignEditor(c *gin.Context) {
 // @Security bearerAuth
 // @Param episodeId path string true "剧集 ID"
 // @Param body body object true "editorId"
-// @Success 200 {object} map[string]any "剧集对象（createdBy/allowedEditors 已 populate）"
+// @Success 200 {object} map[string]any "剧集对象（createdBy/allowedEditors 已关联展开）"
 // @Failure 404 {object} map[string]string "Episode not found"
 // @Router /review/remove-editor/{episodeId} [put]
 func (h *Review) RemoveEditor(c *gin.Context) {
@@ -415,11 +415,11 @@ func (h *Review) RemoveEditor(c *gin.Context) {
 			return
 		}
 	}
-	// 对齐 review.js：remove-editor 不清理剧集缓存。
+	// 有意怪癖：remove-editor 不清理剧集缓存，勿改成清理。
 	h.reviewRefsResponse(c, episodeOID, reviewRefOpt{populateCreatedBy: true, createdByEmail: true, populateAllowedEditors: true, allowedEditorsEmail: true})
 }
 
-// reviewRefsResponse 重新查询剧集并 populate createdBy/allowedEditors 后输出。
+// reviewRefsResponse 重新查询剧集并填充 createdBy/allowedEditors 后输出。
 func (h *Review) reviewRefsResponse(c *gin.Context, episodeOID primitive.ObjectID, opt reviewRefOpt) {
 	updated, err := h.Repos.Episodes.FindByID(c.Request.Context(), episodeOID)
 	if err != nil {
@@ -437,7 +437,7 @@ func (h *Review) reviewRefsResponse(c *gin.Context, episodeOID primitive.ObjectI
 // ---- 通知 / 推送 / 邮件 ----
 
 // notifyCreatorReviewResult 审核结果通知创作者（站内通知 + Push + 邮件；
-// fire-and-forget，对齐 review.js 各步 .catch(()=>{})）。
+// fire-and-forget，各步失败静默）。
 func (h *Review) notifyCreatorReviewResult(ctx context.Context, episode *model.Episode, status, note string) {
 	if episode.CreatedBy == nil {
 		return
@@ -477,8 +477,8 @@ func (h *Review) notifyCreatorReviewResult(ctx context.Context, episode *model.E
 }
 
 // notifyEpisodeNumberChange 在审核通过使 currentEpisodes 增加时，为每个新增集数
-// 给全部追番用户写通知（对齐 utils/episodeNotify.js notifyEpisodeNumberChange）。
-// 站内通知失败向上传播（对齐 Express await，失败 → 500）。
+// 给全部追番用户写通知。
+// 站内通知失败向上传播（失败 → 500，固定契约）。
 func (h *Review) notifyEpisodeNumberChange(ctx context.Context, episodeID primitive.ObjectID,
 	oldCurrent, newCurrent int, episode *model.Episode) error {
 	if newCurrent <= oldCurrent {
@@ -518,8 +518,7 @@ func (h *Review) notifyEpisodeNumberChange(ctx context.Context, episodeID primit
 	return nil
 }
 
-// sendReviewResultEmail 审核结果邮件（对齐 utils/email.js sendReviewResultEmail，
-// 受用户 reviewResult 偏好控制；fire-and-forget）。
+// sendReviewResultEmail 审核结果邮件（受用户 reviewResult 偏好控制；fire-and-forget）。
 func (h *Review) sendReviewResultEmail(ctx context.Context, creatorID primitive.ObjectID, title, status, note string) {
 	if h.Mail == nil {
 		return
@@ -560,8 +559,8 @@ func (h *Review) sendReviewResultEmail(ctx context.Context, creatorID primitive.
 	}(target.Email, subject, body, subject)
 }
 
-// sendEpisodeUpdateEmails 集数变更邮件（对齐 episodeNotify.js sendBatchNotificationEmails：
-// 仅发邮箱已验证且未显式关闭 episodeUpdate 偏好的用户；按 (剧集,集数,事件) 去重）。
+// sendEpisodeUpdateEmails 集数变更邮件（仅发邮箱已验证且未显式关闭
+// episodeUpdate 偏好的用户；按 (剧集,集数,事件) 去重）。
 func (h *Review) sendEpisodeUpdateEmails(ctx context.Context, episodeID primitive.ObjectID,
 	fromEp, toEp int, episodeTitle string, userIDs []primitive.ObjectID) {
 	if h.Mail == nil || len(userIDs) == 0 {
@@ -591,8 +590,7 @@ func (h *Review) sendEpisodeUpdateEmails(ctx context.Context, episodeID primitiv
 	}
 }
 
-// buildAvailableEmail 构造追番更新邮件（对齐 utils/email.js sendEpisodeUpdateEmail 的
-// available 分支）。
+// buildAvailableEmail 构造追番更新邮件（available 事件分支，文案是固定契约）。
 func (h *Review) buildAvailableEmail(episodeTitle string, epNum int, to string) (string, string, string, string) {
 	url := siteURL(h.Config)
 	subject := fmt.Sprintf("《%s》更新了第%d集", episodeTitle, epNum)
@@ -604,8 +602,7 @@ func (h *Review) buildAvailableEmail(episodeTitle string, epNum int, to string) 
 	return to, subject, body, "您关注的剧集有新更新"
 }
 
-// shouldSendEpisodeEmail 邮件去重：同一剧集+集数+事件类型 1 小时内不重复发送
-// （对齐 utils/episodeNotify.js shouldSendEpisodeEmail）。
+// shouldSendEpisodeEmail 邮件去重：同一剧集+集数+事件类型 1 小时内不重复发送。
 func (h *Review) shouldSendEpisodeEmail(episodeID string, epNum int, eventType string) bool {
 	key := fmt.Sprintf("%s_%d_%s", episodeID, epNum, eventType)
 	now := time.Now()
@@ -626,9 +623,9 @@ func (h *Review) shouldSendEpisodeEmail(episodeID string, epNum int, eventType s
 	return true
 }
 
-// sendPushToUser 发送 Web Push（对齐 routes/notifications.js sendPushToUser，
-// fire-and-forget 语义）。neo-server 当前未实现 PushSubscription 集合与 webpush
-// 发送，本函数为 no-op 占位；由主 agent 接入推送域后替换实现。
+// sendPushToUser 发送 Web Push（fire-and-forget 语义）。
+// 当前未实现 PushSubscription 集合与 webpush 发送，
+// 本函数为 no-op 占位；由主 agent 接入推送域后替换实现。
 func (h *Review) sendPushToUser(userIDs []primitive.ObjectID, title, body, url string) {
 	_ = userIDs
 	_ = title
@@ -638,7 +635,7 @@ func (h *Review) sendPushToUser(userIDs []primitive.ObjectID, title, body, url s
 
 // ---- 响应组装 ----
 
-// reviewRefOpt 控制各 ref 类型是否 populate 及是否附带 email 字段。
+// reviewRefOpt 控制各 ref 类型是否关联展开及是否附带 email 字段。
 type reviewRefOpt struct {
 	populateCreatedBy      bool
 	createdByEmail         bool
@@ -648,7 +645,7 @@ type reviewRefOpt struct {
 	allowedEditorsEmail    bool
 }
 
-// reviewPagedResult 组装分页响应（对齐 {list,page,limit,total,totalPages}）。
+// reviewPagedResult 组装分页响应（键为 {list,page,limit,total,totalPages}，固定契约）。
 func reviewPagedResult(list []gin.H, page, limit int, total int64) gin.H {
 	totalPages := 0
 	if limit > 0 {
@@ -657,8 +654,8 @@ func reviewPagedResult(list []gin.H, page, limit int, total int64) gin.H {
 	return gin.H{"list": list, "page": page, "limit": limit, "total": total, "totalPages": totalPages}
 }
 
-// reviewEpisodeJSON 组装剧集响应（对齐 mongoose toObject + populate 语义）。
-// refs 为 nil 或对应 populate 开关关闭时 refs 输出 hex 字符串；开启时输出
+// reviewEpisodeJSON 组装剧集响应（引用字段按关联展开后形态输出）。
+// refs 为 nil 或对应展开开关关闭时 refs 输出 hex 字符串；开启时输出
 // {_id, accountId, username[, email]} 对象。
 func (h *Review) reviewEpisodeJSON(e *model.Episode, refs map[string]repository.ReviewUserRef, opt reviewRefOpt) gin.H {
 	var totalEpisodes any
@@ -704,7 +701,7 @@ func (h *Review) reviewEpisodeJSON(e *model.Episode, refs map[string]repository.
 	}
 }
 
-// reviewRefJSON 渲染单个 ref（populate 或 hex）。
+// reviewRefJSON 渲染单个 ref（关联对象或 hex）。
 func reviewRefJSON(oid *primitive.ObjectID, refs map[string]repository.ReviewUserRef, populate, withEmail bool) any {
 	if oid == nil {
 		return nil
@@ -722,7 +719,7 @@ func reviewRefJSON(oid *primitive.ObjectID, refs map[string]repository.ReviewUse
 	return nil
 }
 
-// reviewRefsJSON 渲染数组 ref（populate 或 hex 数组）。
+// reviewRefsJSON 渲染数组 ref（关联对象数组或 hex 数组）。
 func reviewRefsJSON(ids []primitive.ObjectID, refs map[string]repository.ReviewUserRef, populate, withEmail bool) []any {
 	out := make([]any, 0, len(ids))
 	for _, id := range ids {
@@ -743,7 +740,7 @@ func reviewRefsJSON(ids []primitive.ObjectID, refs map[string]repository.ReviewU
 	return out
 }
 
-// fetchReviewRefs 批量查询剧集 populate 所需的用户引用。
+// fetchReviewRefs 批量查询剧集关联展开所需的用户引用。
 func (h *Review) fetchReviewRefs(ctx context.Context, episodes []model.Episode) (map[string]repository.ReviewUserRef, error) {
 	ids := []primitive.ObjectID{}
 	for i := range episodes {
@@ -763,7 +760,7 @@ func episodeRefIDs(e *model.Episode) []primitive.ObjectID {
 	return ids
 }
 
-// readReviewNote 读取请求体 note（对齐 req.body.note || ”）。
+// readReviewNote 读取请求体 note（`note || ''` 宽松语义）。
 func (h *Review) readReviewNote(c *gin.Context) string {
 	var req struct {
 		Note string `json:"note"`
@@ -772,10 +769,9 @@ func (h *Review) readReviewNote(c *gin.Context) string {
 	return req.Note
 }
 
-// ---- pendingChanges 应用（对齐 mongoose 按 schema cast）----
+// ---- pendingChanges 应用（按字段既有数据类型宽松转换）----
 
-// applyPendingChanges 把待审核修改应用到正式字段（对齐 review.js 的
-// episode[field] = pc[field] + mongoose schema cast）。
+// applyPendingChanges 把待审核修改应用到正式字段（逐字段赋值 + 类型转换）。
 func applyPendingChanges(e *model.Episode, pc primitive.M) {
 	if v, ok := pc["title"]; ok {
 		e.Title = bsonString(v)
@@ -836,7 +832,7 @@ func applyPendingChanges(e *model.Episode, pc primitive.M) {
 	}
 }
 
-// bsonString 提取 BSON 字符串（对齐 mongoose String cast）。
+// bsonString 提取 BSON 字符串（按字符串类型宽松转换）。
 func bsonString(v any) string {
 	switch t := v.(type) {
 	case string:
@@ -862,7 +858,7 @@ func bsonString(v any) string {
 	}
 }
 
-// bsonInt 提取整数（对齐 mongoose Number cast）。
+// bsonInt 提取整数（按数值类型宽松转换）。
 func bsonInt(v any) int {
 	switch t := v.(type) {
 	case int:
@@ -880,7 +876,7 @@ func bsonInt(v any) int {
 	}
 }
 
-// bsonTotalEpisodes 对齐 Episode schema totalEpisodes 的 set：
+// bsonTotalEpisodes 按既有集合 totalEpisodes 的写入约定：
 // null/undefined/” → nil，否则 Number(v)。
 func bsonTotalEpisodes(v any) *int {
 	switch t := v.(type) {
@@ -911,7 +907,7 @@ func bsonTotalEpisodes(v any) *int {
 	}
 }
 
-// bsonStringSlice 提取字符串数组（对齐 mongoose [String] cast）。
+// bsonStringSlice 提取字符串数组（按 [String] 类型宽松转换）。
 func bsonStringSlice(v any) []string {
 	switch t := v.(type) {
 	case primitive.A:
@@ -935,7 +931,7 @@ func bsonStringSlice(v any) []string {
 	}
 }
 
-// bsonStringMap 提取字符串 Map（对齐 mongoose Map of String cast）。
+// bsonStringMap 提取字符串 Map（按 Map of String 类型宽松转换）。
 func bsonStringMap(v any) primitive.M {
 	switch t := v.(type) {
 	case primitive.M:
@@ -953,7 +949,7 @@ func bsonStringMap(v any) primitive.M {
 	}
 }
 
-// bsonBool 提取布尔（对齐 mongoose Boolean cast）。
+// bsonBool 提取布尔（按布尔类型宽松转换）。
 func bsonBool(v any) bool {
 	switch t := v.(type) {
 	case bool:
@@ -975,7 +971,7 @@ func bsonBool(v any) bool {
 	}
 }
 
-// bsonObjectIDs 提取 ObjectID 数组（对齐 mongoose [ObjectId] cast）。
+// bsonObjectIDs 提取 ObjectID 数组（按 [ObjectId] 类型宽松转换）。
 func bsonObjectIDs(v any) []primitive.ObjectID {
 	switch t := v.(type) {
 	case primitive.A:
@@ -1001,7 +997,7 @@ func bsonObjectIDs(v any) []primitive.ObjectID {
 	}
 }
 
-// bsonTime 提取时间（对齐 mongoose Date cast）。
+// bsonTime 提取时间（按日期类型宽松转换）。
 func bsonTime(v any) *time.Time {
 	switch t := v.(type) {
 	case time.Time:
@@ -1023,7 +1019,7 @@ func bsonTime(v any) *time.Time {
 	}
 }
 
-// siteURL 返回站点 URL（对齐 email.js getSiteUrl）。
+// siteURL 返回站点 URL（FrontendURL → SiteURL → 本地回退）。
 func siteURL(cfg *config.Config) string {
 	if cfg.Server.FrontendURL != "" {
 		return cfg.Server.FrontendURL

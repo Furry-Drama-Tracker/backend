@@ -48,7 +48,7 @@ type Theme struct {
 	UsageCount int64     `bson:"usageCount" json:"usageCount"`
 	CreatedAt  time.Time `bson:"createdAt" json:"createdAt"`
 	UpdatedAt  time.Time `bson:"updatedAt" json:"updatedAt"`
-	// VersionKey 是 mongoose 的 __v。
+	// VersionKey 是文档版本键 __v。
 	VersionKey int `bson:"__v,omitempty" json:"__v"`
 }
 
@@ -104,6 +104,6 @@ type Icon struct {
 	Enabled     bool               `bson:"enabled" json:"enabled"`
 	CreatedAt   time.Time          `bson:"createdAt" json:"createdAt"`
 	UpdatedAt   time.Time          `bson:"updatedAt" json:"updatedAt"`
-	// VersionKey 是 mongoose 的 __v。
+	// VersionKey 是文档版本键 __v。
 	VersionKey int `bson:"__v,omitempty" json:"__v"`
 }

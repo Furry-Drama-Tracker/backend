@@ -1,4 +1,4 @@
-// Package upload 实现 multer 等价的上传能力（backend/utils/upload.js）：
+// Package upload 实现图片上传能力：
 // 磁盘存储、扩展名 + MIME 过滤、魔数校验、大小限制。
 //
 // 错误契约（配合 internal/errors 的 AbortWithAppError / UploadError 渲染）：
@@ -6,7 +6,7 @@
 //   - 魔数不符 → UploadError{Code:"BAD_MAGIC"}（文件已删除）
 //   - 超出大小 → UploadError{Code:"LIMIT_FILE_SIZE"}
 //   - 无文件   → ErrNoFile（调用方应回 400 {"message":"请选择要上传的图片"}，
-//     对齐 Express 各路由对 !req.file 的校验）
+//     固定契约）
 package upload
 
 import (
@@ -44,45 +44,45 @@ func SetDir(dir string) {
 	}
 }
 
-// ErrNoFile 表示请求中没有指定字段的文件（对齐 Express 路由层
-// 400 {"message":"请选择要上传的图片"} 的校验，不是 multer 错误）。
+// ErrNoFile 表示请求中没有指定字段的文件（对应路由层
+// 400 {"message":"请选择要上传的图片"} 校验，不属于上传错误码契约）。
 var ErrNoFile = errors.New("请选择要上传的图片")
 
-// 扩展名与 MIME 过滤正则（逐字对齐 utils/upload.js）：
-//   - ext：/jpeg|jpg|png|gif|webp/（非锚定子串匹配，对 path.extname 的小写结果测试）
+// 扩展名与 MIME 过滤正则（固定契约，勿改）：
+//   - ext：/jpeg|jpg|png|gif|webp/（非锚定子串匹配，对小写扩展名测试）
 //   - mime：/^image\/(jpeg|png|gif|webp)$/
 var (
 	allowedExtRe  = regexp.MustCompile(`jpeg|jpg|png|gif|webp`)
 	allowedMimeRe = regexp.MustCompile(`^image/(jpeg|png|gif|webp)$`)
 )
 
-// magicPrefixes 是前 12 字节 base64 后的魔数前缀（对齐 utils/upload.js MAGIC_BYTES 的 key）。
+// magicPrefixes 是前 12 字节 base64 后的魔数前缀（固定集合，勿改）。
 var magicPrefixes = []string{"/9j/", "iVBOR", "R0lGOD", "UklGR"}
 
-// 错误文案（逐字对齐 Express）。
+// 错误文案（固定契约，勿本地化/勿改）。
 const (
 	typeErrMsg  = "仅支持图片文件 (jpg, jpeg, png, gif, webp)"
 	magicErrMsg = "文件内容与类型不匹配，仅支持图片文件"
-	sizeErrMsg  = "File too large" // multer LIMIT_FILE_SIZE 的 message
+	sizeErrMsg  = "File too large" // LIMIT_FILE_SIZE 的固定 message
 )
 
 // uploadBodySlack 是 multipart 体限制相对 maxBytes 的余量（multipart 边界、
-// 表单头与其它字段的开销），配合落盘后的 file.Size 精确判断实现 multer 的
-// "文件内容 ≤ maxBytes" 语义（multer 的 fileSize 只统计文件内容，不含开销）。
+// 表单头与其它字段的开销），配合落盘后的 file.Size 精确判断实现
+// "文件内容 ≤ maxBytes" 语义（大小限制只统计文件内容，不含开销，固定语义）。
 const uploadBodySlack = 1 << 20
 
 // SaveImage 读取并保存一个上传图片，返回可访问 URL（"/uploads/<文件名>"）。
-// 对齐 createUploadConfig(prefix, maxBytes).single(field) 的完整流程：
+// 处理流程固定（勿调整顺序）：
 //
 //  1. 请求体超 maxBytes+1MB（粗限）或落盘后文件内容超 maxBytes（精限）
 //     → UploadError{LIMIT_FILE_SIZE}。
-//  2. 扩展名（originalname 的小写 ext 命中 /jpeg|jpg|png|gif|webp/）且 MIME
+//  2. 扩展名（上传文件名的小写扩展名命中 /jpeg|jpg|png|gif|webp/）且 MIME
 //     （Content-Type 命中 ^image/(jpeg|png|gif|webp)$）不满足 → UploadError{LIMIT_FILE_TYPE}。
 //  3. 落盘到 Dir，文件名为 "<prefix>-<16 字节 hex><原扩展名>"。
 //  4. 前 12 字节 base64 魔数校验失败 → 删除文件并 UploadError{BAD_MAGIC}。
 //
 // 无文件（含非 multipart 请求）→ ErrNoFile。maxBytes<=0 时默认 5MB
-// （对齐 createUploadConfig 的 maxFileSize 默认值）。
+// （默认值固定）。
 func SaveImage(c *gin.Context, field, prefix string, maxBytes int64) (string, error) {
 	if maxBytes <= 0 {
 		maxBytes = 5 << 20
@@ -105,18 +105,18 @@ func SaveImage(c *gin.Context, field, prefix string, maxBytes int64) (string, er
 		return "", fmt.Errorf("读取上传文件失败: %w", err)
 	}
 
-	// 精限：文件内容本身不能超过 maxBytes（对齐 multer fileSize 语义）。
+	// 精限：文件内容本身不能超过 maxBytes（只统计文件内容，固定语义）。
 	if file.Size > maxBytes {
 		return "", &apperrors.UploadError{Code: "LIMIT_FILE_SIZE", Message: sizeErrMsg}
 	}
 
-	// 扩展名 + MIME 过滤（先于魔数校验，与 multer fileFilter 一致）。
+	// 扩展名 + MIME 过滤（先于魔数校验，固定顺序）。
 	ext := strings.ToLower(path.Ext(file.Filename))
 	if !allowedExtRe.MatchString(ext) || !allowedMimeRe.MatchString(file.Header.Get("Content-Type")) {
 		return "", &apperrors.UploadError{Code: "LIMIT_FILE_TYPE", Message: typeErrMsg}
 	}
 
-	// 落盘：<prefix>-<16字节hex><原扩展名>（保留原始大小写，对齐 path.extname）。
+	// 落盘：<prefix>-<16字节hex><原扩展名>（保留原始大小写）。
 	filename := fmt.Sprintf("%s-%s%s", prefix, randHex(16), path.Ext(file.Filename))
 	dstPath := path.Join(Dir, filename)
 	if err := saveToDisk(file, dstPath); err != nil {
@@ -157,7 +157,7 @@ func saveToDisk(file *multipart.FileHeader, dstPath string) error {
 }
 
 // validateMagicBytes 读取文件前 12 字节，base64 后检查魔数前缀
-// （对齐 utils/upload.js validateMagicBytes；读失败视为不匹配）。
+// （读失败视为不匹配，固定行为）。
 func validateMagicBytes(filePath string) bool {
 	f, err := os.Open(filePath)
 	if err != nil {
@@ -165,7 +165,7 @@ func validateMagicBytes(filePath string) bool {
 	}
 	defer f.Close()
 	buf := make([]byte, 12)
-	_, _ = f.Read(buf) // 短文件时剩余字节为 0，与 Buffer.alloc(12) 行为一致
+	_, _ = f.Read(buf) // 短文件时剩余字节为 0（零填充）
 	header := base64.StdEncoding.EncodeToString(buf)
 	for _, magic := range magicPrefixes {
 		if strings.HasPrefix(header, magic) {
@@ -175,7 +175,7 @@ func validateMagicBytes(filePath string) bool {
 	return false
 }
 
-// randHex 生成 n 字节随机数的 hex 字符串（对齐 crypto.randomBytes(16).toString('hex')）。
+// randHex 生成 n 字节随机数的 hex 字符串。
 func randHex(n int) string {
 	buf := make([]byte, n)
 	if _, err := rand.Read(buf); err != nil {
@@ -186,7 +186,7 @@ func randHex(n int) string {
 }
 
 // RemoveFile 删除 uploads 目录下的文件（path 为相对文件名，不含 /uploads/ 前缀）。
-// 文件不存在返回 nil（对齐 Express 删除旧文件忽略错误）。
+// 文件不存在返回 nil（删除旧文件时忽略不存在错误，固定行为）。
 //
 // 防御性校验：只接受 Dir 直属的单层文件名（SaveImage 生成 "<prefix>-<hex>.<ext>"，
 // 永不包含分隔符或 ".."）。空串/"."/".." 或含路径分隔符/ ".." 的路径一律拒绝，

@@ -5,12 +5,12 @@
 //   - 同名环境变量优先于 ini（供 systemd 注入密钥、CI 注入 DEV_API_TOKEN 等）
 //   - 启动致命校验：缺少 JWT secret 或 MONGO_URI，或 JWT secret < 32 字符 → 退出
 //
-// 兼容原 .env 变量名：JWT_SECRET / MONGO_URI / ENCRYPTION_KEY / ALTCHA_HMAC_KEY /
+// 兼容既有 .env 变量名（运行时契约）：JWT_SECRET / MONGO_URI / ENCRYPTION_KEY / ALTCHA_HMAC_KEY /
 // FRONTEND_URL / SITE_URL / ALLOWED_ORIGINS / EMAIL_* / VAPID_* / DEMO_EMAILS /
 // DEV_API_TOKEN / PORT / NODE_ENV / SKIP_RATE_LIMIT。
 //
 // .env 文件支持：启动时自动读取当前目录的 .env 文件（如果存在），
-// 将其中未在真实环境中设置的变量注入到 os.Environ，实现与旧 Express 后端 dotenv 的向下兼容。
+// 将其中未在真实环境中设置的变量注入到 os.Environ，实现与 .env 惯例的向下兼容。
 // 优先级：真实环境变量 > .env 文件 > ini 配置文件。
 package config
 
@@ -27,13 +27,13 @@ import (
 )
 
 const (
-	// MinSecretLen 对齐 Express 启动校验（src/index.js:58-61）。
+	// MinSecretLen 是启动致命校验的 secret 最小长度。
 	MinSecretLen = 32
 
 	defaultFrontendURL = "http://localhost:3000"
 	defaultUploadsDir  = "./uploads"
 	defaultIconsDir    = "./uploads/icons"
-	// 默认 CORS 白名单（对齐 src/index.js:198-209 硬编码的 localhost 端口）。
+	// 默认开发源清单（本地开发端口）。
 	defaultOrigins = "http://localhost:3000,http://localhost:3001,http://localhost:3002,http://localhost:5000"
 )
 
@@ -308,7 +308,7 @@ func applyEnv(cfg *Config) {
 	}
 }
 
-// validate 执行启动致命校验（对齐 src/index.js:50-61）。
+// validate 执行启动致命校验。
 func (c *Config) validate() error {
 	if c.JWT.Secret == "" {
 		return fmt.Errorf("缺少 JWT secret（ini [jwt].secret 或环境变量 JWT_SECRET）")

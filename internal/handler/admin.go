@@ -28,17 +28,17 @@ import (
 	"github.com/xiedada05/furry-drama-be-neo/internal/service"
 )
 
-// adminDefaultSuperEmail 是超管默认邮箱（对齐 requireEmailChanged 判定常量）。
+// adminDefaultSuperEmail 是超管默认邮箱（与 requireEmailChanged 判定常量一致）。
 const adminDefaultSuperEmail = "admin@furry09.com"
 
-// adminManagerRoles 是管理/创作者账户角色集合（对齐 /list 与 DELETE /:id 的角色判定）。
+// adminManagerRoles 是管理/创作者账户角色集合（与 /list 与 DELETE /:id 的角色判定一致）。
 var adminManagerRoles = []string{"admin", "superadmin", "creator"}
 
-// adminUserRoles 是全部角色集合（对齐 PUT /role/:id 的枚举校验）。
+// adminUserRoles 是全部角色集合（与 PUT /role/:id 的枚举校验一致）。
 var adminUserRoles = []string{"user", "creator", "admin", "superadmin"}
 
-// Admin 是管理后台域（/api/admin）handler 容器，行为逐端点对齐
-// backend/routes/admin.js（18 个端点）。MountDual 双版本镜像挂载到 /api/admin。
+// Admin 是管理后台域（/api/admin）handler 容器（18 个端点）。
+// MountDual 双版本镜像挂载到 /api/admin。
 type Admin struct {
 	Repos  *repository.Repos
 	Config *config.Config
@@ -53,10 +53,10 @@ func NewAdmin(repos *repository.Repos, cfg *config.Config, amw *middleware.Auth,
 	return &Admin{Repos: repos, Config: cfg, AuthMW: amw, RL: rl, Mail: mail}
 }
 
-// Register 挂载全部管理后台路由（路径照抄 Express 子路径，不含 /api 前缀）。
+// Register 挂载全部管理后台路由（不含 /api 前缀）。
 // 角色映射：adminProtect = creator/admin/superadmin；superAdminProtect = superadmin。
 // requireEmailChanged 挂在非 GET 的 superadmin 端点（GET 本身放行，挂载无害但
-// 保持中间件顺序与 Express 一致）。
+// 中间件顺序是固定契约，勿重排）。
 func (h *Admin) Register(g *gin.RouterGroup) {
 	adminProtect := h.AuthMW.Protect(middleware.RoleCreator, middleware.RoleAdmin, middleware.RoleSuperAdmin)
 	superProtect := h.AuthMW.Protect(middleware.RoleSuperAdmin)
@@ -148,7 +148,7 @@ func (h *Admin) Login(c *gin.Context) {
 	}
 	_ = h.Repos.Users.ResetLoginAttempts(ctx, user.ID)
 
-	// 邮箱验证检查（非生产 DEMO_EMAILS 跳过，对齐 admin.js DEMO_EMAILS 判定）。
+	// 邮箱验证检查（非生产 DEMO_EMAILS 跳过）。
 	if !user.IsEmailVerified && !h.adminDemoEmail(user.Email) {
 		c.JSON(403, gin.H{"message": "请先验证邮箱后再登录管理后台"})
 		return
@@ -201,7 +201,7 @@ func (h *Admin) Login(c *gin.Context) {
 		c.JSON(500, gin.H{"message": "服务器错误"})
 		return
 	}
-	// 更新最后登录信息（对齐 user.lastLoginAt/lastLoginIp + save）。
+	// 更新最后登录信息（lastLoginAt/lastLoginIp）。
 	if err := h.Repos.Users.AdminUpdateLastLogin(ctx, user.ID, now, ip); err != nil {
 		c.JSON(500, gin.H{"message": "服务器错误"})
 		return
@@ -286,7 +286,7 @@ func (h *Admin) Logout(c *gin.Context) {
 	ctx := c.Request.Context()
 	if refreshToken := auth.GetRefreshToken(c); refreshToken != "" {
 		if _, err := h.Repos.Sessions.FindAndDeactivateRefresh(ctx, auth.HashToken(refreshToken)); err != nil {
-			// 无匹配 session 不影响登出（对齐 findOneAndUpdate 无匹配静默）。
+			// 无匹配 session 不影响登出（无匹配时静默）。
 		}
 	}
 	if v, ok := c.Get(middleware.ContextAuthTokenKey); ok {
@@ -413,8 +413,8 @@ func (h *Admin) RegisterAccount(c *gin.Context) {
 		return
 	}
 	user := &model.User{
-		// UserRepo.Create 不像 EpisodeRepo.Create 那样补默认 _id（mongoose 自动
-		// 生成），这里显式分配，保证响应与 CreatorProfile.creatorId 使用真实 ID。
+		// UserRepo.Create 不像 EpisodeRepo.Create 那样补默认 _id，
+		// 这里显式分配，保证响应与 CreatorProfile.creatorId 使用真实 ID。
 		ID:                     primitive.NewObjectID(),
 		AccountID:              finalAccountId,
 		Username:               orDefaultString(username, finalAccountId),
@@ -432,7 +432,7 @@ func (h *Admin) RegisterAccount(c *gin.Context) {
 		return
 	}
 
-	// 创作者角色账号自动创建 CreatorProfile（失败静默，对齐内层 try/catch）。
+	// 创作者角色账号自动创建 CreatorProfile（失败静默，不影响注册）。
 	if role == "creator" {
 		_ = h.ensureCreatorProfile(ctx, user.ID, user.Username)
 	}
@@ -463,7 +463,7 @@ func (h *Admin) DeleteAccount(c *gin.Context) {
 	idStr := c.Param("id")
 	oid, err := primitive.ObjectIDFromHex(idStr)
 	if err != nil {
-		// 对齐 Express 非法 ID → CastError → 500。
+		// 固定契约：非法 ID → 500 服务器错误。
 		c.JSON(500, gin.H{"message": "服务器错误"})
 		return
 	}
@@ -615,7 +615,7 @@ func (h *Admin) DeleteUser(c *gin.Context) {
 		c.JSON(500, gin.H{"message": "服务器错误"})
 		return
 	}
-	// 对齐 admin.js：Report.deleteMany({ reporter: idStr })（legacy 字段名，照抄）。
+	// 举报集合按 legacy 字段名 reporter 删除（固定契约，勿改字段名）。
 	if err := h.Repos.Reports.AdminDeleteReportsByLegacyReporter(ctx, idStr); err != nil {
 		c.JSON(500, gin.H{"message": "服务器错误"})
 		return
@@ -718,7 +718,7 @@ func (h *Admin) UpdateRole(c *gin.Context) {
 	updated, err := h.Repos.Users.AdminFindByIDAndSetRole(ctx, oid.Hex(), role)
 	if err != nil {
 		if repository.IsNotFound(err) {
-			// 竞态：target 校验后文档被删 → findByIdAndUpdate null → res.json(null)。
+			// 竞态：target 校验后文档被删 → 更新返回 null → 响应体为 null（固定契约）。
 			c.JSON(200, nil)
 			return
 		}
@@ -1039,10 +1039,10 @@ func (h *Admin) ToggleAdminAccess(c *gin.Context) {
 	c.JSON(200, gin.H{"message": message, "adminAccess": adminAccess, "role": newRole})
 }
 
-// ---- 通知 / 邮件联动（对齐 admin.js notifyProfileReviewResult 与 register 邮件）----
+// ---- 通知 / 邮件联动 ----
 
-// notifyProfileReviewResult 创作者主页审核结果站内通知（对齐 admin.js 的
-// Notification.create，fire-and-forget）。Web Push 在 neo-server 未实现，占位跳过。
+// notifyProfileReviewResult 创作者主页审核结果站内通知
+// （fire-and-forget）。Web Push 未实现，占位跳过。
 func (h *Admin) notifyProfileReviewResult(profile *model.CreatorProfile, status, note string) {
 	message := "您的创作者主页修改已通过审核"
 	if status != "approved" {
@@ -1062,8 +1062,8 @@ func (h *Admin) notifyProfileReviewResult(profile *model.CreatorProfile, status,
 	_ = h.Repos.Notifications.Create(context.Background(), notif)
 }
 
-// ensureCreatorProfile 为角色为 creator 的账户自动创建默认创作者主页（对齐 admin.js
-// 内层 try/catch：已存在则跳过，失败静默）。
+// ensureCreatorProfile 为角色为 creator 的账户自动创建默认创作者主页
+// （已存在则跳过，失败静默）。
 func (h *Admin) ensureCreatorProfile(ctx context.Context, creatorID primitive.ObjectID, username string) error {
 	existing, err := h.Repos.CreatorProfiles.FindByCreator(ctx, creatorID)
 	if err == nil && existing != nil {
@@ -1083,8 +1083,7 @@ func (h *Admin) ensureCreatorProfile(ctx context.Context, creatorID primitive.Ob
 	})
 }
 
-// sendAccountCreatedEmail 发送"账号已创建"通知邮件（对齐 admin.js register 的
-// transporter.sendMail(...).catch(()=>{})，fire-and-forget 语义）。
+// sendAccountCreatedEmail 发送"账号已创建"通知邮件（fire-and-forget 语义）。
 func (h *Admin) sendAccountCreatedEmail(ctx context.Context, to, role, accountId string) {
 	if h.Mail == nil {
 		return
@@ -1116,7 +1115,7 @@ func (h *Admin) sendAccountCreatedEmail(ctx context.Context, to, role, accountId
 
 // ---- DTO 组装 ----
 
-// adminUserJSON 组装用户列表响应对象（对齐 mongoose User 文档 toJSON，
+// adminUserJSON 组装用户列表响应对象（与既有 User 集合数据形态一致，
 // 不含 password/2FA 密文/锁定字段）。personalWallpapers 空切片补 []。
 func adminUserJSON(u *model.User) gin.H {
 	wallpapers := u.PersonalWallpapers
@@ -1147,8 +1146,8 @@ func adminUserJSON(u *model.User) gin.H {
 }
 
 // adminCreatorProfileJSON 组装创作者主页响应对象。refs 为 nil 时 creatorId 输出
-// hex 字符串（未 populate 场景，如 PUT 响应）；非 nil 时输出
-// {_id, accountId, username, email}，ref 不存在则置 null（对齐 populate 行为）。
+// hex 字符串（未关联查询场景，如 PUT 响应）；非 nil 时输出
+// {_id, accountId, username, email}，ref 不存在则置 null（固定契约）。
 func adminCreatorProfileJSON(p *model.CreatorProfile, refs map[string]repository.AdminUserRef) gin.H {
 	var creatorRef any = p.CreatorID.Hex()
 	if refs != nil {
@@ -1182,7 +1181,7 @@ func adminCreatorProfileJSON(p *model.CreatorProfile, refs map[string]repository
 // ---- 工具函数 ----
 
 // verifyAdminAltcha 校验 altcha payload；DEV_API_TOKEN 配置且 x-dev-token 匹配时
-// 直接通过（对齐 admin.js verifyAdminAltcha）。
+// 直接通过（开发口令绕过，勿移除）。
 func (h *Admin) verifyAdminAltcha(payload, devToken string) bool {
 	if h.Config.JWT.DevAPIToken != "" && devToken == h.Config.JWT.DevAPIToken {
 		return true
@@ -1208,7 +1207,7 @@ func (h *Admin) verifyAdminAltcha(payload, devToken string) bool {
 }
 
 // altchaHMACSecret 派生 altcha HMAC 密钥：优先配置，缺省 sha256("altcha-"+JWT_SECRET)
-// 的 hex（对齐 utils/altcha.js:8 与 service.AuthService.AltchaHMACSecret）。
+// 的 hex（派生方式是固定契约，改动会使既有 altcha 校验全部失效）。
 func (h *Admin) altchaHMACSecret() string {
 	if k := h.Config.JWT.AltchaHMACKey; k != "" {
 		return k
@@ -1217,8 +1216,7 @@ func (h *Admin) altchaHMACSecret() string {
 	return hex.EncodeToString(sum[:])
 }
 
-// adminDemoEmail 判断邮箱是否在 DEMO_EMAILS 跳过列表中（仅非生产生效，
-// 对齐 admin.js DEMO_EMAILS 的 NODE_ENV 判定）。
+// adminDemoEmail 判断邮箱是否在 DEMO_EMAILS 跳过列表中（仅非生产生效）。
 func (h *Admin) adminDemoEmail(email string) bool {
 	if !h.Config.IsDev {
 		return false
@@ -1232,10 +1230,10 @@ func (h *Admin) adminDemoEmail(email string) bool {
 	return false
 }
 
-// adminNonWordRe 匹配非 \w 字符（对齐 admin.js 的 /[^\w]/g）。
+// adminNonWordRe 匹配非 \w 字符（等价 /[^\w]/g）。
 var adminNonWordRe = regexp.MustCompile(`[^\w]`)
 
-// adminBaseAccountID 生成 accountId 基础串（对齐 admin.js
+// adminBaseAccountID 生成 accountId 基础串（等价
 // (username || email).replace(/[^\w]/g,'_').toLowerCase()）。
 func adminBaseAccountID(username, email string) string {
 	src := username
@@ -1246,8 +1244,8 @@ func adminBaseAccountID(username, email string) string {
 	return strings.ToLower(src)
 }
 
-// adminEmptyPendingChanges 返回待审核改动重置值（对齐 admin.js 的
-// {displayName:”, avatar:”, bio:”, socialLinks:{}, qqGroupLink:”}）。
+// adminEmptyPendingChanges 返回待审核改动重置值
+// （{displayName:”, avatar:”, bio:”, socialLinks:{}, qqGroupLink:”}）。
 func adminEmptyPendingChanges() primitive.M {
 	return primitive.M{
 		"displayName": "",
@@ -1258,8 +1256,8 @@ func adminEmptyPendingChanges() primitive.M {
 	}
 }
 
-// adminApplyPendingChanges 把 pendingChanges 应用到正式字段（对齐 admin.js approve
-// 分支：displayName 仅非空应用，其余字段存在即应用，socialLinks 非 falsy 应用）。
+// adminApplyPendingChanges 把 pendingChanges 应用到正式字段（approve 语义：
+// displayName 仅非空应用，其余字段存在即应用，socialLinks 非 falsy 应用）。
 func adminApplyPendingChanges(pc primitive.M) bson.M {
 	set := bson.M{}
 	if s, ok := pc["displayName"].(string); ok && s != "" {
@@ -1280,7 +1278,7 @@ func adminApplyPendingChanges(pc primitive.M) bson.M {
 	return set
 }
 
-// adminTotalPages 计算总页数（对齐 Math.ceil(total/limit)；limit<=0 时避免除零）。
+// adminTotalPages 计算总页数（ceil(total/limit)；limit<=0 时避免除零）。
 func adminTotalPages(total int64, limit int) int {
 	if limit <= 0 {
 		return 0
@@ -1298,7 +1296,7 @@ func adminContainsRole(roles []string, r string) bool {
 	return false
 }
 
-// adminEscapeHtml 转义 HTML（对齐 utils/helpers.js escapeHtml）。
+// adminEscapeHtml 转义 HTML（转义表是固定契约：& < > " '，勿增删）。
 func adminEscapeHtml(s string) string {
 	s = strings.ReplaceAll(s, "&", "&amp;")
 	s = strings.ReplaceAll(s, "<", "&lt;")
@@ -1308,7 +1306,7 @@ func adminEscapeHtml(s string) string {
 	return s
 }
 
-// clientIP 提取客户端 IP（对齐 helpers.js getClientIp：XFF 首值 → x-real-ip →
+// clientIP 提取客户端 IP（取值顺序是固定契约：XFF 首值 → x-real-ip →
 // RemoteAddr）。
 func (h *Admin) clientIP(c *gin.Context) string {
 	if xff := c.GetHeader("X-Forwarded-For"); xff != "" {

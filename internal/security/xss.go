@@ -17,7 +17,7 @@ import (
 // xssPolicy 是全局只读的清洗策略（bluemonday 并发安全）。
 var xssPolicy = buildPolicy()
 
-// xssTagNames 对齐 xss lib/default.js getDefaultWhiteList() 的标签白名单。
+// xssTagNames 是标签白名单（固定集合，勿增删——影响清洗行为契约）。
 var xssTagNames = []string{
 	"a", "abbr", "address", "area", "article", "aside", "audio", "b", "bdi", "bdo",
 	"big", "blockquote", "br", "caption", "center", "cite", "code", "col", "colgroup",
@@ -32,7 +32,7 @@ var xssTagNames = []string{
 func buildPolicy() *bluemonday.Policy {
 	p := bluemonday.NewPolicy()
 	p.AllowElements(xssTagNames...)
-	// 全局允许的常见属性（对齐 xss 各标签白名单属性的并集）。
+	// 全局允许的常见属性（各标签白名单属性的并集，固定集合）。
 	p.AllowAttrs("title", "class", "id", "name", "value", "type", "placeholder",
 		"width", "height", "colspan", "rowspan", "align", "valign", "loading",
 		"controls", "loop", "muted", "autoplay", "playsinline", "crossorigin",
@@ -41,7 +41,7 @@ func buildPolicy() *bluemonday.Policy {
 	p.AllowAttrs("href").OnElements("a", "area")
 	p.AllowAttrs("src").OnElements("img", "audio", "video")
 	p.AllowAttrs("alt").OnElements("img")
-	// URL scheme 白名单（对齐 xss href/src 前缀白名单）。
+	// URL scheme 白名单（href/src 前缀白名单，固定集合）。
 	p.AllowURLSchemes("http", "https", "mailto", "tel", "ftp")
 	p.AllowRelativeURLs(true)
 	p.AllowDataURIImages()
@@ -49,7 +49,7 @@ func buildPolicy() *bluemonday.Policy {
 	return p
 }
 
-// skipFields 是不做 XSS 清洗（保留原值）的字段名，对齐 security.js sanitizeInput 的 skipFields。
+// skipFields 是不做 XSS 清洗（保留原值）的字段名（固定集合，勿增删）。
 var skipFields = map[string]bool{
 	"password":        true,
 	"newPassword":     true,
@@ -63,7 +63,7 @@ func Sanitize(s string) string {
 	return xssPolicy.Sanitize(s)
 }
 
-// SanitizeValue 递归清洗 JSON 值，对齐 Express middlewares/security.js 的 sanitize()：
+// SanitizeValue 递归清洗 JSON 值（清洗规则为固定契约）：
 //   - string → Sanitize()
 //   - map[string]any → 剥离以 $ 开头或含 . 的键（防 NoSQL 注入）；
 //     密码类字段（skipFields）值为 string 时原样保留不转义，非 string 仍递归
@@ -100,7 +100,7 @@ func SanitizeValue(v any) any {
 }
 
 // ValidatePassword 校验密码强度，返回错误文案；合法则返回空串。
-// 规则对齐 security.js validatePassword：长度（UTF-16 码元）≥8、含字母、含数字。
+// 规则固定（长度按 UTF-16 码元 ≥8、含字母、含数字），文案为固定契约勿改。
 func ValidatePassword(password string) string {
 	if password == "" || utf16Length(password) < 8 {
 		return "密码长度至少8位"

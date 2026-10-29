@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-// TargetRate 目标邮箱限流：每收件邮箱在窗口内最多 max 封（对齐 email.js L5-38）。
+// TargetRate 目标邮箱限流：每收件邮箱在窗口内最多 max 封。
 // 默认 10 封 / 1 小时，每 10 分钟清理过期记录。
 type TargetRate struct {
 	mu     sync.Mutex

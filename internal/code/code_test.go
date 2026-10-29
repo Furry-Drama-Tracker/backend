@@ -34,12 +34,12 @@ func TestStoreSetGetDelete(t *testing.T) {
 }
 
 func TestStoreTTLExpiry(t *testing.T) {
-	// 用极短 TTL 验证过期（Get 不主动判过期——与 Express 一致，由调用方判）。
+	// 用极短 TTL 验证过期（Get 不主动判过期——固定契约，由调用方判）。
 	s := NewStore(time.Millisecond)
 	defer s.Stop()
 	s.Set("111111", Entry{UserID: "u1"})
 	time.Sleep(5 * time.Millisecond)
-	// Get 仍返回条目（Express 语义：verify 时检查 expiresAt）。
+	// Get 仍返回条目（过期判定由调用方在 verify 时检查 expiresAt）。
 	if _, ok := s.Get("111111"); !ok {
 		t.Fatal("Get should still return before cleanup")
 	}

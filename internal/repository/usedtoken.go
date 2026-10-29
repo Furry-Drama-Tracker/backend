@@ -26,7 +26,7 @@ func (r *UsedTokenRepo) newCtx(parent context.Context) (context.Context, context
 }
 
 // MarkUsed 标记令牌已用：插入 {tokenHash, purpose, expiresAt: now+ttl}。
-// 重复键（已标记过）静默忽略——对齐 utils/UsedToken.js markTokenUsed 的吞错语义。
+// 重复键（已标记过）静默忽略——吞错语义是既有契约（幂等标记），勿改。
 func (r *UsedTokenRepo) MarkUsed(ctx context.Context, tokenHash, purpose string, ttl time.Duration) error {
 	ctx, cancel := r.newCtx(ctx)
 	defer cancel()

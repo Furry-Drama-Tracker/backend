@@ -6,11 +6,11 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-// Folder 收藏夹文档（models/Folder.js）。
+// Folder 收藏夹文档（folders 集合）。
 //
-// 注意：Express 收藏夹模型本身不含 items 子文档——剧集条目存放在 Follow/Favorite
-// 集合中，通过 folderId 外键关联（见 folders.js 各端点与 Follow/Favorite 的
-// folderId 字段）。本 struct 逐字段对齐 mongoose schema。
+// 注意：收藏夹文档本身不含 items 子文档——剧集条目存放在 Follow/Favorite
+// 集合中，通过 folderId 外键关联（见 Follow/Favorite 的
+// folderId 字段）。本 struct 逐字段与既有集合数据形态一致（勿改 bson 标签）。
 type Folder struct {
 	ID          primitive.ObjectID `bson:"_id,omitempty" json:"_id"`
 	UserID      primitive.ObjectID `bson:"userId" json:"userId"`
@@ -18,15 +18,14 @@ type Folder struct {
 	Type        string             `bson:"type" json:"type"`
 	Description string             `bson:"description" json:"description"`
 	SortOrder   int                `bson:"sortOrder" json:"sortOrder"`
-	// ShareToken 分享令牌；未分享时为 nil（JSON 输出 null，对齐 schema default: null）。
+	// ShareToken 分享令牌；未分享时为 nil（JSON 输出 null，与既有数据缺省形态一致）。
 	ShareToken *string   `bson:"shareToken" json:"shareToken"`
 	CreatedAt  time.Time `bson:"createdAt" json:"createdAt"`
 }
 
 // FolderItem 分享收藏夹中剧集条目的展示字段。
-// 对齐 folders.js GET /shared/:shareToken 的
-// populate('episodeId', 'title titleEn coverImage currentEpisodes totalEpisodes
-// averageRating ratingCount status reviewStatus')：只返回被选中的字段（+_id）。
+// 只包含分享接口选中的字段（+_id）：title titleEn coverImage currentEpisodes
+// totalEpisodes averageRating ratingCount status reviewStatus。
 type FolderItem struct {
 	ID              primitive.ObjectID `bson:"_id" json:"_id"`
 	Title           string             `bson:"title" json:"title"`
@@ -40,8 +39,8 @@ type FolderItem struct {
 	ReviewStatus    string             `bson:"reviewStatus" json:"reviewStatus"`
 }
 
-// SavedFolder 收藏的他人收藏夹（models/SavedFolder.js）。
-// 逐字段对齐 mongoose schema；{userId, shareToken} 建唯一索引。
+// SavedFolder 收藏的他人收藏夹（savedfolders 集合）。
+// 逐字段与既有集合数据形态一致；{userId, shareToken} 建唯一索引。
 type SavedFolder struct {
 	ID          primitive.ObjectID `bson:"_id,omitempty" json:"_id"`
 	UserID      primitive.ObjectID `bson:"userId" json:"userId"`

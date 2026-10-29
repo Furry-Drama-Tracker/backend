@@ -1,7 +1,7 @@
 {
     "swagger": "2.0",
     "info": {
-        "description": "兽剧内容聚合平台后端服务 API 文档（neo-server，行为对齐 Express 版）",
+        "description": "兽剧内容聚合平台后端服务 API 文档（neo-server）",
         "title": "兽剧聚合平台 API",
         "contact": {},
         "version": "1.0.0"

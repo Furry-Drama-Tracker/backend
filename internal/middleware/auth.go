@@ -16,10 +16,10 @@ const ContextUserKey = "auth.user"
 // ContextAuthTokenKey 是 gin.Context 中原始 access token 的键。
 const ContextAuthTokenKey = "auth.token"
 
-// ConcurrentRefreshGrace 是 refresh 轮换并发宽限期（对齐 authFactory.js 的 30s）。
+// ConcurrentRefreshGrace 是 refresh 轮换并发宽限期（固定 30s，勿改）。
 const ConcurrentRefreshGrace = 30 * time.Second
 
-// Role 常量（对齐 User 模型 enum）。
+// Role 常量（与既有 User 模型 enum 一致，勿改）。
 const (
 	RoleUser      = "user"
 	RoleCreator   = "creator"
@@ -38,7 +38,7 @@ func NewAuth(repos *repository.Repos, signer *auth.Signer) *Auth {
 	return &Auth{Repos: repos, Signer: signer}
 }
 
-// Protect 构造鉴权中间件：校验 JWT + 用户 + 角色（对齐 authFactory.js createAuthMiddleware）。
+// Protect 构造鉴权中间件：校验 JWT + 用户 + 角色（响应契约为固定值，勿改）。
 //   - 无 token → 401 {"message":"Not authorized, no token","messageKey":"auth.noToken"}
 //   - 过期 → 419 {"message":"Access token expired","messageKey":"auth.accessTokenExpired"}
 //   - 其它非法 / purpose 非 access → 401 {"message":"...","messageKey":"auth.invalidToken"}
@@ -76,7 +76,7 @@ func (a *Auth) Protect(allowedRoles ...string) gin.HandlerFunc {
 		}
 		c.Set(ContextUserKey, user)
 		c.Set(ContextAuthTokenKey, token)
-		// fire-and-forget 更新 lastActiveAt（对齐 authFactory.js:54-57）。
+		// fire-and-forget 更新 lastActiveAt（失败静默，固定行为）。
 		go func() {
 			_ = a.Repos.Sessions.UpdateLastActiveByRefresh(c.Request.Context(), user.ID, time.Now())
 		}()
@@ -84,7 +84,7 @@ func (a *Auth) Protect(allowedRoles ...string) gin.HandlerFunc {
 	}
 }
 
-// RequireEmailChanged 拦截超管未改默认邮箱时的写操作（对齐 authFactory.js requireEmailChanged）。
+// RequireEmailChanged 拦截超管未改默认邮箱时的写操作（固定行为，勿改）。
 // 放行 GET、change-email、logout、verify 路径；其余 403 {"forceEmailChange":true}。
 func (a *Auth) RequireEmailChanged() gin.HandlerFunc {
 	return func(c *gin.Context) {

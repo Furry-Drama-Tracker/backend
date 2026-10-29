@@ -50,8 +50,8 @@ func registerTestServer(t *testing.T) *httptest.Server {
 }
 
 // TestRegisterDuplicateEmail 验证同邮箱重复注册被拒绝（400 该邮箱已被注册）。
-// 差分场景 register-duplicate 的 neo 侧覆盖：差分脚本中该场景因两端 register
-// 限流(3/h)计数不同步（Express 常驻进程 vs neo 重启清零）而偶发分叉，行为由本测试锁定。
+// 补充覆盖：该场景受 register 限流(3/h)影响，单独环境重启后计数清零，
+// 对跑验证在该场景不稳定，行为由本测试锁定。
 func TestRegisterDuplicateEmail(t *testing.T) {
 	ts := registerTestServer(t)
 	c := newClient(t, ts.URL)

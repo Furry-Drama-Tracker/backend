@@ -13,7 +13,7 @@ import (
 	"github.com/xiedada05/furry-drama-be-neo/internal/model"
 )
 
-// AnnouncementRepo 公告仓储（models/Announcement.js → announcements 集合）。
+// AnnouncementRepo 公告仓储（announcements 集合）。
 type AnnouncementRepo struct{ coll *mongo.Collection }
 
 // NewAnnouncementRepo 构造公告仓储。
@@ -21,7 +21,7 @@ func NewAnnouncementRepo(coll *mongo.Collection) *AnnouncementRepo {
 	return &AnnouncementRepo{coll: coll}
 }
 
-// FindActive 查询生效中的公告（对齐 GET /active）：active + 已到发布时间 +
+// FindActive 查询生效中的公告（供 /active 端点使用）：active + 已到发布时间 +
 // 未过期（或永不过期），按 pinned/publishAt/createdAt 倒序，取前 20 条。
 // channel 为 "popup"/"banner" 时追加对应展示渠道过滤。
 func (r *AnnouncementRepo) FindActive(ctx context.Context, channel string) ([]model.Announcement, error) {
@@ -57,7 +57,7 @@ func (r *AnnouncementRepo) FindActive(ctx context.Context, channel string) ([]mo
 	return list, nil
 }
 
-// FindByID 按 ID 查公告（对齐 Announcement.findById；不存在返回 ErrNotFound）。
+// FindByID 按 ID 查公告（不存在返回 ErrNotFound）。
 func (r *AnnouncementRepo) FindByID(ctx context.Context, id any) (*model.Announcement, error) {
 	ctx, cancel := context.WithTimeout(ctx, contextTimeout)
 	defer cancel()
@@ -69,7 +69,7 @@ func (r *AnnouncementRepo) FindByID(ctx context.Context, id any) (*model.Announc
 	return a, err
 }
 
-// FindAll 查询全部公告，按 createdAt 倒序（对齐管理后台列表 GET /）。
+// FindAll 查询全部公告，按 createdAt 倒序（管理后台列表使用）。
 func (r *AnnouncementRepo) FindAll(ctx context.Context) ([]model.Announcement, error) {
 	ctx, cancel := context.WithTimeout(ctx, contextTimeout)
 	defer cancel()
@@ -87,7 +87,7 @@ func (r *AnnouncementRepo) FindAll(ctx context.Context) ([]model.Announcement, e
 }
 
 // Create 插入公告；未显式设置时补 _id/createdAt/updatedAt
-// （对齐 mongoose 自动 _id 与 default: Date.now）。
+// （与既有集合文档的默认值形态一致）。
 func (r *AnnouncementRepo) Create(ctx context.Context, a *model.Announcement) error {
 	ctx, cancel := context.WithTimeout(ctx, contextTimeout)
 	defer cancel()
@@ -105,8 +105,8 @@ func (r *AnnouncementRepo) Create(ctx context.Context, a *model.Announcement) er
 	return err
 }
 
-// FindOneAndUpdate 按 ID 更新并返回新文档（对齐 findByIdAndUpdate(id, update, {new:true})）。
-// update 需显式包 $set（对齐 mongoose 对普通对象默认按 $set 处理）。
+// FindOneAndUpdate 按 ID 更新并返回更新后的文档。
+// update 需显式包 $set（本仓储约定普通对象更新一律显式 $set，不依赖驱动隐式行为）。
 func (r *AnnouncementRepo) FindOneAndUpdate(ctx context.Context, id any, update bson.M) (*model.Announcement, error) {
 	ctx, cancel := context.WithTimeout(ctx, contextTimeout)
 	defer cancel()
@@ -119,7 +119,7 @@ func (r *AnnouncementRepo) FindOneAndUpdate(ctx context.Context, id any, update 
 	return a, err
 }
 
-// FindOneAndDelete 按 ID 删除并返回被删文档（对齐 Announcement.findByIdAndDelete）。
+// FindOneAndDelete 按 ID 删除并返回被删文档。
 func (r *AnnouncementRepo) FindOneAndDelete(ctx context.Context, id any) (*model.Announcement, error) {
 	ctx, cancel := context.WithTimeout(ctx, contextTimeout)
 	defer cancel()
@@ -131,7 +131,7 @@ func (r *AnnouncementRepo) FindOneAndDelete(ctx context.Context, id any) (*model
 	return a, err
 }
 
-// Save 整文档覆盖保存（对齐 announcement.save()；updatedAt 刷新 + __v 自增）。
+// Save 整文档覆盖保存（updatedAt 刷新 + __v 自增）。
 func (r *AnnouncementRepo) Save(ctx context.Context, a *model.Announcement) error {
 	ctx, cancel := context.WithTimeout(ctx, contextTimeout)
 	defer cancel()

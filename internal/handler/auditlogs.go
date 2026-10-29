@@ -13,8 +13,8 @@ import (
 	"github.com/xiedada05/furry-drama-be-neo/internal/repository"
 )
 
-// AuditLogs 是审计日志域（/api/audit-logs）handler 容器，行为逐分支对齐
-// backend/routes/auditLogs.js（单个端点）。superAdminProtect 保护。
+// AuditLogs 是审计日志域（/api/audit-logs）handler 容器（单个端点）。
+// superAdminProtect 保护。
 type AuditLogs struct {
 	Repos  *repository.Repos
 	Config *config.Config
@@ -29,8 +29,8 @@ func NewAuditLogs(repos *repository.Repos, cfg *config.Config, amw *middleware.A
 }
 
 // Register 挂载审计日志路由（superAdminProtect）。同时注册 "" 与 "/"：
-// gin 默认对 /api/audit-logs 尾斜杠缺失发起 307 重定向，而 Express（strict
-// routing 关闭）直接匹配，需消除该差异。
+// gin 默认对 /api/audit-logs 尾斜杠缺失发起 307 重定向，而接口契约要求
+// 带与不带尾斜杠都直接匹配（无重定向），需消除该差异。
 func (h *AuditLogs) Register(g *gin.RouterGroup) {
 	protect := h.AuthMW.Protect(middleware.RoleSuperAdmin)
 	g.GET("", protect, h.List)
@@ -87,12 +87,12 @@ func (h *AuditLogs) List(c *gin.Context) {
 	if limit > 0 {
 		totalPages = (int(total) + limit - 1) / limit
 	}
-	// 响应键对齐 auditLogs.js：logs/total/page/totalPages（无 limit 键）。
+	// 响应键是固定契约：logs/total/page/totalPages（无 limit 键），勿增删。
 	c.JSON(200, gin.H{"logs": list, "total": total, "page": page, "totalPages": totalPages})
 }
 
-// auditLogJSON 组装审计日志响应对象。对齐 mongoose AuditLog toJSON：未设置的
-// adminId/adminName/userId/userAgent 键省略（schema 无 default），已设置的输出。
+// auditLogJSON 组装审计日志响应对象。与既有 AuditLog 集合数据形态一致：未设置的
+// adminId/adminName/userId/userAgent 键省略（无默认值），已设置的输出。
 func auditLogJSON(l *model.AuditLog) gin.H {
 	g := gin.H{
 		"_id":       l.ID.Hex(),

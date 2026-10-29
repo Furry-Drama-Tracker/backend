@@ -6,8 +6,8 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-// Episode 剧集文档（models/Episode.js）。逐字段对齐 mongoose schema；
-// collection 名 episodes。内容域各路由共用本模型。
+// Episode 剧集文档（episodes 集合）。字段形态与既有集合数据一致（勿改 bson 标签）；
+// 内容域各路由共用本模型。
 type Episode struct {
 	ID                   primitive.ObjectID   `bson:"_id,omitempty" json:"_id"`
 	Title                string               `bson:"title" json:"title"`
@@ -43,11 +43,11 @@ type Episode struct {
 	ReviewedAt           *time.Time           `bson:"reviewedAt" json:"reviewedAt"`
 	CreatedAt            time.Time            `bson:"createdAt" json:"createdAt"`
 	UpdatedAt            time.Time            `bson:"updatedAt" json:"updatedAt"`
-	// VersionKey 是 mongoose 的 __v（每次 save() 自增；findByIdAndUpdate 不变）。
+	// VersionKey 是文档版本键 __v（整文档覆盖保存时自增；定点更新不变）。
 	VersionKey int `bson:"__v,omitempty" json:"__v"`
 }
 
-// ToVersionData 生成 EpisodeVersion.data 快照（对齐 mongoose episode.toObject() 存入 Mixed）。
+// ToVersionData 生成 EpisodeVersion.data 快照（把文档展开为原生 BSON 类型存入 Mixed）。
 // 值为原生 BSON 类型（ObjectID/Date/数组/map），供审核域读取与应用。
 func (e *Episode) ToVersionData() primitive.M {
 	data := primitive.M{
@@ -117,7 +117,7 @@ func (e *Episode) ToVersionData() primitive.M {
 	return data
 }
 
-// SingleEpisode 单集文档（models/SingleEpisode.js）。
+// SingleEpisode 单集文档（singleepisodes 集合）。
 type SingleEpisode struct {
 	ID            primitive.ObjectID `bson:"_id,omitempty" json:"_id"`
 	EpisodeID     primitive.ObjectID `bson:"episodeId" json:"episodeId"`
@@ -133,7 +133,7 @@ type SingleEpisode struct {
 	IsScheduled   bool               `bson:"isScheduled" json:"isScheduled"`
 	PremiereDate  *time.Time         `bson:"premiereDate" json:"premiereDate"`
 	IsUpcoming    bool               `bson:"isUpcoming" json:"isUpcoming"`
-	// VersionKey 是 mongoose 的 __v。
+	// VersionKey 是文档版本键 __v。
 	VersionKey int `bson:"__v,omitempty" json:"__v"`
 }
 
@@ -153,7 +153,7 @@ type EpisodeTrash struct {
 	TrashAt time.Time `bson:"trashAt" json:"trashAt"`
 }
 
-// EpisodeVersion 剧集版本快照（models/EpisodeVersion.js，episodeId+version 唯一）。
+// EpisodeVersion 剧集版本快照（episodeversions 集合，episodeId+version 唯一）。
 type EpisodeVersion struct {
 	ID            primitive.ObjectID  `bson:"_id,omitempty" json:"_id"`
 	EpisodeID     primitive.ObjectID  `bson:"episodeId" json:"episodeId"`
@@ -162,6 +162,6 @@ type EpisodeVersion struct {
 	ChangedBy     *primitive.ObjectID `bson:"changedBy" json:"changedBy"`
 	ChangeSummary string              `bson:"changeSummary" json:"changeSummary"`
 	CreatedAt     time.Time           `bson:"createdAt" json:"createdAt"`
-	// VersionKey 是 mongoose 的 __v。
+	// VersionKey 是文档版本键 __v。
 	VersionKey int `bson:"__v,omitempty" json:"__v"`
 }

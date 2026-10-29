@@ -17,8 +17,7 @@ import (
 	"github.com/xiedada05/furry-drama-be-neo/internal/repository"
 )
 
-// 本文件实现 /api/histories 与 /api/ratings 两个子域（行为逐分支照抄
-// backend/routes/histories.js 与 ratings.js）。
+// 本文件实现 /api/histories 与 /api/ratings 两个子域。
 
 // Histories 是 /api/histories 域 handler 容器。
 type Histories struct {
@@ -39,7 +38,7 @@ func (h *Histories) Register(g *gin.RouterGroup) {
 	g.GET("/continue-watching", h.AuthMW.Protect(), h.ContinueWatching)
 	g.GET("/list", h.AuthMW.Protect(), h.List)
 	g.GET("/check/:episodeId", h.AuthMW.Protect(), h.Check)
-	// 对齐 Express router.delete('/')：`/histories` 与 `/histories/` 均清空。
+	// 根路径双注册：`/histories` 与 `/histories/` 均清空（固定契约）。
 	g.DELETE("", h.AuthMW.Protect(), h.Clear)
 	g.DELETE("/", h.AuthMW.Protect(), h.Clear)
 	g.DELETE("/:episodeId", h.AuthMW.Protect(), h.DeleteOne)
@@ -65,9 +64,9 @@ func (h *Ratings) Register(g *gin.RouterGroup) {
 	g.GET("/check/:episodeId", h.AuthMW.Protect(), h.Check)
 }
 
-// ---- JS 语义辅助（对齐 Express 对请求值的宽松处理）----
+// ---- JS 语义辅助（对请求值的宽松转换，固定契约）----
 
-// jsFalsy 对齐 JS 的 falsy 判定（null/undefined/false/0/""/NaN）。
+// jsFalsy 等价 JS 的 falsy 判定（null/undefined/false/0/""/NaN）。
 func jsFalsy(v any) bool {
 	switch n := v.(type) {
 	case nil:
@@ -170,7 +169,7 @@ func jsToNumberString(s string) (float64, bool) {
 
 // episodeIDFromBody 从请求体提取 episodeId 并转为 ObjectID。
 // 缺失/null 返回 ok=false；非空但非字符串、空串或非法 hex 返回 err
-// （对应 mongoose CastError，handler 视为 500）。
+// （固定契约：非法 episodeId → 500）。
 func episodeIDFromBody(body map[string]any) (primitive.ObjectID, bool, error) {
 	raw, ok := body["episodeId"]
 	if !ok || raw == nil {
@@ -187,8 +186,8 @@ func episodeIDFromBody(body map[string]any) (primitive.ObjectID, bool, error) {
 	return oid, true, nil
 }
 
-// watchedOrEmpty 保证 watchedEpisodes 输出为数组而非 null（对齐 mongoose
-// schema default: [] 在 hydrate 时补齐）。
+// watchedOrEmpty 保证 watchedEpisodes 输出为数组而非 null（既有集合默认值为 []，
+// 存量缺省文档同样按 [] 输出）。
 func watchedOrEmpty(ws []int) []int {
 	if ws == nil {
 		return []int{}
@@ -198,8 +197,8 @@ func watchedOrEmpty(ws []int) []int {
 
 // ---- histories ----
 
-// historyWriteJSON 对齐 POST /record 的 res.json(history)：episodeId 为 ObjectID
-// 字符串（未 populate），含 __v。
+// historyWriteJSON 组装 POST /record 响应体：episodeId 为 ObjectID
+// 字符串（未关联查询），含 __v。
 func historyWriteJSON(h *model.History, ver int) gin.H {
 	return gin.H{
 		"_id":                      h.ID.Hex(),
@@ -212,8 +211,8 @@ func historyWriteJSON(h *model.History, ver int) gin.H {
 	}
 }
 
-// historyRowJSON 对齐 GET /continue-watching / /list 的单条历史：episodeId 为
-// populate 出的剧集对象；剧集不存在时输出 null（对齐 mongoose populate 行为）。
+// historyRowJSON 组装 GET /continue-watching / /list 的单条历史：episodeId 为
+// 关联查询出的剧集对象；剧集不存在时输出 null（固定契约）。
 func historyRowJSON(row *repository.HistoryRow, eps map[primitive.ObjectID]*repository.HistoryEpisodeView) gin.H {
 	doc := &row.History
 	r := gin.H{
@@ -255,7 +254,7 @@ func (h *Histories) historyEpisodeMap(c *gin.Context, rows []repository.HistoryR
 func (h *Histories) Record(c *gin.Context) {
 	body := middleware.GetBody(c)
 	if body == nil {
-		// 非 JSON/urlencoded 请求体：Express req.body 为 undefined，解构抛错 → 500。
+		// 非 JSON/urlencoded 请求体：请求体视为 undefined，解构失败 → 500（固定契约）。
 		errors.AbortWithAppError(c, errors.New(500, "Server error"), h.Config.IsDev)
 		return
 	}
@@ -264,7 +263,7 @@ func (h *Histories) Record(c *gin.Context) {
 		errors.AbortWithAppError(c, errors.New(400, "Invalid episode number"), h.Config.IsDev)
 		return
 	}
-	// 记录端点无 !episodeId 校验：缺失/null → findById 命中空 → 404；非法 → CastError → 500。
+	// 记录端点无 !episodeId 校验：缺失/null → 按空 ID 查询 → 404；非法 hex → 500 Server error（固定契约）。
 	episodeID, present, err := episodeIDFromBody(body)
 	if err != nil {
 		errors.AbortWithAppError(c, errors.New(500, "Server error"), h.Config.IsDev)
@@ -296,7 +295,7 @@ func (h *Histories) Record(c *gin.Context) {
 // @Tags 观看历史
 // @Security bearerAuth
 // @Produce json
-// @Success 200 {array} map[string]any "历史列表（populate episodeId）"
+// @Success 200 {array} map[string]any "历史列表（episodeId 已关联展开）"
 // @Router /histories/continue-watching [get]
 func (h *Histories) ContinueWatching(c *gin.Context) {
 	user, _ := middleware.GetUser(c)
@@ -317,7 +316,7 @@ func (h *Histories) ContinueWatching(c *gin.Context) {
 	c.JSON(200, out)
 }
 
-// historyPageParams 是 GET /list 的分页参数（对齐 histories.js 的 parseInt 语义；
+// historyPageParams 是 GET /list 的分页参数（parseInt 语义；
 // 非法值对应 NaN，响应输出 null 且不限制条数）。
 type historyPageParams struct {
 	page       int
@@ -396,7 +395,7 @@ func (h *Histories) List(c *gin.Context) {
 	})
 }
 
-// historyPageValue 非法分页参数输出 null（对齐 JSON.stringify(NaN)）。
+// historyPageValue 非法分页参数输出 null（等价 JSON.stringify(NaN)）。
 func historyPageValue(v int, valid bool) any {
 	if !valid {
 		return nil
@@ -405,7 +404,7 @@ func historyPageValue(v int, valid bool) any {
 }
 
 // historyTotalPages 计算 Math.ceil(total/limit)；limit 非法或 0 时输出 null
-// （对齐 Math.ceil(0/0)=NaN → JSON null）。
+// （等价 Math.ceil(0/0)=NaN → JSON null）。
 func historyTotalPages(p historyPageParams, total int64) any {
 	if !p.limitValid || p.limit <= 0 {
 		return nil
@@ -524,7 +523,7 @@ func (h *Ratings) Submit(c *gin.Context) {
 		errors.AbortWithAppError(c, errors.New(500, "Server error"), h.Config.IsDev)
 		return
 	}
-	// 仅允许对已审核通过的剧集评分（reviewStatus 缺失视为 approved，对齐 schema 默认值）。
+	// 仅允许对已审核通过的剧集评分（reviewStatus 缺失视为 approved，与既有集合默认值一致）。
 	if episode.ReviewStatus != "" && episode.ReviewStatus != "approved" {
 		errors.AbortWithAppError(c, errors.New(403, "该剧集暂不可评分"), h.Config.IsDev)
 		return
@@ -539,16 +538,16 @@ func (h *Ratings) Submit(c *gin.Context) {
 		errors.AbortWithAppError(c, errors.New(500, "Server error"), h.Config.IsDev)
 		return
 	}
-	avgRounded := math.Round(avg*10) / 10 // 对齐 Math.round(avg*10)/10（1 位小数）
+	avgRounded := math.Round(avg*10) / 10 // 等价 Math.round(avg*10)/10（1 位小数）
 	if err := h.Repos.Episodes.RatingSetEpisodeStats(c.Request.Context(), episodeID, avgRounded, count); err != nil {
 		errors.AbortWithAppError(c, errors.New(500, "Server error"), h.Config.IsDev)
 		return
 	}
-	// 对齐 clearCache('episode_'+episodeId) + clearCacheByPrefix('episodes_')。
+	// 失效剧集缓存：episode_<id> 单键 + episodes_ 前缀。
 	middleware.EpisodeCache.Delete("episode_" + episodeID.Hex())
 	middleware.EpisodeCache.DeleteByPrefix("episodes_")
 
-	// score 回显原始请求值（对齐 res.json({ score, ... })）。
+	// score 回显原始请求值（固定契约）。
 	c.JSON(200, gin.H{"score": scoreRaw, "averageRating": avgRounded, "ratingCount": count})
 }
 

@@ -85,7 +85,7 @@ func apiCreateSeries(c *client, body any) (*http.Response, map[string]any) {
 	return resp, out
 }
 
-// seedSeriesEpisode 直接向 episodes 集合写入一条 mongoose 形态的剧集。
+// seedSeriesEpisode 直接向 episodes 集合写入一条既有数据形态的剧集。
 func seedSeriesEpisode(t *testing.T, db *mongo.Database) primitive.ObjectID {
 	t.Helper()
 	res, err := db.Collection("episodes").InsertOne(t.Context(), bson.M{
@@ -135,7 +135,7 @@ func TestSeriesListEmptyAndPagination(t *testing.T) {
 	if resp.StatusCode != 200 || len(page2["list"].([]any)) != 1 || page2["total"] != float64(3) {
 		t.Fatalf("page2: %d %v", resp.StatusCode, page2)
 	}
-	// 非法/越界分页：page=0 → 1，limit=999 → 100，limit=0 → 1（对齐 series.js）。
+	// 非法/越界分页：page=0 → 1，limit=999 → 100，limit=0 → 1（钳制规则固定）。
 	var clamped map[string]any
 	resp = c.json("GET", "/api/series?page=0&limit=999", nil, &clamped)
 	if resp.StatusCode != 200 || clamped["page"] != float64(1) || clamped["limit"] != float64(100) {
@@ -337,7 +337,7 @@ func TestSeriesUpdateAndDelete(t *testing.T) {
 		t.Fatalf("put not found: %d body=%v", resp.StatusCode, nf)
 	}
 
-	// DELETE：creator 角色也可删除（Express adminProtect 允许 creator/admin/superadmin）。
+	// DELETE：creator 角色也可删除（管理鉴权允许 creator/admin/superadmin）。
 	resp = otherC.json("DELETE", "/api/series/"+seriesID, nil, &body)
 	if resp.StatusCode != 200 || body["message"] != "Deleted" {
 		t.Fatalf("delete: %d body=%v", resp.StatusCode, body)

@@ -12,7 +12,7 @@ import (
 	"github.com/xiedada05/furry-drama-be-neo/internal/repository"
 )
 
-// 本文件实现 /api/banners 子域（行为逐分支照抄 backend/routes/banners.js）。
+// 本文件实现 /api/banners 子域。
 
 // Banners 是 /api/banners 域 handler 容器。
 type Banners struct {
@@ -27,10 +27,10 @@ func NewBanners(repos *repository.Repos, cfg *config.Config, amw *middleware.Aut
 	return &Banners{Repos: repos, Config: cfg, AuthMW: amw, RL: rl}
 }
 
-// Register 挂载 /api/banners 全部端点（不含 /api 前缀；路径对齐 banners.js 子路径）。
+// Register 挂载 /api/banners 全部端点（不含 /api 前缀）。
 // GET / 公开；GET /all、POST/PUT/DELETE 为 adminOnlyProtect（admin/superadmin）。
-// GET/POST 同时注册 "" 与 "/"：消除 gin 尾斜杠 307 重定向与 Express strict-routing
-// 关闭的差异。
+// GET/POST 同时注册 "" 与 "/"：gin 默认对尾斜杠缺失发起 307 重定向，而接口契约
+// 要求带与不带尾斜杠都直接匹配（无重定向），需消除该差异。
 func (h *Banners) Register(g *gin.RouterGroup) {
 	adminOnly := []string{middleware.RoleAdmin, middleware.RoleSuperAdmin}
 	g.GET("", h.List)
@@ -93,7 +93,7 @@ func (h *Banners) Create(c *gin.Context) {
 		c.JSON(400, gin.H{"message": "链接格式不合法，仅支持 http/https 协议"})
 		return
 	}
-	// title/image 必填：缺失或为空 → mongoose required ValidationError → catch-all 500。
+	// title/image 必填（固定契约）：缺失或为空 → 500 Server error（catch-all）。
 	if asString(body["title"]) == "" || asString(body["image"]) == "" {
 		serverError(c)
 		return
@@ -137,7 +137,7 @@ func (h *Banners) Update(c *gin.Context) {
 		return
 	}
 	body := cmsReadBody(c)
-	// 链接合法性检查在 findById 之前（对齐 banners.js PUT 的检查顺序）。
+	// 链接合法性检查在按 ID 查询之前（检查顺序是固定契约，勿调换）。
 	if !bannerLinkValid(body) {
 		c.JSON(400, gin.H{"message": "链接格式不合法，仅支持 http/https 协议"})
 		return
@@ -151,7 +151,7 @@ func (h *Banners) Update(c *gin.Context) {
 		serverError(c)
 		return
 	}
-	// 对齐 banners.js：各字段仅 !== undefined 时更新。
+	// 各字段仅 !== undefined 时更新（固定契约，勿改成覆盖式更新）。
 	if v, ok := body["title"]; ok {
 		banner.Title = asString(v)
 	}
@@ -217,8 +217,8 @@ func (h *Banners) Delete(c *gin.Context) {
 	c.JSON(200, gin.H{"message": "轮播图已删除"})
 }
 
-// bannerLinkValid 校验请求体 link 字段（对齐 banners.js isValidUrl + 检查时机）：
-// 仅当 link 非空时才校验，且必须为 http/https 绝对 URL。
+// bannerLinkValid 校验请求体 link 字段：
+// 仅当 link 非空时才校验，且必须为 http/https 绝对 URL（固定契约）。
 func bannerLinkValid(body map[string]any) bool {
 	link, ok := body["link"]
 	if !ok {
@@ -231,7 +231,7 @@ func bannerLinkValid(body map[string]any) bool {
 	return cmsIsValidHTTPURL(s)
 }
 
-// bannerJSON 组装轮播图响应对象（对齐 mongoose 文档 toJSON：_id hex、时间 RFC3339、含 __v）。
+// bannerJSON 组装轮播图响应对象（与既有集合数据形态一致：_id hex、时间 RFC3339、含 __v）。
 func bannerJSON(b *model.Banner) gin.H {
 	return gin.H{
 		"_id":        b.ID.Hex(),

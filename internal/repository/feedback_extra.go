@@ -13,12 +13,12 @@ import (
 	"github.com/xiedada05/furry-drama-be-neo/internal/model"
 )
 
-// 本文件为 /api/feedback 域（routes/feedback.js）补充挂在已有 *FeedbackRepo
+// 本文件为 /api/feedback 域补充挂在已有 *FeedbackRepo
 // 类型上的查询/更新方法。方法统一以 Feedback 前缀命名，避免与 misc_repos.go
 // 中已有的 DeleteByUser 及其它域 agent 新增方法重名。
 
 // FeedbackCreate 插入反馈；未显式设置时补 _id/createdAt/__v 默认值
-// （对齐 mongoose 自动 _id、default: Date.now 与 __v:0）。
+// （与既有集合文档的默认值形态一致）。
 func (r *FeedbackRepo) FeedbackCreate(ctx context.Context, f *model.Feedback) error {
 	ctx, cancel := context.WithTimeout(ctx, contextTimeout)
 	defer cancel()
@@ -32,7 +32,7 @@ func (r *FeedbackRepo) FeedbackCreate(ctx context.Context, f *model.Feedback) er
 	return err
 }
 
-// FeedbackCount 按过滤条件统计反馈数（对齐 countDocuments(filter)）。
+// FeedbackCount 按过滤条件统计反馈数（countDocuments(filter)）。
 func (r *FeedbackRepo) FeedbackCount(ctx context.Context, filter bson.M) (int64, error) {
 	ctx, cancel := context.WithTimeout(ctx, contextTimeout)
 	defer cancel()
@@ -40,7 +40,7 @@ func (r *FeedbackRepo) FeedbackCount(ctx context.Context, filter bson.M) (int64,
 }
 
 // FeedbackFindPaged 分页查询反馈，按 sort 排序后 skip/limit
-// （对齐 Feedback.find(filter).sort(sort).skip().limit()）。
+// （filter + sort + skip/limit 分页）。
 func (r *FeedbackRepo) FeedbackFindPaged(ctx context.Context, filter bson.M, sort bson.D, page, limit int) ([]model.Feedback, error) {
 	ctx, cancel := context.WithTimeout(ctx, contextTimeout)
 	defer cancel()
@@ -48,8 +48,8 @@ func (r *FeedbackRepo) FeedbackFindPaged(ctx context.Context, filter bson.M, sor
 	if sort != nil {
 		opts.SetSort(sort)
 	}
-	// skip 恒设置（含负值）：负 skip 由 mongo 拒绝 → 500（对齐 Express 在
-	// page<1 时 skip((page-1)*limit) 的行为）。
+	// skip 恒设置（含负值）：负 skip 由 mongo 拒绝 → 500（page<1 时
+	// skip=(page-1)*limit 为负，调用方依赖此报错路径）。
 	opts.SetSkip(int64((page - 1) * limit))
 	if limit > 0 {
 		opts.SetLimit(int64(limit))
@@ -66,9 +66,8 @@ func (r *FeedbackRepo) FeedbackFindPaged(ctx context.Context, filter bson.M, sor
 	return list, nil
 }
 
-// FeedbackFindOneAndUpdate 按 ID 更新并返回新文档（对齐
-// Feedback.findByIdAndUpdate(id, update, {new:true})）；不存在返回 ErrNotFound。
-// update 为普通字段对象（无 $ 运算符），由调用方按 mongoose 语义包裹 $set。
+// FeedbackFindOneAndUpdate 按 ID 更新并返回更新后的文档；不存在返回 ErrNotFound。
+// update 为普通字段对象（无 $ 运算符），由调用方包裹 $set 后传入。
 func (r *FeedbackRepo) FeedbackFindOneAndUpdate(ctx context.Context, id any, update bson.M) (*model.Feedback, error) {
 	ctx, cancel := context.WithTimeout(ctx, contextTimeout)
 	defer cancel()

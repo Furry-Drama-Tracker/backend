@@ -28,7 +28,7 @@ import (
 	"github.com/xiedada05/furry-drama-be-neo/internal/repository"
 )
 
-// 翻译域常量（对齐 routes/translate.js）。
+// 翻译域常量（固定契约，勿改）。
 const (
 	translateCacheTTL        = 24 * time.Hour
 	translateCacheMax        = 5000
@@ -39,13 +39,13 @@ const (
 // translateHTTPClient 是所有外部翻译服务的共享客户端（10s 超时）。
 var translateHTTPClient = &http.Client{Timeout: 10 * time.Second}
 
-// cachedTranslation 是机器翻译内存缓存的条目（对齐 machineTranslationCache Map）。
+// cachedTranslation 是机器翻译内存缓存的条目。
 type cachedTranslation struct {
 	translation string
 	timestamp   time.Time
 }
 
-// hardcodedTranslations 是硬编码翻译表（逐条照抄 translate.js:22-128 的 translations 对象）。
+// hardcodedTranslations 是硬编码翻译表（固定文案：键与值均为既有契约，勿增删改）。
 var hardcodedTranslations = map[string]map[string]string{
 	"twoFactor.title":          {"en": "🔐 Two-Factor Authentication (2FA)"},
 	"twoFactor.enableDesc":     {"en": "Enable 2FA to require a verification code in addition to your password when logging in, greatly improving account security."},
@@ -154,7 +154,7 @@ var hardcodedTranslations = map[string]map[string]string{
 	"下一页":                   {"en": "Next"},
 }
 
-// englishStopWords 对齐 translate.js ENGLISH_STOP_WORDS（plausibility 英文单词判定用）。
+// englishStopWords 是英文停用词表（plausibility 英文单词判定用，固定表，勿增删）。
 var englishStopWords = map[string]bool{
 	"the": true, "is": true, "a": true, "an": true, "of": true, "in": true, "to": true,
 	"for": true, "and": true, "or": true, "with": true, "by": true, "on": true, "at": true,
@@ -169,7 +169,7 @@ var englishStopWords = map[string]bool{
 	"few": true, "less": true,
 }
 
-// bingScrape 相关正则（best-effort 对齐 bing-translate-api 的页面抓取）。
+// bingScrape 相关正则（best-effort 抓取 Bing 翻译页面参数）。
 var (
 	bingUserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
 	bingIGRe      = regexp.MustCompile(`name="ig" content="([^"]+)"`)
@@ -193,21 +193,21 @@ type batchRequest struct {
 	resultCh   chan []any
 }
 
-// Translate 是翻译域（/api/translate）handler 容器，行为逐端点对齐 backend/routes/translate.js。
+// Translate 是翻译域（/api/translate）handler 容器。
 type Translate struct {
 	Repos  *repository.Repos
 	Config *config.Config
 	AuthMW *middleware.Auth
 	RL     func(ratelimit.Spec) gin.HandlerFunc
 
-	// azureKey/azureRegion 对齐 process.env.AZURE_TRANSLATOR_KEY / _REGION（构造时读取一次）。
+	// azureKey/azureRegion 取自环境变量 AZURE_TRANSLATOR_KEY / AZURE_TRANSLATOR_REGION（构造时读取一次）。
 	azureKey    string
 	azureRegion string
 
 	cacheMu sync.Mutex
 	cache   map[string]cachedTranslation
 
-	// batchCh 是串行批量翻译队列（对齐 translate.js 的 batchQueue + batchProcessing）。
+	// batchCh 是串行批量翻译队列（批量请求逐个串行处理）。
 	batchCh chan *batchRequest
 }
 
@@ -228,7 +228,7 @@ func NewTranslate(repos *repository.Repos, cfg *config.Config, amw *middleware.A
 	return t
 }
 
-// Register 挂载翻译路由（路径照抄 Express 子路径，不含 /api 前缀）。
+// Register 挂载翻译路由（子路径不含 /api 前缀）。
 // POST / 双注册 "" 与 "/" 覆盖 /api/translate 与 /api/translate/；均挂 translateLimiter。
 func (h *Translate) Register(g *gin.RouterGroup) {
 	g.POST("", h.RL(ratelimit.TranslateSpec), h.Translate)
@@ -258,7 +258,7 @@ func (h *Translate) Translate(c *gin.Context) {
 		return
 	}
 	if targetLang == "zh" {
-		// 对齐 targetLang==='zh' 分支：原样返回 key（保留原始类型）。
+		// targetLang 为 zh 时原样返回 key（保留原始类型，勿改）。
 		c.JSON(200, gin.H{"translation": keyVal})
 		return
 	}
@@ -366,7 +366,7 @@ func (h *Translate) Batch(c *gin.Context) {
 	}
 }
 
-// batchLoop 串行处理批量翻译队列（对齐 processBatchQueue：一次只处理一个批次）。
+// batchLoop 串行处理批量翻译队列（一次只处理一个批次）。
 func (h *Translate) batchLoop() {
 	for item := range h.batchCh {
 		machineResults := h.translateWithConcurrencyLimit(context.Background(), item.texts, "zh", item.targetLang)
@@ -377,7 +377,7 @@ func (h *Translate) batchLoop() {
 			if r != "" {
 				finalResults[idx] = r
 			} else {
-				// 机器翻译失败回退原文（对齐 `result || needTranslation[i].text`）。
+				// 机器翻译失败回退原文（result || 原文的语义，消费方依赖）。
 				finalResults[idx] = item.need[i].text
 			}
 		}
@@ -385,7 +385,7 @@ func (h *Translate) batchLoop() {
 	}
 }
 
-// ---- 机器翻译管线（对齐 translate.js） ----
+// ---- 机器翻译管线 ----
 
 // getMachineTranslation 顶层机器翻译：缓存 → Azure → 长文本分段 → fallback。
 func (h *Translate) getMachineTranslation(ctx context.Context, text, sourceLang, targetLang string) string {
@@ -502,7 +502,7 @@ func (h *Translate) translateWithConcurrencyLimit(ctx context.Context, texts []s
 
 // ---- 翻译提供方（均失败返回空串 = null） ----
 
-// fetchMyMemory 调 MyMemory API（对齐 translate.js fetchTranslation）。
+// fetchMyMemory 调 MyMemory API。
 func (h *Translate) fetchMyMemory(ctx context.Context, text, sourceLang, targetLang string) string {
 	sl := translateLangMap(sourceLang)
 	tl := translateLangMap(targetLang)
@@ -544,7 +544,7 @@ func (h *Translate) fetchMyMemory(ctx context.Context, text, sourceLang, targetL
 	return translated
 }
 
-// fetchGoogleTranslation 调 Google 免费翻译接口（对齐 translate.js fetchGoogleTranslation）。
+// fetchGoogleTranslation 调 Google 免费翻译接口。
 func (h *Translate) fetchGoogleTranslation(ctx context.Context, text, sourceLang, targetLang string) string {
 	sl := sourceLang
 	if sl == "zh" {
@@ -581,7 +581,7 @@ func (h *Translate) fetchGoogleTranslation(ctx context.Context, text, sourceLang
 	return translated
 }
 
-// fetchBingTranslation 调 Bing 翻译（对齐 bing-translate-api 的 ttranslatev3，重试一次）。
+// fetchBingTranslation 调 Bing 翻译（ttranslatev3 接口，重试一次）。
 func (h *Translate) fetchBingTranslation(ctx context.Context, text, sourceLang, targetLang string) string {
 	sl := sourceLang
 	if sl == "zh" {
@@ -687,7 +687,7 @@ func bingScrapeConfig(ctx context.Context) (ig, iid, key, token string) {
 	return
 }
 
-// fetchAzureTranslation 调 Azure Translator（对齐 translate.js fetchAzureTranslation）。
+// fetchAzureTranslation 调 Azure Translator。
 // AZURE_TRANSLATOR_KEY 未配置时返回 nil。
 func (h *Translate) fetchAzureTranslation(ctx context.Context, texts []string, sourceLang, targetLang string) []string {
 	if h.azureKey == "" {
@@ -744,7 +744,7 @@ func (h *Translate) fetchAzureTranslation(ctx context.Context, texts []string, s
 
 // ---- 判定与工具函数 ----
 
-// translateLangMap 对齐 LANG_MAP = { zh:'zh-Hans', en:'en' }（未知语言原样返回）。
+// translateLangMap 语言码映射：zh→zh-Hans、en→en（未知语言原样返回）。
 func translateLangMap(lang string) string {
 	switch lang {
 	case "zh":
@@ -755,7 +755,7 @@ func translateLangMap(lang string) string {
 	return lang
 }
 
-// supportedTranslateLang 判断目标语言是否受支持（对齐 !LANG_MAP[targetLang]）。
+// supportedTranslateLang 判断目标语言是否受支持（仅 zh / en）。
 func supportedTranslateLang(targetLang string) bool {
 	return targetLang == "zh" || targetLang == "en"
 }
@@ -784,7 +784,7 @@ func jsFalsy(v any) bool {
 	return false
 }
 
-// jsStringOf 对齐 JS String() 转换（机器翻译入参 stringify）。
+// jsStringOf 按 String() 语义转换任意入参（机器翻译入参 stringify，消费方依赖此格式）。
 func jsStringOf(v any) string {
 	switch t := v.(type) {
 	case nil:
@@ -811,7 +811,7 @@ func jsStringOf(v any) string {
 	}
 }
 
-// isValidTranslation 对齐 translate.js isValidTranslation（过滤服务商告警文案）。
+// isValidTranslation 过滤翻译服务商的告警文案（视为翻译失败）。
 func isValidTranslation(text string) bool {
 	if text == "" {
 		return false
@@ -822,7 +822,7 @@ func isValidTranslation(text string) bool {
 		!strings.Contains(upper, "VISIT HTTPS")
 }
 
-// isPlausibleTranslation 对齐 translate.js isPlausibleTranslation（targetLang=en 时
+// isPlausibleTranslation 判断翻译结果是否可信（targetLang=en 时
 // 检查 CJK 占比与英文单词）。
 func isPlausibleTranslation(sourceText, targetLang, result string) bool {
 	if result == "" {
@@ -862,7 +862,7 @@ func isCJK(r rune) bool {
 	return (r >= 0x4e00 && r <= 0x9fff) || (r >= 0x3400 && r <= 0x4dbf)
 }
 
-// isLowerAlpha 判断是否全为小写英文字母（对齐 /^[a-z]+$/）。
+// isLowerAlpha 判断是否全为小写英文字母（^[a-z]+$）。
 func isLowerAlpha(s string) bool {
 	if s == "" {
 		return false
@@ -875,7 +875,7 @@ func isLowerAlpha(s string) bool {
 	return true
 }
 
-// splitLongText 对齐 translate.js splitLongText：按 450 长度与句读切分。
+// splitLongText 长文本切分：按 450 长度上限与句读切分。
 func splitLongText(text string) []string {
 	runes := []rune(text)
 	if len(runes) <= maxSegmentLength {
@@ -909,7 +909,7 @@ func splitLongText(text string) []string {
 	return segments
 }
 
-// lastRuneIndex 对齐 JS String.lastIndexOf(target, fromIndex)（fromIndex 含）。
+// lastRuneIndex 从 from（含）向前查找 target 的下标，等价 String.lastIndexOf 语义。
 func lastRuneIndex(runes []rune, target rune, from int) int {
 	if from >= len(runes) {
 		from = len(runes) - 1
@@ -922,7 +922,7 @@ func lastRuneIndex(runes []rune, target rune, from int) int {
 	return -1
 }
 
-// getCached 读取翻译缓存并懒惰清理过期条目（对齐 30 分钟 setInterval 清理语义）。
+// getCached 读取翻译缓存并懒惰清理过期条目（超容量时顺带清理，代替定时清理）。
 func (h *Translate) getCached(key string) (string, bool) {
 	h.cacheMu.Lock()
 	defer h.cacheMu.Unlock()
@@ -945,7 +945,7 @@ func (h *Translate) getCached(key string) (string, bool) {
 	return c.translation, true
 }
 
-// setCached 写入翻译缓存，超限时淘汰一条（对齐 Express Map 插入前淘汰最旧）。
+// setCached 写入翻译缓存，超限时淘汰一条（插入前淘汰，与既有缓存淘汰语义一致）。
 func (h *Translate) setCached(key, translation string) {
 	h.cacheMu.Lock()
 	defer h.cacheMu.Unlock()

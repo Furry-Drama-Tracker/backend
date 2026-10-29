@@ -18,8 +18,8 @@ import (
 	"github.com/xiedada05/furry-drama-be-neo/internal/repository"
 )
 
-// 本文件实现 /api/versions 子域（行为逐分支照抄 backend/routes/versions.js）。
-// 集合为 episodeversions（models/EpisodeVersion.js），复用已实现的 EpisodeVersionRepo。
+// 本文件实现 /api/versions 子域。
+// 集合为 episodeversions，复用已实现的 EpisodeVersionRepo。
 
 // Versions 是 /api/versions 域 handler 容器。
 type Versions struct {
@@ -34,8 +34,8 @@ func NewVersions(repos *repository.Repos, cfg *config.Config, amw *middleware.Au
 	return &Versions{Repos: repos, Config: cfg, AuthMW: amw, RL: rl}
 }
 
-// Register 挂载 /api/versions 全部端点（不含 /api 前缀；路径对齐 versions.js 子路径）。
-// 全部为 adminProtect（creator/admin/superadmin）。注册顺序对齐 Express 子路由声明顺序。
+// Register 挂载 /api/versions 全部端点（不含 /api 前缀）。
+// 全部为 adminProtect（creator/admin/superadmin）。注册顺序是固定契约，勿重排。
 func (h *Versions) Register(g *gin.RouterGroup) {
 	protect := h.AuthMW.Protect(middleware.RoleCreator, middleware.RoleAdmin, middleware.RoleSuperAdmin)
 	g.GET("/:episodeId", protect, h.List)
@@ -44,8 +44,8 @@ func (h *Versions) Register(g *gin.RouterGroup) {
 	g.POST("/:episodeId/rollback/:version", protect, h.Rollback)
 }
 
-// versionDiffFieldOrder 是 Episode 文档 toObject() 的字段序（mongoose schema 顺序，
-// _id 在前）。diff 端点按此顺序遍历字段，保证与 Express 的 Object.keys 输出顺序一致。
+// versionDiffFieldOrder 是 Episode 文档 DTO 的字段序（_id 在前）。
+// diff 端点按此顺序遍历字段，输出顺序是消费方依赖的固定契约。
 var versionDiffFieldOrder = []string{
 	"_id", "title", "titleEn", "titleJa", "description", "descriptionEn", "descriptionJa",
 	"coverImage", "totalEpisodes", "currentEpisodes", "status", "category", "tags",
@@ -55,7 +55,7 @@ var versionDiffFieldOrder = []string{
 	"reviewedBy", "reviewedAt", "createdAt", "updatedAt", "__v",
 }
 
-// List GET /api/versions/:episodeId（adminProtect）。分页对齐 versions.js 内联逻辑：
+// List GET /api/versions/:episodeId（adminProtect）。分页逻辑：
 // page 默认 1、limit 默认 20（parseInt 语义，无上限钳制）；响应 {versions,page,limit,total,totalPages}。
 // @Summary 剧集版本历史
 // @Tags 版本
@@ -96,7 +96,7 @@ func (h *Versions) List(c *gin.Context) {
 	for i := range versions {
 		list = append(list, versionsVersionJSON(&versions[i], users))
 	}
-	// limit=0 时 Express 的 Math.ceil(total/0) = Infinity → JSON null。
+	// limit=0 时 totalPages = Infinity → JSON null（固定契约）。
 	var totalPages any
 	if limit > 0 {
 		totalPages = (int(total) + limit - 1) / limit
@@ -163,7 +163,7 @@ func (h *Versions) Diff(c *gin.Context) {
 	}
 	v1Num, v1OK := versionsParseInt(c.Param("v1"))
 	v2Num, v2OK := versionsParseInt(c.Param("v2"))
-	// parseInt 失败 → findOne({version: NaN}) 无匹配 → 404 'Version not found'。
+	// parseInt 失败 → version 非法（NaN）→ 查询无匹配 → 404 "Version not found"。
 	if !v1OK || !v2OK {
 		c.JSON(404, gin.H{"message": "Version not found"})
 		return
@@ -191,7 +191,7 @@ func (h *Versions) Diff(c *gin.Context) {
 }
 
 // Rollback POST /api/versions/:episodeId/rollback/:version（adminProtect）。
-// 回滚逻辑逐分支对齐 versions.js：先写回滚快照，再裁剪版本到 50，最后
+// 回滚顺序是固定契约：先写回滚快照，再裁剪版本到 50，最后
 // 用快照 data（去 _id/__v、updatedAt 置当前时间）$set 更新剧集。
 // @Summary 回滚到指定版本
 // @Tags 版本
@@ -266,7 +266,7 @@ func (h *Versions) Rollback(c *gin.Context) {
 		return
 	}
 
-	// 限制版本数量为 50（对齐 versions.js 裁剪逻辑）。
+	// 限制版本数量为 50（固定契约）。
 	versionCount, err := h.Repos.EpisodeVersions.CountByEpisode(ctx, episodeID)
 	if err != nil {
 		serverError(c)
@@ -289,7 +289,7 @@ func (h *Versions) Rollback(c *gin.Context) {
 	}
 
 	// rollbackData = {...versionDoc.data, updatedAt: Date.now()}，删除 _id/__v。
-	// mongoose findByIdAndUpdate 对普通对象默认按 $set 处理，故显式包裹 $set。
+	// 更新语义为局部 $set（非整体替换），故显式包裹 $set。
 	rollbackData := copyM(versionDoc.Data)
 	rollbackData["updatedAt"] = time.Now().UTC().Truncate(time.Millisecond)
 	delete(rollbackData, "_id")
@@ -308,9 +308,9 @@ func (h *Versions) Rollback(c *gin.Context) {
 
 // ---- helpers ----
 
-// versionsPage 解析版本列表分页参数（对齐 versions.js GET /:episodeId 内联逻辑）：
+// versionsPage 解析版本列表分页参数：
 // page 默认 1、limit 默认 20；parseInt 语义，无上限钳制。
-// 非法值（非数字/负数）在 Express 中触发 mongoose CastError → 500，返回 ok=false。
+// 非法值（非数字/负数）→ 500 Server error（固定契约），返回 ok=false。
 func versionsPage(c *gin.Context) (page, limit int, ok bool) {
 	pageStr, hasPage := c.GetQuery("page")
 	limitStr, hasLimit := c.GetQuery("limit")
@@ -333,7 +333,7 @@ func versionsPage(c *gin.Context) (page, limit int, ok bool) {
 	return page, limit, true
 }
 
-// versionsParseInt 对齐 JS parseInt（base 10）：解析前导空白、可选符号与前导数字；
+// versionsParseInt 等价 JS parseInt（base 10）：解析前导空白、可选符号与前导数字；
 // 无有效数字返回 ok=false（对应 JS 的 NaN）。
 func versionsParseInt(s string) (int, bool) {
 	i := 0
@@ -360,7 +360,7 @@ func versionsParseInt(s string) (int, bool) {
 	return int(n), true
 }
 
-// versionsUserRefs 批量查 changedBy 用户引用（对齐 populate('changedBy', 'accountId username')）。
+// versionsUserRefs 批量查 changedBy 用户引用（输出 accountId/username 字段）。
 func (h *Versions) versionsUserRefs(ctx context.Context, ids []primitive.ObjectID) (map[string]repository.EpisodesUserRef, error) {
 	return h.Repos.Users.EpisodesFindUserRefsByIDs(ctx, dedupIDs(ids))
 }
@@ -376,8 +376,8 @@ func changedByIDs(versions []model.EpisodeVersion) []primitive.ObjectID {
 	return ids
 }
 
-// versionsVersionJSON 组装版本响应对象（对齐 mongoose 文档 toJSON：_id/episodeId hex、
-// data 为完整快照、changedBy populate 或 null、时间 RFC3339、含 __v）。
+// versionsVersionJSON 组装版本响应对象（与既有集合数据形态一致：_id/episodeId hex、
+// data 为完整快照、changedBy 关联查询或 null、时间 RFC3339、含 __v）。
 func versionsVersionJSON(v *model.EpisodeVersion, users map[string]repository.EpisodesUserRef) gin.H {
 	return gin.H{
 		"_id":           v.ID.Hex(),
@@ -391,9 +391,9 @@ func versionsVersionJSON(v *model.EpisodeVersion, users map[string]repository.Ep
 	}
 }
 
-// versionsDiff 计算 v1/v2 两个版本 data 的差异（对齐 versions.js diff 端点）：
+// versionsDiff 计算 v1/v2 两个版本 data 的差异：
 // 逐字段 JSON.stringify 比较；字段仅在一边存在时（另一侧 JS undefined）必然入 diff，
-// 且缺失侧不输出该键（对齐 res.json 对 undefined 的省略）。
+// 且缺失侧不输出该键（undefined 键被 JSON 序列化丢弃，固定契约）。
 func versionsDiff(v1, v2 *model.EpisodeVersion) []gin.H {
 	diff := make([]gin.H, 0)
 	seen := map[string]bool{}

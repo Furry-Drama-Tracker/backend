@@ -9,10 +9,10 @@ import (
 	"github.com/xiedada05/furry-drama-be-neo/internal/model"
 )
 
-// 本文件为 episodes 域（routes/episodes.js）跨集合访问 Notification 集合的方法，
+// 本文件为 episodes 域跨集合访问 Notification 集合的方法，
 // 挂到已有 *NotificationRepo 类型上。方法统一以 Episodes 前缀命名。
 
-// EpisodesInsertMany 批量插入通知（对齐 Notification.insertMany）；
+// EpisodesInsertMany 批量插入通知（insertMany 语义）；
 // 未显式设置时补 createdAt 默认值。
 func (r *NotificationRepo) EpisodesInsertMany(ctx context.Context, items []model.Notification) error {
 	ctx, cancel := context.WithTimeout(ctx, contextTimeout)
@@ -32,7 +32,7 @@ func (r *NotificationRepo) EpisodesInsertMany(ctx context.Context, items []model
 	return err
 }
 
-// EpisodesDeleteManyByEpisode 删除某剧集全部通知（对齐 DELETE /:id 的 Notification.deleteMany）。
+// EpisodesDeleteManyByEpisode 删除某剧集全部通知（删除剧集时清理）。
 func (r *NotificationRepo) EpisodesDeleteManyByEpisode(ctx context.Context, episodeID any) error {
 	ctx, cancel := context.WithTimeout(ctx, contextTimeout)
 	defer cancel()

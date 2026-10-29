@@ -15,7 +15,7 @@ import (
 // 方法名统一 Follow 前缀，避免与其它域 agent 添加的方法重名。
 
 // FollowInsert 插入追番记录；userId+episodeId 唯一键冲突返回 errDuplicateKey
-// （对齐 follows.js 的 error.code===11000 → 'Already following'）。
+// （E11000 → 409 'Already following'，消费方依赖该错误信息）。
 func (r *FollowRepo) FollowInsert(ctx context.Context, f *model.Follow) error {
 	ctx, cancel := context.WithTimeout(ctx, contextTimeout)
 	defer cancel()
@@ -26,7 +26,7 @@ func (r *FollowRepo) FollowInsert(ctx context.Context, f *model.Follow) error {
 	return err
 }
 
-// FollowDeleteOne 删除用户对某剧集的追番。不存在也返回成功（对齐 deleteOne 幂等语义）。
+// FollowDeleteOne 删除用户对某剧集的追番。不存在也返回成功（deleteOne 幂等语义）。
 func (r *FollowRepo) FollowDeleteOne(ctx context.Context, userID, episodeID any) error {
 	ctx, cancel := context.WithTimeout(ctx, contextTimeout)
 	defer cancel()
@@ -34,15 +34,15 @@ func (r *FollowRepo) FollowDeleteOne(ctx context.Context, userID, episodeID any)
 	return err
 }
 
-// FollowCount 按筛选条件统计追番数（对齐 countDocuments(filter)）。
+// FollowCount 按筛选条件统计追番数（countDocuments(filter)）。
 func (r *FollowRepo) FollowCount(ctx context.Context, filter bson.M) (int64, error) {
 	ctx, cancel := context.WithTimeout(ctx, contextTimeout)
 	defer cancel()
 	return r.coll.CountDocuments(ctx, filter)
 }
 
-// FollowListPaged 分页查询追番，按 createdAt 倒序（对齐 follows.js GET /list
-// 默认分支的 sort({createdAt:-1}).skip().limit()）。
+// FollowListPaged 分页查询追番，按 createdAt 倒序
+// （GET /list 默认分支：sort({createdAt:-1}).skip().limit()）。
 func (r *FollowRepo) FollowListPaged(ctx context.Context, filter bson.M, page, limit int) ([]model.Follow, error) {
 	ctx, cancel := context.WithTimeout(ctx, contextTimeout)
 	defer cancel()
@@ -62,8 +62,8 @@ func (r *FollowRepo) FollowListPaged(ctx context.Context, filter bson.M, page, l
 	return list, nil
 }
 
-// FollowListLimited 取前 limit 条追番、不排序（对齐 follows.js name/rating/lastWatched
-// 分支的 find(filter).limit(maxItems)，内存排序后再切片）。
+// FollowListLimited 取前 limit 条追番、不排序（name/rating/lastWatched 分支：
+// find(filter).limit(maxItems)，由调用方内存排序后再切片）。
 func (r *FollowRepo) FollowListLimited(ctx context.Context, filter bson.M, limit int64) ([]model.Follow, error) {
 	ctx, cancel := context.WithTimeout(ctx, contextTimeout)
 	defer cancel()
@@ -79,7 +79,7 @@ func (r *FollowRepo) FollowListLimited(ctx context.Context, filter bson.M, limit
 	return list, nil
 }
 
-// FollowFindByUserEpisode 查用户对某剧集的追番（对齐 findOne({userId, episodeId})）；
+// FollowFindByUserEpisode 查用户对某剧集的追番（findOne({userId, episodeId})）；
 // 不存在返回 ErrNotFound。
 func (r *FollowRepo) FollowFindByUserEpisode(ctx context.Context, userID, episodeID any) (*model.Follow, error) {
 	ctx, cancel := context.WithTimeout(ctx, contextTimeout)

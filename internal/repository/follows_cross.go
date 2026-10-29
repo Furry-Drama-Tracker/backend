@@ -12,11 +12,11 @@ import (
 )
 
 // 本文件是追番/收藏域（follows/favorites）跨集合访问的独占文件：
-// 给 *EpisodeRepo / *HistoryRepo / *FolderRepo 补填充（populate）所需的查询方法。
+// 给 *EpisodeRepo / *HistoryRepo / *FolderRepo 补关联填充所需的查询方法。
 // 方法名统一 Follow 前缀、类型名统一 Follows 前缀，避免与其它域 agent 重名。
 
-// FollowsEpisodeDoc 是追番/收藏列表 populate episodeId 时输出的剧集文档视图，
-// 字段逐项对齐 backend/models/Episode.js 的 schema（mongoose toJSON 含默认字段）。
+// FollowsEpisodeDoc 是追番/收藏列表展开 episodeId 时输出的剧集文档视图，
+// 字段与既有集合数据形态一致（勿改 bson 标签；含集合文档的默认字段形态）。
 type FollowsEpisodeDoc struct {
 	ID                   primitive.ObjectID   `bson:"_id" json:"_id"`
 	Title                string               `bson:"title" json:"title"`
@@ -54,7 +54,7 @@ type FollowsEpisodeDoc struct {
 	UpdatedAt            time.Time            `bson:"updatedAt" json:"updatedAt"`
 }
 
-// normalize 把缺失字段补齐为 mongoose 默认值：空数组输出 [] 而非 null，空 Map 输出 {}。
+// normalize 把缺失字段补齐为集合文档的默认值形态：空数组输出 [] 而非 null，空 Map 输出 {}。
 func (d *FollowsEpisodeDoc) normalize() {
 	if d.Category == nil {
 		d.Category = []string{}
@@ -73,8 +73,8 @@ func (d *FollowsEpisodeDoc) normalize() {
 	}
 }
 
-// FollowsFolderDoc 是追番/收藏列表 populate folderId 时输出的收藏夹文档视图，
-// 字段逐项对齐 backend/models/Folder.js。
+// FollowsFolderDoc 是追番/收藏列表展开 folderId 时输出的收藏夹文档视图，
+// 字段与既有集合数据形态一致（勿改 bson 标签）。
 type FollowsFolderDoc struct {
 	ID          primitive.ObjectID `bson:"_id" json:"_id"`
 	UserID      primitive.ObjectID `bson:"userId" json:"userId"`
@@ -86,9 +86,9 @@ type FollowsFolderDoc struct {
 	CreatedAt   time.Time          `bson:"createdAt" json:"createdAt"`
 }
 
-// FollowEpisodeByID 按 ID 查完整剧集文档（对齐 Episode.findById）。
-//   - id 为空 → ErrNotFound（mongoose findById(undefined) 返回 null → 404）
-//   - id 非法 hex → 非 ErrNotFound 错误（mongoose CastError → 500）
+// FollowEpisodeByID 按 ID 查完整剧集文档。
+//   - id 为空 → ErrNotFound（handler 转 404）
+//   - id 非法 hex → 非 ErrNotFound 错误（handler 转 500）
 //   - 不存在 → ErrNotFound
 func (r *EpisodeRepo) FollowEpisodeByID(ctx context.Context, id string) (*FollowsEpisodeDoc, error) {
 	ctx, cancel := context.WithTimeout(ctx, contextTimeout)
@@ -113,7 +113,7 @@ func (r *EpisodeRepo) FollowEpisodeByID(ctx context.Context, id string) (*Follow
 }
 
 // FollowEpisodesByIDs 批量取剧集文档，返回 id → 文档 的 map。
-// 空 ids 返回空 map（对齐 populate 空列表不查询）。
+// 空 ids 返回空 map（空列表不做查询，与既有关联语义一致）。
 func (r *EpisodeRepo) FollowEpisodesByIDs(ctx context.Context, ids []primitive.ObjectID) (map[primitive.ObjectID]FollowsEpisodeDoc, error) {
 	ctx, cancel := context.WithTimeout(ctx, contextTimeout)
 	defer cancel()
@@ -137,8 +137,8 @@ func (r *EpisodeRepo) FollowEpisodesByIDs(ctx context.Context, ids []primitive.O
 	return result, nil
 }
 
-// FollowLastWatchedMap 批量取用户对若干剧集的 lastWatched（对齐 History.find
-// {userId, episodeId:{$in}}），返回 episodeId → lastWatched 的 map。
+// FollowLastWatchedMap 批量取用户对若干剧集的 lastWatched
+// （find({userId, episodeId:{$in}})），返回 episodeId → lastWatched 的 map。
 func (r *HistoryRepo) FollowLastWatchedMap(ctx context.Context, userID any, episodeIDs []primitive.ObjectID) (map[primitive.ObjectID]time.Time, error) {
 	ctx, cancel := context.WithTimeout(ctx, contextTimeout)
 	defer cancel()
@@ -164,8 +164,8 @@ func (r *HistoryRepo) FollowLastWatchedMap(ctx context.Context, userID any, epis
 	return result, nil
 }
 
-// FollowFolderByIDAndUser 查用户拥有的收藏夹（对齐 Folder.findOne({_id, userId}),
-// favorites.js add 的归属校验）；不存在返回 ErrNotFound。
+// FollowFolderByIDAndUser 查用户拥有的收藏夹（findOne({_id, userId})，
+// 归属校验用）；不存在返回 ErrNotFound。
 func (r *FolderRepo) FollowFolderByIDAndUser(ctx context.Context, id, userID any) (*FollowsFolderDoc, error) {
 	ctx, cancel := context.WithTimeout(ctx, contextTimeout)
 	defer cancel()
@@ -177,7 +177,7 @@ func (r *FolderRepo) FollowFolderByIDAndUser(ctx context.Context, id, userID any
 	return doc, err
 }
 
-// FollowFoldersByIDs 批量取收藏夹文档，返回 id → 文档 的 map（populate folderId 用）。
+// FollowFoldersByIDs 批量取收藏夹文档，返回 id → 文档 的 map（展开 folderId 用）。
 func (r *FolderRepo) FollowFoldersByIDs(ctx context.Context, ids []primitive.ObjectID) (map[primitive.ObjectID]FollowsFolderDoc, error) {
 	ctx, cancel := context.WithTimeout(ctx, contextTimeout)
 	defer cancel()
@@ -201,7 +201,7 @@ func (r *FolderRepo) FollowFoldersByIDs(ctx context.Context, ids []primitive.Obj
 }
 
 // FollowFavoriteFolderIDs 取用户全部 type=favorite 且 name!='__unclassified__' 的
-// 收藏夹 ID（对齐 favorites.js GET /counts 的 Folder.find 投影 _id）。
+// 收藏夹 ID（find 投影 _id，收藏计数端点使用）。
 func (r *FolderRepo) FollowFavoriteFolderIDs(ctx context.Context, userID any) ([]primitive.ObjectID, error) {
 	ctx, cancel := context.WithTimeout(ctx, contextTimeout)
 	defer cancel()

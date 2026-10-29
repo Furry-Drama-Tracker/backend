@@ -5,9 +5,9 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// Gzip 响应压缩中间件（等价 Express compression()，src/index.js:68）。
+// Gzip 响应压缩中间件。
 //
-// 使用 gin-contrib/gzip 默认压缩级别（等价 zlib default = compression() 默认）：
+// 使用 gin-contrib/gzip 默认压缩级别（等价 zlib default 压缩级别）：
 //   - 客户端 Accept-Encoding 含 gzip 时压缩，设置 Content-Encoding: gzip 与
 //     Vary: Accept-Encoding；
 //   - 默认排除已压缩的图片扩展名（.png/.gif/.jpeg/.jpg），与 compression() 的

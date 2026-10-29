@@ -27,14 +27,13 @@ import (
 	"github.com/xiedada05/furry-drama-be-neo/internal/upload"
 )
 
-// 观看去重冷却（对齐 routes/episodes.js VIEW_COOLDOWN 10 分钟）。
+// 观看去重冷却窗口（10 分钟，固定契约）。
 const viewCooldown = 10 * time.Minute
 
-// 邮件通知去重冷却（对齐 utils/episodeNotify.js EMAIL_NOTIFY_COOLDOWN 1 小时）。
+// 邮件通知去重冷却窗口（1 小时，固定契约）。
 const emailNotifyCooldown = time.Hour
 
-// Episodes 是剧集域（/api/episodes）handler 容器，行为逐端点对齐
-// backend/routes/episodes.js。16 个端点通过 Register 挂载到
+// Episodes 是剧集域（/api/episodes）handler 容器。16 个端点通过 Register 挂载到
 // /api/episodes（由 server.RegisterRoutes 的 MountDual 双版本镜像）。
 type Episodes struct {
 	Repos  *repository.Repos
@@ -44,12 +43,12 @@ type Episodes struct {
 	Mail   *email.Client
 
 	// viewLog 观看去重：key = "<episodeId>_<ip>" → 上次计数时间
-	// （对齐 Express viewTracker Map，10min 冷却）。
+	// （10min 冷却，固定契约）。
 	viewMu  sync.Mutex
 	viewLog map[string]time.Time
 
 	// emailLog 邮件去重：key = "<episodeId>_<epNum>_<eventType>" → 上次发送时间
-	// （对齐 shouldSendEpisodeEmail，1h 冷却）。
+	// （1h 冷却，固定契约）。
 	emailMu  sync.Mutex
 	emailLog map[string]time.Time
 }
@@ -69,8 +68,8 @@ func NewEpisodes(repos *repository.Repos, cfg *config.Config, amw *middleware.Au
 	}
 }
 
-// Register 挂载全部剧集路由（路径照抄 Express 子路径，不含 /api 前缀）。
-// 顺序对齐 routes/episodes.js：静态路由在前，参数路由在后。
+// Register 挂载全部剧集路由（不含 /api 前缀）。
+// 注册顺序是固定契约，勿重排：静态路由在前，参数路由在后。
 func (h *Episodes) Register(g *gin.RouterGroup) {
 	creatorRoles := []string{middleware.RoleCreator, middleware.RoleAdmin, middleware.RoleSuperAdmin}
 	g.POST("/upload", h.AuthMW.Protect(creatorRoles...), h.Upload)
@@ -215,7 +214,7 @@ func (h *Episodes) List(c *gin.Context) {
 	if minRating != "" {
 		r, err := strconv.ParseFloat(minRating, 64)
 		if err != nil {
-			r = math.NaN() // 对齐 parseFloat 非数字 → NaN → 无匹配
+			r = math.NaN() // 等价 parseFloat 非数字 → NaN → 无匹配
 		}
 		baseQuery["averageRating"] = bson.M{"$gte": r}
 	}
@@ -408,7 +407,7 @@ func (h *Episodes) PopularTags(c *gin.Context) {
 		serverError(c)
 		return
 	}
-	// 空结果返回 [] 而非 null（对齐 Express 的 []）。
+	// 空结果返回 [] 而非 null（固定契约，消费方依赖数组形态）。
 	if len(result) == 0 {
 		c.JSON(200, []bson.M{})
 		return
@@ -744,7 +743,7 @@ func (h *Episodes) UpdateSingle(c *gin.Context) {
 	}
 	becameAvailable := oldSingle.IsUpcoming && (updateData["isUpcoming"] == false)
 
-	// mongoose findByIdAndUpdate 对无 $ 运算符的普通对象默认按 $set 处理（overwrite:false），
+	// 局部更新语义：更新文档按 $set 处理（非整体替换），
 	// 这里显式包裹 $set 保持同一语义（仅更新提供的字段）。
 	single, err := h.Repos.SingleEpisodes.FindOneAndUpdate(ctx, oid, bson.M{"$set": updateData})
 	if err != nil {
@@ -802,7 +801,7 @@ func (h *Episodes) UpdateSingle(c *gin.Context) {
 			"isScheduled", "premiereDate", "releaseDate", "episodeNumber"}
 		for _, f := range infoFields {
 			if nv, ok := updateData[f]; ok {
-				// 日期字段在 Express 中 String(新串) 恒不等于 String(旧 Date)，视为已变更。
+				// 日期字段按字符串比较：存量数据中的 Date 形态与新提交的字符串恒不相等，视为已变更（固定契约）。
 				if isDateField(f) {
 					infoChanged = true
 					break
@@ -880,7 +879,7 @@ func (h *Episodes) Create(c *gin.Context) {
 	user, _ := middleware.GetUser(c)
 	body := h.readJSONBody(c)
 
-	// 对齐 mongoose required 校验 → ValidationError → 400。
+	// 必填字段校验（固定契约）：缺失 → 400，消息形如 "Path `title` is required."。
 	var msgs []string
 	if asString(body["title"]) == "" {
 		msgs = append(msgs, "Path `title` is required.")
@@ -1111,7 +1110,7 @@ func (h *Episodes) Update(c *gin.Context) {
 	oldCurrentEpisodes := episode.CurrentEpisodes
 	body := h.readJSONBody(c)
 
-	// 版本快照：保存编辑前的完整剧集（对齐 EpisodeVersion.create + data: episode.toObject()）。
+	// 版本快照：保存编辑前的完整剧集 DTO（data 为完整快照）。
 	lastVersion, err := h.Repos.EpisodeVersions.FindLatest(ctx, oid)
 	if err != nil && !repository.IsNotFound(err) {
 		serverError(c)
@@ -1302,7 +1301,7 @@ func (h *Episodes) Delete(c *gin.Context) {
 
 // ---- 通知 / 推送 / 邮件 ----
 
-// insertFollowNotifications 为追番用户批量写入站内通知（对齐 Notification.insertMany）。
+// insertFollowNotifications 为追番用户批量写入站内通知。
 func (h *Episodes) insertFollowNotifications(ctx context.Context, followers []model.Follow,
 	episodeID primitive.ObjectID, episode *model.Episode, message string, metadata primitive.M) error {
 	notifs := make([]model.Notification, 0, len(followers))
@@ -1321,7 +1320,7 @@ func (h *Episodes) insertFollowNotifications(ctx context.Context, followers []mo
 }
 
 // notifyNewEpisode 在单集可观看/预告发布/预告更新时通知追番用户
-// （站内通知 + Push + 邮件去重发送），对齐 episodes.js 对应分支。
+// （站内通知 + Push + 邮件去重发送）。
 // eventType: available | preview | preview_video | preview_info。
 func (h *Episodes) notifyNewEpisode(ctx context.Context, episodeID primitive.ObjectID,
 	episode *model.Episode, epNum int, eventType string) error {
@@ -1368,7 +1367,7 @@ func (h *Episodes) notifyNewEpisode(ctx context.Context, episodeID primitive.Obj
 }
 
 // notifyEpisodeNumberChange 在剧集直接编辑导致 currentEpisodes 增加时，为每个
-// 新增集数给全部追番用户写通知（对齐 utils/episodeNotify.js notifyEpisodeNumberChange）。
+// 新增集数给全部追番用户写通知。
 func (h *Episodes) notifyEpisodeNumberChange(ctx context.Context, episodeID primitive.ObjectID,
 	oldCurrentEpisodes, newCurrentEpisodes int, episode *model.Episode) error {
 	if newCurrentEpisodes <= oldCurrentEpisodes {
@@ -1412,8 +1411,8 @@ func (h *Episodes) notifyEpisodeNumberChange(ctx context.Context, episodeID prim
 	return nil
 }
 
-// sendPushToUser 发送 Web Push（对齐 Express routes/notifications.js sendPushToUser，
-// fire-and-forget 语义）。neo-server 当前未实现 PushSubscription 集合与 webpush 发送，
+// sendPushToUser 发送 Web Push（fire-and-forget 语义）。
+// 当前未实现 PushSubscription 集合与 webpush 发送，
 // 本函数为 no-op 占位；由主 agent 接入推送域后替换实现。
 func (h *Episodes) sendPushToUser(userIDs []primitive.ObjectID, title, body, url string) {
 	_ = userIDs
@@ -1443,8 +1442,8 @@ func (h *Episodes) shouldSendEpisodeEmail(episodeID string, epNum int, eventType
 	return true
 }
 
-// sendEpisodeUpdateEmails 批量发送追番更新邮件（对齐 notifyHelper.js
-// sendBatchNotificationEmails：仅发邮箱已验证且未显式关闭 episodeUpdate 偏好的用户）。
+// sendEpisodeUpdateEmails 批量发送追番更新邮件（仅发邮箱已验证且未显式关闭
+// episodeUpdate 偏好的用户，固定契约）。
 // fire-and-forget：SMTP 发送在独立 goroutine 中进行，失败静默。
 func (h *Episodes) sendEpisodeUpdateEmails(ctx context.Context, episodeID primitive.ObjectID,
 	epNum int, eventType string, episodeTitle string, userIDs []primitive.ObjectID) {
@@ -1470,8 +1469,8 @@ func (h *Episodes) sendEpisodeUpdateEmails(ctx context.Context, episodeID primit
 	}
 }
 
-// buildEpisodeUpdateEmail 构造追番更新邮件（subject/body 对齐 Express utils/email.js
-// sendEpisodeUpdateEmail 的 available/preview/preview_video/preview_info 分支）。
+// buildEpisodeUpdateEmail 构造追番更新邮件（subject/body 按
+// available/preview/preview_video/preview_info 四种事件分支，文案是固定契约）。
 func (h *Episodes) buildEpisodeUpdateEmail(episodeTitle string, epNum int, eventType, to string) (string, string, string, string) {
 	url := h.Config.Server.FrontendURL
 	if url == "" {
@@ -1516,10 +1515,10 @@ func (h *Episodes) buildEpisodeUpdateEmail(episodeTitle string, epNum int, event
 	}
 }
 
-// ---- DTO 组装（对齐 mongoose toObject + populate 语义）----
+// ---- DTO 组装（引用字段按关联查询后形态输出）----
 
 // episodeJSON 组装剧集响应对象。users 为 nil 时 refs 输出 hex 字符串
-// （未 populate 场景）；非 nil 时输出 {_id, accountId, username} 对象。
+// （未关联查询场景）；非 nil 时输出 {_id, accountId, username} 对象。
 func (h *Episodes) episodeJSON(e *model.Episode, users map[string]repository.EpisodesUserRef) gin.H {
 	var totalEpisodes any
 	if e.TotalEpisodes != nil {
@@ -1585,7 +1584,7 @@ func singleEpisodeJSON(s *model.SingleEpisode) gin.H {
 	}
 }
 
-// refJSON 渲染单个 ref 字段（populate 或 hex）。
+// refJSON 渲染单个 ref 字段（关联对象或 hex）。
 func refJSON(oid *primitive.ObjectID, users map[string]repository.EpisodesUserRef) any {
 	if oid == nil {
 		return nil
@@ -1599,7 +1598,7 @@ func refJSON(oid *primitive.ObjectID, users map[string]repository.EpisodesUserRe
 	return nil
 }
 
-// refsJSON 渲染数组 ref 字段（populate 或 hex 数组）。
+// refsJSON 渲染数组 ref 字段（关联对象数组或 hex 数组）。
 func refsJSON(ids []primitive.ObjectID, users map[string]repository.EpisodesUserRef) []any {
 	out := make([]any, 0, len(ids))
 	for _, id := range ids {
@@ -1616,7 +1615,7 @@ func refsJSON(ids []primitive.ObjectID, users map[string]repository.EpisodesUser
 	return out
 }
 
-// userRefsForEpisode 查询单个剧集的 populate 用户引用。
+// userRefsForEpisode 查询单个剧集的关联用户引用。
 func (h *Episodes) userRefsForEpisode(ctx context.Context, e *model.Episode) (map[string]repository.EpisodesUserRef, error) {
 	ids := make([]primitive.ObjectID, 0, 2+len(e.AllowedEditors)+len(e.CustomAuthors))
 	if e.CreatedBy != nil {
@@ -1627,7 +1626,7 @@ func (h *Episodes) userRefsForEpisode(ctx context.Context, e *model.Episode) (ma
 	return h.Repos.Users.EpisodesFindUserRefsByIDs(ctx, dedupIDs(ids))
 }
 
-// userRefsForEpisodes 查询一批剧集的 populate 用户引用（列表接口用）。
+// userRefsForEpisodes 查询一批剧集的关联用户引用（列表接口用）。
 func (h *Episodes) userRefsForEpisodes(ctx context.Context, eps []model.Episode) (map[string]repository.EpisodesUserRef, error) {
 	ids := []primitive.ObjectID{}
 	for i := range eps {
@@ -1640,7 +1639,7 @@ func (h *Episodes) userRefsForEpisodes(ctx context.Context, eps []model.Episode)
 	return h.Repos.Users.EpisodesFindUserRefsByIDs(ctx, dedupIDs(ids))
 }
 
-// canEdit 判断用户是否为创作者本人或允许的编辑者（对齐 createdBy/allowedEditors 校验）。
+// canEdit 判断用户是否为创作者本人或允许的编辑者（createdBy/allowedEditors 校验）。
 func canEdit(e *model.Episode, userID primitive.ObjectID) bool {
 	if e.CreatedBy != nil && *e.CreatedBy == userID {
 		return true
@@ -1672,12 +1671,12 @@ func (h *Episodes) readJSONBody(c *gin.Context) map[string]any {
 	return body
 }
 
-// serverError 渲染 500（对齐 Express 各路由 catch 分支的 {message:'Server error'}）。
+// serverError 渲染 500（响应体固定为 {message:'Server error'}，勿改文案）。
 func serverError(c *gin.Context) {
 	c.JSON(500, gin.H{"message": "Server error"})
 }
 
-// clientIP 提取客户端 IP（生产信任 X-Forwarded-For 首值，对齐 req.ip）。
+// clientIP 提取客户端 IP（生产信任 X-Forwarded-For 首值）。
 func (h *Episodes) clientIP(c *gin.Context) string {
 	if !h.Config.IsDev {
 		if xff := c.GetHeader("X-Forwarded-For"); xff != "" {
@@ -1693,7 +1692,7 @@ func (h *Episodes) clientIP(c *gin.Context) string {
 	return host
 }
 
-// pruneViewLogLocked 清理过期/超限的观看去重记录（对齐 Express setInterval 清理）。
+// pruneViewLogLocked 清理过期/超限的观看去重记录（超 10000 条时按冷却期淘汰）。
 func (h *Episodes) pruneViewLogLocked(now time.Time) {
 	if len(h.viewLog) <= 10000 {
 		return
@@ -1719,7 +1718,7 @@ func (h *Episodes) pruneViewLogLocked(now time.Time) {
 	}
 }
 
-// uniqueUserIDs 去重返回追番用户 ID（对齐 [...new Set(followers.map(f => String(f.userId)))]）。
+// uniqueUserIDs 去重返回追番用户 ID（等价 [...new Set(followers.map(f => String(f.userId)))]）。
 func uniqueUserIDs(follows []model.Follow) []primitive.ObjectID {
 	seen := map[string]bool{}
 	out := make([]primitive.ObjectID, 0, len(follows))
@@ -1756,7 +1755,7 @@ func copyM(src bson.M) bson.M {
 	return out
 }
 
-// escapeRegex 转义正则特殊字符（对齐 utils/helpers.js escapeRegex）。
+// escapeRegex 转义正则特殊字符。
 func escapeRegex(s string) string {
 	var b strings.Builder
 	for _, ch := range s {
@@ -1824,7 +1823,7 @@ func toInt(v any) int {
 	}
 }
 
-// toCurrentEpisodes 对齐 `req.body.currentEpisodes || 0`。
+// toCurrentEpisodes 实现 `currentEpisodes || 0` 宽松语义。
 func toCurrentEpisodes(v any) int {
 	if n := toInt(v); n != 0 {
 		return n
@@ -1832,7 +1831,7 @@ func toCurrentEpisodes(v any) int {
 	return 0
 }
 
-// toTotalEpisodes 对齐 Episode schema totalEpisodes 的 set：
+// toTotalEpisodes 按既有集合 totalEpisodes 的写入约定：
 // null/undefined/” → nil，否则 Number(v)。
 func toTotalEpisodes(v any) *int {
 	switch t := v.(type) {
@@ -1926,7 +1925,7 @@ func toDate(v any) *time.Time {
 	}
 }
 
-// toDateOrDefaultNow 解析日期，缺失/无效返回当前时间（对齐 `req.body.x || Date.now()`）。
+// toDateOrDefaultNow 解析日期，缺失/无效返回当前时间（`x || Date.now()` 语义）。
 func toDateOrDefaultNow(v any) *time.Time {
 	if d := toDate(v); d != nil {
 		return d
@@ -1935,7 +1934,7 @@ func toDateOrDefaultNow(v any) *time.Time {
 	return &now
 }
 
-// typedFieldValue 更新剧集正式字段时的类型转换（对齐 mongoose 按 schema 类型 cast）。
+// typedFieldValue 更新剧集正式字段时的类型转换（按字段既有数据类型）。
 func typedFieldValue(field string, v any) any {
 	switch field {
 	case "title", "titleEn", "titleJa", "description", "descriptionEn", "descriptionJa",
@@ -1962,7 +1961,7 @@ func typedFieldValue(field string, v any) any {
 	}
 }
 
-// isDateField 判断单集信息字段是否为日期（Express 的 String 比较对日期恒不等）。
+// isDateField 判断单集信息字段是否为日期（日期字段的变更检测恒判为已变更，见上）。
 func isDateField(f string) bool {
 	return f == "scheduledDate" || f == "premiereDate" || f == "releaseDate"
 }
@@ -1993,7 +1992,7 @@ func singleFieldValue(s *model.SingleEpisode, f string) any {
 	}
 }
 
-// infoFieldString 把字段值转成 String() 等价字符串（对齐 JS String()）。
+// infoFieldString 把字段值转成 String() 等价字符串（等价 JS String()）。
 func infoFieldString(v any) string {
 	switch t := v.(type) {
 	case nil:

@@ -19,17 +19,17 @@ import (
 	"github.com/xiedada05/furry-drama-be-neo/internal/upload"
 )
 
-// 本文件实现 /api/site-content 子域（行为逐分支照抄 backend/routes/siteContent.js）。
+// 本文件实现 /api/site-content 子域。
 //
 // 端点角色：POST /upload / PUT /:key / GET / / POST /test-email 为
 // superAdminProtect；GET /:key 公开但 key=email 时叠加 superAdminProtect
-// （Express 内联中间件）；GET /pwa-manifest 公开。
+// （内联中间件校验）；GET /pwa-manifest 公开。
 
-// defaultSiteContentKey 是默认内容的 key 顺序（对齐 DEFAULT_CONTENT 的
-// Object.entries 插入序）。
+// defaultSiteContentKey 是默认内容的 key 顺序（与 defaultSiteContent 声明序一致，
+// 固定契约）。
 var defaultSiteContentKey = []string{"privacy", "terms", "about", "settings"}
 
-// defaultSiteContent 对齐 siteContent.js DEFAULT_CONTENT（逐字照抄 content JSON）。
+// defaultSiteContent 默认站点内容表（content JSON 是固定契约，勿改文案）。
 var defaultSiteContent = map[string]struct{ title, content string }{
 	"privacy": {
 		"隐私政策",
@@ -63,8 +63,8 @@ func NewSiteContents(repos *repository.Repos, cfg *config.Config, amw *middlewar
 	return &SiteContents{Repos: repos, Config: cfg, AuthMW: amw, RL: rl, Mail: mail}
 }
 
-// Register 挂载 /api/site-content 全部端点（不含 /api 前缀；路径对齐
-// siteContent.js 子路径）。静态路由（upload/pwa-manifest/test-email）在
+// Register 挂载 /api/site-content 全部端点（不含 /api 前缀）。
+// 静态路由（upload/pwa-manifest/test-email）在
 // 参数路由（/:key）之前注册，满足 gin 的 radix 树约束。
 func (h *SiteContents) Register(g *gin.RouterGroup) {
 	superadmin := []string{middleware.RoleSuperAdmin}
@@ -77,8 +77,8 @@ func (h *SiteContents) Register(g *gin.RouterGroup) {
 	g.POST("/test-email", h.AuthMW.Protect(superadmin...), h.TestEmail)
 }
 
-// emailOnly 对齐 siteContent.js GET /:key 的内联中间件：key=email 时先过
-// superAdminProtect，其余 key 直接放行。
+// emailOnly GET /:key 的内联中间件：key=email 时先过
+// superAdminProtect，其余 key 直接放行（固定契约）。
 func (h *SiteContents) emailOnly(c *gin.Context) {
 	if c.Param("key") != "email" {
 		c.Next()
@@ -284,7 +284,7 @@ func (h *SiteContents) UpdateByKey(c *gin.Context) {
 }
 
 // List GET /api/site-content（superAdminProtect）。
-// 返回全部站点内容；缺失的默认键自动创建并追加（对齐 DEFAULT_CONTENT 遍历）。
+// 返回全部站点内容；缺失的默认键按 defaultSiteContent 顺序自动创建并追加。
 // @Summary 站点内容列表
 // @Tags 站点内容
 // @Security bearerAuth
@@ -363,7 +363,7 @@ func (h *SiteContents) TestEmail(c *gin.Context) {
 
 // ---- helpers ----
 
-// newDefaultContent 构造默认站点内容文档（对齐 DEFAULT_CONTENT[key]）。
+// newDefaultContent 构造默认站点内容文档（按 key 查 defaultSiteContent）。
 func (h *SiteContents) newDefaultContent(key string) *model.SiteContent {
 	def, ok := defaultSiteContent[key]
 	if !ok {
@@ -372,7 +372,7 @@ func (h *SiteContents) newDefaultContent(key string) *model.SiteContent {
 	return &model.SiteContent{Key: key, Title: def.title, Content: def.content}
 }
 
-// siteContentJSON 组装站点内容文档（对齐 mongoose toObject）。
+// siteContentJSON 组装站点内容文档（与既有集合数据形态一致）。
 func siteContentJSON(sc *model.SiteContent) gin.H {
 	return gin.H{
 		"_id":       sc.ID.Hex(),
@@ -384,7 +384,7 @@ func siteContentJSON(sc *model.SiteContent) gin.H {
 	}
 }
 
-// strOr 取字符串值，非字符串/空串回退默认（对齐 `s.x || fallback` 真值语义）。
+// strOr 取字符串值，非字符串/空串回退默认（等价 `s.x || fallback` 真值语义）。
 func strOr(v any, fallback string) string {
 	if s, ok := v.(string); ok && s != "" {
 		return s
@@ -392,7 +392,7 @@ func strOr(v any, fallback string) string {
 	return fallback
 }
 
-// truncRunes 截取前 n 个字符（对齐 String.prototype.slice(0, n)）。
+// truncRunes 截取前 n 个字符（等价 String.prototype.slice(0, n)）。
 func truncRunes(s string, n int) string {
 	runes := []rune(s)
 	if len(runes) > n {

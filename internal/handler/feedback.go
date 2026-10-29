@@ -19,13 +19,13 @@ import (
 	"github.com/xiedada05/furry-drama-be-neo/internal/repository"
 )
 
-// 本文件实现 /api/feedback 子域（行为逐分支照抄 backend/routes/feedback.js）。
+// 本文件实现 /api/feedback 子域。
 //
-// 端点角色（authFactory.js）：POST/GET /my 为 protect（任意登录用户）；
+// 端点角色：POST/GET /my 为 protect（任意登录用户）；
 // GET / 与 PUT /:id 为 adminOnlyProtect（admin/superadmin）。
-// POST / 附带反馈限流器（5/1h，对齐 feedbackLimiter）。
+// POST / 附带反馈限流器（5 次/1h，固定契约）。
 
-// feedbackSpec 是反馈提交限流器（对齐 feedback.js 的 feedbackLimiter）。
+// feedbackSpec 是反馈提交限流器（窗口/上限/文案是固定契约，勿调）。
 var feedbackSpec = ratelimit.Spec{
 	Name:    "feedback",
 	Mounts:  []string{"/feedback"},
@@ -48,8 +48,8 @@ func NewFeedback(repos *repository.Repos, cfg *config.Config, amw *middleware.Au
 	return &Feedback{Repos: repos, Config: cfg, AuthMW: amw, RL: rl, Mail: mail}
 }
 
-// Register 挂载 /api/feedback 全部端点（不含 /api 前缀；路径对齐 feedback.js 子路径）。
-// POST 注册 "" 与 "/"（Express strict routing 关闭对尾斜杠宽容），限流器仅施加于 POST。
+// Register 挂载 /api/feedback 全部端点（不含 /api 前缀）。
+// POST 注册 "" 与 "/"（带与不带尾斜杠都直接匹配，无重定向），限流器仅施加于 POST。
 func (h *Feedback) Register(g *gin.RouterGroup) {
 	adminRoles := []string{middleware.RoleAdmin, middleware.RoleSuperAdmin}
 	g.POST("", h.AuthMW.Protect(), h.RL(feedbackSpec), h.Create)
@@ -228,7 +228,7 @@ func (h *Feedback) Reply(c *gin.Context) {
 	}
 	oid, err := primitive.ObjectIDFromHex(c.Param("id"))
 	if err != nil {
-		// 对齐 Express 非法 ID → CastError → catch → 500。
+		// 固定契约：非法 ID → 500 Server error。
 		errors.AbortWithAppError(c, errors.New(500, "Server error"), h.Config.IsDev)
 		return
 	}
@@ -261,7 +261,7 @@ func (h *Feedback) Reply(c *gin.Context) {
 
 // ---- helpers ----
 
-// feedbackJSON 组装反馈文档（对齐 mongoose toObject）。
+// feedbackJSON 组装反馈文档（与既有集合数据形态一致）。
 func feedbackJSON(f *model.Feedback) gin.H {
 	return gin.H{
 		"_id":       f.ID.Hex(),
@@ -276,15 +276,15 @@ func feedbackJSON(f *model.Feedback) gin.H {
 	}
 }
 
-// myFeedbackPage 解析 GET /my 分页（对齐 feedback.js：page 默认 1，limit 默认 20
+// myFeedbackPage 解析 GET /my 分页（page 默认 1，limit 默认 20
 // 上限 100）。
 func myFeedbackPage(c *gin.Context) (page, limit int) {
 	page, limit = creatorPage(c)
 	return page, limit
 }
 
-// adminFeedbackPage 解析管理端 GET / 分页（对齐 feedback.js：page 默认 1，
-// limit 默认 20，无上限钳制）。
+// adminFeedbackPage 解析管理端 GET / 分页（page 默认 1，
+// limit 默认 20，无上限钳制，固定契约）。
 func adminFeedbackPage(c *gin.Context) (page, limit int) {
 	page = 1
 	if p, err := parseIntQuery(c.Query("page")); err == nil {
@@ -297,7 +297,7 @@ func adminFeedbackPage(c *gin.Context) (page, limit int) {
 	return page, limit
 }
 
-// replyPreview 截取回复前 n 个字符（对齐 reply.slice(0, n)）。
+// replyPreview 截取回复前 n 个字符（等价 reply.slice(0, n)）。
 func replyPreview(s string, n int) string {
 	if runes := []rune(s); len(runes) > n {
 		return string(runes[:n])
@@ -305,9 +305,8 @@ func replyPreview(s string, n int) string {
 	return s
 }
 
-// sendFeedbackReplyEmail 发送反馈回复邮件（对齐 notifyHelper.js
-// sendNotificationEmailToUser(fb.userId, 'feedbackReply', reply)：
-// 邮箱已验证且未显式关闭 feedbackReply 偏好才发送；fire-and-forget）。
+// sendFeedbackReplyEmail 发送反馈回复邮件（仅邮箱已验证且未显式关闭
+// feedbackReply 偏好的用户；fire-and-forget）。
 func (h *Feedback) sendFeedbackReplyEmail(userID primitive.ObjectID, reply string) {
 	if h.Mail == nil {
 		return
@@ -331,7 +330,7 @@ func (h *Feedback) sendFeedbackReplyEmail(userID primitive.ObjectID, reply strin
 	}()
 }
 
-// feedbackSiteURL 返回站点 URL（对齐 getSiteUrl）。
+// feedbackSiteURL 返回站点 URL（FrontendURL → SiteURL → 本地回退）。
 func (h *Feedback) feedbackSiteURL() string {
 	if h.Config.Server.FrontendURL != "" {
 		return h.Config.Server.FrontendURL
@@ -342,7 +341,7 @@ func (h *Feedback) feedbackSiteURL() string {
 	return "http://localhost:3000"
 }
 
-// parseIntQuery 解析整型查询参数（对齐 parseInt 语义，返回错误由调用方回退默认）。
+// parseIntQuery 解析整型查询参数（parseInt 语义，返回错误由调用方回退默认）。
 func parseIntQuery(s string) (int, error) {
 	return strconv.Atoi(s)
 }

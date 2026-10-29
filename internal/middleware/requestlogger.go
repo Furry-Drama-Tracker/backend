@@ -9,11 +9,11 @@ import (
 )
 
 // ContextUserID 是认证中间件写入当前用户 _id（hex 字符串）的 gin.Context 键。
-// requestLogger 读取它填充 userId 字段（对齐 Express 的 req.user?._id）。
+// requestLogger 读取它填充 userId 字段。
 // M2 的 auth 中间件应在鉴权成功后 c.Set(middleware.ContextUserID, <hex _id>)。
 const ContextUserID = "userId"
 
-// 日志阈值（对齐 src/index.js:238 与 middlewares/requestLogger.js:18）。
+// 日志阈值（固定值）。
 const (
 	devSlowThreshold  = 1000 * time.Millisecond
 	prodSlowThreshold = 3000 * time.Millisecond
@@ -34,7 +34,7 @@ func userIDFromContext(c *gin.Context) string {
 	return ""
 }
 
-// SlowLogger 慢请求 / 错误请求日志（对齐 src/index.js:233-246）：
+// SlowLogger 慢请求 / 错误请求日志：
 //   - dev：status>=400 或 duration>1000ms，或路径含 /list、/histories、/follows
 //     → INFO 记录；duration>1000ms 时附加 level=SLOW 标记；
 //   - prod：仅 duration>3000ms → WARN 记录（"[Slow]" 等价）。
@@ -71,10 +71,10 @@ func SlowLogger(log *slog.Logger, isDev bool) gin.HandlerFunc {
 	}
 }
 
-// RequestLogger 通用请求日志（对齐 middlewares/requestLogger.js）：仅当
+// RequestLogger 通用请求日志：仅当
 // duration>1000ms 或 status>=400 或方法非 GET 时输出。级别：5xx=ERROR、
 // 4xx=WARN、duration>1000ms=WARN、其余=INFO。trustXFF 生产传 true 以正确
-// 取 req.ip（对齐 app.set('trust proxy', 1)）。
+// 解析客户端真实 IP（信任第一层代理）。
 func RequestLogger(log *slog.Logger, trustXFF bool) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		start := time.Now()

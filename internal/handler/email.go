@@ -76,7 +76,7 @@ func (h *Auth) VerifyEmail(c *gin.Context) {
 		errors.AbortWithAppError(c, err, h.Config.IsDev)
 		return
 	}
-	// 已验证用户返回不同文案（对齐 email.js：已 verified → "邮箱已验证"）。
+	// 已验证用户返回不同文案（已 verified → "邮箱已验证"，固定契约）。
 	user, _ := middleware.GetUser(c)
 	if user != nil && user.IsEmailVerified {
 		c.JSON(200, gin.H{"message": "邮箱已验证"})

@@ -13,7 +13,7 @@ import (
 	"github.com/xiedada05/furry-drama-be-neo/internal/model"
 )
 
-// EpisodeBasic 是剧集基础字段（导出/列表 populate 用；完整 Episode 模型在内容域实现）。
+// EpisodeBasic 是剧集基础字段（导出/列表展开 episodeId 用；完整 Episode 模型在内容域实现）。
 type EpisodeBasic struct {
 	ID         primitive.ObjectID `bson:"_id" json:"_id"`
 	Title      string             `bson:"title" json:"title"`
@@ -40,7 +40,7 @@ func (r *EpisodeRepo) FindBasicByID(ctx context.Context, id any) (*EpisodeBasic,
 	return e, err
 }
 
-// FindByID 按 ID 查完整剧集（对齐 Episode.findById；不存在返回 ErrNotFound）。
+// FindByID 按 ID 查完整剧集（不存在返回 ErrNotFound）。
 func (r *EpisodeRepo) FindByID(ctx context.Context, id any) (*model.Episode, error) {
 	ctx, cancel := context.WithTimeout(ctx, contextTimeout)
 	defer cancel()
@@ -53,7 +53,7 @@ func (r *EpisodeRepo) FindByID(ctx context.Context, id any) (*model.Episode, err
 }
 
 // Create 插入剧集；未显式设置时补 _id/createdAt/updatedAt/__v 默认值
-// （对齐 mongoose 自动 _id、default: Date.now 与 __v:0）。
+// （与既有集合文档的默认值形态一致）。
 func (r *EpisodeRepo) Create(ctx context.Context, e *model.Episode) error {
 	ctx, cancel := context.WithTimeout(ctx, contextTimeout)
 	defer cancel()
@@ -71,7 +71,7 @@ func (r *EpisodeRepo) Create(ctx context.Context, e *model.Episode) error {
 	return err
 }
 
-// FindOneAndUpdate 按 ID 更新并返回新文档（对齐 findByIdAndUpdate(id, update, {new:true})）。
+// FindOneAndUpdate 按 ID 更新并返回更新后的文档。
 func (r *EpisodeRepo) FindOneAndUpdate(ctx context.Context, id any, update bson.M) (*model.Episode, error) {
 	ctx, cancel := context.WithTimeout(ctx, contextTimeout)
 	defer cancel()
@@ -84,13 +84,13 @@ func (r *EpisodeRepo) FindOneAndUpdate(ctx context.Context, id any, update bson.
 	return e, err
 }
 
-// IncViews 浏览量 +1 并返回新文档（对齐 PUT /:id/view 的 $inc {views:1} new:true）。
+// IncViews 浏览量 +1 并返回更新后的文档（$inc {views:1}）。
 func (r *EpisodeRepo) IncViews(ctx context.Context, id any) (*model.Episode, error) {
 	return r.FindOneAndUpdate(ctx, id, bson.M{"$inc": bson.M{"views": 1}})
 }
 
 // AddSingleEpisodeUpdate 记录新增单集后的剧集变化：设置 updatedAt，
-// 可观看集（非预告）同时 currentEpisodes +1（对齐 POST /:id/episodes）。
+// 可观看集（非预告）同时 currentEpisodes +1（新增单集时调用）。
 func (r *EpisodeRepo) AddSingleEpisodeUpdate(ctx context.Context, id any, updatedAt time.Time, incCurrent bool) error {
 	ctx, cancel := context.WithTimeout(ctx, contextTimeout)
 	defer cancel()
@@ -102,7 +102,7 @@ func (r *EpisodeRepo) AddSingleEpisodeUpdate(ctx context.Context, id any, update
 	return err
 }
 
-// IncCurrentEpisodes currentEpisodes 增减 delta（对齐单集转可观看 +1 / 删除单集 -1）。
+// IncCurrentEpisodes currentEpisodes 增减 delta（单集转可观看 +1 / 删除单集 -1）。
 func (r *EpisodeRepo) IncCurrentEpisodes(ctx context.Context, id any, delta int) error {
 	ctx, cancel := context.WithTimeout(ctx, contextTimeout)
 	defer cancel()
@@ -110,7 +110,7 @@ func (r *EpisodeRepo) IncCurrentEpisodes(ctx context.Context, id any, delta int)
 	return err
 }
 
-// Save 整文档覆盖保存（对齐 episode.save()，resubmit 用；__v 自增对齐 mongoose）。
+// Save 整文档覆盖保存（resubmit 用；__v 自增）。
 func (r *EpisodeRepo) Save(ctx context.Context, e *model.Episode) error {
 	ctx, cancel := context.WithTimeout(ctx, contextTimeout)
 	defer cancel()
@@ -119,7 +119,7 @@ func (r *EpisodeRepo) Save(ctx context.Context, e *model.Episode) error {
 	return err
 }
 
-// DeleteByID 按 ID 删除剧集（对齐 Episode.findByIdAndDelete）。
+// DeleteByID 按 ID 删除剧集。
 func (r *EpisodeRepo) DeleteByID(ctx context.Context, id any) error {
 	ctx, cancel := context.WithTimeout(ctx, contextTimeout)
 	defer cancel()
@@ -134,7 +134,7 @@ func (r *EpisodeRepo) CountDocuments(ctx context.Context, filter any) (int64, er
 	return r.coll.CountDocuments(ctx, filter)
 }
 
-// FindList 按过滤条件查询剧集（对齐 Episode.find(filter).sort(sort).skip().limit()）。
+// FindList 按过滤条件查询剧集（filter + sort + skip/limit 分页）。
 func (r *EpisodeRepo) FindList(ctx context.Context, filter any, sort bson.D, skip, limit int64) ([]model.Episode, error) {
 	ctx, cancel := context.WithTimeout(ctx, contextTimeout)
 	defer cancel()
@@ -142,8 +142,8 @@ func (r *EpisodeRepo) FindList(ctx context.Context, filter any, sort bson.D, ski
 	if sort != nil {
 		opts.SetSort(sort)
 	}
-	// skip 恒设置（含负值）：负 skip 由 mongo 拒绝 → 500（对齐 Express 的
-	// skip((pageNum-1)*limit) 在 page<1 时的行为）。
+	// skip 恒设置（含负值）：负 skip 由 mongo 拒绝 → 500（page<1 时
+	// skip=(page-1)*limit 为负，调用方依赖此报错路径）。
 	opts.SetSkip(skip)
 	if limit > 0 {
 		opts.SetLimit(limit)
@@ -160,7 +160,7 @@ func (r *EpisodeRepo) FindList(ctx context.Context, filter any, sort bson.D, ski
 	return list, nil
 }
 
-// Aggregate 执行聚合管道（对齐 Episode.aggregate，popular-tags 用）。
+// Aggregate 执行聚合管道（popular-tags 用）。
 func (r *EpisodeRepo) Aggregate(ctx context.Context, pipeline mongo.Pipeline) ([]bson.M, error) {
 	ctx, cancel := context.WithTimeout(ctx, contextTimeout)
 	defer cancel()

@@ -9,8 +9,8 @@ import (
 	"time"
 )
 
-// 黄金向量：由 Node 端按 helpers.js verifyTOTP 同一算法（HMAC-SHA1、30s 步长、
-// 6 位码）对固定 secret/时间点生成。2026-08-08 node gen_vectors 脚本现场产出。
+// 黄金向量：按 verifyTOTP 同一算法（HMAC-SHA1、30s 步长、6 位码）对固定
+// secret/时间点生成的固定校验向量，勿改。
 // secret = 20 字节（hex 0123456789abcdef0123456789abcdef01234567）的 base64。
 const (
 	nodeTOTPSecret = "ASNFZ4mrze8BI0VniavN7wEjRWc="
@@ -22,7 +22,7 @@ const (
 	nodeTOTPFarCode        = "547288" // at t+60（窗口外，应拒绝）
 )
 
-// TestVerifyTOTPNodeVector 验证 Go 复算的码与 Node 完全一致。
+// TestVerifyTOTPNodeVector 验证 Go 复算的码与固定校验向量完全一致。
 func TestVerifyTOTPNodeVector(t *testing.T) {
 	at := time.Unix(nodeTOTPTime, 0)
 	if !VerifyTOTPAt(nodeTOTPSecret, nodeTOTPCode, at) {
@@ -52,7 +52,7 @@ func TestVerifyTOTPWindow(t *testing.T) {
 	}
 }
 
-// TestVerifyTOTPInvalidToken 验证非 6 位数字 token 一律拒绝（对齐 /^\d{6}$/）。
+// TestVerifyTOTPInvalidToken 验证非 6 位数字 token 一律拒绝（等价 /^\d{6}$/）。
 func TestVerifyTOTPInvalidToken(t *testing.T) {
 	at := time.Unix(nodeTOTPTime, 0)
 	for _, tok := range []string{"", "12345", "1234567", "12345a", "abc123", "373590 ", " 373590"} {
@@ -112,7 +112,7 @@ func TestGenerateBackupCodes(t *testing.T) {
 }
 
 // TestVerifyTOTPNowSelfConsistent 验证 VerifyTOTP（time.Now 路径）接受
-// 当前步长生成的码。期望码用与 Node 相同的公式独立计算（HMAC-SHA1、30s 步长、
+// 当前步长生成的码。期望码用同一公式独立计算（HMAC-SHA1、30s 步长、
 // 6 位），具体算法正确性由上方黄金向量覆盖。
 func TestVerifyTOTPNowSelfConsistent(t *testing.T) {
 	secret := GenerateTOTPSecret()
@@ -126,7 +126,7 @@ func TestVerifyTOTPNowSelfConsistent(t *testing.T) {
 	}
 }
 
-// computeTOTPNodeFormula 复制 helpers.js verifyTOTP 的码生成公式（供自洽测试，
+// computeTOTPNodeFormula 复制 TOTP 标准码生成公式（供自洽测试，
 // 独立于包内实现）。
 func computeTOTPNodeFormula(secret string, at time.Time) string {
 	raw, err := base64.StdEncoding.DecodeString(secret)

@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-// 命名限流器名称（用于日志与 key 命名空间，对齐 rateLimits.js 各 limiter 变量名）。
+// 命名限流器名称（用于日志与 key 命名空间；固定命名，勿改——改动会使既有计数 key 失效）。
 const (
 	GlobalName             = "global"
 	CaptchaName            = "captcha"
@@ -21,9 +21,9 @@ const (
 	RequestEmailChangeName = "requestEmailChange"
 )
 
-// Spec 描述一个命名限流器（windowMs/max/message 逐项照抄 backend/config/rateLimits.js）。
+// Spec 描述一个命名限流器（windowMs/max/message 为固定契约，勿随意改）。
 //
-// Mounts 列出该限流器在 Express 中的挂载路径（不含 /api 前缀）。空表示全局型
+// Mounts 列出该限流器的挂载路径（不含 /api 前缀）。空表示全局型
 // 限流器（挂载于 /api/，匹配全部 /api/ 前缀，含 /api/v1/ 与 /api/health）。
 // 挂载语义由 middleware.RateLimit 消费：每个 Mount 只匹配 /api/<Mount>
 // 精确与子路径，且【不】匹配 /api/v1/ 前缀。
@@ -35,12 +35,12 @@ type Spec struct {
 	Message string
 }
 
-// 限流器参数与文案（逐项对齐 rateLimits.js；Message 为 429 响应体
-// {"message": <Message>} 的内容）。Mounts 为 src/index.js:297-317 的挂载路径
+// 限流器参数与文案（固定契约，勿随意改；Message 为 429 响应体
+// {"message": <Message>} 的内容）。Mounts 为挂载路径
 // （不含 /api 前缀；空 = 全局）。
 var (
 	// GlobalSpec 全局限流器 300/60s。跳过 /api/translate 与 /api/auth/captcha
-	// 路径（对齐 globalLimiter.skip，由 middleware 施加）。
+	// 路径（固定 skip 规则，由 middleware 施加）。
 	GlobalSpec = Spec{
 		Name: GlobalName, Window: time.Minute, Max: 300,
 		Message: "请求过于频繁，请稍后再试",
@@ -52,7 +52,7 @@ var (
 		Message: "请求过于频繁，请稍后再试",
 	}
 	// AuthSpec 登录限流器 5/15min（挂 /api/auth/login）。非生产且
-	// SKIP_RATE_LIMIT=1 时跳过（对齐 authLimiter.skip，由 middleware 施加）。
+	// SKIP_RATE_LIMIT=1 时跳过（固定 skip 规则，由 middleware 施加）。
 	AuthSpec = Spec{
 		Name: AuthName, Mounts: []string{"/auth/login"},
 		Window: 15 * time.Minute, Max: 5,
@@ -108,9 +108,10 @@ var (
 		Message: "操作过于频繁，请稍后再试",
 	}
 	// RequestEmailChangeSpec 申请更换邮箱限流器 3/1h（挂 /api/auth/request-email-change）。
-	// 注意：Express 的 keyGenerator 调用 ipKeyGenerator(req)（传入请求对象而非 IP），
-	// 实际生成的 key 恒为 "[object Object]:<newEmail 小写>" —— IP 被忽略，仅按邮箱限流。
-	// 本实现逐字复刻该行为（middleware 按此规则生成 key），确保与 oracle 一致。
+	// 注意：key 生成规则是固定契约，勿改（改动会使既有计数失效）：实际生成的 key
+	// 恒为 "[object Object]:<newEmail 小写>" —— IP 被忽略，仅按邮箱限流
+	// （历史怪癖：keyGenerator 把请求对象传给了 ipKeyGenerator）。
+	// middleware 按此规则生成 key。
 	RequestEmailChangeSpec = Spec{
 		Name: RequestEmailChangeName, Mounts: []string{"/auth/request-email-change"},
 		Window: time.Hour, Max: 3,
@@ -124,7 +125,7 @@ var (
 	}
 )
 
-// IPKey 对齐 express-rate-limit 的 ipKeyGenerator 语义：
+// IPKey 归一化客户端 IP key（key 格式为固定契约，勿改）：
 //   - IPv4（含 IPv4-mapped IPv6，如 ::ffff:127.0.0.1）→ 归一化 IPv4 字符串；
 //   - 纯 IPv6 → 截断为 /56 网络前缀并附 "/56" 后缀（如 2001:db8:0:1:2:3:4:5
 //     → "2001:db8::/56"，::1 → "::/56"）；
@@ -142,7 +143,7 @@ func IPKey(ip string) string {
 }
 
 // NormalizeXFF 取 X-Forwarded-For 首值（逗号分隔，trim 空白）。
-// 对齐 Express trust proxy=1 下 req.ip 取链上第一个地址的语义。
+// 等价于信任代理=1 时取链上第一个地址作为客户端 IP 的语义。
 // 空串返回 ""，由调用方决定是否回退到 RemoteAddr。
 func NormalizeXFF(xff string) string {
 	if idx := strings.IndexByte(xff, ','); idx >= 0 {

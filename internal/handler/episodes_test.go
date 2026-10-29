@@ -218,7 +218,7 @@ func TestEpisodesCreateListDetail(t *testing.T) {
 		t.Fatalf("list pagination: %v", list)
 	}
 
-	// 详情：无 token 可见 approved 剧集，createdBy 已 populate。
+	// 详情：无 token 可见 approved 剧集，createdBy 已关联查询展开。
 	anon := newEPClient(t, ts.URL, "")
 	var detail map[string]any
 	resp = anon.json("GET", "/api/episodes/"+episodeID, nil, &detail)
@@ -229,7 +229,7 @@ func TestEpisodesCreateListDetail(t *testing.T) {
 		t.Fatalf("detail title: %v", detail["title"])
 	}
 	if detail["createdBy"] == nil || detail["createdBy"].(map[string]any)["username"] == "" {
-		t.Fatalf("detail createdBy not populated: %v", detail["createdBy"])
+		t.Fatalf("detail createdBy not expanded: %v", detail["createdBy"])
 	}
 	if detail["episodes"] == nil {
 		t.Fatalf("detail episodes missing")
@@ -634,7 +634,7 @@ func TestEpisodesPermission(t *testing.T) {
 	if resp.StatusCode != 401 {
 		t.Fatalf("anon user-status should 401: %d", resp.StatusCode)
 	}
-	// 非法 id 详情 → 500（mongoose CastError 语义）。
+	// 非法 id 详情 → 500（固定契约）。
 	resp = anon.json("GET", "/api/episodes/not-a-valid-id", nil, &out)
 	if resp.StatusCode != 500 {
 		t.Fatalf("bad id detail should 500: %d %v", resp.StatusCode, out)

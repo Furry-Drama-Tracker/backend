@@ -13,14 +13,14 @@ import (
 	"github.com/xiedada05/furry-drama-be-neo/internal/model"
 )
 
-// WallpaperRepo 系统壁纸仓储（models/SystemWallpaper.js → systemwallpapers 集合）。
+// WallpaperRepo 系统壁纸仓储（systemwallpapers 集合）。
 type WallpaperRepo struct{ coll *mongo.Collection }
 
 // NewWallpaperRepo 构造系统壁纸仓储。
 func NewWallpaperRepo(coll *mongo.Collection) *WallpaperRepo { return &WallpaperRepo{coll: coll} }
 
 // FindEnabled 查询启用的系统壁纸，按 sortOrder 升序/createdAt 倒序，仅投影
-// name/url/thumbnailUrl/sortOrder（对齐 GET /system 的 find+select）。
+// name/url/thumbnailUrl/sortOrder（GET /system 使用）。
 func (r *WallpaperRepo) FindEnabled(ctx context.Context) ([]model.SystemWallpaper, error) {
 	ctx, cancel := context.WithTimeout(ctx, contextTimeout)
 	defer cancel()
@@ -48,7 +48,7 @@ func (r *WallpaperRepo) ExistsByURL(ctx context.Context, url string) (bool, erro
 	return n > 0, err
 }
 
-// FindAll 查询全部系统壁纸（含禁用），按 sortOrder 升序/createdAt 倒序（对齐 GET /system/all）。
+// FindAll 查询全部系统壁纸（含禁用），按 sortOrder 升序/createdAt 倒序（GET /system/all 使用）。
 func (r *WallpaperRepo) FindAll(ctx context.Context) ([]model.SystemWallpaper, error) {
 	ctx, cancel := context.WithTimeout(ctx, contextTimeout)
 	defer cancel()
@@ -83,7 +83,7 @@ func (r *WallpaperRepo) Create(ctx context.Context, w *model.SystemWallpaper) er
 	return err
 }
 
-// FindOneAndUpdate 按 ID 更新并返回新文档（对齐 findByIdAndUpdate(id, update, {new:true})）。
+// FindOneAndUpdate 按 ID 更新并返回更新后的文档。
 func (r *WallpaperRepo) FindOneAndUpdate(ctx context.Context, id any, update bson.M) (*model.SystemWallpaper, error) {
 	ctx, cancel := context.WithTimeout(ctx, contextTimeout)
 	defer cancel()
@@ -96,7 +96,7 @@ func (r *WallpaperRepo) FindOneAndUpdate(ctx context.Context, id any, update bso
 	return w, err
 }
 
-// FindOneAndDelete 按 ID 删除并返回被删文档（对齐 SystemWallpaper.findByIdAndDelete）。
+// FindOneAndDelete 按 ID 删除并返回被删文档。
 func (r *WallpaperRepo) FindOneAndDelete(ctx context.Context, id any) (*model.SystemWallpaper, error) {
 	ctx, cancel := context.WithTimeout(ctx, contextTimeout)
 	defer cancel()

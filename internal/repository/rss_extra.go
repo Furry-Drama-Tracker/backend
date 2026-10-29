@@ -1,6 +1,6 @@
 package repository
 
-// 本文件为 rss 域（routes/rss.js）跨集合查询方法，挂到已有 repo 类型上。
+// 本文件为 rss 域跨集合查询方法，挂到已有 repo 类型上。
 // 方法名统一 RSS 前缀，避免与其它域新增方法冲突；不改动他人的 repo 文件。
 
 import (
@@ -13,7 +13,7 @@ import (
 )
 
 // RSSEpisode 是 RSS feed 剧集条目投影
-// （对齐 routes/rss.js select('title currentEpisodes totalEpisodes status updatedAt')）。
+// （选定字段：title currentEpisodes totalEpisodes status updatedAt）。
 type RSSEpisode struct {
 	ID              primitive.ObjectID `bson:"_id"`
 	Title           string             `bson:"title"`
@@ -23,9 +23,9 @@ type RSSEpisode struct {
 	UpdatedAt       time.Time          `bson:"updatedAt"`
 }
 
-// RSSFindRecent 查询最近 7 天内已审核通过的剧集（对齐
-// Episode.find({reviewStatus:'approved', updatedAt:{$gte: sevenDaysAgo}}).
-// sort({updatedAt:-1}).limit(20).select('title currentEpisodes totalEpisodes status updatedAt')）。
+// RSSFindRecent 查询最近 7 天内已审核通过的剧集
+// （find({reviewStatus:'approved', updatedAt:{$gte: since}}).
+// sort({updatedAt:-1}).limit(20)，投影 title/currentEpisodes/totalEpisodes/status/updatedAt）。
 func (r *EpisodeRepo) RSSFindRecent(ctx context.Context, since time.Time) ([]RSSEpisode, error) {
 	ctx, cancel := context.WithTimeout(ctx, contextTimeout)
 	defer cancel()
@@ -48,7 +48,7 @@ func (r *EpisodeRepo) RSSFindRecent(ctx context.Context, since time.Time) ([]RSS
 }
 
 // RSSSingleEpisode 是 RSS feed 单集条目投影
-// （对齐 routes/rss.js 的 SingleEpisode.find(...).populate('episodeId','title') 所需字段）。
+// （单集查询展开 episodeId 取 title 所需的字段）。
 type RSSSingleEpisode struct {
 	ID            primitive.ObjectID `bson:"_id"`
 	EpisodeID     primitive.ObjectID `bson:"episodeId"`
@@ -57,8 +57,8 @@ type RSSSingleEpisode struct {
 	CreatedAt     time.Time          `bson:"createdAt"`
 }
 
-// RSSFindRecent 查询最近 7 天创建的单集（对齐
-// SingleEpisode.find({createdAt:{$gte: sevenDaysAgo}}).sort({createdAt:-1}).limit(20)）。
+// RSSFindRecent 查询最近 7 天创建的单集
+// （find({createdAt:{$gte: since}}).sort({createdAt:-1}).limit(20)）。
 func (r *SingleEpisodeRepo) RSSFindRecent(ctx context.Context, since time.Time) ([]RSSSingleEpisode, error) {
 	ctx, cancel := context.WithTimeout(ctx, contextTimeout)
 	defer cancel()
@@ -79,7 +79,7 @@ func (r *SingleEpisodeRepo) RSSFindRecent(ctx context.Context, since time.Time) 
 }
 
 // RSSFindEpisodeTitles 批量取剧集标题，返回 hex → title 映射
-// （对齐 populate('episodeId', 'title')：被引用剧集不存在时条目缺失 → 调用方跳过）。
+// （被引用剧集不存在时条目缺失 → 调用方跳过，既有契约）。
 func (r *EpisodeRepo) RSSFindEpisodeTitles(ctx context.Context, ids []primitive.ObjectID) (map[string]string, error) {
 	ctx, cancel := context.WithTimeout(ctx, contextTimeout)
 	defer cancel()
@@ -106,9 +106,10 @@ func (r *EpisodeRepo) RSSFindEpisodeTitles(ctx context.Context, ids []primitive.
 	return out, nil
 }
 
-// RSSFindSince 查询接口统计（对齐
-// ApiUsage.find({date:{$gte: since}}).sort({date:-1,count:-1})）。返回原始 bson.M 文档，
-// 由 handler 层负责 JSON 化（对齐 mongoose toJSON 输出 _id/endpoint/method/count/date/__v）。
+// RSSFindSince 查询接口统计
+// （find({date:{$gte: since}}).sort({date:-1,count:-1})）。返回原始 bson.M 文档，
+// 由 handler 层负责 JSON 化（输出 _id/endpoint/method/count/date/__v，
+// 消费方依赖此格式）。
 func (r *ApiUsageRepo) RSSFindSince(ctx context.Context, since string) ([]bson.M, error) {
 	ctx, cancel := context.WithTimeout(ctx, contextTimeout)
 	defer cancel()

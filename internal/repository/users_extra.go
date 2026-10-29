@@ -8,11 +8,11 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-// 本文件为收藏夹域（folders.js GET / 的 populate('userId','username')）跨域
-// 批量查用户名的方法，挂到已有 UserRepo 类型上。
+// 本文件为收藏夹域列表端点把 userId 展开为用户名所需的
+// 跨域批量查用户名方法，挂到已有 UserRepo 类型上。
 
 // FindUsernamesByIDs 批量查用户名，返回 id→username 映射。
-// 对齐 Folder.find().populate('userId', 'username') 的 join 语义：
+// 关联语义与既有集合查询一致（展开 userId 只取 username）：
 // 只取 _id + username，不存在的用户不出现在映射中（调用方回退空串）。
 func (r *UserRepo) FindUsernamesByIDs(ctx context.Context, ids []primitive.ObjectID) (map[primitive.ObjectID]string, error) {
 	ctx, cancel := context.WithTimeout(ctx, contextTimeout)

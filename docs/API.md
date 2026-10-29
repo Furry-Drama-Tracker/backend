@@ -107,4 +107,4 @@
 
 **notifications**：`userId` `episodeId?` `type` `message` `isRead` `createdAt`(TTL 90d)
 
-（完整字段见 `internal/model/` 的 struct 与 Mongoose schema `../backend/models/`）
+（完整字段见 `internal/model/` 的 struct）

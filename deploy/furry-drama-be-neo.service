@@ -22,7 +22,7 @@ ProtectHome=true
 # 运行时目录（Unix socket 父目录，自动创建并清理）
 RuntimeDirectory=furry-drama-be-neo
 RuntimeDirectoryMode=0750
-# 对应 Express 的超时参数（慢客户端防护）
+# 超时参数（慢客户端防护）
 TimeoutStartSec=30
 TimeoutStopSec=15
 

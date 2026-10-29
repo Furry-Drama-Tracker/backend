@@ -265,7 +265,7 @@ func TestNotificationsSubscribeReminder(t *testing.T) {
 	if resp.StatusCode != 400 || out["message"] != "缺少剧集ID" {
 		t.Fatalf("missing id: %d body=%v", resp.StatusCode, out)
 	}
-	// 非法 hex → 500 Server error（对齐 mongoose CastError → catch）
+	// 非法 hex → 500 Server error（非法 ObjectID 转换失败 → 全局错误处理，固定行为）
 	resp = c.json("POST", "/api/notifications/subscribe-reminder", map[string]any{"episodeId": "xyz"}, &out)
 	if resp.StatusCode != 500 || out["message"] != "Server error" {
 		t.Fatalf("bad hex: %d body=%v", resp.StatusCode, out)

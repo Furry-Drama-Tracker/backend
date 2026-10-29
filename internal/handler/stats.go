@@ -18,10 +18,9 @@ import (
 	"github.com/xiedada05/furry-drama-be-neo/internal/repository"
 )
 
-// 本文件实现 /api/stats 子域（行为逐分支照抄 backend/routes/stats.js）。
+// 本文件实现 /api/stats 子域。
 // 8 个端点：overview / calendar / recommendations（3 个）/ activity-heatmap /
-// episode-lifecycle / realtime。缓存键为 stats_<requestURI>（对齐 Express
-// cacheMiddleware 的 `stats_${req.originalUrl}`），TTL 300s。
+// episode-lifecycle / realtime。缓存键为 stats_<requestURI>（即请求原始 URL），TTL 300s。
 
 // Stats 是 /api/stats 域 handler 容器。
 type Stats struct {
@@ -30,7 +29,7 @@ type Stats struct {
 	AuthMW *middleware.Auth
 	RL     func(ratelimit.Spec) gin.HandlerFunc
 
-	// cache 是 stats_ 前缀的内存缓存（对齐 Express 共享 cache Map，5min/200 条）。
+	// cache 是 stats_ 前缀的内存缓存（5min TTL/200 条上限，固定契约）。
 	cache *middleware.Cache
 }
 
@@ -39,8 +38,8 @@ func NewStats(repos *repository.Repos, cfg *config.Config, amw *middleware.Auth,
 	return &Stats{Repos: repos, Config: cfg, AuthMW: amw, RL: rl, cache: middleware.NewCache(5*time.Minute, 200)}
 }
 
-// Register 挂载 /api/stats 全部端点（不含 /api 前缀；路径对齐 stats.js 子路径）。
-// 角色对齐：overview/activity-heatmap/episode-lifecycle/realtime 为 adminOnlyProtect
+// Register 挂载 /api/stats 全部端点（不含 /api 前缀）。
+// 角色划分：overview/activity-heatmap/episode-lifecycle/realtime 为 adminOnlyProtect
 // （admin+superadmin）；recommendations/collaborative 与 personalized 为 protect
 // （任意登录用户）；calendar 与 recommendations/:episodeId 公开。
 func (h *Stats) Register(g *gin.RouterGroup) {
@@ -93,7 +92,7 @@ func (h *Stats) Overview(c *gin.Context) {
 	now := time.Now()
 	thirtyDaysAgo := now.Add(-30 * 24 * time.Hour)
 
-	// 第一组并发聚合（对齐 Promise.all）。
+	// 第一组并发聚合（等价 Promise.all）。
 	totalEpisodes, err := h.Repos.Episodes.CountDocuments(ctx, bson.M{"reviewStatus": "approved"})
 	if err != nil {
 		serverError(c)
@@ -150,7 +149,7 @@ func (h *Stats) Overview(c *gin.Context) {
 		return
 	}
 
-	// 第二组：Top 榜单（对齐第二组 Promise.all）。
+	// 第二组：Top 榜单（等价第二组 Promise.all 并发）。
 	topRated, err := h.Repos.Episodes.StatsTopRated(ctx, 5)
 	if err != nil {
 		serverError(c)
@@ -203,7 +202,7 @@ func (h *Stats) Overview(c *gin.Context) {
 		return
 	}
 
-	// 每日活跃用户（对齐 DAU：本地零点 6 天前起，UTC 日期键）。
+	// 每日活跃用户（DAU：本地零点 6 天前起，UTC 日期键）。
 	sevenDaysAgoDate := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.Local).AddDate(0, 0, -6)
 	dauAgg, err := h.Repos.Histories.StatsDAU(ctx, sevenDaysAgoDate)
 	if err != nil {
@@ -242,7 +241,7 @@ func (h *Stats) Overview(c *gin.Context) {
 		return
 	}
 
-	// 用户留存率（对齐 retention：lastWatched ≥ UTC 7 天前，7 天滑窗）。
+	// 用户留存率（retention：lastWatched ≥ UTC 7 天前，7 天滑窗）。
 	retentionAgg, err := h.Repos.Histories.StatsRetention(ctx, now.Add(-7*24*time.Hour))
 	if err != nil {
 		serverError(c)
@@ -366,7 +365,7 @@ func (h *Stats) Calendar(c *gin.Context) {
 		return
 	}
 
-	// 收集 populate 所需剧集 ID。
+	// 收集关联查询所需剧集 ID。
 	epIDs := make([]primitive.ObjectID, 0, len(released)+len(scheduled)+len(upcomingSingles))
 	for _, se := range released {
 		epIDs = append(epIDs, se.EpisodeID)
@@ -1035,7 +1034,7 @@ func statsRowIDs(rows []repository.StatsFollowCountRow) []primitive.ObjectID {
 	return ids
 }
 
-// uniqueRatingUserIDs 去重返回评分中的用户 ID（对齐 [...new Set(...)]）。
+// uniqueRatingUserIDs 去重返回评分中的用户 ID（等价 [...new Set(...)]）。
 func uniqueRatingUserIDs(rows []repository.StatsSimilarRating) []primitive.ObjectID {
 	seen := map[string]bool{}
 	out := make([]primitive.ObjectID, 0, len(rows))
@@ -1096,7 +1095,7 @@ func statsFollowJSON(rows []repository.StatsFollowCountRow, titles map[primitive
 	return out
 }
 
-// utcDateKey 取日期字段的 UTC 日期串（对齐 toISOString().split('T')[0]）。
+// utcDateKey 取日期字段的 UTC 日期串（等价 toISOString().split("T")[0]）。
 func utcDateKey(t *time.Time) string {
 	if t == nil {
 		return "1970-01-01"

@@ -38,7 +38,7 @@ type LoginResult struct {
 	User               *model.User
 }
 
-// Login 登录分支流程，对齐 routes/auth/session.js L288-470。分支顺序必须严格保持。
+// Login 登录分支流程。分支顺序是固定契约，必须严格保持，勿重排。
 // 需要 *gin.Context（登录成功时设置 access/refresh cookie）。
 func (s *AuthService) Login(c *gin.Context, in LoginInput) (*LoginResult, error) {
 	ctx := c.Request.Context()
@@ -173,7 +173,7 @@ func (s *AuthService) devTokenActive(devToken string) bool {
 	return s.Config.JWT.DevAPIToken != "" && devToken == s.Config.JWT.DevAPIToken
 }
 
-// purgeUser 注销宽限已过时的物理删除（对齐 session.js L312-321）。
+// purgeUser 注销宽限已过时的物理删除（行为固定）。
 func (s *AuthService) purgeUser(ctx context.Context, userID interface{}) error {
 	_ = s.Repos.Follows.DeleteByUser(ctx, userID)
 	_ = s.Repos.Histories.DeleteByUser(ctx, userID)

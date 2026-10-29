@@ -13,7 +13,7 @@ import (
 )
 
 // 本文件为 announcements / wallpapers / friend-links 三域共享的 DTO 组装与
-// 工具函数（对齐 backend/routes/announcements.js / wallpapers.js / friendLinks.js）。
+// 工具函数。
 // 函数名带 cms 前缀，避免与他域 handler 并发定义冲突。
 
 // cmsReadBody 读取（已过 SanitizeInput 的）JSON 请求体为 map；非对象/空体返回空 map。
@@ -25,7 +25,7 @@ func cmsReadBody(c *gin.Context) map[string]any {
 	return body
 }
 
-// cmsCastBool 对齐 mongoose Boolean 类型 cast（update 场景的宽松转换）：
+// cmsCastBool 布尔宽松转换（与既有集合写入形态一致，update 场景）：
 // "false"/"0"/"off"/"" → false，其余非空 → true（与 truthy 的差异仅在于字符串 "false"）。
 func cmsCastBool(v any) bool {
 	switch t := v.(type) {
@@ -50,8 +50,8 @@ func cmsCastBool(v any) bool {
 	}
 }
 
-// cmsDateOrNil 对齐 `expireAt || null`：falsy（nil/false/""/数字0）→ nil，
-// 否则按 mongoose Date cast 解析。
+// cmsDateOrNil 实现 `expireAt || null` 语义：falsy（nil/false/""/数字0）→ nil，
+// 否则按日期解析（毫秒时间戳或 ISO 字符串）。
 func cmsDateOrNil(v any) *time.Time {
 	switch t := v.(type) {
 	case nil:
@@ -88,7 +88,7 @@ func cmsDateOrNil(v any) *time.Time {
 	}
 }
 
-// cmsPublishAtOrNow 对齐 `publishAt || Date.now()`：falsy 值 → 当前时间。
+// cmsPublishAtOrNow 实现 `publishAt || Date.now()` 语义：falsy 值 → 当前时间。
 func cmsPublishAtOrNow(v any) time.Time {
 	if d := cmsDateOrNil(v); d != nil {
 		return *d
@@ -96,7 +96,7 @@ func cmsPublishAtOrNow(v any) time.Time {
 	return time.Now().UTC().Truncate(time.Millisecond)
 }
 
-// cmsParseIntJS 对齐 JS Number.parseInt：解析前导数字（含符号），无法解析返回 0。
+// cmsParseIntJS 等价 JS Number.parseInt：解析前导数字（含符号），无法解析返回 0。
 func cmsParseIntJS(s string) int {
 	s = strings.TrimSpace(s)
 	if s == "" {
@@ -123,7 +123,7 @@ func cmsParseIntJS(s string) int {
 	return n
 }
 
-// cmsIsValidHTTPURL 对齐 friendLinks.js isValidUrl：仅接受 http/https 绝对 URL。
+// cmsIsValidHTTPURL 仅接受 http/https 绝对 URL（固定契约）。
 func cmsIsValidHTTPURL(s string) bool {
 	u, err := url.Parse(s)
 	if err != nil {
@@ -132,7 +132,7 @@ func cmsIsValidHTTPURL(s string) bool {
 	return u.Scheme == "http" || u.Scheme == "https"
 }
 
-// cmsFrontendURL 返回前端站点 URL（对齐 getSiteUrl：FRONTEND_URL || 'http://localhost:3000'）。
+// cmsFrontendURL 返回前端站点 URL（FRONTEND_URL 配置缺省时回退 'http://localhost:3000'）。
 func cmsFrontendURL(cfg *config.Config) string {
 	if cfg.Server.FrontendURL != "" {
 		return cfg.Server.FrontendURL
@@ -140,7 +140,7 @@ func cmsFrontendURL(cfg *config.Config) string {
 	return "http://localhost:3000"
 }
 
-// cmsAnnouncementJSON 组装公告响应对象（对齐 mongoose 文档 toJSON/lean 输出，
+// cmsAnnouncementJSON 组装公告响应对象（与既有集合数据形态一致，
 // _id 为 hex 字符串，时间 RFC3339）。
 func cmsAnnouncementJSON(a *model.Announcement) gin.H {
 	return gin.H{
@@ -171,7 +171,7 @@ func cmsAnnouncementJSON(a *model.Announcement) gin.H {
 	}
 }
 
-// cmsWallpaperJSON 组装系统壁纸响应对象（完整字段，对齐 GET /system/all 的 toJSON）。
+// cmsWallpaperJSON 组装系统壁纸响应对象（完整字段，管理端视图）。
 func cmsWallpaperJSON(w *model.SystemWallpaper) gin.H {
 	return gin.H{
 		"_id":          w.ID.Hex(),
@@ -198,7 +198,7 @@ func cmsWallpaperPublicJSON(w *model.SystemWallpaper) gin.H {
 	}
 }
 
-// cmsFriendLinkJSON 组装友链响应对象（对齐 FriendLink 文档 toJSON/lean 输出）。
+// cmsFriendLinkJSON 组装友链响应对象（与既有集合数据形态一致）。
 func cmsFriendLinkJSON(l *model.FriendLink) gin.H {
 	return gin.H{
 		"_id":           l.ID.Hex(),

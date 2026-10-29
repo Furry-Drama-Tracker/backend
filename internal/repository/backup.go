@@ -28,7 +28,7 @@ import (
 	"github.com/xiedada05/furry-drama-be-neo/internal/repository"
 )
 
-// 备份允许导出的集合（对齐 routes/backup.js ALLOWED_EXPORT_COLLECTIONS）。
+// 备份允许导出的集合。
 // 与 ALLOWED_IMPORT_COLLECTIONS 完全一致。
 var allowedBackupCollections = []string{
 	"episodes", "users", "categories", "banners", "ratings",
@@ -36,8 +36,7 @@ var allowedBackupCollections = []string{
 	"sitecontents", "singleepisodes", "creatorprofiles", "announcements",
 }
 
-// backupCollectionFields 导入时允许保留的字段白名单
-// （对齐 routes/backup.js COLLECTION_FIELDS）。
+// backupCollectionFields 导入时允许保留的字段白名单。
 var backupCollectionFields = map[string]map[string]bool{
 	"episodes":        backupStrSet("title", "titleEn", "titleJa", "description", "descriptionEn", "descriptionJa", "coverImage", "totalEpisodes", "currentEpisodes", "status", "category", "tags", "updateDay", "premiereDate", "platformLinks", "views", "averageRating", "ratingCount", "reviewStatus", "reviewNote", "createdBy", "allowedEditors", "createdAt", "updatedAt"),
 	"users":           backupStrSet("accountId", "username", "email", "isEmailVerified", "role", "avatar", "deletionRequestedAt", "createdAt", "updatedAt"),
@@ -55,38 +54,37 @@ var backupCollectionFields = map[string]map[string]bool{
 	"announcements":   backupStrSet("title", "titleEn", "content", "contentEn", "type", "showPopup", "showBanner", "sendNotification", "sendEmail", "dismissible", "active", "pinned", "publishAt", "expireAt", "notificationSent", "emailSent", "emailSentAt", "emailSentCount", "link", "createdBy", "createdAt", "updatedAt"),
 }
 
-// backupMaxImportBytes 单次导入备份数据大小上限（50MB，对齐 backup.js:69）。
+// backupMaxImportBytes 单次导入备份数据大小上限（50MB，固定契约，勿改）。
 const backupMaxImportBytes = 50 * 1024 * 1024
 
-// backupMaxImportDocs 单集合导入数量上限（对齐 backup.js:97）。
+// backupMaxImportDocs 单集合导入数量上限（固定契约，勿改）。
 const backupMaxImportDocs = 10000
 
-// Backup 是数据备份域（/api/backup）handler 容器，行为逐端点对齐 backend/routes/backup.js。
+// Backup 是数据备份域（/api/backup）handler 容器。
 type Backup struct {
 	Repos  *repository.Repos
 	Config *config.Config
 	AuthMW *middleware.Auth
 	RL     func(ratelimit.Spec) gin.HandlerFunc
-	// DB 提供原始集合访问（对齐 Express mongoose.connection.db）。
+	// DB 提供原始集合访问（不经 repo 层）。
 	DB *mongo.Database
 }
 
-// NewBackup 构造备份 handler 容器。db 用于 raw collection 读取/写入
-// （对齐 backup.js 的 mongoose.connection.db.collection(col)）。
+// NewBackup 构造备份 handler 容器。db 用于 raw collection 读取/写入。
 func NewBackup(repos *repository.Repos, cfg *config.Config, amw *middleware.Auth,
 	rl func(ratelimit.Spec) gin.HandlerFunc, db *mongo.Database) *Backup {
 	return &Backup{Repos: repos, Config: cfg, AuthMW: amw, RL: rl, DB: db}
 }
 
-// Register 挂载备份路由（路径照抄 Express 子路径，不含 /api 前缀）。
-// 鉴权对齐 backup.js：adminProtect（creator/admin/superadmin）→ requireSuperAdmin。
+// Register 挂载备份路由（子路径不含 /api 前缀）。
+// 鉴权：adminProtect（creator/admin/superadmin）→ requireSuperAdmin。
 func (h *Backup) Register(g *gin.RouterGroup) {
 	protect := h.AuthMW.Protect(middleware.RoleCreator, middleware.RoleAdmin, middleware.RoleSuperAdmin)
 	g.GET("/export", protect, h.requireSuperAdmin, h.Export)
 	g.POST("/import", protect, h.requireSuperAdmin, h.Import)
 }
 
-// requireSuperAdmin 对齐 backup.js requireSuperAdmin：仅 superadmin 放行，
+// requireSuperAdmin 仅 superadmin 放行，
 // 否则 403 {"message":"需要超级管理员权限"}。
 func (h *Backup) requireSuperAdmin(c *gin.Context) {
 	user, ok := middleware.GetUser(c)
@@ -109,10 +107,10 @@ func (h *Backup) Export(c *gin.Context) {
 	for _, col := range allowedBackupCollections {
 		docs, err := h.findAllDocs(ctx, col)
 		if err != nil {
-			continue // 对齐 try/catch {}：单集合失败跳过
+			continue // 单集合失败跳过，不中断整体导出
 		}
 		if col == "users" {
-			// 剔除 password / lastLoginIp / lastLoginRegion / deviceInfo（对齐 destructure）。
+			// 剔除 password / lastLoginIp / lastLoginRegion / deviceInfo 等敏感与冗余字段。
 			out := make([]any, 0, len(docs))
 			for _, d := range docs {
 				m := d.(bson.M)
@@ -168,7 +166,7 @@ func (h *Backup) Import(c *gin.Context) {
 	}
 	overwrite := truthy(body["overwrite"])
 
-	// 大小校验（对齐 JSON.stringify(data).length > 50MB，UTF-16 长度）。
+	// 大小校验（按 UTF-16 长度口径计算，上限 50MB）。
 	dataJSON, err := json.Marshal(data)
 	if err != nil {
 		serverError(c)
@@ -229,13 +227,13 @@ func (h *Backup) Import(c *gin.Context) {
 		}
 	}
 
-	// 审计（对齐 logManual(... '数据恢复' '全库' ...)，失败静默）。
+	// 写入「数据恢复/全库」审计日志，失败静默。
 	h.logImportAudit(c, results)
 
 	c.JSON(200, gin.H{"message": "数据恢复完成", "results": results})
 }
 
-// findAllDocs 读取集合全部文档（对齐 db.collection(col).find({}).toArray()）。
+// findAllDocs 读取集合全部文档。
 // 集合不存在返回空列表、nil 错误（MongoDB Find 空集合不报错）。
 func (h *Backup) findAllDocs(ctx context.Context, col string) ([]bson.M, error) {
 	cur, err := h.DB.Collection(col).Find(ctx, bson.M{})
@@ -250,7 +248,7 @@ func (h *Backup) findAllDocs(ctx context.Context, col string) ([]bson.M, error) 
 	return list, nil
 }
 
-// cleanBackupDocs 对齐 backup.js cleanDocs：剔除 _id/password，并按集合白名单过滤字段。
+// cleanBackupDocs 清洗导入文档：剔除 _id/password，并按集合白名单过滤字段。
 func cleanBackupDocs(col string, docs []any) []any {
 	allowed, hasAllowed := backupCollectionFields[col]
 	cleaned := make([]any, 0, len(docs))
@@ -275,7 +273,7 @@ func cleanBackupDocs(col string, docs []any) []any {
 	return cleaned
 }
 
-// logImportAudit 写数据恢复审计日志（对齐 logManual 的 catch(()=>{}) 失败静默）。
+// logImportAudit 写数据恢复审计日志（失败静默，不阻断导入）。
 func (h *Backup) logImportAudit(c *gin.Context, results gin.H) {
 	user, ok := middleware.GetUser(c)
 	if !ok {
@@ -312,7 +310,7 @@ func backupStrSet(items ...string) map[string]bool {
 }
 
 // readBodyMap 读取 JSON 请求体为 map；空体/非对象体返回空 map
-// （对齐 episodes.go readJSONBody 的语义，供 translate/backup 域共用）。
+// （与 episodes.go readJSONBody 语义一致，供 translate/backup 域共用）。
 func readBodyMap(c *gin.Context) map[string]any {
 	var body map[string]any
 	if err := c.ShouldBindJSON(&body); err != nil {
@@ -321,7 +319,7 @@ func readBodyMap(c *gin.Context) map[string]any {
 	return body
 }
 
-// strSetContains 判断字符串是否在切片中（对齐 Array.includes）。
+// strSetContains 判断字符串是否在切片中。
 func backupStrContains(list []string, s string) bool {
 	for _, x := range list {
 		if x == s {
@@ -344,9 +342,10 @@ func jsUTF16Len(s string) int {
 	return n
 }
 
-// bsonJSONValue 把 raw BSON 文档值转换为 JSON 友好值，逐类型对齐 mongoose toJSON：
+// bsonJSONValue 把 raw BSON 文档值转换为 JSON 友好值，逐类型与既有 JSON 输出契约一致
+// （消费方依赖此格式）：
 //   - ObjectID → hex 字符串
-//   - Date(DateTime/time.Time) → ISO 8601（毫秒 + Z，对齐 toISOString）
+//   - Date(DateTime/time.Time) → ISO 8601（毫秒 + Z）
 //   - 嵌套文档/数组 → 递归
 //   - 其余基本类型原样
 func bsonJSONValue(v any) any {

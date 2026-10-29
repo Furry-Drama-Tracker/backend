@@ -1,6 +1,6 @@
 // Package server 装配 Gin 引擎：中间件管线顺序、静态资源、双版本路由、优雅关停。
 //
-// 中间件顺序必须与 Express src/index.js 一致：
+// 中间件顺序是固定契约，勿重排；新增中间件需确认放置位置：
 //
 //	recovery → gzip → securityheaders → cors → 30s 超时 → slowlogger →
 //	bodyparse(1mb/50mb) → sanitizeInput → sanitizeHeaders →
@@ -8,10 +8,10 @@
 //	[受限流路由组 /api] globalLimiter(300/min) → /api/health →
 //	双版本业务路由（M2）→ 全局错误处理
 //
-// 关键差异处理（对比 Express）：
+// 关键装配说明：
 //   - gin 的 r.Use 对所有请求生效（含 csrf-token），故 csrf-token 单独注册在
 //     CSRF 校验之前；CSRF 中间件对 GET 放行，行为一致。
-//   - globalLimiter 挂载到 /api 路由组（不含 csrf-token，对齐 Express 天然豁免）。
+//   - globalLimiter 挂载到 /api 路由组（不含 csrf-token，天然豁免）。
 //   - per-endpoint 限流在 M2 业务路由上施加（RateLimit(store, spec, opts)）。
 package server
 
@@ -57,7 +57,7 @@ func NewApp(d Deps) *gin.Engine {
 	r := gin.New()
 	r.Use(gin.Recovery())
 
-	// ---- 全局中间件（顺序对齐 Express）----
+	// ---- 全局中间件（顺序为固定契约，勿重排）----
 	r.Use(middleware.Gzip())
 	r.Use(middleware.SecurityHeaders())
 	r.Use(middleware.CORS(d.Config.Server.AllowOrigins))
@@ -68,7 +68,7 @@ func NewApp(d Deps) *gin.Engine {
 	r.Use(middleware.SanitizeInput())
 	r.Use(middleware.SanitizeHeaders())
 
-	// ---- csrf-token：注册在 CSRF 校验与限流之前（对齐 Express 天然豁免）----
+	// ---- csrf-token：注册在 CSRF 校验与限流之前（该端点天然豁免 CSRF）----
 	r.GET("/api/csrf-token", handler.CSRF(d.Config))
 
 	r.Use(middleware.CSRF())
@@ -85,7 +85,7 @@ func NewApp(d Deps) *gin.Engine {
 	api.Use(middleware.RateLimit(ratelimit.GlobalSpec, opts))
 	api.GET("/health", handler.Health(d.DB))
 
-	// ---- Swagger UI（仅非生产，对齐 Express src/index.js:352-367）----
+	// ---- Swagger UI（仅非生产，固定放置）----
 	if d.Config.IsDev {
 		r.GET("/api/docs/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 		r.GET("/api/v1/docs/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
@@ -110,7 +110,7 @@ func NewApp(d Deps) *gin.Engine {
 	return r
 }
 
-// serveUploads 提供 /uploads 静态文件服务（对齐 Express express.static 行为）：
+// serveUploads 提供 /uploads 静态文件服务（静态服务行为固定）：
 //   - 7 天缓存（Cache-Control: public, max-age=604800, immutable）；
 //   - X-Content-Type-Options: nosniff、X-Robots-Tag: noindex、Content-Disposition: inline；
 //   - 目录与不存在文件返回 404，禁止目录列举；

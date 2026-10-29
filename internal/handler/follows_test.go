@@ -90,7 +90,7 @@ func (e *testEnv) do(t *testing.T, method, path string, body any) (*httptest.Res
 	return w, w.Body.Bytes()
 }
 
-// insertEpisode 插入一条剧集（字段对齐 FollowsEpisodeDoc / models/Episode.js）。
+// insertEpisode 插入一条剧集（字段与 FollowsEpisodeDoc / 既有 episodes 集合形态一致）。
 func insertEpisode(t *testing.T, db *mongo.Database, currentEpisodes int, reviewStatus string, averageRating float64) primitive.ObjectID {
 	t.Helper()
 	id := primitive.NewObjectID()
@@ -195,7 +195,7 @@ func TestFollowsAddCheckList(t *testing.T) {
 	row := list.List[0]
 	epObj, ok := row["episodeId"].(map[string]any)
 	if !ok || epObj["_id"] != ep.Hex() || epObj["title"] != "测试剧集" {
-		t.Fatalf("list episodeId populate: %v", row["episodeId"])
+		t.Fatalf("list episodeId expanded: %v", row["episodeId"])
 	}
 	if row["followedAtEpisodes"].(float64) != 12 {
 		t.Fatalf("list followedAtEpisodes: %v", row["followedAtEpisodes"])
@@ -346,7 +346,7 @@ func TestFavoritesAddCountsCheckList(t *testing.T) {
 	}
 	folderObj, ok := full.List[0]["folderId"].(map[string]any)
 	if !ok || folderObj["_id"] != folder.Hex() || folderObj["name"] != "追剧" {
-		t.Fatalf("fav folderId populate: %v", full.List[0]["folderId"])
+		t.Fatalf("fav folderId expanded: %v", full.List[0]["folderId"])
 	}
 }
 

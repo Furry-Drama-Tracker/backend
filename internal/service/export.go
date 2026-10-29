@@ -12,7 +12,7 @@ import (
 	"github.com/xiedada05/furry-drama-be-neo/internal/model"
 )
 
-// ExportData 是 /export-my-data 的 JSON 结构（对齐 users.js L187-202）。
+// ExportData 是 /export-my-data 的 JSON 结构（字段集为固定契约，勿增删）。
 type ExportData struct {
 	ExportDate   string   `json:"exportDate"`
 	User         gin.H    `json:"user"`
@@ -131,7 +131,7 @@ func (s *AuthService) episodePopulate(ctx context.Context, id interface{}, withS
 	return row
 }
 
-// ExportCSV 生成 CSV（含 BOM 前缀，对齐 users.js L131-185）。
+// ExportCSV 生成 CSV（含 BOM 前缀，格式固定）。
 func (d *ExportData) ExportCSV() string {
 	var b strings.Builder
 	esc := func(s string) string {
@@ -193,7 +193,7 @@ func episodeTitleStatus(v any) (title, status string) {
 
 // ---- helpers ----
 
-// nowISO 返回 ISO8601 UTC 毫秒时间（对齐 toISOString）。
+// nowISO 返回 ISO8601 UTC 毫秒时间（必须为 UTC Z 后缀格式，消费方依赖此格式）。
 func nowISO() string {
 	return time.Now().UTC().Format("2006-01-02T15:04:05.000Z")
 }

@@ -12,7 +12,7 @@ import (
 )
 
 // ChangePassword PUT /api/auth/change-password（protect）。
-// 对齐 password.js L45-79：校验新密码 → 匹配当前 → 更新 → 吊销全部会话 → 清 cookie。
+// 流程固定：校验新密码 → 匹配当前 → 更新 → 吊销全部会话 → 清 cookie，勿重排。
 func (s *AuthService) ChangePassword(c *gin.Context, userID interface{}, currentPassword, newPassword string) error {
 	if msg := ValidatePassword(newPassword); msg != "" {
 		return errors.New(400, msg)
@@ -38,7 +38,7 @@ func (s *AuthService) ChangePassword(c *gin.Context, userID interface{}, current
 }
 
 // ForgotPassword POST /api/auth/forgot-password。
-// 对齐 password.js L81-105：altcha 后统一文案（不泄露账号是否存在）。
+// altcha 后统一文案（不泄露账号是否存在），固定契约勿改。
 func (s *AuthService) ForgotPassword(ctx context.Context, emailAddr, altcha, devToken string) (string, error) {
 	unified := "如果该邮箱已注册，重置链接已发送至邮箱"
 	if !s.VerifyAltcha(altcha, devToken) {
@@ -60,7 +60,7 @@ func (s *AuthService) ForgotPassword(ctx context.Context, emailAddr, altcha, dev
 }
 
 // ResetPassword POST /api/auth/reset-password。
-// 对齐 password.js L107-154：一次性令牌 + 更新密码 + 吊销会话。
+// 一次性令牌 + 更新密码 + 吊销会话，流程为固定契约。
 func (s *AuthService) ResetPassword(ctx context.Context, token, newPassword string) error {
 	if msg := ValidatePassword(newPassword); msg != "" {
 		return errors.New(400, msg)

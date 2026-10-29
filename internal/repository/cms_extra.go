@@ -19,7 +19,7 @@ import (
 
 // ---- NotificationRepo ----
 
-// CmsInsertMany 批量插入通知（对齐 Notification.insertMany）；未设置时补 createdAt。
+// CmsInsertMany 批量插入通知（InsertMany 语义）；未设置时补 createdAt。
 // 供 announcements 的站内推送与 friend-links 的友链申请通知共用。
 func (r *NotificationRepo) CmsInsertMany(ctx context.Context, items []model.Notification) error {
 	ctx, cancel := context.WithTimeout(ctx, contextTimeout)
@@ -40,9 +40,8 @@ func (r *NotificationRepo) CmsInsertMany(ctx context.Context, items []model.Noti
 }
 
 // AnnouncementsDeleteByAnnouncement 删除某公告的通知中心条目
-//
-//	（对齐 announcements.js DELETE /:id 的 Notification.deleteMany({
-//	  type: 'announcement', 'metadata.announcementId': announcement._id }))。
+// （deleteMany({ type:'announcement', 'metadata.announcementId': id })，
+// 删除公告时调用）。
 //
 // 返回删除数。
 func (r *NotificationRepo) AnnouncementsDeleteByAnnouncement(ctx context.Context, announcementID any) (int64, error) {
@@ -60,8 +59,8 @@ func (r *NotificationRepo) AnnouncementsDeleteByAnnouncement(ctx context.Context
 
 // ---- UserRepo ----
 
-// AnnouncementsFindAllUserIDs 分批查询用户 _id（对齐 sendAnnouncementNotifications 的
-// User.find({}, '_id').skip().limit()）。
+// AnnouncementsFindAllUserIDs 分批查询用户 _id
+// （find({}, '_id').skip().limit()，公告全量推送分页取人）。
 func (r *UserRepo) AnnouncementsFindAllUserIDs(ctx context.Context, skip, limit int64) ([]primitive.ObjectID, error) {
 	ctx, cancel := r.newCtx(ctx)
 	defer cancel()
@@ -94,9 +93,9 @@ type AnnouncementsMailTarget struct {
 	IsEmailVerified bool               `bson:"isEmailVerified"`
 }
 
-// AnnouncementsFindEmailTargets 分批查询公告邮件收件人（对齐 sendAnnouncementEmails 的
-// User.find({ isEmailVerified: true, 'emailNotificationPrefs.announcement': { $ne: false } },
-// 'email emailNotificationPrefs')）。偏好键缺失的用户也会命中（$ne:false 语义）。
+// AnnouncementsFindEmailTargets 分批查询公告邮件收件人
+// （find({ isEmailVerified: true, 'emailNotificationPrefs.announcement': { $ne: false } }，
+// 投影 email/emailNotificationPrefs)）。偏好键缺失的用户也会命中（$ne:false 语义）。
 func (r *UserRepo) AnnouncementsFindEmailTargets(ctx context.Context, skip, limit int64) ([]AnnouncementsMailTarget, error) {
 	ctx, cancel := r.newCtx(ctx)
 	defer cancel()
@@ -127,9 +126,8 @@ type FriendLinksAdminTarget struct {
 	FriendLinkApplyPref *bool              `bson:"friendLinkApply"`
 }
 
-// FriendLinksFindSuperAdmins 查询全部超管的通知信息（对齐 friendLinks.js apply 的
-// User.find({ role: 'superadmin' }) + notifyHelper 的 select email isEmailVerified
-// emailNotificationPrefs）。
+// FriendLinksFindSuperAdmins 查询全部超管的通知信息
+// （find({ role: 'superadmin' })，投影 email/isEmailVerified/emailNotificationPrefs）。
 func (r *UserRepo) FriendLinksFindSuperAdmins(ctx context.Context) ([]FriendLinksAdminTarget, error) {
 	ctx, cancel := r.newCtx(ctx)
 	defer cancel()
@@ -173,8 +171,8 @@ type FriendLinksMailTarget struct {
 	FriendLinkStatusPref *bool              `bson:"friendLinkStatus"`
 }
 
-// FriendLinksFindEmailTarget 查询单用户邮件信息（对齐 sendNotificationEmailToUser 的
-// User.findById(userId).select('email isEmailVerified emailNotificationPrefs')）。
+// FriendLinksFindEmailTarget 查询单用户邮件信息
+// （findById(userId)，投影 email/isEmailVerified/emailNotificationPrefs）。
 func (r *UserRepo) FriendLinksFindEmailTarget(ctx context.Context, id any) (*FriendLinksMailTarget, error) {
 	ctx, cancel := r.newCtx(ctx)
 	defer cancel()
@@ -204,8 +202,7 @@ func (r *UserRepo) FriendLinksFindEmailTarget(ctx context.Context, id any) (*Fri
 	}, nil
 }
 
-// WallpapersPushPersonal 向用户个人壁纸数组追加一条（对齐 wallpapers.js POST /personal 的
-// user.personalWallpapers.push(...); user.save()）。
+// WallpapersPushPersonal 向用户个人壁纸数组追加一条（$push 语义，POST /personal 使用）。
 //
 // 注意：历史整文档写入曾把 Go 的 nil slice 序列化成显式 null 落库，$push 对 null
 // 字段会报 "must be an array"（Plan executor error）。改用 pipeline $set：
@@ -227,8 +224,8 @@ func (r *UserRepo) WallpapersPushPersonal(ctx context.Context, userID any, wp mo
 	return err
 }
 
-// WallpapersRemovePersonal 按 url 从用户个人壁纸数组移除一项（对齐 wallpapers.js
-// DELETE /personal 的 filter + save）。url 不匹配时为 no-op，不影响结果。
+// WallpapersRemovePersonal 按 url 从用户个人壁纸数组移除一项（$pull，DELETE /personal 使用）。
+// url 不匹配时为 no-op，不影响结果。
 func (r *UserRepo) WallpapersRemovePersonal(ctx context.Context, userID any, url string) error {
 	ctx, cancel := r.newCtx(ctx)
 	defer cancel()

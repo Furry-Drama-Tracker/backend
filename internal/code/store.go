@@ -1,5 +1,4 @@
-// Package code 提供验证码内存存储（对齐 Express utils/emailVerifyCodes.js 与
-// deviceLoginCodes.js 的内存 Map 语义）。
+// Package code 提供验证码内存存储（进程内 Map 语义）。
 //
 // 特性：进程内存储、TTL 过期、单码尝试次数上限、用后即删、60s 定时清理。
 // 多实例部署需换共享存储（当前单实例内存语义，接口化便于将来换 Redis）。
@@ -83,7 +82,7 @@ func (s *Store) Set(code string, e Entry) {
 	s.mu.Unlock()
 }
 
-// Get 取出条目（不过期判断由调用方按 ExpiresAt 处理，与 Express 一致）。
+// Get 取出条目（过期判定由调用方负责，Get 不主动判过期——固定契约，勿改）。
 func (s *Store) Get(code string) (Entry, bool) {
 	s.mu.Lock()
 	defer s.mu.Unlock()

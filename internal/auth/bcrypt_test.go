@@ -2,29 +2,27 @@ package auth
 
 import "testing"
 
-// 黄金向量：由 Node 端 bcryptjs（backend/node_modules/bcryptjs，与
-// backend/models/User.js 同库）以 cost=12 对密码 "P@ssw0rd!测试123" 生成。
-// 2026-08-08 由 node gen_vectors 脚本现场产出（见 W3-auth 工作记录）。
-// bcryptjs v3 默认输出 $2b$ 前缀，Go 的 x/crypto/bcrypt 原生支持
+// bcrypt 黄金向量（cost=12）：密码 "P@ssw0rd!测试123" 的固定校验向量，勿改。
+// 向量哈希为 $2b$ 前缀，Go 的 x/crypto/bcrypt 原生支持
 // $2a$/$2b$/$2y$，可互验。
 const (
-	nodeBcryptPassword = "P@ssw0rd!测试123"
-	nodeBcryptHash     = "$2b$12$mgc64fBM4QWNCXcLt2NFkO.UIbZX8kXML75VYLRme/YL.9J/f935y"
+	bcryptVectorPassword = "P@ssw0rd!测试123"
+	bcryptVectorHash     = "$2b$12$mgc64fBM4QWNCXcLt2NFkO.UIbZX8kXML75VYLRme/YL.9J/f935y"
 )
 
-// TestCompareNodeVector 验证 Go 能校验 bcryptjs 生成的哈希（互验兼容）。
-func TestCompareNodeVector(t *testing.T) {
-	if !Compare(nodeBcryptHash, nodeBcryptPassword) {
-		t.Fatal("Compare should accept bcryptjs-generated hash for the correct password")
+// TestCompareBcryptVector 验证既定 bcrypt 向量可被正确校验。
+func TestCompareBcryptVector(t *testing.T) {
+	if !Compare(bcryptVectorHash, bcryptVectorPassword) {
+		t.Fatal("Compare should accept the golden bcrypt hash for the correct password")
 	}
-	if Compare(nodeBcryptHash, "wrong-password") {
+	if Compare(bcryptVectorHash, "wrong-password") {
 		t.Fatal("Compare must reject wrong password")
 	}
 }
 
 // TestHashFormat 验证 Hash 输出 $2a$ 前缀、cost=12 的标准 bcrypt 串。
 func TestHashFormat(t *testing.T) {
-	hash, err := Hash(nodeBcryptPassword)
+	hash, err := Hash(bcryptVectorPassword)
 	if err != nil {
 		t.Fatalf("Hash error: %v", err)
 	}
@@ -51,7 +49,7 @@ func TestHashRoundtrip(t *testing.T) {
 	}
 }
 
-// TestHashCost 验证轮数为 12（对齐 models/User.js bcrypt.genSalt(12)）。
+// TestHashCost 验证轮数为 12（固定值，勿改——改了既有哈希仍可校验但新哈希参数变化）。
 func TestHashCost(t *testing.T) {
 	hash, err := Hash("cost-check")
 	if err != nil {

@@ -1,14 +1,14 @@
 // Package model 定义 MongoDB 文档的 struct 映射（无 ODM，官方驱动直接读写）。
 //
-// 字段名对齐 Mongoose schema（backend/models/*.js），collection 名取 Mongo 默认
+// 字段名与既有集合数据形态一致（勿改 bson 标签），collection 名取 Mongo 默认
 // 小写复数（users / usersessions / usedtokens / notifications / auditlogs /
 // apiusages / sitecontents / settings）。
 //
 // 说明：
 //   - password / twoFactorSecret / twoFactorBackupCodes 仅用于写读，JSON 响应
 //     中永不输出（handler 层用 DTO 组装，这里用 json:"-" 双保险）。
-//   - primitive.ObjectID 的 JSON 序列化自动输出 24 位 hex 字符串，对齐 mongoose
-//     toJSON 行为。
+//   - primitive.ObjectID 的 JSON 序列化自动输出 24 位 hex 字符串，消费方依赖
+//     此 _id 输出格式。
 package model
 
 import (
@@ -17,7 +17,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-// User 对应用户文档（models/User.js）。
+// User 对应用户文档（users 集合）。
 type User struct {
 	ID                     primitive.ObjectID     `bson:"_id,omitempty" json:"_id"`
 	AccountID              string                 `bson:"accountId" json:"accountId"`
@@ -52,7 +52,7 @@ type User struct {
 	LoginAttempts          int                    `bson:"loginAttempts" json:"-"`
 	LockUntil              int64                  `bson:"lockUntil" json:"-"`
 	CreatedAt              time.Time              `bson:"createdAt" json:"createdAt"`
-	// VersionKey 是 mongoose 的 __v。
+	// VersionKey 是文档版本键 __v。
 	VersionKey int `bson:"__v,omitempty" json:"__v"`
 }
 
@@ -108,7 +108,7 @@ type Wallpaper struct {
 	AddedAt time.Time `bson:"addedAt" json:"addedAt"`
 }
 
-// UserSession 对应用户会话文档（models/UserSession.js）。
+// UserSession 对应用户会话文档（usersessions 集合）。
 type UserSession struct {
 	ID               primitive.ObjectID `bson:"_id,omitempty" json:"_id"`
 	UserID           primitive.ObjectID `bson:"userId" json:"userId"`
@@ -122,7 +122,7 @@ type UserSession struct {
 	LogoutAt         *time.Time         `bson:"logoutAt" json:"logoutAt"`
 }
 
-// UsedToken 一次性令牌去重表（models/UsedToken.js，expiresAt 建 TTL 索引自动删除）。
+// UsedToken 一次性令牌去重表（usedtokens 集合，expiresAt 建 TTL 索引自动删除）。
 type UsedToken struct {
 	ID        primitive.ObjectID `bson:"_id,omitempty" json:"_id"`
 	TokenHash string             `bson:"tokenHash" json:"tokenHash"`
@@ -130,7 +130,7 @@ type UsedToken struct {
 	ExpiresAt time.Time          `bson:"expiresAt" json:"expiresAt"`
 }
 
-// Notification 通知文档（models/Notification.js）。
+// Notification 通知文档（notifications 集合）。
 type Notification struct {
 	ID             primitive.ObjectID  `bson:"_id,omitempty" json:"_id"`
 	UserID         primitive.ObjectID  `bson:"userId" json:"userId"`
@@ -145,7 +145,7 @@ type Notification struct {
 	CreatedAt      time.Time           `bson:"createdAt" json:"createdAt"`
 }
 
-// AuditLog 审计日志文档（models/AuditLog.js）。
+// AuditLog 审计日志文档（auditlogs 集合）。
 type AuditLog struct {
 	ID        primitive.ObjectID  `bson:"_id,omitempty" json:"_id"`
 	AdminID   *primitive.ObjectID `bson:"adminId" json:"adminId"`
@@ -160,7 +160,7 @@ type AuditLog struct {
 	CreatedAt time.Time           `bson:"createdAt" json:"createdAt"`
 }
 
-// ApiUsage 接口调用统计（models/ApiUsage.js，endpoint+date 唯一）。
+// ApiUsage 接口调用统计（apiusages 集合，endpoint+date 唯一）。
 type ApiUsage struct {
 	ID       primitive.ObjectID `bson:"_id,omitempty" json:"_id"`
 	Endpoint string             `bson:"endpoint" json:"endpoint"`
@@ -169,18 +169,18 @@ type ApiUsage struct {
 	Date     string             `bson:"date" json:"date"`
 }
 
-// SiteContent 站点内容（models/SiteContent.js，key 唯一；email 键存 SMTP 配置 JSON）。
+// SiteContent 站点内容（sitecontents 集合，key 唯一；email 键存 SMTP 配置 JSON）。
 type SiteContent struct {
 	ID        primitive.ObjectID `bson:"_id,omitempty" json:"_id"`
 	Key       string             `bson:"key" json:"key"`
 	Title     string             `bson:"title" json:"title"`
 	Content   string             `bson:"content" json:"content"`
 	UpdatedAt time.Time          `bson:"updatedAt" json:"updatedAt"`
-	// VersionKey 是 mongoose 的 __v。
+	// VersionKey 是文档版本键 __v。
 	VersionKey int `bson:"__v,omitempty" json:"__v"`
 }
 
-// Setting 迁移标记集合（src/index.js 使用 db.collection('settings')）。
+// Setting 迁移标记集合（settings；以原生 db.collection 方式直接读写，不走模型映射）。
 type Setting struct {
 	ID    primitive.ObjectID `bson:"_id,omitempty" json:"_id"`
 	Key   string             `bson:"key" json:"key"`

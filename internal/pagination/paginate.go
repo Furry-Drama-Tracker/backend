@@ -1,8 +1,8 @@
-// Package pagination 提供与 Express utils/paginate.js 等价的分页参数解析。
+// Package pagination 提供分页参数解析。
 //
-// 规则（对齐 utils/paginate.js:14-17）：
+// 规则：
 //   - page 默认 1，最小 1
-//   - limit 默认 20，钳制在 [1,100]（上限 100 硬编码，尽管 src/config.js 声称 MAX=200）
+//   - limit 默认 20，钳制在 [1,100]（上限 100 硬编码）
 package pagination
 
 import (
@@ -58,7 +58,7 @@ func (q Query) TotalPages(total int64) int {
 	return pages
 }
 
-// Result 是分页响应体，对齐 Express 的 {list, page, limit, total, totalPages}。
+// Result 是分页响应体，字段为 {list, page, limit, total, totalPages}。
 type Result struct {
 	List       any   `json:"list"`
 	Page       int   `json:"page"`

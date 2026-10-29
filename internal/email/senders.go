@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-// DeviceInfo 是邮件中展示的设备信息（对应 Express parsed 设备解析结果）。
+// DeviceInfo 是邮件中展示的设备信息（由请求 User-Agent 解析）。
 type DeviceInfo struct {
 	Browser        string
 	BrowserVersion string
@@ -14,7 +14,7 @@ type DeviceInfo struct {
 	DeviceType     string
 }
 
-// siteURL 返回站点 URL（对齐 getSiteUrl）。
+// siteURL 返回站点 URL（依次取 FrontendURL、SiteURL，兜底本地开发地址）。
 func (c *Client) siteURL() string {
 	if c.cfg.Server.FrontendURL != "" {
 		return c.cfg.Server.FrontendURL
@@ -26,7 +26,6 @@ func (c *Client) siteURL() string {
 }
 
 // SendVerificationCodeEmail 发送 6 位邮箱验证码邮件（场景 register/login/changeEmail）。
-// 对齐 email.js sendVerificationCodeEmail。
 func (c *Client) SendVerificationCodeEmail(ctx context.Context, to, code, scene string) bool {
 	sceneMap := map[string]struct {
 		subject string
@@ -52,7 +51,6 @@ func (c *Client) SendVerificationCodeEmail(ctx context.Context, to, code, scene 
 }
 
 // SendPasswordResetEmail 发送密码重置链接邮件（链接 1 小时有效）。
-// 对齐 email.js sendPasswordResetEmail。
 func (c *Client) SendPasswordResetEmail(ctx context.Context, to, resetToken string) bool {
 	resetURL := c.siteURL() + "/reset-password?token=" + resetToken
 	body := `<h2 style="margin:0 0 16px;color:#1e293b;font-size:22px;font-weight:700;">密码重置</h2>` +
@@ -70,7 +68,7 @@ func (c *Client) SendNotificationEmail(ctx context.Context, to, subject, htmlCon
 }
 
 // SendNewDeviceLoginEmail 发送新设备登录验证码邮件。
-// 对齐 session.js 登录设备检测分支的内联邮件（含 Apple 版本号免责声明）。
+// Apple 系设备附带版本号免责声明（Apple 隐私策略导致版本号可能不准确）。
 func (c *Client) SendNewDeviceLoginEmail(ctx context.Context, to string, d DeviceInfo, ip, region, code string, loginTime time.Time) bool {
 	body := `<h2 style="margin:0 0 16px;color:#1e293b;font-size:22px;font-weight:700;">新设备登录验证</h2>` +
 		`<p style="margin:0 0 16px;color:#475569;font-size:14px;">检测到您的账号在新设备上尝试登录：</p>`

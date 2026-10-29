@@ -13,13 +13,13 @@ import (
 	"github.com/xiedada05/furry-drama-be-neo/internal/model"
 )
 
-// FolderRepo 收藏夹仓储（models/Folder.js / folders.js 全部查询）。
+// FolderRepo 收藏夹仓储（folders 集合全部查询）。
 type FolderRepo struct{ coll *mongo.Collection }
 
 // NewFolderRepo 构造收藏夹仓储。
 func NewFolderRepo(coll *mongo.Collection) *FolderRepo { return &FolderRepo{coll: coll} }
 
-// Create 插入收藏夹；补 createdAt 默认值并回填生成的 _id（对齐 mongoose Folder.create）。
+// Create 插入收藏夹；补 createdAt 默认值并回填生成的 _id。
 func (r *FolderRepo) Create(ctx context.Context, f *model.Folder) error {
 	ctx, cancel := context.WithTimeout(ctx, contextTimeout)
 	defer cancel()
@@ -36,7 +36,7 @@ func (r *FolderRepo) Create(ctx context.Context, f *model.Folder) error {
 	return nil
 }
 
-// Save 整文档覆盖保存（对齐 user.save() 的 ReplaceOne 语义，folder.save() 同构）。
+// Save 整文档覆盖保存（ReplaceOne 全量替换）。
 // 仅用于已通过 Find* 取出的完整文档。
 func (r *FolderRepo) Save(ctx context.Context, f *model.Folder) error {
 	ctx, cancel := context.WithTimeout(ctx, contextTimeout)
@@ -45,8 +45,8 @@ func (r *FolderRepo) Save(ctx context.Context, f *model.Folder) error {
 	return err
 }
 
-// FindUserFolders 查询用户收藏夹列表（folders.js GET /）。
-// 对齐 find({ userId, name: { $ne: '__unclassified__' }, [type] })
+// FindUserFolders 查询用户收藏夹列表（收藏夹列表端点使用）。
+// find({ userId, name: { $ne: '__unclassified__' }, [type] })
 // .sort({ sortOrder: 1, createdAt: 1 })；type 为空时不加 type 过滤。
 // 返回非 nil 空切片（空列表 JSON 输出 []）。
 func (r *FolderRepo) FindUserFolders(ctx context.Context, userID any, ftype string) ([]model.Folder, error) {
@@ -69,8 +69,8 @@ func (r *FolderRepo) FindUserFolders(ctx context.Context, userID any, ftype stri
 	return list, nil
 }
 
-// FindOwnedByID 按 _id+userId 查收藏夹（folders.js 各 :id 端点）；不存在返回 ErrNotFound。
-// 非法 ObjectId 由调用方在 handler 层拦截（对齐 mongoose CastError → 500）。
+// FindOwnedByID 按 _id+userId 查收藏夹（各 :id 端点使用）；不存在返回 ErrNotFound。
+// 非法 ObjectId 由调用方在 handler 层拦截（非法 hex → 500，既有错误路径，勿改）。
 func (r *FolderRepo) FindOwnedByID(ctx context.Context, id, userID any) (*model.Folder, error) {
 	ctx, cancel := context.WithTimeout(ctx, contextTimeout)
 	defer cancel()
@@ -82,7 +82,7 @@ func (r *FolderRepo) FindOwnedByID(ctx context.Context, id, userID any) (*model.
 	return f, err
 }
 
-// FindUnclassified 查用户的「默认收藏夹」虚拟收藏夹（folders.js POST /share-unclassified）。
+// FindUnclassified 查用户的「默认收藏夹」虚拟收藏夹（POST /share-unclassified 使用）。
 // 条件 type=favorite 且 name='__unclassified__'；不存在返回 ErrNotFound。
 func (r *FolderRepo) FindUnclassified(ctx context.Context, userID any) (*model.Folder, error) {
 	ctx, cancel := context.WithTimeout(ctx, contextTimeout)
@@ -108,7 +108,7 @@ func (r *FolderRepo) FindByShareToken(ctx context.Context, shareToken string) (*
 	return f, err
 }
 
-// Reorder 批量更新 sortOrder（folders.js PUT /reorder 的 bulkWrite）。
+// Reorder 批量更新 sortOrder（PUT /reorder 使用 bulkWrite）。
 // orderedIDs 为前端传入的顺序；第 i 个 id 的 sortOrder 置为 i。
 // 每个 updateOne 的 filter 都限定 userId，防止越权。
 func (r *FolderRepo) Reorder(ctx context.Context, userID any, orderedIDs []any) error {
@@ -127,7 +127,7 @@ func (r *FolderRepo) Reorder(ctx context.Context, userID any, orderedIDs []any) 
 	return err
 }
 
-// DeleteByID 物理删除收藏夹（folders.js DELETE /:id 的 folder.deleteOne()）。
+// DeleteByID 物理删除收藏夹。
 func (r *FolderRepo) DeleteByID(ctx context.Context, id any) error {
 	ctx, cancel := context.WithTimeout(ctx, contextTimeout)
 	defer cancel()
@@ -135,14 +135,14 @@ func (r *FolderRepo) DeleteByID(ctx context.Context, id any) error {
 	return err
 }
 
-// SavedFolderRepo 收藏夹收藏项仓储（models/SavedFolder.js / savedFolders.js）。
+// SavedFolderRepo 收藏夹收藏项仓储（savedfolders 集合）。
 type SavedFolderRepo struct{ coll *mongo.Collection }
 
 // NewSavedFolderRepo 构造收藏夹收藏项仓储。
 func NewSavedFolderRepo(coll *mongo.Collection) *SavedFolderRepo { return &SavedFolderRepo{coll: coll} }
 
 // Create 插入收藏项；补 createdAt 默认值并回填 _id。唯一键（userId+shareToken）冲突
-// 返回 IsDuplicateKey(err)（对齐 mongoose E11000）。
+// 返回 IsDuplicateKey(err)（E11000 冲突归一为 errDuplicateKey）。
 func (r *SavedFolderRepo) Create(ctx context.Context, s *model.SavedFolder) error {
 	ctx, cancel := context.WithTimeout(ctx, contextTimeout)
 	defer cancel()
@@ -162,8 +162,8 @@ func (r *SavedFolderRepo) Create(ctx context.Context, s *model.SavedFolder) erro
 	return nil
 }
 
-// FindByUser 查询用户收藏的他人收藏夹（savedFolders.js GET /）。
-// 对齐 find({ userId }).sort({ createdAt: -1 })；返回非 nil 空切片。
+// FindByUser 查询用户收藏的他人收藏夹（GET /saved-folders 列表使用）。
+// find({ userId }).sort({ createdAt: -1 })；返回非 nil 空切片。
 func (r *SavedFolderRepo) FindByUser(ctx context.Context, userID any) ([]model.SavedFolder, error) {
 	ctx, cancel := context.WithTimeout(ctx, contextTimeout)
 	defer cancel()
@@ -180,7 +180,7 @@ func (r *SavedFolderRepo) FindByUser(ctx context.Context, userID any) ([]model.S
 	return list, nil
 }
 
-// FindByUserAndShareToken 查用户是否已收藏某 shareToken（savedFolders.js POST /）。
+// FindByUserAndShareToken 查用户是否已收藏某 shareToken（POST / 使用）。
 // 不存在返回 ErrNotFound。
 func (r *SavedFolderRepo) FindByUserAndShareToken(ctx context.Context, userID any, shareToken string) (*model.SavedFolder, error) {
 	ctx, cancel := context.WithTimeout(ctx, contextTimeout)
@@ -193,7 +193,7 @@ func (r *SavedFolderRepo) FindByUserAndShareToken(ctx context.Context, userID an
 	return s, err
 }
 
-// FindOwnedByID 按 _id+userId 查收藏项（savedFolders.js DELETE /:id）；不存在返回 ErrNotFound。
+// FindOwnedByID 按 _id+userId 查收藏项（DELETE /:id 使用）；不存在返回 ErrNotFound。
 func (r *SavedFolderRepo) FindOwnedByID(ctx context.Context, id, userID any) (*model.SavedFolder, error) {
 	ctx, cancel := context.WithTimeout(ctx, contextTimeout)
 	defer cancel()
@@ -205,7 +205,7 @@ func (r *SavedFolderRepo) FindOwnedByID(ctx context.Context, id, userID any) (*m
 	return s, err
 }
 
-// DeleteByID 物理删除收藏项（savedFolders.js DELETE /:id 的 savedFolder.deleteOne()）。
+// DeleteByID 物理删除收藏项（deleteOne）。
 func (r *SavedFolderRepo) DeleteByID(ctx context.Context, id any) error {
 	ctx, cancel := context.WithTimeout(ctx, contextTimeout)
 	defer cancel()

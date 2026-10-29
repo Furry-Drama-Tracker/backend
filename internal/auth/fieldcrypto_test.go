@@ -2,17 +2,18 @@ package auth
 
 import "testing"
 
-// 黄金向量：由 Node 端 utils/crypto.js 同算法（key=sha256(secret) raw，AES-256-CBC）
-// 用 secret="my-secret-key" 加密 "hello世界123" 得到。用于验证与旧数据解密兼容。
+// 黄金向量：同算法（key=sha256(secret) raw，AES-256-CBC）
+// 用 secret="my-secret-key" 加密 "hello世界123" 得到的固定校验向量，勿改。
+// 用于验证与既有加密数据解密兼容。
 const (
 	nodeVectorSecret = "my-secret-key"
 	nodeVectorCipher = "enc:6dd9c98664e83b7e8bdb6235155c98df:724fd420c02a6d0a45a6d9d1c189af20"
-	nodeVectorPlain  = "hello世界123"
-	// key = sha256("my-secret-key") 的 hex（Node 端计算值）。
+	goldenPlain      = "hello世界123"
+	// key = sha256("my-secret-key") 的 hex（固定校验值）。
 	nodeVectorKeyHex = "1311f8fc80a7ea28d78dd7723f09c44c1754cd35160ca8e7133ae3d7f636a19a"
 )
 
-// TestFieldKeyDerivation 验证 key 派生与 Node 一致（ENCRYPTION_KEY 缺省回退 JWT_SECRET）。
+// TestFieldKeyDerivation 验证 key 派生（优先 ENCRYPTION_KEY，缺省回退 JWT_SECRET，勿改）。
 func TestFieldKeyDerivation(t *testing.T) {
 	if got := FieldKey("", nodeVectorSecret); got != nodeVectorKeyHex {
 		t.Fatalf("FieldKey derivation mismatch: got %s want %s", got, nodeVectorKeyHex)
@@ -23,11 +24,11 @@ func TestFieldKeyDerivation(t *testing.T) {
 	}
 }
 
-// TestDecryptNodeVector 验证能解密 Node 生成的旧数据。
+// TestDecryptNodeVector 验证能解密固定黄金向量（兼容既有数据）。
 func TestDecryptNodeVector(t *testing.T) {
 	got := DecryptField(nodeVectorCipher, nodeVectorKeyHex)
-	if got != nodeVectorPlain {
-		t.Fatalf("decrypt node vector mismatch: got %q want %q", got, nodeVectorPlain)
+	if got != goldenPlain {
+		t.Fatalf("decrypt golden vector mismatch: got %q want %q", got, goldenPlain)
 	}
 }
 

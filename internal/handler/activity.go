@@ -19,10 +19,10 @@ import (
 	"github.com/xiedada05/furry-drama-be-neo/internal/repository"
 )
 
-// 本文件实现 /api/activity 子域（行为逐分支照抄 backend/routes/activity.js）。
+// 本文件实现 /api/activity 子域。
 //
-// 注意：Express activity.js 没有独立 Activity collection——动态流由
-// Follow/SingleEpisode/Episode/Rating 实时聚合计算，本实现同样如此
+// 注意：动态流没有独立 Activity collection——由
+// Follow/SingleEpisode/Episode/Rating 实时聚合计算
 // （ActivityRepo 未注册到 repos.go，按约束不改动 repos.go）。
 
 // Activity 是 /api/activity 域 handler 容器。
@@ -38,7 +38,7 @@ func NewActivity(repos *repository.Repos, cfg *config.Config, amw *middleware.Au
 	return &Activity{Repos: repos, Config: cfg, AuthMW: amw, RL: rl}
 }
 
-// Register 挂载 /api/activity 全部端点（不含 /api 前缀；路径对齐 activity.js 子路径）。
+// Register 挂载 /api/activity 全部端点（不含 /api 前缀）。
 func (h *Activity) Register(g *gin.RouterGroup) {
 	g.GET("", h.AuthMW.Protect(), h.Feed)
 	g.GET("/", h.AuthMW.Protect(), h.Feed)
@@ -215,14 +215,14 @@ func (h *Activity) PublicFeed(c *gin.Context) {
 
 // ---- 动态项组装 ----
 
-// activityItem 是一条动态：sortTime 用于按 date 倒序排序（对齐
+// activityItem 是一条动态：sortTime 用于按 date 倒序排序（等价
 // activities.sort((a,b) => new Date(b.date) - new Date(a.date))），obj 为响应体。
 type activityItem struct {
 	sortTime time.Time
 	obj      gin.H
 }
 
-// newEpisodeItem 组装 new_episode 动态（对齐 activity.js 两处 newEpisodes 循环）。
+// newEpisodeItem 组装 new_episode 动态（动态流两处 newEpisodes 循环共用）。
 func newEpisodeItem(ep model.Episode, se model.SingleEpisode) activityItem {
 	var date any = se.ReleaseDate
 	var sortTime time.Time
@@ -249,7 +249,7 @@ func newEpisodeItem(ep model.Episode, se model.SingleEpisode) activityItem {
 	}
 }
 
-// statusChangeItem 组装 status_change 动态（对齐 activity.js 状态变更循环）。
+// statusChangeItem 组装 status_change 动态。
 func statusChangeItem(ep model.Episode) activityItem {
 	var st string
 	switch ep.Status {
@@ -276,8 +276,8 @@ func statusChangeItem(ep model.Episode) activityItem {
 	}
 }
 
-// highRatingItem 组装 protected 动态流中的 new_rating（对齐 activity.js
-// highRatings 循环：episodeMap 内剧集 + rating.score）。
+// highRatingItem 组装 protected 动态流中的 new_rating
+// （episodeMap 内剧集 + rating.score）。
 func highRatingItem(ep model.Episode, rt model.Rating) activityItem {
 	return activityItem{
 		sortTime: rt.CreatedAt,
@@ -295,7 +295,7 @@ func highRatingItem(ep model.Episode, rt model.Rating) activityItem {
 	}
 }
 
-// trendingItem 组装公开动态流中的 new_rating（对齐 activity.js trendingEpisodes 循环）。
+// trendingItem 组装公开动态流中的 new_rating。
 func trendingItem(ep model.Episode) activityItem {
 	return activityItem{
 		sortTime: ep.UpdatedAt,
@@ -359,7 +359,7 @@ func singleEpisodeIDs(singles []model.SingleEpisode) []primitive.ObjectID {
 	return out
 }
 
-// activityPage 解析动态流分页参数（对齐 activity.js 内联 parseInt，无钳制）。
+// activityPage 解析动态流分页参数（parseInt 语义，无钳制，固定契约）。
 func activityPage(c *gin.Context) (page, limit int) {
 	page = 1
 	if p, err := strconv.Atoi(c.Query("page")); err == nil {
@@ -372,7 +372,7 @@ func activityPage(c *gin.Context) (page, limit int) {
 	return page, limit
 }
 
-// sliceActivityItems 复刻 Array.prototype.slice(start, end) 对正索引的钳制。
+// sliceActivityItems 实现 Array.prototype.slice(start, end) 对正索引的钳制。
 func sliceActivityItems(items []activityItem, start, end int) []activityItem {
 	if start < 0 {
 		start = 0
@@ -389,7 +389,7 @@ func sliceActivityItems(items []activityItem, start, end int) []activityItem {
 	return items[start:end]
 }
 
-// orFirstNonEmpty 取第一个非空字符串，否则用备选（对齐 `a || b` 的 JS 真值语义）。
+// orFirstNonEmpty 取第一个非空字符串，否则用备选（等价 `a || b` 的 JS 真值语义）。
 func orFirstNonEmpty(v, fallback string) string {
 	if v != "" {
 		return v

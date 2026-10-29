@@ -16,7 +16,7 @@ import (
 	"github.com/xiedada05/furry-drama-be-neo/internal/repository"
 )
 
-// 本文件实现 /api/friend-links 子域（行为逐分支照抄 backend/routes/friendLinks.js）。
+// 本文件实现 /api/friend-links 子域。
 // 公开：GET /（列表）、POST /apply（可选鉴权 + altcha 校验）；
 // 登录用户：GET /my-applications；超管：GET /all、POST /、PUT/DELETE /:id。
 
@@ -41,7 +41,7 @@ func NewFriendLinks(repos *repository.Repos, cfg *config.Config, amw *middleware
 	return &FriendLinks{Repos: repos, Config: cfg, AuthMW: amw, RL: rl, Mail: mail, VerifyAltcha: verifyAltcha}
 }
 
-// Register 挂载 /api/friend-links 全部端点（路径照抄 Express 子路径）。
+// Register 挂载 /api/friend-links 全部端点。
 func (h *FriendLinks) Register(g *gin.RouterGroup) {
 	g.GET("", h.List)
 	g.POST("/apply", h.AuthMW.OptionalAuth(), h.Apply)
@@ -347,8 +347,8 @@ func (h *FriendLinks) Delete(c *gin.Context) {
 
 // ---- 通知 / 推送 / 邮件 ----
 
-// sendPushToUser 发送 Web Push（对齐 friendLinks.js 的 sendPushToUser）。
-// neo-server 当前未实现 PushSubscription 集合与 webpush 发送，为 no-op 占位
+// sendPushToUser 发送 Web Push。
+// 当前未实现 PushSubscription 集合与 webpush 发送，为 no-op 占位
 // （与 episodes 域 sendPushToUser 一致），由主 agent 接入推送域后替换。
 func (h *FriendLinks) sendPushToUser(userID, title, body, link string) {
 	_ = userID
@@ -357,9 +357,8 @@ func (h *FriendLinks) sendPushToUser(userID, title, body, link string) {
 	_ = link
 }
 
-// sendBatchFriendLinkApplyEmails 给超管批量发送友链申请邮件（对齐 notifyHelper.js
-// sendBatchNotificationEmails + prefKey friendLinkApply：仅发邮箱已验证且未显式
-// 关闭 friendLinkApply 偏好的用户）。fire-and-forget，失败静默。
+// sendBatchFriendLinkApplyEmails 给超管批量发送友链申请邮件（仅发邮箱已验证且未显式
+// 关闭 friendLinkApply 偏好的用户，固定契约）。fire-and-forget，失败静默。
 func (h *FriendLinks) sendBatchFriendLinkApplyEmails(ctx context.Context, superAdmins []repository.FriendLinksAdminTarget, applicantName string) {
 	if h.Mail == nil {
 		return
@@ -379,8 +378,7 @@ func (h *FriendLinks) sendBatchFriendLinkApplyEmails(ctx context.Context, superA
 	}
 }
 
-// sendFriendLinkStatusEmail 给申请者发送审核结果邮件（对齐 notifyHelper.js
-// sendNotificationEmailToUser + prefKey friendLinkStatus）。失败静默。
+// sendFriendLinkStatusEmail 给申请者发送审核结果邮件（受 friendLinkStatus 偏好控制）。失败静默。
 func (h *FriendLinks) sendFriendLinkStatusEmail(ctx context.Context, userID primitive.ObjectID, linkName, statusLabel string) {
 	if h.Mail == nil {
 		return
@@ -401,7 +399,7 @@ func (h *FriendLinks) sendFriendLinkStatusEmail(ctx context.Context, userID prim
 	}()
 }
 
-// buildFriendLinkApplyEmail 构造友链申请通知邮件（对齐 email.js sendFriendLinkApplyEmail）。
+// buildFriendLinkApplyEmail 构造友链申请通知邮件（文案是固定契约）。
 func (h *FriendLinks) buildFriendLinkApplyEmail(applicantName string) (string, string, string) {
 	url := cmsFrontendURL(h.Config) + "/admin/friend-links"
 	html := `<h2 style="margin:0 0 16px;color:#1e293b;font-size:22px;font-weight:700;">新友链申请</h2>` +
@@ -411,7 +409,7 @@ func (h *FriendLinks) buildFriendLinkApplyEmail(applicantName string) (string, s
 	return "新友链申请", html, "收到新的友链申请"
 }
 
-// buildFriendLinkStatusEmail 构造友链审核结果邮件（对齐 email.js sendFriendLinkStatusEmail）。
+// buildFriendLinkStatusEmail 构造友链审核结果邮件（文案是固定契约）。
 func (h *FriendLinks) buildFriendLinkStatusEmail(linkName, statusLabel string) (string, string, string) {
 	url := cmsFrontendURL(h.Config) + "/profile"
 	subject := "友链申请" + statusLabel

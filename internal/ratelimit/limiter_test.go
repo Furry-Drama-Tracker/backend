@@ -46,7 +46,7 @@ func TestNormalizeXFF(t *testing.T) {
 	}
 }
 
-// TestSpecParams 校验命名限流器参数逐项对齐 rateLimits.js（防回归）。
+// TestSpecParams 校验命名限流器参数为既定固定值（防回归）。
 func TestSpecParams(t *testing.T) {
 	cases := []struct {
 		name   string

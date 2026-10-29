@@ -19,14 +19,14 @@ import (
 	"github.com/xiedada05/furry-drama-be-neo/internal/repository"
 )
 
-// rssPubDateLayout 对齐 JS Date.prototype.toUTCString() 输出
+// rssPubDateLayout 等价 JS Date.prototype.toUTCString() 输出
 // （如 "Sun, 10 Aug 2026 12:34:56 GMT"）。
 const rssPubDateLayout = "Mon, 02 Jan 2006 15:04:05 GMT"
 
-// rssSevenDays 是 RSS 最近更新窗口（7 天，对齐 routes/rss.js sevenDaysAgo）。
+// rssSevenDays 是 RSS 最近更新窗口（7 天，固定契约）。
 const rssSevenDays = 7 * 24 * time.Hour
 
-// RSS 是 RSS 订阅域（/api/rss）handler 容器，行为逐端点对齐 backend/routes/rss.js。
+// RSS 是 RSS 订阅域（/api/rss）handler 容器。
 type RSS struct {
 	Repos  *repository.Repos
 	Config *config.Config
@@ -40,13 +40,13 @@ func NewRSS(repos *repository.Repos, cfg *config.Config, amw *middleware.Auth,
 	return &RSS{Repos: repos, Config: cfg, AuthMW: amw, RL: rl}
 }
 
-// Register 挂载 RSS 路由（路径照抄 Express 子路径，不含 /api 前缀）。
-// GET / 同时注册 "" 与 "/" 以覆盖 /api/rss 与 /api/rss/（Express 默认 strict routing=false
-// 两者均 200；gin 默认 RedirectTrailingSlash 会 301，故显式双注册）。
+// Register 挂载 RSS 路由（不含 /api 前缀）。
+// GET / 同时注册 "" 与 "/" 以覆盖 /api/rss 与 /api/rss/（契约要求两者均 200；
+// gin 默认 RedirectTrailingSlash 会 301，故显式双注册）。
 func (h *RSS) Register(g *gin.RouterGroup) {
 	g.GET("", h.Feed)
 	g.GET("/", h.Feed)
-	// superAdminProtect（仅 superadmin，对齐 rss.js 第 63 行）。
+	// superAdminProtect（仅 superadmin，固定契约）。
 	g.GET("/api-usage", h.AuthMW.Protect(middleware.RoleSuperAdmin), h.ApiUsage)
 }
 
@@ -118,7 +118,7 @@ func (h *RSS) Feed(c *gin.Context) {
 			se := &singles[i]
 			title, ok := titles[se.EpisodeID.Hex()]
 			if !ok {
-				// 被引用剧集已删除 → populate('episodeId') 得 null → 跳过（对齐 rss.js:52）。
+				// 被引用剧集已删除 → 关联查询得 null → 跳过（固定契约）。
 				continue
 			}
 			b.WriteString("<item><title>")
@@ -191,7 +191,7 @@ func (h *RSS) ApiUsage(c *gin.Context) {
 	if len(sorted) > 20 {
 		sorted = sorted[:20]
 	}
-	// 对齐 Object.entries(topEndpoints).sort(...).slice(0,20)：输出 [endpoint, count] 对数组。
+	// 等价 Object.entries(topEndpoints).sort(...).slice(0,20)：输出 [endpoint, count] 对数组。
 	top := make([][2]any, 0, len(sorted))
 	for _, e := range sorted {
 		top = append(top, [2]any{e.name, e.count})
@@ -208,7 +208,7 @@ func (h *RSS) ApiUsage(c *gin.Context) {
 }
 
 // loadSiteMeta 读取站点名称与描述（SiteContent 'settings'/'about'），
-// 对齐 rss.js:24-35：单个 try/catch 包裹——settings 存在但 JSON.parse 抛错或 DB 错误时
+// 容错语义是固定契约：单个错误处理包裹——settings 存在但 JSON 解析抛错或 DB 错误时
 // 跳过 about 读取；settings 缺失/无 siteName 时正常继续读 about。
 func (h *RSS) loadSiteMeta(ctx context.Context) (siteName, siteDesc string) {
 	siteName = "兽剧聚合平台"
@@ -239,7 +239,7 @@ func (h *RSS) loadSiteMeta(ctx context.Context) (siteName, siteDesc string) {
 	return siteName, siteDesc
 }
 
-// escapeXML 对齐 rss.js escapeXml：转义 & < > " '；空串原样返回。
+// escapeXML 转义 & < > " '；空串原样返回（转义表是固定契约）。
 func escapeXML(s string) string {
 	if s == "" {
 		return ""

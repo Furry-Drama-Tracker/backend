@@ -17,8 +17,7 @@ import (
 	"github.com/xiedada05/furry-drama-be-neo/internal/repository"
 )
 
-// 本文件实现 /api/follows 与 /api/favorites 两个子域（行为逐分支照抄
-// backend/routes/follows.js 与 favorites.js）。
+// 本文件实现 /api/follows 与 /api/favorites 两个子域。
 
 // Follows 是 /api/follows 域 handler 容器。
 type Follows struct {
@@ -64,8 +63,8 @@ func (h *Favorites) Register(g *gin.RouterGroup) {
 }
 
 // parseRef 解析 hex 引用（episodeId/folderId）。
-// 空串返回 ok=false（对齐 mongoose 对 undefined 的宽松处理），非法 hex 返回 error
-// （对齐 mongoose CastError，handler 视为 500）。
+// 空串视为字段缺失（宽松处理，ok=false），非法 hex 返回 error
+// （handler 视为 500 Server error，固定契约）。
 func parseRef(s string) (primitive.ObjectID, bool, error) {
 	if s == "" {
 		return primitive.NilObjectID, false, nil
@@ -79,7 +78,7 @@ func parseRef(s string) (primitive.ObjectID, bool, error) {
 
 // ---- follows ----
 
-// followWriteRow 对齐 follows.js POST /add 的 res.json(follow)（folderId 缺省输出 null）。
+// followWriteRow 组装 POST /add 响应体（folderId 缺省输出 null，固定契约）。
 type followWriteRow struct {
 	ID                 primitive.ObjectID  `json:"_id"`
 	UserID             primitive.ObjectID  `json:"userId"`
@@ -89,7 +88,7 @@ type followWriteRow struct {
 	CreatedAt          time.Time           `json:"createdAt"`
 }
 
-// followListRow 对齐 follows.js GET /list 单条（populate episodeId/folderId 后）。
+// followListRow 组装 GET /list 单条（episodeId/folderId 为关联查询后的对象）。
 type followListRow struct {
 	ID                 primitive.ObjectID `json:"_id"`
 	UserID             primitive.ObjectID `json:"userId"`
@@ -125,7 +124,7 @@ func (h *Follows) Add(c *gin.Context) {
 		errors.AbortWithAppError(c, errors.New(500, "Server error"), h.Config.IsDev)
 		return
 	}
-	// 仅允许追番已审核通过的剧集（对齐 follows.js 的 reviewStatus 检查）。
+	// 仅允许追番已审核通过的剧集（reviewStatus 检查，固定契约）。
 	if episode.ReviewStatus != "" && episode.ReviewStatus != "approved" {
 		errors.AbortWithAppError(c, errors.New(403, "该剧集暂不可追番"), h.Config.IsDev)
 		return
@@ -242,7 +241,7 @@ func (h *Follows) List(c *gin.Context) {
 
 	switch sortParam {
 	case "name", "rating":
-		// 对齐 follows.js：取 min(total, page*limit+100) 条，内存排序后切片。
+		// 排序分支：取 min(total, page*limit+100) 条，内存排序后切片（固定契约）。
 		maxItems := total
 		if m := int64(pq.Page*pq.Limit + 100); maxItems > m {
 			maxItems = m
@@ -288,7 +287,7 @@ func (h *Follows) List(c *gin.Context) {
 			errors.AbortWithAppError(c, errors.New(500, "Server error"), h.Config.IsDev)
 			return
 		}
-		// 缺 lastWatched 的按 epoch 视为最旧（对齐 historyMap[...] || new Date(0)）。
+		// 缺 lastWatched 的按 epoch 视为最旧（等价 `x || new Date(0)`）。
 		sort.SliceStable(allItems, func(i, j int) bool {
 			return historyMap[allItems[i].EpisodeID].After(historyMap[allItems[j].EpisodeID])
 		})
@@ -358,7 +357,7 @@ func (h *Follows) Check(c *gin.Context) {
 		errors.AbortWithAppError(c, errors.New(500, "Server error"), h.Config.IsDev)
 		return
 	}
-	// 未追番时 followedAtEpisodes 省略（对齐 Express 输出 undefined 被 JSON 丢弃）。
+	// 未追番时 followedAtEpisodes 省略（undefined 键被 JSON 序列化丢弃，固定契约）。
 	if follow == nil {
 		c.JSON(200, gin.H{"isFollowing": false})
 		return
@@ -368,7 +367,7 @@ func (h *Follows) Check(c *gin.Context) {
 
 // ---- favorites ----
 
-// favoriteListRow 对齐 favorites.js GET /list 单条（populate episodeId/folderId 后）。
+// favoriteListRow 组装 GET /list 单条（episodeId/folderId 为关联查询后的对象）。
 type favoriteListRow struct {
 	ID        primitive.ObjectID `json:"_id"`
 	UserID    primitive.ObjectID `json:"userId"`
@@ -404,7 +403,7 @@ func (h *Favorites) Add(c *gin.Context) {
 		errors.AbortWithAppError(c, errors.New(500, "Server error"), h.Config.IsDev)
 		return
 	}
-	// 仅允许收藏已审核通过的剧集（对齐 favorites.js 的 reviewStatus 检查）。
+	// 仅允许收藏已审核通过的剧集（reviewStatus 检查，固定契约）。
 	if episode.ReviewStatus != "" && episode.ReviewStatus != "approved" {
 		errors.AbortWithAppError(c, errors.New(403, "该剧集暂不可收藏"), h.Config.IsDev)
 		return
@@ -424,7 +423,7 @@ func (h *Favorites) Add(c *gin.Context) {
 			return
 		}
 		if ok {
-			// 收藏夹必须存在且属于当前用户（对齐 favorites.js 的归属校验）。
+			// 收藏夹必须存在且属于当前用户（归属校验）。
 			if _, ferr := h.Repos.Folders.FollowFolderByIDAndUser(c.Request.Context(), folderID, user.ID); ferr != nil {
 				if repository.IsNotFound(ferr) {
 					errors.AbortWithAppError(c, errors.New(400, "收藏夹不存在或不属于当前用户"), h.Config.IsDev)
@@ -679,7 +678,7 @@ func (h *Favorites) Check(c *gin.Context) {
 
 // ---- helpers ----
 
-// followEpisodeIDs 提取去重后的剧集 ID 列表（populate episodeId 用）。
+// followEpisodeIDs 提取去重后的剧集 ID 列表（关联查询 episodeId 用）。
 func followEpisodeIDs(items []model.Follow) []primitive.ObjectID {
 	ids := make([]primitive.ObjectID, 0, len(items))
 	seen := make(map[primitive.ObjectID]struct{}, len(items))
@@ -696,7 +695,7 @@ func followEpisodeIDs(items []model.Follow) []primitive.ObjectID {
 	return ids
 }
 
-// favoriteEpisodeIDs 提取去重后的剧集 ID 列表（populate episodeId 用）。
+// favoriteEpisodeIDs 提取去重后的剧集 ID 列表（关联查询 episodeId 用）。
 func favoriteEpisodeIDs(items []model.Favorite) []primitive.ObjectID {
 	ids := make([]primitive.ObjectID, 0, len(items))
 	seen := make(map[primitive.ObjectID]struct{}, len(items))
@@ -713,7 +712,7 @@ func favoriteEpisodeIDs(items []model.Favorite) []primitive.ObjectID {
 	return ids
 }
 
-// followFolderIDs 提取去重后的收藏夹 ID 列表（populate folderId 用）。
+// followFolderIDs 提取去重后的收藏夹 ID 列表（关联查询 folderId 用）。
 func followFolderIDs(items []model.Follow) []primitive.ObjectID {
 	ids := make([]primitive.ObjectID, 0)
 	seen := make(map[primitive.ObjectID]struct{})
@@ -730,7 +729,7 @@ func followFolderIDs(items []model.Follow) []primitive.ObjectID {
 	return ids
 }
 
-// favoriteFolderIDs 提取去重后的收藏夹 ID 列表（populate folderId 用）。
+// favoriteFolderIDs 提取去重后的收藏夹 ID 列表（关联查询 folderId 用）。
 func favoriteFolderIDs(items []model.Favorite) []primitive.ObjectID {
 	ids := make([]primitive.ObjectID, 0)
 	seen := make(map[primitive.ObjectID]struct{})
@@ -747,7 +746,7 @@ func favoriteFolderIDs(items []model.Favorite) []primitive.ObjectID {
 	return ids
 }
 
-// followTitle 取追番项对应剧集标题（缺失回退空串，对齐 a.episodeId?.title || ”）。
+// followTitle 取追番项对应剧集标题（缺失回退空串，等价 `a.episodeId?.title || ”`）。
 func followTitle(m map[primitive.ObjectID]repository.FollowsEpisodeDoc, item model.Follow) string {
 	if ep, ok := m[item.EpisodeID]; ok {
 		return ep.Title
@@ -755,7 +754,7 @@ func followTitle(m map[primitive.ObjectID]repository.FollowsEpisodeDoc, item mod
 	return ""
 }
 
-// followRating 取追番项对应剧集均分（缺失回退 0，对齐 a.episodeId?.averageRating || 0）。
+// followRating 取追番项对应剧集均分（缺失回退 0，等价 `a.episodeId?.averageRating || 0`）。
 func followRating(m map[primitive.ObjectID]repository.FollowsEpisodeDoc, item model.Follow) float64 {
 	if ep, ok := m[item.EpisodeID]; ok {
 		return ep.AverageRating
@@ -779,7 +778,7 @@ func favoriteRating(m map[primitive.ObjectID]repository.FollowsEpisodeDoc, item 
 	return 0
 }
 
-// followSlice 复刻 Array.prototype.slice(start, end) 对正索引的钳制。
+// followSlice 实现 Array.prototype.slice(start, end) 对正索引的钳制。
 func followSlice(items []model.Follow, start, end int) []model.Follow {
 	if start < 0 {
 		start = 0
@@ -796,7 +795,7 @@ func followSlice(items []model.Follow, start, end int) []model.Follow {
 	return items[start:end]
 }
 
-// favoriteSlice 复刻 Array.prototype.slice(start, end) 对正索引的钳制。
+// favoriteSlice 实现 Array.prototype.slice(start, end) 对正索引的钳制。
 func favoriteSlice(items []model.Favorite, start, end int) []model.Favorite {
 	if start < 0 {
 		start = 0

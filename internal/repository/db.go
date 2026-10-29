@@ -11,7 +11,7 @@ import (
 )
 
 // Connect 建立 MongoDB 连接并 Ping 验证，返回指定库的 Database。
-// pool 为连接池大小（对齐 config/db.js maxPoolSize）。
+// pool 为连接池大小（SetMaxPoolSize）。
 // name 为空时从 URI 的 path 提取库名。
 func Connect(ctx context.Context, uri, name string, pool int) (*mongo.Database, error) {
 	if pool <= 0 {

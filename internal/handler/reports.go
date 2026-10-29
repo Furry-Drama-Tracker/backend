@@ -15,7 +15,7 @@ import (
 	"github.com/xiedada05/furry-drama-be-neo/internal/repository"
 )
 
-// 本文件实现 /api/reports 子域（行为逐分支照抄 backend/routes/reports.js）。
+// 本文件实现 /api/reports 子域。
 // 3 个端点：POST /（提交举报，protect）、GET /list（举报列表，adminOnly）、
 // PUT /resolve/:id（处理举报，adminOnly）。
 
@@ -32,7 +32,7 @@ func NewReports(repos *repository.Repos, cfg *config.Config, amw *middleware.Aut
 	return &Reports{Repos: repos, Config: cfg, AuthMW: amw, RL: rl}
 }
 
-// Register 挂载 /api/reports 全部端点（不含 /api 前缀；路径对齐 reports.js 子路径）。
+// Register 挂载 /api/reports 全部端点（不含 /api 前缀）。
 func (h *Reports) Register(g *gin.RouterGroup) {
 	adminOnly := h.AuthMW.Protect(middleware.RoleAdmin, middleware.RoleSuperAdmin)
 	g.POST("", h.AuthMW.Protect(), h.Create)
@@ -71,7 +71,7 @@ func (h *Reports) Create(c *gin.Context) {
 		c.JSON(400, gin.H{"message": "描述不能超过2000个字符"})
 		return
 	}
-	// targetId 非法 hex → CastError → 500（对齐 mongoose）。
+	// 固定契约：targetId 非法 hex → 500 Server error。
 	targetID, err := primitive.ObjectIDFromHex(req.TargetID)
 	if err != nil {
 		serverError(c)
@@ -153,7 +153,7 @@ func (h *Reports) List(c *gin.Context) {
 	}
 	list := make([]gin.H, 0, len(reports))
 	for i := range reports {
-		var reporter any // nil → null（对齐 populate 已删除举报者）
+		var reporter any // nil → null（举报者已删除时输出 null，固定契约）
 		if r, ok := refs[reports[i].ReporterID.Hex()]; ok {
 			reporter = gin.H{"_id": r.ID.Hex(), "accountId": r.AccountID, "username": r.Username}
 		}
@@ -218,7 +218,7 @@ func (h *Reports) Resolve(c *gin.Context) {
 	c.JSON(200, reportsJSON(doc, doc.ReporterID.Hex()))
 }
 
-// reportsJSON 渲染举报文档（reporter 为 hex 或 populate 对象）。
+// reportsJSON 渲染举报文档（reporter 为 hex 或关联对象）。
 func reportsJSON(doc *repository.ReportsDoc, reporter any) gin.H {
 	return gin.H{
 		"_id":         doc.ID.Hex(),
@@ -236,7 +236,7 @@ func reportsJSON(doc *repository.ReportsDoc, reporter any) gin.H {
 	}
 }
 
-// validReportReason 判断举报原因是否合法（对齐 reason enum）。
+// validReportReason 判断举报原因是否合法（枚举是固定契约，勿增删）。
 func validReportReason(reason string) bool {
 	switch reason {
 	case "inappropriate", "copyright", "spam", "misleading", "other":
@@ -245,7 +245,7 @@ func validReportReason(reason string) bool {
 	return false
 }
 
-// utf16Len 计算字符串的 UTF-16 码元长度（对齐 JS String.prototype.length）。
+// utf16Len 计算字符串的 UTF-16 码元长度（等价 JS String.prototype.length）。
 func utf16Len(s string) int {
 	n := 0
 	for _, r := range s {
@@ -258,9 +258,9 @@ func utf16Len(s string) int {
 	return n
 }
 
-// sendPushToUser 发送 Web Push（对齐 routes/notifications.js sendPushToUser，
-// fire-and-forget 语义）。neo-server 当前未实现 PushSubscription 集合与 webpush
-// 发送，本函数为 no-op 占位；由主 agent 接入推送域后替换实现。
+// sendPushToUser 发送 Web Push（fire-and-forget 语义）。
+// 当前未实现 PushSubscription 集合与 webpush 发送，
+// 本函数为 no-op 占位；由主 agent 接入推送域后替换实现。
 func (h *Reports) sendPushToUser(userIDs []primitive.ObjectID, title, body, url string) {
 	_ = userIDs
 	_ = title

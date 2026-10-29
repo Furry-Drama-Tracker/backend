@@ -13,14 +13,14 @@ import (
 	"github.com/xiedada05/furry-drama-be-neo/internal/model"
 )
 
-// FriendLinkRepo 友链仓储（models/FriendLink.js → friendlinks 集合）。
+// FriendLinkRepo 友链仓储（friendlinks 集合）。
 type FriendLinkRepo struct{ coll *mongo.Collection }
 
 // NewFriendLinkRepo 构造友链仓储。
 func NewFriendLinkRepo(coll *mongo.Collection) *FriendLinkRepo { return &FriendLinkRepo{coll: coll} }
 
 // FindActive 查询对外展示的友链（isActive 且 approved 或 status 缺失），
-// 按 order/createdAt 升序（对齐 GET / 的 find().sort({order:1, createdAt:1})）。
+// 按 order/createdAt 升序（find().sort({order:1, createdAt:1})）。
 func (r *FriendLinkRepo) FindActive(ctx context.Context) ([]model.FriendLink, error) {
 	ctx, cancel := context.WithTimeout(ctx, contextTimeout)
 	defer cancel()
@@ -42,7 +42,7 @@ func (r *FriendLinkRepo) FindActive(ctx context.Context) ([]model.FriendLink, er
 	return list, nil
 }
 
-// FindByApplicant 按申请者查友链，createdAt 倒序（对齐 GET /my-applications）。
+// FindByApplicant 按申请者查友链，createdAt 倒序（GET /my-applications 使用）。
 func (r *FriendLinkRepo) FindByApplicant(ctx context.Context, applicantID any) ([]model.FriendLink, error) {
 	ctx, cancel := context.WithTimeout(ctx, contextTimeout)
 	defer cancel()
@@ -59,7 +59,7 @@ func (r *FriendLinkRepo) FindByApplicant(ctx context.Context, applicantID any) (
 	return list, nil
 }
 
-// FindAll 查询全部友链，按 order/createdAt 升序（对齐 GET /all）。
+// FindAll 查询全部友链，按 order/createdAt 升序（GET /all 使用）。
 func (r *FriendLinkRepo) FindAll(ctx context.Context) ([]model.FriendLink, error) {
 	ctx, cancel := context.WithTimeout(ctx, contextTimeout)
 	defer cancel()
@@ -94,7 +94,7 @@ func (r *FriendLinkRepo) Create(ctx context.Context, l *model.FriendLink) error 
 	return err
 }
 
-// FindOneAndUpdate 按 ID 更新并返回新文档（对齐 findByIdAndUpdate(id, update, {new:true})）。
+// FindOneAndUpdate 按 ID 更新并返回更新后的文档。
 func (r *FriendLinkRepo) FindOneAndUpdate(ctx context.Context, id any, update bson.M) (*model.FriendLink, error) {
 	ctx, cancel := context.WithTimeout(ctx, contextTimeout)
 	defer cancel()
@@ -107,7 +107,7 @@ func (r *FriendLinkRepo) FindOneAndUpdate(ctx context.Context, id any, update bs
 	return l, err
 }
 
-// FindOneAndDelete 按 ID 删除并返回被删文档（对齐 FriendLink.findByIdAndDelete）。
+// FindOneAndDelete 按 ID 删除并返回被删文档。
 func (r *FriendLinkRepo) FindOneAndDelete(ctx context.Context, id any) (*model.FriendLink, error) {
 	ctx, cancel := context.WithTimeout(ctx, contextTimeout)
 	defer cancel()

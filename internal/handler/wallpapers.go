@@ -17,7 +17,7 @@ import (
 	"github.com/xiedada05/furry-drama-be-neo/internal/upload"
 )
 
-// 本文件实现 /api/wallpapers 子域（行为逐分支照抄 backend/routes/wallpapers.js）。
+// 本文件实现 /api/wallpapers 子域。
 // 公开：GET /system；超管：GET /system/all、POST /system、PUT/DELETE /system/:id；
 // 登录用户：GET/POST/DELETE /personal。
 
@@ -35,7 +35,7 @@ func NewWallpapers(repos *repository.Repos, cfg *config.Config, amw *middleware.
 	return &Wallpapers{Repos: repos, Config: cfg, AuthMW: amw, RL: rl}
 }
 
-// Register 挂载 /api/wallpapers 全部端点（路径照抄 Express 子路径）。
+// Register 挂载 /api/wallpapers 全部端点。
 func (h *Wallpapers) Register(g *gin.RouterGroup) {
 	super := h.AuthMW.Protect(middleware.RoleSuperAdmin)
 	g.GET("/system", h.SystemList)
@@ -184,7 +184,7 @@ func (h *Wallpapers) SystemDelete(c *gin.Context) {
 		c.JSON(500, gin.H{"message": "删除系统壁纸失败"})
 		return
 	}
-	// 删除文件（对齐 fs.unlink(path, cb) fire-and-forget）。
+	// 删除文件（fire-and-forget，失败不影响响应）。
 	if w.URL != "" && strings.HasPrefix(w.URL, "/uploads/") {
 		_ = upload.RemoveFile(strings.TrimPrefix(w.URL, "/uploads/"))
 	}
@@ -237,7 +237,7 @@ func (h *Wallpapers) PersonalUpload(c *gin.Context) {
 	}
 	// 限制个人壁纸数量。
 	if len(u.PersonalWallpapers) >= 20 {
-		// 删除刚上传的文件（对齐 fs.unlinkSync）。
+		// 删除刚上传的文件（同步删除）。
 		_ = upload.RemoveFile(strings.TrimPrefix(url, "/uploads/"))
 		c.JSON(400, gin.H{"message": "个人壁纸最多 20 张，请先删除旧的"})
 		return
@@ -267,18 +267,17 @@ func (h *Wallpapers) PersonalDelete(c *gin.Context) {
 		c.JSON(500, gin.H{"message": "删除个人壁纸失败"})
 		return
 	}
-	// 删除文件（对齐 fs.unlink(path, cb) fire-and-forget）。
+	// 删除文件（fire-and-forget，失败不影响响应）。
 	if url != "" && strings.HasPrefix(url, "/uploads/") {
 		_ = upload.RemoveFile(strings.TrimPrefix(url, "/uploads/"))
 	}
 	c.JSON(200, gin.H{"message": "已删除"})
 }
 
-// abortImageUploadError 渲染图片上传错误（对齐 wallpapers.js 无本地错误
-// 中间件时由全局错误处理分支产生的状态码/文案）：
+// abortImageUploadError 渲染图片上传错误（状态码/文案是固定契约，勿改）：
 //   - 无文件 → 400 请选择要上传的图片
-//   - 超大小 → MulterError LIMIT_FILE_SIZE → 400 "文件上传错误: File too large"
-//   - 类型不符 → fileFilter 抛普通 Error → 全局 500（dev 暴露 message）
+//   - 超大小 → 400 "文件上传错误: File too large"
+//   - 类型不符 → 全局 500（dev 暴露 message）
 //   - 魔数不符 → 400 "文件内容与类型不匹配，仅支持图片文件"
 func abortImageUploadError(c *gin.Context, cfg *config.Config, err error, fallback string) {
 	if err == upload.ErrNoFile {

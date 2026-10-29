@@ -13,7 +13,7 @@ import (
 	"github.com/xiedada05/furry-drama-be-neo/internal/repository"
 )
 
-// ConcurrentRefreshGrace 是并发宽限期（对齐 authFactory.js 30s）。
+// ConcurrentRefreshGrace 是并发宽限期（固定 30s，勿改）。
 const ConcurrentRefreshGrace = 30 * time.Second
 
 // RefreshResult 是 refresh 校验通过后的结果。
@@ -22,7 +22,7 @@ type RefreshResult struct {
 	Session *model.UserSession
 }
 
-// VerifyRefreshToken 校验 refresh token 并原子"取用并作废"（对齐 authFactory.js verifyRefreshToken）。
+// VerifyRefreshToken 校验 refresh token 并原子"取用并作废"（轮换语义为固定契约，勿改）。
 // 返回 *errors.AppError（带 messageKey），handler 依状态码渲染。
 func (s *AuthService) VerifyRefreshToken(ctx context.Context, refreshToken string) (*RefreshResult, error) {
 	if refreshToken == "" {
@@ -79,8 +79,7 @@ func (s *AuthService) handleRefreshMiss(ctx context.Context, hash, claimsID stri
 }
 
 // RotateRefresh 轮换双 token：旧 session 已作废（VerifyRefreshToken 已做），
-// 新建 session（继承 deviceInfo/ip/loginAt），设新 cookie。
-// 对齐 session.js refresh 成功路径 L527-576。
+// 新建 session（继承 deviceInfo/ip/loginAt），设新 cookie（流程为固定契约）。
 func (s *AuthService) RotateRefresh(c *gin.Context, user *model.User, old *model.UserSession) error {
 	accessToken, err := s.Signer.Sign(user.ID.Hex(), "access", s.Config.JWT.AccessTTL, nil)
 	if err != nil {
@@ -107,8 +106,8 @@ func (s *AuthService) RotateRefresh(c *gin.Context, user *model.User, old *model
 	return nil
 }
 
-// DeactivateForLogout 登出吊销：双路置废（refresh hash + access/token hash）并清 cookie。
-// 对齐 session.js L487-512。
+// DeactivateForLogout 登出吊销：双路置废（refresh hash + access/token hash）并清 cookie
+// （双路吊销为固定契约，勿删任一路径）。
 func (s *AuthService) DeactivateForLogout(c *gin.Context, refreshToken, accessToken string) {
 	if refreshToken != "" {
 		hash := auth.HashToken(refreshToken)

@@ -231,7 +231,7 @@ func TestRSSFeedEscapesXML(t *testing.T) {
 // TestRSSApiUsage api-usage 统计：dailyTotals/topEndpoints/raw。
 func TestRSSApiUsage(t *testing.T) {
 	ts, db, repos, signer := rssTranslateBackupApp(t)
-	// 直接插入 api-usage 文档（对齐 Express ApiUsage 集合形态）。
+	// 直接插入 api-usage 文档（与既有 ApiUsage 集合形态一致）。
 	docs := []any{
 		bson.M{"endpoint": "GET /episodes", "method": "GET", "count": 5, "date": time.Now().UTC().Format("2006-01-02")},
 		bson.M{"endpoint": "GET /episodes", "method": "GET", "count": 3, "date": time.Now().UTC().Add(-1 * 24 * time.Hour).Format("2006-01-02")},
@@ -533,7 +533,7 @@ func TestBackupImport(t *testing.T) {
 }
 
 // TestBackupImportOverwrite 覆盖导入：200 且 results 含集合计数或错误串
-// （独立 mongod 无事务支持时 overwrite 走 error: 导入失败，与 Express 行为一致）。
+// （独立 mongod 无事务支持时 overwrite 走 error: 导入失败，固定行为）。
 func TestBackupImportOverwrite(t *testing.T) {
 	ts, db, repos, signer := rssTranslateBackupApp(t)
 	_, token := rtbNewRoleUser(t, repos, signer, "superadmin", "bkw")

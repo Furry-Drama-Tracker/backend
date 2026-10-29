@@ -21,7 +21,7 @@ type DeviceVerifyResult struct {
 }
 
 // VerifyDevice POST /api/auth/verify-device：校验邮箱内的一次性验证链接，
-// 生成设备登录码返回给前端。对齐 device.js L48-78。
+// 生成设备登录码返回给前端（流程为固定契约）。
 func (s *AuthService) VerifyDevice(ctx context.Context, token string) (*DeviceVerifyResult, error) {
 	if token == "" {
 		return nil, errors.New(400, "缺少验证令牌")
@@ -57,7 +57,7 @@ func (s *AuthService) VerifyDevice(ctx context.Context, token string) (*DeviceVe
 }
 
 // ConfirmDeviceLogin POST /api/auth/confirm-device-login：用户输入 6 位码完成登录
-// 或进入 2FA 流程。对齐 device.js L82-157。
+// 或进入 2FA 流程（分支顺序为固定契约，勿重排）。
 func (s *AuthService) ConfirmDeviceLogin(c *gin.Context, loginCode string) (*LoginResult, error) {
 	if loginCode == "" {
 		return nil, errors.New(400, "请输入验证码")
@@ -120,8 +120,7 @@ func (s *AuthService) ConfirmDeviceLogin(c *gin.Context, loginCode string) (*Log
 	return &LoginResult{User: user}, nil
 }
 
-// Login2FA POST /api/auth/login-2fa：TOTP 或备份码校验后完成登录。
-// 对齐 device.js L160-264。
+// Login2FA POST /api/auth/login-2fa：TOTP 或备份码校验后完成登录（流程为固定契约）。
 func (s *AuthService) Login2FA(c *gin.Context, emailAddr, challenge, token string, deviceInfo *auth.DeviceInfoPayload) (*LoginResult, error) {
 	if challenge == "" {
 		return nil, errors.New(400, "缺少2FA挑战令牌，请重新登录")

@@ -13,14 +13,14 @@ import (
 	"github.com/xiedada05/furry-drama-be-neo/internal/model"
 )
 
-// BannerRepo 横幅仓储（models/Banner.js → banners 集合）。
+// BannerRepo 横幅仓储（banners 集合）。
 type BannerRepo struct{ coll *mongo.Collection }
 
 // NewBannerRepo 构造横幅仓储。
 func NewBannerRepo(coll *mongo.Collection) *BannerRepo { return &BannerRepo{coll: coll} }
 
 // FindActiveSorted 查询 active=true 的轮播图，按 order 升序、createdAt 倒序
-// （对齐 banners.js GET / 的 find({active:true}).sort({order:1, createdAt:-1})）。
+// （find({active:true}).sort({order:1, createdAt:-1})）。
 func (r *BannerRepo) FindActiveSorted(ctx context.Context) ([]model.Banner, error) {
 	ctx, cancel := context.WithTimeout(ctx, contextTimeout)
 	defer cancel()
@@ -28,7 +28,7 @@ func (r *BannerRepo) FindActiveSorted(ctx context.Context) ([]model.Banner, erro
 }
 
 // FindAllSorted 查询全部轮播图，按 order 升序、createdAt 倒序
-// （对齐 banners.js GET /all 的 find({}).sort({order:1, createdAt:-1})）。
+// （find({}).sort({order:1, createdAt:-1})）。
 func (r *BannerRepo) FindAllSorted(ctx context.Context) ([]model.Banner, error) {
 	ctx, cancel := context.WithTimeout(ctx, contextTimeout)
 	defer cancel()
@@ -50,7 +50,7 @@ func (r *BannerRepo) findSorted(ctx context.Context, query bson.M) ([]model.Bann
 	return list, nil
 }
 
-// FindByID 按 ID 查轮播图（对齐 Banner.findById）；不存在返回 ErrNotFound。
+// FindByID 按 ID 查轮播图；不存在返回 ErrNotFound。
 func (r *BannerRepo) FindByID(ctx context.Context, id any) (*model.Banner, error) {
 	ctx, cancel := context.WithTimeout(ctx, contextTimeout)
 	defer cancel()
@@ -62,8 +62,8 @@ func (r *BannerRepo) FindByID(ctx context.Context, id any) (*model.Banner, error
 	return b, err
 }
 
-// Create 插入轮播图；未显式设置时补 _id/createdAt（对齐 mongoose 自动 _id 与
-// default: Date.now）。
+// Create 插入轮播图；未显式设置时补 _id/createdAt
+// （与既有集合文档的默认值形态一致）。
 func (r *BannerRepo) Create(ctx context.Context, b *model.Banner) error {
 	ctx, cancel := context.WithTimeout(ctx, contextTimeout)
 	defer cancel()
@@ -77,7 +77,7 @@ func (r *BannerRepo) Create(ctx context.Context, b *model.Banner) error {
 	return err
 }
 
-// Save 整文档覆盖保存（对齐 banner.save()；__v 自增对齐 mongoose versionKey）。
+// Save 整文档覆盖保存（__v 自增）。
 func (r *BannerRepo) Save(ctx context.Context, b *model.Banner) error {
 	ctx, cancel := context.WithTimeout(ctx, contextTimeout)
 	defer cancel()
@@ -86,7 +86,7 @@ func (r *BannerRepo) Save(ctx context.Context, b *model.Banner) error {
 	return err
 }
 
-// DeleteByID 按 ID 删除轮播图（对齐 Banner.findByIdAndDelete）。
+// DeleteByID 按 ID 删除轮播图。
 func (r *BannerRepo) DeleteByID(ctx context.Context, id any) error {
 	ctx, cancel := context.WithTimeout(ctx, contextTimeout)
 	defer cancel()

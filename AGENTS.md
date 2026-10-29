@@ -1,6 +1,6 @@
 # neo-server — AGENTS.md
 
-Go/Gin 版兽剧聚合平台后端。**行为与 `../backend`（Express 5 + Mongoose 9）向下兼容**，前端零改动可切换。
+Go/Gin 版兽剧聚合平台后端，前端零改动对接。
 
 - 独立 git 仓库，license AGPL-3.0-or-later（见 LICENSE.md）
 - module `github.com/xiedada05/furry-drama-be-neo`，Go 1.26
@@ -23,7 +23,7 @@ go run ./cmd/server --listen=unix:/run/furry-drama-be-neo.sock   # Unix socket
 
 - **`.env` 文件**：启动时自动读取当前目录的 `.env`（如果存在），仅为未在真实环境中设置的变量注入值。兼容 dotenv 格式（`KEY=VALUE`、`#` 注释、`export` 前缀、引号包裹）。
 - **ini 配置文件**：默认按 OS 读取（Linux: `/etc/furry-drama-tracker/backend.ini`，macOS: `/Library/Application Support/furry-drama-tracker/backend.ini`，Windows: `C:\ProgramData\furry-drama-tracker\backend.ini`），`--config=` 覆盖。section：`[server] [database] [jwt] [email] [vapid] [security]`。
-- **环境变量**：同名环境变量优先于 ini 和 `.env`（供 systemd 注入密钥、CI 注入 DEV_API_TOKEN 等）。兼容旧 `.env` 变量名：`JWT_SECRET MONGO_URI ENCRYPTION_KEY ALTCHA_HMAC_KEY FRONTEND_URL SITE_URL ALLOWED_ORIGINS EMAIL_* VAPID_* DEMO_EMAILS DEV_API_TOKEN PORT NODE_ENV SKIP_RATE_LIMIT`。
+- **环境变量**：同名环境变量优先于 ini 和 `.env`（供 systemd 注入密钥、CI 注入 DEV_API_TOKEN 等）。兼容 `.env` 变量名：`JWT_SECRET MONGO_URI ENCRYPTION_KEY ALTCHA_HMAC_KEY FRONTEND_URL SITE_URL ALLOWED_ORIGINS EMAIL_* VAPID_* DEMO_EMAILS DEV_API_TOKEN PORT NODE_ENV SKIP_RATE_LIMIT`。
 
 启动致命校验：缺 `JWT_SECRET`/`MONGO_URI` 或 secret < 32 字符 → 退出 1。
 
@@ -39,19 +39,18 @@ internal/
   handler/            薄 HTTP 层（auth/{session,device,password,email,account}、usersession、twofactor、users、csrf、health）
   service/            领域逻辑（登录分支流、refresh 轮换、设备码链、导出）
   repository/         mongo repo（Repos 聚合注入）
-  model/              struct 映射（bson 标签对齐 Mongoose schema）
+  model/              struct 映射（bson 标签与既有集合数据形态一致）
   auth/               jwt/cookies/bcrypt/totp/fieldcrypto/lockout
-  security/           xss 过滤 Go 移植
+  security/           XSS 清洗（bluemonday）+ 密码强度
   altcha/             Altcha v2 PoW
   ratelimit/          限流（Store interface，内存滑动窗口）
   code/               验证码内存存储（CodeStore interface）
   email/              SMTP 客户端 + 模板
   ipregion/           ipapi.co 外呼 + LRU
-  upload/             multer 等价（魔数校验）
+  upload/             图片落盘（魔数/大小/类型校验）
   pagination/ errors/ logging/ audit/ migrate/ indexes/ cron/
-docs/                 swaggo 产物 + 行为基线
+docs/                 swaggo 产物 + 维护文档
 deploy/               systemd unit + ini 模板 + run.sh
-scripts/differential/ 差分测试（Node）
 ```
 
 ## 接口契约（固定，勿改签名——并行 subagent 依赖）
@@ -69,21 +68,13 @@ scripts/differential/ 差分测试（Node）
 - `server.NewApp(server.Deps{Config, DB, Repos, Signer}) *gin.Engine`
 - `handler.CSRF(cfg)`、`handler.Health(db)`
 
-## 行为一致性铁律（差分测试为准）
+## 行为一致性铁律
 
 1. **双 token**：access 15m / refresh 7d，HS256；`refreshToken` cookie path=`/api/auth`；419=access 过期（`auth.accessTokenExpired`）
 2. **refresh 轮换 + 重用**：原子 findOneAndUpdate 取用作废；未抢到且 logoutAt 在 30s 并发宽限内 → **409**（`auth.concurrentRefresh`，不清 cookie 不吊销）；否则吊销全部 → 401（`auth.refreshTokenReuse`）
-3. **CSRF 三态** 403（对齐 src/index.js:267-283）
+3. **CSRF 三态** 403
 4. **登录分支顺序**：altcha→锁定→删除宽限→密码→邮箱(403 needVerification)→设备(403 needDeviceVerify)→2FA(200 need2FA)→成功；状态码不能乱
-5. **AES-256-CBC**：key=`sha256(ENCRYPTION_KEY 或 JWT_SECRET)`（二选一非拼接），格式 `enc:iv:ct`，兼容旧数据
+5. **AES-256-CBC**：key=`sha256(ENCRYPTION_KEY 或 JWT_SECRET)`（二选一非拼接），格式 `enc:iv:ct`，兼容既有加密数据
 6. **限流挂载不对称**：per-endpoint 只作用于 `/api/<path>`（不含 `/api/v1/`）；global 作用于全部 `/api/*`
 7. **`_id` 输出 hex 字符串**；`backgroundPrefs` 默认 `{image:'',enabled:false,opacity:30,blur:0}`
-8. 差分测试（scripts/differential）是行为 ground truth；现 Express 进程于本机 :5000 常驻（oracle）
-
-## 里程碑
-
-- M0 种子（骨架/config/repos/model/认证原语/健康检查/CSRF/双版本）— 完成
-- M1 基础原语（xss/中间件/altcha/email+ipregion+code/upload/repo 补全/migrate/indexes/cron）— 并行
-- M2 认证+用户域（service + handler）
-- M3 集成测试 + 差分闸门
-- M4 部署产物 + swaggo 注解 + godoc + README
+8. 行为怪癖与有意偏离（XSS 白名单外标签剥除而非转义、固定窗口限流、per-endpoint 限流不作用 v1 等）集中在 `docs/decisions.md`——**改动任何行为前先读**；`go test ./...` 是行为回归闸门

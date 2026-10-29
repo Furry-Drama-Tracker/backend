@@ -13,7 +13,7 @@ import (
 	"github.com/xiedada05/furry-drama-be-neo/internal/model"
 )
 
-// EpisodeVersionRepo 剧集版本仓储（models/EpisodeVersion.js，episodeId+version 唯一）。
+// EpisodeVersionRepo 剧集版本仓储（episodeversions 集合，episodeId+version 唯一）。
 type EpisodeVersionRepo struct{ coll *mongo.Collection }
 
 // NewEpisodeVersionRepo 构造剧集版本仓储。
@@ -35,7 +35,7 @@ func (r *EpisodeVersionRepo) Create(ctx context.Context, v *model.EpisodeVersion
 	return err
 }
 
-// FindLatest 查某剧集最大 version 的版本（对齐 findOne().sort({version:-1})）。
+// FindLatest 查某剧集最大 version 的版本（findOne + sort({version:-1})）。
 func (r *EpisodeVersionRepo) FindLatest(ctx context.Context, episodeID any) (*model.EpisodeVersion, error) {
 	ctx, cancel := context.WithTimeout(ctx, contextTimeout)
 	defer cancel()
@@ -90,7 +90,7 @@ func (r *EpisodeVersionRepo) FindAllByEpisode(ctx context.Context, episodeID any
 	return list, nil
 }
 
-// DeleteManyByIDs 批量删除版本（对齐 deleteMany({_id:{$in:[...]}})）。
+// DeleteManyByIDs 批量删除版本（deleteMany({_id:{$in:[...]}})）。
 func (r *EpisodeVersionRepo) DeleteManyByIDs(ctx context.Context, ids []any) (int64, error) {
 	ctx, cancel := context.WithTimeout(ctx, contextTimeout)
 	defer cancel()
@@ -101,7 +101,7 @@ func (r *EpisodeVersionRepo) DeleteManyByIDs(ctx context.Context, ids []any) (in
 	return res.DeletedCount, nil
 }
 
-// DeleteByEpisode 删除某剧集全部版本（对齐 DELETE /:id 清理 episodeId 关联）。
+// DeleteByEpisode 删除某剧集全部版本（删除剧集时清理 episodeId 关联）。
 func (r *EpisodeVersionRepo) DeleteByEpisode(ctx context.Context, episodeID any) error {
 	ctx, cancel := context.WithTimeout(ctx, contextTimeout)
 	defer cancel()

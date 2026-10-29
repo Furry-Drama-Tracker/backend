@@ -7,9 +7,8 @@ import (
 	"time"
 )
 
-// Cache 是线程安全的内存缓存（对齐 Express middlewares/cache.js）：
-// LRU 淘汰 + TTL 过期。Get 命中时移动到 LRU 尾部，Set 已存在键时同样刷新
-// 位置（对齐 Map.delete+set 的"移到最后"语义）。
+// Cache 是线程安全的内存缓存：LRU 淘汰 + TTL 过期。Get 命中时移动到
+// LRU 尾部，Set 已存在键时同样刷新位置（"移到最后"语义）。
 type Cache struct {
 	mu    sync.Mutex
 	items map[string]*cacheEntry

@@ -17,11 +17,11 @@ import (
 	"github.com/xiedada05/furry-drama-be-neo/internal/repository"
 )
 
-// 本文件实现 /api/announcements 子域（行为逐分支照抄 backend/routes/announcements.js）。
+// 本文件实现 /api/announcements 子域。
 // 公开端点：GET /active、GET /:id；超管 CRUD：GET/POST /、PUT/DELETE /:id、
 // POST /:id/send-email、POST /:id/send-notification。
 
-// 公告通知推送分批大小（对齐 announcements.js 常量）。
+// 公告通知推送分批大小（固定契约，勿调）。
 const (
 	announcementNotifBatch = 1000
 	announcementEmailBatch = 50
@@ -42,9 +42,9 @@ func NewAnnouncements(repos *repository.Repos, cfg *config.Config, amw *middlewa
 	return &Announcements{Repos: repos, Config: cfg, AuthMW: amw, RL: rl, Mail: mail}
 }
 
-// Register 挂载 /api/announcements 全部端点（路径照抄 Express 子路径，不含 /api 前缀）。
+// Register 挂载 /api/announcements 全部端点（不含 /api 前缀）。
 // 公开端点在前，超管 CRUD 用 Protect("superadmin") + RequireEmailChanged 保护
-// （对齐 router.use(superAdminProtect); router.use(requireEmailChanged)）。
+// （保护中间件施加于全部 CRUD 路由，勿只保护单个端点）。
 func (h *Announcements) Register(g *gin.RouterGroup) {
 	super := h.AuthMW.Protect(middleware.RoleSuperAdmin)
 	emailChanged := h.AuthMW.RequireEmailChanged()
@@ -133,7 +133,7 @@ func (h *Announcements) Create(c *gin.Context) {
 		c.JSON(400, gin.H{"message": "标题和内容不能为空"})
 		return
 	}
-	// 对齐 mongoose enum 校验：type 非法 → ValidationError → 500。
+	// type 枚举校验（固定契约）：type 非法 → 500 Server error。
 	annType := orDefaultString(body["type"], "info")
 	switch annType {
 	case "info", "warning", "maintenance", "update":
@@ -191,7 +191,7 @@ func (h *Announcements) Update(c *gin.Context) {
 	ctx := c.Request.Context()
 	body := cmsReadBody(c)
 
-	// 对齐 mongoose enum 校验（findByIdAndUpdate runValidators:true）：type 非法 → 500。
+	// type 枚举校验（固定契约，更新路径同样生效）：type 非法 → 500。
 	if v, ok := body["type"]; ok {
 		switch asString(v) {
 		case "info", "warning", "maintenance", "update":
@@ -374,7 +374,7 @@ func (h *Announcements) SendNotification(c *gin.Context) {
 	c.JSON(200, gin.H{"message": fmt.Sprintf("通知推送完成，发送 %d 条", count), "count": count})
 }
 
-// ---- 工具函数（对齐 announcements.js 底部 broadcast/send 系列）----
+// ---- 工具函数 ----
 
 // findAnnouncement 解析路径 ID 并查询公告；错误已渲染响应，ok=false 表示已返回。
 func (h *Announcements) findAnnouncement(c *gin.Context) (*model.Announcement, bool) {
@@ -396,7 +396,7 @@ func (h *Announcements) findAnnouncement(c *gin.Context) (*model.Announcement, b
 }
 
 // broadcastAnnouncement 发布时综合推送：按开关发送通知 + 邮件。
-// 对齐 broadcastAnnouncement：内部吞掉一切错误（Express try/catch 仅打日志），
+// 推送失败不向上传播：内部吞掉一切错误（仅记日志），
 // 由调用方忽略返回值。
 func (h *Announcements) broadcastAnnouncement(ctx context.Context, a *model.Announcement) {
 	if a.SendNotification && !a.NotificationSent {
@@ -414,7 +414,7 @@ func (h *Announcements) broadcastAnnouncement(ctx context.Context, a *model.Anno
 }
 
 // sendAnnouncementNotifications 给所有用户推送通知中心条目（分批 insertMany），
-// 返回 { count }。对齐 announcements.js sendAnnouncementNotifications。
+// 返回 { count }。
 func (h *Announcements) sendAnnouncementNotifications(ctx context.Context, a *model.Announcement) (int, error) {
 	total := 0
 	skip := 0
@@ -454,7 +454,7 @@ func (h *Announcements) sendAnnouncementNotifications(ctx context.Context, a *mo
 }
 
 // sendAnnouncementEmails 给所有已验证邮箱且未关闭公告偏好的用户发邮件（分批），
-// 返回成功发送数。对齐 announcements.js sendAnnouncementEmails。
+// 返回成功发送数。
 func (h *Announcements) sendAnnouncementEmails(ctx context.Context, a *model.Announcement) (int, error) {
 	if h.Mail == nil {
 		return 0, nil
@@ -484,7 +484,7 @@ func (h *Announcements) sendAnnouncementEmails(ctx context.Context, a *model.Ann
 	return total, nil
 }
 
-// buildAnnouncementHTML 构造公告邮件正文（对齐 announcements.js buildAnnouncementHtml）。
+// buildAnnouncementHTML 构造公告邮件正文（文案是固定契约）。
 func (h *Announcements) buildAnnouncementHTML(a *model.Announcement) string {
 	typeLabels := map[string]string{
 		"info":        "📢 站点公告",
@@ -516,7 +516,7 @@ func (h *Announcements) buildAnnouncementHTML(a *model.Announcement) string {
 	return body
 }
 
-// cmsCastAnnouncementField 对齐 mongoose 按 schema 类型 cast 的更新字段转换。
+// cmsCastAnnouncementField 按字段既有数据类型做更新字段转换（固定契约）。
 func cmsCastAnnouncementField(field string, v any) any {
 	switch field {
 	case "title", "titleEn", "content", "contentEn", "type", "link":

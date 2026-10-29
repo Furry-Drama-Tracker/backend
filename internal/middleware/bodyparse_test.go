@@ -111,7 +111,7 @@ func TestBodyParseEmptyJSON(t *testing.T) {
 	if w.Code != 200 {
 		t.Fatalf("status=%d, want 200", w.Code)
 	}
-	// 对齐 Express：空 JSON 体 → req.body = {}
+	// 空 JSON 体 → 解析为空对象（固定行为）。
 	if !strings.Contains(w.Body.String(), `"body":{}`) {
 		t.Fatalf("空 JSON 体应得到空对象: %s", w.Body.String())
 	}

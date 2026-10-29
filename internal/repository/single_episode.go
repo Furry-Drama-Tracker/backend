@@ -12,7 +12,7 @@ import (
 	"github.com/xiedada05/furry-drama-be-neo/internal/model"
 )
 
-// SingleEpisodeRepo 单集仓储（models/SingleEpisode.js）。
+// SingleEpisodeRepo 单集仓储（singleepisodes 集合）。
 type SingleEpisodeRepo struct{ coll *mongo.Collection }
 
 // NewSingleEpisodeRepo 构造单集仓储。
@@ -20,7 +20,7 @@ func NewSingleEpisodeRepo(coll *mongo.Collection) *SingleEpisodeRepo {
 	return &SingleEpisodeRepo{coll: coll}
 }
 
-// FindByEpisode 查询剧集全部单集，按 episodeNumber 升序（对齐 GET /:id 详情）。
+// FindByEpisode 查询剧集全部单集，按 episodeNumber 升序（剧集详情端点使用）。
 func (r *SingleEpisodeRepo) FindByEpisode(ctx context.Context, episodeID any) ([]model.SingleEpisode, error) {
 	ctx, cancel := context.WithTimeout(ctx, contextTimeout)
 	defer cancel()
@@ -37,7 +37,7 @@ func (r *SingleEpisodeRepo) FindByEpisode(ctx context.Context, episodeID any) ([
 	return list, nil
 }
 
-// FindByID 按 ID 查单集（对齐 SingleEpisode.findById().lean()）。
+// FindByID 按 ID 查单集。
 func (r *SingleEpisodeRepo) FindByID(ctx context.Context, id any) (*model.SingleEpisode, error) {
 	ctx, cancel := context.WithTimeout(ctx, contextTimeout)
 	defer cancel()
@@ -49,7 +49,7 @@ func (r *SingleEpisodeRepo) FindByID(ctx context.Context, id any) (*model.Single
 	return s, err
 }
 
-// Create 插入单集；补 _id/__v 默认值（mongoose 自动 _id 与 __v）。
+// Create 插入单集；补 _id/__v 默认值（与既有集合文档的默认值形态一致）。
 func (r *SingleEpisodeRepo) Create(ctx context.Context, s *model.SingleEpisode) error {
 	ctx, cancel := context.WithTimeout(ctx, contextTimeout)
 	defer cancel()
@@ -60,7 +60,7 @@ func (r *SingleEpisodeRepo) Create(ctx context.Context, s *model.SingleEpisode) 
 	return err
 }
 
-// FindOneAndUpdate 按 ID 更新并返回新文档（对齐 findByIdAndUpdate(id, update, {new:true})）。
+// FindOneAndUpdate 按 ID 更新并返回更新后的文档。
 func (r *SingleEpisodeRepo) FindOneAndUpdate(ctx context.Context, id any, update bson.M) (*model.SingleEpisode, error) {
 	ctx, cancel := context.WithTimeout(ctx, contextTimeout)
 	defer cancel()
@@ -73,12 +73,12 @@ func (r *SingleEpisodeRepo) FindOneAndUpdate(ctx context.Context, id any, update
 	return s, err
 }
 
-// IncViews 单集浏览量 +1 并返回新文档（对齐 PUT /single/:id/view）。
+// IncViews 单集浏览量 +1 并返回更新后的文档（PUT /single/:id/view 使用）。
 func (r *SingleEpisodeRepo) IncViews(ctx context.Context, id any) (*model.SingleEpisode, error) {
 	return r.FindOneAndUpdate(ctx, id, bson.M{"$inc": bson.M{"views": 1}})
 }
 
-// FindOneAndDelete 按 ID 删除并返回被删文档（对齐 SingleEpisode.findByIdAndDelete）。
+// FindOneAndDelete 按 ID 删除并返回被删文档。
 func (r *SingleEpisodeRepo) FindOneAndDelete(ctx context.Context, id any) (*model.SingleEpisode, error) {
 	ctx, cancel := context.WithTimeout(ctx, contextTimeout)
 	defer cancel()
@@ -90,7 +90,7 @@ func (r *SingleEpisodeRepo) FindOneAndDelete(ctx context.Context, id any) (*mode
 	return s, err
 }
 
-// DeleteByEpisode 删除某剧集全部单集（对齐 DELETE /:id 清理 episodeId 关联）。
+// DeleteByEpisode 删除某剧集全部单集（删除剧集时清理 episodeId 关联）。
 func (r *SingleEpisodeRepo) DeleteByEpisode(ctx context.Context, episodeID any) error {
 	ctx, cancel := context.WithTimeout(ctx, contextTimeout)
 	defer cancel()

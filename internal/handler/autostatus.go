@@ -12,7 +12,7 @@ import (
 	"github.com/xiedada05/furry-drama-be-neo/internal/repository"
 )
 
-// 本文件实现 /api/auto-status 子域（行为逐分支照抄 backend/routes/autoStatus.js）。
+// 本文件实现 /api/auto-status 子域。
 // 两个端点均为 superAdminProtect（仅 superadmin）。
 
 // AutoStatus 是 /api/auto-status 域 handler 容器。
@@ -28,7 +28,7 @@ func NewAutoStatus(repos *repository.Repos, cfg *config.Config, amw *middleware.
 	return &AutoStatus{Repos: repos, Config: cfg, AuthMW: amw, RL: rl}
 }
 
-// Register 挂载 /api/auto-status 全部端点（不含 /api 前缀；路径对齐 autoStatus.js 子路径）。
+// Register 挂载 /api/auto-status 全部端点（不含 /api 前缀）。
 // 仅 superadmin 可调用。
 func (h *AutoStatus) Register(g *gin.RouterGroup) {
 	g.POST("/auto-complete", h.AuthMW.Protect(middleware.RoleSuperAdmin), h.AutoComplete)
@@ -51,7 +51,7 @@ func (h *AutoStatus) AutoComplete(c *gin.Context) {
 	updated := 0
 	for i := range episodes {
 		ep := &episodes[i]
-		// 对齐 autoStatus.js：currentEpisodes>0 && totalEpisodes>0 && current>=total。
+		// 完结判定（固定契约）：currentEpisodes>0 && totalEpisodes>0 && current>=total。
 		if ep.CurrentEpisodes > 0 && ep.TotalEpisodes != nil && *ep.TotalEpisodes > 0 &&
 			ep.CurrentEpisodes >= *ep.TotalEpisodes {
 			ep.Status = "completed"
@@ -85,7 +85,7 @@ func (h *AutoStatus) CheckPremieres(c *gin.Context) {
 	released := 0
 	for i := range singles {
 		se := &singles[i]
-		// 对齐 autoStatus.js：isUpcoming=false，releaseDate=premiereDate。
+		// 上线写回（固定契约）：isUpcoming=false，releaseDate=premiereDate。
 		se.IsUpcoming = false
 		se.ReleaseDate = se.PremiereDate
 		if err := h.Repos.SingleEpisodes.AutoStatusSave(ctx, se); err != nil {

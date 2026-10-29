@@ -16,7 +16,7 @@ handler (HTTP 层，薄)  ──→  service (领域逻辑)  ──→  reposito
    │  解析请求/组装响应            │  登录分支流/轮换/2FA/导出         │  FindByEmail/IncLoginAttempts...
    ▼                              ▼                               ▼
 middleware (横切)              model (struct 映射)            mongo-driver (官方 v1)
-   CORS/CSRF/Protect/限流          bson 标签对齐 Mongoose         无 ODM
+   CORS/CSRF/Protect/限流          bson 标签与既有数据形态一致    无 ODM
 ```
 
 **依赖只允许向下**：middleware → handler → service → repository → model。禁止反向。包内导出符号都有 godoc 注释。
@@ -32,19 +32,19 @@ middleware (横切)              model (struct 映射)            mongo-driver (
 | `handler` | 薄 HTTP 层：认证五文件 + usersession/twofactor/users | `NewAuth` |
 | `service` | 领域逻辑：`AuthService`（登录/注册/refresh 轮换/设备码链/2FA/邮箱变更/注销/导出） | `NewAuthService` |
 | `repository` | mongo 仓储：`Repos` 聚合 + 各 collection 的 repo | `NewRepos`、`Connect`、`ToObjectID` |
-| `model` | struct 映射（bson 标签对齐 Mongoose schema） | User/UserSession/... |
+| `model` | struct 映射（bson 标签与既有集合数据形态一致） | User/UserSession/... |
 | `auth` | 密码学/令牌原语：jwt/cookies/bcrypt/totp/fieldcrypto/parseUserAgent | `NewSigner`、`HashToken`、`RandomHex` |
 | `security` | XSS 清洗（bluemonday）+ 密码强度 | `Sanitize`、`SanitizeValue`、`ValidatePassword` |
 | `ratelimit` | 命名限流器定义（Spec）+ IP key | `AuthSpec`、`IPKey` |
 | `code` | 验证码内存存储（接口化，可换 Redis） | `NewStore`、`GenerateCode` |
 | `email` | SMTP（go-mail）+ 模板 + 目标限流 + SiteContent 配置 | `NewClient` |
 | `ipregion` | ipapi.co 外呼 + LRU | `NewClient` |
-| `upload` | multer 等价（魔数校验/大小/类型） | `SaveImage`、`RemoveFile` |
+| `upload` | 图片落盘（魔数校验/大小/类型） | `SaveImage`、`RemoveFile` |
 | `pagination` | 分页参数（page/limit 上限 100） | `Parse` |
 | `errors` | AppError + 全局错误处理 | `New`、`NewKey`、`AbortWithAppError` |
 | `logging` | slog 封装（dev/prod 级别） | `New` |
 | `migrate` | 启动迁移（accountId/role/creatorProfile） | `Run` |
-| `indexes` | ensureIndexes 等价 | `Ensure` |
+| `indexes` | 启动时确保索引 | `Ensure` |
 | `cron` | 定时任务（会话/通知清理） | `Start*` |
 
 ## 依赖注入链（一次请求前如何组装）
@@ -67,7 +67,7 @@ main.go
 
 **重要**：`service.AuthService` 持有 `Repos`/`Signer`/`Mail`/`IPRegion`/`Config` 的引用，是认证逻辑的枢纽。handler 只做"解析 body → 调 service → 按结果组装响应"。
 
-## 中间件管线顺序（`server/app.go`，与 Express 对齐）
+## 中间件管线顺序（`server/app.go`）
 
 ```
 Recovery → Gzip → SecurityHeaders → CORS → Timeout(30s) → SlowLogger →

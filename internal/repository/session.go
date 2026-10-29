@@ -48,7 +48,7 @@ func (r *SessionRepo) FindByRefreshTokenHash(ctx context.Context, hash string) (
 
 // FindAndDeactivateRefresh 原子"取用并作废"：把匹配的 active 会话置为 inactive。
 // 返回更新后的文档（new:true）；无匹配返回 ErrNotFound。
-// 这是 refresh 轮换 + 重用检测的核心（对齐 authFactory.js:97-101）。
+// 这是 refresh 轮换 + 重用检测的核心，勿改其原子语义。
 func (r *SessionRepo) FindAndDeactivateRefresh(ctx context.Context, hash string) (*model.UserSession, error) {
 	ctx, cancel := r.newCtx(ctx)
 	defer cancel()
@@ -114,7 +114,7 @@ func (r *SessionRepo) UpdateLastActiveByTokenHash(ctx context.Context, hash stri
 	return err
 }
 
-// DeactivateAllByUser 吊销用户全部 active 会话（对齐 updateMany 吊销逻辑）。
+// DeactivateAllByUser 吊销用户全部 active 会话（updateMany 批量置 inactive + logoutAt）。
 func (r *SessionRepo) DeactivateAllByUser(ctx context.Context, userID any) error {
 	ctx, cancel := r.newCtx(ctx)
 	defer cancel()
@@ -173,8 +173,8 @@ func (r *SessionRepo) UpdateDeviceName(ctx context.Context, id, userID any, name
 	return err
 }
 
-// UpsertByTokenHash 按 tokenHash upsert 会话（对齐 userSessions.js POST /create 的
-// findOneAndUpdate + upsert + $setOnInsert loginAt）。返回更新后文档。
+// UpsertByTokenHash 按 tokenHash upsert 会话
+// （findOneAndUpdate + upsert + $setOnInsert loginAt）。返回更新后文档。
 func (r *SessionRepo) UpsertByTokenHash(ctx context.Context, tokenHash string, userID any, deviceInfo model.DeviceInfo, ip string, now time.Time) (*model.UserSession, error) {
 	ctx, cancel := r.newCtx(ctx)
 	defer cancel()
@@ -222,7 +222,7 @@ func (r *SessionRepo) FindAll(ctx context.Context, limit int) ([]model.UserSessi
 }
 
 // FindByUser 返回某用户最近登录的会话，按 loginAt 倒序，最多 limit 条。
-// 对齐 routes/userSessions.js GET /my 的 find({userId}).sort({loginAt:-1}).limit(20)。
+// find({userId}).sort({loginAt:-1}).limit(limit)（GET /my 使用，默认 20）。
 func (r *SessionRepo) FindByUser(ctx context.Context, userID any, limit int) ([]model.UserSession, error) {
 	ctx, cancel := r.newCtx(ctx)
 	defer cancel()
@@ -243,7 +243,7 @@ func (r *SessionRepo) FindByUser(ctx context.Context, userID any, limit int) ([]
 }
 
 // MarkInactiveOlderThan 把 lastActiveAt 早于 cutoff 的 active 会话批量置为 inactive+logoutAt。
-// 对齐 src/index.js 会话清理 cron 的 updateMany({isActive:true, lastActiveAt:{$lt:cutoff}})。
+// updateMany({isActive:true, lastActiveAt:{$lt:cutoff}})（会话清理定时任务使用）。
 // 返回被修改的文档数。
 func (r *SessionRepo) MarkInactiveOlderThan(ctx context.Context, cutoff time.Time) (int64, error) {
 	ctx, cancel := r.newCtx(ctx)

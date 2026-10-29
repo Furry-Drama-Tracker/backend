@@ -36,14 +36,14 @@ func (r *NotificationRepo) DeleteByUser(ctx context.Context, userID any) error {
 	return err
 }
 
-// CountUnread 统计用户未读通知数（routes/notifications.js GET /unread-count）。
+// CountUnread 统计用户未读通知数（GET /unread-count 使用）。
 func (r *NotificationRepo) CountUnread(ctx context.Context, userID any) (int64, error) {
 	ctx, cancel := context.WithTimeout(ctx, contextTimeout)
 	defer cancel()
 	return r.coll.CountDocuments(ctx, bson.M{"userId": userID, "isRead": false})
 }
 
-// CountByUser 统计用户通知总数（routes/notifications.js GET /list 的 total）。
+// CountByUser 统计用户通知总数（GET /list 的 total）。
 func (r *NotificationRepo) CountByUser(ctx context.Context, userID any) (int64, error) {
 	ctx, cancel := context.WithTimeout(ctx, contextTimeout)
 	defer cancel()
@@ -51,7 +51,7 @@ func (r *NotificationRepo) CountByUser(ctx context.Context, userID any) (int64, 
 }
 
 // FindByUser 分页查询用户通知，按 createdAt 倒序。
-// 对齐 routes/notifications.js GET /list 的 find().sort({createdAt:-1}).skip(...).limit(...)。
+// find().sort({createdAt:-1}).skip(...).limit(...)（GET /list 使用）。
 func (r *NotificationRepo) FindByUser(ctx context.Context, userID any, page, limit int) ([]model.Notification, error) {
 	ctx, cancel := context.WithTimeout(ctx, contextTimeout)
 	defer cancel()
@@ -80,7 +80,7 @@ func (r *NotificationRepo) FindByUser(ctx context.Context, userID any, page, lim
 	return list, nil
 }
 
-// MarkReadByID 将某用户的一条通知标记为已读（routes/notifications.js PUT /read/:id）。
+// MarkReadByID 将某用户的一条通知标记为已读（PUT /read/:id 使用）。
 func (r *NotificationRepo) MarkReadByID(ctx context.Context, id, userID any) error {
 	ctx, cancel := context.WithTimeout(ctx, contextTimeout)
 	defer cancel()
@@ -133,7 +133,7 @@ func (r *NotificationRepo) DeleteByIDForUser(ctx context.Context, id, userID any
 	return err
 }
 
-// DeleteReadOlderThan 删除 isRead=true 且 createdAt 早于 cutoff 的通知（src/index.js 每天 3 点 cron）。
+// DeleteReadOlderThan 删除 isRead=true 且 createdAt 早于 cutoff 的通知（每日 3 点定时清理任务使用）。
 // 返回删除数。
 func (r *NotificationRepo) DeleteReadOlderThan(ctx context.Context, cutoff time.Time) (int64, error) {
 	ctx, cancel := context.WithTimeout(ctx, contextTimeout)
@@ -151,7 +151,7 @@ type AuditLogRepo struct{ coll *mongo.Collection }
 // NewAuditLogRepo 构造审计日志仓储。
 func NewAuditLogRepo(coll *mongo.Collection) *AuditLogRepo { return &AuditLogRepo{coll: coll} }
 
-// Create 写入审计日志（失败静默，不阻断业务——对齐 logManual 的 catch(()=>{})）。
+// Create 写入审计日志（调用方对写入失败静默处理，不阻断业务）。
 func (r *AuditLogRepo) Create(ctx context.Context, log *model.AuditLog) error {
 	ctx, cancel := context.WithTimeout(ctx, contextTimeout)
 	defer cancel()
@@ -165,7 +165,7 @@ type ApiUsageRepo struct{ coll *mongo.Collection }
 // NewApiUsageRepo 构造统计仓储。
 func NewApiUsageRepo(coll *mongo.Collection) *ApiUsageRepo { return &ApiUsageRepo{coll: coll} }
 
-// UpsertInc 按 endpoint+date 聚合自增 count（对齐 findOneAndUpdate + $inc + upsert）。
+// UpsertInc 按 endpoint+date 聚合自增 count（upsert + $inc + $setOnInsert）。
 func (r *ApiUsageRepo) UpsertInc(ctx context.Context, endpoint, method, date string, count int64) error {
 	ctx, cancel := context.WithTimeout(ctx, contextTimeout)
 	defer cancel()
@@ -211,7 +211,7 @@ type SettingRepo struct{ coll *mongo.Collection }
 func NewSettingRepo(coll *mongo.Collection) *SettingRepo { return &SettingRepo{coll: coll} }
 
 // GetFlag 读取迁移标记值（不存在返回 false）。
-// 兼容两种已写入的 value 形态：旧 Express 的 { value: true }，以及本实现的 { value: { done: true } }。
+// 既有数据中存在两种 value 形态：{ value: true } 与 { value: { done: true } }，都要识别。
 func (r *SettingRepo) GetFlag(ctx context.Context, key string) (bool, error) {
 	ctx, cancel := context.WithTimeout(ctx, contextTimeout)
 	defer cancel()
@@ -230,7 +230,7 @@ func (r *SettingRepo) GetFlag(ctx context.Context, key string) (bool, error) {
 
 // flagDone 从 settings.value 中提取 done 布尔。
 // 驱动把子文档解码为 bson.D（any 目标）或 bson.M（map 目标），两种形态都要处理；
-// 旧 Express 直接写入 value: true，也要识别。
+// { value: true } 形态（既有数据）也要识别。
 func flagDone(v any) bool {
 	switch doc := v.(type) {
 	case bool:
@@ -432,7 +432,7 @@ func (r *CreatorProfileRepo) DeleteByCreator(ctx context.Context, creatorID any)
 }
 
 // Create 插入创作者资料；唯一键冲突（creatorId 已存在）返回 IsDuplicateKey(err)。
-// 未显式设置时补 createdAt / updatedAt 默认值（对齐 mongoose default: Date.now）。
+// 未显式设置时补 createdAt / updatedAt 默认值（与既有集合文档的默认值形态一致）。
 func (r *CreatorProfileRepo) Create(ctx context.Context, p *model.CreatorProfile) error {
 	ctx, cancel := context.WithTimeout(ctx, contextTimeout)
 	defer cancel()

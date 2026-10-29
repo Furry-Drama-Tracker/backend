@@ -8,10 +8,10 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-// 本文件为 review 域（backend/routes/review.js）的数据访问方法。
+// 本文件为 review 域的数据访问方法。
 // 方法统一以 Review 前缀命名，挂到已有 repo 类型上，避免与其它域 agent 重名。
 
-// ReviewUserRef 是审核列表 populate 输出的用户引用视图
+// ReviewUserRef 是审核列表输出的用户引用视图
 // （_id + accountId + username，可选 email）。
 type ReviewUserRef struct {
 	ID        primitive.ObjectID `bson:"_id" json:"_id"`
@@ -21,8 +21,7 @@ type ReviewUserRef struct {
 }
 
 // ReviewFindUserRefsByIDs 批量查用户引用（accountId/username/email），返回 hex → 视图。
-// 对齐 review.js populate('createdBy'/'customAuthors'/'allowedEditors',
-// 'accountId username[ email]')：不存在的用户不出现在映射中（调用方渲染 null）。
+// 关联语义与既有集合查询一致：不存在的用户不出现在映射中（调用方渲染 null）。
 func (r *UserRepo) ReviewFindUserRefsByIDs(ctx context.Context, ids []primitive.ObjectID) (map[string]ReviewUserRef, error) {
 	out := make(map[string]ReviewUserRef, len(ids))
 	if len(ids) == 0 {
@@ -47,9 +46,9 @@ func (r *UserRepo) ReviewFindUserRefsByIDs(ctx context.Context, ids []primitive.
 	return out, nil
 }
 
-// ReviewMailTarget 是审核结果邮件收件人信息（对齐 notifyHelper.js
-// sendNotificationEmailToUser 的 User.findById(userId).select('email isEmailVerified
-// emailNotificationPrefs')）。ReviewResultPref 为 nil 视为未关闭（允许发送）。
+// ReviewMailTarget 是审核结果邮件收件人信息
+// （findById(userId)，投影 email/isEmailVerified/emailNotificationPrefs）。
+// ReviewResultPref 为 nil 视为未关闭（允许发送）。
 type ReviewMailTarget struct {
 	ID               primitive.ObjectID `bson:"_id"`
 	Email            string             `bson:"email"`

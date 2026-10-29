@@ -6,8 +6,8 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-// PushSubscription 对应浏览器 Web Push 订阅文档（models/PushSubscription.js，
-// collection pushsubscriptions，userId+endpoint 唯一索引）。
+// PushSubscription 对应浏览器 Web Push 订阅文档（pushsubscriptions 集合，
+// userId+endpoint 唯一索引）。
 type PushSubscription struct {
 	ID        primitive.ObjectID   `bson:"_id,omitempty" json:"_id"`
 	UserID    primitive.ObjectID   `bson:"userId" json:"userId"`
@@ -17,7 +17,7 @@ type PushSubscription struct {
 	CreatedAt time.Time            `bson:"createdAt" json:"createdAt"`
 }
 
-// PushSubscriptionKeys 是推送订阅的 VAPID 密钥子文档（对齐 schema keys.p256dh/auth）。
+// PushSubscriptionKeys 是推送订阅的 VAPID 密钥子文档（keys.p256dh/auth）。
 type PushSubscriptionKeys struct {
 	P256DH string `bson:"p256dh" json:"p256dh"`
 	Auth   string `bson:"auth" json:"auth"`

@@ -1,8 +1,8 @@
 // Package auth 提供认证核心原语：JWT 签发/校验、HTTP cookie 管理、令牌哈希。
 //
-// 行为对齐 Express utils/helpers.js：
+// 行为契约固定：
 //   - access token 15m，refresh token 7d，HS256 固定
-//   - claims: {id, purpose, jti?}，jsonwebtoken 输出 iat/exp（秒）
+//   - claims: {id, purpose, jti?}，iat/exp 为秒级时间戳
 //   - cookie 属性精确：accessToken(path=/, maxAge 15m)、refreshToken(path=/api/auth, maxAge 7d)
 package auth
 
@@ -18,7 +18,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-// Claims 是 JWT 载荷，对齐 jsonwebtoken 输出。
+// Claims 是 JWT 载荷（字段布局为固定契约，勿增删）。
 type Claims struct {
 	ID              string `json:"id"`
 	Purpose         string `json:"purpose,omitempty"`
@@ -89,13 +89,14 @@ func (s *Signer) Verify(tokenStr string) (*Claims, error) {
 	return claims, nil
 }
 
-// HashToken 计算令牌哈希：sha256 hex（对齐 utils/helpers.js hashToken）。
+// HashToken 计算令牌哈希：sha256 hex（固定契约，勿改——改动会使已存的
+// refresh 令牌哈希无法比对）。
 func HashToken(token string) string {
 	sum := sha256.Sum256([]byte(token))
 	return hex.EncodeToString(sum[:])
 }
 
-// RandomHex 生成 n 字节随机数的 hex 串（对齐 crypto.randomBytes(n).toString('hex')）。
+// RandomHex 生成 n 字节随机数的 hex 串。
 func RandomHex(n int) string {
 	buf := make([]byte, n)
 	if _, err := rand.Read(buf); err != nil {
