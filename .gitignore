@@ -4,3 +4,5 @@ dev.ini
 deploy/backend.production.ini
 deploy/furry-drama-be-neo.production.service
 uploads/
+.idea/
+.mimosa/

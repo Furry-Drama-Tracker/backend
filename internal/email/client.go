@@ -2,12 +2,14 @@
 //
 // 配置来源：ini [email] 段 + 环境变量 EMAIL_*（不再读取 SiteContent email 数据库配置）。
 // 目标邮箱限流：每收件邮箱 1 小时最多 10 封（内存窗口）。
+// 邮件操作日志输出到 stderr（见 emailLog），与 stdout 上的请求日志分流，便于诊断邮件问题。
 package email
 
 import (
 	"context"
 	"encoding/json"
 	"log/slog"
+	"os"
 	"sync"
 	"time"
 
@@ -61,6 +63,10 @@ type Client struct {
 }
 
 const cacheTTL = 5 * time.Minute
+
+// emailLog 记录全部邮件操作到 stderr：与请求日志（stdout）分流，便于单独采集与诊断。
+// 每次发送恰一条：成功 Info / 限流或未配置跳过 Warn / 失败 Error。不含密码与邮件正文。
+var emailLog = slog.New(slog.NewTextHandler(os.Stderr, nil))
 
 // NewClient 构造邮件客户端。
 func NewClient(cfg *config.Config, sc *repository.SiteContentRepo) *Client {
@@ -134,26 +140,36 @@ func (c *Client) GetSiteAbout(ctx context.Context) siteAbout {
 	return a
 }
 
-// Send 发送邮件：目标限流 → SMTP；未配置或失败返回 false（返回 bool，不返回错误）。
-// 三种失败均记日志，避免静默：限流/未配置记 Warn，SMTP 发送失败记 Error（含 err 与 host:port，不含 pass）。
+// Send 发送邮件：目标限流 → SMTP；未配置或失败返回 false。
+// 无论成败均记录一条日志到 stderr（emailLog）。
 func (c *Client) Send(ctx context.Context, to, subject, html string) bool {
 	to = toLowerTrim(to)
 	if !c.target.Allow(to) {
-		slog.Warn("[Email] skip: target rate-limited", "to", to, "subject", subject)
+		emailLog.Warn("[Email] skip: target rate-limited", "to", to, "subject", subject)
 		return false
 	}
 	cfg, ok := c.GetConfig(ctx)
 	if !ok {
-		slog.Warn("[Email] skip: SMTP not configured", "to", to, "subject", subject)
+		emailLog.Warn("[Email] skip: SMTP not configured", "to", to, "subject", subject)
 		return false
 	}
 	fromName := cfg.FromName
 	if fromName == "" {
 		fromName = firstNonEmpty(c.cfg.Email.FromName, "兽剧聚合平台")
 	}
+	start := time.Now()
 	okSend, err := c.sendMail(cfg.Host, cfg.Port, cfg.User, cfg.Pass, fromName, to, subject, html)
-	if err != nil {
-		slog.Error("[Email] send failed", "to", to, "subject", subject, "host", cfg.Host, "port", cfg.Port, "err", err)
+	elapsed := time.Since(start).Round(time.Millisecond)
+	switch {
+	case err != nil:
+		emailLog.Error("[Email] send failed", "to", to, "subject", subject,
+			"host", cfg.Host, "port", cfg.Port, "elapsed", elapsed, "err", err)
+	case okSend:
+		emailLog.Info("[Email] sent", "to", to, "subject", subject,
+			"host", cfg.Host, "port", cfg.Port, "elapsed", elapsed)
+	default:
+		emailLog.Warn("[Email] send rejected", "to", to, "subject", subject,
+			"host", cfg.Host, "port", cfg.Port, "elapsed", elapsed)
 	}
 	return okSend
 }

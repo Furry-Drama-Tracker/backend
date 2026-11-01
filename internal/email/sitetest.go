@@ -19,6 +19,7 @@ import (
 //   - From 显示名 "fromName || '兽剧聚合平台'"，主题 '邮件服务测试 - 兽剧聚合平台'
 //
 // 发送失败返回错误，由 handler 渲染 400 '邮件发送失败，请检查邮件服务配置'。
+// 成败均记录到 stderr（emailLog）——测试发送本身就是邮件诊断操作。
 func (c *Client) SendSiteTestEmail(ctx context.Context, host string, port int, user, pass, fromName, to string) error {
 	siteURL := c.siteURL()
 	display := firstNonEmpty(fromName, "兽剧聚合平台")
@@ -27,7 +28,16 @@ func (c *Client) SendSiteTestEmail(ctx context.Context, host string, port int, u
 		EmailInfoBox("如果您收到了此邮件，说明邮件服务配置成功！", "success") +
 		`<p style="margin:20px 0;">` + EmailButton("访问站点", siteURL, "secondary") + `</p>`
 	html := c.BuildEmailHTML(ctx, display, siteURL, body, "邮件服务测试")
-	return sendSiteTestMail(host, port, user, pass, display, to, "邮件服务测试 - 兽剧聚合平台", html)
+	start := time.Now()
+	err := sendSiteTestMail(host, port, user, pass, display, to, "邮件服务测试 - 兽剧聚合平台", html)
+	elapsed := time.Since(start).Round(time.Millisecond)
+	if err != nil {
+		emailLog.Error("[Email] test send failed", "to", to, "host", host, "port", port,
+			"elapsed", elapsed, "err", err)
+		return err
+	}
+	emailLog.Info("[Email] test sent", "to", to, "host", host, "port", port, "elapsed", elapsed)
+	return nil
 }
 
 // ClearCache 清空站点设置/关于信息的缓存。
