@@ -1,0 +1,160 @@
+---
+type: operations
+title: 部署与运行时
+description: 构建目标、准确启动顺序、TCP 与 Unix socket 监听、服务器超时、优雅关停、目录初始化、systemd unit 与 ini 模板，以及多实例后果。
+tags: [deployment, runtime, systemd, startup, shutdown]
+verified:
+  - by: openwiki/0.7.2
+    at: 2026-11-02T17:41:59.592Z
+sources:
+  - id: openwiki-source-0f6ed11169bd8e6b34b44280
+    resource: repo://cmd/server/main.go
+  - id: openwiki-source-6e11d7a3d9cd222e5ed01aed
+    resource: repo://deploy/furry-drama-be-neo.ini
+  - id: openwiki-source-965e9675b33e3892958fab10
+    resource: repo://deploy/furry-drama-be-neo.service
+  - id: openwiki-source-523bc741245510a618f572a9
+    resource: repo://deploy/run.sh
+  - id: openwiki-source-da80fdae2220fc6ad9a470b7
+    resource: repo://internal/upload/svg.go
+  - id: openwiki-source-012f2c78e3b1446dfc35803f
+    resource: repo://Makefile
+  - id: openwiki-source-4b6409919cd6826ecddd2894
+    resource: repo://Makefile.win
+generated: { by: "opencode", at: "2026-11-02T17:41:59.592Z" }
+---
+
+# 部署与运行时
+
+后端是一个 Go 二进制，加上配置和两个可写目录。仓库中没有容器定义、CI 流水线或迁移步骤；部署就是构建、配置文件和进程守护。
+
+## 构建
+
+Makefile 提供标准目标：
+
+| 目标 | 动作 |
+|---|---|
+| `make build` | `go build -o bin/furry-drama-be-neo ./cmd/server` |
+| `make run` | `go run ./cmd/server` |
+| `make test` | `go test ./...` |
+| `make vet` | `go vet ./...` |
+| `make fmt` | `gofmt -l -w .` |
+| `make docs` | 重新生成 Swagger 到 `docs/`（需要 `swag`） |
+| `make clean` | 删除二进制 |
+
+`Makefile.win` 为 NMAKE 镜像这些目标，二进制带 `.exe`。模块要求 Go 1.26 与可访问的 MongoDB。
+
+## 启动顺序
+
+`cmd/server/main.go` 按顺序执行：
+
+1. 解析 `--config` 与 `--listen`。
+2. `config.Load`——缺少或过短的 `JWT_SECRET`，或缺少 `MONGO_URI`，以状态码 1 退出。
+3. `repository.Connect`，15 秒上下文——连接或 ping 失败即退出。
+4. 构造 `Repos` 与 JWT 签名器。
+5. 从配置应用上传与图标目录；缺失时创建图标目录。
+6. 构建 Gin 应用。
+7. 创建监听器；失败即退出。
+8. 开始服务。
+9. 等待 SIGTERM/SIGINT 或服务错误。
+10. 用 10 秒超时关停并退出。
+
+该顺序明显缺少：`migrate.Run`、`indexes.Ensure` 与 `cron.StartSessions`。启动时没有隐式 schema 迁移或索引创建，也没有清理调度器。需要时部署方必须外部处理。
+
+## 可写目录
+
+- `uploads_dir`（默认 `./uploads`）是图片写入位置。**它不会自动创建**；目录不存在时上传会失败。它也是 `/uploads` 服务的根。
+- `icons_dir`（默认 `./uploads/icons`）在启动时与 SVG 上传前创建。返回 URL 始终为 `/uploads/icons/...`，因此上传根之外的自定义目录不会被内置静态路由服务。
+
+两者都应可被服务用户写入，并与二进制独立持久化。
+
+## 监听模式
+
+`--listen` 接受：
+
+- `tcp:HOST:PORT` 或裸 `HOST:PORT` → TCP；
+- `unix:/path/to.sock` → Unix domain socket，先删除残留文件并设置权限 `0660`；
+- `unix:@name` → Linux abstract socket，无文件或权限。
+
+默认是 `tcp:0.0.0.0:5000`。缺少 flag 时使用 ini 的 `listen`，但要注意省略该键的 ini 会清空默认值而不是保留。
+
+## HTTP 服务器超时
+
+服务器配置为：
+
+- 读头超时 65 秒（慢客户端防护）；
+- 读超时 30 秒；
+- 写超时 30 秒；
+- 空闲超时 5 秒。
+
+这些与中间件应用的 30 秒请求上下文截止时间是分开的。
+
+## 优雅关停
+
+收到 SIGTERM 或 SIGINT 时，进程记录信号，调用带 10 秒上下文的 `Shutdown`，并记录完成或超时。systemd unit 在 SIGKILL 前允许 15 秒（`TimeoutStopSec=15`）。在途请求获得关停窗口；更长请求会被截断。
+
+## systemd unit
+
+`deploy/furry-drama-be-neo.service` 是标准 simple unit：
+
+- `User=www-data`、`Group=www-data`；
+- `WorkingDirectory=/opt/furry-drama-tracker/neo-server`；
+- `ExecStart=.../bin/furry-drama-be-neo --config=/etc/furry-drama-tracker/backend.ini --listen=unix:/run/furry-drama-be-neo.sock`；
+- `Restart=on-failure`、`RestartSec=2`；
+- 加固：`UMask=0077`、`NoNewPrivileges`、`PrivateTmp`、`ProtectSystem=full`、`ProtectHome`；
+- `RuntimeDirectory=furry-drama-be-neo`，模式 `0750`，用于 socket；
+- `TimeoutStartSec=30` 与 `TimeoutStopSec=15`。
+
+注释掉的 `Environment=` 行展示了预期的密钥注入方式：`JWT_SECRET` 与 `MONGO_URI`。
+
+若要改为 TCP，把 `ExecStart` 中的 `--listen` 改为 `tcp:0.0.0.0:5000` 并去掉 socket 依赖。反向代理应终止 TLS，通过 `CF-Connecting-IP`、`X-Real-IP` 或 `X-Forwarded-For` 转发真实客户端 IP，并单独服务前端。
+
+## ini 模板
+
+`deploy/furry-drama-be-neo.ini` 记录了每个段与面向生产的默认值。使用前：
+
+1. 复制到 OS 默认路径，或让 `--config` 指向它；
+2. 把 `[jwt].secret` 设为至少 32 个随机字符；
+3. 设置 `[database].uri` 与可选 `name`；
+4. 把 `uploads_dir` 设为持久可写路径；
+5. 如需邮件，配置 `[email]`；
+6. 把 `allow_origins` 设为真实前端源；
+7. 可选地显式设置 `encryption_key` 与 `altcha_hmac_key`。
+
+该文件包含密钥，建议 `chmod 600`。
+
+## run.sh
+
+`deploy/run.sh` 是无 systemd 主机上的最小备选。尽管注释提到 nohup，它当前在前台 `exec` 二进制，并期望外部守护进程将其转入后台。二进制缺失时快速失败，使用 `CONFIG` 与可选的 listen 参数。
+
+## 多实例影响
+
+在负载均衡后运行多个实例会改变行为，因为多个存储是进程本地的：
+
+- 验证码与设备登录码；
+- 限流计数；
+- SSE 连接上限与驱逐；
+- 剧集缓存；
+- 按收件人邮件限流；
+- 观看去重日志。
+
+会话、令牌与用户数据在 MongoDB 中，可跨实例工作。实际建议是在这些存储迁移到共享后端之前保持单实例。
+
+## 部署检查清单
+
+1. 构建二进制并放到 `ExecStart` 路径。
+2. 创建上传目录并确保归属。
+3. 编写包含密钥与真实 URL 的 ini。
+4. 如果是新数据库，外部创建索引并运行迁移。
+5. 启动服务并检查 `/api/health` 报告数据库已连接。
+6. 通过真实源验证 `/api/csrf-token` 与一个非 GET 端点。
+7. 确认 `/uploads/<已知文件>` 可访问并带有缓存头。
+
+## 相关阅读
+
+<!-- openwiki: broken internal link [/openwiki/architecture/configuration.md] link "/openwiki/architecture/configuration.md" is root-absolute, which no real consumer resolves against the repository root (not a coding agent reading the page, not GitHub's Markdown renderer, not a local viewer); use a path relative to this file instead. Fix the href or restore the target, then delete this comment. -->
+- [配置与环境变量](/openwiki/architecture/configuration.md)——所有设置与优先级。
+<!-- openwiki: broken internal link [/openwiki/architecture/overview.md] link "/openwiki/architecture/overview.md" is root-absolute, which no real consumer resolves against the repository root (not a coding agent reading the page, not GitHub's Markdown renderer, not a local viewer); use a path relative to this file instead. Fix the href or restore the target, then delete this comment. -->
+- [架构总览](/openwiki/architecture/overview.md)——启动链的上下文。
+<!-- openwiki: broken internal link [/openwiki/operations/observability-and-background-jobs.md] link "/openwiki/operations/observability-and-background-jobs.md" is root-absolute, which no real consumer resolves against the repository root (not a coding agent reading the page, not GitHub's Markdown renderer, not a local viewer); use a path relative to this file instead. Fix the href or restore the target, then delete this comment. -->
+- [可观测性与后台任务](/openwiki/operations/observability-and-background-jobs.md)——日志与未接线任务。

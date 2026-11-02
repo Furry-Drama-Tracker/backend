@@ -1,0 +1,148 @@
+{
+  "schemaVersion": 1,
+  "pageVersion": "sha256:f7dd3c29b56e00fb2c28607507d449c9e36686107cb44ed8139a2c8a1c0f1093",
+  "claims": [
+    {
+      "id": "claim_99db9eec0b584b638ff12791e5258fc1",
+      "statement": "Site content is a key/value store with default keys privacy, terms, about, and settings that are created on demand; the email key is synthesized from runtime configuration, is readable only by superadmins, and cannot be updated through the API.",
+      "evidence": [
+        {
+          "resource": "repo://internal/handler/sitecontent.go#L231-L290",
+          "version": "repo-lines-v1:sha256:87e6ea6f538153a3344802926df6273479601e3cc05e601881372eaab890c076:eyJzZWxlY3RlZExpbmVDb3VudCI6NjAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjU3NjAyNTJlNjkxYTM1NDMwNTVmMmE5Njk0NDJjOWQzYzJjNTg2NmU5YWNlMzVkOWJiMzYyNWYyNmY2Y2Q5MTYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjIyNmNiODA3ZDgzZGZhMjMyYWEyZGUxNDZkMzIwYzE1MmRiMWUxZjYzN2I4NzliODlkYTA0NTk4ZGM0NzNiYTgiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImQyNzhkZDE4Mjk5NGVkMGU3MDQxYTI5N2Q5NWQ1YTk0ZDE0ZmYzYzg0ZjkyYTFiMDg0YTBhZmY0YzNmMmE5MWEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjliMTJjNDI3NTIzZDA2NjhlNTU4MjZjZDk3MTc3N2FiNjhjOTgyMmI3OGQ0OWUzNDJlMDIzNzg5NDVjNTRlOGEifQ"
+        },
+        {
+          "resource": "repo://internal/handler/sitecontent.go#L28-L50",
+          "version": "repo-lines-v1:sha256:c4a836c031d27c8bd6274f52d5843d5fa0dad8ff083bb6a6a0766bb91226dc75:eyJzZWxlY3RlZExpbmVDb3VudCI6MjMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjBiOGZlZjcwNzIwMTlmNTQ3NDNjY2FjODFmMjViODk2ODJlZDg2ZmVmNzc3OWVhZDRhNzA4OGM3MzI2YWU4M2YiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImEzYjg3MjQ2NDBjOTgyOTcwNDhlN2MyNjU1OTBkYTI3ZjQ4ZjcxZDMyMjY2ODEzNTQ1YWQ0ZTUwOTU5ZTk1NjkiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImFlZjFlZmU3ODk2ZmZkODM0NDMxMDhkYjI2OTBhNGRiYzZjNjM5Y2EyYzAwZjdkMmY4OWQwOGFlNGJkNDMyY2QifQ"
+        },
+        {
+          "resource": "repo://internal/handler/sitecontent.go#L69-L95",
+          "version": "repo-lines-v1:sha256:f68749fc2a2ae38ea6da9cab20546f33e3c1f558b87351cd3e2c43dc9f26426b:eyJzZWxlY3RlZExpbmVDb3VudCI6MjcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAyMzY3NmE3ZDJkZGNiYjg2MTE3MzQ1NGRhNDUzZTFjMjNiYTk1YjhlMjIxYTc2OWNlZTg3OGQzYzc4MDNlZWEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjI1YmJmYjg1Mjg3M2VlYTljMjY2NGYzYTYzZDNmNzdjODliZmJkNmQ3YjdiYTNmZGVhMzdmNmM2NWYxNDQzMDciLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImZmNzNmYmE1ZTQ5NDBjYjBmMDM4YzdhNzM1ZTkzNTVkMjA2NWUxMzFhMDM4MWI0NmE3NmRlMWM1YTU4MTU1ZmMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjdkOGIyMjEzOGJmZTdmOTE4MjQ1MzRhM2Q4MTg5MjFlYWRiNjM0ZmVlODhiZDNmOTU1M2IzNmExMjhhZTViYzMifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_bec7b7360e664307bdfb0e7639119b9a",
+      "statement": "Transactional email branding reads the settings and about site-content documents and caches each for five minutes.",
+      "evidence": [
+        {
+          "resource": "repo://internal/email/client.go#L100-L140",
+          "version": "repo-lines-v1:sha256:078082fdcbcd7ed734e468b046f350b96caa79a00e60f1115433556a83254dd3:eyJzZWxlY3RlZExpbmVDb3VudCI6NDEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjM2ZDBjZDg2YTliOTRmYTdkOWMwOTJjMDZlOWVjNmUxMTZjOGViNWY0N2Y4Yzk3MWFhMjZjZTEzMDU4ZjcyYjEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjdmNzhhNTY5Y2FjZTJhOWNjZGEyZmY1ZTdjOWZmZThhZGY4YTk2MmU3YWJiNzhlNDU1MWY3MWU3ZjhkYjNmNDEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjRkNzJmYjRlOWFmNjFiMjdkMjFmNTY3YTZkNjM1YWJhYTJiYzk5NmJjNmJiMTNjMTU5ZTk4NDljZGE5ZGQ4NWIifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_76e8b009864a4c96acd98f2bfb18d4e8",
+      "statement": "Announcement broadcast writes notifications to all users in batches of 1000 and sends emails only to eligible verified users in batches of 50, and an update re-broadcasts when active, notification, or email flags transition from false to true.",
+      "evidence": [
+        {
+          "resource": "repo://internal/handler/announcements.go#L185-L200",
+          "version": "repo-lines-v1:sha256:0da2144ae278cdd028e08fb07f0fea358b4b32bbc4e13720598932dbdb141230:eyJzZWxlY3RlZExpbmVDb3VudCI6MTYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjcxMTY4OGE0MzcxMDU0OWNhY2RmOWVkZjE2YmM2ZTY4MTk0ZTQwMDkxYTMyYjFlN2RjYzY3NzZhNDA0YjY5OWYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjUxMzE0NTFkYjBiMWY4ZWUyNDgzNzRjZmI2NTg3Y2Q3ODQ4Mjk2MTA5OTExNzhkY2QwNDBkMzgwZGQ0ZTFlM2UiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImE5MDY5YWM0NmRmYzZkMDY3OTlhOTg4YmMzODdkZGM0YTkyMjg0YTUzMjQ0NzAzZWJhMzFjZTM4MzI3OTQ4YmMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjIyZjJmZjVmZWVjNjBmNTg3YzhmYWU0ZTg3ZjgwOWE2NjFjZmZlZDZiNDdhYWU1ZjZkNmEyNjUzYWE4OTUyZWYifQ"
+        },
+        {
+          "resource": "repo://internal/handler/announcements.go#L401-L490",
+          "version": "repo-lines-v1:sha256:6ccdb7e4adf8156db7875f19692de72bd243a73065445793d9332ae468361482:eyJzZWxlY3RlZExpbmVDb3VudCI6OTAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjlkZDFkNmFlY2NkNDk4NzMwMDA4NGY3NjZhYzU4MmMzM2Y0OGFlMjY4MTAxNTk3OGYxMWZiMDcxNzk4ZDg4YzkiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjEwMjE4MjU1YmM4YTFlOTQ5ZWFjMTg0ZDQwYjJmYzg1MDVhN2NhYzMyYTE4ZDBlNGIxMDQxODRhNTcxYWE4MzUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjdkMThiZmM5Nzk5ZjE5YTY5OGU5ZjY3MTM5NzgwZTAyMGFjMzE0ZTRkMGFhNzM3ODkyYzhmY2U4Mjk1NjI1MDYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjE1MTJkZmUwMzAxYjdmZWE2ZjY0ZTljYTNkNTI2Y2Y1MmY5ZjI1NjgxZjdhZDU0NzYyZDM2ZGYxYmMzM2I2ZjkifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_4581e600d22e4f9ca6556ae77004d331",
+      "statement": "Wallpapers are split between a systemwallpapers collection managed by superadmins and a per-user personalWallpapers array capped at 20 entries, with both upload paths accepting images up to 8 MB.",
+      "evidence": [
+        {
+          "resource": "repo://internal/handler/wallpapers.go#L101-L120",
+          "version": "repo-lines-v1:sha256:50ef19a021e4d7ed5215fac9bca93d64107ab8a8062eab0b9a3b5b8ffaabebc0:eyJzZWxlY3RlZExpbmVDb3VudCI6MjAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjA1OGMxZTBkYjM4OWVkNjM4Y2Y4NjY5MTJmMTZmNjNkOWFjM2U0MDczMDRkYzY2YTU5ZjY0ZmZlNDgwMzY0MmUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImM2NmEzNDI0MWRmZDdkZTIyMzg2NTY3ZDE1ZWUxN2RlZWIyZmY5NGY0YjExMzQwMWVhNzY1MzJkMmEwZDk1N2QiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImNlZDNkOTdiNWM4MjJlNTYzYjQzZDlmNmIxZjEwZjYxMWZkNjcyNzkxM2RkNTNjMGY4YTZkNzRlZDNmZGMxNDciLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjQ5NDlmZGE2OGQ0NDk0YzFkMjRkYjQ1YjFkNjU3NmFiOTk1YTUxNjllNWNiZjgxMjUxNmJhNzdjNGYxMzdmNzQifQ"
+        },
+        {
+          "resource": "repo://internal/handler/wallpapers.go#L225-L250",
+          "version": "repo-lines-v1:sha256:169e5ad465d8a1bc20490e83d5a899936b766707e73adda07b01b4d00db06bf9:eyJzZWxlY3RlZExpbmVDb3VudCI6MjYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImQ5ZDczOGJkMjI5OGZlODlhMmRmMzU5OTBlZjY0YmYzNmVhYmMzNmFkOWRjYzM5ZGYwY2FhOTI0NWZiZTU1ZGQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY3Y2RhODJkYTYwNjIzOGUwNWU2MjM5OTU2OWM1ZWUwMzk5MzQxOTY0OGFlNWQ0M2EyYmY4Y2Q2MzQ3ZjgyNjMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjlkMTAwMzVmNDRjMGJhOGM3YjU1ZjQ2ZTkyNTI1NjUyMjBmYWM1OGNjZGNiYWI4ZWIxN2Y2MjU3OWFhNjVhNjciLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjZhZjM0YjljMmEzY2I4MzgxOGNhNDQxYmIzM2I5MzZlYThiMDc1NjllN2UxMjZlNjZkODgwZWY0ZjY4ZjIxMzUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_58707ec2ae2b443c8f9346cb04e9768e",
+      "statement": "A friend-link application requires Altcha even for anonymous visitors, is created as pending and inactive, and notifies every superadmin in-app and by email for review.",
+      "evidence": [
+        {
+          "resource": "repo://internal/handler/friendlinks.go#L82-L140",
+          "version": "repo-lines-v1:sha256:be6a52f1131e9faa49153909b980756d6421a8847ec9454eb724e4e5d9d4a31d:eyJzZWxlY3RlZExpbmVDb3VudCI6NTksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImZmY2M1ZTlhNGU3ZWNjZjdjZmYyMmIyZjUyN2M4YTA3YjcyMmQ2MGZlNjViNzZmOGNiNDA1NmJhZTc5NWZhYjAiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjUxMzE0NTFkYjBiMWY4ZWUyNDgzNzRjZmI2NTg3Y2Q3ODQ4Mjk2MTA5OTExNzhkY2QwNDBkMzgwZGQ0ZTFlM2UiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjYxNDIyYTcwMzRhMDc5ZGU5YTY3ZjRmMjFlMjY2YmM0MjdlZGEzYjAzMmZkOGEwMDcyYWQ5NmFlNzE5OGNkZTMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImE2NWRmMWY1ODk5MzU1ODU2YjUwMmM0NjQyNmM2OTAzOTdkYWNjMjRhMTY1M2E2NWZlMzM0NWJkMDMwNjVjODEifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_6691268db2d74685ab9d7206836642a7",
+      "statement": "Theme selection uses independent wallpaper and icon slots that fall back to the site default when unset, while the legacy single themeId plus apply flags are migrated into those slots and stale references are cleared.",
+      "evidence": [
+        {
+          "resource": "repo://internal/handler/themes.go#L295-L380",
+          "version": "repo-lines-v1:sha256:462759972f925c5beec36b3c2043c64b830c591e5f3f947377e64400755e6ab7:eyJzZWxlY3RlZExpbmVDb3VudCI6ODYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjVlMDgwODI2NjZkY2YwMzg1MGI4MzY3MTU5Yjg2ZGM1MmU0Y2Q3MjdiY2JlZGEyNzExNzJhZGM3YjMwNDAxMTQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjJiZmI0N2QwOTdkNWFhNDI2MTBjNmU5YzdkNjA1OGI1MjBkOTYxNzk2ZWVlZjdmMTA2ZjkxNzJiYjk0YjAzNTIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjY2NjQ5MmUwMDBmOTNlMDVkNTU5MTg4ZjU4NTZjZGVjN2ZiODhkMzhlZjAwZmRkNzE4NDUxMmFjZmM0Mjg5ZmIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjU2OTg5MDMzMmQyNjVlY2Q4NWZmNjJmOGM0OTRlNTgzNDFmYmViYjE5ZjcyNmQ3MWE1ODFiYmE5MmRhZWVlNmUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_0d5b4d8c1f1e4079bd928e9612f01d65",
+      "statement": "Theme review approval promotes a personal theme to an enabled system theme, rejection keeps it personal with a review note, and only one enabled system theme can hold the site-default flag.",
+      "evidence": [
+        {
+          "resource": "repo://internal/handler/themes.go#L894-L940",
+          "version": "repo-lines-v1:sha256:5deff5ef1b79eccaabc29f8897733c6e84babc13163d37e280a560fc7bb6f23c:eyJzZWxlY3RlZExpbmVDb3VudCI6NDcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ2ZGUyYjYwMjcwNmUxNDgyYzI1MGZkNWViNjhhNDNiZWMyYmQzYWMyMGZkZDdmYjBmMGRkYTFmZTA0NWQyNmUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjU2MTY5YmYzZTQwY2M4N2QzMThjNWIxMjgyNjIzMmJlYTFkMTgwNjZiNzhmZjNmNjMzNTU5OTA3ZTc3OTAzMGMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImNiNmY0YmE0M2UxMWNmYzAxODQ4ZjdkZTFkYzIxN2QxYmMxYWIwMWM3YjJkNjc2MDE0YjViMTQwMmYzMDExMTQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjkzYzAxNDJkY2JmNTMyYWE4YWRlZTQwYjBlOGQ5Zjk2ZTYzNDRlN2VjY2UyODY5NzY3NzVmZTU0MDUyMjdlOTAifQ"
+        },
+        {
+          "resource": "repo://internal/handler/themes.go#L967-L1010",
+          "version": "repo-lines-v1:sha256:553e84cf07b7314626b718e48c3f18f504e429979bd808a9f656292e6aed86c6:eyJzZWxlY3RlZExpbmVDb3VudCI6NDQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjZiZDMwMjAxZTllOGRlNTQ3MmRkZTM0NDhhNzUzMmQ5OWZiNjljMjcwZDdhOTc4YzE1Y2VjOWYzODdlYTdkMGIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjcwZDFiNjFjNTRlYzJkNDhiNGQyMTY3OGJmMzUwZTlmM2MzZWY3OTU5YTgxZGRiNjA5YTAzOWFlNGI3ZDhhNzciLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImY4MWU2ZDhhMGRjNDM0MTRjMTljZDkxYzk4MDcxZjhiY2I4ZWYzNzIzNjBiY2NkYTlhYmYwMjQwNTlmMDVkNjMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImNiMTYxNzc3MmQyZWRmNzhmYzZiNjdjYzQwNmQ5MzdjZDUzNGVjZGIzNDZhYjFiNjJiOGU4ODUxYjRhYTNhMzYifQ"
+        },
+        {
+          "resource": "repo://internal/model/theme.go#L1-L70",
+          "version": "repo-lines-v1:sha256:cde9c8f3876b6536e925572f4dc3aa945a50898beea567f207f09a32ade4d93b:eyJzZWxlY3RlZExpbmVDb3VudCI6NzAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjYxZDI4YzhlMTZiMGYxOTEzYWVkOWM4YzQ3YzNhMWUyYTcyOGVjMWY5ZjEzMThmZmE5MGJhMGVjYmFjMTNlMjkiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImE5ZWFhYjk1NGIzMzM1ZjE3YTBlNmE3MzRjZWZiNzE1NjZiMDk1ZDYzMTM1M2FmZGMwMDk1NjZhZjEzZjZkNzIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjU1NTA2NWU4OTY0MTgzZGNjNzhiYjQwZDdiMDY5ODQwZDI0NzlkM2U2ZDlkMWRlZWU3YTZhOGE3YTZmZjU1YTcifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_a40a4e8886764d398c684c02f496670f",
+      "statement": "The public icon listing returns enabled icons plus a flattened component-key-to-URL map, and batch SVG upload is superadmin-only with a maximum of 50 files per request and per-file failure reporting.",
+      "evidence": [
+        {
+          "resource": "repo://internal/handler/icons.go#L118-L200",
+          "version": "repo-lines-v1:sha256:43064e87f66d9f907ea7f66ceab3d4eb49d1879b679f44c6a60eb0e696a7eb51:eyJzZWxlY3RlZExpbmVDb3VudCI6ODMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQyZDhhYTk4MzZmZjBjNDI3NzAxOTE1MTJhZjY3MzNjYmM4YzU3NDRjOGQ0ZDI0OGM4ZGZjYmZlZmFjNjU2ZDgiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjIyOGY1MzgwMjkzMWNhNDg1OGQ4NDY0YjQ2NGZiMjZhY2Q1ZjJlYWI0N2VmODE1M2ZjNTQ2Y2M0OWFjZTM0ZWUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImVkMDBjZGVmYWQ3NjE0OWZhNTRhOWU2NDgyYjNhOWM3MWM4NjA3NmRiODhhODMzMzhiZTE5MjAwMTI0NzcyY2YiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjNkNzA3ZWU2OGNlN2VjMjkwYWQ0MWM5MTFkYjE1MmRkMmM5YTAyZjgyZmVkMmY1YmYxNzVlMWVlNWZjMTIwY2IifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_be88297a73984115a542349e53810fb1",
+      "statement": "Creator profile updates are stored as pendingChanges with reviewStatus pending, and public profile responses strip pending changes, review status, and review notes.",
+      "evidence": [
+        {
+          "resource": "repo://internal/handler/creatorprofile.go#L88-L150",
+          "version": "repo-lines-v1:sha256:f787de62a218a95e497fd6e798d7e66173e3a608f49c5d36be1ceca168ea0e3b:eyJzZWxlY3RlZExpbmVDb3VudCI6NjMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImU2MjgzODFkNjgzZWQ4MzFkOWZkZDRjODQ4ZjUxNzc5MjM3NDk4YzNjM2M4YTRiZjU1Zjk3ODJhNTZiZTE2NWEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY3Y2RhODJkYTYwNjIzOGUwNWU2MjM5OTU2OWM1ZWUwMzk5MzQxOTY0OGFlNWQ0M2EyYmY4Y2Q2MzQ3ZjgyNjMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUyM2E3NzAwNGRjZWZlNzkwYzRjMWRhMmQ0NzMyZjFkYTJkMWQ4MTczMDAxNWJlNTRjNzI5ODZhZjRlZGE4NzIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjgyNGI2MDExMDQ0NGE1MGVjNDA2ZjhlMjg3NDQzZWZhOTA3ZjQ5YmY3MDU1ZDIzZjI4NDg5MzU5MzUwMTM3OWUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_01b8d4f639c94de2893cd9f463e1c905",
+      "statement": "The personalized activity feed has no dedicated collection and is aggregated in memory from followed episodes' new single episodes, recent updates, and high ratings over a 30-day window.",
+      "evidence": [
+        {
+          "resource": "repo://internal/handler/activity.go#L20-L145",
+          "version": "repo-lines-v1:sha256:e4d7f244183724d77e75e59382beef1e27709889e05161d19577209187d6a4cf:eyJzZWxlY3RlZExpbmVDb3VudCI6MTI2LCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiJmYWZiYTA1MjdjMzk1M2M0YjZlMGU1YjU3MzliYTgzNjEyZjgwNTNiY2RjOTQ2NjczMDE5M2NkMWQ1OTBiNDA4IiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiIyZjk3ZDg1YWM3NDM3OTBiOGQzOThjOTQyOGFmODVlNDZiMjZkZGRjYTE1NmEwZTk1MWI1YmY5N2E2YmFmMmZiIiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiIxNDI0ZThkODNlNzAyMzI3NDk3MWNmYTY2N2QyNjc0Nzc4Nzc5MzdhYWI1ZWVjMjFjMWZkMTUyN2U4ZTY0ZDI0IiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MywiZm9sbG93aW5nQ29udGV4dEhhc2giOiI1NmQ3ZDhjZDRjMzlhZDE3NTFjZDU1ZDIwMDU1NTVkZmYwOTdjYjFiZjY4ZGM3YjBkOGQ4MGI2YzA0MmZjZTQ4In0"
+        }
+      ]
+    },
+    {
+      "id": "claim_00f00800bd234d15a46500ea9bf227e5",
+      "statement": "Saving a non-empty feedback reply creates a feedback_reply notification and asynchronously emails the user only when their address is verified and the feedbackReply preference is enabled.",
+      "evidence": [
+        {
+          "resource": "repo://internal/handler/feedback.go#L205-L250",
+          "version": "repo-lines-v1:sha256:4104db0e7fd9c566f327e915a983f2dd19f768d48bb9f5ce37cab905ffc99150:eyJzZWxlY3RlZExpbmVDb3VudCI6NDYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImNiZjRmYjI1MDBhYjU4OGUyODBjOWMwOWQ2ZWMwMThmNjcyYTUxYjAyYjBkNTU4YjQxNWVjZjcyN2NlZDUyOGYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjZhNzZjOTdjMjFhZmZkY2Q2NmYwYjYyYzJmNGMyZTU4Y2JkMDRkZmE5ZTE4MmYxNTNmOGZmMTg0MWE2YzNhY2QiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImQwMjFjYzMwNmZkOWFjM2U2YzA3YzhjNzdjMzhkZDI0YmEyM2M5NjFkMjkwM2VhNWQ1MWM4MDljOTc5MWE4ODgiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImYxYmUyODQ3NGM3MjA3YmYzYTc4MzRkMDJhYjJiMGYwNDVlZjZjYzk5YWE4NTcxY2JhMTU4NWNhYmY5ZWYxMmUifQ"
+        },
+        {
+          "resource": "repo://internal/handler/feedback.go#L309-L340",
+          "version": "repo-lines-v1:sha256:ee1fdf3d9e0e1b6e154085fdd0d0a9be01658913af37ace43e57d5026e343809:eyJzZWxlY3RlZExpbmVDb3VudCI6MzIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImJiYzBiNTFkNDJkOWIyMmQxZTBmZmE5MTk4YzI3MzY1MDJhNjMxYTQ0M2VlODM1MDcxNTA2NmM1ODRiMjUyNmUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY3Y2RhODJkYTYwNjIzOGUwNWU2MjM5OTU2OWM1ZWUwMzk5MzQxOTY0OGFlNWQ0M2EyYmY4Y2Q2MzQ3ZjgyNjMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImY0ZjJkZjkwNjhjMjExN2EzZWQwZjRiNzBhNThiYjJhNWNlNDk1NzJhM2FjNjc3MWUyZjcxMjU1MGM4ZjFhNTIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjViZTg3NDIxMGE4YTc2Y2VhYWY5NzU1ODg5MGI0ZDBhMGVjZjU1NGU4Y2JkZDQxNjRiMjIxZGViOTc2NjBhMmUifQ"
+        }
+      ]
+    }
+  ],
+  "verification": {
+    "by": "openwiki/0.7.2",
+    "at": "2026-11-02T17:41:59.592Z"
+  }
+}

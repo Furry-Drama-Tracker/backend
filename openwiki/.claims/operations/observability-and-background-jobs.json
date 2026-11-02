@@ -1,0 +1,122 @@
+{
+  "schemaVersion": 1,
+  "pageVersion": "sha256:3963d5fc90c2fe080056f77123949bda4b0ccc3167a0461cff149413233fbfa4",
+  "claims": [
+    {
+      "id": "claim_906974628b5a4b4091aae42fe2e0023d",
+      "statement": "Application logs use a slog text handler on stdout at Debug in development and Info in production.",
+      "evidence": [
+        {
+          "resource": "repo://internal/logging/logging.go#L1-L18",
+          "version": "repo-lines-v1:sha256:8e85744d3d257cbfe5ca0ce9a6470a1ff8fcd457a9c7c168f3ede1316ef120d3:eyJzZWxlY3RlZExpbmVDb3VudCI6MTgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjczOTJlYWVmMjQ5ZjIzODVmN2QyNzdjYWFlYmFkYTUwMTk5MjUzNjE3NzE4NzhiOTI4ZTE5MTRiNWJkZGQyOWYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijg0MTNlNjc2ZGZlNmExNDhlMDE5NjljNmIxNWFkYWMwMjQxMzYyYmNiYWVhNzhiODAyNjczOTEyYTgyZjdjZDAiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjoxLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_91ab1d8716c44fa8a0942a75b20d0b80",
+      "statement": "SlowLogger logs development requests with status at least 400, duration over one second, or paths containing list, histories, or follows, while production logs only requests over three seconds.",
+      "evidence": [
+        {
+          "resource": "repo://internal/middleware/requestlogger.go#L38-L70",
+          "version": "repo-lines-v1:sha256:44664c72ccd68abee6b639beef6cae047f114f8e7e7b218a623cca2d1484cb51:eyJzZWxlY3RlZExpbmVDb3VudCI6MzMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijc4ZDZkMWU1YzkwYjVhNGYxYWNiN2EzZmQ4YWU5ODhkOGQ4NzMyN2NiYzcyNzkwNjZjYzY4N2Y4Zjc0NjRjOGQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY0ZWZjNDk0MThkMjZkY2YxMjliMjJhNmFhMjExMDhjZWVjMzc2NzdhMzJkMDhlOWQ1ZmVlMzVkZGE2NmJiOWQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImFjYTI4ODUzNjFlZWZjNjEzYjc5YmQ3YTJiYjRjYWQ4MThiZDgwNDIwZjk0ODkwNGZkNTE3MWNhMjIzNzkxMzgiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImYyOTY0MDc5YzNjNWM4MTUyMGVmMzNhMmI5ZDJlMTVhMWI4NGQ3MjgwZGI4NTkwZGNkNjU3NDdlM2UwMTJhNDAifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_28cf6188c0854fc5961f1cf3b29a678a",
+      "statement": "RequestLogger logs non-GET requests, responses with status at least 400, or requests over one second, at ERROR for 5xx and WARN for 4xx or slow responses.",
+      "evidence": [
+        {
+          "resource": "repo://internal/middleware/requestlogger.go#L72-L110",
+          "version": "repo-lines-v1:sha256:f49edb8413f5c392d1a3bb168694071c7792c47ed4def2a8f0fb670b8a56106d:eyJzZWxlY3RlZExpbmVDb3VudCI6MzksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjZjMGJjN2Q1MmIwMTI1NmUxZWEzOTNiYzliMzE2ZGUyZWI1YjgzMjcyNzMxZDFjNWU1NWMzYzljYWQyNDMzODciLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_5c916280da96440dbdab41c4c97d176a",
+      "statement": "Email operations log to stderr rather than stdout, with one entry per sent, skipped, rejected, or failed message.",
+      "evidence": [
+        {
+          "resource": "repo://internal/email/client.go#L145-L177",
+          "version": "repo-lines-v1:sha256:ae5ed4a61e9ba247b629b1c509e5e41fb15a5cb3d32410d9777fd9c6d6b07c47:eyJzZWxlY3RlZExpbmVDb3VudCI6MzMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImUzMGNiYzUxZTJkMjQzYWNlOTNiYjg4NjllYTRjNTgxM2JkMTY5NTU5N2Q0ZTQxYzJiYzI5Zjc4Y2ZiZjI0MDciLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjVhZmY3NGYzNWRkMjJmZjZiZGQ3YmIyNDgwOWUxZTY5OWQxZDM5MjA2ZjQ5MGY1Y2ZlYzA5N2Q3NGI0NGY5ODMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjkyYTA4NjIwMTNmNGRmNTI1Y2RmMzc3NjM1ZGM2NzgyNzMzOWYyOTExNDg1MTczNDJhMGIyMTNjYzI4MzhmODMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImVjNjMxODVhZTVjMmZhZmQwNmUxOWQ5OTMwOWQyZDlmNzMwYjAxZjM5ZjhiOGYxYTg2OWRmNjcwNDUzMTJkOGIifQ"
+        },
+        {
+          "resource": "repo://internal/email/client.go#L55-L70",
+          "version": "repo-lines-v1:sha256:38f91a971cefd353cfbef23b7be75e5ef0f38945ff8dfdfecc850023b667ecec:eyJzZWxlY3RlZExpbmVDb3VudCI6MTYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImU5MjgxYjQxODEzOGE3NDgzODdmOTlkZjk1ZmZjODdmNGVmYTI1YzE4MDYzODlmMTE3MzI5OGExZWUxY2M0ZjIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjNhZGYyYWNhMWE4NjRmMDU2OGYwNTIxMjNkNDAxNDdhMmMxNTYxYjU0YTAzOGM3MDllYjEwMjE2NDczYWMwZDUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjFiMTA0ZmVkMWJhYWRkMjVlNzg1Yzg5MjEzYmU4MTgzY2Y2MDJjODk3MmZkMDc2YTBhMTEyYTQ2NTczYzdmMjIifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_2b32ae926cb544f791610ea012eafec1",
+      "statement": "API usage tracking buffers method and route-template counts by UTC date and flushes at 50 pending requests or every 60 seconds, upserting with an increment and silently ignoring flush failures.",
+      "evidence": [
+        {
+          "resource": "repo://internal/middleware/apitracker.go#L20-L80",
+          "version": "repo-lines-v1:sha256:60c30db7b5f91edf70dde79a84e0c25b6a53cbd8589d1c0f1d9e4bf0b4fa3b66:eyJzZWxlY3RlZExpbmVDb3VudCI6NjEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImY2OWZjOWUxNjM3YzA2NjU4OGI3MGVlNTZiZjVkYjhiMjRhMDA3YzVjZTE5N2YwMzJlYmQ5NGZlYjljNWY0MzYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjRjNTIwNTFmZWVlYTQwZTU5YmJhNWQxMGIzMjk2YzFlNzlmYTI2ZjU5NWQxMDc1NTg1ZjkxODk3MGRhYmUxYzIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijk5MzE5MTcyZThiYjZiMTc5ZTQ3NjU1ZjBkODcxOWJiNzRiYWFjZmUyZWEyOTQ2YmQyMTA2N2Q2MzhiZTAyNGIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjhiYTgyMTY2NDI4ODZlNDk2ZDUxMjk5ZmU3ZDVhY2Y5OTQ0MzcwM2RmNWE1ODJmNTgxNjg0NWY0MGRkMWIyNWYifQ"
+        },
+        {
+          "resource": "repo://internal/middleware/apitracker.go#L80-L130",
+          "version": "repo-lines-v1:sha256:350bf4c1c88194fec80eca4e8993aba145efdd3e82786297abc30542b3132301:eyJzZWxlY3RlZExpbmVDb3VudCI6NTEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjRjNTIwNTFmZWVlYTQwZTU5YmJhNWQxMGIzMjk2YzFlNzlmYTI2ZjU5NWQxMDc1NTg1ZjkxODk3MGRhYmUxYzIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY3Y2RhODJkYTYwNjIzOGUwNWU2MjM5OTU2OWM1ZWUwMzk5MzQxOTY0OGFlNWQ0M2EyYmY4Y2Q2MzQ3ZjgyNjMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjIzNzMwZmE0MjcwZmJiMzIwNWE3MWQ0YzBhZGNiYWQzYzQwZGU5YjdlODE5NzQ1MGRkZjllMzBjNGVmMjlkZmIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjoxLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEifQ"
+        },
+        {
+          "resource": "repo://internal/repository/misc_repos.go#L169-L177",
+          "version": "repo-lines-v1:sha256:d5713962b41bfbb743d2492848e25189f6f2e4326990bf129ea87d6ddec54ea7:eyJzZWxlY3RlZExpbmVDb3VudCI6OSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiNWJiYzYxN2MzNTkyNGQ0N2UyNmZlMjY2ZDA5NjM3YzgwMWMxMTI2MjRjOWI0NmVjYmQyN2EwOWI0MDg4ZTdlZCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNDEyY2EzNDVjY2Y3NWJmOWMwODA2YmNlNjk1YmU4ZGU4MDhiNzk5ODQyNTFhN2E1NGQyMDJjZjYxMDFkZDQ1MSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiOWE4NmIxZmI2NzVkMjIyMjVkNjM3MzJjYmQ1OWUyMjExNDFlODQzNmY2YWJlMWEwMDY4MjA5ZDljMzhiNzFhMyIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiNzQ0NjM5Nzc5MTI0ODFjOTFmZjlhZjRjYjIzNzMxYTAyODlkYzZlZGMzYWNjYzIxYzI5ZmRjNDY3MGUyMmMyYyJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_237cce16db2b40119843b5b241e51351",
+      "statement": "Audit entries are written for authentication session issuance, password change and reset, 2FA changes, email change, deletion requests, and backup import, while routine admin mutations do not write audit entries.",
+      "evidence": [
+        {
+          "resource": "repo://internal/handler/backup.go#L272-L292",
+          "version": "repo-lines-v1:sha256:3a16504bce0133c063ab3ca1df707d5c1f66f21837d48b5ae747319bfab17a76:eyJzZWxlY3RlZExpbmVDb3VudCI6MjEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY3ZjUwNzY4MzVlNzYyMDVjZGQ5Mjg3ODc4MzRiYWEzZGMzOGQxNTFkNGZjODE0YzFhMGQwNTg3ZTAwOWIwOGQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImFkZDc1ZDYxMTg2ZjdkOGI1NjhjYTJjZGRhMzk2ZjAwNmEzZjZhNmUyOGI1NWZhNDdjNjU0YWQ3ODViNjU0NmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjUzOTJiMjRjZjA1ZTBlMjFmMzFhMWFjMDgyMTBkZTYxZGQ5YzJiMGMwNGU1YTI3ZjgyM2FjNmJiMWNiZGY2YjYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjkzYzhjODdlNTc4NGY3YmM2ZDRhNTJkNTQ5YTdkZjQ3MGY5MmExNGNiYTdkNzkxNWI5ZWFjZWM5M2Y2NjUxNzEifQ"
+        },
+        {
+          "resource": "repo://internal/service/auth_service.go#L193-L214",
+          "version": "repo-lines-v1:sha256:d01ae07ea8310cca0bc3abcb5ae3a11abaf73fc89a929d752bcf57476431bf83:eyJzZWxlY3RlZExpbmVDb3VudCI6MjIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjA4MWM0Yjk4OGNmZjZjMTlhZTZiMDhjYmE2ZWEwZjgxODQ3MGNjNDIzZDllMjg4Mjc2ZDY1MWVhYjRmNjgwNjEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjY0YjBmYzYxZDFkZmIwMzA1MzYxMDgzNDA0M2ZiOGUyM2Y3NTQ1MWRkNzA4MjRiMTYxNGYyNTAyYThmY2ZlNTEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImViYmNkNjA5MDE4OTliYWI0YmMzZmRjZjUyY2JjYzI4ZTQxN2MyZDQ5MGVhMTA4MjUzZjExOWRjMWZiODdlOTYifQ"
+        },
+        {
+          "resource": "repo://internal/service/password.go#L10-L40",
+          "version": "repo-lines-v1:sha256:8534434edf24e60324f425ac0ab812c587143f0b7ad24ecec6dd8e419686df33:eyJzZWxlY3RlZExpbmVDb3VudCI6MzEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjIzZWNiMGQ0NGIyMDg2YmQzOTVmMWM0ZDYzOWVmNTVmYzQwNzBhOTc2NjQxNDM1OGFmM2U3NTYwYjg4NzkxZmEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImU1NzBhYjI0M2UwYTJjODkwNDY5YjQ5ZWM0YjZiZjNiMDhmNTI4ZWNiMDQyYzVhNjA5ZTE4YTJhNGIwNTg2YmMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijk0NzcwZGY2Mzk0ZTc1MDM2NGMwMjQ0OTU1MjJlZjM5YjVlYTZjZTUzOWJjNzUzNTAxZTYyYTA2MTk5NzIxZmIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjdmMzQzOGM0MmI1MjdhNzg3OWMxMzA4MmE3ZDk5YmE2Y2RhZGNlYTFiMGIwOGFmNGVhYTRjZDRjNmQxNjM5ZjgifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_1b4f1205c94b4e1bbdaf861740d0138d",
+      "statement": "The cron package defines hourly cleanup of sessions inactive for 30 days and daily 03:00 cleanup of read notifications older than 30 days, but neither job is started by the entrypoint.",
+      "evidence": [
+        {
+          "resource": "repo://internal/cron/cron.go#L20-L100",
+          "version": "repo-lines-v1:sha256:0076b9e3ec4ebc3958a7fe66b56950c45153462f891cc43dcbd2d0ef13902a0d:eyJzZWxlY3RlZExpbmVDb3VudCI6ODEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImZhZmJhMDUyN2MzOTUzYzRiNmUwZTViNTczOWJhODM2MTJmODA1M2JjZGM5NDY2NzMwMTkzY2QxZDU5MGI0MDgiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImZlMWI0OWRjNzJmNjMyNjNkYzRmODFkZDIxZGYzZWRiZmU2NWU5NjVlN2FmMjhjNDM4OGFmMjc0NThlZTYwY2YiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImM3Y2M1ZmMzNzk2ZTJkNmZiNTg1ODY1MjFmZDllOTRlOTdiNmUxYTUzNjAyM2Q1OWUzNTJjYmRmMzAwYzdhMWEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjY3MmMwZTlkNjBmZWJjZDQzNzBmZTBmNTcyM2ZlMTQxNTdlZGExNTEzNTlhMDAyNGM5N2Q5YmI3MWIzZGU1NDMifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_c63337e394a0474ebebedea254e76d59",
+      "statement": "The API usage flush loop, email target-rate cleanup, verification-code cleanup loops, and translation batch worker start during middleware or handler construction, while cron, indexes, and migrations never start.",
+      "evidence": [
+        {
+          "resource": "repo://internal/code/store.go#L28-L45",
+          "version": "repo-lines-v1:sha256:a30e60d01d89dc887a912dab18694e2fb244ed32fad6dcfab3c3637252314d62:eyJzZWxlY3RlZExpbmVDb3VudCI6MTgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImE4N2EwN2E3ZGM2ZWNhNWFjNDNjZTkxNWRiOTk0MjkwZDllM2ZlYTUyNzVhMWY5OTU3YmMyZmM1MmE1NGZlMWYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImFhMzAzODFkY2JjYzI3ZTRiNGNmZjFmMjU0MjEyOTc2OTlkYjY3ZDNhNTAyMmIyMzJiMTYzMDU0NWE4ZWM4OWMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImQ3MmJlZTYxZjJmMjE3OWNjMGVhYmE2Y2I4NGVjMmZlZmFhNGIyNGQxNWRlZDU4NjdhZDQ5ZTUyN2E2MzYwZDUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjUyMTk5YTNlMWZkMWE2ZjRkOTBjOTcxYmY1NzJiNTE2YzQ5Y2RhYTU1NWI0ZjNiY2EyMTczYmM1MTk1NjY3OTIifQ"
+        },
+        {
+          "resource": "repo://internal/handler/translate.go#L210-L222",
+          "version": "repo-lines-v1:sha256:385a9def16a8426e9ff7a0a39013692f51928d05f151e1ad7bdbaf637bb8a27d:eyJzZWxlY3RlZExpbmVDb3VudCI6MTMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijk0NjJhMzI0ZmM4NTRkMzc4OGJhODIyODlhMjhiZTZkYmQxYzlkZTY0ZDgwZjBjYTZhZWIyZTFkOGY3ZmI5Y2EiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijk1ZmJlOTBkMWQyM2FkOTJkZDJkYWIzYWU4NGU4NzkxMDVkNmJmZWE3NDU1Y2QzODdkODEwYzYxOGY5N2IyNGIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijg2NWJhZTU5N2QwODg1M2ZmZGZmMDEzZjAyNzA5NzUzOTYzMjY5M2M0NmU5MWEyZWQzOTkyZTc4YjQxMDBhM2UiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjVmYzRlZWViOWM5Y2IzYmEyZjViMTA2ZDRhMjQwMTljZjE1MzA3ODVlYTU1NTM3MGRlMTJiNGEyMWYxMmZjZDQifQ"
+        },
+        {
+          "resource": "repo://internal/middleware/apitracker.go#L57-L65",
+          "version": "repo-lines-v1:sha256:017514cf0c7bd353517f62e86a53f4e0f21b1908697cc06d58dff79c04b9bf61:eyJzZWxlY3RlZExpbmVDb3VudCI6OSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiOWMzM2I1MmU5NThhYmIwMGM4ZWFjYWRjN2ExNmU4MTViZmUwZWIxMTMyNTYyOTUxYzM4OGI2NDZiYThkYzRjYiIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMWQxYjU1MDdiMDFlZWM3YjIwODZhMDQ2MzNkMmI4MjExYWQ3YzFiOGUyYjk4Nzk4Yjg2YjMwMTM3MzNlZmRlZiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiMzQ1ZjlkYjg2ZmU4MmZmOTMzZGRkZDQ1YTUyNmZjNWM3YTdlMDMyM2Q0ZmE5ZWFjY2MwMDA2MmI4YTJiYTlkNyIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiNjA2MThlODdiMWIzMzc2NGVkMzk2ZjIyY2U0Yjk5YThhZDJkOGI3OTU1MzMzNWI4NTVhYjdmMjMzMTc0OWUwYiJ9"
+        },
+        {
+          "resource": "repo://internal/server/register_routes.go#L30-L40",
+          "version": "repo-lines-v1:sha256:d0604080e94a125f150c1fcda13e311c39176f36aacf340196c386b5848d5bb0:eyJzZWxlY3RlZExpbmVDb3VudCI6MTEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjEzMDVjNmFlZjg1ZTY0YmJkYTc1ZTQ2ZmExM2I4YjdlN2EzNTA0MjJhZGVlODdlZDVhMGQ5MDJjNmMzM2JkYTMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijc3NzdiNjVlYTlhMjhiYjVmOTk0NjExMWIxNzVmOWI2YTBmMGNmMzFhMDFmZThkYzNkNmQ2MTcxMmIyYWVmYTkiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImE0MDUyNzk4ZTBjMmM5M2Q3NjA5M2JjMTVkZDc3Y2VhZTNmNzkzMTZmNmE2MjY5YjBjZjMxYzkxOGViOTVmNDQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImU3ZmFiN2JkNzdmNmU0ZDQ0Y2FhNmI2MGNkMzFhM2M3M2VkYTM1NTgxM2RhMTJmNTg3MzVlN2E2MmZmYTIyMGUifQ"
+        }
+      ]
+    }
+  ],
+  "verification": {
+    "by": "openwiki/0.7.2",
+    "at": "2026-11-02T17:41:59.592Z"
+  }
+}

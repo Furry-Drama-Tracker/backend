@@ -1,0 +1,92 @@
+{
+  "schemaVersion": 1,
+  "pageVersion": "sha256:cd846ace93af2be24e7d78608440d9c78dca48a697080fe541476b84e81bb33a",
+  "claims": [
+    {
+      "id": "claim_9d5c0f9d432440f1b13cc0b99d629064",
+      "statement": "Altcha challenges use SHA-256 with cost 10000, key length 32, prefix 00, and a five-minute expiry, and verification accepts a matching x-dev-token as a bypass before decoding the payload.",
+      "evidence": [
+        {
+          "resource": "repo://internal/service/auth_service.go#L60-L105",
+          "version": "repo-lines-v1:sha256:fa45e9639ee9a816d5d6b6212e27ce6a6411031f606998648b30e74d7cdb4dde:eyJzZWxlY3RlZExpbmVDb3VudCI6NDYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjU5MDkzNjI1OGY4NmY2ZjgxY2ZlZGRiYTM1NzA0YTBiM2YzMDUzOGVhNGY4MTY5OTA2OGZmZjY3ZDJmMDFiZWEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjFkMjIxYmZmNTA4YjdjYzFkNmMyNWUwNjIxNGMyODc1NDkyMTgzNDNiODU3OTY2YWE0NWEyYTdlMDg4NTI4ZmUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjgwZWJjNjVlZDAxZmQwYWQzNmM4MmYwMjE0OTFkZmY1MTFhMWJiYjg2ZGIwNDgwNzk5OGQ0OGUxYWZhNjRhMTAifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_6bc26dadd1f94a688e7297f807296716",
+      "statement": "The Altcha HMAC secret is ALTCHA_HMAC_KEY when set, otherwise the hex SHA-256 of altcha- concatenated with JWT_SECRET.",
+      "evidence": [
+        {
+          "resource": "repo://internal/service/auth_service.go#L60-L72",
+          "version": "repo-lines-v1:sha256:0c61d4ee94f281a775245b13a00204b6a577d36f6d0dced9b5141ec65720667e:eyJzZWxlY3RlZExpbmVDb3VudCI6MTMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImNlYjJhYjRkYTE3MTU5YzliOGNlZWVhM2U0YTMwMTBjYzZhZGFhYjhkYjBmYjVmYzc3YjJhM2U2MWI2ODdlMzIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjFkMjIxYmZmNTA4YjdjYzFkNmMyNWUwNjIxNGMyODc1NDkyMTgzNDNiODU3OTY2YWE0NWEyYTdlMDg4NTI4ZmUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjUyM2VlNGU1N2EzNDNiNDY0Mzc1NzM3MGU1YTYzYzY0ZWY1NTgyNGY5MDFhYTExODhiMTc3M2NiNWY1NjYzYzAifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_e1504456983643de8d1b623087ed37fa",
+      "statement": "IP region lookup returns a local marker for loopback addresses and otherwise calls ipapi.co for country, region, and city with a five-second timeout, joining non-empty parts with a separator.",
+      "evidence": [
+        {
+          "resource": "repo://internal/ipregion/client.go#L40-L100",
+          "version": "repo-lines-v1:sha256:9d018a5ffb87da22f9f37f9368deec4b0a4cdbe67405f1dc828becf67c6a9c90:eyJzZWxlY3RlZExpbmVDb3VudCI6NjEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjBlNDJlMWRkZWEyNDg3MWE3NjY3NGQ3MzRjNDJiYjcxZTdlM2M2ZWVkYzE2NWJhMmU4N2U0MWYwNjA3OTQ0MjMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImQxOWMzZmE3ZTFiNWM2Njc1NWUyNGNiNzFiMTAzNmQzZjM0YzM2ZTg4OTJmMmJkYzI1ZDNlZmJjYjNmYWM2NjUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImEwY2QxYjEwMTI5N2FkMWIwNjY3MmVjN2M5Yjg3YjEyZmJlY2EyOWUzMGUxOTVhZmQ5MTY0ZjIzYzU4ZDhiNmMifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_08f0484958e0481aa7541a9a9bb31581",
+      "statement": "IP region results are cached in an LRU of at most 1000 entries with a 24-hour TTL, and an expired entry is removed and refetched on access.",
+      "evidence": [
+        {
+          "resource": "repo://internal/ipregion/client.go#L15-L65",
+          "version": "repo-lines-v1:sha256:8623c2b088a3142cfb236b8a41771e0d7a07257c4dc1c1b449b224c6c68edeaa:eyJzZWxlY3RlZExpbmVDb3VudCI6NTEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImZhZmJhMDUyN2MzOTUzYzRiNmUwZTViNTczOWJhODM2MTJmODA1M2JjZGM5NDY2NzMwMTkzY2QxZDU5MGI0MDgiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjYwMzJkMmFlZTUyZjM3ZmI3YTg0MTRkYmE3MWVkNGVkZjcxOTU0ODAyNGI0YTNkYmY4MDZhMjAzNDczZDQ5MDAiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImI3MmM2MzQ3OTY1MGY0YzliMDJmOTNjYTVkYTc4ZjM3YmJjOTUyY2VmMDc1NjYxNTBmMGVhMWFiOGRiYmQ2MjkiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUwMWQyMTE4ODcxMDFlN2RhZWQyYzQ4ZTBhN2QyYmM1OWJkNjBhODBhZGY2OTlmMjI0ZTUyZWZmMmJkYmI1NzEifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_e60f5bb4dd7e4192b0c59d71852dce57",
+      "statement": "IP region lookup failures fall back to an unknown marker, and the lookup is synchronous during login and registration before the user is saved.",
+      "evidence": [
+        {
+          "resource": "repo://internal/ipregion/client.go#L66-L100",
+          "version": "repo-lines-v1:sha256:739ce38c6188efbb6849496c3c32771f9575922aebbb17ecebaff5bdaabf89f5:eyJzZWxlY3RlZExpbmVDb3VudCI6MzUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY0ZWZjNDk0MThkMjZkY2YxMjliMjJhNmFhMjExMDhjZWVjMzc2NzdhMzJkMDhlOWQ1ZmVlMzVkZGE2NmJiOWQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjBlNDJlMWRkZWEyNDg3MWE3NjY3NGQ3MzRjNDJiYjcxZTdlM2M2ZWVkYzE2NWJhMmU4N2U0MWYwNjA3OTQ0MjMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImU2ZjA2OTI2ZDMyMWVhNWIxYWM0NzUyNTAxMGY1MWIyOGJiYzE4MTIwNDhhM2NiN2E2NzAxODY4MzhhMjAzMzciLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImEwY2QxYjEwMTI5N2FkMWIwNjY3MmVjN2M5Yjg3YjEyZmJlY2EyOWUzMGUxOTVhZmQ5MTY0ZjIzYzU4ZDhiNmMifQ"
+        },
+        {
+          "resource": "repo://internal/service/login.go#L160-L180",
+          "version": "repo-lines-v1:sha256:bd26a2cb74adb0fb5ac83219c9de3f8cd5aae2d1f57c6bb6fb7109877abc1803:eyJzZWxlY3RlZExpbmVDb3VudCI6MjEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjE2Y2RjMTZlNjA0NzZmOTFmM2I3ZjVmMTYxMzcwM2JkMzk1OWE2YzgyM2UxZTVmZGM2YjVjMWFlY2RlZmI4ZjQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjhiMGEwODhiMDkzM2I2NzgyZmNmNmFmOTBlN2M2NjQzODYzZTY0YTE0ZDZjMjNmZTgzMzBhZWQ4Y2NjZmQwZmEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjMzMWNlMzQ5ODJhNjBiMDA0NzBiNmQwNmI3NDBkY2ZiM2ZmOGRiZjZjYTljNTMxNzg3NWE4NzI4MDIzNWZlMDMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImJlY2MxMjg0ZGIwNmFmNjAzZWY1NWU5ODg0Mjk2YzhiNzE0ZmExN2M3MWNlZmFlMTU0YzViODJjYTMzZTlhYWQifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_0675070b20ad4facb87cbc6e846755e1",
+      "statement": "VAPID public key, private key, and subject are configurable through ini or environment variables, and the public key endpoint returns null when no key is configured.",
+      "evidence": [
+        {
+          "resource": "repo://internal/config/config.go#L97-L102",
+          "version": "repo-lines-v1:sha256:40430e9d62dbbd0dd5944884e3b8dcbfe649edfdac18fd0fbc3fc69bf9f41d26:eyJzZWxlY3RlZExpbmVDb3VudCI6NiwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiODA5NjI3ZGZmZmRiM2UwYzMyMTFlZjVhMGE0YjM3MzQwMmQ1YTNhOTBhNDA5MzZkZjFjZDVhZWFmNzFhN2YzMSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNDEyY2EzNDVjY2Y3NWJmOWMwODA2YmNlNjk1YmU4ZGU4MDhiNzk5ODQyNTFhN2E1NGQyMDJjZjYxMDFkZDQ1MSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNTM0OTdmMmM4MDBmMWU5ZGE3ODljZDhkYTEwNWYxOWY3ZTZkZWJmZDcwMWRjYzE3NTUzNTYzNDY5NGU4NjQ2OCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiNmRmNDU4NjA0YzI2Nzk1ODliMGMzNTVjZTVmNmU0ZGM2Y2FmYjgwYWY1MTZmNjQ0MDJmMzkzZGQzY2U1OWM5MCJ9"
+        },
+        {
+          "resource": "repo://internal/handler/notifications.go#L398-L409",
+          "version": "repo-lines-v1:sha256:33413e182f79df059d321d63dcf3546d4e32af301cc77a4bde6584fe4c92413c:eyJzZWxlY3RlZExpbmVDb3VudCI6MTIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImM0M2VlNTA4YmE4ZTBiMzU0ZDBkODAyYzliZDUwN2IyMTRiZDhhNTBhYzMxOWQ3ZGJmM2RlODIwNzI3ZTFiMzQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjY3NDBkMmM0MTEyMDU5MmQwMTU5YjdhMDY0ZjdjNDFkZDUwNzhhOGUwMmNmMzE1MmU1YWJiMDlhOTFjN2I3MDIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjliNzM5NjYzMjgwZmM0NzY1ZDY1M2EyZWFhOTc2MzA1OWQzOWZiN2NiMzJkZjU2MzczMDMzNzE5OThiZDc0N2IifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_e9b5384296c4401c947020a1b2077576",
+      "statement": "The VAPID private key is never used because web push sending is a no-op placeholder in every domain.",
+      "evidence": [
+        {
+          "resource": "repo://internal/handler/notifications.go#L420-L435",
+          "version": "repo-lines-v1:sha256:860e2923342abf2fec16857f6e6180ba8df481cf2b5064855823c5eae741af4d:eyJzZWxlY3RlZExpbmVDb3VudCI6MTYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjIxODc2OTQyYzZmYWIzYjNkNmYxYzIyM2FmODEyZjc3YjQ3MDBmZDZkMjc1NDc4ZjE0YTI1MjdjMzJlMTA0NjgiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImQ4ZmQ0MTA1YjRmNjBkMTdhOTY3ZmI0NThhZGFlMzY4ODU3ZWI2NzY0NjBjNzNhNzUyMWYyNDliMGI1NDdmZmYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjJkNWI0ODY5MGM5MWJjMGJlNTdhMWFlYTllMzcwMzI5YWZiNjcxNmMyZDQ0OTBlODUxMzhkOGYzOTA0MDdiNzYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImY5ODUzYjFjMDg3YTU3YjQ3MzhlOWJjMGM4NGFhNmY1ZWUwMGFiZWZhZTI5NjFiNWJhMzFjZDA4Y2EyYTkwNTgifQ"
+        },
+        {
+          "resource": "repo://internal/handler/reports.go#L258-L268",
+          "version": "repo-lines-v1:sha256:4f05185c49cef0edee74edf5c9cd74de174b7d4db1af67165e01b5cd47303632:eyJzZWxlY3RlZExpbmVDb3VudCI6MTEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjFjNWM5N2RkZDA5MmMyZTYzNzE5NmNlMDQ0MDhlYjFiYTllNzVmODQ4NmY0YzM2YWE0NjdjY2JmODQxYjZlYTYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjZmYzIxZmUxMzBlYWM1OGQwN2VhNDhjOWY0ZTE5MmM4NGM3NTFiY2ExMjk1YjJiNDIyZWNlM2JjNzUwZWE0NzciLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjI5OThiNGU0NzZhZGVmMWUzZjEzOGEyMjg3M2VjMzRjNGQ3YzI3MmJlYzZlNDAxMzE4NTIyZmFjY2ZiNTk5YzYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjoxLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEifQ"
+        }
+      ]
+    }
+  ],
+  "verification": {
+    "by": "openwiki/0.7.2",
+    "at": "2026-11-02T17:41:59.592Z"
+  }
+}

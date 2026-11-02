@@ -1,0 +1,104 @@
+{
+  "schemaVersion": 1,
+  "pageVersion": "sha256:9edd62b3fe8eae7d5496e13dd17d8506ded99ba80a0c1d19538d739daece67b3",
+  "claims": [
+    {
+      "id": "claim_c845bf9476c04bc59d141d6f5c00fd02",
+      "statement": "Startup loads configuration, connects and pings MongoDB, constructs Repos and the JWT signer, configures upload directories, assembles the Gin app, then listens and waits for SIGTERM or SIGINT with a 10-second shutdown cap.",
+      "evidence": [
+        {
+          "resource": "repo://cmd/server/main.go#L38-L120",
+          "version": "repo-lines-v1:sha256:8a4cd1f67ae56a884b24cbd798d8032d1c46817f374bf83a67aa42a93b16326e:eyJzZWxlY3RlZExpbmVDb3VudCI6ODMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImU3OGFlYTY2NGEzYjI3ZjJmOGZlYTE1ZDFiYzM4Zjc4MjI1YTBjYzNiYjIyMmFkYzQ4NTE0MjU5Y2JjMWE1ZDQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY2N2U3YWVlZDkwOTRjZDYzZTZiZmZhMmEwNzcwNmZkNzdlNzE0YjZkOWNiNTcyZTMzYjY5ZDVjMDRhYmQ3MGQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImEwYjAxY2I4M2VjYTZjYmI0NmQ0M2ZlNGI5ZTRkMjhhYTgwOTMxZGI4ZmQ4MzRkNjhiZmRjM2U4MDIzNDJmZjAiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjE4M2ZmNzZlNGVlYzdhODZjM2Y3NjhjOGZiNmNjYjFjNGMyMDUzOGMwYzU5ZTdmOTY3NGU1NjgzYTMxNWY0MzUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_361f507e7df54158a51ebe62750876f0",
+      "statement": "server.Deps carries only Config, DB, Repos, and Signer, and RegisterRoutes constructs the email client, IP-region client, auth service, auth middleware, and all domain handlers from those dependencies.",
+      "evidence": [
+        {
+          "resource": "repo://internal/server/app.go#L36-L62",
+          "version": "repo-lines-v1:sha256:88b0f1f24d93f1120941653da16c42d3ff41b110cf7a22c423aca6b781491b7d:eyJzZWxlY3RlZExpbmVDb3VudCI6MjcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAwNjIzNDVjNzFmYzhhMTc0NWYyNTg1MmUzNTNmNmQyYTliZThhODJjYTczNzcwODY4MTQyMjgwZWZhZDkxODEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjRkZTY2NTQ4MTg1MjE3YTVhZjJkZjMzMTgyNGZmYzc2YTU3MGNmODdkMWYwNjgyYTMzNjRmNWQ0YjBjOTNmZjIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImI4MTcwMjgyOThiNzliM2Q4Mzg5YjYyYzhkZGRmNTkzODE3NDhmNDE2ODhiNDk3OTY4NmY4YTRkYjk5ZDU2ZmYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6Ijc0NzEzZGVmYTdiOWMzMDkyZjY0ZTM4ZDQ3ZTA5YjFmNjAxMmQ4ZTM5MTJkMDE3ZWQxNTRmZmY5MTMyMDZlZTEifQ"
+        },
+        {
+          "resource": "repo://internal/server/register_routes.go#L28-L45",
+          "version": "repo-lines-v1:sha256:790f05b87e5a786665a3ffb5be0b1f0a9fb04b972aee42fc03fdcb45b98b3ba3:eyJzZWxlY3RlZExpbmVDb3VudCI6MTgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY1MWNkODRiNDM3MTk5Njc0MTAzNWRiMDhlNzE2OTU1MTI1MGQ0ZWFhNzBjZTE0YjE1OTZmM2VmMDI3NjNiMGMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjZjYmVjYjBjYTgyYzUyMzQ4NDFiN2E3NDMwNTM3MjQ1NTBjNWZjNDAzZTk2NzcxNmZmNTg5NGQ4ZGM3ZWY1MDQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjNhNDdlZGQ2ODgxNGEyNTIzMDQ2MGVlYmY4MDIyZGJlZmU1ZGMzNjczN2ZhMGZhN2I3YWU0MDFlNmY2YjYyYTcifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_f840d2ec3d97412ba436a8f4d4727166",
+      "statement": "The service layer is auth-specific: content, CMS, and admin handlers access repositories directly, and the auth middleware also queries repositories without an intervening service.",
+      "evidence": [
+        {
+          "resource": "repo://internal/handler/episodes.go#L148-L210",
+          "version": "repo-lines-v1:sha256:11dd08c080d8941d048946187488898f76814530dd2013ebf083c3b5676e844d:eyJzZWxlY3RlZExpbmVDb3VudCI6NjMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjdlYmRjZWUyMDgxZmUwMGYxMzExNjFkN2NiYmVhZjI1NTE2YmU1ZjYyMDc3MjA2MDFhMDJiZmM3MGMwYzA0ZTQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY3Y2RhODJkYTYwNjIzOGUwNWU2MjM5OTU2OWM1ZWUwMzk5MzQxOTY0OGFlNWQ0M2EyYmY4Y2Q2MzQ3ZjgyNjMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImJhZjJmMDA0YjIyZTRkNmY5NmRmOGQ3M2Q4MDFkNWFmMDE2OWQ5M2Y3OTgxMWI3NDRlN2VlOWI0MTVkZDU1M2MiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjM0MTdiOWNmNDEyZDVkNjJiOGI4NDNlYjhiYzEzNWY5MTZjZjc5OWI2MWJmZWU2ZDUwODMzNzYwY2RkNjBkMzcifQ"
+        },
+        {
+          "resource": "repo://internal/middleware/auth.go#L57-L109",
+          "version": "repo-lines-v1:sha256:78a9a9797e9096bd4a4c2e4484a1acb000b32ba3bd88ef5ec93730511d052a37:eyJzZWxlY3RlZExpbmVDb3VudCI6NTMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImEyNGNjMTBjY2I4ZDUzYzI4YjM3MGFiMzcyNGFjZjZkYTIyY2Y2NzBlM2E1OGIzZTg2YjU3YTYzNThlZjg3NWUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImZmYzE1YTc2OWQzN2Q0YzRkNjE4NDM1NDczMDhlY2UwZmJmZDhhYzBjOTU4YWUxNjg1ZmU4MjUyN2I1ZjU3ZWUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjAzMzdmYTRlNTM4NGY0YWE0ZDdkMmM1MWRkMDdiMmQwZjkwMTE2MWVmN2M2ODRiZmZkYWZmYjc0YmU0NTNjZjMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjZjNjk0YzNjNWM4NGE0ZGM1ZWU0MzQ3OTljNTc2NGQwNjBjMTEzYzRiOWNjYzFkNTg0MTI3OTdhMjhkMGE4NmMifQ"
+        },
+        {
+          "resource": "repo://internal/service/auth_service.go#L30-L60",
+          "version": "repo-lines-v1:sha256:fb65915b377be79d612245990fbf1c1a10fb43188f8ed4434b28f8cfadb96c3f:eyJzZWxlY3RlZExpbmVDb3VudCI6MzEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImI1MzJhMjYzNTE1YzJlYTg5ZjY0MTJmMzgxNDc3M2FhNGU0NDYxNzk5MDkwMTIwYTFlYzkyOTM5ZWU4Mzk0NWMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjNhZGNjZDRiODk3NjQ4YWU4MTYwZjgxNGQyNjAyYzNmYzUwNTA4NTMxN2YzNzcyMjYzZWUzNzc3NmRkOTE4MTYifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_2e5565b83de845dca1461830c591bacf",
+      "statement": "Repos is a flat aggregate of repository pointers, one per collection or cohesive collection group, injected into handlers and services.",
+      "evidence": [
+        {
+          "resource": "repo://internal/repository/repos.go#L15-L89",
+          "version": "repo-lines-v1:sha256:a5bc5143719bf89b653e733a7476ddd027878d2b55b7a05f37b6df003cf4b3d6:eyJzZWxlY3RlZExpbmVDb3VudCI6NzUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImQ3ZmI1OTEzODVkNjU2NTc1ZjMwYjViMGIyNzA1OTIxOGI0ZDViMmNmZTVkMTE4N2EyZGY5YWU2NTVmMDQwYjciLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImM4YzVmY2RlYTkwZjA5NjU3YTQzOGNhOTRkMWNjMWU5Yzk0OTNmMGQ1MGJkYmRhN2M2YTM1ZThlYjU1OTg3MmMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijk5YTU2MGJmOTdkYjc2MTU2NjgzMWJhZTRkOGNmM2YyNzU0YjY0ZWYyOGJmNDVjZDE2YzU5YmY1MzE0MThkOGQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_585385d5e1ea48dcb9a0da6a6e764302",
+      "statement": "Every domain route is mounted twice through MountDual, once at /api/<path> and once at /api/v1/<path> with Deprecation and Sunset headers.",
+      "evidence": [
+        {
+          "resource": "repo://internal/router/dual.go#L20-L31",
+          "version": "repo-lines-v1:sha256:2e4a1bb9b9e90d3502841bb69580268e4e4345d4e5985d24ad39b9b015cdc610:eyJzZWxlY3RlZExpbmVDb3VudCI6MTIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY3Y2RhODJkYTYwNjIzOGUwNWU2MjM5OTU2OWM1ZWUwMzk5MzQxOTY0OGFlNWQ0M2EyYmY4Y2Q2MzQ3ZjgyNjMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjdhNWI2MmZjYmJhZTkzOTI5NmNlZWVkYjY3MmU3OGEzOGIyMTliYzAwNWQ0YjM4MDU5NmE4MWI5NzJmODRhMWEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        },
+        {
+          "resource": "repo://internal/server/register_routes.go#L30-L45",
+          "version": "repo-lines-v1:sha256:b1ad9f26228de850e3b30a40ea04ec579801676420ec21da19fdeab1ea6afa0e:eyJzZWxlY3RlZExpbmVDb3VudCI6MTYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjEzMDVjNmFlZjg1ZTY0YmJkYTc1ZTQ2ZmExM2I4YjdlN2EzNTA0MjJhZGVlODdlZDVhMGQ5MDJjNmMzM2JkYTMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY1MWNkODRiNDM3MTk5Njc0MTAzNWRiMDhlNzE2OTU1MTI1MGQ0ZWFhNzBjZTE0YjE1OTZmM2VmMDI3NjNiMGMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImE0MDUyNzk4ZTBjMmM5M2Q3NjA5M2JjMTVkZDc3Y2VhZTNmNzkzMTZmNmE2MjY5YjBjZjMxYzkxOGViOTVmNDQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjNhNDdlZGQ2ODgxNGEyNTIzMDQ2MGVlYmY4MDIyZGJlZmU1ZGMzNjczN2ZhMGZhN2I3YWU0MDFlNmY2YjYyYTcifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_835c23713a6f4965a1b2b8caaa499b48",
+      "statement": "The migrate, indexes, and cron packages exist but are not invoked from the server entrypoint.",
+      "evidence": [
+        {
+          "resource": "repo://cmd/server/main.go#L38-L120",
+          "version": "repo-lines-v1:sha256:8a4cd1f67ae56a884b24cbd798d8032d1c46817f374bf83a67aa42a93b16326e:eyJzZWxlY3RlZExpbmVDb3VudCI6ODMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImU3OGFlYTY2NGEzYjI3ZjJmOGZlYTE1ZDFiYzM4Zjc4MjI1YTBjYzNiYjIyMmFkYzQ4NTE0MjU5Y2JjMWE1ZDQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY2N2U3YWVlZDkwOTRjZDYzZTZiZmZhMmEwNzcwNmZkNzdlNzE0YjZkOWNiNTcyZTMzYjY5ZDVjMDRhYmQ3MGQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImEwYjAxY2I4M2VjYTZjYmI0NmQ0M2ZlNGI5ZTRkMjhhYTgwOTMxZGI4ZmQ4MzRkNjhiZmRjM2U4MDIzNDJmZjAiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjE4M2ZmNzZlNGVlYzdhODZjM2Y3NjhjOGZiNmNjYjFjNGMyMDUzOGMwYzU5ZTdmOTY3NGU1NjgzYTMxNWY0MzUifQ"
+        },
+        {
+          "resource": "repo://internal/cron/cron.go#L1-L50",
+          "version": "repo-lines-v1:sha256:60e3d6382d4f4bf624777ab5a1fa3410ddc4a3d8c89c5ccd475c7c7979d44e18:eyJzZWxlY3RlZExpbmVDb3VudCI6NTAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjNlNzg3NjU2MmVhYzk4YzkxZThiMTQ1ZTIxMTFiNjk0OTQ4MmM5MWU5MWJlM2VjMTBmZTliMTYzMDU2ODgxMDEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjE5MzNkYzNhM2ExMTBhNDRlYTg2NDM5N2YyYjVkMDE4ZGIwN2Q0MWMwZmY1YTIxNTM4NmU1NWRkMDA4Yjk3NmEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjJjMjNhNjVjMjc1M2JmY2RhNTI1ZTZhYTNlODU3MjliMWY2ODljNDNiYjMxMDk3ZTA0ZjhkZjY3YTdkN2VhZTEifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_0ec4ef9a509843c7a88e744ec84365e2",
+      "statement": "Domain state has no global singletons, but process-global infrastructure exists in the episode cache, upload and icon directories, and rate-limiter stores.",
+      "evidence": [
+        {
+          "resource": "repo://internal/middleware/cache.go#L111-L114",
+          "version": "repo-lines-v1:sha256:593c52ee4b4ce23693bc012793511fc52f3fbdde681d1edf34fe0a6c5946795e:eyJzZWxlY3RlZExpbmVDb3VudCI6NCwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiNzY3MGEwMTc4YmM5ZDQyMjc1ODZjZTU3N2ZmNmRhMzdlMzdkMjEyMjUwYmY2YzA3NDY5M2I5MDYwYWM5MTYzNSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMjlkYzc1MDcyYmQ1NGNhMmVjZmYzNDhjNmM0MTMwZmJhYTBiOWViYmRlOGQ3ZjQ5ODA2OGFiNmExMzk1YTFkOSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZjI5NjQwNzljM2M1YzgxNTIwZWYzM2EyYjlkMmUxNWExYjg0ZDcyODBkYjg1OTBkY2Q2NTc0N2UzZTAxMmE0MCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjAsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZTNiMGM0NDI5OGZjMWMxNDlhZmJmNGM4OTk2ZmI5MjQyN2FlNDFlNDY0OWI5MzRjYTQ5NTk5MWI3ODUyYjg1NSJ9"
+        },
+        {
+          "resource": "repo://internal/upload/upload.go#L35-L50",
+          "version": "repo-lines-v1:sha256:a3360bd5fe95c96136c4e9e99d75a8714cae38e4a64cd18f834a22398260b9ca:eyJzZWxlY3RlZExpbmVDb3VudCI6MTYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjNmNTFkMTZlMmQ2Nzg5NTJiNzdmNjU1YzY3ODI4ZTQ0OGI1YTI4YTllOTg5YjkzNjU0M2NiYzZkNWNlZmJiYjkiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImMwNjhjN2Q5ODNkNzNkMWNkMjgxOThhZjhlYTM3NWE0YjJjMDE1OWIyYzg1ZjY5YTU1MDU5ZTc3YzlhMDE3YWEifQ"
+        }
+      ]
+    }
+  ],
+  "verification": {
+    "by": "openwiki/0.7.2",
+    "at": "2026-11-02T17:41:59.592Z"
+  }
+}

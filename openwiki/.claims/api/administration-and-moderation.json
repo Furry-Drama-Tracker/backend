@@ -1,0 +1,134 @@
+{
+  "schemaVersion": 1,
+  "pageVersion": "sha256:cdc5444c51402be0d775c431257fa79098f668e3ecd7fe1a66b9f105c9b931d4",
+  "claims": [
+    {
+      "id": "claim_ecba2947abd34fa08ccd26f57887e786",
+      "statement": "The admin console separates creator-inclusive administration (verify, pending counts, creators, verify-password) from superadmin-only account and creator-profile administration, and attaches RequireEmailChanged to mutating superadmin routes.",
+      "evidence": [
+        {
+          "resource": "repo://internal/handler/admin.go#L60-L83",
+          "version": "repo-lines-v1:sha256:e3049c81052733efb9e50c6cb1bd19cef9bbab84c6a1ceb88eb2e0cc6b0a3bb0:eyJzZWxlY3RlZExpbmVDb3VudCI6MjQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImVhMjQ5YzllYjE0ZDIwYmQ2OTk0NDU2Mzc1MDBjNzc0NTliYzQ1YjdlYTllMjdkODExNTQyODAwMjk5OGRiOTUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImZiNWY4ZWQxZTM5ZDIzZWZkZWU4ZWM4M2EyMmJjMzE1ZWM0MTQ2NzdiYzliMmYxMWMxNDQ1OGRkOGIyNWY1M2EiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6Ijk5YTgxMWQzNzcyNDlmMmY2MWU0ZWVkMTBmYTY0NDNkNWZkOWEwYzQ3ZWJiMmMyYjcwNDJmZjk5NzI3Y2QwNDkifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_30a3bb108cab4dfd914473393013874a",
+      "statement": "Admin console login verifies Altcha, accepts account/email/username identifiers, admits only admin or superadmin roles, enforces account lockout, requires a verified email, and issues access plus jti-bearing refresh tokens with a persisted session.",
+      "evidence": [
+        {
+          "resource": "repo://internal/handler/admin.go#L98-L227",
+          "version": "repo-lines-v1:sha256:bf82ea2c3092b310e067c895cddac615fa9d4a4d0c52fd6d0c6d242f62acd6aa:eyJzZWxlY3RlZExpbmVDb3VudCI6MTMwLCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiIzMGVjMmRhNzhmZGRhNTc1N2U1MzYxNmU0Y2FjZDI5NjE2ZWJjYjg1MGE3Mjg0ZDJkMjRiN2E4MGNjN2ZlNzQ5IiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiI5ZmRjYzhkYmVhNTJkNTg4NmZiOWI3ODc5ZTJiMWRhNWQxMTdhMjYwMzUwNDFhYzRiOTY2MDdmNTA1ZGUyMGM3IiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiI5YTZiNWFkY2NhODg3MjYzMWZmZDQ5OThiMDFmOWQ5N2Q4YzI2MTY0MzAxNTZkZTNiZTBhMDI0ZWI4ZDU3OGFiIiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MywiZm9sbG93aW5nQ29udGV4dEhhc2giOiIxYjlkM2Y2MGYyYWMwZWQ1YzZlZDg4MzJlOTliZjJkMWE3OTNmNDVjNzQ4MGIwZTVlMjBjMDQwMzdmYzAyNDZlIn0"
+        },
+        {
+          "resource": "repo://internal/middleware/auth.go#L57-L109",
+          "version": "repo-lines-v1:sha256:78a9a9797e9096bd4a4c2e4484a1acb000b32ba3bd88ef5ec93730511d052a37:eyJzZWxlY3RlZExpbmVDb3VudCI6NTMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImEyNGNjMTBjY2I4ZDUzYzI4YjM3MGFiMzcyNGFjZjZkYTIyY2Y2NzBlM2E1OGIzZTg2YjU3YTYzNThlZjg3NWUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImZmYzE1YTc2OWQzN2Q0YzRkNjE4NDM1NDczMDhlY2UwZmJmZDhhYzBjOTU4YWUxNjg1ZmU4MjUyN2I1ZjU3ZWUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjAzMzdmYTRlNTM4NGY0YWE0ZDdkMmM1MWRkMDdiMmQwZjkwMTE2MWVmN2M2ODRiZmZkYWZmYjc0YmU0NTNjZjMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjZjNjk0YzNjNWM4NGE0ZGM1ZWU0MzQ3OTljNTc2NGQwNjBjMTEzYzRiOWNjYzFkNTg0MTI3OTdhMjhkMGE4NmMifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_f7d177316ae84fe7b46a3d689871666c",
+      "statement": "Deleting a user from the admin console cascades across follows, histories, notifications, favorites, folders, feedbacks, sessions, push subscriptions, and reports, then rebuilds rating aggregates for affected episodes.",
+      "evidence": [
+        {
+          "resource": "repo://internal/handler/admin.go#L565-L676",
+          "version": "repo-lines-v1:sha256:e8519776a63f4982a0ca2ec1e0fdc55b19cb4cc5786f23d5b318721894d26aba:eyJzZWxlY3RlZExpbmVDb3VudCI6MTEyLCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiJjMDU0NDA1YjBjYjBmZmY5YjJlMmEwOTJhOWFhNzFmN2VhMDUyMmUwOTRjYmU2Mjc2MDVmMGFhNzNmMWY0NjA5IiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiJjNzNkOWYzYWZjYTI1ODNmOTdlZTY2YTNhNzc1ZTc2YmVjNjBjMGUyYzU5MzdhOGYxMmFhZTRiYzU5NjM3YTEwIiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiIwMjhmMzc1NDg4MGM1YjliZDg0NDE3NmZhMTI1ODY4YjY1OGU0MDZkZGIxNjEwZGE0MzVhNmU5M2YyMTlkZjQ1IiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MywiZm9sbG93aW5nQ29udGV4dEhhc2giOiI2YzM2M2QyZWIyNTYzNzZkNGMxNDRjNGFlZjhjYTVlNmVmNWI2Y2RiMTVkMjkxNjlkYWJmNTc1YmVhZTg0MjgwIn0"
+        }
+      ]
+    },
+    {
+      "id": "claim_b9975323868c45e3bccd2428c215ada8",
+      "statement": "Review approval applies pending changes and, when currentEpisodes increases, writes one new_episode notification per added episode to every follower and de-duplicates follower update emails per episode, episode number, and event for one hour.",
+      "evidence": [
+        {
+          "resource": "repo://internal/handler/review.go#L167-L241",
+          "version": "repo-lines-v1:sha256:8564bf6c5ebc5edc389f58f37255c9440e5922b0e00b635966c42cd3429c99a5:eyJzZWxlY3RlZExpbmVDb3VudCI6NzUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjhiNzIxM2UxMjE5ZmE1YTM3YzY4MzA1MjAwNjkzNmRiMTM5MDhhZWJlZWQ3MTUyNDQ1Mjc3MDVlOGQ2YzEyNTEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjdiODQ3NzJmMTdlYTVlYjU2MDVjYTliZTkxMDNkM2VhZmYyOGJlOTE1MDY2NDJlMGNjOGU1YzE4MDdkZjY5MjAiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjZiZWFmZTE0ZGJhZmQwOWFlMWMxYWNiODljOWZhMjgwYzI0NTY3YjRhMDRjNWJlNzAzMzBmZTk1NjhmMWJjMTQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImNiMDdhOTM0ZWU1MGI3NzVjMzdkM2YyMDU1ZDI0OGFkZGFkMmE0MWI3MWY1ODU0MDRlODNjOTcwY2YxMGFhMWEifQ"
+        },
+        {
+          "resource": "repo://internal/handler/review.go#L482-L520",
+          "version": "repo-lines-v1:sha256:bf35b540397007716d380bbad705a07e76b6d4b2b40610bf12bd27afce25fa30:eyJzZWxlY3RlZExpbmVDb3VudCI6MzksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijk0MDg0NTBmZDM2YjdiNjI2Nzc5ZDRkMmI1NTg4YzM4YTRiMWJiMzZiODVhMGRmOTE2MzI2NDkxOTk4ZjU0YTkiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjhlZDBiNzNlNjc3ZjZlZjkzMDZlOGQ1MWU5MGRkNmQxNjM0ZTJmMDI1YjBlNDI2ZTg0NmZjZjQxZmJlZDRkYzQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6Ijg5ZGNiYjllZTQxYTZiNDg1MTAwZTk0Y2M4YjdkN2U1MzY2NmI0Mjc3MThjNmQ1ZmEyNWI2OTZlZmI2OWNhY2QifQ"
+        },
+        {
+          "resource": "repo://internal/handler/review.go#L606-L628",
+          "version": "repo-lines-v1:sha256:ec69bdc4ef42010fcdebd2595b543a5e04545a81abee87bb9ccc0f24ca7cd4af:eyJzZWxlY3RlZExpbmVDb3VudCI6MjMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijk2MzQ1NjFjYzhmNDcwZjAwYmQ2YTJjM2FjYTA3OGEyOWE2YmM3ZDk3MThkZGIwOTM4MDgyZjA5NjhhOWVhMWIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImMzZTExNGU2MGUxZWY1MjZkMWUzNTc1YmQzMzEzZThjMTcwZGZjMzZmZmViMGI0YWUyMTNmYjkyYWRhNTA4MTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjhkYjFiOTE1OTYzYmEzYWE1YWZmYjhlOGMyNmJlOTgwYzNlYjk1N2QzNDk4MmNjMGY1NWFmMGFlODkxZDQ4OWYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjdhNDhjNjBmY2Y1OGIzYWE3MWFmYTQ5ZjE1ZGQ3YjMwZGYxYTJhZmU1NDc3ZDFlMjJmYzg5OTdjMjJkMTI0MDAifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_ff220f1a5b1d420fbbec3bacd1338734",
+      "statement": "Review rejection discards pending changes on an already approved episode, but for a never-approved pending episode it marks the episode rejected and moves it into the episode trash with reason rejected.",
+      "evidence": [
+        {
+          "resource": "repo://internal/handler/review.go#L243-L313",
+          "version": "repo-lines-v1:sha256:531a881e9d88c0340889dce155f8313ce4354a015561f856cd25b85ca7170824:eyJzZWxlY3RlZExpbmVDb3VudCI6NzEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijc5NDMwZDA1OTJhY2QyMmRlYWFjNTVjOTU2ZjRkNzMyODJlOTY3MTRhYmZiMjEwOTk5NGEzMzc2MjhkOGMxMjkiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImU3MzIwNWExMDE5ZjU5MmU5MTlmNDE5NmRmY2Y1YjU4MzM1M2UxOTA1ZTNmMTBmZDc3YmM0YWZhOWYzNWYxNTgiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjJmNWMwMzUxYjZiM2MyZDdiMmYyNTY4YWJiYmUzMTMxNDg1YmUzZmYyOGNlZjlkZWY0Njg3ZmM5OWE3YjdiYmQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImFlZDcyNGUxOTgyYjBjZjRmYjQ1NmRjODRlMjNlYWM0ZGViMGQ1MTRlMzVjODQ0ZGVlNDMyN2ZiY2I1OTkyODQifQ"
+        },
+        {
+          "resource": "repo://internal/repository/episode_trash.go#L51-L70",
+          "version": "repo-lines-v1:sha256:b1ae39676ab418e8a2375480bdf3908b90378d3f572c89acfc4eb1e171589d92:eyJzZWxlY3RlZExpbmVDb3VudCI6MjAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjBkYWE3Y2Q0OGVkOTMzM2M1ZDgyZjhkOWQyM2JkY2VkYzNlN2JmMDc1MTBlNmZmMzFmOTM3M2YxOTBjNjk5MTAiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjRjZGMwZTA5ZmMxZTYzMzMwYTRiZWVkNjdmMzVjMjU1ZWQzNWEwMmIzZjgxMTQ2YzcwMGM3MGY1ZDIyNTExZTciLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjdhNjRhODAzOWNjZWEwYjY0ZDJiYzVhNmNmZDU2NzljZWJlMWFmNTE0NGYwZDIwYjEyNmY4OTc1MjhmMjFjYzIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjI5ZDMwODY5NmUxN2EyNGMyNjdmMmRkMTg4NWFlOWEzOTZhOWIzNGUxZTk2NDQ5YTA1ZjJiZmMyM2FlYzJkZmQifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_5bc8011cfdc54605b12605dae0f7110e",
+      "statement": "Episode trash restore re-inserts the episode into the episodes collection with its original _id and rolls back if removing the trash copy fails, while purge removes the trash document plus its single episodes, versions, follows, favorites, histories, ratings, and notifications.",
+      "evidence": [
+        {
+          "resource": "repo://internal/handler/episodetrash.go#L36-L42",
+          "version": "repo-lines-v1:sha256:d72b6acc5fcb3216efe682df1ab30784c364a883b5747fea8d521c5ee115ca86:eyJzZWxlY3RlZExpbmVDb3VudCI6NywiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiYjg1YzI0NGExYmUwY2ExMDMxMDdjNDRjN2JhOTU5YTM3N2UzNjFlZjQxYTE4ZWZiNGEwOTkxZGVmMzg5MmVkZCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNDEyY2EzNDVjY2Y3NWJmOWMwODA2YmNlNjk1YmU4ZGU4MDhiNzk5ODQyNTFhN2E1NGQyMDJjZjYxMDFkZDQ1MSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiMmY4MTA1NmQwODUwM2E1ZGRiZWY3MDgwNTY5NWJkNzU4Njk5Y2VjNjY2Njg5MmNhZDY5NDI2NzUzY2I3ZTljOSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiMTQ4NmFmYWQ1MWViNWEyODAxMjMxMmMxNzk0MjA5ODY0YWVkZWNkMTI3ODUzMTRlYmNkYWNiZjNhNjY5ZTJlNCJ9"
+        },
+        {
+          "resource": "repo://internal/repository/episode_trash.go#L107-L143",
+          "version": "repo-lines-v1:sha256:eff0dab77e80a835c21ac520b5afc5623b2dd653e4c21c0743a5c11ca650a1bb:eyJzZWxlY3RlZExpbmVDb3VudCI6MzcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjU4NTI5ZTRjNzM5YjUxOTI3OTNjNjExMmQ3ZmQyNGRhOTg1NjEwZGZkMTE1OGVlNmUxZjgyMGI4MjE4OWU5ZmIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImI5Nzk5MzkxNDViNTRlMzAzZDQ1NDZkY2I2ZjUzNjIxN2UzNGRiMDlmNzQ0ZjY5ZGMxOGQwNzhiNWIyZDdjYjciLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_76260fb71c7f4d148e8d6176a03f8c16",
+      "statement": "Report resolution accepts resolved or dismissed, records the resolver and note, and creates an in-app report_result notification for the reporter while push delivery is a no-op placeholder.",
+      "evidence": [
+        {
+          "resource": "repo://internal/handler/reports.go#L180-L240",
+          "version": "repo-lines-v1:sha256:74d20084373f6a72a9e5b069dde7ac0668ad15583120fbc6e9bdc5826fb53432:eyJzZWxlY3RlZExpbmVDb3VudCI6NjEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjZmNWQ5NjlkZDAzNzkzZWQ5OTY4MjQ2ODAwYmUyMTNjOWZhYzFmZTllYzkxOGZkZDYzNTY3YThmMDllNjRkYTQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImExMWE5YzcwNjI0M2YwNzgzYTIzM2RhODNlOTVhYzc2MGI0OTliMzFkYjhjODE0NzVjYjZkMzM0OGEyMTY3NWMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjdkMjE1ZDNjN2I2MTM5MjJiY2I3NmVmYjE4OGZlZDQzOTIwZWQzZDYwYzI5ZGQ1MDlmN2RlZjE1ZDY5NGEzNTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjM2ZWM0MzQyNzE4ZGJkNjdjODZiZmRmZDcyMGM0YTgzN2ZhYmU5MTFhYzA2MmNmYzczYzdhOGE3OGM0ODIyMDIifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_a029ce1bcf59418a950f60cf36aa33a9",
+      "statement": "Stats overview, activity heatmap, and episode lifecycle responses are cached in memory for five minutes with a 200-entry cap, while the realtime endpoint queries live data without caching.",
+      "evidence": [
+        {
+          "resource": "repo://internal/handler/stats.go#L45-L66",
+          "version": "repo-lines-v1:sha256:35664d697bb2e5458b709f74160b55ad5bb45a2fdb449f70aa06a33329367d80:eyJzZWxlY3RlZExpbmVDb3VudCI6MjIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY4ODRkYjgwMzc4ZDFmY2Y2NTY3MmI4N2FkNjE4NDZkZWMwNTc2ZjVmYWRjMmViZjZhZGFjMzA5NWZiYjc0YTMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijk5OTNkNDM5ZDEwNjJhYmY5NGRmYmU1M2QzOWExM2E2MDRlYjg2NmFhZGYxM2I4MzU5YjllY2UzOTEwOTUzNmIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjU0N2YxMzc3ODIwZTRlMTc1MzQyNTQ4YTRkNDA0ZGQ5YjdjZmJjMWM4MGQwNmJmMWUwMzE3MTg1MDE1YmY2MGEifQ"
+        },
+        {
+          "resource": "repo://internal/handler/stats.go#L937-L1010",
+          "version": "repo-lines-v1:sha256:7e1c273e8fdb707c2ba5e0622fd3b87d30d3673855aa61b543ef6b8b1ea9e27d:eyJzZWxlY3RlZExpbmVDb3VudCI6NzQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjMxMGM4ZmE1NWU2ODRkNjQ3YjI2N2Y1MTc2MWQ5ZmZiZjQ4N2ZlZjM0YjlmOTVkYTMxN2MxMTVlZGI1ZmZkMjciLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjgyYzFmOWJlMjBjY2MxMTkzMDU0OGFmZDg1NTU0ZGU3MjVhZDZiM2EwN2I0NjI2ZWNlZTY4ODExNTY5YzNlZWMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjE2YjhhM2RlYzA5ZjhhZmM3OWVjZmU4ZmM0OWM3YjgzODI0NGYxYjBmNTdjNzBjZjI1NWMwYTQyYTJmYzkxZjgiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImJjYmM1NWM0YzU2ODMwYTcxYmQzMTUxMzM1MjUwYTZlMzkyYjdiMDg3OTk2YmQyNjQzNTM1YzBhZTkzOTZhM2UifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_0705a00a1d874ab2b067627b9200c0c1",
+      "statement": "The auto-status endpoints are superadmin-only and mutate episodes to completed when currentEpisodes reaches totalEpisodes, or release due single episodes by clearing isUpcoming and copying premiereDate to releaseDate.",
+      "evidence": [
+        {
+          "resource": "repo://internal/handler/autostatus.go#L33-L101",
+          "version": "repo-lines-v1:sha256:cd386ddf5acae1276f1879d97aefd15c7b11188d0e49229839fe8dc4b21d4567:eyJzZWxlY3RlZExpbmVDb3VudCI6NjksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjRiNzA2NWU1NmQ2ZTE5OTY2NTg5YThjM2NkMzA1OTIyMTNjZWNlZmJiZmM1YzE5ZDcxNzI3MjhmMDA1Nzc0ZTEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjlkMjE1ZDg0M2VmYTUyOTAyZWYzZjExNWI2MzRlODcyNzcxYTllYmFjOWViYjIyN2M3MGViZTI2YjI0NmZiNjUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_c21f8c74700b4eb7bccaedc9871c82f9",
+      "statement": "Audit log listing is superadmin-only, filters action, admin, and user with escaped case-insensitive regexes, and returns logs/total/page/totalPages without a limit key.",
+      "evidence": [
+        {
+          "resource": "repo://internal/handler/auditlogs.go#L40-L110",
+          "version": "repo-lines-v1:sha256:53a84aa0863ccc33b0dad308ef645a7671c7e953f582dc8d49c2452f3c31cf07:eyJzZWxlY3RlZExpbmVDb3VudCI6NzEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImU4MzhhNDc0ZDdhODgxMjQxOGQyMDIzZDMxYTUwNzZhYjdiZmM5ZjFmMWQ1MzI0ZDMwZDNlMWFiYWJmMmIyMmUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjBkNWIzNzYzZjI3YTYwODI0ZGMyZDEyNjgzM2I1NTJlOTQ5MDBkNGEzNzFjZGZjOTdhOWQ1NDY1MjZkMzI2NjciLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImRjYWQ0NTkyMjIyODk1NmU0OGY4NzY5N2IyOWE2ZWNkYWMyN2UyYTk3MmFhNDJjMmM5NGJiNjc3ZjZlOTJjYzAiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjMyMmYyY2IxZjA5Mzk3Y2QyMjMzODZiOGQ4ODA4OGZiNTUzNWIxMzI3NDUwNWUxMmZmMzVlOTE2MTc0NWUxMzAifQ"
+        }
+      ]
+    }
+  ],
+  "verification": {
+    "by": "openwiki/0.7.2",
+    "at": "2026-11-02T17:41:59.592Z"
+  }
+}

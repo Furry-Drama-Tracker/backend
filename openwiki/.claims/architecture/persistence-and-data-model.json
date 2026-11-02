@@ -1,0 +1,110 @@
+{
+  "schemaVersion": 1,
+  "pageVersion": "sha256:ee0d58cedab62dc18336aa4c6301c050c4d534f12cc08b8062cbaa5f7b30fd18",
+  "claims": [
+    {
+      "id": "claim_813d5398a03447928aea6cd62fb23b94",
+      "statement": "MongoDB connections configure a default pool size of 10, a 10-second server-selection timeout, a 45-second socket timeout, and a ping before returning; an empty database name is extracted from the URI path.",
+      "evidence": [
+        {
+          "resource": "repo://internal/repository/db.go#L14-L54",
+          "version": "repo-lines-v1:sha256:a6d68924c35f9f770147b9df3b0c0978db5e570d1445812b0d90d27e074d6f46:eyJzZWxlY3RlZExpbmVDb3VudCI6NDEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjVkZWRjNjg2ZTYyYzIzMWI3OGQzOWYwYjEyMzAzOTNlYWZjMDE5ODQyNzQ0Yjk0OWRkNmU3MTdhZDY4YzFjMTkiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjNmZjY4MzE0NDU3YThjM2NkM2Y4MDc4ZTZjMGE0ZDExYjAwYmFhNzgyZTM5MzdjMjExYjg5MTkwZTVlZDMxY2IiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_0ee72f7aa24749ddbeb5a6b2592bd84a",
+      "statement": "Repos is a flat aggregate whose fields map to lowercase plural collections such as users, usersessions, episodes, singleepisodes, and systemwallpapers, with push subscriptions and the trash repository constructed outside it.",
+      "evidence": [
+        {
+          "resource": "repo://internal/repository/push_subscription.go#L15-L28",
+          "version": "repo-lines-v1:sha256:d29caf7f08d9d65fe362077650bfb8d2bf4b0bd7fef82cbd5d083990b50b3cbd:eyJzZWxlY3RlZExpbmVDb3VudCI6MTQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijg4ODY0NWVhZmFjMDZiZGQzYjczNWJjMjUzY2M5YWJhZDFhZjkwM2ZhZGZiNDkwNWYwNmU4ZDNmMGQ2ZGJkYzQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImJhYzBkNTU4N2Y1Nzg5Y2EwZTI4ZTVkOGM1ZDA1NGEwY2E4ODc2MzIzYTRmNDYxMjA4ZDQ3NzI2NzY2NTRmM2UiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImI0YWZlYTY0NGFiZTJhZGZiNjk4YjEyZjhjMGUyMWFhOWU5ZjdmZDlhMWY3NjIyZGE3N2MwYzNhMGIyZDZkZTAiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImRiYTA4ODRhYjViZDIxMGFmNzNkZTZlOGVlMDYwZmQxNTlhMzE0MjgyNWY5NmFlZmQyZWZhNTZiMDEzY2Q0OWEifQ"
+        },
+        {
+          "resource": "repo://internal/repository/repos.go#L15-L89",
+          "version": "repo-lines-v1:sha256:a5bc5143719bf89b653e733a7476ddd027878d2b55b7a05f37b6df003cf4b3d6:eyJzZWxlY3RlZExpbmVDb3VudCI6NzUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImQ3ZmI1OTEzODVkNjU2NTc1ZjMwYjViMGIyNzA1OTIxOGI0ZDViMmNmZTVkMTE4N2EyZGY5YWU2NTVmMDQwYjciLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImM4YzVmY2RlYTkwZjA5NjU3YTQzOGNhOTRkMWNjMWU5Yzk0OTNmMGQ1MGJkYmRhN2M2YTM1ZThlYjU1OTg3MmMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijk5YTU2MGJmOTdkYjc2MTU2NjgzMWJhZTRkOGNmM2YyNzU0YjY0ZWYyOGJmNDVjZDE2YzU5YmY1MzE0MThkOGQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_f856841f8600401d95e58d238ee8f734",
+      "statement": "Models map documents with bson tags and JSON tags, hide password and 2FA and lockout fields from JSON, model the __v version key, and normalize legacy defaults through explicit constructors.",
+      "evidence": [
+        {
+          "resource": "repo://internal/model/model.go#L1-L60",
+          "version": "repo-lines-v1:sha256:b95089fea27aeae067d8af04795ea731b973027ac5419a0568a3c6c5e1408b21:eyJzZWxlY3RlZExpbmVDb3VudCI6NjAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjJiMmQwZWY2ZmIzMGNmZDA0YWU1ODk1MmE2YTg4MWZjZjBhNzUwYTM0YmE2YmQzMDY0MTQ0MTU2NTkzNTAxNTMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImFlYjU3ZjBjZDA3MDMxZTBlY2M3MTljOGJiYmY2NzkzY2UwMmQ5YTdkYjY4ZDY0MjhkOWUwY2UwMGM5OThiMWMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjBkNDU1ZWU4ZmE1ZjJhZDIyYjEyYjQ4ZGQxNWZkMDI5ODJmMzE4Y2E0YzRjMzI4YjM3ODVjMjhiZTk1M2MyOTQifQ"
+        },
+        {
+          "resource": "repo://internal/model/model.go#L84-L107",
+          "version": "repo-lines-v1:sha256:0bad67089cfd78263bfe52940d17217989b3d03a4d2f42c0950cf63ff4c54c7f:eyJzZWxlY3RlZExpbmVDb3VudCI6MjQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjcwMmM4OWZlN2I0YmQ0ZWE1YzVmZWE1NjkwNWVlYTY3ODhjZWZhMzE1NTM4NDRjMjVlYzdmNTY4NWY5ZmU2ZGIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImI0NzI3NjlmNjcwZTVjYWM4ODQ1ZmUxZDQ5ZjAxYTk2MzcyYmRlODE0YjE0ODk1YTAzMWJhMjU0YzBjZmMyNWEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjNiY2M5ZjVkYjdjMTBjYzdjMjMwOTdmNWZjOWQ1ZmJjMDM1ZWYxNGNmM2M1Y2E4OGIyNmY5YzQyNTVmYTlhODAifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_0abb0299b70f4f7bbefe92ae2550ac3e",
+      "statement": "ToObjectID converts a hex string to an ObjectID and returns non-string or invalid values unchanged, so ID filters accept both JWT string claims and ObjectID path parameters.",
+      "evidence": [
+        {
+          "resource": "repo://internal/repository/idutil.go#L1-L16",
+          "version": "repo-lines-v1:sha256:f060eccf6ef1533b5bfba1be517e665e46f58bdb726e7a34294251c6af765a66:eyJzZWxlY3RlZExpbmVDb3VudCI6MTYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjgwNThjMzlkMDM2YjI0ZmUyNGI4NDQyMTNjYTJiMjU4MzE5MzRiNjA2ODE2ZTE4YjNmZGI1MmYwMTJjMGRiODAiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_02eee9ec86934f8d961fba3f39362d15",
+      "statement": "Repositories expose ErrNotFound and duplicate-key sentinels plus a lockout predicate, and each operation derives a 10-second timeout context.",
+      "evidence": [
+        {
+          "resource": "repo://internal/repository/repos.go#L86-L89",
+          "version": "repo-lines-v1:sha256:e52fb655d69d25e4e719bd376fa57f7d9a3a98960d2ae58c38bdafc916870429:eyJzZWxlY3RlZExpbmVDb3VudCI6NCwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiNDEyY2EzNDVjY2Y3NWJmOWMwODA2YmNlNjk1YmU4ZGU4MDhiNzk5ODQyNTFhN2E1NGQyMDJjZjYxMDFkZDQ1MSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiYzhjNWZjZGVhOTBmMDk2NTdhNDM4Y2E5NGQxY2MxZTljOTQ5M2YwZDUwYmRiZGE3YzZhMzVlOGViNTU5ODcyYyIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNTJiOTFlOWNlNDViNjQxYWQ1ZTE2MWEyYjdhZmQ0MjEyNTUwNTFjOWJjMzYyMmQ5M2JkMGRmMmE5NDZkOTgyNyIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjAsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZTNiMGM0NDI5OGZjMWMxNDlhZmJmNGM4OTk2ZmI5MjQyN2FlNDFlNDY0OWI5MzRjYTQ5NTk5MWI3ODUyYjg1NSJ9"
+        },
+        {
+          "resource": "repo://internal/repository/user.go#L15-L60",
+          "version": "repo-lines-v1:sha256:dd54ef36c77a7e7de418bc7e77557265682f85eeafceffda178f14140bfcb998:eyJzZWxlY3RlZExpbmVDb3VudCI6NDYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImI3OGM3MzYzNzE2MmNlNTEzN2U1MmJjYzk1ZWU4MWQ1NjhmZDYxMjQ4ODA0ODE4NzU1N2JhMTNhYjU3NzE4N2IiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImEzMjc4OTRmMTQxMjMxZTNmOGMyOGFkMjZhZDNlOWZlMDBkNjRlNjdlOGYzNWMyNWVhNjJjODliMGMzMTM5YTIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjdjZjE2ZWM2ZmRhNWU0ZDUxN2ZmZDliZmI1MTU2NTJiMTBlNzA3N2U2MWY5ODg0MDUwYTIzZWVjMWM2NzIwNDcifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_3150083fe0c643febce1165e6ed3d549",
+      "statement": "The indexes package defines unique and TTL indexes for users, sessions, tokens, histories, notifications, ratings, follows, favorites, audit logs, API usage, site content, and folders, creating them by name idempotently.",
+      "evidence": [
+        {
+          "resource": "repo://internal/indexes/indexes.go#L42-L100",
+          "version": "repo-lines-v1:sha256:936cb6e893c64696e60010b6c1e55cd5869b32eda2690e433f7440d7f4e06a65:eyJzZWxlY3RlZExpbmVDb3VudCI6NTksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImNhY2Q5ZDdlMDE4NjljNjdiNTg0MTU4MTFjM2Q5NmE2NmM1MzczMzZkMmVkZWNhODg1Y2FlNGE3NmZhMGFkM2IiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjQ3YTY2ODVjMjFjMTNjOGM4ZDZjZGY0NmZjNDU4YTFiZjUwMGVkNmFmN2I2M2ExYWU2NDBkMzhmYTBlYWRjNDYifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_42beadfc09f94ad6a320b6c5b0b87193",
+      "statement": "The migrate package implements three marker-gated migrations for accountId backfill, adminAccess to role conversion, and creatorProfile adminId to creatorId plus profile creation.",
+      "evidence": [
+        {
+          "resource": "repo://internal/migrate/migrate.go#L24-L70",
+          "version": "repo-lines-v1:sha256:f354bfff28b49d25f9d5da514f5749b608d3f96de7d612c7917bfddb85f60a2d:eyJzZWxlY3RlZExpbmVDb3VudCI6NDcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjM1NWJhODE4NWRjZWJmMzg1YjYzNzNkNzJhYTg1YWQwODgzNjc5ODhiZWZiMDU5ZTRjNGRkMzE3N2FmZTU1Y2EiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImYwZDRhMTc5OGZhZDFjMjA3ZjRhMTdjNjk0ZDFiZTU5YzkwMzYzMjYzMzhkMWQyYjJiNTdiNDE0Y2QxYjA2ZWEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjE1NDBhODc3YjkxODQxNzQ0ZDU0MWQzMWNiOTU0MWJiMDVjNDFkNTJhNWVkNDg4MjcyNmY5OGI5NmMwNTZmZDMifQ"
+        },
+        {
+          "resource": "repo://internal/migrate/migrate.go#L60-L100",
+          "version": "repo-lines-v1:sha256:f2cf47ef4c38b780fa6eabc0744153d6ad5f0f07c6257b91fb307054484b0765:eyJzZWxlY3RlZExpbmVDb3VudCI6NDEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImU4MWM1YjJiZjcyMDViNzNlZDVmZDQ5Nzg3YzdiODVmOGEwZjM4YzNlNjQ1N2RjOTA2YmQzNmMxMmI2ZDg2MmMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijc4NTU2YWEzZjliNWI1NWJlZjA5YmIzYmE2ZmJhNmY2NjFmODE5NDA2OGFhMTkwNmJiMjU0MzdjNTgzYzAwMjgiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjkyYWY1YjYyNWM3NDJjMDJiNDFmNjkzMDVhM2I3ZjcyYjg0NTcxMGRmODk1YWFjOGIwNWU3ZjIyZjhlMWJiNmUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImE3MDhkYTQ3MzVjNWZkNzI1YTVkNWI5OWNhMzcyY2RkMDUzOGY4MTY1ZWM2ZDU4M2Q2OWVmNGZmZDgzNDcxZmUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_27c200b464474f3ab5dded6bad055238",
+      "statement": "Neither indexes.Ensure nor migrate.Run is invoked from the server entrypoint, so a fresh database lacks the declared indexes and migrations unless they are applied out-of-band.",
+      "evidence": [
+        {
+          "resource": "repo://cmd/server/main.go#L38-L120",
+          "version": "repo-lines-v1:sha256:8a4cd1f67ae56a884b24cbd798d8032d1c46817f374bf83a67aa42a93b16326e:eyJzZWxlY3RlZExpbmVDb3VudCI6ODMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImU3OGFlYTY2NGEzYjI3ZjJmOGZlYTE1ZDFiYzM4Zjc4MjI1YTBjYzNiYjIyMmFkYzQ4NTE0MjU5Y2JjMWE1ZDQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY2N2U3YWVlZDkwOTRjZDYzZTZiZmZhMmEwNzcwNmZkNzdlNzE0YjZkOWNiNTcyZTMzYjY5ZDVjMDRhYmQ3MGQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImEwYjAxY2I4M2VjYTZjYmI0NmQ0M2ZlNGI5ZTRkMjhhYTgwOTMxZGI4ZmQ4MzRkNjhiZmRjM2U4MDIzNDJmZjAiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjE4M2ZmNzZlNGVlYzdhODZjM2Y3NjhjOGZiNmNjYjFjNGMyMDUzOGMwYzU5ZTdmOTY3NGU1NjgzYTMxNWY0MzUifQ"
+        },
+        {
+          "resource": "repo://internal/indexes/indexes.go#L55-L84",
+          "version": "repo-lines-v1:sha256:41bfd151d714e65734733f17fe7af833579be23c8aa22b92c95b5f554dbf4617:eyJzZWxlY3RlZExpbmVDb3VudCI6MzAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImZmZjkyYjM3NDU1MjZlM2Q4OTQwNzMwYThjZDRhYzEwNGYzZDFkOGQwYTRkZDZlYzBiNTAwMGVmOTkzNWQ4MzkiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImFjZWI5ZTRkYjkyMDU5ZWRlZTM5MTZmNjMwYzBiNjA3NTk5MmY1ZjA1ZTU1ZjkxZDYxNTdlYWVlMjA1MDBmMzUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijk2M2I4YTliYjkwMjg2NmMwMDhmZGE3MjYzNzNjOGJkMDNhOGRmMjc4NTA2MWRlN2YyYmVmMDMwNWNhN2E4ODAiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjQxYmY1ZTdjZjQ3NzVhZGM3NWRkOWViOTc1NzY4M2RmMjU1YjVhMWNkZTI1ZTQ0ZmI5NzZlM2Y1YmRkMWU1ZDcifQ"
+        }
+      ]
+    }
+  ],
+  "verification": {
+    "by": "openwiki/0.7.2",
+    "at": "2026-11-02T17:41:59.592Z"
+  }
+}

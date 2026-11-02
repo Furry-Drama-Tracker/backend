@@ -1,0 +1,106 @@
+{
+  "schemaVersion": 1,
+  "pageVersion": "sha256:091bfa1a95bea3abca0c193f74e8abcdef2bd5e79b7dedf0b1a1b844d21a3819",
+  "claims": [
+    {
+      "id": "claim_44a225440a434f3cb0ddbdb067d86cf1",
+      "statement": "SMTP settings come only from config.Email (ini or EMAIL_* environment variables), and configuration is considered usable only when host, user, and password are all non-empty.",
+      "evidence": [
+        {
+          "resource": "repo://internal/email/client.go#L85-L100",
+          "version": "repo-lines-v1:sha256:50d6a041c7fa8349bb57aa4e828e478f4969d2a13a5d54b13bbffcb3943c1dd9:eyJzZWxlY3RlZExpbmVDb3VudCI6MTYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjNhMTM3YTFiY2ZhODZiMGRkYjE2ZjVjYjU1MWExNTdhYjM0M2U4MmY0OTQyODI3M2M1M2UxN2NkZTBmMzAzYWMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjdmNTk0NzM0NjNhOTc0M2FiYTUxMzYzNzJmYjM3NmE1OWJhMDg2NzgxNTIwMTkwM2YxMTdhZjcwNmZhNWRiYmQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjlmZDc0M2E1OGQxODE0NWM5YjMwNzVmZTNjODVlZWZhZGUzZTI5ZjY0ZjZjY2IwYWU0MWYzMzEwMDhjODdiYmIifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_fe9c363d9d8b4b84a3491674d4baa9ba",
+      "statement": "The transport uses implicit SSL on port 465, disables TLS for localhost, uses opportunistic TLS otherwise, applies plain auth only when a username exists, and enforces a 15-second timeout.",
+      "evidence": [
+        {
+          "resource": "repo://internal/email/client.go#L193-L225",
+          "version": "repo-lines-v1:sha256:caab692afdd31ac3fd0b3d9f61172499121c4fd2d52a973f8f59b5996047951e:eyJzZWxlY3RlZExpbmVDb3VudCI6MzMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjFkYWRhZmQxNGFkZGQ5ZDllNjkzZjkxYTg4NGQzNmZlMmYwZTM3ZDY5ZjFmZjlkYTEyMzhkNjI4NDZhZjY2MjgiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImZkZGVmNmQ0MzFmYjlhNWI0MjJmNTJmMWVlZDA5OWUwYzQ0YjU3NzZmYWQxNTU3MTNhY2RhM2U3N2EyZTNkMjMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjNmYzc5MTNiNGY1NDhjYzZkZTM4NTM1YjgzODIzMjZlNzI5YmMzMDk1ZWY2YjgzMDE5MWM5YjUyYzE1ZWViMTcifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_3796fa1c318943d3aa9f25c7c3a2de7d",
+      "statement": "Outbound mail is limited to 10 messages per hour per lowercased recipient address using an in-memory tracker with periodic cleanup, and over-limit sends are skipped.",
+      "evidence": [
+        {
+          "resource": "repo://internal/email/client.go#L145-L150",
+          "version": "repo-lines-v1:sha256:335621c8296e64b66151f9a708ad2fa5439f3b38ab9539f23892dddf2e3b8c2a:eyJzZWxlY3RlZExpbmVDb3VudCI6NiwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiZTMwY2JjNTFlMmQyNDNhY2U5M2JiODg2OWVhNGM1ODEzYmQxNjk1NTk3ZDRlNDFjMmJjMjlmNzhjZmJmMjQwNyIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNjdjZGE4MmRhNjA2MjM4ZTA1ZTYyMzk5NTY5YzVlZTAzOTkzNDE5NjQ4YWU1ZDQzYTJiZjhjZDYzNDdmODI2MyIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiOTJhMDg2MjAxM2Y0ZGY1MjVjZGYzNzc2MzVkYzY3ODI3MzM5ZjI5MTE0ODUxNzM0MmEwYjIxM2NjMjgzOGY4MyIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiYTJiMWQwMjI3YTNhMWYzNjI3ODRkNmZkNTkyYjJiYTA1ZTgzNjRiN2QzYjVmYjFhMWIzOTYxMzMwZDUwZjU0NyJ9"
+        },
+        {
+          "resource": "repo://internal/email/targetrate.go#L1-L45",
+          "version": "repo-lines-v1:sha256:bd27694d461d2bbad13d3e428191d1bdc9f025b2818f38cbaff748e9de97cff8:eyJzZWxlY3RlZExpbmVDb3VudCI6NDUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImZkY2M1M2Q5ZWRiYTdlZmU3NzA1N2Y3YmI0NmI5MTVhNjFjMzRiNmM5NDE0ODRiODgxMzBiOGRhYmQyZmYwNzUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjRkZmE4NjhiMDViYWYzNWRhMTMyMWRlYTYxNTkwN2MyYzM4OGZiODljMWUyN2RmMmViMzRmZDRlMDEyMThjMDMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImYzYzhlOGViMWI1MjljZmVjOTgxYjZkOTVlNjdhY2FiNjRiYjcwN2RmYzMxNWZmMzQwNWM0MTQxNDBhMzhmZjAifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_9789b69e56ae43108ae8bed7f9f9fc19",
+      "statement": "Every mail operation logs exactly one sent, skipped, rejected, or failed entry to stderr with recipient, subject, host, port, and elapsed time, without passwords or bodies.",
+      "evidence": [
+        {
+          "resource": "repo://internal/email/client.go#L145-L177",
+          "version": "repo-lines-v1:sha256:ae5ed4a61e9ba247b629b1c509e5e41fb15a5cb3d32410d9777fd9c6d6b07c47:eyJzZWxlY3RlZExpbmVDb3VudCI6MzMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImUzMGNiYzUxZTJkMjQzYWNlOTNiYjg4NjllYTRjNTgxM2JkMTY5NTU5N2Q0ZTQxYzJiYzI5Zjc4Y2ZiZjI0MDciLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjVhZmY3NGYzNWRkMjJmZjZiZGQ3YmIyNDgwOWUxZTY5OWQxZDM5MjA2ZjQ5MGY1Y2ZlYzA5N2Q3NGI0NGY5ODMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjkyYTA4NjIwMTNmNGRmNTI1Y2RmMzc3NjM1ZGM2NzgyNzMzOWYyOTExNDg1MTczNDJhMGIyMTNjYzI4MzhmODMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImVjNjMxODVhZTVjMmZhZmQwNmUxOWQ5OTMwOWQyZDlmNzMwYjAxZjM5ZjhiOGYxYTg2OWRmNjcwNDUzMTJkOGIifQ"
+        },
+        {
+          "resource": "repo://internal/email/client.go#L30-L70",
+          "version": "repo-lines-v1:sha256:dea691c080094326dc3bfcba5e4e0db4300dc7c410eafc168aa645c9eab80ed5:eyJzZWxlY3RlZExpbmVDb3VudCI6NDEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjhjY2ZkNGJhYWI4MDZjMTljMjM3NjgxMGQ0MjI3MTdlOTAzODlkYmJiMjAwYWYxYjhhMzNjYzk4MDY1MWU4NmIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjFiMTA0ZmVkMWJhYWRkMjVlNzg1Yzg5MjEzYmU4MTgzY2Y2MDJjODk3MmZkMDc2YTBhMTEyYTQ2NTczYzdmMjIifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_c962393a243d49c380ee7da97c86ba78",
+      "statement": "Email HTML wraps content in a branded layout whose site name and logo come from the settings site-content document and whose ICP, police record, and version come from the about document, both cached for five minutes.",
+      "evidence": [
+        {
+          "resource": "repo://internal/email/client.go#L102-L140",
+          "version": "repo-lines-v1:sha256:425d8585586936cd835d932da2e081bb1bea6759beb1819dfe2c2d386061fcaa:eyJzZWxlY3RlZExpbmVDb3VudCI6MzksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjM0YmUyYTA0YzYxZTZhYzQzMGRhODE3MzY0YzQxZGM0NTAyYmU5YTlhZGE5MGNhMTc3YTY3MTJkYzE0NzNkODkiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjM2ZDBjZDg2YTliOTRmYTdkOWMwOTJjMDZlOWVjNmUxMTZjOGViNWY0N2Y4Yzk3MWFhMjZjZTEzMDU4ZjcyYjEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImNiZDUzZTQ4MzA1M2JhZmI3MDIyZjA0MTg1NjEyMTA3YTM0NzhhZmZmODdjNjc2ZjEzMDc1ZjljOWJmMzVlOTIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjRkNzJmYjRlOWFmNjFiMjdkMjFmNTY3YTZkNjM1YWJhYTJiYzk5NmJjNmJiMTNjMTU5ZTk4NDljZGE5ZGQ4NWIifQ"
+        },
+        {
+          "resource": "repo://internal/email/templates.go#L41-L90",
+          "version": "repo-lines-v1:sha256:2e47e5e0bf07f32b0196b40a3763361fdec18d1688aa67dd219f2a1807553b2b:eyJzZWxlY3RlZExpbmVDb3VudCI6NTAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImNhNWFkMGMzNGY2OWJmYzJhOTYzNDc4NTRlNTFlZTQzMDMyZGU4OTljNTkwOGZhN2QzNjNmZDQxZTc2OTkwOGQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjcyZDk1Y2Y5Zjc1MjNlMmRjNjUyOWZiODA1NGJkOTY2ZjhiOWI1YTBiMzRlNThmYWUwYTI3MWU5NjMzZmZlNzEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjVlNTdjNDBmODY2YzZlYWM3OTIyZjZjZGFhZDJjYWU0NzBhM2VkOGZiNWEzNmFiZDU3NWEzZjk3YWM0ZWI5OTEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImYxZGEwNjUxOTU0ODMxNWMzMDg0NTc2MzRmNzFjNjY1MmFiYzRmNjJhZTUyNjRiYjEyN2FlZGExNTIyNzQzYzQifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_f4e22b471fc5404791138fef580b4efa",
+      "statement": "The email package provides senders for verification codes, password reset links, new-device login codes, and generic notification HTML.",
+      "evidence": [
+        {
+          "resource": "repo://internal/email/senders.go#L18-L95",
+          "version": "repo-lines-v1:sha256:a2def03a8eaff969db3096d971c183611708e34878d1961a0d3200ccf24e7212:eyJzZWxlY3RlZExpbmVDb3VudCI6NzgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijc5YzJmMzFkZjFmNmNmZGFiNGEyNGRmOWVkNzI0MDY0ZTI1Y2QzMDA1NzRkMjg5NDU4YWIxOWQ2NDM5MmI5MGYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY3Y2RhODJkYTYwNjIzOGUwNWU2MjM5OTU2OWM1ZWUwMzk5MzQxOTY0OGFlNWQ0M2EyYmY4Y2Q2MzQ3ZjgyNjMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjhhN2FkYTMyNzkzZTY1ZWQxMTRmMDJlZjBlYzgzZTU1OWIzMzU5YmQ5MTllZjY0MWU4ZmJhNTY4NjY4NjgzNWIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjoyLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImEyODYwNGU0MGNjZTZhZjE4NGEyOTNjMDdiOWNiYjA2YzI1Mjg2MjJjZGNiNDliZTFiMTdlZmM0OTE1MmRlMTYifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_ae7ed8e6e9704197b47f1db4e1c7db82",
+      "statement": "Client.SetSendMail replaces the transport function, providing the injection seam used by unit tests to verify recipients and subjects without an SMTP server.",
+      "evidence": [
+        {
+          "resource": "repo://internal/email/client.go#L72-L83",
+          "version": "repo-lines-v1:sha256:802c657284333fe428e740b6a92f1af93a05c61b70eb096945c0dfe734d2da9e:eyJzZWxlY3RlZExpbmVDb3VudCI6MTIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjJlNDEzOGMwOWY4Y2I4ZDAxZDJiMjYyNTRhNGQ0ZTQzZjBiOGU2MjAxY2RiYjc2M2ZjYjVlMWY0MWUxMTQyYTIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjIxMmU1NmI5NTQ1YjYwMzBmY2I2OThiNTg3MjU2OTQ5ZGJkYjkwMDk0MGMxNjkwOTMxZGI2YWI1MmE3NjIyYWUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImQzMjYzMjY3MDhlZjY2ZGRkOWQzMTM0ODJiMjhlYWFlNDFhZTMzMzMzM2Y1NTVjMzUyZTFiMjQwMDMzOGNhMjIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjkyZGY2ZjQ3NWRlYWJjYzljZmVmNGFhNWNmYmVmNWE3OTBkM2ZhYjE0ZDY3ZTU2ZDhhMGRlMjdjZGRhY2VlYmMifQ"
+        },
+        {
+          "resource": "repo://internal/email/client_test.go#L40-L63",
+          "version": "repo-lines-v1:sha256:1a05d72b9220875da3b3fec25922c1e9d90f5b50e3f4879b4e5623612520cb29:eyJzZWxlY3RlZExpbmVDb3VudCI6MjQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY2YjViNTU3MDdhOWM1NzM4MjJmYTg4ZjJiYTYwZDYxZTAxYjRhZjcxZGVmMDgzOWNkY2I0ZTJmY2MyNDNjMTEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjViYTliMzkyZDNiYjU3OGQ0MWJmNGMwNDE3OGRjYjk2NzkxOWU2MTdlZDg4MzM5NGI0ZDkwYjMzZGI4OTM5YjkiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_c03ae0b5d1ce45edb645d426d2d74742",
+      "statement": "The superadmin test-email endpoint sends with caller-supplied credentials through a separate transport path that bypasses the configured SMTP settings and per-recipient limiter.",
+      "evidence": [
+        {
+          "resource": "repo://internal/email/sitetest.go#L23-L83",
+          "version": "repo-lines-v1:sha256:0ce253b5602b1e84ed09ae7ddf7d8646acc0a9e589fc148bbd93b8eeb66287fe:eyJzZWxlY3RlZExpbmVDb3VudCI6NjEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjE0YTdkNGMxZWJlMGQwN2YyMmU0NWJjNTU0MDk5NzZiMjQzYTA5OGNhY2Y1MWM1ODA1MzU5MTc0NDAzNTJiNDQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjNmNGYzOTdhYzMyODg5NzNiNDFkOWIwNWFhZDNhYTg3MDQ4ZTRiYzQ5YjFlMDI0NmFlMzMzMjBmZTBmMGNkM2EiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    }
+  ],
+  "verification": {
+    "by": "openwiki/0.7.2",
+    "at": "2026-11-02T17:41:59.592Z"
+  }
+}

@@ -1,0 +1,106 @@
+{
+  "schemaVersion": 1,
+  "pageVersion": "sha256:baf029caedb63beadcb5ecaa0838d9ff648e85575d679cd3094867b0850cefe5",
+  "claims": [
+    {
+      "id": "claim_663a630ac6fb40d4ad42080b26bcfb33",
+      "statement": "Altcha challenges use SHA-256, cost 10000, 32-byte keys, prefix 00, and a five-minute expiry, and the verification accepts the configured x-dev-token as a development bypass.",
+      "evidence": [
+        {
+          "resource": "repo://internal/service/auth_service.go#L60-L105",
+          "version": "repo-lines-v1:sha256:fa45e9639ee9a816d5d6b6212e27ce6a6411031f606998648b30e74d7cdb4dde:eyJzZWxlY3RlZExpbmVDb3VudCI6NDYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjU5MDkzNjI1OGY4NmY2ZjgxY2ZlZGRiYTM1NzA0YTBiM2YzMDUzOGVhNGY4MTY5OTA2OGZmZjY3ZDJmMDFiZWEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjFkMjIxYmZmNTA4YjdjYzFkNmMyNWUwNjIxNGMyODc1NDkyMTgzNDNiODU3OTY2YWE0NWEyYTdlMDg4NTI4ZmUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjgwZWJjNjVlZDAxZmQwYWQzNmM4MmYwMjE0OTFkZmY1MTFhMWJiYjg2ZGIwNDgwNzk5OGQ0OGUxYWZhNjRhMTAifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_c2df94af66e24ba88ef88d2896606610",
+      "statement": "Registration validates Altcha, email format, account ID length and characters, username length, password strength, demo-email protection, email uniqueness, and account ID uniqueness in that order, returning 400 on the first failure.",
+      "evidence": [
+        {
+          "resource": "repo://internal/service/register.go#L25-L110",
+          "version": "repo-lines-v1:sha256:78579c8fab8bbd63d465fc54dd59c8ca6d8737855d6ab44267b7d425fa96310f:eyJzZWxlY3RlZExpbmVDb3VudCI6ODYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImFmN2Q2MjJmYTZkZmJlOTZkOTA2ZGQ4NjhlMjZiNTU2NzlmMzQ4MzkxNDI5NWZkM2RmODJkODY4YzkxOWJmZDkiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjczN2UyNTBlNTk1MGU2OTY0Y2M4Y2NkNzM1NjIzMjA5ZWExZjdjNDRhMTM0MzkwOWQ0NTZmYjc5ZmZiZjJjYTMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImE1YzczMjg3Y2Y1ZTUwZmNiYzkzODU2MDJkMDlhYjg5OGNjOTYwYmM2Y2FkMGVjMzZlMTFhZGQyMzVlM2I4NjIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjkyYWQ2ZmJlNDI2M2NhNGU4NWVhMGYxYTlmNzU4NTlmNjc0YzI4MGViZjg0ZWI3MWIwYjE4ZDYyMTU2NTZkNTcifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_1ba163f395ed4f8cad91e9f95b4ec505",
+      "statement": "Login branches execute in the order Altcha, lookup, lockout, deletion grace, password, email verification, new-device verification, 2FA, success, and the handler maps them to 200 for success or 2FA and 403 for verification or device verification.",
+      "evidence": [
+        {
+          "resource": "repo://internal/handler/auth.go#L137-L184",
+          "version": "repo-lines-v1:sha256:602524c03c2c3b21803ea502b0e6664d3b99a91aafd396bd6a247be58a9ab562:eyJzZWxlY3RlZExpbmVDb3VudCI6NDgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImE5ZGE5ODZjYzkzNjIyZmJmMGMzODc3N2U1NGVkY2IwMzRkOWVkMjVhNzY4MWZhNmZkY2RkYmIwOTY4ZDFiOWYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ5MGFiZmZmNzAxNWZiMjQyMjBiOGY2MmYzNjAwNzZkY2QwZGExMjI1NTA5Nzc3OTg1ZTU0OWJhMmI0YzY1NzciLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjIzN2YyMGMxNTc4MzM1Y2EyMGE1ZjAwMDlhYjJiZjE4MTkxNzNiZjQ2YjgwM2RmMzFmNjFlMTVhZmRkYWJhYTQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImU1NWE5NDEyOTkzN2NiOWI3NTY4MWU0ZmQ1Y2I5Yzk1Yzc0MTc4MDM0Zjc2YTU5NjE0ZjY2ZGI0NWE0OTQ4Y2UifQ"
+        },
+        {
+          "resource": "repo://internal/service/login.go#L35-L200",
+          "version": "repo-lines-v1:sha256:fd262fdacff02c2a4edaed2ec74b3fd83181fabce1d360a01ae55aa133859f7e:eyJzZWxlY3RlZExpbmVDb3VudCI6MTY2LCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiIyYTYyZTQ4Y2MwMjk3OTYzMzY0ZTY1ZWJmOWIzZGQzYjM2ZWFhODcwNmVlNWRiZjY4MGIyMzQyZDRiZWE5YmFjIiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiJlNzE0MGFhOWU1MTk0ZDE0MjFmZmY2MGExZTJiNDc2YTUyM2NiNTk1ZjA2ZWIyMDE5Y2UwNjE2MTQ5MGIyODUxIiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiJhOTljYmI5NTJmNmZiZmQ0NmU4MjQyNzRlMDQ5NzUxMjIyYjNlNGIzZWUwOWUzZDk5ZWZlNGY1OGYxZjU5ZTRmIiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MywiZm9sbG93aW5nQ29udGV4dEhhc2giOiIzYzhjNDJmZWY3NmQxZDE0ZmE1ZDhiOTk2Njk3NWQ4M2ViZDc4MTk0ZTI3ODk3N2I5ZTk3OGY2NGU3ZjA5MDk2In0"
+        }
+      ]
+    },
+    {
+      "id": "claim_cc64c711e78f44a9bb4bdf41924b0186",
+      "statement": "Account lockout uses loginAttempts and lockUntil with defaults of five attempts and 30 minutes, and lockout during ordinary login returns the generic credential error rather than a lockout-specific message.",
+      "evidence": [
+        {
+          "resource": "repo://internal/repository/user.go#L160-L205",
+          "version": "repo-lines-v1:sha256:5ddda1d74c2d29ae21bf048277f943341aab9d835d5a0f1866966b28a10c4541:eyJzZWxlY3RlZExpbmVDb3VudCI6NDYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImQ5ZDE3ZTVhZTRjNWUyYjE1ZTIyMzRiNGIzNDMzNjRhODZkNzkwNzk1NWNlODE0YTUzZGYzMGE4OTI0MWFiZjciLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImJiMWIyYjFiMDlmZDI3OTljMmExNTdmZTMzMDM1MGIxNjVkMzFiMzg4NWM2ODM5MTIyNWIzNmY2MWIyN2E4YmQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjQ3ZGQzMmEyOGZmNzFhOGVmMDNhZTk5NjU4ZTU0OWUwNDFiZDgwNmMwYzM2MjcyZjgzNTg4NmEyNzZkMzAwNzYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjA4ZWZjYjExMDEyZWU0YjVhOTkwMzIyZGU5OWRjOWY5ODRiZmQ4OGMyMWJiYjA2OTY0NmI1Mjc4M2MwMzViOWQifQ"
+        },
+        {
+          "resource": "repo://internal/service/login.go#L50-L60",
+          "version": "repo-lines-v1:sha256:129d57a6d24ed8ed4415776373ad682ff2acedeaef9240e6424820d51ea0c304:eyJzZWxlY3RlZExpbmVDb3VudCI6MTEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImRlZGIyZDM5NmNiMjdhMmM3ZTM1OWMyNTEzNzFjMmNiZGM0NTlkOGYyMTVlYmE0NTk0MTg1OTAzMTM0Y2E1ZjEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImFmZmFiOTNkZjc3OGUxMTZiZjZhZmY2OGM0N2M5MjQyMzcyM2U5MTIzZmNhYTVkOWY1N2QwYjI1NWEyMTk4ODUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_3293e394995445f0a5788201de695066",
+      "statement": "New-device verification emails a one-time device-verify token, and confirming it creates a six-digit device login code with at most five attempts that either completes login or returns a 2FA challenge carrying the device code.",
+      "evidence": [
+        {
+          "resource": "repo://internal/service/device.go#L110-L205",
+          "version": "repo-lines-v1:sha256:52e799790ea6899d2a16c5147cce854af245a1205c467df12041269ebdc2881e:eyJzZWxlY3RlZExpbmVDb3VudCI6OTYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY3Y2RhODJkYTYwNjIzOGUwNWU2MjM5OTU2OWM1ZWUwMzk5MzQxOTY0OGFlNWQ0M2EyYmY4Y2Q2MzQ3ZjgyNjMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjFjMzI4YzRiZGRkZmNmN2RjYWQ4NDViZGU2N2I0NWE3ZDI1ZDFiN2QyYTdmNTU0NzgzNTkyNjU5N2I0NTg3OGUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjM3MGJkZGUyYThiYWUxNTFkMzNjNmJiYTcxNGE0YjE4OGExOWM5Y2FjYWFjZTk4MGNlMmNiMzJmYThmNzA5NGYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImNhMDYyODkwZjhhNjE1NmFjNWUyMTAyNDMwYmE5YTcyNDNkYzg2YTFhYjJjODU5ZDQzMTQwMWY0OTgyN2U5NTIifQ"
+        },
+        {
+          "resource": "repo://internal/service/device.go#L20-L110",
+          "version": "repo-lines-v1:sha256:5cb35ec06929192e56da60f81349e7ba04d6c836fe0bc99e9c5f2d8c5d19c988:eyJzZWxlY3RlZExpbmVDb3VudCI6OTEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ0OGE1NTMzNGFlOTE5M2QwNTljZTQ4MWE0ZTg2YmVjY2FiMWZiZGExNjNlYmU0YmY2NjM5MWVhZThkOWViY2MiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY3Y2RhODJkYTYwNjIzOGUwNWU2MjM5OTU2OWM1ZWUwMzk5MzQxOTY0OGFlNWQ0M2EyYmY4Y2Q2MzQ3ZjgyNjMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjRhYTIyOGViNDRhZjg1OWI3M2JkNjhlOGE3Y2FjZGMyZTMxMjQxNDE0MDBjYmY3ZDkzMjY4ZWI0Y2U2NjhkNjAiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjMxZTdjOGQ5NzY4NTQ4NDE4OGEwODE1NDc1YjkyYTdiODE3YzI2ZjY1Y2I3OTgzYjRhOWFjM2Y3MWJhMzU5OWUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_8adfc89ccb214869a2073fd0bf1f3ea5",
+      "statement": "The 2FA login challenge is a five-minute token with purpose 2fa-challenge, and successful verification accepts either TOTP or a backup code, consuming a used backup code.",
+      "evidence": [
+        {
+          "resource": "repo://internal/service/device.go#L150-L205",
+          "version": "repo-lines-v1:sha256:43d0e864de9ba1efa421792f1bf5d01bd5fefcedef2a3f5ad9466918d901b7a4:eyJzZWxlY3RlZExpbmVDb3VudCI6NTYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQzNTAzNTk2MTUyOTJjNDNiOWY4OWUyNTBlYTU4N2M0ZTNhY2VkNzZlODk5NTIwNjRlNTVhYWVlMzlhYzllNGUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjFjMzI4YzRiZGRkZmNmN2RjYWQ4NDViZGU2N2I0NWE3ZDI1ZDFiN2QyYTdmNTU0NzgzNTkyNjU5N2I0NTg3OGUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjUyYmM5MDM5NWE4NmNmMjI2Yjg5ZGVjMzFiZmIwYjA2MTBlNmFjNzJkYTYzNWExNGEwYTA1NTBlYzM0YmMyYzQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImNhMDYyODkwZjhhNjE1NmFjNWUyMTAyNDMwYmE5YTcyNDNkYzg2YTFhYjJjODU5ZDQzMTQwMWY0OTgyN2U5NTIifQ"
+        },
+        {
+          "resource": "repo://internal/service/login.go#L165-L180",
+          "version": "repo-lines-v1:sha256:9473c852eba2cc200a14490f011c58f12d4164381d142353360b89a20905c7e0:eyJzZWxlY3RlZExpbmVDb3VudCI6MTYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImU5ZGZhYWIwZTcwOGZlOTQ5MTI1YjY4ODEzNzg3YzlmODM5OGNkZTZhY2NjOWI2NzQ4OWIxZmVmMWJhNGY3OTYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjhiMGEwODhiMDkzM2I2NzgyZmNmNmFmOTBlN2M2NjQzODYzZTY0YTE0ZDZjMjNmZTgzMzBhZWQ4Y2NjZmQwZmEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImEyMmJmOTExZTg4NDBjNTIyYjU2OWVlN2ZkZDg4OWJiYzUyNTNkMWRjYTgzY2JlNTYzNjEwNDQwNGMwM2IzMmUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImJlY2MxMjg0ZGIwNmFmNjAzZWY1NWU5ODg0Mjk2YzhiNzE0ZmExN2M3MWNlZmFlMTU0YzViODJjYTMzZTlhYWQifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_800bd7c0a11a456baeaee5504c450734",
+      "statement": "Verification codes are stored in an in-process map with a ten-minute TTL, per-entry attempt tracking, and a 60-second cleanup loop, making the flow single-instance.",
+      "evidence": [
+        {
+          "resource": "repo://internal/code/store.go#L1-L80",
+          "version": "repo-lines-v1:sha256:fbc8e1cc3c7e4b3131d6ac839564b0d54fe07c483488c5d8064876237ea22f6e:eyJzZWxlY3RlZExpbmVDb3VudCI6ODAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjcwMzUyNDc1YzI0ZDc5OGMyODhjOTM2ZWQyOTQ5N2JhNGI4MWNkZGViZGRmZDQ5ZTBjODZiZDMwNjJiZGQ3MTQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImY0ZmFkYzQzNTc3MjhmNmJmNjcxYTJjMjBmY2E0MDdmZWE0NDk4NzQwYTgwMTJjNmJhOWVhYjM3NzljOGFlZDkiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjZkM2I2OWM1MDFhMjQyYTljZDJmODBlMDk2NTU5MzI5Yzg4OWE4ZTQxZjM4N2U4ODM0OWM1YWJlOTVkNWQ5MzkifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_a76f81c2baae4c37a10355b2be112385",
+      "statement": "Successful login converges on IssueSession, which signs a 15-minute access token and a 7-day refresh token with a random jti, stores the refresh hash in a usersessions document, sets cookies, and audits asynchronously.",
+      "evidence": [
+        {
+          "resource": "repo://internal/service/auth_service.go#L170-L210",
+          "version": "repo-lines-v1:sha256:2172eb54d78baa14bce98912d74ff3c99654f54dc979e8fc4a7bb9d2ecb69430:eyJzZWxlY3RlZExpbmVDb3VudCI6NDEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjM1NWJhODE4NWRjZWJmMzg1YjYzNzNkNzJhYTg1YWQwODgzNjc5ODhiZWZiMDU5ZTRjNGRkMzE3N2FmZTU1Y2EiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjIwZGRmMDIzNDJhMDNkZTg3MWZlYjY5ODE5NTM5YmFkMmU4YzJlOThhZjUzODQwODM3MjA4ZWIzZmY2Y2E2NDQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjVmYjMxMzE1NTFjMTc5MWFmNDk4ZWNkNmUxMGRjNWI0Mjc3Yzc0NjAwZjU1OTE5ZTQxYTdkMGMzNmIxOWE0NTIifQ"
+        }
+      ]
+    }
+  ],
+  "verification": {
+    "by": "openwiki/0.7.2",
+    "at": "2026-11-02T17:41:59.592Z"
+  }
+}

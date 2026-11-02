@@ -1,0 +1,118 @@
+{
+  "schemaVersion": 1,
+  "pageVersion": "sha256:35d02cd5c477e42c5fb239fcaf47d10c83f85cc486a2eb8b001567f1d7e18b87",
+  "claims": [
+    {
+      "id": "claim_5dbfb384331346708453099adf64485f",
+      "statement": "Image uploads require multipart form data, enforce a coarse body limit then the exact file size, filter extension and declared MIME type, write a random prefixed filename, and reject files whose first 12 bytes do not match a known image magic prefix after deleting them.",
+      "evidence": [
+        {
+          "resource": "repo://internal/upload/upload.go#L86-L160",
+          "version": "repo-lines-v1:sha256:e5454a8c6535502a424713d5ea839d3ff218294fa5959a1a9f8eac2d1c57b932:eyJzZWxlY3RlZExpbmVDb3VudCI6NzUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImQwODMxYjM1NTEyYWNlMGQ1NDgxMzc3MmNhY2JjNDZkZmMxZjMzMTU3ODQxNzJjOWRhYzM1OTg3MTJlYTA2NzMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjU3ZGMyMGViYTEzYzZjZGQ3NjE1MWU3NDE1NWNkODMyMjgzZWUzNjI1NzE0MmFiMmE4ZTdkYjJlZWRkMDZkMmEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjlkOWEzOWU3NDU0NzUyYzA4Y2JkOTBmZWExZDhmNWM0MzIyZDQzZjgyOWY5OWNiOGVhOWY1MWJlMzZmN2YwYTkiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImMzZTY1NjZiN2RkZDRlNTc2NDk2ZGQ5YzA4NzEyMGZmZjNjMDExMDQ4MGJiYzYwMDRkYmNjMGNhMzZkMmM1YTkifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_9fed8636ecdb42de905044b0468ea71e",
+      "statement": "Upload file deletion rejects empty, dot, parent, separator-containing, and parent-traversal names and treats a missing file as success.",
+      "evidence": [
+        {
+          "resource": "repo://internal/upload/upload.go#L194-L204",
+          "version": "repo-lines-v1:sha256:f286d94d3add8a54aaa2877ce5340b8c892d94387e96d2151b322612229dc19b:eyJzZWxlY3RlZExpbmVDb3VudCI6MTEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImExZDY4NTY4NDlmNDhiYjI0NTRiODhhOGU1Y2JmNzYyYmJlMzA1ZjA4YjMwYjkyMGUzZjQ5MDdiMDg5YzlhN2EiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImIwZDBjYzc1MzFiMDhmYzlhMDM5MDBmMGJjMTU2M2FhZThjYzZlYzRkYjE5MWJjMWJkZGI3NmI2NDJiMTI0MTgiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_e4b3c43a0bd141149b0b22ceecb15855",
+      "statement": "Static uploads are served outside the API rate-limited group with seven-day immutable caching, nosniff, noindex, inline disposition, and 404 for traversal attempts, directories, and missing files.",
+      "evidence": [
+        {
+          "resource": "repo://internal/server/app.go#L118-L135",
+          "version": "repo-lines-v1:sha256:facf8be9fe27cb4b740488f559723e8db3cc6cfc7225dcd718eabb8c01b08090:eyJzZWxlY3RlZExpbmVDb3VudCI6MTgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImIzOWJlOTMxNDJmNzNmOTdiZjdkNWRjMGI1MjRmNjRjN2Y2ODYwMzJiNmE3ZTg0Y2FiMWZjM2Y2YWI3MjQzY2IiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImU5YzEyYzI4ZDFmMzBkNGViMTc0NmJkMmM0ZDVkOGU4MjZhZmRlOWQ0ZTcwYmI3OGI1M2VhYTg0ZDBkZWJmYWYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_3308c0ce1d3a47c2b2d14dbcf7ccc8ef",
+      "statement": "SVG icon uploads are limited to 1 MB, require the .svg extension, must start with an XML or svg declaration, and are rejected if their content contains a script tag.",
+      "evidence": [
+        {
+          "resource": "repo://internal/upload/svg.go#L34-L110",
+          "version": "repo-lines-v1:sha256:5037b24ed9c5d81e762e8c59a798e52ec181371888002b44ff8bb152f65104a5:eyJzZWxlY3RlZExpbmVDb3VudCI6NzcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImJjNjYwMzBhNDU3ZGE4MjU4ODkyOWQxOGJlODVkZWI0MzllNjA5ZTU4NWVlNjFmZmQ2YTQwM2I1NTVhNWY1OWIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjRkYWZjYjRiZGRjMzYwMzQ3NzRhYWM2YWI2OGY1ZjZjMGQ0ZDVjM2RlMDgyZjc2MzQ5ZjcxZTU3MzUwYzI4ZTkiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjRhZTgxNjc3ZjE3ODZhNDZiMzQwNDBmODMwZWQ3NjRhYjgwNTVkZTA5Zjk1ZjYwNjgxNjJlOGQzMWJmYWVkZTYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImE3NTEwZTI4MDNlM2M5NTgxNmQ4ZjFmMTk0OTZkYjg3YjQzMTdkZWRiZTk2M2E2Y2QxOTgzZTNlMDgxZDY3ZDcifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_2e69bed209474ada8d79674857eeb111",
+      "statement": "The RSS feed is public and covers a fixed seven-day window of recently updated episodes and released single episodes.",
+      "evidence": [
+        {
+          "resource": "repo://internal/handler/rss.go#L46-L155",
+          "version": "repo-lines-v1:sha256:f461401bc79d5e2fb5153662cad94eb544280710c0afc1b1a9632766619dac6e:eyJzZWxlY3RlZExpbmVDb3VudCI6MTEwLCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiJjNjNkMzNlZTY3NjdkMjY2ZjVlZTMxMmVlMmM4YjliOTFhNjA3OWNiOGM3NDY2MzJmZTA4MDAyMjVkNjhiMjdkIiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiIzNjI1YzcxZDM2ZDNhNDFiZjZjNmJkYWViZmRjZjYxYzBlYzg2MzYyMmZjMDE4ZTkxYWVlMjdhYjJiNWY0ZGNkIiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiIwOWI4ODY3MGRhZDAyYzAzOTlmN2FkOGU2ZTY3ZTcxNGRiMGIxZDIzZWUxZmRmODExNDg2ZjAzN2I1MTUxNWJmIiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MywiZm9sbG93aW5nQ29udGV4dEhhc2giOiI2YmFjYTQ3ZDc5OTk3NWIxN2RmMDc2MzkwYjBiNDQxNTcyODBiMDY4YmI4Y2UwOWMwZDVkOGUyYzkwMmNmY2U5In0"
+        }
+      ]
+    },
+    {
+      "id": "claim_a4bbf4e3913a41cfbfbfa7f9597ffbfa",
+      "statement": "Translation returns Chinese targets unchanged, serves known UI keys from a hardcoded table, then falls back through a 24-hour 5000-entry cache, Azure when configured, MyMemory, and parallel Google and Bing, with a 20-second single-request timeout and 60-second batch timeout.",
+      "evidence": [
+        {
+          "resource": "repo://internal/handler/translate.go#L228-L300",
+          "version": "repo-lines-v1:sha256:4fa26c98dd57806db4d50d67843e4b44497aaf4ae4307ce47c8729eb29fd2286:eyJzZWxlY3RlZExpbmVDb3VudCI6NzMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjdhMzhlMTY0YTEzMGMzNWE5MTc5N2NjNGMzNjZiYzJlZjhjN2EyNzQ4OGFlYTA5ZTcxMTZiNjZiY2VkNzZmNzciLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImJhNWYzNzBjOGJhZTMxMTdiODRmZDAxMmFiMGVmYjQxZjQ2YWE4MmIwZWNhMDRhM2ExMTZiNGY1ZWEyNjc0NjYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImNjYmEwYzQwZjNlOGQ2ODg2YmI4OTVhODZmZjg2MWEyM2VlOTRlNjE1NmNjZDViNjBlMzVkMzQyMGM2MjIyN2MiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6Ijc2ZmQwMjE1MDllNTc1NWIzMjdkYzllYzVmM2Y1NDAzNmIzZDM3YTgwMThhZDY3ZGM5NTgxMjFlZjliMDE0MWIifQ"
+        },
+        {
+          "resource": "repo://internal/handler/translate.go#L386-L460",
+          "version": "repo-lines-v1:sha256:8f329af15ac8c7ba89c7545f01a4eee8e9fa826c6e1385b1df06348a498f8e1b:eyJzZWxlY3RlZExpbmVDb3VudCI6NzUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjdiNjRhOWQ0NTJiMmYxODE0M2MyOWU2MjAwOWYzODM1MzIyNWZjNzRhMDhlN2QyZDE0MzNjMGZjN2VjYTMxNGQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImEyNDVhOTIzZTUyZTM2ZmU4NzVlM2E1OGJlN2ZhMDgyODJiZmIyMmJiOWFjNzkyYjQ4MzVlYzZkMDY1ZDhlOTkiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjlmODYxMjFmM2IwN2Q3NTNhNDA1Y2QyMTMxNTdkYTVjY2UwMTc1ZDVjNDc0YWRiOGM5YTI3MjIwMTM2YmNjY2EiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjdlZTZkZmY2NDhkMTJiOGFkMjI4OTFlMzY1M2UxYTE4N2RhZWJiY2FhOWJjMTMyNDAyNTQxODY0NjkyMzE1MjQifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_2f04d4746d46428ebafd906c675d5ed1",
+      "statement": "Backup export covers a fixed 14-collection allow-list and removes password, login IP/region, and device info from exported users.",
+      "evidence": [
+        {
+          "resource": "repo://internal/handler/backup.go#L24-L70",
+          "version": "repo-lines-v1:sha256:ed6259b3bc9652bde2e5b4b8ff339c75f6e5e0207fc0c98b59760243337cd520:eyJzZWxlY3RlZExpbmVDb3VudCI6NDcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImYyYTFjOTdjN2JhNmM3NTdhNzgxMDE1MWRiZDVjNTIxYjE3ZmMyYjNkY2RiYzY4NmM0NGY4Yjg2YWI1MTVjZDIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjVkMDI0YWJhZmQ2YTI0MzIwNmQwMDM0MTBlYjA2NDI1YzVhMDRhMTUyY2RiN2JjM2Y3N2Y3OWEwY2E5ZTljM2UiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImE2ZWUyMWIxMWYzYzgyMzg4NWUwYTE0NDQ2ZjQzN2Y4MjYwZmQ2OWUyOTcxODE0NTdjM2Q2MGZkM2FmNGEzZGMifQ"
+        },
+        {
+          "resource": "repo://internal/handler/backup.go#L99-L135",
+          "version": "repo-lines-v1:sha256:f3abb902c1d5b0abaef61bf94c3cd0be709a462a75e55efac0d86f13fb251c2f:eyJzZWxlY3RlZExpbmVDb3VudCI6MzcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImJjMDdlOGRiZmMxNTUwZDY3MDZkNzQwMzQxMmE5MjBjMTMxMzZjMTg1ODc4MzY1OGQ5NmQ0M2NmNWQ1Zjc5MjMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijk5Y2NlMGExMmY4YjY4MDVhZTZlM2UzZGUxMGQ2NjhlNzJiNTY4MGNjZWQxNzZhYjAxNDQ3ZjE2NTcwYTBlODAiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjcxNWYxMzc5NzQ0NjBhZTY4Njk4NGQwODk5ZWJlZDQ1ZTdhMTFlODM0Zjk4NWE0YTg3MDZmYWQ3ZmVmM2FjNWIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjBmNmQyOWIxNzJkYmNlMzcxODM1ZmE5M2FiYWExMDdkZGFhMTdhOGVlYWZlMTExYjQ4MmU2Y2M3YzA4NTEwY2QifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_d80fb8d9b00b427698c1f3c80934b777",
+      "statement": "Backup import enforces a 50 MB UTF-16 payload limit and 10000 documents per collection, skips non-allow-listed collections, filters documents through a field whitelist, and replaces collections transactionally only when overwrite is set.",
+      "evidence": [
+        {
+          "resource": "repo://internal/handler/backup.go#L141-L230",
+          "version": "repo-lines-v1:sha256:f626f9dce6c924be36b1b78fce9f7e9620f53cb9cde2c72fe054f25197c102eb:eyJzZWxlY3RlZExpbmVDb3VudCI6OTAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjM3MjczMmMxY2JmZmY5YWZkYjE3ZWEyZjg3NWFhZTEzMTNkNjJmMDAzOGU2MmM4NDBlZWNkYjI5MzBmZjk3NjgiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImIxY2Q3MGE1MmM5ZmY0ZjE0N2E0MmI1MTdmODY2YTg5ZGJkZTllOTQ2ODg2YTYwMWI3Njk1ZDhlYTIxNTY0M2UiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjM1NThlOGEyMzFhMjE2OTJhOTUyYWRkODhiNTljNDc0Y2Y5ZWM1MjljNGZlODdjNzhhODZkNjExM2RhZjU1NzEifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_54fd985eaa6e4cf4a3da76d7413a1836",
+      "statement": "The 50 MB request-body limit applies only to JSON requests targeting /api/backup/import and its versioned mirror, while other JSON and form requests stay at 1 MB.",
+      "evidence": [
+        {
+          "resource": "repo://internal/middleware/bodyparse.go#L20-L45",
+          "version": "repo-lines-v1:sha256:d73f3ffc91e336f1367ac7a16c6286aae41bee4c52b71ded648cc7957ffa9cdb:eyJzZWxlY3RlZExpbmVDb3VudCI6MjYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjE4MTRhYTU2YjU1YmMyZjFiM2RjNDUyOWE1Zjk5ZDVkODJmMjliNjZiMmYyYTAxMjVlNThkOTg0NDIxOTgzZWUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjM4YjVlYWVhMjQ4ODBmOGM3YTg1MDk4MDJmZDZjNTY3NjZkZWM5MDVmMGU3MjBmNTFiYjIzMjMzYzViZGVkYzIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjAwNWViYjI4MDgxNjAxNDc3MTZmMTI1OWU0ZWIzM2U5ODcxZDZkZGUyMThhYTUxZTVmNjg3Yzk5NmU4MGY1MGUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6Ijg4NzZkYzcwYzJjYmU2NzBlYWE2NjJmMjI1NTk4M2MyMWM5ZjdjMDkxY2I2OGNlYmU1MmY4YTI3YzNhN2QwNmMifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_0ba04afd17824bada190c1efe3ad50a8",
+      "statement": "The shared pagination helper defaults page to 1, limit to 20, clamps limit into 1 through 100, and renders list, page, limit, total, and totalPages.",
+      "evidence": [
+        {
+          "resource": "repo://internal/pagination/paginate.go#L1-L68",
+          "version": "repo-lines-v1:sha256:cd3111df1c99bf920412efefdabf051ee63fbd35ae9cdff03126f1a88bdb797e:eyJzZWxlY3RlZExpbmVDb3VudCI6NjgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImNjMDhjNWU4Zjc2MDhjMjBkM2RmNTViMjNmY2JkMzIyNWRmNGMwMGE4YzQ4OWRhZDNiNjYxNzI0NGI2NjJlMjAiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    }
+  ],
+  "verification": {
+    "by": "openwiki/0.7.2",
+    "at": "2026-11-02T17:41:59.592Z"
+  }
+}

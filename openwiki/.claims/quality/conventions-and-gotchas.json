@@ -1,0 +1,92 @@
+{
+  "schemaVersion": 1,
+  "pageVersion": "sha256:edb8c8c92b5194795863d7e97937a8aafe2af095da2a8ca6727a3f436710da0c",
+  "claims": [
+    {
+      "id": "claim_deb47bdd79be4295a6916727d8f6bc09",
+      "statement": "Project conventions require godoc comments on exports, AppError-based domain errors, stable message keys, downward-only dependencies, ToObjectID for ID filters, and go test/vet/build as the verification gate.",
+      "evidence": [
+        {
+          "resource": "repo://docs/contributing.md#L60-L101",
+          "version": "repo-lines-v1:sha256:f23579d0258f9f213138a622de211ac845b18ecb2477fa382d72d33ca2de2d9d:eyJzZWxlY3RlZExpbmVDb3VudCI6NDIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjBjOWQyOGVlYTk0YTBiYTFiOTI4NzM2MmExY2Y1YWJjOGU0MDM4ZTk0YjFlOTQ1Y2EzMmQ2OWI3MGM2ZGRkNmYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImM0ZDM4OGQ3NzYwM2I0M2EyMGY2ZDg4YmU5YjJiZWI0ZmEwYjAyNTA1MDRiNjAwYTlmOTM5Njg2NWQ0MWU4NWIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjNlODBjYjJiNWYyNWQyNGUxM2RiZjhkM2RlYTc5ZjgzNTc2N2M1MmUwNWY2MjI0NGFjODIzOWE5MjNjMDViOTMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_f0eb101567ca4f00ae3ac7ffdd9e9476",
+      "statement": "AppError rendering maps status 0 to 500, hides 5xx messages in production, exposes a stack in development, preserves messageKey, and prevents extra fields from overriding message or messageKey.",
+      "evidence": [
+        {
+          "resource": "repo://internal/errors/apperror.go#L1-L140",
+          "version": "repo-lines-v1:sha256:73a21ceacf17933e4159f4526007ce9053198071735e2f39b3289ad9a88a0940:eyJzZWxlY3RlZExpbmVDb3VudCI6MTQwLCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiIxMzE1YjE4OTdlNDE0ZWVhYzY3YjJkNTU3NzdmM2ZiYjRiNTYzMGRjNDFlNmQ2MDQ3ZmJhYWRlNGNkZjU5YTk5IiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiI4YjdkNzEzMDNlOGVjZTJjOTBjODljMGRjZmUyNTk0YTkwNGM3YjQwY2Q1Zjc4NmQyOWY3MzY0NzA3ZTVmYWZhIiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MCwicHJlY2VkaW5nQ29udGV4dEhhc2giOiJlM2IwYzQ0Mjk4ZmMxYzE0OWFmYmY0Yzg5OTZmYjkyNDI3YWU0MWU0NjQ5YjkzNGNhNDk1OTkxYjc4NTJiODU1IiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MywiZm9sbG93aW5nQ29udGV4dEhhc2giOiI2NGQxYTRlNTFmZTc4NGE4ZjczMmNkYmYyZjViZjc5NTlhODMwN2ViYmRkMmQ1NWJjZDk5ODdiNzE5Y2JmZTIyIn0"
+        }
+      ]
+    },
+    {
+      "id": "claim_d1d2d97f59cb4fc79d059b6e12d29045",
+      "statement": "Endpoint rate limiters intentionally never match /api/v1, use fixed-window counting, and are constructed per route so a shared spec yields independent counters.",
+      "evidence": [
+        {
+          "resource": "repo://docs/decisions.md#L55-L75",
+          "version": "repo-lines-v1:sha256:16648ace32b3a67281117e2e278f9ff579ed2561400bcaf61676855ea9a630c9:eyJzZWxlY3RlZExpbmVDb3VudCI6MjEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImU3Zjk5NjlkZTlmZjMyMWE1MGIxMmQ1MzM5MDQyM2RjN2JhZjRhYjJlOWFmNzM3YzMxMjA2OGZmNmQwYmZjZDciLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjJlN2U4ODk1ZDcwZWEwNGM5ZThiMjcwN2JkMTQ2NWEyMDVkMTQzZDQ2NzQ4YWUxZGUwNDdkM2E5Y2NlZTQ4OWYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjFhNTBmNjI1NTQyODY4MDVkMzRmMDBlODhjNDMwOTUxMjdiNzJmMzM2ODM4MTAwNGFjYjRhODFjNmE2NGNlOWMifQ"
+        },
+        {
+          "resource": "repo://internal/middleware/ratelimit.go#L50-L72",
+          "version": "repo-lines-v1:sha256:32635e7ed87fc493eb4b22a3e507a10b267963b97114e3ceecd3e76d0ded6d14:eyJzZWxlY3RlZExpbmVDb3VudCI6MjMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjA1NWVkNTg1NmQ1ZjgzNGRjM2ZlZWU3MGMxYWRhZTBlZWFlZjk1YmViNzEwMDVjMmFhZWRhY2NlOTliOWFiZWIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjIyYThmNTliZjM2ZjJhZWQxODc1ZGNhYzg1MjEyMzExNzY4NjY1NTg2MTZmYTdhYWZkYTI4ODk5NTdlMmJkZTgiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjIxZDI5ZTg2MmVlNzI3ZTkwOWJkNjE0NzYwYWFmNTRlNjljMWUzYzUxNjQ3ZmI1ODIzNjBmNjdjNDk2ODBkYjgiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImM1MzYwZWZkODg0ZTcxMGUzYzNhZTcxMTdiMTQyZTRiNzljZjZmNTI2OTRlOGUyNTNlM2U1OGJiZTQwODczMWUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_6254d1654f59497db71a566b0f42d098",
+      "statement": "The request-email-change limiter keys on [object Object] plus the lowercased new email rather than IP, preserving a historical key-generator quirk.",
+      "evidence": [
+        {
+          "resource": "repo://internal/middleware/ratelimit.go#L108-L120",
+          "version": "repo-lines-v1:sha256:adda48b7635adc0e5890c38e8f8172b2f6e8e8f180e57d8571f4e296333dd5f9:eyJzZWxlY3RlZExpbmVDb3VudCI6MTMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImMwNjU3NGU4ZWI1MzQ3MGMyMDViYjJlNjZiZjYwNmZlMDFhMGQ0ODEwZmJlNGJjYWUzMTYxMTA4ZjMxZDRiNmMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjJjNjE3NmIwOTZhNWExZjA1MDJlMDZjMzRhNjEzYjRkNDIzMjVmNmZlYzE1MDk3NGJiZTQxYWM5MzY0OTM2YjEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjRlOTBhYTg0YTlmNDI0NjkxZmE4OGI3NTEyOGNjMGI1MWQ2ODliYTFmMzRlN2I2MzJlYmNlMjdkMGQ1NGY1YjgiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjdkOTU5MTU4OTNlYTFhNzdjMDUwYzg3NjMwMTMxYzhlMDQ1ZDAxYWUxMzcxNmNiYWE4YjIwMjIwOGRmMjkzNzIifQ"
+        },
+        {
+          "resource": "repo://internal/ratelimit/limiter.go#L125-L153",
+          "version": "repo-lines-v1:sha256:8463d3cabad5371f5d4611d353bb1868a8032e7f4cd89b0118aa6b819057d46e:eyJzZWxlY3RlZExpbmVDb3VudCI6MjksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY3Y2RhODJkYTYwNjIzOGUwNWU2MjM5OTU2OWM1ZWUwMzk5MzQxOTY0OGFlNWQ0M2EyYmY4Y2Q2MzQ3ZjgyNjMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImU5MzA4M2Q5MDY1YjhkZTFkMjJjNjgwNjE3ZDk1Yjk5ZmQ3ZjRlZmU3Njg5YTE3MDFmZWJhMjkxNGVkYzM4ZTYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_3659554e27ba4b15bea8a5fdb8869ca2",
+      "statement": "XSS sanitization strips disallowed tags while keeping text rather than escaping markup, matching the documented bluemonday replacement decision.",
+      "evidence": [
+        {
+          "resource": "repo://docs/decisions.md#L45-L60",
+          "version": "repo-lines-v1:sha256:55e8f276cd39b0cd06b51dce11a5893e875cce4b3e2c886dff7d9873af61bbb8:eyJzZWxlY3RlZExpbmVDb3VudCI6MTYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjJkZTUyZTMxMjJiNzRmZGQwNTg1MzE3ZGExODQyYWMzYmM3YWMxM2VlMWUzNDg1ZDU0MTJjNzNlMTY5ZTZhZWIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQwNWY1ZGVlYWFmMWQ0N2Q3ZGJlN2IzYjg4ZjllZTU2OWQ1MWJjODRmZGMzODExNTdhZjhkYzM4YWU4NjEwMDYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjdlYjJlYTJiMTI2YjM0OTllNTFhZTMwZWI5NDFhYjBlMjQ1YzE1MTM2YTg3YzMxZDMxZDBhODgzODI5NmQ4OWQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6Ijc1OTQxMmY5MTBjMTcyOGM2OTZiOTQ4YjZkMzQ3ZjgwZDE2Mjc4MjlkOTU0MTEyOTZkNTFjZmQxNjcyZDhmNTQifQ"
+        },
+        {
+          "resource": "repo://internal/security/xss.go#L1-L20",
+          "version": "repo-lines-v1:sha256:eb5c2926d8c765d892e3e0af5ecb4cbf5540b200b522f4c014cc137abc8fe6d1:eyJzZWxlY3RlZExpbmVDb3VudCI6MjAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjVkZDQwYzgwNzhjMTI3NWRjYjQ0NTE2OThmZDdlOTZiOWI3OTM5ZDVhOGNhOGUyNmZiNDYzOWFiN2NiMzgyOTkiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjI0NGY0NjU0NjIxZDIwN2QzYWM1YmQzMDIzNmQzZDNjZTgzMmM3NzBmN2MzNzRjZTZmODUzNzExNzI2YzNhZDAiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjhkOGRhOGM2Yjg0MmUyMTQxYTEzZWIwYmUxZmViZGRmYzM1ZTc4NzNjZWEwOTI0NTg2ZWMwZjMxNThlYjU4NzQifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_b83aa8e45b4f44fb84d2dfd9aab3a80c",
+      "statement": "Dual-version routing adds fixed Deprecation and Sunset headers to every /api/v1 route.",
+      "evidence": [
+        {
+          "resource": "repo://internal/router/dual.go#L5-L31",
+          "version": "repo-lines-v1:sha256:949e3773f5342a0694578f528badb6d449f0b2ade8accb71b36d89477d3062ee:eyJzZWxlY3RlZExpbmVDb3VudCI6MjcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijk2MmE2YjYzZjlhZjIxNGM3ZGI3NTFkMmQwNzFhZDBmZTkwOTI5YjgyMTcyZjJkZDdjZjg2NzZhYjAzM2IzNWYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjI5N2FjMDZiZWI5OGE5YTUwZTc3YjMxYmJiNzQzZjM5MzY0OGVlMTUxNWFlY2M0YTNmMzE2ZGVkNWQyYWQyOGIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_3e91760d85c5499a895a4b9f3da57dc1",
+      "statement": "ToObjectID normalizes hex strings for Mongo ID filters and otherwise returns the input unchanged.",
+      "evidence": [
+        {
+          "resource": "repo://internal/repository/idutil.go#L1-L16",
+          "version": "repo-lines-v1:sha256:f060eccf6ef1533b5bfba1be517e665e46f58bdb726e7a34294251c6af765a66:eyJzZWxlY3RlZExpbmVDb3VudCI6MTYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjgwNThjMzlkMDM2YjI0ZmUyNGI4NDQyMTNjYTJiMjU4MzE5MzRiNjA2ODE2ZTE4YjNmZGI1MmYwMTJjMGRiODAiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    }
+  ],
+  "verification": {
+    "by": "openwiki/0.7.2",
+    "at": "2026-11-02T17:41:59.592Z"
+  }
+}

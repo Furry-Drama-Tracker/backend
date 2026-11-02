@@ -1,0 +1,76 @@
+{
+  "schemaVersion": 1,
+  "pageVersion": "sha256:9188cf4351c1bcf4ef00a8a491b85dd19fe7c98123e3ce03956da24f9eea300f",
+  "claims": [
+    {
+      "id": "claim_fc955c86188c43aeb6166babbb7bf27c",
+      "statement": "Startup is fatal when JWT_SECRET is missing or shorter than 32 characters, or when MONGO_URI is missing.",
+      "evidence": [
+        {
+          "resource": "repo://internal/config/config.go#L311-L323",
+          "version": "repo-lines-v1:sha256:7b15dc01439c9db3d3b295863540ce1356a28cdf1f7a7f8dbb7b02be878207f9:eyJzZWxlY3RlZExpbmVDb3VudCI6MTMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImQ1NTRjZDZiYmQxN2RhYWNmMjQyOTY2YzFjYzQzMGE5NmVmOTkwMTRiMzA2YWMxM2QxMjU3ZWM0MTA3MzExNDUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImYyOTY0MDc5YzNjNWM4MTUyMGVmMzNhMmI5ZDJlMTVhMWI4NGQ3MjgwZGI4NTkwZGNkNjU3NDdlM2UwMTJhNDAiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImNmZDQxYWYyZTk1ZjEzMDJiYTcxNDc2YzMxZGFlYzc3MjEwMjAwZTQwY2VlNzZiZmM4ZWM3MmQ2MmFkNWFiZmEifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_30d8bb7e3eb44ccb8f4cff6b84832aac",
+      "statement": "Configuration precedence is real environment variables over the working-directory .env file over the ini file over defaults.",
+      "evidence": [
+        {
+          "resource": "repo://internal/config/config.go#L128-L170",
+          "version": "repo-lines-v1:sha256:a60e77bc08852c64dc4ae8ded89527b61f169d373703b5f521040cd25c1e4be6:eyJzZWxlY3RlZExpbmVDb3VudCI6NDMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY0ZWZjNDk0MThkMjZkY2YxMjliMjJhNmFhMjExMDhjZWVjMzc2NzdhMzJkMDhlOWQ1ZmVlMzVkZGE2NmJiOWQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY3Y2RhODJkYTYwNjIzOGUwNWU2MjM5OTU2OWM1ZWUwMzk5MzQxOTY0OGFlNWQ0M2EyYmY4Y2Q2MzQ3ZjgyNjMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjU0ODc5MDYwN2I3OWNmNTFmZDBiNDRlYjMwNjQzOGQwZDMzMzg4NWFjY2MwOTJjYThlYTM2YjdlNGE5N2E0ODAiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjY5Zjk5YzBjMTliZDE4NTQzOGZiMGE2Y2MyY2Q0YjE3M2I3NDY4YTk3YThhYWRkMzg1ZTNmY2U0YTAyZDViOTAifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_a3abd8e195ae4d6fa5b0692be5922750",
+      "statement": "GET /api/health pings MongoDB and reports ok or 503, GET /api/csrf-token issues the CSRF cookie and token, and Swagger UI is mounted only in development.",
+      "evidence": [
+        {
+          "resource": "repo://internal/handler/csrf.go#L14-L37",
+          "version": "repo-lines-v1:sha256:08d433e2dd2b7c447ddc712ff60b64aa9e2e568d0004f55b4eb37bcc2408e21a:eyJzZWxlY3RlZExpbmVDb3VudCI6MjQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImI2Y2Q2OGU4NTZhMDE3YjAzMmQ2ODk1NDcxM2JjZGU3MjYzMmM3OTkzMzY2ZjIxZjlhMjcwNDlhYTMxZTYzYTkiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        },
+        {
+          "resource": "repo://internal/server/app.go#L78-L92",
+          "version": "repo-lines-v1:sha256:82493bbbc0545838dd4f04bb2e4d820e4d391115235d08fc07795051bbbd1f0d:eyJzZWxlY3RlZExpbmVDb3VudCI6MTUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjcwYmU0ZDExNzU2YTc5MTEyNzM1ODdhZTEzNjg3MmEyYmMzYmIyZWQxNWE2NDk4N2YwYmYzODlhNzBjODc1OGIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY3Y2RhODJkYTYwNjIzOGUwNWU2MjM5OTU2OWM1ZWUwMzk5MzQxOTY0OGFlNWQ0M2EyYmY4Y2Q2MzQ3ZjgyNjMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImVhYWJkNmRhYzRhMmY3NjkyZmU5NDk3OWFkNmVjZWQwM2Y3YWYyOWMzOWI1ZjQ1NjYzYWEzZDljNzEzYjlmNzIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImExNzczYWJiYmZmZDgwYjMyNzgxNTU5ZWQ5NTI2ZTU0YjM1NTFhZjNjOTFlMDZmZTdhMjk1Zjk1MTA2OGRjMTgifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_a6fa90ab0ed44278bcbacd9a09b60abc",
+      "statement": "The regression gate is go test ./..., and integration tests require a local mongod on 127.0.0.1:27017.",
+      "evidence": [
+        {
+          "resource": "repo://Makefile#L18-L22",
+          "version": "repo-lines-v1:sha256:bf9f545b60c030931fedc7b2e60413a5d6914f4a5bdcadf0927f776eb408664a:eyJzZWxlY3RlZExpbmVDb3VudCI6NSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiMDFiYTQ3MTljODBiNmZlOTExYjA5MWE3YzA1MTI0YjY0ZWVlY2U5NjRlMDljMDU4ZWY4Zjk4MDVkYWNhNTQ2YiIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiN2Y1MjJlY2Q2MDUyYTA2OGE5YWEyMWYxYjZhOTFhYjZkZDIzOGJlNjRkZjM3MjJjYTA3ZDYwZTI4NTZlOWRlNSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZTcxMzYwOGQzNTVmNWRiYjJlMTJjNDBmNzJkYWQzNjE4NTZlYTA5NDZiMzYxOTk1ZTFjMzM5NzhiMGZiOWZjZCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiMjUzODkyZjQ5YTQzZjYyZGZlNGE0MGJkMDMxNDM1NjBjMDc0NGY5YWI4YmMyMDU0N2Q5Yzc1ODkyN2YwYmE3NCJ9"
+        },
+        {
+          "resource": "repo://internal/server/integration_test.go#L30-L45",
+          "version": "repo-lines-v1:sha256:a09e512354f632af85993d277e1afe15f60156c64f3bf45846979b40e330a340:eyJzZWxlY3RlZExpbmVDb3VudCI6MTYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImVjZTUyM2M3ZDk1ZDQyMGQ0ZmY0OWU0MmI0ZmIyNjM4NDdiZmIxOTRkOTZlZWJiOWY5NDcyYTJiMDI2NmE3ZTQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijc2ZWM0ODgxYWVjN2I1NjdmNWEzNTM0N2I3ZDRkZTBiMzY5ZThhZWY5M2M5YWUwMmQ1Y2IyYWZjMTJkMDM1MTAiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImQwNWZlZDgwNmIxY2E2OTIxMGZkNWNjNjFlNGZiNzE3NmM1NTZiMmQ2OTRjMzNkZWEyNTFjOGQ2ZDk4ODQ4MGUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_63030e44fb5e46eabe78864e11d2e739",
+      "statement": "Index creation, migrations, session and notification cleanup cron, and web push sending are defined but not active at runtime, while verification codes, rate limits, the episode cache, and SSE state are process-local.",
+      "evidence": [
+        {
+          "resource": "repo://cmd/server/main.go#L38-L100",
+          "version": "repo-lines-v1:sha256:27e6a29dba294300dec6adcf4d916f4e310e75ac29b11220c8844de366dd89cf:eyJzZWxlY3RlZExpbmVDb3VudCI6NjMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImU3OGFlYTY2NGEzYjI3ZjJmOGZlYTE1ZDFiYzM4Zjc4MjI1YTBjYzNiYjIyMmFkYzQ4NTE0MjU5Y2JjMWE1ZDQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjhiN2JjY2ZmNDUyMWNmZTE4MWVlZDkwNTZiY2ZiNWY3ZjQ5ZGQwMjgyNzYxNDRkMTRiODdhYTE3MjVmNDFjMmMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImEwYjAxY2I4M2VjYTZjYmI0NmQ0M2ZlNGI5ZTRkMjhhYTgwOTMxZGI4ZmQ4MzRkNjhiZmRjM2U4MDIzNDJmZjAiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjcyMTY3MzY0NzU0MzgwMmFkMjNlZGY5NGMxM2M4MmE5NzM2ODEwNDk1NGQ3ZTE2MDY1YjJjOTlmMWFmYTE0YTcifQ"
+        },
+        {
+          "resource": "repo://internal/code/store.go#L1-L12",
+          "version": "repo-lines-v1:sha256:3639875ab22b6ae9f86693c06b47026889a7eb8e00da9754d672232a60f20957:eyJzZWxlY3RlZExpbmVDb3VudCI6MTIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjcwMzUyNDc1YzI0ZDc5OGMyODhjOTM2ZWQyOTQ5N2JhNGI4MWNkZGViZGRmZDQ5ZTBjODZiZDMwNjJiZGQ3MTQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImZhZmJhMDUyN2MzOTUzYzRiNmUwZTViNTczOWJhODM2MTJmODA1M2JjZGM5NDY2NzMwMTkzY2QxZDU5MGI0MDgiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjIwNTU4Y2I1OGQ1OWMxMzcxMDhhYTg5NGUyN2VkOWQwNzEwNGM3YjUwYzRlNjNmOTc4ZTg3OWJjMTdiMmUwYWQifQ"
+        },
+        {
+          "resource": "repo://internal/handler/notifications.go#L20-L27",
+          "version": "repo-lines-v1:sha256:04837153192325a113960ae775694058161a2ab8c4e8886a49237896183cb70f:eyJzZWxlY3RlZExpbmVDb3VudCI6OCwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiMDFiYTQ3MTljODBiNmZlOTExYjA5MWE3YzA1MTI0YjY0ZWVlY2U5NjRlMDljMDU4ZWY4Zjk4MDVkYWNhNTQ2YiIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiYTExMDczMDFlYTE1ZWQ4MjdhZmQ2OGE3ZTUzNzA1NTFjZjRmZWQyM2RhMTk4ZTkyYWRhYjdkMjNmODQ5NmQ3OSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNWQwMjRhYmFmZDZhMjQzMjA2ZDAwMzQxMGViMDY0MjVjNWEwNGExNTJjZGI3YmMzZjc3Zjc5YTBjYTllOWMzZSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZjcwNDhiZjc2OWI5Mzk0ZTcxMzM2MGVhOGM1ZTZiN2QxMDI2NzUyNjM2MjlmNTc1MjRkOTVlMjM0MjRhZGM4YSJ9"
+        }
+      ]
+    }
+  ],
+  "verification": {
+    "by": "openwiki/0.7.2",
+    "at": "2026-11-02T17:41:59.592Z"
+  }
+}

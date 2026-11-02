@@ -1,0 +1,98 @@
+{
+  "schemaVersion": 1,
+  "pageVersion": "sha256:7397e0ceb9a0801ed1421bab5d868152be97f1d71781e3ed2c4b68803c0e0e5f",
+  "claims": [
+    {
+      "id": "claim_5048775d39784f869d86ba80c02f62d9",
+      "statement": "Startup parses flags, loads configuration, connects and pings MongoDB, builds repositories and the signer, sets upload directories, creates the icon directory, assembles Gin, listens, and waits for SIGTERM or SIGINT.",
+      "evidence": [
+        {
+          "resource": "repo://cmd/server/main.go#L38-L100",
+          "version": "repo-lines-v1:sha256:27e6a29dba294300dec6adcf4d916f4e310e75ac29b11220c8844de366dd89cf:eyJzZWxlY3RlZExpbmVDb3VudCI6NjMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImU3OGFlYTY2NGEzYjI3ZjJmOGZlYTE1ZDFiYzM4Zjc4MjI1YTBjYzNiYjIyMmFkYzQ4NTE0MjU5Y2JjMWE1ZDQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjhiN2JjY2ZmNDUyMWNmZTE4MWVlZDkwNTZiY2ZiNWY3ZjQ5ZGQwMjgyNzYxNDRkMTRiODdhYTE3MjVmNDFjMmMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImEwYjAxY2I4M2VjYTZjYmI0NmQ0M2ZlNGI5ZTRkMjhhYTgwOTMxZGI4ZmQ4MzRkNjhiZmRjM2U4MDIzNDJmZjAiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjcyMTY3MzY0NzU0MzgwMmFkMjNlZGY5NGMxM2M4MmE5NzM2ODEwNDk1NGQ3ZTE2MDY1YjJjOTlmMWFmYTE0YTcifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_7f53f690f3004e048f1f234d2450806b",
+      "statement": "Graceful shutdown uses a 10-second context, while the server enforces a 65-second read-header timeout, 30-second read and write timeouts, and a 5-second idle timeout.",
+      "evidence": [
+        {
+          "resource": "repo://cmd/server/main.go#L80-L118",
+          "version": "repo-lines-v1:sha256:18553c86f28220c9983de75a3b77f1b4af47d712e78b29bc858991f34af80ef8:eyJzZWxlY3RlZExpbmVDb3VudCI6MzksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjhmMGIxZjk3ZGZkN2FiMzdjYTExNGMwYTFiY2ZhZDczZTliYzVlNjRkN2NkZDdiMmYzZTU1MmZmNzk4ZDE1MTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjUxMzFkYTY1YWY4OThhYWQzNzE2YzBjMDIyYWMxZDQxN2RiNmRkNmJiY2Q2N2YyYWZmMGUzODcyZGM1MDMxNDAiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImI4OThkYTE2OTk5ODlhNzI3MjE1YjMzNGE2YTBlYzRkOWZjOTIyYzlmYzBkYmE1YWUwYTYxNjYyN2ZkNjkyZGYifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_e78f43574ad74051bb618ce4df86ae84",
+      "statement": "The uploads directory is not created automatically, while the icon directory is created at startup and before SVG writes.",
+      "evidence": [
+        {
+          "resource": "repo://cmd/server/main.go#L62-L70",
+          "version": "repo-lines-v1:sha256:2f279a9fbca37d21b9dca271a73fa83f2b7a7e16aef19c1b992cbb6dde079b13:eyJzZWxlY3RlZExpbmVDb3VudCI6OSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiMGFlM2YyZjdlNWQyMTI3ZTliMjU5ZDMzZTNmOTllZWY3N2E1ZTVjYjNkOGY3MmY0NTdjNmJlYWNiMjM0ZDNkOSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMGQ1NDEzMzFhNTFkYWVhZDJiZDQwZTI0MDRiMTU2MTUwNDY0ZDgyZDRjOWExMGMxOTljMDgzODExNWY5MTFjYSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiMDQ2NDRiOGRlZmFkMTUzMWMzZmMxY2FlNDM0M2Y0NzAzMmQzMjM2MDFhNGM1YzRjMmI4ZTBjYWU1YWNlZTdmYyIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiNzRmNjYzMTI4MjVmZjU2N2E0OGZhMTNmOWJlMWE0YjFjMzc3NzNjODFmODg4MDUyNDQ3NmRjZWVjYjNmMTFhOSJ9"
+        },
+        {
+          "resource": "repo://internal/upload/svg.go#L90-L100",
+          "version": "repo-lines-v1:sha256:c2511707a30ded1e8e1fc0b87c56d96bd628d57a857341fa67168ade790efc28:eyJzZWxlY3RlZExpbmVDb3VudCI6MTEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY3Y2RhODJkYTYwNjIzOGUwNWU2MjM5OTU2OWM1ZWUwMzk5MzQxOTY0OGFlNWQ0M2EyYmY4Y2Q2MzQ3ZjgyNjMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjExN2FmNWIyMmZmMjhmOGYxMjZmYWE5MmEwZDkyYWVlNjNkZjExYTFmZmE1ODZiNzkxNTgyMTVkNGNmZDI0NWIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijg4OWNlZDY2YWIwZmE4NGVmOTEwMzg2OGRlYTMyNjk1MzhjMTZiZTQwMmFjNDU1YWRlOWVjODYyYzE4YTU4YjEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjkyNDZlMTVlZjZhMDA3NjI3ZjVlY2MwN2MwMzRjYjRjZDUzZjQ4NWIyMGQ4YzE3MTgxMzQ3ZjBkNWFiODBhZTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_a1e642e00db24145b5cc3de52b092d2f",
+      "statement": "The listener supports tcp host-port, Unix socket paths with stale-file removal and 0660 permissions, and Linux abstract Unix sockets.",
+      "evidence": [
+        {
+          "resource": "repo://cmd/server/main.go#L120-L143",
+          "version": "repo-lines-v1:sha256:b431cb00df71456de9c6f8b1d88e9490ace99feb5884dc482da6ce50ee2338eb:eyJzZWxlY3RlZExpbmVDb3VudCI6MjQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY2N2U3YWVlZDkwOTRjZDYzZTZiZmZhMmEwNzcwNmZkNzdlNzE0YjZkOWNiNTcyZTMzYjY5ZDVjMDRhYmQ3MGQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjRkYzI5ZWI4YzYxMWY2MTZhNjc3YTkyYzUxODFiZWJiZDcxNTE1OTVjNjgxN2M4YzRkNDc0ZjU3OGNmOTVjZDEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_146b71762d43484aa66b0bebb4ed0c0e",
+      "statement": "The Makefile provides build, run, test, vet, fmt, docs, and clean targets, with a Windows NMAKE equivalent.",
+      "evidence": [
+        {
+          "resource": "repo://Makefile#L1-L33",
+          "version": "repo-lines-v1:sha256:dd93ae0fc3c86b17af0a1cd8fd2d60552fde736649428a39f1f0619a9183614d:eyJzZWxlY3RlZExpbmVDb3VudCI6MzMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImYwYmYwZTViNWUxOWFiYTE1ZTg1NTMwZmFjMzRiOGU1MTc0YjA0YjA1OTY3YjYyY2M2NmU0ODM5YWRiZTRlYWMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY5OWVhM2YyMTExMWM2YzQ5ZjY1NDNhZjE5ODYwMmQ5YmI2NzU0NmYwZTUxMTA5NTdjNmRhZDAxMjY1YThiMzAiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        },
+        {
+          "resource": "repo://Makefile.win#L1-L30",
+          "version": "repo-lines-v1:sha256:932ab1fd6d3f8820f65bad3a0b21b9a9548a3460052253f6f86fa157a38583b6:eyJzZWxlY3RlZExpbmVDb3VudCI6MzAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjUxMGZkM2Y5YzAwZDA3ZmJjYWY1NGQyOTc1NzNjOWRkMDA1NWM1Y2I0ZDJmODc3Yjg1NDViNzhiOWNmZjdhMjYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjoyLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImIyMjU4NjZlODZiNTM3MTQ4NjAwZDgwZjkyNDMwZWE4YmVlOGM0YzI4NzdmOGJkNWY0M2JhMjUyOTFlMThkMDYifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_be4eb71e30b54598a9b8dc6666228d3e",
+      "statement": "The systemd unit runs as www-data, uses a Unix socket under RuntimeDirectory, restarts on failure, applies hardening directives, and allows 15 seconds for stop.",
+      "evidence": [
+        {
+          "resource": "repo://deploy/furry-drama-be-neo.service#L1-L34",
+          "version": "repo-lines-v1:sha256:ffbf494aaf37d5315c5c5c8f9309b054b6126b2805deba7f952a5e2d2015a493:eyJzZWxlY3RlZExpbmVDb3VudCI6MzQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImFlNmM2M2NmZjMzYmNmYTNiNmEyZDZkMGM5ZGQxOTUyMWRlZGFhMzUxMTQ2YjFhNjQyZDJiZmM5Y2Y1YTFlMWYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImI5NzQ5YzMxYmI3ZGMzODEwMmQxZmZjZGE1MjZlNWU1ZTZmNjZjYjk1ZGMzZDE4NzI3YWE4NDM4ZWUxYTJiNWYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_5c6ee09fda9a4135992cf932a5e4664f",
+      "statement": "The deploy run script execs the binary in the foreground with a configurable config path and listen address, despite describing a nohup alternative.",
+      "evidence": [
+        {
+          "resource": "repo://deploy/run.sh#L1-L19",
+          "version": "repo-lines-v1:sha256:6ca5804fef957b86f394dfe90f457eb7f8170c72e76417ebec8eead174d3a0ac:eyJzZWxlY3RlZExpbmVDb3VudCI6MTksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImE4MDc2ZDNkMjhkMjFlMDIwMTJiMjBlYWY3ZGJmNzU0MDlhNjI3NzEzNDQzOTAyNWYyODJlMzY4ZTMzMDVhYmYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjMxZTM4OTQxOTk3NmM2N2E4Y2NjMDgyOGEwMmUyZTNmZjU4ZDVkYTAwOTYwM2Y5MTBkNDY4NTg0YjY1YjlmMjMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_91461108de234f3f8010ac753a6beb3d",
+      "statement": "The ini template documents server, database, jwt, email, vapid, and security sections with production-oriented values and recommends file mode 600 because it contains secrets.",
+      "evidence": [
+        {
+          "resource": "repo://deploy/furry-drama-be-neo.ini#L1-L60",
+          "version": "repo-lines-v1:sha256:bc6456253254a11b9d50232a93cde54e0a2e9a695a18399419bd067a14c3f53f:eyJzZWxlY3RlZExpbmVDb3VudCI6NjAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY2OTNiZjc3MGM0MDFhNWMzYmU3MzRlMWUxOTg4Mjg4MmIzMjRhNjlhNGQxMzdmMTljYTljMjliNTZiODRkN2EiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjZkOTNlNzcwNDU5NDBiNTRmZjE0MGMwNTkzYTFkZjJmYzUyYmJlZjFjMWVjMWMzMTYxOGQyMjkzNDM5MzRmMTciLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    }
+  ],
+  "verification": {
+    "by": "openwiki/0.7.2",
+    "at": "2026-11-02T17:41:59.592Z"
+  }
+}

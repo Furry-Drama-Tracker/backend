@@ -1,0 +1,110 @@
+{
+  "schemaVersion": 1,
+  "pageVersion": "sha256:d1b44b13d081fd7e4b19da64ab7cf8f9dbbe4db33164fa8d16274a08e67edbca",
+  "claims": [
+    {
+      "id": "claim_030a3007b94e4501b11d17747e3599e5",
+      "statement": "Configuration precedence is real environment variables over a non-overloading .env file over the ini file over built-in defaults.",
+      "evidence": [
+        {
+          "resource": "repo://internal/config/config.go#L128-L170",
+          "version": "repo-lines-v1:sha256:a60e77bc08852c64dc4ae8ded89527b61f169d373703b5f521040cd25c1e4be6:eyJzZWxlY3RlZExpbmVDb3VudCI6NDMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY0ZWZjNDk0MThkMjZkY2YxMjliMjJhNmFhMjExMDhjZWVjMzc2NzdhMzJkMDhlOWQ1ZmVlMzVkZGE2NmJiOWQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY3Y2RhODJkYTYwNjIzOGUwNWU2MjM5OTU2OWM1ZWUwMzk5MzQxOTY0OGFlNWQ0M2EyYmY4Y2Q2MzQ3ZjgyNjMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjU0ODc5MDYwN2I3OWNmNTFmZDBiNDRlYjMwNjQzOGQwZDMzMzg4NWFjY2MwOTJjYThlYTM2YjdlNGE5N2E0ODAiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjY5Zjk5YzBjMTliZDE4NTQzOGZiMGE2Y2MyY2Q0YjE3M2I3NDY4YTk3YThhYWRkMzg1ZTNmY2U0YTAyZDViOTAifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_8b0d16801ad54980b73eef8f4517d8c6",
+      "statement": "The ini file uses server, database, jwt, email, vapid, and security sections, with Go duration syntax for access and refresh TTLs; invalid durations are ignored.",
+      "evidence": [
+        {
+          "resource": "repo://deploy/furry-drama-be-neo.ini#L12-L60",
+          "version": "repo-lines-v1:sha256:beb43f380f2c58561ecf0bfe15ce91f6e3496bd23f4658549bd634dc6a06d0b3:eyJzZWxlY3RlZExpbmVDb3VudCI6NDksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImZlNzM1NDQyMTQyMjI1ZDVkODg5NjA3ZTk0YjljZDZiNTc2MjZmNDljZDIxZGQ4ZGE5NWQwNGEzM2RkYzBiY2EiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjZkOTNlNzcwNDU5NDBiNTRmZjE0MGMwNTkzYTFkZjJmYzUyYmJlZjFjMWVjMWMzMTYxOGQyMjkzNDM5MzRmMTciLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjlkYzk4NGMyMzBhM2FkZTRhY2Q4YmM1Mjk4YzJkMDFkMjdhYjg3NDg0YWFlNGU4MmZiZDE4ODQyNDg1ZWJmOWYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        },
+        {
+          "resource": "repo://internal/config/config.go#L203-L266",
+          "version": "repo-lines-v1:sha256:fc1e2ac075e7be9e546be9ac44a5e828ed1e09d82b7bca4637558691b94750e1:eyJzZWxlY3RlZExpbmVDb3VudCI6NjQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjgzODI5NjgyMTJiMjZhNTY1NDg4OWQzOGU1MTAwMGE2MjVmMjQzYWM1OTdkMzg1NDEzMDMxNDA1YmYyZDcxNTYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjMyYzVmYWY0YzhlMDVkOGI0MjYxZjQ3OGM0MzU4MTlmMjkwYzIzODM5NDk4NzhhNmNmYmVlMjdkYjFkN2JiZmEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImYyOTY0MDc5YzNjNWM4MTUyMGVmMzNhMmI5ZDJlMTVhMWI4NGQ3MjgwZGI4NTkwZGNkNjU3NDdlM2UwMTJhNDAiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjE2MzFiNmUyY2EwN2Q4YmFmMGViNDRlNzQ5ZGJmNDkwYjM5MmUzYTUzNGVmNjEwMjI3NzExNDZjZGY5YWYxYTIifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_4f960aab0ce94453921dd77170486163",
+      "statement": "Environment overrides are limited to a fixed variable set, empty values never replace resolved values, SKIP_RATE_LIMIT only applies when exactly 1, and uploads_dir has no environment override.",
+      "evidence": [
+        {
+          "resource": "repo://internal/config/config.go#L269-L320",
+          "version": "repo-lines-v1:sha256:49324405a5e9a3a94afa868f510b95c8ee0f0f5d6a9882f3ecd4d1dd195a00f8:eyJzZWxlY3RlZExpbmVDb3VudCI6NTIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjkzMDEyNzI4NzZmYzBkOWQ2NWI4YzFhMjI2ZTZmOTlhZDNmMTQ4ZmI4MTY4NGYyYWQzYmJlYjc1N2Q1YjVjYzMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjUxZTQ4OGQ1MzRiOWFlN2VkMjQ5ZWVmMDJhNGE5NWMzYjI2YjEzNDdiMzVlMWM5MDUwOGZjOGIyZTQxOWRjZDkiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjgyOThjM2JiNWYxZWRlZGJhODQzOTFjYjA5YzExOTQyOTM5ZTcyNjFlMmVjNDY5ZjNkMzQ4NGZkNmNkN2ZjNWUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_90019b37427a4e5e86f8a831d8e86842",
+      "statement": "IsDev is true whenever NODE_ENV is not production (case-insensitive) and controls Gin mode, secure cookies, Swagger mounting, X-Forwarded-For trust, 5xx detail exposure, and demo-email verification skipping.",
+      "evidence": [
+        {
+          "resource": "repo://internal/config/config.go#L155-L160",
+          "version": "repo-lines-v1:sha256:1146ebea9d6e4a2ec166a30116b4c000eed4a8d465a464d3286e2114c921bc79:eyJzZWxlY3RlZExpbmVDb3VudCI6NiwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiMDFiYTQ3MTljODBiNmZlOTExYjA5MWE3YzA1MTI0YjY0ZWVlY2U5NjRlMDljMDU4ZWY4Zjk4MDVkYWNhNTQ2YiIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiM2NiZGRjY2E4ZWMxNzdiOGM4NWFjNTA5YWU5MDk5MTZkNDY5YjEzNDE0ZWE1Mzc2ZjhkYWE4MDFhNzIxMjdjZiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZTE2MmNlYTk4MmRjY2Q2YzBiYmZlN2EwMzQ5YWRiMDljOGRiODhjZmQ1N2M3NzM5ZjE1NTBmMjBhNzg3NTQ5NSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiN2QxNDQ1N2QzZWZiZjMyYTNmMmQxMjNkZWE2OGE5MjFiYTVmZjM4NDNiMjNjZWY0NzkzMWZjNGI0YWU4MWJlNCJ9"
+        },
+        {
+          "resource": "repo://internal/server/app.go#L45-L82",
+          "version": "repo-lines-v1:sha256:0df88782361d59605ccc7d39703e701c1b48947ab58d8b9bee1dc97924cd473e:eyJzZWxlY3RlZExpbmVDb3VudCI6MzgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImRhMTJhNGIxZThlYzY2ODA2ODQ1ZTNkMWY2Y2E0MGM0YWE5ZTM1NGRkMjNmMGY4MzkwZmQ0YjU4Y2E5MzA1NjMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImFlYmFkYjVhMjJlYjdiMTMzNzE3MDYzY2MyMjY1ZWJhNWU3ODU3MTZiNThhZDhlMTg2NTczZThiNTVlMDg0NzciLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImNhODVkYmMwMWU3MDdlOGJiNjIxYjk2ZTFhZGEyMzBkZDJlZGE4YjA2YTMwNTM5NjMwMTBkNmZkZWE4OTg1OGUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImI2OTExODMzOWMwNTI0ZDBjN2E0Y2FkZThkZGE4ZTcwODAzM2JhNzYwY2NiZTBlNTY0M2VmNDhkMGZlYmRmYzUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_48ad663b712c4f348025b2225331fddb",
+      "statement": "Startup is fatal only when JWT_SECRET is missing or shorter than 32 characters, or when MONGO_URI is missing.",
+      "evidence": [
+        {
+          "resource": "repo://internal/config/config.go#L311-L323",
+          "version": "repo-lines-v1:sha256:7b15dc01439c9db3d3b295863540ce1356a28cdf1f7a7f8dbb7b02be878207f9:eyJzZWxlY3RlZExpbmVDb3VudCI6MTMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImQ1NTRjZDZiYmQxN2RhYWNmMjQyOTY2YzFjYzQzMGE5NmVmOTkwMTRiMzA2YWMxM2QxMjU3ZWM0MTA3MzExNDUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImYyOTY0MDc5YzNjNWM4MTUyMGVmMzNhMmI5ZDJlMTVhMWI4NGQ3MjgwZGI4NTkwZGNkNjU3NDdlM2UwMTJhNDAiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImNmZDQxYWYyZTk1ZjEzMDJiYTcxNDc2YzMxZGFlYzc3MjEwMjAwZTQwY2VlNzZiZmM4ZWM3MmQ2MmFkNWFiZmEifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_d73e8fa55bf34165808035fb59ae04f6",
+      "statement": "Field encryption falls back to JWT_SECRET when ENCRYPTION_KEY is absent, and the Altcha HMAC key falls back to a SHA-256 derivation from JWT_SECRET.",
+      "evidence": [
+        {
+          "resource": "repo://internal/config/config.go#L85-L100",
+          "version": "repo-lines-v1:sha256:44d20bdfa479af5b359e9af973bd4f5c6721e506c453cbe1a00a32cf1f5afcd0:eyJzZWxlY3RlZExpbmVDb3VudCI6MTYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjU1NThkY2YyZTBmNjE0MjFlM2E2Nzg4YzVlNDgyOTdlNzFhZDhkOWIyOWZkMThmYzA2MjNmY2U4YmNkOTQwNjIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjUyODczYTc1MDlhNmI2MWQ3YmNhZDg2YzVlOTAzOTQzNzJiZDNkYzBlZDA4NTI2ZTk4YzVkYmQxZWYwN2RmMWQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjcyNWUxOGY3YmRhOGRiZjgzYWQ5M2MwYTFkNjMxMTA5OTAwZWFlNWMzNmVkM2MwYThlMzIzODNiZGE4MmM4MWEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImQxZTc4NWViMjkzY2IzMTRjMDdkZjAzMTBhMjQ5NzI4NmJmYTM0MmI2ZmE1NWIzMzQ5MzVjNGU0MTEwZDkxOTMifQ"
+        },
+        {
+          "resource": "repo://internal/service/auth_service.go#L60-L72",
+          "version": "repo-lines-v1:sha256:0c61d4ee94f281a775245b13a00204b6a577d36f6d0dced9b5141ec65720667e:eyJzZWxlY3RlZExpbmVDb3VudCI6MTMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImNlYjJhYjRkYTE3MTU5YzliOGNlZWVhM2U0YTMwMTBjYzZhZGFhYjhkYjBmYjVmYzc3YjJhM2U2MWI2ODdlMzIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjFkMjIxYmZmNTA4YjdjYzFkNmMyNWUwNjIxNGMyODc1NDkyMTgzNDNiODU3OTY2YWE0NWEyYTdlMDg4NTI4ZmUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjUyM2VlNGU1N2EzNDNiNDY0Mzc1NzM3MGU1YTYzYzY0ZWY1NTgyNGY5MDFhYTExODhiMTc3M2NiNWY1NjYzYzAifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_f82bfecb09d740bf92e073389c6f0dd9",
+      "statement": "CSRFMaxAgeHours is consumed by the csrf-token handler to set the XSRF-TOKEN cookie lifetime, and email and VAPID settings are passed through to their subsystems rather than read from the database.",
+      "evidence": [
+        {
+          "resource": "repo://internal/email/client.go#L70-L90",
+          "version": "repo-lines-v1:sha256:56f9d40a16b23957ea99ef97025343df9cceb5c2911c12f7bb8dd28189769d37:eyJzZWxlY3RlZExpbmVDb3VudCI6MjEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijk3MmE4YzQ0YzAxZmJkZDRmMzVlZmUwNTUxY2RmYjYxNjE5MTA0MjMxZGQ4NzkxNGUxZGMwMjNmZTEyNGZlZmUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImQ1OGRmNGEwZWFlNGVlZTE0ZWU4ZDIzZjFhMmNjYzY0MTRhZDZlZTBiZjM1ZTg2YzUwYzA5MDk1NTkzYWYyZGUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjJlMTQxMDNiNmZiNmJjNmViZWZlMmQxMjEyY2NkNzFhZDhjZGMwZDAwZjM4ODI2NmU1ZGNlOGIyM2RkNzU3ZjcifQ"
+        },
+        {
+          "resource": "repo://internal/handler/csrf.go#L14-L24",
+          "version": "repo-lines-v1:sha256:afc1a3f28a6d9d153c6e50e38b336992e11fc7f777e76a2144fc61dd82bf6438:eyJzZWxlY3RlZExpbmVDb3VudCI6MTEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjNkMDRlMjA1ZmJjNzU5ZWE2ZjI0Y2RjZTgwZDlkMGFkZTFjNzJiMjA3ODEyZTI3NzM5OTRlMzQwNTBhMjRhZjUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImI2Y2Q2OGU4NTZhMDE3YjAzMmQ2ODk1NDcxM2JjZGU3MjYzMmM3OTkzMzY2ZjIxZjlhMjcwNDlhYTMxZTYzYTkiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjE4Yjg4YzMwYWMwYmJjN2Q2OTdkMTE2OGIxZDYxMTQ4MjFhZTVmYTI0MzFjNzc4NTA4ZWUyNzE4N2FkMGQzNmYifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_a4faa156661348168c4cd338cefae6b5",
+      "statement": "applyINI assigns listen, database URI and name, JWT secrets, and email credentials unconditionally from the ini section, so an ini file omitting them clears the defaults, and database min/select/sock plus server port are parsed but unused.",
+      "evidence": [
+        {
+          "resource": "repo://internal/config/config.go#L108-L118",
+          "version": "repo-lines-v1:sha256:1d87445d742c433b39a3c9e6c5ee91e7800dd2f820989b43381016f73d535e71:eyJzZWxlY3RlZExpbmVDb3VudCI6MTEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjIxN2QxM2UzOTc3MzQ0NjcxODdiMGMwMmE2YjJhN2Q3YTBiZmM3MzM5OWU4ZmMyNWFiNGFmYWE4ZmZiZTAzZjQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImE0ZjY5YjFkNmRlY2M4NTY2ODEyNTc5YThmYzRjMWU0MGJlNDEyYTgyNmViMzdiMGY5YzgxYTdmOGFmOTMzZjQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjZmYzM5NmRhZGRiYjQ0N2JhZjYyZmE4NzM0NTZlM2ZiN2RhYjhmZTJhODY5NDUzY2YwMTQ1YzY2N2VlMjQ5NDgifQ"
+        },
+        {
+          "resource": "repo://internal/config/config.go#L203-L240",
+          "version": "repo-lines-v1:sha256:79c055379a2f08fdcd8eb50e79e895466621df541d54cc1c181a0e05364e89c1:eyJzZWxlY3RlZExpbmVDb3VudCI6MzgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjgzODI5NjgyMTJiMjZhNTY1NDg4OWQzOGU1MTAwMGE2MjVmMjQzYWM1OTdkMzg1NDEzMDMxNDA1YmYyZDcxNTYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY3Y2RhODJkYTYwNjIzOGUwNWU2MjM5OTU2OWM1ZWUwMzk5MzQxOTY0OGFlNWQ0M2EyYmY4Y2Q2MzQ3ZjgyNjMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImYyOTY0MDc5YzNjNWM4MTUyMGVmMzNhMmI5ZDJlMTVhMWI4NGQ3MjgwZGI4NTkwZGNkNjU3NDdlM2UwMTJhNDAiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjQ0YTU0NWQ4MGQ4ODkzYzMyNDEwN2YxNWZjMjU3OWIxNmJkOGEwNTkxYmY1Yzg5NTJkMjczNTQ5NTUzOTU4OTgifQ"
+        }
+      ]
+    }
+  ],
+  "verification": {
+    "by": "openwiki/0.7.2",
+    "at": "2026-11-02T17:41:59.592Z"
+  }
+}

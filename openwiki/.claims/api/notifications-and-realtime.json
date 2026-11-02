@@ -1,0 +1,112 @@
+{
+  "schemaVersion": 1,
+  "pageVersion": "sha256:f79bab0e543481bd3b77f778b34fe24018692a2de38c867670d7fd6b680ed7a3",
+  "claims": [
+    {
+      "id": "claim_36fbd8cc553944c6b27fbd9bea38abbd",
+      "statement": "Notification documents in the notifications collection carry userId, optional episode references, type, link, message, metadata, isRead, and creation time, and responses render episodeId as hex or null and empty metadata as an empty object.",
+      "evidence": [
+        {
+          "resource": "repo://internal/handler/notifications.go#L560-L582",
+          "version": "repo-lines-v1:sha256:cee96b67bc31699d30504c1eecd458a49918f4c2c324e5a555cce09f9152c7ac:eyJzZWxlY3RlZExpbmVDb3VudCI6MjMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImNjZDRhZDZhYWMxYjEzZDRjMWFiZTJlZTFjMjEwMjZiNWViZTcxODcyZjI3M2EwNDY3YzgxYzAwMzA0ZGE4NzAiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        },
+        {
+          "resource": "repo://internal/model/model.go#L134-L146",
+          "version": "repo-lines-v1:sha256:8083fb5c5f438386191ed2d8a54a699bab6ea9ff42931b8ac324e9fd40f63a88:eyJzZWxlY3RlZExpbmVDb3VudCI6MTMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjU2YTU0YWFlNDgyMjIwN2ZiNjAxMGNjYzBmMDQ4MDFmOGY1NzkwMDRlOTUwOTdjNGI4MzY5YWQ1MTA0M2UyM2UiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjJiNGQ0ZTEzODI5MmNiMzAxZjRjMTAyNzJiN2ZjYTdlMDE0NDg3YTM3YmE4NjE3MGMzZjQ0ZjQ2MjVhOGJiNjIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImI5MmZjYjk0Y2E1OWFhZTUyOTU4ZWU0ZWFhMjg3Y2I4ZjEzZWI3ODdiNTgzMmEwMWI1NWU1NjIxZWNlZjAyNjQifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_4f8bbdd9f63442d6b954c4f7861ab111",
+      "statement": "The SSE stream authenticates with a 30-second sse-ticket JWT delivered by GET /auth/sse-ticket, enforces 10 connections per IP, 500 globally, and 5 per user with oldest-connection eviction.",
+      "evidence": [
+        {
+          "resource": "repo://internal/handler/auth.go#L245-L258",
+          "version": "repo-lines-v1:sha256:3cc8904805f506c46d242e81a24d280fc10fe2f0dfa44475575a01dedb01588b:eyJzZWxlY3RlZExpbmVDb3VudCI6MTQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjFkMmYwY2YzNjEyZDQ5NjJmODRkMTg0NzU5YjExNWUyYjZlMjliZmVkNjFjNWI0MDQ3ZjZkZWFkMDBmODY1YzEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjIzYTc0Zjk5ZTYyOWFiNzhkZTI3NTYwOWU4N2U3YjdmMjgxMzViYTYyZTMzNTEyNWY2NzZiNTY3MmE1N2M0YjAiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        },
+        {
+          "resource": "repo://internal/handler/notifications.go#L20-L27",
+          "version": "repo-lines-v1:sha256:04837153192325a113960ae775694058161a2ab8c4e8886a49237896183cb70f:eyJzZWxlY3RlZExpbmVDb3VudCI6OCwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiMDFiYTQ3MTljODBiNmZlOTExYjA5MWE3YzA1MTI0YjY0ZWVlY2U5NjRlMDljMDU4ZWY4Zjk4MDVkYWNhNTQ2YiIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiYTExMDczMDFlYTE1ZWQ4MjdhZmQ2OGE3ZTUzNzA1NTFjZjRmZWQyM2RhMTk4ZTkyYWRhYjdkMjNmODQ5NmQ3OSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNWQwMjRhYmFmZDZhMjQzMjA2ZDAwMzQxMGViMDY0MjVjNWEwNGExNTJjZGI3YmMzZjc3Zjc5YTBjYTllOWMzZSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZjcwNDhiZjc2OWI5Mzk0ZTcxMzM2MGVhOGM1ZTZiN2QxMDI2NzUyNjM2MjlmNTc1MjRkOTVlMjM0MjRhZGM4YSJ9"
+        },
+        {
+          "resource": "repo://internal/handler/notifications.go#L95-L175",
+          "version": "repo-lines-v1:sha256:86c15917d86d016006c2c1b807d11761316c84c167a4023e285935b9b5fd231e:eyJzZWxlY3RlZExpbmVDb3VudCI6ODEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImU2MzA0ZTI5NzY4NGM3ZjJlMjQ5ZjFmMWM3OGU4ZGViNjk1N2I4MTE3NDJlY2EwZDEzNzlkZTMxOGJjNzdlMTMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAyN2JkMWJlZTc5ZDk3YzA0ODJhZmNjOWEzYTE5MzBhNDNjYzU3NzA5ZTc2ZDY4NTRmNWE2YzZlOGVlOGI0MjEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjVlYTAyOGExODNkZjYwYTA1ZWRmYzUwNzk5NWM1NDg5Yzg1M2E2ODhlMzMxZjViOGI5ZDAxZTRhNzg4Y2VhNWIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImNjM2VhNTdmMmJmYWEzNWY2YzAyMWMwNGE1NzNlMmVkZDg2NmNkMjc4NmRiOTVkNTZhMzdkZTAzMGQ4MmU2OWYifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_c126e509b4f34c7b8ff4fa1b6849017e",
+      "statement": "The SSE stream emits only a connected event, heartbeats, and limit errors; no handler writes notification payloads into the connection registry, so notifications are never pushed over the stream.",
+      "evidence": [
+        {
+          "resource": "repo://internal/handler/notifications.go#L136-L190",
+          "version": "repo-lines-v1:sha256:bc6cc27cfc30b8c433ffaa5a875c241d5cc3032ae753af7d825f20be3c29b984:eyJzZWxlY3RlZExpbmVDb3VudCI6NTUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjcxODFhMzUwYjAwMTQ4MDAzNzIyN2ZhYzcyZjdmYTRiNjIyN2YwODYwNTA0MjE5ZDc1YmU4YzFkNTczZGYzZjAiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjRjZTJiMDYxMDc4MTljMWUwNTEzZWM0NzI0YzQ4YTI1ZDU5YTA5MjUzNTgwOTM0YWJiOTI5NjRiODkwMGEyZTYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjUxOWY5MjQ1YjJkYjg1ZTUzNmJlMjQ0NTY0MmRhYjYzMDRmZDNmYWY2NmI4MzQ3MTEwMWI0MjM4YzFjYzljN2IiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjM4ZmM1NmUzOWRlNjQ0ZWM0NDdhZDM2NWYxMTI1YTM5NTBmMTA1MTM3NzZkMDU5NWM3OGFkMzEzNDc3ZGIyMjkifQ"
+        },
+        {
+          "resource": "repo://internal/handler/notifications.go#L482-L513",
+          "version": "repo-lines-v1:sha256:87fc0f19483a3513b4b692b79ec9fc22cc7e88f25b9fc5cee5634d8fe90f5429:eyJzZWxlY3RlZExpbmVDb3VudCI6MzIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImI2ZDY1OWNhY2I0MzUzNTgwZDcwYWE5NjgwNzM5MThiM2IzOTc2ZDAwMWJlZjY2MmM2ZDJmYWY5YWJlZGQwMTUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjIxOGYxNjA3MmEzYTA1OTA4Zjc4ZjlhYzUyYzQ4NmQ5NTJmYzIzMzBmYWE3NWFlZDllZjBmMTc3MzA4MjU0MjUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImMwNmQ2MTQ4YzAzNWQ4YzMxNDE5N2ZlYTIwNTJmMjZjZWQyNDIzYzMxZjFiNjZlODFkNWI3ZWI1OTZkZTk1OWQifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_816bebb05c904290bd19535ed45cd18b",
+      "statement": "Web push subscriptions are stored in pushsubscriptions and upserted or deleted by the user and browser endpoint pair, with the repository constructed outside the Repos aggregate.",
+      "evidence": [
+        {
+          "resource": "repo://internal/handler/notifications.go#L40-L63",
+          "version": "repo-lines-v1:sha256:a34035cb0b23c5deac07924cfb4ef107210fec59eca1f8951acd098c6e824e8a:eyJzZWxlY3RlZExpbmVDb3VudCI6MjQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImU2MjYwMGViYjU5NjYyOGYxN2VmZWMyNTVkNGRjMzM0Y2Y3MjQ5MzE0YmUwMGM5ZGQ0YzdjOTI4NzMzZjA3ZjMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImI1ZTYyZWMxZTE4MDc4YTE1M2Q5NzdjMDc3NDhjZDIxMzg4MDQwM2MzYWQ1ZDQyYWRiZmY5NTZjYTRhODkxYjYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImNmMjg4NjVhMjI4NTI0OWYyNjE5ODc2OTQwNTM5ZGUxOGIzNGY5OTNmMzBhMjZjNTQ2YzJiNmVhMWQ5OGQ0NjMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjhiZjE5YmE0Mzk5MzUzYTIwYzViYTRiMGViODczNmRjOGRmODcwMWNmOWY5MmY3Mzc1OTIwNDk1YWFhNzljMWYifQ"
+        },
+        {
+          "resource": "repo://internal/repository/push_subscription.go#L31-L58",
+          "version": "repo-lines-v1:sha256:8ccc3839e3ea468e02a574ab520b7bbc1df0a1279012b5e557cc9e1b5f91417d:eyJzZWxlY3RlZExpbmVDb3VudCI6MjgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjBiYzc5OTJlYjZmMWU3NGNjMjM0MzlkZWUxNGI5ODUzOWQ3ZDY2MDVjMzVlNDY0Yjc3NWMzOWY5MzlhMmE0MDIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImExMmIyNjQxMjExN2M5ZWNhNjM0N2JkYzRhNzcxOGYzMGJlZWFjNDUzMGM4NzNjYzlhZWExOWZlMTJjMjhlZDEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_f7fcc28a877543629de6f17c322c0bad",
+      "statement": "Web push sending is not implemented: every domain's sendPushToUser helper is a no-op placeholder, so stored subscriptions never receive messages.",
+      "evidence": [
+        {
+          "resource": "repo://internal/handler/episodes.go#L1415-L1424",
+          "version": "repo-lines-v1:sha256:5f1483fffc3ef9b89a39be740a968193df863b03b5bcd549f2be6404416f4ae8:eyJzZWxlY3RlZExpbmVDb3VudCI6MTAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImY5ZjdlYzZmZmRkODQxOGNjMjU4Y2ZjMDhiYWU1ZjQxZTYyNDkxYzEwMDA2MGY4MDhiODRkNGI1ZWY4MGQzYmQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjIzZTdjNDM5OTQ1Njc0NjVjMzhlM2UzNGI3YzAxZjcyNTNmOWRiMTEyMTY3NzkyYjY1OWVjMWVhM2IwMjYwNTgiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImRlZWJhMDg1YjI0ZTNkOGNmMTg2YWUyNTZhOWEzZDIyMzQ5M2JlNjMzMDBmYjkyNGNmNzc5MzI1MzM0ZGNhMWYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImEwZGY5OTY3MDJkY2Y0OTc4ODE0MThlMWE4MzZjMjc5Y2MyYzhhNjBlMTdlMGFjMWYyODgzZmFkYmQ5MmNmMDUifQ"
+        },
+        {
+          "resource": "repo://internal/handler/reports.go#L258-L268",
+          "version": "repo-lines-v1:sha256:4f05185c49cef0edee74edf5c9cd74de174b7d4db1af67165e01b5cd47303632:eyJzZWxlY3RlZExpbmVDb3VudCI6MTEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjFjNWM5N2RkZDA5MmMyZTYzNzE5NmNlMDQ0MDhlYjFiYTllNzVmODQ4NmY0YzM2YWE0NjdjY2JmODQxYjZlYTYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjZmYzIxZmUxMzBlYWM1OGQwN2VhNDhjOWY0ZTE5MmM4NGM3NTFiY2ExMjk1YjJiNDIyZWNlM2JjNzUwZWE0NzciLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjI5OThiNGU0NzZhZGVmMWUzZjEzOGEyMjg3M2VjMzRjNGQ3YzI3MmJlYzZlNDAxMzE4NTIyZmFjY2ZiNTk5YzYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjoxLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEifQ"
+        },
+        {
+          "resource": "repo://internal/handler/review.go#L627-L637",
+          "version": "repo-lines-v1:sha256:bf4c40cb4aca82fbea4cdb5d11ed84e640cc2f25cfa4fd625591faecf5d7f396:eyJzZWxlY3RlZExpbmVDb3VudCI6MTEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImY5ZjdlYzZmZmRkODQxOGNjMjU4Y2ZjMDhiYWU1ZjQxZTYyNDkxYzEwMDA2MGY4MDhiODRkNGI1ZWY4MGQzYmQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImRlZWJhMDg1YjI0ZTNkOGNmMTg2YWUyNTZhOWEzZDIyMzQ5M2JlNjMzMDBmYjkyNGNmNzc5MzI1MzM0ZGNhMWYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjEyYmE0MzE1MDk1MDRkYzVjYTkxMmY3YmQ5YzkyYWU5MjIzOWY0NzVmOGVmOTRlNTVkMTdjYjQ2ZTRjMDRlOTAifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_836ffeb43e85421fb2e98295cc58837a",
+      "statement": "Users have seven email notification preferences that default to true, are returned by /auth/me, and gate outbound emails without preventing in-app notification creation.",
+      "evidence": [
+        {
+          "resource": "repo://internal/model/model.go#L84-L107",
+          "version": "repo-lines-v1:sha256:0bad67089cfd78263bfe52940d17217989b3d03a4d2f42c0950cf63ff4c54c7f:eyJzZWxlY3RlZExpbmVDb3VudCI6MjQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjcwMmM4OWZlN2I0YmQ0ZWE1YzVmZWE1NjkwNWVlYTY3ODhjZWZhMzE1NTM4NDRjMjVlYzdmNTY4NWY5ZmU2ZGIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImI0NzI3NjlmNjcwZTVjYWM4ODQ1ZmUxZDQ5ZjAxYTk2MzcyYmRlODE0YjE0ODk1YTAzMWJhMjU0YzBjZmMyNWEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjNiY2M5ZjVkYjdjMTBjYzdjMjMwOTdmNWZjOWQ1ZmJjMDM1ZWYxNGNmM2M1Y2E4OGIyNmY5YzQyNTVmYTlhODAifQ"
+        },
+        {
+          "resource": "repo://internal/service/auth_service.go#L143-L160",
+          "version": "repo-lines-v1:sha256:9e333fa80da7b8a468d3629006dd0143c4b6834c6d26d36ae1198dbf2bd33bd1:eyJzZWxlY3RlZExpbmVDb3VudCI6MTgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImMxMmVlMjlhZmU5ODkzYTViYjI0NzA3ZjJlOTY5Y2VkN2ZmNzhmMjhiNDA0MGZmNzRhNGQ0ZDVkODc4NDNkNTAiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjhmNDc1NTJjNzcwN2JkMzM4MTFmNzVjMmVkOWVmYzQwMzMyMWEyZjk0ZTMxYzU1N2IzNzQwOGE2N2EwOWUyNzciLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjFhMWRmYWJmNTUwZGI1ZDA0MTNkMzVlZDc0ZmY0NDczN2Q4YTNhMGFjM2IxNDgwMDcyMDlmNTQzMWMwMzBhYTQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImVkODJhNDBjMGM0M2JlYmM1OTA1ODQ1ZTU4NWJkM2RjYzA0NzM1OTcxYjYyOGE3MjdhNTYxY2YzZjQwODk5YmMifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_02ce4a58bfd2401081a7f2c467f02c79",
+      "statement": "Notification listing coerces page and limit with JavaScript-like semantics: page defaults to 1, limit defaults to 20, negative limit becomes 1, zero falls back to the default, and values above 100 are clamped.",
+      "evidence": [
+        {
+          "resource": "repo://internal/handler/notifications.go#L540-L558",
+          "version": "repo-lines-v1:sha256:4fb186a7a21a6ba3b8eeee026bb99fd667d946b5332414cb271e874955fa3753:eyJzZWxlY3RlZExpbmVDb3VudCI6MTksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImM4MGUwMWNkMGU1MGU3MzdjOGMxZTk5ZjRjZjY4ZDJkYzg3MDkyZDc1OWM4NWVhNWY3OWJhZDk0YTk1NjBmMGEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImU5YTU2NTQ4ZDUyYTk4ZDdmYjY5YjM2MDI2ZTY2MTVmOWEwY2IxNzc2MmMwNDBlZDVlNWZlYWMwZGE1YzNlYWUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImJmNWY0MjlhOTVkMTA2N2IxMjlhYmYxMzI5NzE1Yjg2YmIwYWFiM2MyNmRiYjIzNGFjYzIyNGY4YTRiNjhjMWMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjAwZjZhY2Y1NzFiMzRlOTQ0ZTM5NTFkMjA4MjgyMjQ1YmVmMzU1YzJiYzllMGE3ZjI4ZTkwMzY4YzVmM2Y1ZDIifQ"
+        }
+      ]
+    }
+  ],
+  "verification": {
+    "by": "openwiki/0.7.2",
+    "at": "2026-11-02T17:41:59.592Z"
+  }
+}

@@ -1,0 +1,136 @@
+---
+type: quality
+title: 约定与有意保留的怪癖
+description: Go 后端编码规则、新增端点/集合/定时任务/配置项的配方，以及不得擅自修复的既有兼容性怪癖。
+tags: [conventions, gotchas, compatibility, code-style]
+verified:
+  - by: openwiki/0.7.2
+    at: 2026-11-02T17:41:59.592Z
+sources:
+  - id: openwiki-source-193053215eb2d471ac4f675e
+    resource: repo://docs/contributing.md
+  - id: openwiki-source-5e8cfa6ef22542c9ea8aaf4a
+    resource: repo://docs/decisions.md
+  - id: openwiki-source-9002449d5a813a8783166c8a
+    resource: repo://internal/errors/apperror.go
+  - id: openwiki-source-f7cdef93f6fa51dc3ffc0594
+    resource: repo://internal/middleware/ratelimit.go
+  - id: openwiki-source-6e8f4534cd26274b5794f0ca
+    resource: repo://internal/ratelimit/limiter.go
+  - id: openwiki-source-bd4263ae6284e6c27650b1e8
+    resource: repo://internal/repository/idutil.go
+  - id: openwiki-source-f6a0016b0fdad43ad2e998f5
+    resource: repo://internal/router/dual.go
+  - id: openwiki-source-a8ba835229d442d09305d33e
+    resource: repo://internal/security/xss.go
+generated: { by: "opencode", at: "2026-11-02T17:41:59.592Z" }
+---
+
+# 约定与有意保留的怪癖
+
+本项目刻意保留旧实现的行为。若干看起来像缺陷的地方其实是兼容契约。经验法则是：任何会改变 HTTP 响应、状态码、message key、限流 key 或存储格式的改动都是行为变更，需要明确决策。
+
+## 编码规则
+
+1. **为导出符号写文档。** 每个导出类型与函数都有 godoc 注释。这对审计与回归推理很重要。
+2. **使用错误类型。** 领域错误是 `New`、`NewKey` 或 `NewExtra` 构造的 `*errors.AppError`。handler 用 `errors.AbortWithAppError` 渲染，不要为领域失败手写状态码。
+3. **保持 `messageKey` 稳定。** 它是前端 i18n 键，改名会破坏翻译。
+4. **遵守依赖方向。** 禁止向上导入：handler 不导入会反向依赖它的 service，repository 不导入 handler。认证中间件直接消费 repository 是已接受的例外。
+5. **规范化 ID。** 当值可能是来自 JWT claims 的 hex 字符串时，对 `_id` 过滤使用 `repository.ToObjectID`。解析路径参数的 handler 可以用 `primitive.ObjectIDFromHex`，非法值表现为 500。
+6. **不要新造基础设施。** 优先使用成熟库；如果必须自实现，在决策日志中记录原因。
+7. **跑闸门。** `go test ./...` 是行为回归闸门，`go vet ./...` 与 `go build ./...` 也应通过。
+
+## 错误契约
+
+`AppError` 携带状态、消息、可选 message key、cause、operational 标志与 extra 标志。渲染规则：
+
+- 状态 0 变为 500；
+- 生产环境中状态 500 及以上始终返回“服务器内部错误”，忽略内部消息；
+- 开发环境中 5xx 可以包含由 cause 派生的 `stack`；
+- 设置了 `messageKey` 时会包含；
+- extra 字段合并进响应体，但不能覆盖 `message` 与 `messageKey`；
+- 上传错误渲染为 400，并带“文件上传错误: ...”前缀。
+
+`errors.Handler` 作为全局兜底存在，但它注册在路由之后，因此实践中领域 handler 必须自行渲染错误。不要假设未处理错误会被转换。
+
+## 新增端点
+
+既有的四步模式：
+
+1. 添加 handler 方法：解析请求、调用 service 或 repository、写响应。存在 service 时把领域决策留在 service。
+2. 只有该领域有 service 时才加 service 逻辑；大多数领域直接调用 repository。
+3. 在 `internal/server/register_routes.go` 的对应 `MountDual` 块中注册路由。需要认证就加 `amw.Protect(...)`，需要限流就加 `rl(ratelimit.XxxSpec)`。路由会自动出现在 `/api` 与 `/api/v1`。
+4. 如果端点要出现在 API 文档中，添加 Swagger 注解并用 `make docs` 重新生成 `docs/`。
+
+记住端点限流不匹配 `/api/v1`，且每次 `rl(spec)` 调用都会创建独立限流器。
+
+## 新增集合
+
+1. 在 `internal/model` 添加模型结构体，BSON 标签匹配存储文档形态，JSON 标签匹配响应契约。
+2. 在 `internal/repository` 添加 repository 文件与接收 Mongo 集合的构造函数。
+3. 在 `repository.NewRepos` 中把 repository 字段注册到 `Repos`。
+4. 如果唯一性、TTL 或查询性能需要，把索引加到 `internal/indexes`——记住 `Ensure` 不会在启动时调用。
+5. 如果既有文档需要转换，在 `internal/migrate` 添加带 `settings` 标记的幂等迁移。
+
+## 新增后台任务
+
+遵循 cron 包模式：goroutine、对齐的首次运行、ticker、上下文取消与日志。然后真正从入口或装配函数启动它。现有任务虽已定义但未启动，仅复制该包是不够的。
+
+## 新增配置项
+
+1. 在 `config.Config` 的对应段结构体中添加字段。
+2. 在 `applyINI` 中读取（如果省略键时应保留默认值，用 `firstNonEmpty`）。
+3. 如果需要环境变量覆盖，在 `applyEnv` 中读取。
+4. 加到 `deploy/furry-drama-be-neo.ini`。
+5. 记录优先级以及它是否为密钥。
+
+注意 `applyINI` 中的无条件赋值：`listen`、数据库 URI/name、JWT 密钥与邮件凭据即使 ini 省略也会被覆盖。
+
+## 有意保留的怪癖
+
+| 怪癖 | 原因 | 后果 |
+|---|---|---|
+| 端点限流永不作用于 `/api/v1` | 遗留挂载契约 | v1 在端点上实际不受限，但仍受全局限流覆盖 |
+| 共享 spec 的每个路由仍有独立限流器实例 | 每次 `rl(spec)` 都构造限流器 | 2FA 预算按端点独立，而不是七个路由共享 |
+| `ulule/limiter` 的固定窗口计数 | 替换旧滑动窗口的库选型 | `RateLimit-*` 与 `Retry-After` 是近似值；窗口边界的突发行为不同 |
+| `requestEmailChange` 的键是 `[object Object]:<email>` | 历史 key 生成器怪癖 | 它按新邮箱而非 IP 限流；修改会重置既有计数 |
+| XSS 清洗剥除不允许标签而不是转义 | 用 `bluemonday` 替换旧 `xss` 库 | 用户 HTML 会丢失标签，而不是显示转义标记 |
+| 动态观看路由永远不命中其配置的限流器 | 挂载匹配基于前缀，无法表达 `:id` | 十分钟的每 IP 观看冷却是真正的去重机制 |
+| `personalWallpapers` 的 nil 序列化为 `[]` | 遗留输出形状 | 客户端可以始终按数组处理 |
+| `_id` 始终是 hex 字符串 | JSON 没有 ObjectID 类型 | 字符串 ID 在 Mongo 查询前必须规范化 |
+| `backgroundPrefs` 默认空图片、关闭、opacity 30、blur 0 | 遗留默认值 | 缺失字段不能被解释为零值 |
+| v1 响应带固定 `Deprecation` 与 `Sunset` 头 | 公开弃用承诺 | 修改日期是破坏性公告，不是代码清理 |
+| 一秒以内的成功 GET 不出现在请求日志 | 日志量控制 | 流量分析应使用 API 统计而非日志 |
+| 验证码与限流在内存中 | 单实例设计 | 多实例部署会破坏验证码并使限制按实例生效 |
+
+## 已知未接线的内容
+
+这些是当前状态事实，不是背书：
+
+- `indexes.Ensure` 从未调用，因此新数据库没有唯一或 TTL 索引，除非外部创建。
+- `migrate.Run` 从未调用，因此 account ID、角色与创作者主页迁移不会自动运行。
+- `cron.StartSessions` 从未调用，因此会话与已读通知清理不会发生。
+- Web Push 发送是空实现，尽管订阅会被存储。
+- SSE 流维护连接但从不广播通知负载。
+
+## 兼容性检查清单
+
+修改行为前问自己：
+
+1. 是否改变状态码、消息、message key 或响应字段？
+2. 是否改变限流器名称、key、窗口或挂载？
+3. 是否改变存储格式（加密、哈希、BSON 标签、集合名）？
+4. 是否改变登录或注册分支顺序？
+5. 是否改变 CSRF、cookie 或令牌语义？
+6. 是否影响 `/api/v1` 镜像？
+
+任一答案为是，就把它当作有意的 API 变更，并运行完整测试套件。
+
+## 相关阅读
+
+<!-- openwiki: broken internal link [/openwiki/architecture/overview.md] link "/openwiki/architecture/overview.md" is root-absolute, which no real consumer resolves against the repository root (not a coding agent reading the page, not GitHub's Markdown renderer, not a local viewer); use a path relative to this file instead. Fix the href or restore the target, then delete this comment. -->
+- [架构总览](/openwiki/architecture/overview.md)——这些规则保护的分层。
+<!-- openwiki: broken internal link [/openwiki/architecture/request-lifecycle.md] link "/openwiki/architecture/request-lifecycle.md" is root-absolute, which no real consumer resolves against the repository root (not a coding agent reading the page, not GitHub's Markdown renderer, not a local viewer); use a path relative to this file instead. Fix the href or restore the target, then delete this comment. -->
+- [请求生命周期与中间件管线](/openwiki/architecture/request-lifecycle.md)——限流与 CSRF 机制。
+<!-- openwiki: broken internal link [/openwiki/quality/testing.md] link "/openwiki/quality/testing.md" is root-absolute, which no real consumer resolves against the repository root (not a coding agent reading the page, not GitHub's Markdown renderer, not a local viewer); use a path relative to this file instead. Fix the href or restore the target, then delete this comment. -->
+- [测试策略](/openwiki/quality/testing.md)——回归闸门。
