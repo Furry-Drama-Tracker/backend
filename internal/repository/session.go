@@ -256,3 +256,18 @@ func (r *SessionRepo) MarkInactiveOlderThan(ctx context.Context, cutoff time.Tim
 	}
 	return res.ModifiedCount, nil
 }
+
+// CountActiveUsersSince 统计 since 之后仍有活动（心跳/刷新）的活跃会话覆盖的去重用户数。
+// 用于前台"当前在线人数"展示，不参与任何鉴权逻辑。
+func (r *SessionRepo) CountActiveUsersSince(ctx context.Context, since time.Time) (int, error) {
+	ctx, cancel := r.newCtx(ctx)
+	defer cancel()
+	ids, err := r.coll.Distinct(ctx, "userId", bson.M{
+		"isActive":     true,
+		"lastActiveAt": bson.M{"$gte": since},
+	})
+	if err != nil {
+		return 0, err
+	}
+	return len(ids), nil
+}

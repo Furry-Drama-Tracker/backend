@@ -184,4 +184,8 @@ func RegisterRoutes(d Deps, api *gin.RouterGroup, opts middleware.RateLimitOpts)
 
 	ac := handler.NewActivity(d.Repos, d.Config, amw, rl)
 	router.MountDual(api, "/activity", ac.Register)
+
+	// 前台公开站点规模数据（用户数/剧集数/在线人数），只读聚合，无鉴权
+	ss := handler.NewSiteStats(d.Repos)
+	router.MountDual(api, "/site-stats", ss.Register)
 }
