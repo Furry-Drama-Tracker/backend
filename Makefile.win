@@ -1,35 +1,66 @@
-# Windows NMAKE makefile — furry-drama-be-neo 后端
-# 用法：nmake /f Makefile.win [all|build|run|test|vet|fmt|docs|clean]
-# Unix/Linux 请使用 GNU make 与 Makefile。
-# 注意：NMAKE 不支持 .PHONY，此处依赖目标与文件名不冲突，可重复执行。
+# Windows NMAKE makefile - furry-drama-be-neo backend
+# Usage: nmake /f Makefile.win [all|build|release|run|seed|test|vet|fmt|docs|clean]
+# Cross-compile: nmake /f Makefile.win release GOOS=linux GOARCH=arm64
+# Use GNU make with Makefile on Unix/Linux.
+#
+# NMAKE notes:
+# 1. No .PHONY: a target whose name matches an existing file or directory is
+#    treated as up to date and its commands are skipped (e.g. "docs" vs the
+#    docs\ directory), so every phony target depends on FORCE.
+# 2. NMAKE parses this file with the system ANSI code page, so non-ASCII
+#    (e.g. UTF-8) text can corrupt parsing. Keep this file ASCII-only.
+# 3. Macros passed on the command line (nmake GOOS=linux) are exported to the
+#    commands NMAKE runs, so "go build" receives GOOS/GOARCH as environment
+#    variables with no extra plumbing.
 
-BINARY = bin\furry-drama-be-neo.exe
-PKG    = .\cmd\server
-SWAG   = swag
+BIN_DIR = bin
+NAME    = furry-drama-be-neo
+PKG     = .\cmd\server
+SWAG    = swag
+
+# Release link flags: -s drops the symbol table, -w drops DWARF debug info.
+STRIP_LDFLAGS = -s -w
+
+# Keep the historical .exe suffix for Windows targets and drop it when
+# cross-compiling for another OS. Override BINARY=... on the command line to
+# choose a different output name.
+!IF "$(GOOS)" == "windows" || "$(GOOS)" == ""
+BINARY = $(BIN_DIR)\$(NAME).exe
+!ELSE
+BINARY = $(BIN_DIR)\$(NAME)
+!ENDIF
 
 all: build
 
-build:
+build: FORCE
 	go build -o $(BINARY) $(PKG)
 
-run:
+# Release build: -trimpath removes local source paths, then strip symbols.
+release: FORCE
+	go build -trimpath -ldflags "$(STRIP_LDFLAGS)" -o $(BINARY) $(PKG)
+
+run: FORCE
 	go run $(PKG)
 
-seed:
-	go run ./cmd/seed-admin
+seed: FORCE
+	go run .\cmd\seed-admin
 
-test:
+test: FORCE
 	go test ./...
 
-vet:
+vet: FORCE
 	go vet ./...
 
-fmt:
+fmt: FORCE
 	gofmt -l -w .
 
-# 重新生成 Swagger 产物（需要 swag，安装：go install github.com/swaggo/swag/cmd/swag@latest）
-docs:
+# Regenerate Swagger artifacts (requires swag:
+# go install github.com/swaggo/swag/cmd/swag@latest)
+docs: FORCE
 	$(SWAG) init -g cmd/server/main.go --output docs
 
-clean:
-	if exist $(BINARY) del /q $(BINARY)
+clean: FORCE
+	if exist "$(BINARY)" del /q "$(BINARY)"
+
+# Phony helper: never an existing file, so its dependents always run.
+FORCE:

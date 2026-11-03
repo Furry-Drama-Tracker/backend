@@ -36,11 +36,18 @@ JWT_SECRET=... MONGO_URI=mongodb://127.0.0.1:27017/furry_drama_tracker NODE_ENV=
 
 | 目标 | 作用 |
 |---|---|
-| `make build` | 编译到 `bin/furry-drama-be-neo` |
+| `make build` | 编译到 `bin/furry-drama-be-neo`（Windows 目标带 `.exe`） |
+| `make release` | 发布构建：`-trimpath` 并剥离符号表/调试信息（`-ldflags "-s -w"`） |
 | `make run` | `go run ./cmd/server` |
 | `make test` / `make vet` / `make fmt` | 测试 / 静态检查 / 格式化 |
 | `make docs` | 重新生成 Swagger 产物（需要 swag） |
 | `make clean` | 清理构建产物 |
+
+`GOOS`/`GOARCH` 会作为环境变量传给 `go`，可直接交叉编译：
+`make release GOOS=linux GOARCH=arm64`（非 Windows 目标的输出不带 `.exe`）。
+需要不同文件名时覆盖 `BINARY`，例如
+`make release GOOS=windows GOARCH=amd64 BINARY=bin/server.exe`。Windows 下等价写法为
+`nmake /f Makefile.win release GOOS=linux GOARCH=arm64`。
 
 ## 配置
 

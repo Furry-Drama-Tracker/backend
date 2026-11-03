@@ -9,12 +9,14 @@ Go/Gin 版兽剧聚合平台后端，前端零改动对接。
 ## Commands
 
 ```bash
-make build                         # = go build -o bin/server ./cmd/server 的便捷入口
+make build                         # = go build -o bin/furry-drama-be-neo ./cmd/server（Windows 目标带 .exe）
+make release                       # 发布构建：-trimpath -ldflags "-s -w"（剥离符号表 + 调试信息）
 make run / test / vet / fmt / docs / clean
-nmake /f Makefile.win              # Windows 等价（build/run/test/vet/fmt/docs/clean）
+make release GOOS=linux GOARCH=arm64   # 交叉编译：GOOS/GOARCH 经环境变量传给 go
+nmake /f Makefile.win              # Windows 等价（build/release/run/seed/test/vet/fmt/docs/clean）
 
 go build ./...                    # 编译全部
-go build -o bin/server ./cmd/server
+go build -o bin/furry-drama-be-neo ./cmd/server
 go vet ./...                      # 静态检查
 go test ./...                     # 单元 + 集成测试（需 mongod 于 127.0.0.1:27017）
 go run ./cmd/server --config=dev.ini --listen=tcp:0.0.0.0:5000
