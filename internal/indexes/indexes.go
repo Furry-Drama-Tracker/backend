@@ -7,6 +7,7 @@ package indexes
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strings"
 
@@ -115,12 +116,14 @@ func Ensure(ctx context.Context, db *mongo.Database) error {
 		{coll: "reports", name: "status_1_createdAt_-1", keys: bson.D{{Key: "status", Value: 1}, {Key: "createdAt", Value: -1}}},
 	}
 
+	var errs []error
 	for _, spec := range specs {
 		if err := ensureIndex(ctx, db.Collection(spec.coll), spec); err != nil {
-			return fmt.Errorf("indexes.Ensure: %s.%s: %w", spec.coll, spec.name, err)
+			// 单个索引失败不阻断其余索引创建（常见于历史重复数据）。
+			errs = append(errs, fmt.Errorf("indexes.Ensure: %s.%s: %w", spec.coll, spec.name, err))
 		}
 	}
-	return nil
+	return errors.Join(errs...)
 }
 
 // ensureIndex 幂等建索引：按名字查重，存在跳过；创建冲突（同名不同键/选项）容错。

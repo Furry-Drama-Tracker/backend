@@ -2,6 +2,7 @@ package handler
 
 import (
 	"encoding/json"
+	"html"
 	"log/slog"
 	"strconv"
 	"time"
@@ -148,7 +149,7 @@ func (h *SiteContents) PWAManifest(c *gin.Context) {
 	}
 	if content != nil && content.Content != "" {
 		var parsed map[string]any
-		if err := json.Unmarshal([]byte(content.Content), &parsed); err == nil {
+		if err := json.Unmarshal([]byte(normalizeLegacySiteContent("settings", content.Content)), &parsed); err == nil {
 			settingsData = parsed
 		}
 	}
@@ -381,12 +382,31 @@ func (h *SiteContents) newDefaultContent(key string) *model.SiteContent {
 }
 
 // siteContentJSON 组装站点内容文档（与既有集合数据形态一致）。
+// normalizeLegacySiteContent 兼容旧版全局 HTML 转义造成的数据损坏：
+// 仅在原字符串不是合法 JSON、而反转义后是合法 JSON 时返回反转义结果。
+// 不写回数据库，避免升级时批量改数据；新保存的内容已是正常的原始 JSON。
+func normalizeLegacySiteContent(key, content string) string {
+	switch key {
+	case "about", "settings", "privacy", "terms":
+	default:
+		return content
+	}
+	if content == "" || json.Valid([]byte(content)) {
+		return content
+	}
+	unescaped := html.UnescapeString(content)
+	if json.Valid([]byte(unescaped)) {
+		return unescaped
+	}
+	return content
+}
+
 func siteContentJSON(sc *model.SiteContent) gin.H {
 	return gin.H{
 		"_id":       sc.ID.Hex(),
 		"key":       sc.Key,
 		"title":     sc.Title,
-		"content":   sc.Content,
+		"content":   normalizeLegacySiteContent(sc.Key, sc.Content),
 		"updatedAt": sc.UpdatedAt,
 		"__v":       sc.VersionKey,
 	}

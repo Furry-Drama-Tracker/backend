@@ -63,11 +63,9 @@ func (h *Admin) Register(g *gin.RouterGroup) {
 	superProtect := h.AuthMW.Protect(middleware.RoleSuperAdmin)
 	reqEmail := h.AuthMW.RequireEmailChanged()
 
-	// 生产环境禁用独立管理员登录入口：管理员统一走 /api/auth/login，
-	// 以便完整执行邮箱校验、新设备验证与 2FA。仅开发环境保留该入口便于调试。
-	if h.Config.IsDev {
-		g.POST("/login", h.RL(ratelimit.AdminAuthSpec), h.Login)
-	}
+	// 保留独立管理员登录入口以兼容既有客户端；已开启 2FA 的账号会被
+	// Login 处理器拒绝，必须走 /api/auth/login 完成两步验证。
+	g.POST("/login", h.RL(ratelimit.AdminAuthSpec), h.Login)
 	g.GET("/verify", adminProtect, h.Verify)
 	g.GET("/pending-counts", adminProtect, h.PendingCounts)
 	g.POST("/logout", adminProtect, h.Logout)

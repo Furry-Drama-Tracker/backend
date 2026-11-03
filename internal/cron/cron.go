@@ -43,8 +43,8 @@ func StartSessions(ctx context.Context, repos *repository.Repos) {
 	go runAligned(ctx, nextDailyDelay(now, 3), 24*time.Hour, func() {
 		cleanupReadNotifications(ctx, repos)
 	})
-	// 注销宽限期到期账号物理删除：启动后立即执行一次，之后每 6 小时执行。
-	go cleanupDeletionRequests(ctx, repos)
+	// 注销宽限期到期账号物理删除：启动后延迟 6 小时执行第一次，
+	// 避免升级/重启瞬间批量删除历史申请，给运维留出核查窗口。
 	go runAligned(ctx, 6*time.Hour, 6*time.Hour, func() {
 		cleanupDeletionRequests(ctx, repos)
 	})

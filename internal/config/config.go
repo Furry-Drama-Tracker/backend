@@ -62,6 +62,9 @@ type ServerConfig struct {
 	// IconsDir 是 SVG 图标文件的存储目录（可配置；默认 ./uploads/icons）。
 	IconsDir     string
 	AllowOrigins []string
+	// InsecureOrigins 表示生产环境 CORS 源仍是 localhost/example.com 等占位值。
+	// 仅告警不阻止启动，避免已有服务因配置检查而中断。
+	InsecureOrigins bool
 }
 
 // DatabaseConfig MongoDB 连接配置。
@@ -83,6 +86,9 @@ type JWTConfig struct {
 	RefreshTTL    time.Duration
 	DevAPIToken   string
 	DemoEmails    []string
+	// WeakSecret 表示当前 secret 是示例/历史弱密钥。生产环境仅告警，不阻止启动，
+	// 以便已有服务平滑升级；后续应尽快轮换。
+	WeakSecret bool
 }
 
 // EmailConfig SMTP 配置（EMAail_* 回退值；运行时优先 SiteContent 配置）。
@@ -331,9 +337,9 @@ func (c *Config) validate() error {
 	if len(c.JWT.Secret) < MinSecretLen {
 		return fmt.Errorf("JWT secret 长度必须 >= %d 字符", MinSecretLen)
 	}
-	if isWeakSecret(c.JWT.Secret) {
-		return fmt.Errorf("JWT secret 使用了示例/弱密钥，必须替换为随机生成的高强度密钥")
-	}
+	// 弱密钥只告警不阻止启动：已有服务可能正在使用历史密钥，
+	// 强制失败会导致拉取新代码后无法启动。main 会输出醒目安全警告。
+	c.JWT.WeakSecret = isWeakSecret(c.JWT.Secret)
 	if c.JWT.EncryptionKey != "" && len(c.JWT.EncryptionKey) < MinSecretLen {
 		return fmt.Errorf("ENCRYPTION_KEY 长度必须 >= %d 字符", MinSecretLen)
 	}
@@ -342,11 +348,11 @@ func (c *Config) validate() error {
 	}
 	if !c.IsDev {
 		if len(c.Server.AllowOrigins) == 0 {
-			return fmt.Errorf("生产环境必须设置 ALLOWED_ORIGINS 或 FRONTEND_URL/SITE_URL")
+			c.Server.InsecureOrigins = true
 		}
 		for _, o := range c.Server.AllowOrigins {
 			if strings.Contains(o, "localhost") || strings.Contains(o, "127.0.0.1") || strings.Contains(o, "example.com") {
-				return fmt.Errorf("生产环境 CORS 源不能使用 localhost/127.0.0.1/example.com，请配置真实站点域名")
+				c.Server.InsecureOrigins = true
 			}
 		}
 	}

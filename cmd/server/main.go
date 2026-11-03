@@ -55,6 +55,12 @@ func main() {
 	if listen != "" {
 		cfg.Server.Listen = listen
 	}
+	if cfg.JWT.WeakSecret {
+		log.Printf("[SECURITY WARN] JWT_SECRET 仍是示例/历史弱密钥，请尽快轮换；轮换前先设置 ENCRYPTION_KEY=旧密钥以兼容 2FA/邮件加密数据")
+	}
+	if cfg.Server.InsecureOrigins {
+		log.Printf("[SECURITY WARN] 生产环境 CORS 源仍包含 localhost/127.0.0.1/example.com 或为空，请尽快配置真实站点域名")
+	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
@@ -70,13 +76,13 @@ func main() {
 
 	// 启动迁移与索引必须在接收请求前完成。
 	startupCtx, startupCancel := context.WithTimeout(context.Background(), 60*time.Second)
+	// 迁移/索引失败不让已有服务无法启动：记录告警并继续。
+	// 首次部署或数据重复时应尽快人工处理后重启。
 	if err := migrate.Run(startupCtx, db, repos); err != nil {
-		startupCancel()
-		log.Fatalf("[FATAL] 启动迁移失败: %v", err)
+		log.Printf("[WARN] 启动迁移失败（服务继续启动，请检查数据）: %v", err)
 	}
 	if err := indexes.Ensure(startupCtx, db); err != nil {
-		startupCancel()
-		log.Fatalf("[FATAL] 索引创建失败: %v", err)
+		log.Printf("[WARN] 索引创建失败（服务继续启动，请检查重复数据/索引冲突）: %v", err)
 	}
 	startupCancel()
 
