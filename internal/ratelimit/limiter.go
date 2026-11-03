@@ -123,6 +123,29 @@ var (
 		Window: time.Hour, Max: 3,
 		Message: "导出请求过于频繁，请1小时后再试",
 	}
+	// FriendLinkApplySpec 友链申请限流器 5/1h，防止匿名/登录用户刷申请邮件。
+	FriendLinkApplySpec = Spec{
+		Name: "friendLinkApply", Mounts: []string{"/friend-links/apply"},
+		Window: time.Hour, Max: 5,
+		Message: "友链申请过于频繁，请1小时后再试",
+	}
+	// ReportSpec 举报提交限流器 10/1h，防止刷举报。
+	ReportSpec = Spec{
+		Name: "report", Mounts: []string{"/reports"},
+		Window: time.Hour, Max: 10,
+		Message: "举报提交过于频繁，请1小时后再试",
+	}
+	// UploadSpec 上传限流器 20/1h（用于主要上传端点，降低磁盘耗尽风险）。
+	UploadSpec = Spec{
+		Name: "upload",
+		Mounts: []string{
+			"/users/avatar", "/episodes/upload", "/themes/upload-wallpaper",
+			"/themes/upload-icon", "/wallpapers/personal", "/site-content/upload",
+			"/icons/upload",
+		},
+		Window: time.Hour, Max: 20,
+		Message: "上传过于频繁，请稍后再试",
+	}
 )
 
 // IPKey 归一化客户端 IP key（key 格式为固定契约，勿改）：

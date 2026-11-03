@@ -14,12 +14,12 @@ import (
 
 // ExportData 是 /export-my-data 的 JSON 结构（字段集为固定契约，勿增删）。
 type ExportData struct {
-	ExportDate   string   `json:"exportDate"`
-	User         gin.H    `json:"user"`
-	Follows      []gin.H  `json:"follows"`
-	Favorites    []gin.H  `json:"favorites"`
-	Ratings      []gin.H  `json:"ratings"`
-	WatchHistory []gin.H  `json:"watchHistory"`
+	ExportDate   string  `json:"exportDate"`
+	User         gin.H   `json:"user"`
+	Follows      []gin.H `json:"follows"`
+	Favorites    []gin.H `json:"favorites"`
+	Ratings      []gin.H `json:"ratings"`
+	WatchHistory []gin.H `json:"watchHistory"`
 }
 
 // BuildExportData 组装导出数据，populate episodeId 的 title/coverImage/status。
@@ -45,12 +45,12 @@ func (s *AuthService) BuildExportData(ctx context.Context, user *model.User) (*E
 	for i := range follows {
 		f := &follows[i]
 		followRows = append(followRows, gin.H{
-			"_id":                 f.ID.Hex(),
-			"userId":              f.UserID.Hex(),
-			"episodeId":           s.episodePopulate(ctx, f.EpisodeID, true),
-			"folderId":            objectIDOrNil(f.FolderID),
-			"followedAtEpisodes":  f.FollowedAtEpisodes,
-			"createdAt":           f.CreatedAt,
+			"_id":                f.ID.Hex(),
+			"userId":             f.UserID.Hex(),
+			"episodeId":          s.episodePopulate(ctx, f.EpisodeID, true),
+			"folderId":           objectIDOrNil(f.FolderID),
+			"followedAtEpisodes": f.FollowedAtEpisodes,
+			"createdAt":          f.CreatedAt,
 		})
 	}
 
@@ -58,12 +58,12 @@ func (s *AuthService) BuildExportData(ctx context.Context, user *model.User) (*E
 	for i := range favorites {
 		f := &favorites[i]
 		favRows = append(favRows, gin.H{
-			"_id":        f.ID.Hex(),
-			"userId":     f.UserID.Hex(),
-			"episodeId":  s.episodePopulate(ctx, f.EpisodeID, true),
-			"folderId":   objectIDOrNil(f.FolderID),
-			"createdAt":  f.CreatedAt,
-			"updatedAt":  f.UpdatedAt,
+			"_id":       f.ID.Hex(),
+			"userId":    f.UserID.Hex(),
+			"episodeId": s.episodePopulate(ctx, f.EpisodeID, true),
+			"folderId":  objectIDOrNil(f.FolderID),
+			"createdAt": f.CreatedAt,
+			"updatedAt": f.UpdatedAt,
 		})
 	}
 
@@ -84,13 +84,13 @@ func (s *AuthService) BuildExportData(ctx context.Context, user *model.User) (*E
 	for i := range history {
 		h := &history[i]
 		historyRows = append(historyRows, gin.H{
-			"_id":                     h.ID.Hex(),
-			"userId":                  h.UserID.Hex(),
-			"episodeId":               s.episodePopulate(ctx, h.EpisodeID, false),
-			"watchedEpisodes":         h.WatchedEpisodes,
+			"_id":                      h.ID.Hex(),
+			"userId":                   h.UserID.Hex(),
+			"episodeId":                s.episodePopulate(ctx, h.EpisodeID, false),
+			"watchedEpisodes":          h.WatchedEpisodes,
 			"lastWatchedEpisodeNumber": h.LastWatchedEpisodeNumber,
-			"lastWatched":             h.LastWatched,
-			"createdAt":               h.CreatedAt,
+			"lastWatched":              h.LastWatched,
+			"createdAt":                h.CreatedAt,
 		})
 	}
 
@@ -135,6 +135,13 @@ func (s *AuthService) episodePopulate(ctx context.Context, id interface{}, withS
 func (d *ExportData) ExportCSV() string {
 	var b strings.Builder
 	esc := func(s string) string {
+		// 防止 CSV 公式注入：以 = + - @ 或制表/回车开头的单元格加单引号前缀。
+		if s != "" {
+			switch s[0] {
+			case '=', '+', '-', '@', '\t', '\r':
+				s = "'" + s
+			}
+		}
 		if strings.ContainsAny(s, ",\"\n") {
 			return `"` + strings.ReplaceAll(s, `"`, `""`) + `"`
 		}

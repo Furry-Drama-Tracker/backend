@@ -132,8 +132,12 @@ func (h *Auth) abortUploadError(c *gin.Context, err error, maxMB int) {
 	c.JSON(500, gin.H{"message": "服务器错误"})
 }
 
-// removeUploadedFile 删除已上传文件（忽略错误）。
+// removeUploadedFile 删除已上传文件（忽略错误）。只允许删除头像前缀文件，
+// 防止数据库字段被污染后删除任意上传文件。
 func removeUploadedFile(url string) error {
+	if !strings.HasPrefix(url, "/uploads/avatar-") {
+		return nil
+	}
 	path := strings.TrimPrefix(url, "/uploads/")
 	return upload.RemoveFile(path)
 }

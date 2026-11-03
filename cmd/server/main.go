@@ -34,6 +34,9 @@ import (
 
 	"github.com/xiedada05/furry-drama-be-neo/internal/auth"
 	"github.com/xiedada05/furry-drama-be-neo/internal/config"
+	"github.com/xiedada05/furry-drama-be-neo/internal/cron"
+	"github.com/xiedada05/furry-drama-be-neo/internal/indexes"
+	"github.com/xiedada05/furry-drama-be-neo/internal/migrate"
 	"github.com/xiedada05/furry-drama-be-neo/internal/repository"
 	"github.com/xiedada05/furry-drama-be-neo/internal/server"
 	"github.com/xiedada05/furry-drama-be-neo/internal/upload"
@@ -59,13 +62,35 @@ func main() {
 	if err != nil {
 		log.Fatalf("[FATAL] MongoDB 连接失败: %v", err)
 	}
-	log.Printf("MongoDB 连接成功: %s", cfg.Database.URI)
+	// 不打印包含账号密码的 Mongo URI。
+	log.Printf("MongoDB 连接成功")
 
 	repos := repository.NewRepos(db, cfg.Security.LoginMaxAttempts, cfg.Security.LoginLockMinutes)
 	signer := auth.NewSigner(cfg.JWT.Secret)
+
+	// 启动迁移与索引必须在接收请求前完成。
+	startupCtx, startupCancel := context.WithTimeout(context.Background(), 60*time.Second)
+	if err := migrate.Run(startupCtx, db, repos); err != nil {
+		startupCancel()
+		log.Fatalf("[FATAL] 启动迁移失败: %v", err)
+	}
+	if err := indexes.Ensure(startupCtx, db); err != nil {
+		startupCancel()
+		log.Fatalf("[FATAL] 索引创建失败: %v", err)
+	}
+	startupCancel()
+
+	// 后台清理任务：过期会话、已读通知、到期注销账号。
+	cronCtx, cronCancel := context.WithCancel(context.Background())
+	defer cronCancel()
+	cron.StartSessions(cronCtx, repos)
+
 	// 上传目录与 SVG 图标目录（按配置注入；缺省 ./uploads 与 ./uploads/icons）。
 	upload.SetDir(cfg.Server.UploadsDir) // 上传落盘目录（SaveImage 与 /uploads 静态服务共用）
 	upload.SetIconsDir(cfg.Server.IconsDir)
+	if err := os.MkdirAll(upload.Dir, 0o755); err != nil {
+		log.Printf("[WARN] 创建上传目录失败: %v", err)
+	}
 	if err := os.MkdirAll(upload.IconsDir, 0o755); err != nil {
 		log.Printf("[WARN] 创建图标目录失败: %v", err)
 	}

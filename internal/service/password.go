@@ -22,8 +22,10 @@ func (s *AuthService) ChangePassword(c *gin.Context, userID interface{}, current
 		return errors.New(404, "用户不存在")
 	}
 	if !auth.Compare(user.Password, currentPassword) {
+		_ = s.Repos.Users.IncLoginAttempts(c.Request.Context(), user.ID)
 		return errors.New(400, "当前密码不正确")
 	}
+	_ = s.Repos.Users.ResetLoginAttempts(c.Request.Context(), user.ID)
 	hash, err := auth.Hash(newPassword)
 	if err != nil {
 		return errors.New(500, "服务器错误")
@@ -44,7 +46,7 @@ func (s *AuthService) ForgotPassword(ctx context.Context, emailAddr, altcha, dev
 	if !s.VerifyAltcha(altcha, devToken) {
 		return "", errors.New(400, "验证码错误或已过期")
 	}
-	user, err := s.Repos.Users.FindByEmail(ctx, strings.TrimSpace(emailAddr))
+	user, err := s.Repos.Users.FindByEmail(ctx, strings.ToLower(strings.TrimSpace(emailAddr)))
 	if err != nil {
 		// 用户不存在：仍返回统一文案（不泄露）。
 		return unified, nil
@@ -82,6 +84,10 @@ func (s *AuthService) ResetPassword(ctx context.Context, token, newPassword stri
 	user, err := s.Repos.Users.FindByIDWithAuth(ctx, claims.ID)
 	if err != nil {
 		return errors.New(404, "用户不存在")
+	}
+	// 密码修改后，旧的重置令牌立即失效。
+	if user.PasswordChangedAt != nil && claims.IssuedAt != nil && claims.IssuedAt.Time.Before(*user.PasswordChangedAt) {
+		return errors.New(400, "该重置链接已失效，请重新获取")
 	}
 	hash, err := auth.Hash(newPassword)
 	if err != nil {

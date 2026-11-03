@@ -2,8 +2,11 @@ package handler
 
 import (
 	"context"
+	"encoding/json"
 	"net"
+	"net/http"
 	"strconv"
+	"strings"
 	"sync"
 	"time"
 
@@ -24,6 +27,7 @@ const (
 	maxSSEPerIP          = 10  // MAX_SSE_PER_IP
 	maxSSEClientsPerUser = 5   // 每用户最多连接数（超出驱逐最旧）
 	sseHeartbeatInterval = 30 * time.Second
+	sseNotificationPoll  = 10 * time.Second
 	sseConnectionTimeout = 30 * time.Minute
 )
 
@@ -94,6 +98,11 @@ func (h *Notifications) Register(g *gin.RouterGroup) {
 func (h *Notifications) Stream(c *gin.Context) {
 	userID, ok := h.verifySSETicket(c)
 	if !ok {
+		return
+	}
+	userOID, err := primitive.ObjectIDFromHex(userID)
+	if err != nil {
+		c.JSON(401, gin.H{"message": "认证信息无效"})
 		return
 	}
 
@@ -170,11 +179,17 @@ func (h *Notifications) Stream(c *gin.Context) {
 	registered = true
 	h.sseMu.Unlock()
 
+	// 清除服务端 WriteTimeout 对该长连接的限制（main.go 全局 30s）。
+	_ = http.NewResponseController(c.Writer).SetWriteDeadline(time.Time{})
+
 	ticker := time.NewTicker(sseHeartbeatInterval)
 	defer ticker.Stop()
+	notifyTicker := time.NewTicker(sseNotificationPoll)
+	defer notifyTicker.Stop()
 	timeout := time.NewTimer(sseConnectionTimeout)
 	defer timeout.Stop()
 	closeNotify := c.Writer.CloseNotify()
+	since := time.Now()
 	for {
 		select {
 		case <-ctx.Done():
@@ -183,6 +198,35 @@ func (h *Notifications) Stream(c *gin.Context) {
 			return
 		case <-timeout.C:
 			return
+		case <-notifyTicker.C:
+			// 轮询当前用户的新通知并推送 SSE 事件。使用 DB 作为唯一事实来源，
+			// 保证多实例/重启后也能工作；每连接 10s 一次，量级可控。
+			cutoff := time.Now()
+			qctx, qcancel := context.WithTimeout(context.Background(), 5*time.Second)
+			list, err := h.Repos.Notifications.FindByUser(qctx, userOID, 1, 50)
+			unread, _ := h.Repos.Notifications.CountUnread(qctx, userOID)
+			qcancel()
+			if err == nil {
+				for i := len(list) - 1; i >= 0; i-- {
+					n := &list[i]
+					if !n.CreatedAt.After(since) {
+						continue
+					}
+					payload, merr := json.Marshal(gin.H{
+						"type":         "notification",
+						"notification": notificationJSON(n),
+						"unreadCount":  unread,
+					})
+					if merr != nil {
+						continue
+					}
+					if _, werr := c.Writer.WriteString("event: notification\ndata: " + string(payload) + "\n\n"); werr != nil {
+						return
+					}
+					c.Writer.Flush()
+				}
+				since = cutoff
+			}
 		case <-ticker.C:
 			if _, err := c.Writer.WriteString(":heartbeat\n\n"); err != nil {
 				return
@@ -402,7 +446,8 @@ func (h *Notifications) Delete(c *gin.Context) {
 // @Router /notifications/vapid-public-key [get]
 func (h *Notifications) VapidPublicKey(c *gin.Context) {
 	var publicKey any
-	if h.Config.VAPID.PublicKey != "" {
+	// 只有公私钥都配置时才对外暴露公钥，避免前端误以为 Web Push 可用。
+	if h.Config.VAPID.PublicKey != "" && h.Config.VAPID.PrivateKey != "" {
 		publicKey = h.Config.VAPID.PublicKey
 	}
 	c.JSON(200, gin.H{"publicKey": publicKey})
@@ -521,9 +566,12 @@ func (h *Notifications) decSSEIPLocked(ip string) {
 	}
 }
 
-// clientIP 提取客户端 IP（生产信任 X-Forwarded-For 首值）。
+// clientIP 提取客户端 IP（生产优先 X-Real-IP，其次 X-Forwarded-For 首值）。
 func (h *Notifications) clientIP(c *gin.Context) string {
 	if !h.Config.IsDev {
+		if xri := strings.TrimSpace(c.GetHeader("X-Real-IP")); xri != "" {
+			return xri
+		}
 		if xff := c.GetHeader("X-Forwarded-For"); xff != "" {
 			if first := ratelimit.NormalizeXFF(xff); first != "" {
 				return first

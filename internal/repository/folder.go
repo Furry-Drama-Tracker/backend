@@ -206,6 +206,14 @@ func (r *SavedFolderRepo) FindOwnedByID(ctx context.Context, id, userID any) (*m
 }
 
 // DeleteByID 物理删除收藏项（deleteOne）。
+// DeleteByUser 删除用户全部收藏夹收藏项（注销/删号级联清理）。
+func (r *SavedFolderRepo) DeleteByUser(ctx context.Context, userID any) error {
+	ctx, cancel := context.WithTimeout(ctx, contextTimeout)
+	defer cancel()
+	_, err := r.coll.DeleteMany(ctx, bson.M{"userId": userID})
+	return err
+}
+
 func (r *SavedFolderRepo) DeleteByID(ctx context.Context, id any) error {
 	ctx, cancel := context.WithTimeout(ctx, contextTimeout)
 	defer cancel()

@@ -68,13 +68,14 @@ func NewSiteContents(repos *repository.Repos, cfg *config.Config, amw *middlewar
 // 参数路由（/:key）之前注册，满足 gin 的 radix 树约束。
 func (h *SiteContents) Register(g *gin.RouterGroup) {
 	superadmin := []string{middleware.RoleSuperAdmin}
-	g.POST("/upload", h.AuthMW.Protect(superadmin...), h.Upload)
+	reqEmail := h.AuthMW.RequireEmailChanged()
+	g.POST("/upload", h.AuthMW.Protect(superadmin...), reqEmail, h.RL(ratelimit.UploadSpec), h.Upload)
 	g.GET("/pwa-manifest", h.PWAManifest)
 	g.GET("/:key", h.emailOnly, h.GetByKey)
-	g.PUT("/:key", h.AuthMW.Protect(superadmin...), h.UpdateByKey)
+	g.PUT("/:key", h.AuthMW.Protect(superadmin...), reqEmail, h.UpdateByKey)
 	g.GET("", h.AuthMW.Protect(superadmin...), h.List)
 	g.GET("/", h.AuthMW.Protect(superadmin...), h.List)
-	g.POST("/test-email", h.AuthMW.Protect(superadmin...), h.TestEmail)
+	g.POST("/test-email", h.AuthMW.Protect(superadmin...), reqEmail, h.TestEmail)
 }
 
 // emailOnly GET /:key 的内联中间件：key=email 时先过
@@ -205,6 +206,7 @@ func (h *SiteContents) GetByKey(c *gin.Context) {
 	key := c.Param("key")
 	ctx := c.Request.Context()
 	if key == "email" {
+		c.Header("Cache-Control", "no-store")
 		c.JSON(200, h.emailConfigJSON())
 		return
 	}
@@ -268,6 +270,12 @@ func (h *SiteContents) UpdateByKey(c *gin.Context) {
 	}
 	contentVal, hasContent := body["content"]
 	processed := asString(contentVal)
+	if hasContent && (key == "about" || key == "settings") {
+		if !json.Valid([]byte(processed)) {
+			c.JSON(400, gin.H{"message": "该站点内容的 content 必须是合法 JSON"})
+			return
+		}
+	}
 	update := bson.M{"updatedAt": time.Now().UTC().Truncate(time.Millisecond)}
 	if titleVal, ok := body["title"]; ok {
 		update["title"] = asString(titleVal)

@@ -11,7 +11,6 @@ package upload
 
 import (
 	"crypto/rand"
-	"path/filepath"
 	"encoding/base64"
 	"encoding/hex"
 	"errors"
@@ -21,6 +20,7 @@ import (
 	"net/http"
 	"os"
 	"path"
+	"path/filepath"
 	"regexp"
 	"strings"
 	"time"
@@ -48,11 +48,11 @@ func SetDir(dir string) {
 // 400 {"message":"请选择要上传的图片"} 校验，不属于上传错误码契约）。
 var ErrNoFile = errors.New("请选择要上传的图片")
 
-// 扩展名与 MIME 过滤正则（固定契约，勿改）：
-//   - ext：/jpeg|jpg|png|gif|webp/（非锚定子串匹配，对小写扩展名测试）
+// 扩展名与 MIME 过滤正则：
+//   - ext：必须完整匹配 .jpg/.jpeg/.png/.gif/.webp（避免 .notjpg 等绕过）
 //   - mime：/^image\/(jpeg|png|gif|webp)$/
 var (
-	allowedExtRe  = regexp.MustCompile(`jpeg|jpg|png|gif|webp`)
+	allowedExtRe  = regexp.MustCompile(`^\.(jpe?g|png|gif|webp)$`)
 	allowedMimeRe = regexp.MustCompile(`^image/(jpeg|png|gif|webp)$`)
 )
 

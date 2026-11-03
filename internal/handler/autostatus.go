@@ -31,8 +31,10 @@ func NewAutoStatus(repos *repository.Repos, cfg *config.Config, amw *middleware.
 // Register 挂载 /api/auto-status 全部端点（不含 /api 前缀）。
 // 仅 superadmin 可调用。
 func (h *AutoStatus) Register(g *gin.RouterGroup) {
-	g.POST("/auto-complete", h.AuthMW.Protect(middleware.RoleSuperAdmin), h.AutoComplete)
-	g.POST("/check-premieres", h.AuthMW.Protect(middleware.RoleSuperAdmin), h.CheckPremieres)
+	super := h.AuthMW.Protect(middleware.RoleSuperAdmin)
+	reqEmail := h.AuthMW.RequireEmailChanged()
+	g.POST("/auto-complete", super, reqEmail, h.AutoComplete)
+	g.POST("/check-premieres", super, reqEmail, h.CheckPremieres)
 }
 
 // AutoComplete POST /api/auto-status/auto-complete（superAdminProtect）。

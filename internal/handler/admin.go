@@ -59,10 +59,15 @@ func NewAdmin(repos *repository.Repos, cfg *config.Config, amw *middleware.Auth,
 // 中间件顺序是固定契约，勿重排）。
 func (h *Admin) Register(g *gin.RouterGroup) {
 	adminProtect := h.AuthMW.Protect(middleware.RoleCreator, middleware.RoleAdmin, middleware.RoleSuperAdmin)
+	adminOnly := h.AuthMW.Protect(middleware.RoleAdmin, middleware.RoleSuperAdmin)
 	superProtect := h.AuthMW.Protect(middleware.RoleSuperAdmin)
 	reqEmail := h.AuthMW.RequireEmailChanged()
 
-	g.POST("/login", h.RL(ratelimit.AdminAuthSpec), h.Login)
+	// 生产环境禁用独立管理员登录入口：管理员统一走 /api/auth/login，
+	// 以便完整执行邮箱校验、新设备验证与 2FA。仅开发环境保留该入口便于调试。
+	if h.Config.IsDev {
+		g.POST("/login", h.RL(ratelimit.AdminAuthSpec), h.Login)
+	}
 	g.GET("/verify", adminProtect, h.Verify)
 	g.GET("/pending-counts", adminProtect, h.PendingCounts)
 	g.POST("/logout", adminProtect, h.Logout)
@@ -72,13 +77,13 @@ func (h *Admin) Register(g *gin.RouterGroup) {
 	g.GET("/users", superProtect, h.ListUsers)
 	g.DELETE("/users/:id", superProtect, reqEmail, h.DeleteUser)
 	g.PUT("/role/:id", superProtect, reqEmail, h.UpdateRole)
-	g.GET("/creators", adminProtect, h.ListCreators)
+	g.GET("/creators", adminOnly, h.ListCreators)
 	g.GET("/creator-profiles", superProtect, reqEmail, h.ListCreatorProfiles)
 	g.GET("/creator-profiles/:id", superProtect, reqEmail, h.GetCreatorProfile)
 	g.PUT("/creator-profiles/:id", superProtect, reqEmail, h.UpdateCreatorProfile)
 	g.PUT("/creator-profiles/:id/approve", superProtect, reqEmail, h.ApproveCreatorProfile)
 	g.PUT("/creator-profiles/:id/reject", superProtect, reqEmail, h.RejectCreatorProfile)
-	g.POST("/verify-password", adminProtect, h.VerifyPassword)
+	g.POST("/verify-password", adminProtect, h.RL(ratelimit.PasswordResetSpec), h.VerifyPassword)
 	g.PUT("/user-admin-access/:id", superProtect, reqEmail, h.ToggleAdminAccess)
 }
 
@@ -153,8 +158,13 @@ func (h *Admin) Login(c *gin.Context) {
 		c.JSON(403, gin.H{"message": "请先验证邮箱后再登录管理后台"})
 		return
 	}
+	// 该入口仅开发环境开放；即便在开发环境，也不允许绕过 2FA。
+	if user.TwoFactorEnabled {
+		c.JSON(403, gin.H{"message": "该账号已开启两步验证，请使用前台登录入口完成验证", "need2FA": true})
+		return
+	}
 
-	accessToken, err := h.AuthMW.Signer.Sign(user.ID.Hex(), "access", h.Config.JWT.AccessTTL, nil)
+	accessToken, err := h.AuthMW.Signer.Sign(user.ID.Hex(), "access", h.Config.JWT.AccessTTL, map[string]string{"jti": auth.RandomHex(24)})
 	if err != nil {
 		c.JSON(500, gin.H{"message": "服务器错误"})
 		return
@@ -190,6 +200,7 @@ func (h *Admin) Login(c *gin.Context) {
 	now := time.Now()
 	session := &model.UserSession{
 		UserID:           user.ID,
+		TokenHash:        auth.HashToken(accessToken),
 		RefreshTokenHash: auth.HashToken(refreshToken),
 		DeviceInfo:       di,
 		IP:               ip,
@@ -350,7 +361,7 @@ func (h *Admin) RegisterAccount(c *gin.Context) {
 	var body map[string]any
 	_ = c.ShouldBindJSON(&body)
 	username := asString(body["username"])
-	email := asString(body["email"])
+	email := strings.ToLower(strings.TrimSpace(asString(body["email"])))
 	password := asString(body["password"])
 	role := orDefaultString(body["role"], "admin")
 	accountId := asString(body["accountId"])
@@ -361,6 +372,10 @@ func (h *Admin) RegisterAccount(c *gin.Context) {
 	}
 	if email == "" {
 		c.JSON(400, gin.H{"message": "请输入邮箱"})
+		return
+	}
+	if !service.EmailRegex.MatchString(email) {
+		c.JSON(400, gin.H{"message": "邮箱格式不正确"})
 		return
 	}
 	if role != "admin" && role != "creator" {
@@ -378,7 +393,13 @@ func (h *Admin) RegisterAccount(c *gin.Context) {
 		return
 	}
 	// 自动生成 accountId。
-	finalAccountId := accountId
+	finalAccountId := strings.TrimSpace(accountId)
+	if finalAccountId != "" {
+		if len(finalAccountId) < 3 || len(finalAccountId) > 20 || !service.AccountIDRegex.MatchString(finalAccountId) {
+			c.JSON(400, gin.H{"message": "账号ID需为3-20位字母、数字或下划线"})
+			return
+		}
+	}
 	if finalAccountId == "" {
 		baseId := adminBaseAccountID(username, email)
 		finalAccountId = baseId
@@ -497,11 +518,7 @@ func (h *Admin) DeleteAccount(c *gin.Context) {
 			return
 		}
 	}
-	if err := h.Repos.Users.DeleteByID(ctx, oid); err != nil {
-		c.JSON(500, gin.H{"message": "服务器错误"})
-		return
-	}
-	if err := h.Repos.Sessions.DeleteByUser(ctx, oid); err != nil {
+	if err := service.PurgeUserData(ctx, h.Repos, oid); err != nil {
 		c.JSON(500, gin.H{"message": "服务器错误"})
 		return
 	}
@@ -661,6 +678,11 @@ func (h *Admin) DeleteUser(c *gin.Context) {
 			return
 		}
 	}
+	// 现代字段名的举报、收藏夹收藏项、主题、创作者主页也一并清理。
+	_ = h.Repos.Reports.DeleteByReporter(ctx, oid)
+	_ = h.Repos.SavedFolders.DeleteByUser(ctx, oid)
+	_ = h.Repos.Themes.DeleteByOwner(ctx, oid)
+	_ = h.Repos.CreatorProfiles.DeleteByCreator(ctx, oid)
 	c.JSON(200, gin.H{"message": "用户已删除"})
 }
 
@@ -746,7 +768,15 @@ func (h *Admin) ListCreators(c *gin.Context) {
 	}
 	list := make([]gin.H, 0, len(creators))
 	for i := range creators {
-		list = append(list, adminUserJSON(&creators[i]))
+		u := &creators[i]
+		// 最小化暴露：编辑器选择只需要标识与展示名，不返回邮箱、IP、设备等 PII。
+		list = append(list, gin.H{
+			"_id":       u.ID.Hex(),
+			"accountId": u.AccountID,
+			"username":  u.Username,
+			"avatar":    u.Avatar,
+			"role":      u.Role,
+		})
 	}
 	c.JSON(200, list)
 }
@@ -981,9 +1011,11 @@ func (h *Admin) VerifyPassword(c *gin.Context) {
 		return
 	}
 	if !auth.Compare(full.Password, password) {
+		_ = h.Repos.Users.IncLoginAttempts(c.Request.Context(), user.ID)
 		c.JSON(400, gin.H{"message": "密码错误"})
 		return
 	}
+	_ = h.Repos.Users.ResetLoginAttempts(c.Request.Context(), user.ID)
 	c.JSON(200, gin.H{"verified": true})
 }
 
@@ -1306,16 +1338,15 @@ func adminEscapeHtml(s string) string {
 	return s
 }
 
-// clientIP 提取客户端 IP（取值顺序是固定契约：XFF 首值 → x-real-ip →
-// RemoteAddr）。
+// clientIP 提取客户端 IP：优先反代覆盖写入的 X-Real-IP，其次 XFF 首值。
 func (h *Admin) clientIP(c *gin.Context) string {
+	if xri := strings.TrimSpace(c.GetHeader("X-Real-IP")); xri != "" {
+		return xri
+	}
 	if xff := c.GetHeader("X-Forwarded-For"); xff != "" {
 		if first := ratelimit.NormalizeXFF(xff); first != "" {
 			return first
 		}
-	}
-	if xri := c.GetHeader("X-Real-IP"); xri != "" {
-		return strings.TrimSpace(xri)
 	}
 	host, _, err := net.SplitHostPort(c.Request.RemoteAddr)
 	if err != nil {

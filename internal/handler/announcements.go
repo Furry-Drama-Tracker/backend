@@ -3,6 +3,7 @@ package handler
 import (
 	"context"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -141,6 +142,11 @@ func (h *Announcements) Create(c *gin.Context) {
 		serverError(c)
 		return
 	}
+	link := orDefaultString(body["link"], "")
+	if link != "" && !isHTTPURL(link) {
+		c.JSON(400, gin.H{"message": "公告链接必须为 http/https 地址"})
+		return
+	}
 	user, _ := middleware.GetUser(c)
 	a := &model.Announcement{
 		Title:            title,
@@ -157,7 +163,7 @@ func (h *Announcements) Create(c *gin.Context) {
 		Pinned:           truthy(body["pinned"]),
 		PublishAt:        cmsPublishAtOrNow(body["publishAt"]),
 		ExpireAt:         cmsDateOrNil(body["expireAt"]),
-		Link:             orDefaultString(body["link"], ""),
+		Link:             link,
 		CreatedBy:        &user.ID,
 	}
 	if err := h.Repos.Announcements.Create(c.Request.Context(), a); err != nil {
@@ -199,6 +205,14 @@ func (h *Announcements) Update(c *gin.Context) {
 			serverError(c)
 			return
 		}
+	}
+	if v, ok := body["link"]; ok {
+		link := strings.TrimSpace(asString(v))
+		if link != "" && !isHTTPURL(link) {
+			c.JSON(400, gin.H{"message": "公告链接必须为 http/https 地址"})
+			return
+		}
+		body["link"] = link
 	}
 
 	allowedFields := []string{

@@ -1,6 +1,7 @@
 package server
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -24,7 +25,18 @@ func RegisterRoutes(d Deps, api *gin.RouterGroup, opts middleware.RateLimitOpts)
 	svc := service.NewAuthService(d.Config, d.Repos, d.Signer, mail, ipr)
 	amw := middleware.NewAuth(d.Repos, d.Signer)
 	h := handler.NewAuth(svc, amw, d.Config)
-	rl := func(spec ratelimit.Spec) gin.HandlerFunc { return middleware.RateLimit(spec, opts) }
+	// 同名 spec 在同一个 App 内复用同一个 limiter，确保 /api 与 /api/v1
+	// 镜像路由共享计数器；不同 App/测试实例之间互不影响。
+	limiters := map[string]gin.HandlerFunc{}
+	rl := func(spec ratelimit.Spec) gin.HandlerFunc {
+		key := spec.Name + "|" + spec.Window.String() + "|" + fmt.Sprint(spec.Max)
+		if h, ok := limiters[key]; ok {
+			return h
+		}
+		h := middleware.RateLimit(spec, opts)
+		limiters[key] = h
+		return h
+	}
 
 	router.MountDual(api, "/auth", func(g *gin.RouterGroup) {
 		g.GET("/captcha", rl(ratelimit.CaptchaSpec), h.Captcha)
@@ -54,6 +66,7 @@ func RegisterRoutes(d Deps, api *gin.RouterGroup, opts middleware.RateLimitOpts)
 	})
 
 	router.MountDual(api, "/user-sessions", func(g *gin.RouterGroup) {
+		reqEmail := amw.RequireEmailChanged()
 		g.POST("/create", amw.Protect(), h.CreateUserSession)
 		g.GET("/my", amw.Protect(), h.MyUserSessions)
 		g.PUT("/:id/name", amw.Protect(), h.RenameUserSession)
@@ -61,8 +74,8 @@ func RegisterRoutes(d Deps, api *gin.RouterGroup, opts middleware.RateLimitOpts)
 		g.DELETE("/my/all", amw.Protect(), h.DeleteAllOtherSessions)
 		g.POST("/heartbeat", amw.Protect(), h.Heartbeat)
 		g.GET("/all", amw.Protect("superadmin"), h.AllUserSessions)
-		g.DELETE("/admin/:id", amw.Protect("superadmin"), h.AdminDeleteSession)
-		g.DELETE("/admin/user/:userId/all", amw.Protect("superadmin"), h.AdminDeleteUserSessions)
+		g.DELETE("/admin/:id", amw.Protect("superadmin"), reqEmail, h.AdminDeleteSession)
+		g.DELETE("/admin/user/:userId/all", amw.Protect("superadmin"), reqEmail, h.AdminDeleteUserSessions)
 	})
 
 	router.MountDual(api, "/2fa", func(g *gin.RouterGroup) {
@@ -73,7 +86,7 @@ func RegisterRoutes(d Deps, api *gin.RouterGroup, opts middleware.RateLimitOpts)
 	})
 
 	router.MountDual(api, "/users", func(g *gin.RouterGroup) {
-		g.POST("/avatar", amw.Protect(), h.Avatar)
+		g.POST("/avatar", amw.Protect(), rl(ratelimit.UploadSpec), h.Avatar)
 		g.PUT("/profile", amw.Protect(), h.Profile)
 		g.GET("/export-my-data", amw.Protect(), rl(ratelimit.ExportSpec), h.ExportMyData)
 	})

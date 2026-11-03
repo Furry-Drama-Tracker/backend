@@ -121,6 +121,14 @@ func serveUploads(c *gin.Context) {
 		c.Status(http.StatusNotFound)
 		return
 	}
+	// 仅允许公开的图片类型，避免上传目录中的历史 HTML/JS 等文件被同源执行。
+	ext := strings.ToLower(filepath.Ext(name))
+	switch ext {
+	case ".jpg", ".jpeg", ".png", ".gif", ".webp", ".svg":
+	default:
+		c.Status(http.StatusNotFound)
+		return
+	}
 	full := filepath.Join(upload.Dir, filepath.FromSlash(name))
 	info, err := os.Stat(full)
 	if err != nil || info.IsDir() {
@@ -131,5 +139,7 @@ func serveUploads(c *gin.Context) {
 	c.Header("X-Content-Type-Options", "nosniff")
 	c.Header("X-Robots-Tag", "noindex")
 	c.Header("Content-Disposition", "inline")
+	// 上传资源单独使用 sandbox CSP：即使 SVG 被直接打开，也禁止脚本执行。
+	c.Header("Content-Security-Policy", "default-src 'none'; img-src 'self' data:; style-src 'unsafe-inline'; sandbox")
 	c.File(full)
 }

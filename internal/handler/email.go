@@ -177,8 +177,16 @@ func (h *Auth) VerifyEmailChange(c *gin.Context) {
 // @Success 200 {object} map[string]any "deletionRequestedAt/deleteAt"
 // @Router /auth/request-deletion [post]
 func (h *Auth) RequestDeletion(c *gin.Context) {
+	var req struct {
+		Password string `json:"password"`
+	}
+	_ = c.ShouldBindJSON(&req)
 	user, _ := middleware.GetUser(c)
-	res, err := h.Svc.RequestDeletion(c.Request.Context(), user)
+	if req.Password == "" {
+		c.JSON(400, gin.H{"message": "请输入密码确认注销"})
+		return
+	}
+	res, err := h.Svc.RequestDeletion(c.Request.Context(), user, req.Password)
 	if err != nil {
 		errors.AbortWithAppError(c, err, h.Config.IsDev)
 		return

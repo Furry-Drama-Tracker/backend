@@ -52,13 +52,13 @@ type Config struct {
 // ServerConfig 服务监听与站点配置。
 type ServerConfig struct {
 	// Listen 是监听地址，形如 "tcp:0.0.0.0:5000" 或 "unix:/run/xxx.sock"（"@name" 为 abstract）。
-	Listen       string
-	Port         int
+	Listen string
+	Port   int
 	// NodeEnv 等价于 NODE_ENV（development|production）。
-	NodeEnv      string
-	FrontendURL  string
-	SiteURL      string
-	UploadsDir   string
+	NodeEnv     string
+	FrontendURL string
+	SiteURL     string
+	UploadsDir  string
 	// IconsDir 是 SVG 图标文件的存储目录（可配置；默认 ./uploads/icons）。
 	IconsDir     string
 	AllowOrigins []string
@@ -136,7 +136,22 @@ func Load(path string) (*Config, error) {
 	// 3) 派生 IsDev
 	cfg.IsDev = !strings.EqualFold(cfg.Server.NodeEnv, "production")
 
-	// 4) 致命校验
+	// 4) CORS 源兜底：开发环境允许 localhost；生产环境从站点地址派生，
+	// 避免 ALLOWED_ORIGINS 留空时把所有同源 POST 都拒绝。
+	if len(cfg.Server.AllowOrigins) == 0 {
+		if cfg.IsDev {
+			cfg.Server.AllowOrigins = splitTrim(defaultOrigins)
+		} else {
+			for _, u := range []string{cfg.Server.FrontendURL, cfg.Server.SiteURL} {
+				u = strings.TrimRight(strings.TrimSpace(u), "/")
+				if u != "" {
+					cfg.Server.AllowOrigins = append(cfg.Server.AllowOrigins, u)
+				}
+			}
+		}
+	}
+
+	// 5) 致命校验
 	if err := cfg.validate(); err != nil {
 		return nil, err
 	}
@@ -174,14 +189,14 @@ func init() {
 func defaults() *Config {
 	return &Config{
 		Server: ServerConfig{
-			Listen:       "tcp:0.0.0.0:5000",
+			Listen:       "tcp:127.0.0.1:5000",
 			Port:         5000,
 			NodeEnv:      "development",
 			FrontendURL:  defaultFrontendURL,
 			SiteURL:      defaultFrontendURL,
 			UploadsDir:   defaultUploadsDir,
 			IconsDir:     defaultIconsDir,
-			AllowOrigins: splitTrim(defaultOrigins),
+			AllowOrigins: nil,
 		},
 		Database: DatabaseConfig{
 			Pool: 10, Min: 2, Select: 10, Sock: 45,
@@ -316,10 +331,40 @@ func (c *Config) validate() error {
 	if len(c.JWT.Secret) < MinSecretLen {
 		return fmt.Errorf("JWT secret 长度必须 >= %d 字符", MinSecretLen)
 	}
+	if isWeakSecret(c.JWT.Secret) {
+		return fmt.Errorf("JWT secret 使用了示例/弱密钥，必须替换为随机生成的高强度密钥")
+	}
+	if c.JWT.EncryptionKey != "" && len(c.JWT.EncryptionKey) < MinSecretLen {
+		return fmt.Errorf("ENCRYPTION_KEY 长度必须 >= %d 字符", MinSecretLen)
+	}
 	if c.Database.URI == "" {
 		return fmt.Errorf("缺少 MONGO_URI（ini [database].uri 或环境变量 MONGO_URI）")
 	}
+	if !c.IsDev {
+		if len(c.Server.AllowOrigins) == 0 {
+			return fmt.Errorf("生产环境必须设置 ALLOWED_ORIGINS 或 FRONTEND_URL/SITE_URL")
+		}
+		for _, o := range c.Server.AllowOrigins {
+			if strings.Contains(o, "localhost") || strings.Contains(o, "127.0.0.1") || strings.Contains(o, "example.com") {
+				return fmt.Errorf("生产环境 CORS 源不能使用 localhost/127.0.0.1/example.com，请配置真实站点域名")
+			}
+		}
+	}
 	return nil
+}
+
+// isWeakSecret 拒绝模板/示例/历史默认密钥，避免“长度够但可预测”的密钥上线。
+func isWeakSecret(s string) bool {
+	l := strings.ToLower(strings.TrimSpace(s))
+	if strings.HasPrefix(l, "change-me") || strings.Contains(l, "example") {
+		return true
+	}
+	switch l {
+	case "furry-drama-tracker-secret-key-2024",
+		"secret", "jwt-secret", "changeme", "password":
+		return true
+	}
+	return false
 }
 
 func setStr(dst *string, v string) {

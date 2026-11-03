@@ -49,12 +49,13 @@ func NewReview(repos *repository.Repos, cfg *config.Config, amw *middleware.Auth
 // Register 挂载 /api/review 全部端点（不含 /api 前缀）。
 func (h *Review) Register(g *gin.RouterGroup) {
 	protect := h.AuthMW.Protect(middleware.RoleCreator, middleware.RoleAdmin, middleware.RoleSuperAdmin)
+	reqEmail := h.AuthMW.RequireEmailChanged()
 	g.GET("/pending", protect, adminOnlyReview, h.Pending)
 	g.GET("/all", protect, adminOnlyReview, h.All)
-	g.PUT("/approve/:id", protect, adminOnlyReview, h.Approve)
-	g.PUT("/reject/:id", protect, adminOnlyReview, h.Reject)
-	g.PUT("/assign-editor/:episodeId", protect, adminOnlyReview, h.AssignEditor)
-	g.PUT("/remove-editor/:episodeId", protect, adminOnlyReview, h.RemoveEditor)
+	g.PUT("/approve/:id", protect, adminOnlyReview, reqEmail, h.Approve)
+	g.PUT("/reject/:id", protect, adminOnlyReview, reqEmail, h.Reject)
+	g.PUT("/assign-editor/:episodeId", protect, adminOnlyReview, reqEmail, h.AssignEditor)
+	g.PUT("/remove-editor/:episodeId", protect, adminOnlyReview, reqEmail, h.RemoveEditor)
 }
 
 // adminOnlyReview 内联校验：非 admin/superadmin → 403 需要管理员权限。

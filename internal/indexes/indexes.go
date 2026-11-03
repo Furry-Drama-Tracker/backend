@@ -65,6 +65,7 @@ func Ensure(ctx context.Context, db *mongo.Database) error {
 		{coll: "usersessions", name: "userId_1_isActive_1", keys: bson.D{{Key: "userId", Value: 1}, {Key: "isActive", Value: 1}}},
 		{coll: "usersessions", name: "isActive_1_lastActiveAt_-1", keys: bson.D{{Key: "isActive", Value: 1}, {Key: "lastActiveAt", Value: -1}}},
 		{coll: "usersessions", name: "refreshTokenHash_1", keys: bson.D{{Key: "refreshTokenHash", Value: 1}}, unique: true, sparse: true},
+		{coll: "usersessions", name: "tokenHash_1", keys: bson.D{{Key: "tokenHash", Value: 1}}, unique: true, sparse: true},
 
 		{coll: "usedtokens", name: "tokenHash_1", keys: bson.D{{Key: "tokenHash", Value: 1}}, unique: true},
 		{coll: "usedtokens", name: "expiresAt_1", keys: bson.D{{Key: "expiresAt", Value: 1}}, isTTL: true, ttlSeconds: 0},
@@ -88,6 +89,30 @@ func Ensure(ctx context.Context, db *mongo.Database) error {
 		{coll: "apiusages", name: "endpoint_1_date_1", keys: bson.D{{Key: "endpoint", Value: 1}, {Key: "date", Value: 1}}, unique: true},
 		{coll: "sitecontents", name: "key_1", keys: bson.D{{Key: "key", Value: 1}}, unique: true},
 		{coll: "folders", name: "userId_1_type_1", keys: bson.D{{Key: "userId", Value: 1}, {Key: "type", Value: 1}}},
+		{coll: "savedfolders", name: "userId_1", keys: bson.D{{Key: "userId", Value: 1}}},
+
+		// 内容域高频查询索引（公开列表/搜索/审核/创作中心）。
+		{coll: "episodes", name: "reviewStatus_1_updatedAt_-1", keys: bson.D{{Key: "reviewStatus", Value: 1}, {Key: "updatedAt", Value: -1}}},
+		{coll: "episodes", name: "reviewStatus_1_views_-1", keys: bson.D{{Key: "reviewStatus", Value: 1}, {Key: "views", Value: -1}}},
+		{coll: "episodes", name: "reviewStatus_1_createdAt_-1", keys: bson.D{{Key: "reviewStatus", Value: 1}, {Key: "createdAt", Value: -1}}},
+		{coll: "episodes", name: "createdBy_1", keys: bson.D{{Key: "createdBy", Value: 1}}},
+		{coll: "episodes", name: "allowedEditors_1", keys: bson.D{{Key: "allowedEditors", Value: 1}}},
+		{coll: "episodes", name: "customAuthors_1", keys: bson.D{{Key: "customAuthors", Value: 1}}},
+		{coll: "episodes", name: "tags_1", keys: bson.D{{Key: "tags", Value: 1}}},
+		{coll: "episodes", name: "category_1", keys: bson.D{{Key: "category", Value: 1}}},
+		{coll: "episodes", name: "premiereDate_1", keys: bson.D{{Key: "premiereDate", Value: 1}}},
+
+		{coll: "series", name: "createdBy_1", keys: bson.D{{Key: "createdBy", Value: 1}}},
+		{coll: "series", name: "createdAt_-1", keys: bson.D{{Key: "createdAt", Value: -1}}},
+
+		{coll: "themes", name: "ownerId_1", keys: bson.D{{Key: "ownerId", Value: 1}}},
+		{coll: "themes", name: "isSystem_1_enabled_1", keys: bson.D{{Key: "isSystem", Value: 1}, {Key: "enabled", Value: 1}}},
+		{coll: "themes", name: "status_1", keys: bson.D{{Key: "status", Value: 1}}},
+		{coll: "themes", name: "isDefault_1", keys: bson.D{{Key: "isDefault", Value: 1}}},
+
+		{coll: "notifications", name: "userId_1_createdAt_-1", keys: bson.D{{Key: "userId", Value: 1}, {Key: "createdAt", Value: -1}}},
+		{coll: "reports", name: "reporterId_1_status_1", keys: bson.D{{Key: "reporterId", Value: 1}, {Key: "status", Value: 1}}},
+		{coll: "reports", name: "status_1_createdAt_-1", keys: bson.D{{Key: "status", Value: 1}, {Key: "createdAt", Value: -1}}},
 	}
 
 	for _, spec := range specs {

@@ -337,8 +337,13 @@ func TestSeriesUpdateAndDelete(t *testing.T) {
 		t.Fatalf("put not found: %d body=%v", resp.StatusCode, nf)
 	}
 
-	// DELETE：creator 角色也可删除（管理鉴权允许 creator/admin/superadmin）。
+	// DELETE：非 owner creator 不能删除。
 	resp = otherC.json("DELETE", "/api/series/"+seriesID, nil, &body)
+	if resp.StatusCode != 403 {
+		t.Fatalf("non-owner delete: %d body=%v", resp.StatusCode, body)
+	}
+	// admin 可删除任意系列。
+	resp = adminC.json("DELETE", "/api/series/"+seriesID, nil, &body)
 	if resp.StatusCode != 200 || body["message"] != "Deleted" {
 		t.Fatalf("delete: %d body=%v", resp.StatusCode, body)
 	}

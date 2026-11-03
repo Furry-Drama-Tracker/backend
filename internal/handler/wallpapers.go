@@ -38,13 +38,14 @@ func NewWallpapers(repos *repository.Repos, cfg *config.Config, amw *middleware.
 // Register 挂载 /api/wallpapers 全部端点。
 func (h *Wallpapers) Register(g *gin.RouterGroup) {
 	super := h.AuthMW.Protect(middleware.RoleSuperAdmin)
+	reqEmail := h.AuthMW.RequireEmailChanged()
 	g.GET("/system", h.SystemList)
 	g.GET("/system/all", super, h.SystemAll)
-	g.POST("/system", super, h.SystemUpload)
-	g.PUT("/system/:id", super, h.SystemUpdate)
-	g.DELETE("/system/:id", super, h.SystemDelete)
+	g.POST("/system", super, reqEmail, h.RL(ratelimit.UploadSpec), h.SystemUpload)
+	g.PUT("/system/:id", super, reqEmail, h.SystemUpdate)
+	g.DELETE("/system/:id", super, reqEmail, h.SystemDelete)
 	g.GET("/personal", h.AuthMW.Protect(), h.PersonalList)
-	g.POST("/personal", h.AuthMW.Protect(), h.PersonalUpload)
+	g.POST("/personal", h.AuthMW.Protect(), h.RL(ratelimit.UploadSpec), h.PersonalUpload)
 	g.DELETE("/personal", h.AuthMW.Protect(), h.PersonalDelete)
 }
 
@@ -184,10 +185,8 @@ func (h *Wallpapers) SystemDelete(c *gin.Context) {
 		c.JSON(500, gin.H{"message": "删除系统壁纸失败"})
 		return
 	}
-	// 删除文件（fire-and-forget，失败不影响响应）。
-	if w.URL != "" && strings.HasPrefix(w.URL, "/uploads/") {
-		_ = upload.RemoveFile(strings.TrimPrefix(w.URL, "/uploads/"))
-	}
+	// 删除文件（fire-and-forget，失败不影响响应）。只清理系统壁纸前缀文件。
+	removeUploadedFileIfUnused(c.Request.Context(), h.Repos, w.URL, "wallpaper-", primitive.NilObjectID)
 	c.JSON(200, gin.H{"message": "已删除"})
 }
 
@@ -263,14 +262,33 @@ func (h *Wallpapers) PersonalDelete(c *gin.Context) {
 	body := cmsReadBody(c)
 	url := asString(body["url"])
 	user, _ := middleware.GetUser(c)
+	if url == "" || !strings.HasPrefix(url, "/uploads/wallpaper-") {
+		c.JSON(400, gin.H{"message": "无效的壁纸地址"})
+		return
+	}
+	// 必须先确认该文件确实属于当前用户的个人壁纸库，不能只凭 URL 删除。
+	u, err := h.Repos.Users.FindByID(c.Request.Context(), user.ID)
+	if err != nil {
+		c.JSON(500, gin.H{"message": "删除个人壁纸失败"})
+		return
+	}
+	owned := false
+	for _, wp := range u.PersonalWallpapers {
+		if wp.URL == url {
+			owned = true
+			break
+		}
+	}
+	if !owned {
+		c.JSON(404, gin.H{"message": "壁纸不存在"})
+		return
+	}
 	if err := h.Repos.Users.WallpapersRemovePersonal(c.Request.Context(), user.ID, url); err != nil {
 		c.JSON(500, gin.H{"message": "删除个人壁纸失败"})
 		return
 	}
-	// 删除文件（fire-and-forget，失败不影响响应）。
-	if url != "" && strings.HasPrefix(url, "/uploads/") {
-		_ = upload.RemoveFile(strings.TrimPrefix(url, "/uploads/"))
-	}
+	// 仅在文件已无任何业务引用时删除，避免误删被主题/系统壁纸复用的文件。
+	removeUploadedFileIfUnused(c.Request.Context(), h.Repos, url, "wallpaper-", primitive.NilObjectID)
 	c.JSON(200, gin.H{"message": "已删除"})
 }
 

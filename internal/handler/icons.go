@@ -41,11 +41,12 @@ func NewIcons(repos *repository.Repos, cfg *config.Config, amw *middleware.Auth,
 // Register 挂载 /api/icons 全部端点。
 func (h *Icons) Register(g *gin.RouterGroup) {
 	super := h.AuthMW.Protect(middleware.RoleSuperAdmin)
+	reqEmail := h.AuthMW.RequireEmailChanged()
 	g.GET("/list", h.List)
 	g.GET("/all", super, h.AdminAll)
-	g.POST("/upload", super, h.Upload)
-	g.PUT("/:id", super, h.Update)
-	g.DELETE("/:id", super, h.Delete)
+	g.POST("/upload", super, reqEmail, h.RL(ratelimit.UploadSpec), h.Upload)
+	g.PUT("/:id", super, reqEmail, h.Update)
+	g.DELETE("/:id", super, reqEmail, h.Delete)
 }
 
 // iconJSON 组装图标响应对象。

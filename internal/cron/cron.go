@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/xiedada05/furry-drama-be-neo/internal/repository"
+	"github.com/xiedada05/furry-drama-be-neo/internal/service"
 )
 
 const (
@@ -41,6 +42,11 @@ func StartSessions(ctx context.Context, repos *repository.Repos) {
 	})
 	go runAligned(ctx, nextDailyDelay(now, 3), 24*time.Hour, func() {
 		cleanupReadNotifications(ctx, repos)
+	})
+	// 注销宽限期到期账号物理删除：启动后立即执行一次，之后每 6 小时执行。
+	go cleanupDeletionRequests(ctx, repos)
+	go runAligned(ctx, 6*time.Hour, 6*time.Hour, func() {
+		cleanupDeletionRequests(ctx, repos)
 	})
 }
 
@@ -90,6 +96,23 @@ func cleanupExpiredSessions(ctx context.Context, repos *repository.Repos) {
 	}
 	if n > 0 {
 		slog.Info("[Cron] Cleaned expired sessions", "count", n)
+	}
+}
+
+// cleanupDeletionRequests 删除注销申请已过 7 天宽限期的用户及其个人数据。
+func cleanupDeletionRequests(ctx context.Context, repos *repository.Repos) {
+	cutoff := time.Now().Add(-service.DeletionGraceDays * 24 * time.Hour)
+	users, err := repos.Users.FindDeletionRequestedBefore(ctx, cutoff)
+	if err != nil {
+		slog.Error("[Cron] Deletion cleanup query error", "err", err)
+		return
+	}
+	for _, u := range users {
+		if err := service.PurgeUserData(ctx, repos, u.ID); err != nil {
+			slog.Error("[Cron] Purge user error", "userId", u.ID.Hex(), "err", err)
+			continue
+		}
+		slog.Info("[Cron] Purged deleted user", "userId", u.ID.Hex())
 	}
 }
 

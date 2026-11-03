@@ -393,6 +393,18 @@ func (h *Series) Delete(c *gin.Context) {
 		errors.AbortWithAppError(c, errors.New(500, "Server error"), h.Config.IsDev)
 		return
 	}
+	existing, err := h.Repos.Series.FindByID(c.Request.Context(), id)
+	if err == nil {
+		user, _ := middleware.GetUser(c)
+		if user.Role != middleware.RoleSuperAdmin && user.Role != middleware.RoleAdmin &&
+			existing.CreatedBy != nil && existing.CreatedBy.Hex() != user.ID.Hex() {
+			c.JSON(403, gin.H{"message": "无权删除此系列"})
+			return
+		}
+	} else if !repository.IsNotFound(err) {
+		errors.AbortWithAppError(c, errors.New(500, "Server error"), h.Config.IsDev)
+		return
+	}
 	if err := h.Repos.Series.DeleteByID(c.Request.Context(), id); err != nil {
 		errors.AbortWithAppError(c, errors.New(500, "Server error"), h.Config.IsDev)
 		return

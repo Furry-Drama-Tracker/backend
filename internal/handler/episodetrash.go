@@ -35,10 +35,11 @@ func NewEpisodeTrash(repos *repository.Repos, amw *middleware.Auth) *EpisodeTras
 // Register 挂载 /api/episode-trash 全部端点（仅 admin/superadmin，creator 403）。
 func (h *EpisodeTrash) Register(g *gin.RouterGroup) {
 	protect := h.AuthM.Protect(middleware.RoleCreator, middleware.RoleAdmin, middleware.RoleSuperAdmin)
+	reqEmail := h.AuthM.RequireEmailChanged()
 	g.GET("", protect, adminOnlyReview, h.List)
 	g.GET("/:id/versions", protect, adminOnlyReview, h.Versions)
-	g.PUT("/:id/restore", protect, adminOnlyReview, h.Restore)
-	g.DELETE("/:id", protect, adminOnlyReview, h.Purge)
+	g.PUT("/:id/restore", protect, adminOnlyReview, reqEmail, h.Restore)
+	g.DELETE("/:id", protect, adminOnlyReview, reqEmail, h.Purge)
 }
 
 // trashPage 解析回收站分页参数（page 默认 1；limit 默认 20，上限 100）。
@@ -85,25 +86,25 @@ func episodeTrashBodyJSON(e *model.Episode) gin.H {
 		totalEpisodes = *e.TotalEpisodes
 	}
 	return gin.H{
-		"_id":               e.ID.Hex(),
-		"title":             e.Title,
-		"titleEn":           e.TitleEn,
-		"titleJa":           e.TitleJa,
-		"description":       e.Description,
-		"coverImage":        e.CoverImage,
-		"totalEpisodes":     totalEpisodes,
-		"currentEpisodes":   e.CurrentEpisodes,
-		"status":            e.Status,
-		"category":          orEmptyStrings(e.Category),
-		"tags":              orEmptyStrings(e.Tags),
-		"views":             e.Views,
-		"averageRating":     e.AverageRating,
-		"ratingCount":       e.RatingCount,
-		"createdBy":         refJSON(e.CreatedBy, nil),
-		"reviewStatus":      e.ReviewStatus,
-		"reviewNote":        e.ReviewNote,
-		"createdAt":         e.CreatedAt,
-		"updatedAt":         e.UpdatedAt,
+		"_id":             e.ID.Hex(),
+		"title":           e.Title,
+		"titleEn":         e.TitleEn,
+		"titleJa":         e.TitleJa,
+		"description":     e.Description,
+		"coverImage":      e.CoverImage,
+		"totalEpisodes":   totalEpisodes,
+		"currentEpisodes": e.CurrentEpisodes,
+		"status":          e.Status,
+		"category":        orEmptyStrings(e.Category),
+		"tags":            orEmptyStrings(e.Tags),
+		"views":           e.Views,
+		"averageRating":   e.AverageRating,
+		"ratingCount":     e.RatingCount,
+		"createdBy":       refJSON(e.CreatedBy, nil),
+		"reviewStatus":    e.ReviewStatus,
+		"reviewNote":      e.ReviewNote,
+		"createdAt":       e.CreatedAt,
+		"updatedAt":       e.UpdatedAt,
 	}
 }
 
@@ -259,4 +260,3 @@ func (h *EpisodeTrash) Purge(c *gin.Context) {
 	middleware.EpisodeCache.DeleteByPrefix("episodes_")
 	c.JSON(200, gin.H{"message": "已彻底删除"})
 }
-

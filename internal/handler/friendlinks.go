@@ -3,6 +3,7 @@ package handler
 import (
 	"context"
 	"fmt"
+	stdhtml "html"
 
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
@@ -43,13 +44,15 @@ func NewFriendLinks(repos *repository.Repos, cfg *config.Config, amw *middleware
 
 // Register 挂载 /api/friend-links 全部端点。
 func (h *FriendLinks) Register(g *gin.RouterGroup) {
+	super := h.AuthMW.Protect(middleware.RoleSuperAdmin)
+	reqEmail := h.AuthMW.RequireEmailChanged()
 	g.GET("", h.List)
-	g.POST("/apply", h.AuthMW.OptionalAuth(), h.Apply)
+	g.POST("/apply", h.AuthMW.OptionalAuth(), h.RL(ratelimit.FriendLinkApplySpec), h.Apply)
 	g.GET("/my-applications", h.AuthMW.Protect(), h.MyApplications)
-	g.GET("/all", h.AuthMW.Protect(middleware.RoleSuperAdmin), h.All)
-	g.POST("", h.AuthMW.Protect(middleware.RoleSuperAdmin), h.Create)
-	g.PUT("/:id", h.AuthMW.Protect(middleware.RoleSuperAdmin), h.Update)
-	g.DELETE("/:id", h.AuthMW.Protect(middleware.RoleSuperAdmin), h.Delete)
+	g.GET("/all", super, h.All)
+	g.POST("", super, reqEmail, h.Create)
+	g.PUT("/:id", super, reqEmail, h.Update)
+	g.DELETE("/:id", super, reqEmail, h.Delete)
 }
 
 // List GET /api/friend-links：获取对外展示的友链列表（公开）。
@@ -403,7 +406,7 @@ func (h *FriendLinks) sendFriendLinkStatusEmail(ctx context.Context, userID prim
 func (h *FriendLinks) buildFriendLinkApplyEmail(applicantName string) (string, string, string) {
 	url := cmsFrontendURL(h.Config) + "/admin/friend-links"
 	html := `<h2 style="margin:0 0 16px;color:#1e293b;font-size:22px;font-weight:700;">新友链申请</h2>` +
-		`<p style="margin:0 0 16px;color:#475569;font-size:14px;">收到来自「<strong>` + applicantName + `</strong>」的友链申请，请前往管理后台审核。</p>` +
+		`<p style="margin:0 0 16px;color:#475569;font-size:14px;">收到来自「<strong>` + stdhtml.EscapeString(applicantName) + `</strong>」的友链申请，请前往管理后台审核。</p>` +
 		`<p style="margin:20px 0;">` + email.EmailButton("前往审核", url, "primary") + `</p>` +
 		`<p style="margin:0;color:#94a3b8;font-size:12px;">您可以在账号设置中关闭此类邮件通知。</p>`
 	return "新友链申请", html, "收到新的友链申请"
@@ -414,8 +417,8 @@ func (h *FriendLinks) buildFriendLinkStatusEmail(linkName, statusLabel string) (
 	url := cmsFrontendURL(h.Config) + "/profile"
 	subject := "友链申请" + statusLabel
 	html := `<h2 style="margin:0 0 16px;color:#1e293b;font-size:22px;font-weight:700;">友链审核结果</h2>` +
-		`<p style="margin:0 0 16px;color:#475569;font-size:14px;">您申请的友链「<strong>` + linkName + `</strong>」审核结果：</p>` +
-		email.EmailInfoBox(`<p style="margin:0;font-size:18px;font-weight:600;">`+statusLabel+`</p>`, "success") +
+		`<p style="margin:0 0 16px;color:#475569;font-size:14px;">您申请的友链「<strong>` + stdhtml.EscapeString(linkName) + `</strong>」审核结果：</p>` +
+		email.EmailInfoBox(`<p style="margin:0;font-size:18px;font-weight:600;">`+stdhtml.EscapeString(statusLabel)+`</p>`, "success") +
 		`<p style="margin:20px 0;">` + email.EmailButton("查看详情", url, "primary") + `</p>` +
 		`<p style="margin:0;color:#94a3b8;font-size:12px;">您可以在账号设置中关闭此类邮件通知。</p>`
 	return subject, html, "友链审核结果：" + statusLabel

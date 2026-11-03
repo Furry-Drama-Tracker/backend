@@ -47,22 +47,23 @@ func NewThemes(repos *repository.Repos, cfg *config.Config, amw *middleware.Auth
 // Register 挂载 /api/themes 全部端点。
 func (h *Themes) Register(g *gin.RouterGroup) {
 	super := h.AuthMW.Protect(middleware.RoleSuperAdmin)
+	reqEmail := h.AuthMW.RequireEmailChanged()
 	g.GET("/active", h.Active)
 	g.GET("/list", h.List)
 	g.GET("/my", h.AuthMW.Protect(), h.MyList)
 	g.GET("/my/selection", h.AuthMW.Protect(), h.MySelection)
 	g.PUT("/selection", h.AuthMW.Protect(), h.SetSelection)
 	g.PUT("/background-prefs", h.AuthMW.Protect(), h.UpdateBackgroundPrefs)
-	g.POST("/", h.AuthMW.Protect(), h.Create)
-	g.POST("/upload-wallpaper", h.AuthMW.Protect(), h.UploadWallpaper)
-	g.POST("/upload-icon", h.AuthMW.Protect(), h.UploadIcon)
-	g.PUT("/:id", h.AuthMW.Protect(), h.Update)
-	g.DELETE("/:id", h.AuthMW.Protect(), h.Delete)
-	g.POST("/:id/submit", h.AuthMW.Protect(), h.Submit)
+	g.POST("/", h.AuthMW.Protect(), reqEmail, h.Create)
+	g.POST("/upload-wallpaper", h.AuthMW.Protect(), reqEmail, h.RL(ratelimit.UploadSpec), h.UploadWallpaper)
+	g.POST("/upload-icon", h.AuthMW.Protect(), reqEmail, h.RL(ratelimit.UploadSpec), h.UploadIcon)
+	g.PUT("/:id", h.AuthMW.Protect(), reqEmail, h.Update)
+	g.DELETE("/:id", h.AuthMW.Protect(), reqEmail, h.Delete)
+	g.POST("/:id/submit", h.AuthMW.Protect(), reqEmail, h.Submit)
 	g.GET("/all", super, h.AdminAll)
-	g.POST("/:id/review", super, h.Review)
-	g.POST("/:id/default", super, h.SetDefault)
-	g.PUT("/:id/admin", super, h.AdminUpdate)
+	g.POST("/:id/review", super, reqEmail, h.Review)
+	g.POST("/:id/default", super, reqEmail, h.SetDefault)
+	g.PUT("/:id/admin", super, reqEmail, h.AdminUpdate)
 }
 
 // themeIconsOr 规范化 icons 为非 nil map。
@@ -348,8 +349,8 @@ func (h *Themes) MySelection(c *gin.Context) {
 	}
 
 	resp := gin.H{
-		"wallpaperTheme":    nil,
-		"iconsTheme":        nil,
+		"wallpaperTheme":     nil,
+		"iconsTheme":         nil,
 		"wallpaperIsDefault": wpIsDefault,
 		"iconsIsDefault":     icIsDefault,
 	}
@@ -510,7 +511,7 @@ func (h *Themes) SetSelection(c *gin.Context) {
 }
 
 // findValidatedTheme 按 hex ID 查找主题并校验可用性与槽匹配内容
-//（壁纸槽需含壁纸 / 图标槽需含图标）。失败时已写入响应，调用方直接 return。
+// （壁纸槽需含壁纸 / 图标槽需含图标）。失败时已写入响应，调用方直接 return。
 func (h *Themes) findValidatedTheme(c *gin.Context, raw string, forWallpaper bool) (
 	primitive.ObjectID, *model.Theme, error) {
 	oid, err := primitive.ObjectIDFromHex(strings.TrimSpace(raw))
@@ -819,17 +820,9 @@ func (h *Themes) removeUnreferencedThemeFiles(ctx context.Context, t *model.Them
 			continue
 		}
 		seen[url] = true
-		// 仍被其他主题 / 系统壁纸库 / 个人壁纸库引用的文件保留。
-		if n, err := h.Repos.Themes.CountURLReferences(ctx, url, id); err == nil && n > 0 {
-			continue
-		}
-		if ok, err := h.Repos.Wallpapers.ExistsByURL(ctx, url); err == nil && ok {
-			continue
-		}
-		if ok, err := h.Repos.Users.PersonalWallpaperInUse(ctx, url); err == nil && ok {
-			continue
-		}
-		_ = upload.RemoveFile(strings.TrimPrefix(url, "/uploads/"))
+		// 只清理主题壁纸前缀文件；头像/剧集封面/站点图片/轮播图等不属于主题资源，
+		// 即使被恶意写入主题 URL 也绝不删除。
+		removeUploadedFileIfUnused(ctx, h.Repos, url, "theme-wallpaper-", id)
 	}
 }
 
@@ -992,7 +985,7 @@ func (h *Themes) SetDefault(c *gin.Context) {
 		}
 		updated, err := h.Repos.Themes.FindOneAndUpdate(c.Request.Context(), oid, bson.M{"$set": bson.M{
 			"isDefault": false,
-			"updatedAt":  time.Now().UTC().Truncate(time.Millisecond),
+			"updatedAt": time.Now().UTC().Truncate(time.Millisecond),
 		}})
 		if err != nil {
 			c.JSON(500, gin.H{"message": "取消默认主题失败"})
@@ -1007,7 +1000,7 @@ func (h *Themes) SetDefault(c *gin.Context) {
 	}
 	updated, err := h.Repos.Themes.FindOneAndUpdate(c.Request.Context(), oid, bson.M{"$set": bson.M{
 		"isDefault": true,
-		"updatedAt":  time.Now().UTC().Truncate(time.Millisecond),
+		"updatedAt": time.Now().UTC().Truncate(time.Millisecond),
 	}})
 	if err != nil {
 		c.JSON(500, gin.H{"message": "设置默认主题失败"})

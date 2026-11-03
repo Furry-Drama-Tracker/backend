@@ -127,14 +127,14 @@ func (s *AuthService) ForceEmailChange(u *model.User) bool {
 // SessionUserJSON 组装登录/refresh 响应的用户对象（字段集为固定契约，勿增删）。
 func (s *AuthService) SessionUserJSON(u *model.User) gin.H {
 	return gin.H{
-		"_id":              u.ID.Hex(),
-		"accountId":        u.AccountID,
-		"username":         u.Username,
-		"email":            u.Email,
-		"isEmailVerified":  u.IsEmailVerified,
-		"role":             u.Role,
-		"forceEmailChange": s.ForceEmailChange(u),
-		"backgroundPrefs":  u.BackgroundPrefs,
+		"_id":                u.ID.Hex(),
+		"accountId":          u.AccountID,
+		"username":           u.Username,
+		"email":              u.Email,
+		"isEmailVerified":    u.IsEmailVerified,
+		"role":               u.Role,
+		"forceEmailChange":   s.ForceEmailChange(u),
+		"backgroundPrefs":    u.BackgroundPrefs,
 		"personalWallpapers": nonNilWallpapers(u.PersonalWallpapers),
 	}
 }
@@ -142,16 +142,16 @@ func (s *AuthService) SessionUserJSON(u *model.User) gin.H {
 // MeJSON 组装 /me 响应（字段集为固定契约，勿增删）。
 func (s *AuthService) MeJSON(u *model.User) gin.H {
 	return gin.H{
-		"_id":                   u.ID.Hex(),
-		"accountId":             u.AccountID,
-		"username":              u.Username,
-		"email":                 u.Email,
-		"isEmailVerified":       u.IsEmailVerified,
-		"role":                  u.Role,
-		"avatar":                u.Avatar,
+		"_id":                    u.ID.Hex(),
+		"accountId":              u.AccountID,
+		"username":               u.Username,
+		"email":                  u.Email,
+		"isEmailVerified":        u.IsEmailVerified,
+		"role":                   u.Role,
+		"avatar":                 u.Avatar,
 		"emailNotificationPrefs": u.EmailNotificationPrefs,
-		"backgroundPrefs":       u.BackgroundPrefs,
-		"personalWallpapers":    nonNilWallpapers(u.PersonalWallpapers),
+		"backgroundPrefs":        u.BackgroundPrefs,
+		"personalWallpapers":     nonNilWallpapers(u.PersonalWallpapers),
 	}
 }
 
@@ -165,7 +165,7 @@ func nonNilWallpapers(w []model.Wallpaper) []model.Wallpaper {
 
 // IssueSession 签发双 token、创建会话、设置 cookie 并写审计日志（登录成功路径）。
 func (s *AuthService) IssueSession(c *gin.Context, u *model.User, deviceInfo model.DeviceInfo, ip string, action string) error {
-	accessToken, err := s.Signer.Sign(u.ID.Hex(), "access", s.Config.JWT.AccessTTL, nil)
+	accessToken, err := s.Signer.Sign(u.ID.Hex(), "access", s.Config.JWT.AccessTTL, map[string]string{"jti": auth.RandomHex(24)})
 	if err != nil {
 		return err
 	}
@@ -176,6 +176,7 @@ func (s *AuthService) IssueSession(c *gin.Context, u *model.User, deviceInfo mod
 	}
 	session := &model.UserSession{
 		UserID:           u.ID,
+		TokenHash:        auth.HashToken(accessToken),
 		RefreshTokenHash: auth.HashToken(refreshToken),
 		DeviceInfo:       deviceInfo,
 		IP:               ip,
@@ -232,8 +233,11 @@ func containsFoldSlice(list []string, v string) bool {
 	return false
 }
 
-// clientIPFromRequest 从 X-Forwarded-For 首值或 RemoteAddr 提取客户端 IP。
+// clientIPFromRequest 从 X-Real-IP / X-Forwarded-For 首值或 RemoteAddr 提取客户端 IP。
 func clientIPFromRequest(c *gin.Context) string {
+	if ip := strings.TrimSpace(c.GetHeader("X-Real-IP")); ip != "" {
+		return ip
+	}
 	if xff := c.GetHeader("X-Forwarded-For"); xff != "" {
 		if idx := strings.IndexByte(xff, ','); idx >= 0 {
 			xff = xff[:idx]

@@ -3,6 +3,7 @@ package handler
 import (
 	"context"
 	"fmt"
+	stdhtml "html"
 	"math"
 	"net"
 	"regexp"
@@ -72,7 +73,7 @@ func NewEpisodes(repos *repository.Repos, cfg *config.Config, amw *middleware.Au
 // 注册顺序是固定契约，勿重排：静态路由在前，参数路由在后。
 func (h *Episodes) Register(g *gin.RouterGroup) {
 	creatorRoles := []string{middleware.RoleCreator, middleware.RoleAdmin, middleware.RoleSuperAdmin}
-	g.POST("/upload", h.AuthMW.Protect(creatorRoles...), h.Upload)
+	g.POST("/upload", h.AuthMW.Protect(creatorRoles...), h.RL(ratelimit.UploadSpec), h.Upload)
 	g.GET("", h.List)
 	g.GET("/search-suggestions", h.SearchSuggestions)
 	g.GET("/popular-tags", h.PopularTags)
@@ -709,7 +710,12 @@ func (h *Episodes) UpdateSingle(c *gin.Context) {
 		updateData["duration"] = asString(v)
 	}
 	if v, ok := body["platformLinks"]; ok {
-		updateData["platformLinks"] = toStrMap(v)
+		links, msg := sanitizePlatformLinks(v)
+		if msg != "" {
+			c.JSON(400, gin.H{"message": msg})
+			return
+		}
+		updateData["platformLinks"] = links
 	}
 	if v, ok := body["scheduledDate"]; ok {
 		updateData["scheduledDate"] = toDate(v)
@@ -740,6 +746,14 @@ func (h *Episodes) UpdateSingle(c *gin.Context) {
 		}
 		serverError(c)
 		return
+	}
+	user, _ := middleware.GetUser(c)
+	if user.Role == "creator" {
+		parent, perr := h.Repos.Episodes.FindByID(ctx, oldSingle.EpisodeID)
+		if perr != nil || !canEdit(parent, user.ID) {
+			c.JSON(403, gin.H{"message": "You do not have permission to edit this episode"})
+			return
+		}
 	}
 	becameAvailable := oldSingle.IsUpcoming && (updateData["isUpcoming"] == false)
 
@@ -847,8 +861,25 @@ func (h *Episodes) DeleteSingle(c *gin.Context) {
 		serverError(c)
 		return
 	}
-	single, err := h.Repos.SingleEpisodes.FindOneAndDelete(c.Request.Context(), oid)
+	ctx := c.Request.Context()
+	single, err := h.Repos.SingleEpisodes.FindByID(ctx, oid)
 	if err != nil {
+		if repository.IsNotFound(err) {
+			c.JSON(404, gin.H{"message": "Single episode not found"})
+			return
+		}
+		serverError(c)
+		return
+	}
+	user, _ := middleware.GetUser(c)
+	if user.Role == "creator" {
+		parent, perr := h.Repos.Episodes.FindByID(ctx, single.EpisodeID)
+		if perr != nil || !canEdit(parent, user.ID) {
+			c.JSON(403, gin.H{"message": "You do not have permission to delete this episode"})
+			return
+		}
+	}
+	if _, err := h.Repos.SingleEpisodes.FindOneAndDelete(ctx, oid); err != nil {
 		if repository.IsNotFound(err) {
 			c.JSON(404, gin.H{"message": "Single episode not found"})
 			return
@@ -903,6 +934,21 @@ func (h *Episodes) Create(c *gin.Context) {
 		c.JSON(400, gin.H{"message": strings.Join(msgs, ", ")})
 		return
 	}
+	cover := strings.TrimSpace(asString(body["coverImage"]))
+	if !isSafeAssetURL(cover) {
+		c.JSON(400, gin.H{"message": "封面地址必须为 /uploads/ 或 http(s) 地址"})
+		return
+	}
+	links, msg := sanitizePlatformLinks(body["platformLinks"])
+	if msg != "" {
+		c.JSON(400, gin.H{"message": msg})
+		return
+	}
+	qq := strings.TrimSpace(orDefaultString(body["qqGroupLink"], ""))
+	if qq != "" && !isHTTPURL(qq) {
+		c.JSON(400, gin.H{"message": "QQ群链接必须为 http/https 地址"})
+		return
+	}
 
 	isCreator := user.Role == "creator"
 	reviewStatus := "approved"
@@ -916,19 +962,19 @@ func (h *Episodes) Create(c *gin.Context) {
 		Description:     asString(body["description"]),
 		DescriptionEn:   orDefaultString(body["descriptionEn"], ""),
 		DescriptionJa:   orDefaultString(body["descriptionJa"], ""),
-		CoverImage:      asString(body["coverImage"]),
+		CoverImage:      cover,
 		TotalEpisodes:   toTotalEpisodes(body["totalEpisodes"]),
 		CurrentEpisodes: toCurrentEpisodes(body["currentEpisodes"]),
 		Status:          status,
 		Category:        toStringSlice(body["category"]),
 		Tags:            toStringSlice(body["tags"]),
-		PlatformLinks:   toStrMap(body["platformLinks"]),
+		PlatformLinks:   links,
 		UpdateDay:       orDefaultString(body["updateDay"], ""),
 		PremiereDate:    toDate(body["premiereDate"]),
 		CreatedBy:       &user.ID,
 		HideCreator:     truthy(body["hideCreator"]),
 		CustomAuthors:   toObjectIDs(body["customAuthors"]),
-		QQGroupLink:     orDefaultString(body["qqGroupLink"], ""),
+		QQGroupLink:     qq,
 		QQGroupNumber:   orDefaultString(body["qqGroupNumber"], ""),
 		ReviewStatus:    reviewStatus,
 	}
@@ -982,6 +1028,11 @@ func (h *Episodes) CreateSingle(c *gin.Context) {
 		serverError(c)
 		return
 	}
+	singleLinks, msg := sanitizePlatformLinks(body["platformLinks"])
+	if msg != "" {
+		c.JSON(400, gin.H{"message": msg})
+		return
+	}
 
 	isScheduled := truthy(body["isScheduled"])
 	single := &model.SingleEpisode{
@@ -991,7 +1042,7 @@ func (h *Episodes) CreateSingle(c *gin.Context) {
 		TitleEn:       orDefaultString(body["titleEn"], ""),
 		TitleJa:       orDefaultString(body["titleJa"], ""),
 		Duration:      orDefaultString(body["duration"], ""),
-		PlatformLinks: toStrMap(body["platformLinks"]),
+		PlatformLinks: singleLinks,
 		ScheduledDate: toDate(body["scheduledDate"]),
 		IsScheduled:   isScheduled,
 		PremiereDate:  toDate(body["premiereDate"]),
@@ -1028,7 +1079,7 @@ func (h *Episodes) CreateSingle(c *gin.Context) {
 	}
 	if len(followers) > 0 {
 		isPreview := isScheduled
-		links := toStrMap(body["platformLinks"])
+		links := singleLinks
 		hasVideo := false
 		for k, v := range links {
 			if k != "" && v != "" {
@@ -1109,6 +1160,30 @@ func (h *Episodes) Update(c *gin.Context) {
 	}
 	oldCurrentEpisodes := episode.CurrentEpisodes
 	body := h.readJSONBody(c)
+	if v, ok := body["platformLinks"]; ok {
+		links, msg := sanitizePlatformLinks(v)
+		if msg != "" {
+			c.JSON(400, gin.H{"message": msg})
+			return
+		}
+		body["platformLinks"] = links
+	}
+	if v, ok := body["qqGroupLink"]; ok {
+		s := strings.TrimSpace(asString(v))
+		if s != "" && !isHTTPURL(s) {
+			c.JSON(400, gin.H{"message": "QQ群链接必须为 http/https 地址"})
+			return
+		}
+		body["qqGroupLink"] = s
+	}
+	if v, ok := body["coverImage"]; ok {
+		s := strings.TrimSpace(asString(v))
+		if s != "" && !isSafeAssetURL(s) {
+			c.JSON(400, gin.H{"message": "封面地址必须为 /uploads/ 或 http(s) 地址"})
+			return
+		}
+		body["coverImage"] = s
+	}
 
 	// 版本快照：保存编辑前的完整剧集 DTO（data 为完整快照）。
 	lastVersion, err := h.Repos.EpisodeVersions.FindLatest(ctx, oid)
@@ -1290,6 +1365,11 @@ func (h *Episodes) Delete(c *gin.Context) {
 		return
 	}
 	user, _ := middleware.GetUser(c)
+	// 创作者只能删除自己创建或被授权管理的剧集；admin/superadmin 不受此限。
+	if user.Role == "creator" && !canEdit(episode, user.ID) {
+		c.JSON(403, gin.H{"message": "You do not have permission to delete this episode"})
+		return
+	}
 	if err := h.Repos.EpisodeTrash.MoveToTrash(ctx, episode, "deleted", "", &user.ID); err != nil {
 		serverError(c)
 		return
@@ -1472,6 +1552,7 @@ func (h *Episodes) sendEpisodeUpdateEmails(ctx context.Context, episodeID primit
 // buildEpisodeUpdateEmail 构造追番更新邮件（subject/body 按
 // available/preview/preview_video/preview_info 四种事件分支，文案是固定契约）。
 func (h *Episodes) buildEpisodeUpdateEmail(episodeTitle string, epNum int, eventType, to string) (string, string, string, string) {
+	episodeTitle = stdhtml.EscapeString(episodeTitle)
 	url := h.Config.Server.FrontendURL
 	if url == "" {
 		url = h.Config.Server.SiteURL
@@ -1676,9 +1757,12 @@ func serverError(c *gin.Context) {
 	c.JSON(500, gin.H{"message": "Server error"})
 }
 
-// clientIP 提取客户端 IP（生产信任 X-Forwarded-For 首值）。
+// clientIP 提取客户端 IP（生产优先 X-Real-IP，其次 X-Forwarded-For 首值）。
 func (h *Episodes) clientIP(c *gin.Context) string {
 	if !h.Config.IsDev {
+		if xri := strings.TrimSpace(c.GetHeader("X-Real-IP")); xri != "" {
+			return xri
+		}
 		if xff := c.GetHeader("X-Forwarded-For"); xff != "" {
 			if first := ratelimit.NormalizeXFF(xff); first != "" {
 				return first

@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"html"
 	"strings"
 	"time"
 
@@ -42,7 +43,7 @@ type LoginResult struct {
 // 需要 *gin.Context（登录成功时设置 access/refresh cookie）。
 func (s *AuthService) Login(c *gin.Context, in LoginInput) (*LoginResult, error) {
 	ctx := c.Request.Context()
-	emailAddr := strings.TrimSpace(in.Email)
+	emailAddr := strings.ToLower(strings.TrimSpace(in.Email))
 
 	if !s.VerifyAltcha(in.Altcha, in.DevToken) {
 		return nil, errors.New(400, "验证码错误或已过期")
@@ -50,9 +51,8 @@ func (s *AuthService) Login(c *gin.Context, in LoginInput) (*LoginResult, error)
 
 	user, err := s.Repos.Users.FindByEmailWithAuth(ctx, emailAddr)
 	if err != nil {
-		// 邮箱不存在：附带 accountNotFound 标志，前端引导去注册。
-		//（注册接口已暴露邮箱存在性判断，此处不额外增加枚举面。）
-		return nil, errors.NewExtra(400, "该邮箱尚未注册，请先注册账号", map[string]any{"accountNotFound": true})
+		// 不区分“邮箱不存在”和“密码错误”，降低账号枚举面。
+		return nil, errors.New(400, "用户名或密码错误")
 	}
 	if repository.IsLocked(user) {
 		return nil, errors.New(400, "用户名或密码错误")
@@ -104,7 +104,13 @@ func (s *AuthService) Login(c *gin.Context, in LoginInput) (*LoginResult, error)
 			break
 		}
 	}
-	if !isKnownDevice && len(knownSessions) > 0 && !s.SkipVerification(user) && !s.devTokenActive(in.DevToken) {
+	// 任何未识别设备都要求邮箱验证码（不再以“已有 session”为前置条件）。
+	// 邮件服务未配置时无法发送验证码，退化为仅密码登录，避免整站无法登录。
+	mailReady := false
+	if s.Mail != nil {
+		_, mailReady = s.Mail.GetConfig(ctx)
+	}
+	if !isKnownDevice && !s.SkipVerification(user) && !s.devTokenActive(in.DevToken) && mailReady {
 		loginCode := code.GenerateCode()
 		s.DeviceLoginCodes.Set(loginCode, code.Entry{
 			UserID:    user.ID.Hex(),
@@ -175,15 +181,7 @@ func (s *AuthService) devTokenActive(devToken string) bool {
 
 // purgeUser 注销宽限已过时的物理删除（行为固定）。
 func (s *AuthService) purgeUser(ctx context.Context, userID interface{}) error {
-	_ = s.Repos.Follows.DeleteByUser(ctx, userID)
-	_ = s.Repos.Histories.DeleteByUser(ctx, userID)
-	_ = s.Repos.Notifications.DeleteByUser(ctx, userID)
-	_ = s.Repos.Favorites.DeleteByUser(ctx, userID)
-	_ = s.Repos.Ratings.DeleteByUser(ctx, userID)
-	_ = s.Repos.Reports.DeleteByReporter(ctx, userID)
-	_ = s.Repos.Feedbacks.DeleteByUser(ctx, userID)
-	_ = s.Repos.Sessions.DeleteByUser(ctx, userID)
-	return s.Repos.Users.DeleteByID(ctx, userID)
+	return PurgeUserData(ctx, s.Repos, userID)
 }
 
 // sendNewDeviceNotification 新设备登录提醒邮件（受 emailNotificationPrefs.newDeviceLogin 控制）。
@@ -195,10 +193,10 @@ func (s *AuthService) sendNewDeviceNotification(u *model.User, parsed auth.Parse
 		`<h2 style="margin:0 0 16px;color:#1e293b;font-size:22px;font-weight:700;">新设备登录提醒</h2>`+
 			`<p style="margin:0 0 16px;color:#475569;font-size:14px;">您的账号检测到一次新的设备登录：</p>`+
 			email.EmailInfoBox(
-				`<p style="margin:4px 0;"><strong>浏览器：</strong>`+orUnknown(parsed.Browser)+` `+parsed.BrowserVersion+`</p>`+
-					`<p style="margin:4px 0;"><strong>操作系统：</strong>`+orUnknown(parsed.OS)+` `+parsed.OSVersion+`</p>`+
-					`<p style="margin:4px 0;"><strong>IP地址：</strong>`+ip+`</p>`+
-					`<p style="margin:4px 0;"><strong>地域：</strong>`+orUnknown(region)+`</p>`, "info"),
+				`<p style="margin:4px 0;"><strong>浏览器：</strong>`+html.EscapeString(orUnknown(parsed.Browser))+" "+html.EscapeString(parsed.BrowserVersion)+`</p>`+
+					`<p style="margin:4px 0;"><strong>操作系统：</strong>`+html.EscapeString(orUnknown(parsed.OS))+" "+html.EscapeString(parsed.OSVersion)+`</p>`+
+					`<p style="margin:4px 0;"><strong>IP地址：</strong>`+html.EscapeString(ip)+`</p>`+
+					`<p style="margin:4px 0;"><strong>地域：</strong>`+html.EscapeString(orUnknown(region))+`</p>`, "info"),
 		"检测到新设备登录")
 }
 

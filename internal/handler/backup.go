@@ -75,8 +75,9 @@ func NewBackup(repos *repository.Repos, cfg *config.Config, amw *middleware.Auth
 // 鉴权两级：adminProtect（creator/admin/superadmin）→ requireSuperAdmin。
 func (h *Backup) Register(g *gin.RouterGroup) {
 	protect := h.AuthMW.Protect(middleware.RoleCreator, middleware.RoleAdmin, middleware.RoleSuperAdmin)
-	g.GET("/export", protect, h.requireSuperAdmin, h.Export)
-	g.POST("/import", protect, h.requireSuperAdmin, h.Import)
+	reqEmail := h.AuthMW.RequireEmailChanged()
+	g.GET("/export", protect, h.requireSuperAdmin, reqEmail, h.Export)
+	g.POST("/import", protect, h.requireSuperAdmin, reqEmail, h.Import)
 }
 
 // requireSuperAdmin 仅 superadmin 放行，

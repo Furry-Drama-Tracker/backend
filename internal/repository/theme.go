@@ -66,6 +66,14 @@ func (r *ThemeRepo) FindByOwner(ctx context.Context, owner primitive.ObjectID) (
 }
 
 // FindAllAdmin 查询全部主题（管理后台），按 createdAt 倒序。
+// DeleteByOwner 删除用户的个人主题（注销/删号级联清理）；系统主题保留。
+func (r *ThemeRepo) DeleteByOwner(ctx context.Context, owner primitive.ObjectID) error {
+	ctx, cancel := context.WithTimeout(ctx, contextTimeout)
+	defer cancel()
+	_, err := r.coll.DeleteMany(ctx, bson.M{"ownerId": owner, "isSystem": bson.M{"$ne": true}})
+	return err
+}
+
 func (r *ThemeRepo) FindAllAdmin(ctx context.Context) ([]model.Theme, error) {
 	ctx, cancel := context.WithTimeout(ctx, contextTimeout)
 	defer cancel()
@@ -172,5 +180,3 @@ func (r *ThemeRepo) CountURLReferences(ctx context.Context, url string, excludeI
 		},
 	})
 }
-
-

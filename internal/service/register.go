@@ -14,21 +14,21 @@ import (
 
 // RegisterInput 是注册请求的解析结果。
 type RegisterInput struct {
-	AccountID   string
-	Username    string
-	Email       string
-	Password    string
-	DeviceInfo  *auth.DeviceInfoPayload
-	Altcha      string
-	Ua          string
-	DevToken    string
-	AcceptLang  string
-	IP          string
+	AccountID  string
+	Username   string
+	Email      string
+	Password   string
+	DeviceInfo *auth.DeviceInfoPayload
+	Altcha     string
+	Ua         string
+	DevToken   string
+	AcceptLang string
+	IP         string
 }
 
 // RegisterResult 是注册成功响应数据。
 type RegisterResult struct {
-	Email           string
+	Email            string
 	NeedVerification bool
 }
 
@@ -37,7 +37,7 @@ type RegisterResult struct {
 func (s *AuthService) Register(ctx context.Context, in RegisterInput) (*RegisterResult, error) {
 	accountID := strings.TrimSpace(in.AccountID)
 	username := strings.TrimSpace(in.Username)
-	email := strings.TrimSpace(in.Email)
+	email := strings.ToLower(strings.TrimSpace(in.Email))
 
 	if !s.VerifyAltcha(in.Altcha, in.DevToken) {
 		return nil, errors.New(400, "验证码错误或已过期")

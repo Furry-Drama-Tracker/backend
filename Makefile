@@ -1,4 +1,4 @@
-# Unix Makefile — furry-drama-be-neo 后端（GNU make）
+﻿# Unix Makefile — furry-drama-be-neo 后端（GNU make）
 # 常用：make build / make run / make test / make vet / make clean
 # Windows 请使用：nmake /f Makefile.win
 
@@ -6,7 +6,7 @@ BINARY ?= bin/furry-drama-be-neo
 PKG    ?= ./cmd/server
 SWAG   ?= swag
 
-.PHONY: all build run test vet fmt docs clean
+.PHONY: all build run seed test vet fmt docs clean
 
 all: build
 
@@ -15,6 +15,9 @@ build:
 
 run:
 	go run $(PKG)
+
+seed:
+	go run ./cmd/seed-admin
 
 test:
 	go test ./...

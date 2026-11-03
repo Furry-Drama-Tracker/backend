@@ -81,7 +81,8 @@ func sanitizeBody(r *http.Request) {
 	r.ContentLength = int64(len(out))
 }
 
-// sanitizeQuery 清洗并重写 query 字符串；剥离 $/. 前缀键。
+// sanitizeQuery 重写 query 字符串，仅剥离 $ 前缀键（防 NoSQL 操作符注入）。
+// 不对值做 HTML 转义，否则 URL/搜索词中的 & 会被改成 &amp;，导致查询和链接损坏。
 func sanitizeQuery(r *http.Request) {
 	values := r.URL.Query()
 	if len(values) == 0 {
@@ -89,11 +90,11 @@ func sanitizeQuery(r *http.Request) {
 	}
 	sanitized := url.Values{}
 	for k, vs := range values {
-		if strings.HasPrefix(k, "$") || strings.Contains(k, ".") {
+		if strings.HasPrefix(k, "$") {
 			continue
 		}
 		for _, v := range vs {
-			sanitized.Add(k, security.Sanitize(v))
+			sanitized.Add(k, v)
 		}
 	}
 	if enc := sanitized.Encode(); enc != r.URL.RawQuery {
@@ -101,9 +102,7 @@ func sanitizeQuery(r *http.Request) {
 	}
 }
 
-// sanitizeParams 清洗路由参数值（键为路由定义的固定名，无需剥离）。
+// sanitizeParams 路由参数为固定 ID/枚举，无需 HTML 清洗（避免破坏合法字符）。
 func sanitizeParams(c *gin.Context) {
-	for i := range c.Params {
-		c.Params[i].Value = security.Sanitize(c.Params[i].Value)
-	}
+	_ = c
 }

@@ -12,7 +12,7 @@ import (
 // Strict-Transport-Security：恒定输出 max-age=31536000;
 // includeSubDomains，不区分生产/开发（固定行为）。
 const (
-	cspHeader = "default-src 'self';script-src 'self' 'unsafe-inline' blob:;style-src 'self' 'unsafe-inline';img-src 'self' data: blob:;font-src 'self';connect-src 'self' https://api.mymemory.translated.net https://translate.googleapis.com https://api.cognitive.microsofttranslator.com https://ipapi.co;frame-src 'self' https://player.bilibili.com https://www.youtube.com https://embed.nicovideo.jp;object-src 'none';upgrade-insecure-requests;base-uri 'self';form-action 'self';frame-ancestors 'self';script-src-attr 'none'"
+	cspHeader = "default-src 'self';script-src 'self' 'unsafe-inline' blob:;style-src 'self' 'unsafe-inline';img-src 'self' data: blob: https:;font-src 'self';connect-src 'self' https://api.mymemory.translated.net https://translate.googleapis.com https://api.cognitive.microsofttranslator.com https://ipapi.co;frame-src 'self' https://player.bilibili.com https://www.youtube.com https://embed.nicovideo.jp;object-src 'none';upgrade-insecure-requests;base-uri 'self';form-action 'self';frame-ancestors 'self';script-src-attr 'none'"
 )
 
 // SecurityHeaders 设置安全响应头。必须尽早注册（在会写头的中间件之前），
@@ -22,6 +22,7 @@ func SecurityHeaders() gin.HandlerFunc {
 		c.Header("Content-Security-Policy", cspHeader)
 		c.Header("Origin-Agent-Cluster", "?1")
 		c.Header("Referrer-Policy", "no-referrer")
+		c.Header("Permissions-Policy", "camera=(), microphone=(), geolocation=(), payment=()")
 		c.Header("Strict-Transport-Security", "max-age=31536000; includeSubDomains")
 		c.Header("X-Content-Type-Options", "nosniff")
 		c.Header("X-DNS-Prefetch-Control", "off")

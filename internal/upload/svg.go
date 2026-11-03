@@ -1,13 +1,15 @@
 package upload
 
 import (
+	"encoding/xml"
 	"fmt"
+	"io"
+	"mime/multipart"
+	"net/http"
 	"os"
 	"path"
 	"path/filepath"
 	"strings"
-
-	"mime/multipart"
 
 	"github.com/gin-gonic/gin"
 )
@@ -28,19 +30,87 @@ func SetIconsDir(dir string) {
 // svgMaxBytes 单个 SVG 图标大小上限（1MB）。
 const svgMaxBytes = 1 << 20
 
-// validateSVGContent 校验 SVG 文本内容：
-//   - 去掉 UTF-8 BOM 与首部空白后必须以 <?xml 或 <svg 开头；
-//   - 不允许包含 <script（防 XSS；inline 渲染侧同样会再过滤一次）。
+// forbiddenSVGElements 是不允许出现在用户上传 SVG 中的元素（防脚本/CSS 注入/外链）。
+var forbiddenSVGElements = map[string]bool{
+	"script": true, "foreignobject": true, "iframe": true, "object": true,
+	"embed": true, "link": true, "style": true, "animate": true, "set": true,
+	"discard": true,
+}
+
+// svgURLAllowed 仅允许站内相对路径、锚点与 http(s) 外链。
+func svgURLAllowed(v string) bool {
+	v = strings.ToLower(strings.TrimSpace(v))
+	if v == "" || strings.HasPrefix(v, "#") || strings.HasPrefix(v, "/") ||
+		strings.HasPrefix(v, "./") || strings.HasPrefix(v, "../") {
+		return true
+	}
+	return strings.HasPrefix(v, "http://") || strings.HasPrefix(v, "https://")
+}
+
+// validateSVGContent 使用 XML 解析器做结构化校验：
+//   - 必须是单个 <svg> 根元素；
+//   - 禁止 script/foreignObject/iframe/object/embed/link/style/animate/set 等元素；
+//   - 禁止 on* 事件属性、javascript:/data:/file: 等危险 URL；
+//   - 禁止 DOCTYPE/ENTITY/外部处理指令（防 XXE）。
 func validateSVGContent(content string) bool {
 	s := strings.TrimPrefix(content, "\ufeff")
-	s = strings.TrimLeft(s, " \t\r\n")
+	s = strings.TrimSpace(s)
 	if !strings.HasPrefix(s, "<?xml") && !strings.HasPrefix(s, "<svg") {
 		return false
 	}
-	if strings.Contains(strings.ToLower(s), "<script") {
+	lower := strings.ToLower(s)
+	if strings.Contains(lower, "<!doctype") || strings.Contains(lower, "<!entity") {
 		return false
 	}
-	return true
+	dec := xml.NewDecoder(strings.NewReader(s))
+	dec.Strict = false
+	depth := 0
+	root := ""
+	for {
+		tok, err := dec.Token()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			return false
+		}
+		switch t := tok.(type) {
+		case xml.ProcInst:
+			if strings.ToLower(t.Target) != "xml" {
+				return false
+			}
+		case xml.Directive:
+			return false
+		case xml.StartElement:
+			name := strings.ToLower(t.Name.Local)
+			if forbiddenSVGElements[name] {
+				return false
+			}
+			if depth == 0 {
+				root = name
+			}
+			depth++
+			for _, a := range t.Attr {
+				attr := strings.ToLower(a.Name.Local)
+				val := strings.ToLower(strings.TrimSpace(a.Value))
+				if strings.HasPrefix(attr, "on") {
+					return false
+				}
+				if attr == "href" || attr == "src" {
+					if !svgURLAllowed(val) {
+						return false
+					}
+				}
+				if strings.Contains(val, "javascript:") || strings.Contains(val, "vbscript:") ||
+					strings.Contains(val, "expression(") || strings.Contains(val, "@import") {
+					return false
+				}
+			}
+		case xml.EndElement:
+			depth--
+		}
+	}
+	return depth == 0 && root == "svg"
 }
 
 // SaveSVG 读取并保存一个上传的 SVG 图标文件，返回可访问 URL
@@ -49,6 +119,8 @@ func SaveSVG(c *gin.Context, field string) (string, error) {
 	if !strings.HasPrefix(c.ContentType(), "multipart/form-data") {
 		return "", ErrNoFile
 	}
+	// SVG 单文件上限 1MB，额外 1MB 容忍 multipart 边界/表单头开销。
+	c.Request.Body = http.MaxBytesReader(c.Writer, c.Request.Body, svgMaxBytes+(1<<20))
 	file, err := c.FormFile(field)
 	if err != nil {
 		return "", ErrNoFile

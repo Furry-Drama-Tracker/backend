@@ -63,16 +63,16 @@ func Sanitize(s string) string {
 	return xssPolicy.Sanitize(s)
 }
 
-// SanitizeValue 递归清洗 JSON 值（清洗规则为固定契约）：
-//   - string → Sanitize()
-//   - map[string]any → 剥离以 $ 开头或含 . 的键（防 NoSQL 注入）；
-//     密码类字段（skipFields）值为 string 时原样保留不转义，非 string 仍递归
+// SanitizeValue 递归清洗 JSON 值：
+//   - string 原样保留（不在这里做 HTML 转义，避免把 &、引号、URL query 转成 HTML 实体；
+//     XSS 防护由 React 输出转义、邮件模板显式转义和富文本字段的白名单清洗负责）
+//   - map[string]any → 剥离以 $ 开头的键（防 NoSQL 操作符注入）
 //   - []any → 逐元素递归
 //   - 其他类型（json.Number/bool/nil 等）原样返回
 func SanitizeValue(v any) any {
 	switch t := v.(type) {
 	case string:
-		return Sanitize(t)
+		return t
 	case []any:
 		out := make([]any, 0, len(t))
 		for _, item := range t {
@@ -82,14 +82,8 @@ func SanitizeValue(v any) any {
 	case map[string]any:
 		out := make(map[string]any, len(t))
 		for k, val := range t {
-			if strings.HasPrefix(k, "$") || strings.Contains(k, ".") {
+			if strings.HasPrefix(k, "$") {
 				continue
-			}
-			if skipFields[k] {
-				if s, ok := val.(string); ok {
-					out[k] = s
-					continue
-				}
 			}
 			out[k] = SanitizeValue(val)
 		}

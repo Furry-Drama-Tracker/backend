@@ -7,10 +7,84 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 
 	"github.com/xiedada05/furry-drama-be-neo/internal/config"
 	"github.com/xiedada05/furry-drama-be-neo/internal/model"
 )
+
+// isHTTPURL 判断是否为 http(s) 绝对 URL。
+func isHTTPURL(s string) bool {
+	return cmsIsValidHTTPURL(strings.TrimSpace(s))
+}
+
+// isSafeAssetURL 允许站内 /uploads/ 资源或 http(s) 绝对 URL。
+func isSafeAssetURL(s string) bool {
+	s = strings.TrimSpace(s)
+	return strings.HasPrefix(s, "/uploads/") || isHTTPURL(s)
+}
+
+// sanitizePlatformLinks 校验平台链接 map，所有非空值必须是 http(s) URL。
+func sanitizePlatformLinks(v any) (primitive.M, string) {
+	if v == nil {
+		return primitive.M{}, ""
+	}
+	raw, ok := v.(map[string]any)
+	if !ok {
+		return nil, "平台链接格式不正确"
+	}
+	out := primitive.M{}
+	for k, val := range raw {
+		key := strings.TrimSpace(k)
+		if key == "" || len([]rune(key)) > 50 {
+			return nil, "平台名称不合法"
+		}
+		s, ok := val.(string)
+		if !ok {
+			return nil, "平台链接必须为字符串: " + key
+		}
+		s = strings.TrimSpace(s)
+		if s == "" {
+			continue
+		}
+		if !isHTTPURL(s) {
+			return nil, "平台链接必须为 http/https 地址: " + key
+		}
+		out[key] = s
+	}
+	return out, ""
+}
+
+// sanitizeSocialLinks 校验创作者社交链接 map，所有非空值必须是 http(s) URL。
+func sanitizeSocialLinks(v any) (map[string]string, string) {
+	if v == nil {
+		return map[string]string{}, ""
+	}
+	raw, ok := v.(map[string]any)
+	if !ok {
+		return nil, "社交链接格式不正确"
+	}
+	out := map[string]string{}
+	for k, val := range raw {
+		key := strings.TrimSpace(k)
+		if key == "" || len([]rune(key)) > 50 {
+			return nil, "社交平台名称不合法"
+		}
+		s, ok := val.(string)
+		if !ok {
+			return nil, "社交链接必须为字符串: " + key
+		}
+		s = strings.TrimSpace(s)
+		if s == "" {
+			continue
+		}
+		if !isHTTPURL(s) {
+			return nil, "社交链接必须为 http/https 地址: " + key
+		}
+		out[key] = s
+	}
+	return out, ""
+}
 
 // 本文件为 announcements / wallpapers / friend-links 三域共享的 DTO 组装与
 // 工具函数。

@@ -461,6 +461,24 @@ func (r *UserRepo) AccountIDExistsExcluding(ctx context.Context, accountID strin
 	return r.exists(ctx, bson.M{"accountId": accountID, "_id": bson.M{"$ne": excludeID}})
 }
 
+// FindDeletionRequestedBefore 返回注销申请时间早于 cutoff 的用户（只需 _id）。
+func (r *UserRepo) FindDeletionRequestedBefore(ctx context.Context, cutoff time.Time) ([]model.User, error) {
+	ctx, cancel := r.newCtx(ctx)
+	defer cancel()
+	cur, err := r.coll.Find(ctx,
+		bson.M{"deletionRequestedAt": bson.M{"$ne": nil, "$lte": cutoff}},
+		options.Find().SetProjection(bson.M{"_id": 1}))
+	if err != nil {
+		return nil, err
+	}
+	defer cur.Close(ctx)
+	var list []model.User
+	if err := cur.All(ctx, &list); err != nil {
+		return nil, err
+	}
+	return list, nil
+}
+
 func (r *UserRepo) findOne(ctx context.Context, filter, projection bson.M) (*model.User, error) {
 	u := &model.User{}
 	opts := options.FindOne()

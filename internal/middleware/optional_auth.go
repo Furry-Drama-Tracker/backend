@@ -32,6 +32,13 @@ func (a *Auth) OptionalAuth() gin.HandlerFunc {
 			c.Next()
 			return
 		}
+		if claims.JTI != "" {
+			sess, serr := a.Repos.Sessions.FindByTokenHash(c.Request.Context(), auth.HashToken(token))
+			if serr != nil || !sess.IsActive || sess.UserID != user.ID {
+				c.Next()
+				return
+			}
+		}
 		c.Set(ContextUserKey, user)
 		c.Next()
 	}

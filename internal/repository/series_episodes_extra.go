@@ -28,7 +28,16 @@ func (r *EpisodeRepo) FindByIDsForSeries(ctx context.Context, ids []primitive.Ob
 		"status": 1, "averageRating": 1, "description": 1, "category": 1,
 		"tags": 1, "views": 1,
 	}
-	cur, err := r.coll.Find(ctx, bson.M{"_id": bson.M{"$in": ids}},
+	// 公开系列接口只能展示已审核剧集，避免创作者把 pending/rejected 剧集
+	// 加入系列后绕过审核。
+	filter := bson.M{
+		"_id": bson.M{"$in": ids},
+		"$or": bson.A{
+			bson.M{"reviewStatus": "approved"},
+			bson.M{"reviewStatus": bson.M{"$exists": false}},
+		},
+	}
+	cur, err := r.coll.Find(ctx, filter,
 		options.Find().SetProjection(projection))
 	if err != nil {
 		return nil, err

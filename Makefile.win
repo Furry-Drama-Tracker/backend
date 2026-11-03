@@ -15,6 +15,9 @@ build:
 run:
 	go run $(PKG)
 
+seed:
+	go run ./cmd/seed-admin
+
 test:
 	go test ./...
 

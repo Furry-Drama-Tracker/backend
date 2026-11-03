@@ -62,8 +62,12 @@ func RateLimit(spec ratelimit.Spec, opts RateLimitOpts) gin.HandlerFunc {
 	type prefixPair struct{ exact, sub string }
 	var mounts []prefixPair
 	for _, m := range spec.Mounts {
-		p := "/api" + m
-		mounts = append(mounts, prefixPair{exact: p, sub: p + "/"})
+		// 端点限流必须同时覆盖 /api/<mount> 与 /api/v1/<mount>，
+		// 否则攻击者可通过 v1 镜像绕过登录/注册/2FA/邮箱等限流。
+		for _, prefix := range []string{"/api", "/api/v1"} {
+			p := prefix + m
+			mounts = append(mounts, prefixPair{exact: p, sub: p + "/"})
+		}
 	}
 
 	return func(c *gin.Context) {
@@ -100,7 +104,8 @@ func RateLimit(spec ratelimit.Spec, opts RateLimitOpts) gin.HandlerFunc {
 		ip := clientIP(c, opts.TrustXFF)
 		key := spec.Name + ":" + ratelimit.IPKey(ip)
 		if spec.Name == ratelimit.RequestEmailChangeName {
-			key = spec.Name + ":[object Object]:" + strings.ToLower(newEmailFromBody(c))
+			// 同时按来源 IP 与目标邮箱限流，避免攻击者用不同邮箱刷验证邮件。
+			key = spec.Name + ":" + ratelimit.IPKey(ip) + ":" + strings.ToLower(newEmailFromBody(c))
 		}
 
 		ctx, err := sl.lim.Get(c.Request.Context(), key)
@@ -141,18 +146,14 @@ func newEmailFromBody(c *gin.Context) string {
 	return "unknown"
 }
 
-// clientIP 解析客户端 IP：生产（trustXFF）依次优先 CF-Connecting-IP（Cloudflare
-// 注入的单值头）、X-Real-IP（nginx proxy_set_header 注入的单值头）、
-// X-Forwarded-For 首值，否则取 RemoteAddr 去端口。
+// clientIP 解析客户端 IP：生产（trustXFF）优先使用反向代理覆盖写入的
+// X-Real-IP，其次 X-Forwarded-For 首值，最后才是 Cloudflare 头。
 //
-// 只认 XFF 时，若反代仅设置 X-Real-IP（常见 nginx 配置）或 Cloudflare 直连回源，
-// RemoteAddr 恒为代理 IP——所有用户共享同一限流桶，表现为"限流没分 IP、误伤全员"。
-// 补充单值头兜底后三种部署（CF / nginx / 直连回源）均能取到真实客户端 IP。
+// 不能优先信任 CF-Connecting-IP：普通客户端可以自行伪造该头，经 Caddy/Nginx
+// 转发后绕过限流。Caddy 配置应覆盖 X-Real-IP/X-Forwarded-For；若使用 Cloudflare，
+// 应在 Caddy 配置 trusted_proxies 后再决定是否信任 CF 头。
 func clientIP(c *gin.Context, trustXFF bool) string {
 	if trustXFF {
-		if cf := strings.TrimSpace(c.GetHeader("CF-Connecting-IP")); cf != "" {
-			return cf
-		}
 		if xri := strings.TrimSpace(c.GetHeader("X-Real-IP")); xri != "" {
 			return xri
 		}
@@ -160,6 +161,9 @@ func clientIP(c *gin.Context, trustXFF bool) string {
 			if first := ratelimit.NormalizeXFF(xff); first != "" {
 				return first
 			}
+		}
+		if cf := strings.TrimSpace(c.GetHeader("CF-Connecting-IP")); cf != "" {
+			return cf
 		}
 	}
 	return remoteIP(c.Request.RemoteAddr)

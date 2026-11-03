@@ -35,8 +35,9 @@ func NewReports(repos *repository.Repos, cfg *config.Config, amw *middleware.Aut
 // Register 挂载 /api/reports 全部端点（不含 /api 前缀）。
 func (h *Reports) Register(g *gin.RouterGroup) {
 	adminOnly := h.AuthMW.Protect(middleware.RoleAdmin, middleware.RoleSuperAdmin)
-	g.POST("", h.AuthMW.Protect(), h.Create)
-	g.POST("/", h.AuthMW.Protect(), h.Create)
+	reportRL := h.RL(ratelimit.ReportSpec)
+	g.POST("", h.AuthMW.Protect(), reportRL, h.Create)
+	g.POST("/", h.AuthMW.Protect(), reportRL, h.Create)
 	g.GET("/list", adminOnly, h.List)
 	g.PUT("/resolve/:id", adminOnly, h.Resolve)
 }

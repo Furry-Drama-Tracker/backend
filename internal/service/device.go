@@ -133,7 +133,7 @@ func (s *AuthService) Login2FA(c *gin.Context, emailAddr, challenge, token strin
 		return nil, errors.New(400, "无效的2FA挑战令牌")
 	}
 
-	user, err := s.Repos.Users.FindByEmailWith2FA(c.Request.Context(), strings.TrimSpace(emailAddr))
+	user, err := s.Repos.Users.FindByEmailWith2FA(c.Request.Context(), strings.ToLower(strings.TrimSpace(emailAddr)))
 	if err != nil || !user.TwoFactorEnabled {
 		return nil, errors.New(400, "该账号未启用两步验证")
 	}

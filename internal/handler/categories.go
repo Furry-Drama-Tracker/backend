@@ -33,12 +33,13 @@ func NewCategories(repos *repository.Repos, cfg *config.Config, amw *middleware.
 // 而接口契约要求带与不带尾斜杠都直接匹配（无重定向），需消除该差异。
 func (h *Categories) Register(g *gin.RouterGroup) {
 	adminOnly := []string{middleware.RoleAdmin, middleware.RoleSuperAdmin}
+	reqEmail := h.AuthMW.RequireEmailChanged()
 	g.GET("", h.List)
 	g.GET("/", h.List)
-	g.POST("", h.AuthMW.Protect(adminOnly...), h.Create)
-	g.POST("/", h.AuthMW.Protect(adminOnly...), h.Create)
-	g.PUT("/:id", h.AuthMW.Protect(adminOnly...), h.Update)
-	g.DELETE("/:id", h.AuthMW.Protect(adminOnly...), h.Delete)
+	g.POST("", h.AuthMW.Protect(adminOnly...), reqEmail, h.Create)
+	g.POST("/", h.AuthMW.Protect(adminOnly...), reqEmail, h.Create)
+	g.PUT("/:id", h.AuthMW.Protect(adminOnly...), reqEmail, h.Update)
+	g.DELETE("/:id", h.AuthMW.Protect(adminOnly...), reqEmail, h.Delete)
 }
 
 // List GET /api/categories（公开，按 order/createdAt 升序）。

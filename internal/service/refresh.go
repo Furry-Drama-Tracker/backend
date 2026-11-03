@@ -81,7 +81,7 @@ func (s *AuthService) handleRefreshMiss(ctx context.Context, hash, claimsID stri
 // RotateRefresh 轮换双 token：旧 session 已作废（VerifyRefreshToken 已做），
 // 新建 session（继承 deviceInfo/ip/loginAt），设新 cookie（流程为固定契约）。
 func (s *AuthService) RotateRefresh(c *gin.Context, user *model.User, old *model.UserSession) error {
-	accessToken, err := s.Signer.Sign(user.ID.Hex(), "access", s.Config.JWT.AccessTTL, nil)
+	accessToken, err := s.Signer.Sign(user.ID.Hex(), "access", s.Config.JWT.AccessTTL, map[string]string{"jti": auth.RandomHex(24)})
 	if err != nil {
 		return err
 	}
@@ -92,6 +92,7 @@ func (s *AuthService) RotateRefresh(c *gin.Context, user *model.User, old *model
 	now := time.Now()
 	newSession := &model.UserSession{
 		UserID:           user.ID,
+		TokenHash:        auth.HashToken(accessToken),
 		RefreshTokenHash: auth.HashToken(refreshToken),
 		DeviceInfo:       old.DeviceInfo,
 		IP:               old.IP,

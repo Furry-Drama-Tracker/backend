@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	stdhtml "html"
 	"strings"
 	"time"
 
@@ -152,7 +153,7 @@ func (s *AuthService) ResendVerificationByEmail(ctx context.Context, emailAddr, 
 	if !EmailRegex.MatchString(emailAddr) {
 		return "", errors.New(400, "邮箱格式不正确")
 	}
-	user, err := s.Repos.Users.FindByEmail(ctx, strings.TrimSpace(emailAddr))
+	user, err := s.Repos.Users.FindByEmail(ctx, strings.ToLower(strings.TrimSpace(emailAddr)))
 	if err != nil || user.IsEmailVerified {
 		return unified, nil
 	}
@@ -204,7 +205,10 @@ func (s *AuthService) RequestEmailChange(c *gin.Context, userID interface{}, pas
 	if s.Mail == nil {
 		return errors.New(503, "邮件服务暂不可用，请稍后再试")
 	}
-	token, err := s.Signer.Sign(user.ID.Hex(), "email-change", time.Hour, map[string]string{"newEmail": newEmail})
+	token, err := s.Signer.Sign(user.ID.Hex(), "email-change", time.Hour, map[string]string{
+		"newEmail": newEmail,
+		"type":     "email-change",
+	})
 	if err != nil {
 		return errors.New(500, "服务器错误")
 	}
@@ -217,7 +221,7 @@ func (s *AuthService) RequestEmailChange(c *gin.Context, userID interface{}, pas
 	}
 	confirmURL := siteURL + "/verify-email-change?token=" + token
 	html := `<h2 style="margin:0 0 16px;color:#1e293b;font-size:22px;font-weight:700;">确认修改邮箱</h2>` +
-		`<p style="margin:0 0 16px;color:#475569;font-size:14px;">您正在将账号绑定邮箱修改为：<strong>` + newEmail + `</strong></p>` +
+		`<p style="margin:0 0 16px;color:#475569;font-size:14px;">您正在将账号绑定邮箱修改为：<strong>` + stdhtml.EscapeString(newEmail) + `</strong></p>` +
 		`<p style="margin:20px 0;">` + email.EmailButton("确认修改邮箱", confirmURL, "primary") + `</p>` +
 		email.EmailInfoBox("此链接 1 小时内有效。如非本人操作，请忽略此邮件。", "info")
 	if !s.Mail.SendNotificationEmail(ctx, newEmail, "确认修改邮箱 - 兽剧聚合平台", html, "确认修改邮箱") {
@@ -232,7 +236,7 @@ func (s *AuthService) VerifyEmailChange(ctx context.Context, token string) (stri
 		return "", errors.New(400, "缺少验证令牌")
 	}
 	claims, err := s.Signer.Verify(token)
-	if err != nil || claims.Type != "email-change" {
+	if err != nil || (claims.Type != "email-change" && claims.Purpose != "email-change") {
 		return "", errors.New(400, "无效的验证令牌")
 	}
 	tokenHash := auth.HashToken(token)
@@ -242,6 +246,10 @@ func (s *AuthService) VerifyEmailChange(ctx context.Context, token string) (stri
 	user, err := s.Repos.Users.FindByID(ctx, claims.ID)
 	if err != nil {
 		return "", errors.New(404, "用户不存在")
+	}
+	// 密码修改后，旧的换绑邮箱链接立即失效。
+	if user.PasswordChangedAt != nil && claims.IssuedAt != nil && claims.IssuedAt.Time.Before(*user.PasswordChangedAt) {
+		return "", errors.New(400, "该验证链接已失效，请重新申请")
 	}
 	newEmail := strings.ToLower(claims.NewEmail)
 	if exists, err := s.Repos.Users.ExistsByEmail(ctx, newEmail); err == nil && exists {

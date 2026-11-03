@@ -15,16 +15,14 @@ import (
 // sessionJSON 组装会话对象（含 isCurrent 标记）。
 func sessionJSON(s *model.UserSession, isCurrent bool) gin.H {
 	return gin.H{
-		"_id":              s.ID.Hex(),
-		"tokenHash":        s.TokenHash,
-		"refreshTokenHash": s.RefreshTokenHash,
-		"deviceInfo":       s.DeviceInfo,
-		"ip":               s.IP,
-		"isActive":         s.IsActive,
-		"loginAt":          s.LoginAt,
-		"lastActiveAt":     s.LastActiveAt,
-		"logoutAt":         s.LogoutAt,
-		"isCurrent":        isCurrent,
+		"_id":          s.ID.Hex(),
+		"deviceInfo":   s.DeviceInfo,
+		"ip":           s.IP,
+		"isActive":     s.IsActive,
+		"loginAt":      s.LoginAt,
+		"lastActiveAt": s.LastActiveAt,
+		"logoutAt":     s.LogoutAt,
+		"isCurrent":    isCurrent,
 	}
 }
 

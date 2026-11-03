@@ -144,6 +144,15 @@ func (h *Follows) Add(c *gin.Context) {
 			return
 		}
 		if ok {
+			// 收藏夹必须存在且属于当前用户，防止向他人收藏夹注入条目。
+			if _, ferr := h.Repos.Folders.FollowFolderByIDAndUser(c.Request.Context(), folderID, user.ID); ferr != nil {
+				if repository.IsNotFound(ferr) {
+					errors.AbortWithAppError(c, errors.New(400, "收藏夹不存在或不属于当前用户"), h.Config.IsDev)
+					return
+				}
+				errors.AbortWithAppError(c, errors.New(500, "Server error"), h.Config.IsDev)
+				return
+			}
 			follow.FolderID = &folderID
 		}
 	}

@@ -21,9 +21,9 @@ const ConcurrentRefreshGrace = 30 * time.Second
 
 // Role 常量（与既有 User 模型 enum 一致，勿改）。
 const (
-	RoleUser      = "user"
-	RoleCreator   = "creator"
-	RoleAdmin     = "admin"
+	RoleUser       = "user"
+	RoleCreator    = "creator"
+	RoleAdmin      = "admin"
 	RoleSuperAdmin = "superadmin"
 )
 
@@ -69,6 +69,16 @@ func (a *Auth) Protect(allowedRoles ...string) gin.HandlerFunc {
 		if err != nil {
 			c.AbortWithStatusJSON(401, gin.H{"message": "Not authorized, user not found", "messageKey": "auth.userNotFound"})
 			return
+		}
+		// 新签发的 access token 带 jti，且对应 session 记录 access token 哈希。
+		// 登出、改密、管理员下线后 session 立即失效，access token 也随之失效。
+		// 历史无 jti 的旧令牌最多再存活 15 分钟（AccessTTL），用于平滑过渡。
+		if claims.JTI != "" {
+			sess, serr := a.Repos.Sessions.FindByTokenHash(c.Request.Context(), auth.HashToken(token))
+			if serr != nil || !sess.IsActive || sess.UserID != user.ID {
+				c.AbortWithStatusJSON(401, gin.H{"message": "Not authorized, token revoked", "messageKey": "auth.invalidToken"})
+				return
+			}
 		}
 		if len(allowedRoles) > 0 && !containsRole(allowedRoles, user.Role) {
 			c.AbortWithStatusJSON(403, gin.H{"message": "Not authorized", "messageKey": "auth.forbidden"})

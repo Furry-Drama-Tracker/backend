@@ -57,7 +57,7 @@ func TestSanitizeDropsUnknownTag(t *testing.T) {
 	}
 }
 
-// TestSanitizeValueKeyStrip 剥离 $ 前缀与含 . 的键（防 NoSQL 注入）。
+// TestSanitizeValueKeyStrip 剥离 $ 前缀键（防 NoSQL 操作符注入），普通值保持原样。
 func TestSanitizeValueKeyStrip(t *testing.T) {
 	in := map[string]any{
 		"email":    "a@b.com",
@@ -69,11 +69,14 @@ func TestSanitizeValueKeyStrip(t *testing.T) {
 	if _, ok := out["$gt"]; ok {
 		t.Fatal("$ 前缀键应被剥离")
 	}
-	if _, ok := out["a.b"]; ok {
-		t.Fatal("含 . 键应被剥离")
+	if out["a.b"] != "nested" {
+		t.Fatalf("含 . 键应保留: %v", out["a.b"])
 	}
 	if out["email"] != "a@b.com" {
 		t.Fatalf("普通字段应保留: %v", out["email"])
+	}
+	if out["username"] != "<script>u</script>" {
+		t.Fatalf("字符串不应被 HTML 转义: %v", out["username"])
 	}
 }
 

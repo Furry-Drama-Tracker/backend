@@ -19,6 +19,11 @@ const bodyContextKey = "bodyparse.body"
 const (
 	defaultBodyLimit = 1 << 20
 	importBodyLimit  = 50 << 20
+
+	// 所有请求（含 multipart / 未知 Content-Type）的总请求体上限。
+	// 防止 SanitizeInput 在鉴权/限流之前无上限 ReadAll 导致内存 DoS。
+	defaultRequestLimit = 12 << 20
+	importRequestLimit  = 51 << 20
 )
 
 // backupImportPrefixes 是备份导入路径（精确或子路径命中则放大体限制）。
@@ -55,6 +60,16 @@ func BodyParse() gin.HandlerFunc {
 		ct := c.ContentType()
 		isJSON := ct == "application/json" || strings.HasSuffix(ct, "+json")
 		isForm := ct == "application/x-www-form-urlencoded"
+
+		// 先对全部请求体做硬上限，再判断是否解析 JSON/form。
+		// 这一层保护 multipart、octet-stream 等非 JSON 请求，避免后续
+		// SanitizeInput / FormFile 无限制读取内存。
+		requestLimit := int64(defaultRequestLimit)
+		if isJSON && onImportPath(c.Request.URL.Path) {
+			requestLimit = importRequestLimit
+		}
+		c.Request.Body = http.MaxBytesReader(c.Writer, c.Request.Body, requestLimit)
+
 		if !isJSON && !isForm {
 			c.Next()
 			return

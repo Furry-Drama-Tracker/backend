@@ -25,7 +25,7 @@ func TestSecurityHeaders(t *testing.T) {
 
 	// 期望值为固定的安全头契约（勿随意增删改）。
 	expected := map[string]string{
-		"Content-Security-Policy":           "default-src 'self';script-src 'self' 'unsafe-inline' blob:;style-src 'self' 'unsafe-inline';img-src 'self' data: blob:;font-src 'self';connect-src 'self' https://api.mymemory.translated.net https://translate.googleapis.com https://api.cognitive.microsofttranslator.com https://ipapi.co;frame-src 'self' https://player.bilibili.com https://www.youtube.com https://embed.nicovideo.jp;object-src 'none';upgrade-insecure-requests;base-uri 'self';form-action 'self';frame-ancestors 'self';script-src-attr 'none'",
+		"Content-Security-Policy":           "default-src 'self';script-src 'self' 'unsafe-inline' blob:;style-src 'self' 'unsafe-inline';img-src 'self' data: blob: https:;font-src 'self';connect-src 'self' https://api.mymemory.translated.net https://translate.googleapis.com https://api.cognitive.microsofttranslator.com https://ipapi.co;frame-src 'self' https://player.bilibili.com https://www.youtube.com https://embed.nicovideo.jp;object-src 'none';upgrade-insecure-requests;base-uri 'self';form-action 'self';frame-ancestors 'self';script-src-attr 'none'",
 		"Origin-Agent-Cluster":              "?1",
 		"Referrer-Policy":                   "no-referrer",
 		"Strict-Transport-Security":         "max-age=31536000; includeSubDomains",

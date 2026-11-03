@@ -6,6 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
+	"github.com/xiedada05/furry-drama-be-neo/internal/auth"
 	"github.com/xiedada05/furry-drama-be-neo/internal/errors"
 	"github.com/xiedada05/furry-drama-be-neo/internal/model"
 )
@@ -17,11 +18,20 @@ type DeletionResult struct {
 }
 
 // RequestDeletion POST /api/auth/request-deletion（protect）。
-// 置 deletionRequestedAt + audit（流程固定）。
-func (s *AuthService) RequestDeletion(ctx context.Context, user *model.User) (*DeletionResult, error) {
+// 置 deletionRequestedAt + audit；必须再次校验当前密码，防止会话被盗后恶意注销。
+func (s *AuthService) RequestDeletion(ctx context.Context, user *model.User, password string) (*DeletionResult, error) {
 	if user.DeletionRequestedAt != nil {
 		return nil, errors.New(400, "已提交过注销申请")
 	}
+	full, err := s.Repos.Users.FindByIDWithAuth(ctx, user.ID)
+	if err != nil {
+		return nil, errors.New(500, "服务器错误")
+	}
+	if !auth.Compare(full.Password, password) {
+		_ = s.Repos.Users.IncLoginAttempts(ctx, user.ID)
+		return nil, errors.New(400, "密码不正确")
+	}
+	_ = s.Repos.Users.ResetLoginAttempts(ctx, user.ID)
 	now := time.Now()
 	user.DeletionRequestedAt = &now
 	_ = s.Repos.Users.Save(ctx, user)

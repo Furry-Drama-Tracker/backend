@@ -2,6 +2,7 @@ package handler
 
 import (
 	"context"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -92,12 +93,27 @@ func (h *CreatorProfiles) UpdateMyProfile(c *gin.Context) {
 	if runes := []rune(bio); len(runes) > 500 {
 		bio = string(runes[:500])
 	}
+	avatar := strings.TrimSpace(asString(body["avatar"]))
+	if avatar != "" && !isSafeAssetURL(avatar) {
+		c.JSON(400, gin.H{"message": "头像地址必须为 /uploads/ 或 http(s) 地址"})
+		return
+	}
+	socialLinks, msg := sanitizeSocialLinks(body["socialLinks"])
+	if msg != "" {
+		c.JSON(400, gin.H{"message": msg})
+		return
+	}
+	qqGroupLink := strings.TrimSpace(orDefaultString(body["qqGroupLink"], ""))
+	if qqGroupLink != "" && !isHTTPURL(qqGroupLink) {
+		c.JSON(400, gin.H{"message": "QQ群链接必须为 http/https 地址"})
+		return
+	}
 	pending := primitive.M{
 		"displayName": asString(body["displayName"]),
-		"avatar":      asString(body["avatar"]),
+		"avatar":      avatar,
 		"bio":         bio,
-		"socialLinks": toStrMap(body["socialLinks"]),
-		"qqGroupLink": orDefaultString(body["qqGroupLink"], ""),
+		"socialLinks": socialLinks,
+		"qqGroupLink": qqGroupLink,
 	}
 	ctx := c.Request.Context()
 	profile, err := h.Repos.CreatorProfiles.CreatorProfilesUpsertPending(ctx, user.ID,
@@ -241,19 +257,19 @@ func creatorProfileJSON(p *model.CreatorProfile) gin.H {
 		}
 	}
 	return gin.H{
-		"_id":           p.ID.Hex(),
-		"creatorId":     p.CreatorID.Hex(),
-		"displayName":   p.DisplayName,
-		"avatar":        p.Avatar,
-		"bio":           p.Bio,
-		"socialLinks":   social,
-		"qqGroupLink":   p.QqGroupLink,
-		"reviewStatus":  reviewStatus,
-		"reviewNote":    p.ReviewNote,
+		"_id":            p.ID.Hex(),
+		"creatorId":      p.CreatorID.Hex(),
+		"displayName":    p.DisplayName,
+		"avatar":         p.Avatar,
+		"bio":            p.Bio,
+		"socialLinks":    social,
+		"qqGroupLink":    p.QqGroupLink,
+		"reviewStatus":   reviewStatus,
+		"reviewNote":     p.ReviewNote,
 		"pendingChanges": pending,
-		"createdAt":     p.CreatedAt,
-		"updatedAt":     p.UpdatedAt,
-		"__v":           p.VersionKey,
+		"createdAt":      p.CreatedAt,
+		"updatedAt":      p.UpdatedAt,
+		"__v":            p.VersionKey,
 	}
 }
 
