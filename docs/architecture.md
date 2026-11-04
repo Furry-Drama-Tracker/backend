@@ -28,7 +28,7 @@ middleware (横切)              model (struct 映射)            mongo-driver (
 | `config` | ini+env 加载、致命校验、`IsDev` 派生 | `Load` |
 | `server` | Gin 装配（中间件顺序）、路由注册表 | `NewApp`、`Deps`、`RegisterRoutes` |
 | `middleware` | CORS、CSRF、`Auth.Protect`（鉴权五档）、限流、gzip、bodyparse、sanitize、apiTracker、requestLogger | `NewAuth`、`RateLimit`、`CSRF`、`CORS` |
-| `router` | 双版本挂载（/api + /api/v1 + Deprecation/Sunset） | `MountDual` |
+| `router` | 领域路由单前缀挂载（/api） | `Mount` |
 | `handler` | 薄 HTTP 层：认证五文件 + usersession/twofactor/users | `NewAuth` |
 | `service` | 领域逻辑：`AuthService`（登录/注册/refresh 轮换/设备码链/2FA/邮箱变更/注销/导出） | `NewAuthService` |
 | `repository` | mongo 仓储：`Repos` 聚合 + 各 collection 的 repo | `NewRepos`、`Connect`、`ToObjectID` |
@@ -62,7 +62,7 @@ main.go
         └ email.NewClient + ipregion.NewClient + service.NewAuthService
         └ middleware.NewAuth(repos, signer)
         └ handler.NewAuth(svc, amw, cfg)
-        └ MountDual 挂 /auth /user-sessions /2fa /users
+        └ Mount 挂 /auth /user-sessions /2fa /users
 ```
 
 **重要**：`service.AuthService` 持有 `Repos`/`Signer`/`Mail`/`IPRegion`/`Config` 的引用，是认证逻辑的枢纽。handler 只做"解析 body → 调 service → 按结果组装响应"。
@@ -80,8 +80,8 @@ CSRF 校验(非 GET) → APITracker → RequestLogger →
 
 关键点：
 - **CSRF**：非 GET 请求校验 `XSRF-TOKEN` cookie 与 `X-XSRF-TOKEN` header 双拷贝相等（三态 403）。
-- **限流**：globalLimiter 挂 `/api` 路由组（含 v1/health）；per-endpoint 限流在具体路由上（`rl(spec)`），只匹配 `/api/<mount>`（不含 v1）。
-- **SanitizeInput**：读 body 做键剥离（$ 前缀/含 . 键）+ 值 XSS 清洗（bluemonday）；密码字段跳过。
+- **限流**：globalLimiter 挂 `/api` 路由组（含 health）；per-endpoint 限流在具体路由上（`rl(spec)`），只匹配 `/api/<mount>`。
+- **SanitizeInput**：读 body 剥离以 `$` 开头的键（防 NoSQL 操作符注入），字符串值不再做 HTML 转义；query 同样只剥离 `$` 键且不改写值；Referer 头仍经 bluemonday 清洗。
 
 ## 请求生命周期示例：POST /api/auth/login
 

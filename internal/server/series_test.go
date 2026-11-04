@@ -21,7 +21,7 @@ import (
 )
 
 // seriesApp 构造带 series 路由的完整测试应用。register_routes.go 已通过
-// server.NewApp 挂载 series 域（双版本 + 全局中间件），测试直接复用生产装配。
+// server.NewApp 挂载 series 域（单前缀 + 全局中间件），测试直接复用生产装配。
 func seriesApp(t *testing.T) (*httptest.Server, *mongo.Database) {
 	t.Helper()
 	gin.SetMode(gin.TestMode)

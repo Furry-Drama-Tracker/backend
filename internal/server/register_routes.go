@@ -16,8 +16,7 @@ import (
 )
 
 // RegisterRoutes 挂载第一段业务路由（认证 + 用户域）到受限流的 /api 路由组下。
-// 每个端点经 MountDual 同时获得 /api 与 /api/v1 镜像；per-endpoint 限流由
-// middleware.RateLimit 施加（内部按 path 判断，v1 不触发端点限流）。
+// 每个端点只在 /api 下注册一次；per-endpoint 限流由 middleware.RateLimit 施加。
 func RegisterRoutes(d Deps, api *gin.RouterGroup, opts middleware.RateLimitOpts) {
 	mail := email.NewClient(d.Config, d.Repos.SiteContents)
 	mail.StartCleanup(10 * time.Minute)
@@ -25,8 +24,8 @@ func RegisterRoutes(d Deps, api *gin.RouterGroup, opts middleware.RateLimitOpts)
 	svc := service.NewAuthService(d.Config, d.Repos, d.Signer, mail, ipr)
 	amw := middleware.NewAuth(d.Repos, d.Signer)
 	h := handler.NewAuth(svc, amw, d.Config)
-	// 同名 spec 在同一个 App 内复用同一个 limiter，确保 /api 与 /api/v1
-	// 镜像路由共享计数器；不同 App/测试实例之间互不影响。
+	// 同一 spec 在同一个 App 内复用同一个 limiter，使挂载到多个路由的 spec
+	// （例如 2FA）共享计数器；不同 App/测试实例之间互不影响。
 	limiters := map[string]gin.HandlerFunc{}
 	rl := func(spec ratelimit.Spec) gin.HandlerFunc {
 		key := spec.Name + "|" + spec.Window.String() + "|" + fmt.Sprint(spec.Max)
@@ -38,7 +37,7 @@ func RegisterRoutes(d Deps, api *gin.RouterGroup, opts middleware.RateLimitOpts)
 		return h
 	}
 
-	router.MountDual(api, "/auth", func(g *gin.RouterGroup) {
+	router.Mount(api, "/auth", func(g *gin.RouterGroup) {
 		g.GET("/captcha", rl(ratelimit.CaptchaSpec), h.Captcha)
 		g.GET("/check-accountId", rl(ratelimit.CheckAccountIDSpec), h.CheckAccountID)
 		g.POST("/register", rl(ratelimit.RegisterSpec), h.Register)
@@ -65,7 +64,7 @@ func RegisterRoutes(d Deps, api *gin.RouterGroup, opts middleware.RateLimitOpts)
 		g.GET("/deletion-status", amw.Protect(), h.DeletionStatus)
 	})
 
-	router.MountDual(api, "/user-sessions", func(g *gin.RouterGroup) {
+	router.Mount(api, "/user-sessions", func(g *gin.RouterGroup) {
 		reqEmail := amw.RequireEmailChanged()
 		g.POST("/create", amw.Protect(), h.CreateUserSession)
 		g.GET("/my", amw.Protect(), h.MyUserSessions)
@@ -78,14 +77,14 @@ func RegisterRoutes(d Deps, api *gin.RouterGroup, opts middleware.RateLimitOpts)
 		g.DELETE("/admin/user/:userId/all", amw.Protect("superadmin"), reqEmail, h.AdminDeleteUserSessions)
 	})
 
-	router.MountDual(api, "/2fa", func(g *gin.RouterGroup) {
+	router.Mount(api, "/2fa", func(g *gin.RouterGroup) {
 		g.POST("/enable", amw.Protect(), rl(ratelimit.TwoFactorSpec), h.Enable2FA)
 		g.POST("/verify-enable", amw.Protect(), rl(ratelimit.TwoFactorSpec), h.VerifyEnable2FA)
 		g.POST("/disable", amw.Protect(), rl(ratelimit.TwoFactorSpec), h.Disable2FA)
 		g.POST("/verify", amw.Protect(), rl(ratelimit.TwoFactorSpec), h.Verify2FA)
 	})
 
-	router.MountDual(api, "/users", func(g *gin.RouterGroup) {
+	router.Mount(api, "/users", func(g *gin.RouterGroup) {
 		g.POST("/avatar", amw.Protect(), rl(ratelimit.UploadSpec), h.Avatar)
 		g.PUT("/profile", amw.Protect(), h.Profile)
 		g.GET("/export-my-data", amw.Protect(), rl(ratelimit.ExportSpec), h.ExportMyData)
@@ -93,112 +92,112 @@ func RegisterRoutes(d Deps, api *gin.RouterGroup, opts middleware.RateLimitOpts)
 
 	// ---- 内容域（挂载前缀为固定路由表，勿改）----
 	ep := handler.NewEpisodes(d.Repos, d.Config, amw, rl, mail)
-	router.MountDual(api, "/episodes", ep.Register)
+	router.Mount(api, "/episodes", ep.Register)
 
 	se := handler.NewSeries(d.Repos, d.Config, amw, rl)
-	router.MountDual(api, "/series", se.Register)
+	router.Mount(api, "/series", se.Register)
 
 	fw := handler.NewFollows(d.Repos, d.Config, amw, rl)
-	router.MountDual(api, "/follows", fw.Register)
+	router.Mount(api, "/follows", fw.Register)
 
 	fv := handler.NewFavorites(d.Repos, d.Config, amw, rl)
-	router.MountDual(api, "/favorites", fv.Register)
+	router.Mount(api, "/favorites", fv.Register)
 
 	fo := handler.NewFolders(d.Repos, d.Config, amw, rl)
-	router.MountDual(api, "/folders", fo.Register)
+	router.Mount(api, "/folders", fo.Register)
 
 	sf := handler.NewSavedFolders(d.Repos, d.Config, amw, rl)
-	router.MountDual(api, "/saved-folders", sf.Register)
+	router.Mount(api, "/saved-folders", sf.Register)
 
 	hi := handler.NewHistories(d.Repos, d.Config, amw, rl)
-	router.MountDual(api, "/histories", hi.Register)
+	router.Mount(api, "/histories", hi.Register)
 
 	ra := handler.NewRatings(d.Repos, d.Config, amw, rl)
-	router.MountDual(api, "/ratings", ra.Register)
+	router.Mount(api, "/ratings", ra.Register)
 
 	// ---- CMS 域（公告/壁纸/友链，挂载前缀为固定路由表，勿改）----
 	an := handler.NewAnnouncements(d.Repos, d.Config, amw, rl, mail)
-	router.MountDual(api, "/announcements", an.Register)
+	router.Mount(api, "/announcements", an.Register)
 
 	wp := handler.NewWallpapers(d.Repos, d.Config, amw, rl)
-	router.MountDual(api, "/wallpapers", wp.Register)
+	router.Mount(api, "/wallpapers", wp.Register)
 
 	fl := handler.NewFriendLinks(d.Repos, d.Config, amw, rl, mail, svc.VerifyAltcha)
-	router.MountDual(api, "/friend-links", fl.Register)
+	router.Mount(api, "/friend-links", fl.Register)
 
 	// ---- 主题 / 图标管理域 ----
 	th := handler.NewThemes(d.Repos, d.Config, amw, rl)
-	router.MountDual(api, "/themes", th.Register)
+	router.Mount(api, "/themes", th.Register)
 
 	ic := handler.NewIcons(d.Repos, d.Config, amw, rl)
-	router.MountDual(api, "/icons", ic.Register)
+	router.Mount(api, "/icons", ic.Register)
 
 	// ---- 管理后台 + 审计日志域 ----
 	ad := handler.NewAdmin(d.Repos, d.Config, amw, rl, mail)
-	router.MountDual(api, "/admin", ad.Register)
+	router.Mount(api, "/admin", ad.Register)
 
 	al := handler.NewAuditLogs(d.Repos, d.Config, amw, rl)
-	router.MountDual(api, "/audit-logs", al.Register)
+	router.Mount(api, "/audit-logs", al.Register)
 
 	// ---- 通知域 ----
 	nt := handler.NewNotifications(d.Repos, d.Config, amw, rl, d.DB)
-	router.MountDual(api, "/notifications", nt.Register)
+	router.Mount(api, "/notifications", nt.Register)
 
 	// ---- 统计 / 举报 / 审核域（挂载前缀为固定路由表，勿改）----
 	st := handler.NewStats(d.Repos, d.Config, amw, rl)
-	router.MountDual(api, "/stats", st.Register)
+	router.Mount(api, "/stats", st.Register)
 
 	rp := handler.NewReports(d.Repos, d.Config, amw, rl)
-	router.MountDual(api, "/reports", rp.Register)
+	router.Mount(api, "/reports", rp.Register)
 
 	rv := handler.NewReview(d.Repos, d.Config, amw, rl, mail)
-	router.MountDual(api, "/review", rv.Register)
+	router.Mount(api, "/review", rv.Register)
 
 	// ---- 剧集回收站域（删除/审核拒绝的剧集移入此处，仅 admin/superadmin）----
 	et := handler.NewEpisodeTrash(d.Repos, amw)
-	router.MountDual(api, "/episode-trash", et.Register)
+	router.Mount(api, "/episode-trash", et.Register)
 
 	// ---- 分类 / 轮播图 / 后台自动任务 / 版本历史域 ----
 	cat := handler.NewCategories(d.Repos, d.Config, amw, rl)
-	router.MountDual(api, "/categories", cat.Register)
+	router.Mount(api, "/categories", cat.Register)
 
 	bn := handler.NewBanners(d.Repos, d.Config, amw, rl)
-	router.MountDual(api, "/banners", bn.Register)
+	router.Mount(api, "/banners", bn.Register)
 
 	as := handler.NewAutoStatus(d.Repos, d.Config, amw, rl)
-	router.MountDual(api, "/auto-status", as.Register)
+	router.Mount(api, "/auto-status", as.Register)
 
 	vs := handler.NewVersions(d.Repos, d.Config, amw, rl)
-	router.MountDual(api, "/versions", vs.Register)
+	router.Mount(api, "/versions", vs.Register)
 
 	// ---- RSS 订阅 / 翻译 / 数据备份域（挂载前缀为固定路由表，勿改）----
 	rs := handler.NewRSS(d.Repos, d.Config, amw, rl)
-	router.MountDual(api, "/rss", rs.Register)
+	router.Mount(api, "/rss", rs.Register)
 
 	tl := handler.NewTranslate(d.Repos, d.Config, amw, rl)
-	router.MountDual(api, "/translate", tl.Register)
+	router.Mount(api, "/translate", tl.Register)
 
 	bk := handler.NewBackup(d.Repos, d.Config, amw, rl, d.DB)
-	router.MountDual(api, "/backup", bk.Register)
+	router.Mount(api, "/backup", bk.Register)
 
 	// ---- 创作者中心 / 创作者主页 / 站点内容 / 反馈 / 动态流域
 	// （挂载前缀为固定路由表，勿改）----
 	cr := handler.NewCreator(d.Repos, d.Config, amw, rl)
-	router.MountDual(api, "/creator", cr.Register)
+	router.Mount(api, "/creator", cr.Register)
 
 	cp := handler.NewCreatorProfiles(d.Repos, d.Config, amw, rl)
-	router.MountDual(api, "/creator-profile", cp.Register)
+	router.Mount(api, "/creator-profile", cp.Register)
 
 	sc := handler.NewSiteContents(d.Repos, d.Config, amw, rl, mail)
-	router.MountDual(api, "/site-content", sc.Register)
+	router.Mount(api, "/site-content", sc.Register)
 
 	fb := handler.NewFeedback(d.Repos, d.Config, amw, rl, mail)
-	router.MountDual(api, "/feedback", fb.Register)
+	router.Mount(api, "/feedback", fb.Register)
 
 	ac := handler.NewActivity(d.Repos, d.Config, amw, rl)
-	router.MountDual(api, "/activity", ac.Register)
+	router.Mount(api, "/activity", ac.Register)
 
 	// 前台公开站点规模数据（用户数/剧集数/在线人数），只读聚合，无鉴权
 	ss := handler.NewSiteStats(d.Repos)
-	router.MountDual(api, "/site-stats", ss.Register)
+	router.Mount(api, "/site-stats", ss.Register)
 }

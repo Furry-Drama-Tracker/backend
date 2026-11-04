@@ -41,7 +41,7 @@ internal/
   config/             ini+env 加载与校验
   server/             Gin 装配（中间件管线顺序见 app.go 注释）
   middleware/         CORS/CSRF/security/ratelimit/apitracker/requestlogger/bodyparse/...
-  router/             双版本挂载（MountDual）+ 路由注册表
+  router/             领域路由单前缀挂载（Mount）+ 路由注册表
   handler/            薄 HTTP 层（auth/{session,device,password,email,account}、usersession、twofactor、users、csrf、health）
   service/            领域逻辑（登录分支流、refresh 轮换、设备码链、导出）
   repository/         mongo repo（Repos 聚合注入）
@@ -70,7 +70,7 @@ deploy/               systemd unit + ini 模板 + run.sh
 - `errors.New/NewKey/Wrap(status, message[, key, cause])`、`errors.AbortWithAppError(c, err, isDev)`
 - `pagination.Parse(c) (Query)`、`(*Query).Skip()/TotalPages()`
 - `middleware.CORS(allowOrigins []string)`、`middleware.CSRF()`
-- `router.MountDual(r *gin.Engine, mountPath string, register func(*gin.RouterGroup))`
+- `router.Mount(parent *gin.RouterGroup, mountPath string, register func(*gin.RouterGroup))`
 - `server.NewApp(server.Deps{Config, DB, Repos, Signer}) *gin.Engine`
 - `handler.CSRF(cfg)`、`handler.Health(db)`
 
@@ -81,9 +81,9 @@ deploy/               systemd unit + ini 模板 + run.sh
 3. **CSRF 三态** 403
 4. **登录分支顺序**：altcha→锁定→删除宽限→密码→邮箱(403 needVerification)→设备(403 needDeviceVerify)→2FA(200 need2FA)→成功；状态码不能乱
 5. **AES-256-CBC**：key=`sha256(ENCRYPTION_KEY 或 JWT_SECRET)`（二选一非拼接），格式 `enc:iv:ct`，兼容既有加密数据
-6. **限流挂载不对称**：per-endpoint 只作用于 `/api/<path>`（不含 `/api/v1/`）；global 作用于全部 `/api/*`
+6. **单前缀路由**：所有领域端点只挂 `/api/<path>`；v1 镜像已移除，per-endpoint 限流只匹配 `/api/<mount>`；global 作用于全部 `/api/*`
 7. **`_id` 输出 hex 字符串**；`backgroundPrefs` 默认 `{image:'',enabled:false,opacity:30,blur:0}`
-8. 行为怪癖与有意偏离（XSS 白名单外标签剥除而非转义、固定窗口限流、per-endpoint 限流不作用 v1 等）集中在 `docs/decisions.md`——**改动任何行为前先读**；`go test ./...` 是行为回归闸门
+8. 行为怪癖与有意偏离（XSS 处理、固定窗口限流等）集中在 `docs/decisions.md`——**改动任何行为前先读**；`go test ./...` 是行为回归闸门
 
 <!-- OPENWIKI:START -->
 

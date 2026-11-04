@@ -194,52 +194,6 @@ func TestAdminListRequiresSuperAdmin(t *testing.T) {
 	}
 }
 
-// TestAdminLoginFlow 验证管理员登录：dev-token 绕过 altcha、密码错误 400、成功 200。
-func TestAdminLoginFlow(t *testing.T) {
-	e := newAdminTestEnv(t)
-	e.insertUser(t, "sadm", "super", "super@test.com", "superadmin", "pass1234")
-
-	w, data := e.do(t, "POST", "/api/admin/login", map[string]any{
-		"email": "super@test.com", "password": "wrongpass1", "altcha": "x",
-	}, "", true)
-	if w.Code != 400 {
-		t.Fatalf("wrong password status=%d body=%s want 400", w.Code, string(data))
-	}
-	var errBody struct {
-		Message string `json:"message"`
-	}
-	decode(t, data, &errBody)
-	if errBody.Message != "用户名或密码错误" {
-		t.Fatalf("wrong password message=%q", errBody.Message)
-	}
-
-	w, data = e.do(t, "POST", "/api/admin/login", map[string]any{
-		"email": "super@test.com", "password": "pass1234", "altcha": "x",
-	}, "", true)
-	if w.Code != 200 {
-		t.Fatalf("login status=%d body=%s want 200", w.Code, string(data))
-	}
-	var login struct {
-		ID               string `json:"_id"`
-		Role             string `json:"role"`
-		ForceEmailChange bool   `json:"forceEmailChange"`
-	}
-	decode(t, data, &login)
-	if login.ID == "" || login.Role != "superadmin" || login.ForceEmailChange {
-		t.Fatalf("login body unexpected: %+v", login)
-	}
-	// 成功登录应写会话并设置 accessToken cookie。
-	found := false
-	for _, h := range w.Result().Header.Values("Set-Cookie") {
-		if strings.HasPrefix(h, "accessToken=") {
-			found = true
-		}
-	}
-	if !found {
-		t.Fatalf("login did not set accessToken cookie: %v", w.Result().Header.Values("Set-Cookie"))
-	}
-}
-
 // TestAdminRegisterAndRoleFlow 验证创建管理/创作者账户、角色修改、creator profile 自动创建。
 func TestAdminRegisterAndRoleFlow(t *testing.T) {
 	e := newAdminTestEnv(t)

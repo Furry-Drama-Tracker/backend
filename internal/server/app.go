@@ -1,4 +1,4 @@
-// Package server 装配 Gin 引擎：中间件管线顺序、静态资源、双版本路由、优雅关停。
+// Package server 装配 Gin 引擎：中间件管线顺序、静态资源、业务路由、优雅关停。
 //
 // 中间件顺序是固定契约，勿重排；新增中间件需确认放置位置：
 //
@@ -6,7 +6,7 @@
 //	bodyparse(1mb/50mb) → sanitizeInput → sanitizeHeaders →
 //	GET /api/csrf-token → CSRF 校验(非 GET) → apiTracker → requestLogger →
 //	[受限流路由组 /api] globalLimiter(300/min) → /api/health →
-//	双版本业务路由（M2）→ 全局错误处理
+//	业务路由（M2）→ 全局错误处理
 //
 // 关键装配说明：
 //   - gin 的 r.Use 对所有请求生效（含 csrf-token），故 csrf-token 单独注册在
@@ -75,7 +75,7 @@ func NewApp(d Deps) *gin.Engine {
 	r.Use(middleware.APITracker(d.Repos.ApiUsage))
 	r.Use(middleware.RequestLogger(log, !d.Config.IsDev)) // trustXFF 仅生产
 
-	// ---- 受限流路由组 /api（globalLimiter 300/min，含 /api/v1 与 health）----
+	// ---- 受限流路由组 /api（globalLimiter 300/min，含 health）----
 	opts := middleware.RateLimitOpts{
 		TrustXFF:      !d.Config.IsDev,
 		IsDev:         d.Config.IsDev,
@@ -88,10 +88,9 @@ func NewApp(d Deps) *gin.Engine {
 	// ---- Swagger UI（仅非生产，固定放置）----
 	if d.Config.IsDev {
 		r.GET("/api/docs/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
-		r.GET("/api/v1/docs/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	}
 
-	// ---- 双版本业务路由挂载（M2 填充；挂 api 组下以继承 globalLimiter）----
+	// ---- 业务路由挂载（M2 填充；挂 api 组下以继承 globalLimiter）----
 	RegisterRoutes(d, api, opts)
 
 	// ---- /uploads 静态服务（图片/SVG 图标，公开可读）----

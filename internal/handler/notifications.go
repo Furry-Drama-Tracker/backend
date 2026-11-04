@@ -37,7 +37,7 @@ type sseClient struct {
 }
 
 // Notifications 是通知域（/api/notifications）handler 容器。12 个端点通过 Register 挂载到
-// /api/notifications（server.RegisterRoutes 的 MountDual 双版本镜像）。
+// /api/notifications（server.RegisterRoutes 挂载）。
 type Notifications struct {
 	Repos  *repository.Repos
 	Config *config.Config

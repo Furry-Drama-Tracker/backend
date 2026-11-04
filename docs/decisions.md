@@ -35,8 +35,7 @@
 - **决策**：HTTP 行为以既有契约为准：响应结构、状态码、错误 key、限流窗口与文案都是**对外承诺**，不能凭直觉"修正"。已知的怪癖集中在下表与 ADR-011，改动任何一项都视为行为变更。
 - **背景**：API 文档与实际行为存在历史偏差，实际响应才是前端依赖的真值。
 - **取舍**：容忍怪癖、保住兼容。典型的有意怪癖：
-  - `requestEmailChange` 限流 key 含 `[object Object]` 字样——keyGenerator 的历史行为，**勿修**（改了会让既有计数/key 形态变化）；
-  - per-endpoint 限流不作用于 `/api/v1/`——见 ADR-010；
+  - `requestEmailChange` 限流 key 由来源 IP 与目标邮箱小写值组成——防止用不同邮箱刷验证邮件，**勿简化回单一 IP**；
   - XSS 白名单外标签剥除而非转义——见 ADR-008。
 
 ## ADR-006 认证：双 token + refresh 轮换 + jti
@@ -60,7 +59,7 @@
 | altcha PoW | `altcha-org/altcha-lib-go/v2` | 此前自实现的 920+ 行移植代码 | KDF 与前端 widget 完全一致（跨实现验证过）；挑战 signature 的 canonical JSON 形态与前端不同，但**不影响实际使用**（后端只用自生成挑战，前端只负责求解） |
 | TOTP | `pquerna/otp`（hotp 底层） | 手写 RFC6238 | **secret 保持 base64 存储格式**（兼容既有数据），内部字节转 base32 供 pquerna（保字节不变） |
 | IP 地域缓存 | `hashicorp/golang-lru` | 手写 map+order | 上限 1000 + 24h TTL（命中时淘汰过期） |
-| 限流 | `ulule/limiter` | 手写滑动窗口 | **固定窗口语义**（沿用既定行为）；Reset/Retry-After 为近似值（客户端不依赖其精确值）；挂载不对称/IP key/skip 是应用层逻辑仍自持 |
+| 限流 | `ulule/limiter` | 手写滑动窗口 | **固定窗口语义**（沿用既定行为）；Reset/Retry-After 为近似值（客户端不依赖其精确值）；挂载规则/IP key/skip 是应用层逻辑仍自持 |
 | XSS | `microcosm-cc/bluemonday` | 此前 920 行逐字节移植的清洗实现 | **行为契约：白名单外标签【剥除】而非转义**（转义会输出 `&lt;...&gt;`）；script 连同内容删除、javascript: URL/事件属性过滤。已接受此偏离（用户"向下兼容不求完美"） |
 
 **保留的自实现（无成熟等价或标准库更合适）**：
@@ -75,11 +74,12 @@
 - **背景**：内存状态不跨实例共享，多实例部署会破坏行为（验证码分发到另一实例失效）。
 - **取舍**：保持单实例语义；多实例需显式迁移到 Redis（届时改接口实现，不动业务代码）。
 
-## ADR-010 双版本挂载 + 限流挂载不对称
+## ADR-010 移除双版本挂载（v1 已删除）
 
-- **决策**：每个端点经 `router.MountDual` 挂 `/api/X` 与 `/api/v1/X`（v1 加 Deprecation/Sunset 头）；**per-endpoint 限流只作用于 `/api/<path>`，不作用于 `/api/v1/`**；全局限流作用于全部 `/api/*`（含 v1、health）。
-- **背景**：v1 是对外承诺过的弃用镜像（Deprecation/Sunset 头值固定）；前端从不打 v1。限流挂载不对称是既定契约。
-- **取舍**：v1 保留是对外承诺；限流不对称是固定行为（含 global skip 的历史死代码——`/api/translate`/`/api/auth/captcha` 的 skip 因 req.path 被剥前缀实际不生效，**维持现状，勿"修复"**）。
+- **决策**：不再提供 `/api/v1` 镜像。所有领域端点只在 `/api/X` 注册一次；`router.Mount` 只做单前缀挂载，不再注入 `Deprecation`/`Sunset` 头。
+- **背景**：v1 是旧后端对外承诺的弃用镜像，但唯一客户端前端从不使用 v1。它只是同一 handler 的第二条 URL，无法独立演进，还带来 refresh cookie 路径不匹配、限流/统计/文档分裂与单边漏挂风险。
+- **取舍**：这是一次有意的破坏性变更，放弃 2027-01-01 的 Sunset 承诺。若未来确实需要版本化，应通过独立 handler 或转换层实现，而不是再挂一条相同路由。
+- **历史**：旧实现为 `router.MountDual` + `/api/v1` + 固定 `Deprecation`/`Sunset` 头；相关不对称规则随 v1 一并删除。
 
 ## ADR-011 接受的行为偏离清单（与其他实现约定不完全一致处）
 
@@ -89,3 +89,9 @@
 | 限流窗口语义**固定窗口**（ulule） | 换库 | Reset/Retry-After 头近似；极端突发行为略异 |
 | `personalWallpapers` nil → 输出 `[]` | JSON nil 序列化差异 | 已显式归一化 |
 | JWT claims.id 是 hex 字符串需转 ObjectID 查库 | JSON 载荷无原生 ObjectID 类型 | 已集中到 `repository.ToObjectID` |
+
+## ADR-012 删除独立管理员登录入口
+
+- **决策**：移除 `POST /api/admin/login`、`Admin.Login`、`AdminAuthSpec` 以及只服务于它的 `AdminFindByIdentifierWithAuth` / `AdminUpdateLastLogin`。管理员统一走 `POST /api/auth/login`，之后用 `/api/admin/verify` 校验后台权限。
+- **背景**：旧 Express 后端有独立管理员表与登录入口；迁移后管理员已是 `users` 集合中带 `admin`/`superadmin` 角色的普通账号，原入口没有独立数据模型支撑。现有前端从不调用该路径（`apiEndpoints.js` 里的 `ADMIN.LOGIN` 常量已删除）。
+- **取舍**：删除重复且更弱的认证路径——它缺少新设备验证、2FA 与注销宽限检查，仅以“邮箱已验证 + 未开启 2FA”作为放行条件。任何未知外部调用方会收到 404；已确认无此类客户端。

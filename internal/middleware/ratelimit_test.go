@@ -65,7 +65,7 @@ func TestRateLimitTriggers429(t *testing.T) {
 	}
 }
 
-// TestRateLimitPerEndpointMount 端点型限流同时覆盖 /api 与 /api/v1 镜像。
+// TestRateLimitPerEndpointMount 端点型限流只覆盖 /api/<mount>，不匹配其他前缀。
 func TestRateLimitPerEndpointMount(t *testing.T) {
 	spec := ratelimit.Spec{Name: "login", Mounts: []string{"/auth/login"}, Window: time.Minute, Max: 1, Message: "x"}
 	r := newTestLimitEngine(spec, RateLimitOpts{IsDev: true}, "/api/auth/login", "/api/v1/auth/login")
@@ -79,13 +79,11 @@ func TestRateLimitPerEndpointMount(t *testing.T) {
 	if w.Code != 429 {
 		t.Fatalf("同路径第二次应 429: %d", w.Code)
 	}
-	// v1 路径同样命中原端点限流（共享同一计数器）→ 继续请求应 429。
-	for i := 0; i < 2; i++ {
-		w = httptest.NewRecorder()
-		r.ServeHTTP(w, httptest.NewRequest(http.MethodGet, "/api/v1/auth/login", nil))
-		if w.Code != 429 {
-			t.Fatalf("v1 路径应触发端点限流, 第 %d 次: %d", i+1, w.Code)
-		}
+	// 非 /api 前缀不命中端点限流，即使路由存在也应放行。
+	w = httptest.NewRecorder()
+	r.ServeHTTP(w, httptest.NewRequest(http.MethodGet, "/api/v1/auth/login", nil))
+	if w.Code != 200 {
+		t.Fatalf("非 /api 前缀不应触发端点限流: %d", w.Code)
 	}
 }
 

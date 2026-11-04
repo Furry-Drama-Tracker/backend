@@ -59,7 +59,6 @@ func TestSpecParams(t *testing.T) {
 		{"global", GlobalSpec, time.Minute, 300, "请求过于频繁，请稍后再试", nil},
 		{"captcha", CaptchaSpec, time.Minute, 60, "请求过于频繁，请稍后再试", []string{"/auth/captcha"}},
 		{"auth", AuthSpec, 15 * time.Minute, 5, "登录尝试过多，请15分钟后再试", []string{"/auth/login"}},
-		{"adminAuth", AdminAuthSpec, 15 * time.Minute, 5, "登录尝试过多，请15分钟后再试", []string{"/admin/login"}},
 		{"register", RegisterSpec, time.Hour, 3, "注册尝试过多，请1小时后再试", []string{"/auth/register"}},
 		{"checkAccountId", CheckAccountIDSpec, time.Minute, 20, "请求过于频繁，请稍后再试", []string{"/auth/check-accountId"}},
 		{"passwordReset", PasswordResetSpec, time.Hour, 3, "操作过于频繁，请稍后再试",

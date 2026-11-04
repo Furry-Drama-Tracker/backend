@@ -2,18 +2,12 @@ package handler
 
 import (
 	"context"
-	"crypto/sha256"
-	"encoding/base64"
-	"encoding/hex"
-	"encoding/json"
 	"fmt"
-	"net"
 	"regexp"
 	"strconv"
 	"strings"
 	"time"
 
-	altchalib "github.com/altcha-org/altcha-lib-go/v2"
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -38,7 +32,7 @@ var adminManagerRoles = []string{"admin", "superadmin", "creator"}
 var adminUserRoles = []string{"user", "creator", "admin", "superadmin"}
 
 // Admin 是管理后台域（/api/admin）handler 容器（18 个端点）。
-// MountDual 双版本镜像挂载到 /api/admin。
+// 挂载到 /api/admin。
 type Admin struct {
 	Repos  *repository.Repos
 	Config *config.Config
@@ -63,9 +57,6 @@ func (h *Admin) Register(g *gin.RouterGroup) {
 	superProtect := h.AuthMW.Protect(middleware.RoleSuperAdmin)
 	reqEmail := h.AuthMW.RequireEmailChanged()
 
-	// 保留独立管理员登录入口以兼容既有客户端；已开启 2FA 的账号会被
-	// Login 处理器拒绝，必须走 /api/auth/login 完成两步验证。
-	g.POST("/login", h.RL(ratelimit.AdminAuthSpec), h.Login)
 	g.GET("/verify", adminProtect, h.Verify)
 	g.GET("/pending-counts", adminProtect, h.PendingCounts)
 	g.POST("/logout", adminProtect, h.Logout)
@@ -86,147 +77,6 @@ func (h *Admin) Register(g *gin.RouterGroup) {
 }
 
 // ---- 端点 ----
-
-// Login POST /api/admin/login（adminAuthLimiter 5/15min）。
-// @Summary 管理员登录
-// @Tags 管理后台
-// @Accept json
-// @Produce json
-// @Param body body object true "username/account/email/password/altcha/screenWidth/screenHeight/language"
-// @Success 200 {object} map[string]any "用户对象 + forceEmailChange"
-// @Failure 400 {object} map[string]any "验证码错误/账号或密码错误/请输入账号"
-// @Failure 403 {object} map[string]any "无管理后台权限/请先验证邮箱"
-// @Failure 423 {object} map[string]any "账号已锁定"
-// @Router /admin/login [post]
-func (h *Admin) Login(c *gin.Context) {
-	var body map[string]any
-	_ = c.ShouldBindJSON(&body)
-	username := asString(body["username"])
-	account := asString(body["account"])
-	email := asString(body["email"])
-	password := asString(body["password"])
-	screenWidth := toInt(body["screenWidth"])
-	screenHeight := toInt(body["screenHeight"])
-	language := asString(body["language"])
-	altcha := asString(body["altcha"])
-
-	if !h.verifyAdminAltcha(altcha, c.GetHeader("x-dev-token")) {
-		c.JSON(400, gin.H{"message": "验证码错误或已过期"})
-		return
-	}
-	// 登录标识符：兼容 username / account / email 三种字段名。
-	identifier := account
-	if identifier == "" {
-		identifier = email
-	}
-	if identifier == "" {
-		identifier = username
-	}
-	if identifier == "" {
-		c.JSON(400, gin.H{"message": "请输入账号"})
-		return
-	}
-	ctx := c.Request.Context()
-	user, err := h.Repos.Users.AdminFindByIdentifierWithAuth(ctx, identifier)
-	if err != nil {
-		if repository.IsNotFound(err) {
-			c.JSON(400, gin.H{"message": "用户名或密码错误"})
-			return
-		}
-		c.JSON(500, gin.H{"message": "服务器错误"})
-		return
-	}
-	if user.Role != "admin" && user.Role != "superadmin" {
-		c.JSON(403, gin.H{"message": "无管理后台权限"})
-		return
-	}
-	if repository.IsLocked(user) {
-		c.JSON(423, gin.H{"message": "账号已被锁定，请30分钟后再试"})
-		return
-	}
-	if !auth.Compare(user.Password, password) {
-		_ = h.Repos.Users.IncLoginAttempts(ctx, user.ID)
-		c.JSON(400, gin.H{"message": "用户名或密码错误"})
-		return
-	}
-	_ = h.Repos.Users.ResetLoginAttempts(ctx, user.ID)
-
-	// 邮箱验证检查（非生产 DEMO_EMAILS 跳过）。
-	if !user.IsEmailVerified && !h.adminDemoEmail(user.Email) {
-		c.JSON(403, gin.H{"message": "请先验证邮箱后再登录管理后台"})
-		return
-	}
-	// 该入口仅开发环境开放；即便在开发环境，也不允许绕过 2FA。
-	if user.TwoFactorEnabled {
-		c.JSON(403, gin.H{"message": "该账号已开启两步验证，请使用前台登录入口完成验证", "need2FA": true})
-		return
-	}
-
-	accessToken, err := h.AuthMW.Signer.Sign(user.ID.Hex(), "access", h.Config.JWT.AccessTTL, map[string]string{"jti": auth.RandomHex(24)})
-	if err != nil {
-		c.JSON(500, gin.H{"message": "服务器错误"})
-		return
-	}
-	refreshToken, err := h.AuthMW.Signer.Sign(user.ID.Hex(), "refresh", h.Config.JWT.RefreshTTL,
-		map[string]string{"jti": auth.RandomHex(24)})
-	if err != nil {
-		c.JSON(500, gin.H{"message": "服务器错误"})
-		return
-	}
-
-	ua := c.Request.UserAgent()
-	ip := h.clientIP(c)
-	parsed := auth.ParseUserAgent(ua)
-	di := model.DeviceInfo{
-		Browser:        parsed.Browser,
-		BrowserVersion: parsed.BrowserVersion,
-		OS:             parsed.OS,
-		OSVersion:      parsed.OSVersion,
-		DeviceType:     parsed.DeviceType,
-		DeviceModel:    parsed.DeviceModel,
-		UserAgent:      ua,
-	}
-	if screenWidth != 0 {
-		di.ScreenWidth = screenWidth
-	}
-	if screenHeight != 0 {
-		di.ScreenHeight = screenHeight
-	}
-	if language != "" {
-		di.Language = language
-	}
-	now := time.Now()
-	session := &model.UserSession{
-		UserID:           user.ID,
-		TokenHash:        auth.HashToken(accessToken),
-		RefreshTokenHash: auth.HashToken(refreshToken),
-		DeviceInfo:       di,
-		IP:               ip,
-		IsActive:         true,
-		LoginAt:          now,
-		LastActiveAt:     now,
-	}
-	if err := h.Repos.Sessions.Create(ctx, session); err != nil {
-		c.JSON(500, gin.H{"message": "服务器错误"})
-		return
-	}
-	// 更新最后登录信息（lastLoginAt/lastLoginIp）。
-	if err := h.Repos.Users.AdminUpdateLastLogin(ctx, user.ID, now, ip); err != nil {
-		c.JSON(500, gin.H{"message": "服务器错误"})
-		return
-	}
-	auth.SetAuthCookies(c, accessToken, refreshToken, !h.Config.IsDev)
-
-	c.JSON(200, gin.H{
-		"_id":              user.ID.Hex(),
-		"username":         user.Username,
-		"accountId":        user.AccountID,
-		"email":            user.Email,
-		"role":             user.Role,
-		"avatar":           user.Avatar,
-		"forceEmailChange": user.Role == "superadmin" && user.Email == adminDefaultSuperEmail,
-	})
-}
 
 // Verify GET /api/admin/verify（adminProtect）。
 // @Summary 校验管理令牌有效性
@@ -1210,56 +1060,6 @@ func adminCreatorProfileJSON(p *model.CreatorProfile, refs map[string]repository
 
 // ---- 工具函数 ----
 
-// verifyAdminAltcha 校验 altcha payload；DEV_API_TOKEN 配置且 x-dev-token 匹配时
-// 直接通过（开发口令绕过，勿移除）。
-func (h *Admin) verifyAdminAltcha(payload, devToken string) bool {
-	if h.Config.JWT.DevAPIToken != "" && devToken == h.Config.JWT.DevAPIToken {
-		return true
-	}
-	if payload == "" {
-		return false
-	}
-	raw, err := base64.StdEncoding.DecodeString(payload)
-	if err != nil {
-		return false
-	}
-	var p altchalib.Payload
-	if err := json.Unmarshal(raw, &p); err != nil {
-		return false
-	}
-	res, err := altchalib.VerifySolution(altchalib.VerifySolutionOptions{
-		Challenge:           p.Challenge,
-		Solution:            p.Solution,
-		DeriveKey:           altchalib.DeriveKeySHA(),
-		HMACSignatureSecret: h.altchaHMACSecret(),
-	})
-	return err == nil && res.Verified
-}
-
-// altchaHMACSecret 派生 altcha HMAC 密钥：优先配置，缺省 sha256("altcha-"+JWT_SECRET)
-// 的 hex（派生方式是固定契约，改动会使既有 altcha 校验全部失效）。
-func (h *Admin) altchaHMACSecret() string {
-	if k := h.Config.JWT.AltchaHMACKey; k != "" {
-		return k
-	}
-	sum := sha256.Sum256([]byte("altcha-" + h.Config.JWT.Secret))
-	return hex.EncodeToString(sum[:])
-}
-
-// adminDemoEmail 判断邮箱是否在 DEMO_EMAILS 跳过列表中（仅非生产生效）。
-func (h *Admin) adminDemoEmail(email string) bool {
-	if !h.Config.IsDev {
-		return false
-	}
-	lower := strings.ToLower(email)
-	for _, d := range h.Config.JWT.DemoEmails {
-		if strings.EqualFold(d, lower) {
-			return true
-		}
-	}
-	return false
-}
-
 // adminNonWordRe 匹配非 \w 字符（等价 /[^\w]/g）。
 var adminNonWordRe = regexp.MustCompile(`[^\w]`)
 
@@ -1334,21 +1134,4 @@ func adminEscapeHtml(s string) string {
 	s = strings.ReplaceAll(s, `"`, "&quot;")
 	s = strings.ReplaceAll(s, "'", "&#039;")
 	return s
-}
-
-// clientIP 提取客户端 IP：优先反代覆盖写入的 X-Real-IP，其次 XFF 首值。
-func (h *Admin) clientIP(c *gin.Context) string {
-	if xri := strings.TrimSpace(c.GetHeader("X-Real-IP")); xri != "" {
-		return xri
-	}
-	if xff := c.GetHeader("X-Forwarded-For"); xff != "" {
-		if first := ratelimit.NormalizeXFF(xff); first != "" {
-			return first
-		}
-	}
-	host, _, err := net.SplitHostPort(c.Request.RemoteAddr)
-	if err != nil {
-		return c.Request.RemoteAddr
-	}
-	return host
 }

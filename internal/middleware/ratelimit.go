@@ -34,16 +34,12 @@ type specLimiter struct {
 // RateLimit 构造一个命名限流中间件（挂载语义为固定契约），
 // 计数由 github.com/ulule/limiter 提供：
 //
-//   - spec.Mounts 为空 → 全局型：匹配 /api 与全部 /api/ 前缀（含 /api/v1/、
-//     /api/health），并跳过 /api/translate 与 /api/auth/captcha 路径
-//     （全局型固定 skip 规则）；
-//   - spec.Mounts 非空 → 端点型：只匹配 /api/<Mount> 精确与子路径，
-//     【不】匹配 /api/v1/ 前缀（限流挂载不对称铁律，勿改）。
+//   - spec.Mounts 为空 → 全局型：匹配 /api 与全部 /api/ 前缀（含 /api/health），
+//     并跳过 /api/translate 与 /api/auth/captcha 路径（全局型固定 skip 规则）；
+//   - spec.Mounts 非空 → 端点型：只匹配 /api/<Mount> 精确与子路径。
 //
 // auth（AuthSpec）在非生产且 SKIP_RATE_LIMIT=1 时整体跳过（该 spec 固定 skip 规则）。
-// requestEmailChange 的 key 生成规则是固定契约，勿改（改动会使既有计数失效）：
-// [object Object]:<newEmail 小写>（keyGenerator 把请求对象传给了 ipKeyGenerator
-// 所致的历史怪癖）。
+// requestEmailChange 同时按来源 IP 与目标邮箱小写值限流，避免用不同邮箱刷验证邮件。
 //
 // 429 响应体 {"message": <spec.Message>}，并设置 draft-6 标准限流头：
 // RateLimit-Policy / -Limit / -Remaining / -Reset，以及 Retry-After。
@@ -62,12 +58,8 @@ func RateLimit(spec ratelimit.Spec, opts RateLimitOpts) gin.HandlerFunc {
 	type prefixPair struct{ exact, sub string }
 	var mounts []prefixPair
 	for _, m := range spec.Mounts {
-		// 端点限流必须同时覆盖 /api/<mount> 与 /api/v1/<mount>，
-		// 否则攻击者可通过 v1 镜像绕过登录/注册/2FA/邮箱等限流。
-		for _, prefix := range []string{"/api", "/api/v1"} {
-			p := prefix + m
-			mounts = append(mounts, prefixPair{exact: p, sub: p + "/"})
-		}
+		p := "/api" + m
+		mounts = append(mounts, prefixPair{exact: p, sub: p + "/"})
 	}
 
 	return func(c *gin.Context) {

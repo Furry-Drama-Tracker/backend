@@ -11,7 +11,6 @@ const (
 	GlobalName             = "global"
 	CaptchaName            = "captcha"
 	AuthName               = "auth"
-	AdminAuthName          = "adminAuth"
 	RegisterName           = "register"
 	CheckAccountIDName     = "checkAccountId"
 	PasswordResetName      = "passwordReset"
@@ -24,9 +23,9 @@ const (
 // Spec 描述一个命名限流器（windowMs/max/message 为固定契约，勿随意改）。
 //
 // Mounts 列出该限流器的挂载路径（不含 /api 前缀）。空表示全局型
-// 限流器（挂载于 /api/，匹配全部 /api/ 前缀，含 /api/v1/ 与 /api/health）。
+// 限流器（挂载于 /api/，匹配全部 /api/ 前缀，含 /api/health）。
 // 挂载语义由 middleware.RateLimit 消费：每个 Mount 只匹配 /api/<Mount>
-// 精确与子路径，且【不】匹配 /api/v1/ 前缀。
+// 精确与子路径。
 type Spec struct {
 	Name    string
 	Mounts  []string
@@ -55,12 +54,6 @@ var (
 	// SKIP_RATE_LIMIT=1 时跳过（固定 skip 规则，由 middleware 施加）。
 	AuthSpec = Spec{
 		Name: AuthName, Mounts: []string{"/auth/login"},
-		Window: 15 * time.Minute, Max: 5,
-		Message: "登录尝试过多，请15分钟后再试",
-	}
-	// AdminAuthSpec 管理员登录限流器 5/15min（挂 /api/admin/login）。
-	AdminAuthSpec = Spec{
-		Name: AdminAuthName, Mounts: []string{"/admin/login"},
 		Window: 15 * time.Minute, Max: 5,
 		Message: "登录尝试过多，请15分钟后再试",
 	}

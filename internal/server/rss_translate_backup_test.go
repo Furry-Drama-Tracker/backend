@@ -60,9 +60,9 @@ func rssTranslateBackupApp(t *testing.T) (*httptest.Server, *mongo.Database, *re
 	r := gin.New()
 	r.Use(gin.Recovery())
 	api := r.Group("/api")
-	router.MountDual(api, "/rss", handler.NewRSS(repos, cfg, amw, rl).Register)
-	router.MountDual(api, "/translate", handler.NewTranslate(repos, cfg, amw, rl).Register)
-	router.MountDual(api, "/backup", handler.NewBackup(repos, cfg, amw, rl, db).Register)
+	router.Mount(api, "/rss", handler.NewRSS(repos, cfg, amw, rl).Register)
+	router.Mount(api, "/translate", handler.NewTranslate(repos, cfg, amw, rl).Register)
+	router.Mount(api, "/backup", handler.NewBackup(repos, cfg, amw, rl, db).Register)
 	ts := httptest.NewServer(r)
 	t.Cleanup(ts.Close)
 	return ts, db, repos, signer

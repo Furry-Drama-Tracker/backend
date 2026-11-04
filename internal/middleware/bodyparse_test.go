@@ -77,11 +77,9 @@ func TestBodyParseBackupImport50mb(t *testing.T) {
 	r := bodyRouter()
 	// 2MB > 1MB 但 < 50MB：备份导入路径应放行
 	big := `{"data":"` + strings.Repeat("a", (2<<20)+100) + `"}`
-	for _, p := range []string{"/api/backup/import", "/api/v1/backup/import"} {
-		w := do(r, http.MethodPost, p, big, "application/json")
-		if w.Code != 200 {
-			t.Fatalf("GET %s 2MB body 状态码=%d, want 200", p, w.Code)
-		}
+	w := do(r, http.MethodPost, "/api/backup/import", big, "application/json")
+	if w.Code != 200 {
+		t.Fatalf("POST /api/backup/import 2MB body 状态码=%d, want 200", w.Code)
 	}
 }
 

@@ -35,7 +35,7 @@ const viewCooldown = 10 * time.Minute
 const emailNotifyCooldown = time.Hour
 
 // Episodes 是剧集域（/api/episodes）handler 容器。16 个端点通过 Register 挂载到
-// /api/episodes（由 server.RegisterRoutes 的 MountDual 双版本镜像）。
+// /api/episodes（由 server.RegisterRoutes 挂载）。
 type Episodes struct {
 	Repos  *repository.Repos
 	Config *config.Config

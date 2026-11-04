@@ -5,7 +5,6 @@ import (
 	"errors"
 	"math"
 	"strings"
-	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -19,18 +18,6 @@ import (
 // 避免与其它域 agent 在各自 repo 文件里新增的方法重名。绝不修改 repos.go。
 
 // ---- UserRepo 扩展 ----
-
-// AdminFindByIdentifierWithAuth 按 邮箱或 accountId 二选一查找，附带密码哈希与
-// 锁定字段（findOne({$or:[{email},{accountId}]})，
-// 含 loginAttempts/lockUntil/password 投影）。排除 2FA 密文。
-func (r *UserRepo) AdminFindByIdentifierWithAuth(ctx context.Context, identifier string) (*model.User, error) {
-	ctx, cancel := r.newCtx(ctx)
-	defer cancel()
-	return r.findOne(ctx, bson.M{"$or": bson.A{
-		bson.M{"email": identifier},
-		bson.M{"accountId": identifier},
-	}}, bson.M{"twoFactorSecret": 0, "twoFactorBackupCodes": 0})
-}
 
 // AdminCountRoles 统计角色属于 roles 集合的用户数
 // （countDocuments({role:{$in:roles}})）。
@@ -131,16 +118,6 @@ func (r *UserRepo) AdminSetRole(ctx context.Context, id any, role string) error 
 	ctx, cancel := r.newCtx(ctx)
 	defer cancel()
 	_, err := r.coll.UpdateOne(ctx, bson.M{"_id": ToObjectID(id)}, bson.M{"$set": bson.M{"role": role}})
-	return err
-}
-
-// AdminUpdateLastLogin 更新最近登录时间与 IP（admin 登录成功时调用，
-// $set lastLoginAt/lastLoginIp 两字段）。
-func (r *UserRepo) AdminUpdateLastLogin(ctx context.Context, id any, lastLoginAt time.Time, ip string) error {
-	ctx, cancel := r.newCtx(ctx)
-	defer cancel()
-	_, err := r.coll.UpdateOne(ctx, bson.M{"_id": ToObjectID(id)},
-		bson.M{"$set": bson.M{"lastLoginAt": lastLoginAt, "lastLoginIp": ip}})
 	return err
 }
 

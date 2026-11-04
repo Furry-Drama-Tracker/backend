@@ -48,13 +48,13 @@ go build ./...         # 编译检查
    }
    ```
 2. **service**（如需业务逻辑）在 `service.AuthService` 加方法；纯透传可跳过。
-3. **挂路由**（`internal/server/register_routes.go`）在对应 `MountDual` 块内：
+3. **挂路由**（`internal/server/register_routes.go`）在对应 `Mount` 块内：
    ```go
    g.GET("/ping", amw.Protect(), h.Ping)   // 需要登录就加 Protect
    // 需要限流：rl(ratelimit.XXXSpec)（见 ratelimit 包 Spec 定义）
    // 需要角色：amw.Protect("admin", "superadmin")
    ```
-   `MountDual` 自动获得 `/api/auth/ping` 与 `/api/v1/auth/ping`（v1 带弃用头）。
+   `Mount` 自动获得 `/api/auth/ping`（单前缀，不再提供 v1 镜像）。
 4. **swagger 注解**（`@Summary/@Tags/@Router`，参考 handler/auth.go 现有注解）→ `~/go/bin/swag init -g cmd/server/main.go --output docs` 重新生成 → 验证 `/api/docs`。
 
 **规则**：handler 不写业务逻辑（查询/决策都在 service）；错误用 `errors.New/NewKey` 抛，handler 用 `errors.AbortWithAppError(c, err, isDev)` 渲染。

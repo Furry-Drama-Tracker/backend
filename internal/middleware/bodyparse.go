@@ -15,7 +15,7 @@ import (
 const bodyContextKey = "bodyparse.body"
 
 // 请求体大小上限（固定值，勿随意改）：
-// 普通 JSON/urlencoded 1MB；/api/backup/import 与 /api/v1/backup/import 放宽到 50MB。
+// 普通 JSON/urlencoded 1MB；/api/backup/import 放宽到 50MB。
 const (
 	defaultBodyLimit = 1 << 20
 	importBodyLimit  = 50 << 20
@@ -27,7 +27,7 @@ const (
 )
 
 // backupImportPrefixes 是备份导入路径（精确或子路径命中则放大体限制）。
-var backupImportPrefixes = []string{"/api/backup/import", "/api/v1/backup/import"}
+var backupImportPrefixes = []string{"/api/backup/import"}
 
 // SetBody 把解析后的请求体存入上下文。供 W1 的 SanitizeInput 等后续中间件读取。
 func SetBody(c *gin.Context, m map[string]any) {
@@ -50,7 +50,7 @@ func GetBody(c *gin.Context) map[string]any {
 //   - Content-Type 为 application/x-www-form-urlencoded → 表单解析（支持 a[b]=c 嵌套）；
 //   - 其他 Content-Type 不解析（按 Content-Type 精确匹配）。
 //
-// 大小上限 1MB，/api/backup/import 与 /api/v1/backup/import（含子路径）放宽到 50MB
+// 大小上限 1MB，/api/backup/import（含子路径）放宽到 50MB
 // （仅 JSON；urlencoded 保持 1MB——50MB 放宽只作用于 JSON 解析，固定行为）。
 // 超限 → 413 {"message":"request entity too large"}；JSON 语法错误 → 400。
 // 解析结果经 SetBody 存入上下文，供 GetBody / 限流 key 使用；同时把原始体还原到

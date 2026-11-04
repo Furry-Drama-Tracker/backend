@@ -92,7 +92,7 @@ internal/
   config/              ini+env 加载与校验
   server/              Gin 装配（中间件管线顺序）+ 路由注册表
   middleware/          CORS/CSRF/Protect 鉴权/ratelimit/apitracker/requestlogger/bodyparse/sanitize...
-  router/              双版本挂载（/api/X 与 /api/v1/X + Deprecation/Sunset）
+  router/              领域路由挂载辅助（/api 单前缀）
   handler/             薄 HTTP 层（auth + usersession/twofactor/users + 内容域 episodes/series/follows/favorites/folders/histories/ratings + 管理/审核/站点长尾/通知/工具）
   service/             领域逻辑（登录分支流、refresh 轮换+重用检测、设备登录码链、2FA、导出）
   repository/          mongo 仓储（Repos 聚合，ToObjectID 规范化）
@@ -119,7 +119,7 @@ deploy/                systemd unit + ini 模板 + run.sh
 - **Altcha PoW 验证码**：SHA-256 cost 10000；`DEV_API_TOKEN` + `x-dev-token` 头可绕过（仅开发）。
 - **账号锁定**：5 次失败锁 30 分钟（`loginAttempts`/`lockUntil`）。
 - **字段加密**：AES-256-CBC，`enc:iv:ct`，key=`sha256(ENCRYPTION_KEY 或 JWT_SECRET)`，兼容既有加密数据。
-- **限流**：全局 300/min + 各端点专用（login 5/15min、register 3/h 等）；per-endpoint 不作用于 `/api/v1/`。
+- **限流**：全局 300/min + 各端点专用（login 5/15min、register 3/h 等）；per-endpoint 只匹配 `/api/<mount>`。
 
 ## 部署
 
@@ -140,4 +140,4 @@ deploy/                systemd unit + ini 模板 + run.sh
 - **公告/壁纸/友链**：announcements、wallpapers、friend-links
 - **工具**：rss、translate、backup
 
-全部端点经 `router.MountDual` 同时获得 `/api` 与 `/api/v1` 双版本（Deprecation/Sunset 头）。
+全部端点经 `router.Mount` 挂载在 `/api` 下（v1 镜像已移除）。
