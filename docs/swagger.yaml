@@ -1,6 +1,6 @@
 basePath: /api
 definitions:
-  github_com_xiedada05_furry-drama-be-neo_internal_auth.DeviceInfoPayload:
+  auth.DeviceInfoPayload:
     properties:
       browser:
         type: string
@@ -23,31 +23,120 @@ definitions:
       screenWidth:
         type: integer
     type: object
-  internal_handler.loginRequest:
+  handler.loginRequest:
     properties:
       altcha:
         type: string
       deviceInfo:
-        $ref: '#/definitions/github_com_xiedada05_furry-drama-be-neo_internal_auth.DeviceInfoPayload'
+        $ref: '#/definitions/auth.DeviceInfoPayload'
       email:
         type: string
       password:
         type: string
     type: object
-  internal_handler.registerRequest:
+  handler.registerRequest:
     properties:
       accountId:
         type: string
       altcha:
         type: string
       deviceInfo:
-        $ref: '#/definitions/github_com_xiedada05_furry-drama-be-neo_internal_auth.DeviceInfoPayload'
+        $ref: '#/definitions/auth.DeviceInfoPayload'
       email:
         type: string
       password:
         type: string
       username:
         type: string
+    type: object
+  model.Folder:
+    properties:
+      _id:
+        type: string
+      createdAt:
+        type: string
+      description:
+        type: string
+      name:
+        type: string
+      shareToken:
+        description: ShareToken 分享令牌；未分享时为 nil（JSON 输出 null，与既有数据缺省形态一致）。
+        type: string
+      sortOrder:
+        type: integer
+      type:
+        type: string
+      userId:
+        type: string
+    type: object
+  model.SavedFolder:
+    properties:
+      _id:
+        type: string
+      createdAt:
+        type: string
+      creatorId:
+        type: string
+      creatorName:
+        type: string
+      description:
+        type: string
+      folderName:
+        type: string
+      folderType:
+        type: string
+      shareToken:
+        type: string
+      userId:
+        type: string
+    type: object
+  model.Series:
+    properties:
+      _id:
+        type: string
+      createdAt:
+        type: string
+      createdBy:
+        type: string
+      description:
+        type: string
+      descriptionEn:
+        type: string
+      descriptionJa:
+        type: string
+      episodes:
+        items:
+          type: string
+        type: array
+      name:
+        type: string
+      nameEn:
+        type: string
+      nameJa:
+        type: string
+      updatedAt:
+        type: string
+    type: object
+  model.Wallpaper:
+    properties:
+      addedAt:
+        type: string
+      name:
+        type: string
+      url:
+        type: string
+    type: object
+  pagination.Result:
+    properties:
+      limit:
+        type: integer
+      list: {}
+      page:
+        type: integer
+      total:
+        type: integer
+      totalPages:
+        type: integer
     type: object
 host: localhost:5000
 info:
@@ -140,6 +229,698 @@ paths:
       summary: 确认开启 2FA
       tags:
       - 2FA
+  /activity:
+    get:
+      parameters:
+      - description: 页码
+        in: query
+        name: page
+        type: integer
+      - description: 每页数量
+        in: query
+        name: limit
+        type: integer
+      responses:
+        "200":
+          description: activities/page/limit/total/totalPages
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - bearerAuth: []
+      summary: 我的动态流
+      tags:
+      - 动态
+  /activity/public:
+    get:
+      responses:
+        "200":
+          description: activities/total
+          schema:
+            additionalProperties: true
+            type: object
+      summary: 公开动态流
+      tags:
+      - 动态
+  /admin/{id}:
+    delete:
+      parameters:
+      - description: 账户 ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: message
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: 不能删除自己/最后一个超管/非管理账户
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: 账户不存在
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - bearerAuth: []
+      summary: 删除管理/创作者账户
+      tags:
+      - 管理后台
+  /admin/creator-profiles:
+    get:
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              additionalProperties: true
+              type: object
+            type: array
+      security:
+      - bearerAuth: []
+      summary: 创作者主页列表（含创作者用户信息）
+      tags:
+      - 管理后台
+  /admin/creator-profiles/{id}:
+    get:
+      parameters:
+      - description: 主页 ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: 创作者主页不存在
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - bearerAuth: []
+      summary: 创作者主页详情
+      tags:
+      - 管理后台
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: 主页 ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: displayName/avatar/bio/socialLinks/qqGroupLink
+        in: body
+        name: body
+        required: true
+        schema:
+          type: object
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: 创作者主页不存在
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - bearerAuth: []
+      summary: 编辑创作者主页
+      tags:
+      - 管理后台
+  /admin/creator-profiles/{id}/approve:
+    put:
+      parameters:
+      - description: 主页 ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: 创作者主页不存在
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - bearerAuth: []
+      summary: 通过创作者主页修改
+      tags:
+      - 管理后台
+  /admin/creator-profiles/{id}/reject:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: 主页 ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: note
+        in: body
+        name: body
+        required: true
+        schema:
+          type: object
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: 创作者主页不存在
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - bearerAuth: []
+      summary: 拒绝创作者主页修改
+      tags:
+      - 管理后台
+  /admin/creators:
+    get:
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              additionalProperties: true
+              type: object
+            type: array
+      security:
+      - bearerAuth: []
+      summary: 创作者列表
+      tags:
+      - 管理后台
+  /admin/list:
+    get:
+      parameters:
+      - description: 页码（默认 1）
+        in: query
+        name: page
+        type: integer
+      - description: 每页数量（默认 20，上限 100）
+        in: query
+        name: limit
+        type: integer
+      responses:
+        "200":
+          description: list/page/limit/total/totalPages
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - bearerAuth: []
+      summary: 管理/创作者账户列表
+      tags:
+      - 管理后台
+  /admin/logout:
+    post:
+      responses:
+        "200":
+          description: message
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - bearerAuth: []
+      summary: 管理员退出登录
+      tags:
+      - 管理后台
+  /admin/pending-counts:
+    get:
+      responses:
+        "200":
+          description: episodes/reports/feedbacks/friendLinks
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - bearerAuth: []
+      summary: 待办数量统计
+      tags:
+      - 管理后台
+  /admin/register:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: username/email/password/role/accountId
+        in: body
+        name: body
+        required: true
+        schema:
+          type: object
+      responses:
+        "200":
+          description: 用户对象 + message
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: 校验失败
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - bearerAuth: []
+      summary: 创建管理/创作者账户
+      tags:
+      - 管理后台
+  /admin/role/{id}:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: 账户 ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: role
+        in: body
+        name: body
+        required: true
+        schema:
+          type: object
+      responses:
+        "200":
+          description: 用户对象
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: 无效的角色/不能修改自己/最后一个超管
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: 账户不存在
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - bearerAuth: []
+      summary: 修改账户角色
+      tags:
+      - 管理后台
+  /admin/user-admin-access/{id}:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: 用户 ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: adminAccess
+        in: body
+        name: body
+        required: true
+        schema:
+          type: object
+      responses:
+        "200":
+          description: message/adminAccess/role
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: 参数错误/不能修改超管或创作者权限
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: 用户不存在
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - bearerAuth: []
+      summary: 切换用户管理权限
+      tags:
+      - 管理后台
+  /admin/users:
+    get:
+      parameters:
+      - description: 页码（默认 1）
+        in: query
+        name: page
+        type: integer
+      - description: 每页数量（默认 20，上限 200）
+        in: query
+        name: limit
+        type: integer
+      - description: 关键词（accountId/username/email）
+        in: query
+        name: search
+        type: string
+      responses:
+        "200":
+          description: list/page/limit/total/totalPages
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - bearerAuth: []
+      summary: 用户列表
+      tags:
+      - 管理后台
+  /admin/users/{id}:
+    delete:
+      parameters:
+      - description: 用户 ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: message
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: 不能删除自己/最后一个超管
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: 用户不存在
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - bearerAuth: []
+      summary: 删除用户（级联清理）
+      tags:
+      - 管理后台
+  /admin/verify:
+    get:
+      responses:
+        "200":
+          description: valid/admin
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - bearerAuth: []
+      summary: 校验管理令牌有效性
+      tags:
+      - 管理后台
+  /admin/verify-password:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: password
+        in: body
+        name: body
+        required: true
+        schema:
+          type: object
+      responses:
+        "200":
+          description: verified
+          schema:
+            additionalProperties:
+              type: boolean
+            type: object
+        "400":
+          description: 请输入密码/密码错误
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: 未找到
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - bearerAuth: []
+      summary: 校验管理员密码
+      tags:
+      - 管理后台
+  /announcements:
+    get:
+      responses:
+        "200":
+          description: 公告列表（createdAt 倒序）
+          schema:
+            items:
+              additionalProperties: true
+              type: object
+            type: array
+      security:
+      - bearerAuth: []
+      summary: 公告列表（管理后台）
+      tags:
+      - 公告
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: title/content 必填；其余字段可选
+        in: body
+        name: body
+        required: true
+        schema:
+          type: object
+      responses:
+        "200":
+          description: 公告对象
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: 标题和内容不能为空
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - bearerAuth: []
+      summary: 创建公告
+      tags:
+      - 公告
+  /announcements/{id}:
+    delete:
+      parameters:
+      - description: 公告 ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: 已删除
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Announcement not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - bearerAuth: []
+      summary: 删除公告
+      tags:
+      - 公告
+    get:
+      parameters:
+      - description: 公告 ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: 公告对象
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Announcement not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: 获取公告详情
+      tags:
+      - 公告
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: 公告 ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: 可更新字段
+        in: body
+        name: body
+        required: true
+        schema:
+          type: object
+      responses:
+        "200":
+          description: 公告对象
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Announcement not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - bearerAuth: []
+      summary: 更新公告
+      tags:
+      - 公告
+  /announcements/{id}/send-email:
+    post:
+      parameters:
+      - description: 公告 ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: message/sent
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: 该公告未启用邮件推送
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Announcement not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - bearerAuth: []
+      summary: 手动触发公告邮件推送
+      tags:
+      - 公告
+  /announcements/{id}/send-notification:
+    post:
+      parameters:
+      - description: 公告 ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: message/count
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: 该公告未启用通知推送
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Announcement not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - bearerAuth: []
+      summary: 手动触发公告通知推送
+      tags:
+      - 公告
+  /announcements/active:
+    get:
+      parameters:
+      - description: 渠道过滤 popup|banner
+        in: query
+        name: channel
+        type: string
+      responses:
+        "200":
+          description: 公告列表（≤20）
+          schema:
+            items:
+              additionalProperties: true
+              type: object
+            type: array
+      summary: 获取生效中的公告
+      tags:
+      - 公告
+  /audit-logs:
+    get:
+      parameters:
+      - description: 页码（默认 1）
+        in: query
+        name: page
+        type: integer
+      - description: 每页数量（默认 50）
+        in: query
+        name: limit
+        type: integer
+      - description: 操作关键词
+        in: query
+        name: action
+        type: string
+      - description: 操作者昵称关键词
+        in: query
+        name: admin
+        type: string
+      - description: 被操作用户关键词
+        in: query
+        name: user
+        type: string
+      responses:
+        "200":
+          description: logs/total/page/totalPages
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - bearerAuth: []
+      summary: 审计日志列表
+      tags:
+      - 审计日志
   /auth/cancel-deletion:
     post:
       responses:
@@ -328,7 +1109,7 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/internal_handler.loginRequest'
+          $ref: '#/definitions/handler.loginRequest'
       produces:
       - application/json
       responses:
@@ -432,7 +1213,7 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/internal_handler.registerRequest'
+          $ref: '#/definitions/handler.registerRequest'
       produces:
       - application/json
       responses:
@@ -628,6 +1409,2838 @@ paths:
       summary: 确认修改邮箱
       tags:
       - 认证
+  /auto-status/auto-complete:
+    post:
+      responses:
+        "200":
+          description: message/updated
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - bearerAuth: []
+      summary: 自动完结剧集
+      tags:
+      - 自动任务
+  /auto-status/check-premieres:
+    post:
+      responses:
+        "200":
+          description: message/released
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - bearerAuth: []
+      summary: 自动发布预告单集
+      tags:
+      - 自动任务
+  /backup/export:
+    get:
+      responses:
+        "200":
+          description: 各集合文档数组；users 剔除敏感字段
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - bearerAuth: []
+      summary: 导出全库备份（JSON 下载）
+      tags:
+      - 备份
+  /backup/import:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: '{data: 备份对象, overwrite: 是否覆盖}'
+        in: body
+        name: body
+        required: true
+        schema:
+          type: object
+      responses:
+        "200":
+          description: message/results
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - bearerAuth: []
+      summary: 恢复备份数据
+      tags:
+      - 备份
+  /banners:
+    get:
+      responses:
+        "200":
+          description: 轮播图数组
+          schema:
+            items:
+              additionalProperties: true
+              type: object
+            type: array
+      summary: 轮播图列表（激活中）
+      tags:
+      - 轮播图
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: title/titleEn/titleJa/subtitle/subtitleEn/subtitleJa/image/link/order/active
+        in: body
+        name: body
+        required: true
+        schema:
+          type: object
+      responses:
+        "200":
+          description: 轮播图对象
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - bearerAuth: []
+      summary: 创建轮播图
+      tags:
+      - 轮播图
+  /banners/{id}:
+    delete:
+      parameters:
+      - description: 轮播图 ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: message
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - bearerAuth: []
+      summary: 删除轮播图
+      tags:
+      - 轮播图
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: 轮播图 ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: 可更新字段（全字段可选）
+        in: body
+        name: body
+        required: true
+        schema:
+          type: object
+      responses:
+        "200":
+          description: 轮播图对象
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - bearerAuth: []
+      summary: 更新轮播图
+      tags:
+      - 轮播图
+  /banners/all:
+    get:
+      responses:
+        "200":
+          description: 轮播图数组
+          schema:
+            items:
+              additionalProperties: true
+              type: object
+            type: array
+      security:
+      - bearerAuth: []
+      summary: 轮播图列表（全部）
+      tags:
+      - 轮播图
+  /categories:
+    get:
+      responses:
+        "200":
+          description: 分类数组
+          schema:
+            items:
+              additionalProperties: true
+              type: object
+            type: array
+      summary: 分类列表
+      tags:
+      - 分类
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: name/nameEn/nameJa/order
+        in: body
+        name: body
+        required: true
+        schema:
+          type: object
+      responses:
+        "200":
+          description: 分类对象
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - bearerAuth: []
+      summary: 创建分类
+      tags:
+      - 分类
+  /categories/{id}:
+    delete:
+      parameters:
+      - description: 分类 ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: message
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - bearerAuth: []
+      summary: 删除分类
+      tags:
+      - 分类
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: 分类 ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: 可更新字段 name/nameEn/nameJa/order
+        in: body
+        name: body
+        required: true
+        schema:
+          type: object
+      responses:
+        "200":
+          description: 分类对象
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - bearerAuth: []
+      summary: 更新分类
+      tags:
+      - 分类
+  /creator-profile/by-creator/{creatorId}:
+    get:
+      parameters:
+      - description: 创作者用户 ID
+        in: path
+        name: creatorId
+        required: true
+        type: string
+      responses:
+        "200":
+          description: profile + episodes
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Profile not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: 按创作者用户 ID 查询公开主页
+      tags:
+      - 创作者主页
+  /creator-profile/my-profile:
+    get:
+      responses:
+        "200":
+          description: 创作者主页文档
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - bearerAuth: []
+      summary: 获取我的创作者主页
+      tags:
+      - 创作者主页
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: displayName/avatar/bio/socialLinks/qqGroupLink
+        in: body
+        name: body
+        required: true
+        schema:
+          type: object
+      responses:
+        "200":
+          description: 创作者主页文档
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - bearerAuth: []
+      summary: 更新我的创作者主页（暂存待审核）
+      tags:
+      - 创作者主页
+  /creator-profile/public/{id}:
+    get:
+      parameters:
+      - description: 创作者主页 ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: profile + episodes
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Profile not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: 公开创作者主页
+      tags:
+      - 创作者主页
+  /creator/editable:
+    get:
+      parameters:
+      - description: 页码
+        in: query
+        name: page
+        type: integer
+      - description: 每页数量（默认20，上限100）
+        in: query
+        name: limit
+        type: integer
+      responses:
+        "200":
+          description: list/page/limit/total/totalPages
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - bearerAuth: []
+      summary: 创作中心-可编辑剧集
+      tags:
+      - 创作者
+  /creator/my-episodes:
+    get:
+      parameters:
+      - description: 页码
+        in: query
+        name: page
+        type: integer
+      - description: 每页数量（默认20，上限100）
+        in: query
+        name: limit
+        type: integer
+      responses:
+        "200":
+          description: list/page/limit/total/totalPages
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - bearerAuth: []
+      summary: 创作中心-我的剧集
+      tags:
+      - 创作者
+  /episode-trash:
+    get:
+      parameters:
+      - description: 页码（默认 1）
+        in: query
+        name: page
+        type: integer
+      - description: 每页数量（默认 20，上限 100）
+        in: query
+        name: limit
+        type: integer
+      responses:
+        "200":
+          description: list/page/limit/total/totalPages
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - bearerAuth: []
+      summary: 回收站剧集列表
+      tags:
+      - 回收站
+  /episode-trash/{id}:
+    delete:
+      parameters:
+      - description: 剧集 ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: message
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Episode not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - bearerAuth: []
+      summary: 彻底删除回收站剧集（清理全部关联数据，释放服务器资源）
+      tags:
+      - 回收站
+  /episode-trash/{id}/restore:
+    put:
+      parameters:
+      - description: 剧集 ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: 剧集对象
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Episode not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - bearerAuth: []
+      summary: 从回收站恢复剧集（移回正式集合，可再次编辑/重新提交审核）
+      tags:
+      - 回收站
+  /episode-trash/{id}/versions:
+    get:
+      parameters:
+      - description: 剧集 ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              additionalProperties: true
+              type: object
+            type: array
+      security:
+      - bearerAuth: []
+      summary: 回收站剧集的编辑内容日志（版本快照）
+      tags:
+      - 回收站
+  /episodes:
+    get:
+      parameters:
+      - description: 页码
+        in: query
+        name: page
+        type: integer
+      - description: 每页数量（≤100）
+        in: query
+        name: limit
+        type: integer
+      - description: 分类
+        in: query
+        name: category
+        type: string
+      - description: latest|views|premiere|rating
+        in: query
+        name: sort
+        type: string
+      - description: 状态
+        in: query
+        name: status
+        type: string
+      - description: 标签
+        in: query
+        name: tag
+        type: string
+      - description: 关键词（标题/简介）
+        in: query
+        name: search
+        type: string
+      - description: 最低评分
+        in: query
+        name: minRating
+        type: number
+      - description: 年份或 earlier
+        in: query
+        name: year
+        type: string
+      - description: desc|asc
+        in: query
+        name: order
+        type: string
+      responses:
+        "200":
+          description: episodes/page/limit/total/totalPages
+          schema:
+            additionalProperties: true
+            type: object
+      summary: 剧集列表
+      tags:
+      - 剧集
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 剧集信息
+        in: body
+        name: body
+        required: true
+        schema:
+          type: object
+      responses:
+        "201":
+          description: 剧集对象
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - bearerAuth: []
+      summary: 创建剧集
+      tags:
+      - 剧集
+  /episodes/{id}:
+    delete:
+      parameters:
+      - description: 剧集 ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: message
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - bearerAuth: []
+      summary: 删除剧集（移入回收站）
+      tags:
+      - 剧集
+    get:
+      parameters:
+      - description: 剧集 ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: 剧集对象 + episodes 单集数组
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - bearerAuth: []
+      summary: 剧集详情
+      tags:
+      - 剧集
+    put:
+      parameters:
+      - description: 剧集 ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: 可更新字段 + changeSummary
+        in: body
+        name: body
+        required: true
+        schema:
+          type: object
+      responses:
+        "200":
+          description: 剧集对象
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - bearerAuth: []
+      summary: 更新剧集
+      tags:
+      - 剧集
+  /episodes/{id}/episodes:
+    post:
+      parameters:
+      - description: 剧集 ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: 单集信息
+        in: body
+        name: body
+        required: true
+        schema:
+          type: object
+      responses:
+        "201":
+          description: 单集对象
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - bearerAuth: []
+      summary: 为剧集添加单集
+      tags:
+      - 剧集
+  /episodes/{id}/resubmit:
+    post:
+      parameters:
+      - description: 剧集 ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: 剧集对象
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - bearerAuth: []
+      summary: 重新提交审核
+      tags:
+      - 剧集
+  /episodes/{id}/user-status:
+    get:
+      parameters:
+      - description: 剧集 ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: isFollowing/followedAtEpisodes/watchedEpisodes/score/isFavorite
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - bearerAuth: []
+      summary: 当前用户对剧集的状态
+      tags:
+      - 剧集
+  /episodes/{id}/view:
+    put:
+      parameters:
+      - description: 剧集 ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: 剧集对象
+          schema:
+            additionalProperties: true
+            type: object
+      summary: 观看计数 +1
+      tags:
+      - 剧集
+  /episodes/popular-tags:
+    get:
+      responses:
+        "200":
+          description: name/count
+          schema:
+            items:
+              additionalProperties: true
+              type: object
+            type: array
+      summary: 热门标签 Top20
+      tags:
+      - 剧集
+  /episodes/search:
+    get:
+      parameters:
+      - description: 关键词
+        in: query
+        name: q
+        required: true
+        type: string
+      - description: 条数（默认10，≤50）
+        in: query
+        name: limit
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              additionalProperties: true
+              type: object
+            type: array
+      summary: 搜索剧集
+      tags:
+      - 剧集
+  /episodes/search-suggestions:
+    get:
+      parameters:
+      - description: 关键词
+        in: query
+        name: q
+        required: true
+        type: string
+      responses:
+        "200":
+          description: titles/tags
+          schema:
+            additionalProperties: true
+            type: object
+      summary: 搜索建议（标题/标签）
+      tags:
+      - 剧集
+  /episodes/single/{id}:
+    delete:
+      parameters:
+      - description: 单集 ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: message
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - bearerAuth: []
+      summary: 删除单集
+      tags:
+      - 剧集
+    put:
+      parameters:
+      - description: 单集 ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: 单集可更新字段
+        in: body
+        name: body
+        required: true
+        schema:
+          type: object
+      responses:
+        "200":
+          description: 单集对象
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - bearerAuth: []
+      summary: 更新单集
+      tags:
+      - 剧集
+  /episodes/single/{id}/view:
+    put:
+      parameters:
+      - description: 单集 ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: 单集对象
+          schema:
+            additionalProperties: true
+            type: object
+      summary: 单集观看计数 +1
+      tags:
+      - 剧集
+  /episodes/upload:
+    post:
+      consumes:
+      - multipart/form-data
+      parameters:
+      - description: 图片（≤5MB）
+        in: formData
+        name: image
+        required: true
+        type: file
+      responses:
+        "200":
+          description: url
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - bearerAuth: []
+      summary: 上传封面图片
+      tags:
+      - 剧集
+  /favorites/add:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: episodeId/folderId
+        in: body
+        name: body
+        required: true
+        schema:
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - bearerAuth: []
+      summary: 收藏剧集
+      tags:
+      - 收藏
+  /favorites/check/{episodeId}:
+    get:
+      parameters:
+      - description: 剧集 ID
+        in: path
+        name: episodeId
+        required: true
+        type: string
+      responses:
+        "200":
+          description: isFavorite
+          schema:
+            additionalProperties:
+              type: boolean
+            type: object
+      security:
+      - bearerAuth: []
+      summary: 是否收藏该剧集
+      tags:
+      - 收藏
+  /favorites/counts:
+    get:
+      responses:
+        "200":
+          description: total/unclassified/folders
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - bearerAuth: []
+      summary: 各收藏夹收藏计数
+      tags:
+      - 收藏
+  /favorites/list:
+    get:
+      parameters:
+      - description: 页码
+        in: query
+        name: page
+        type: integer
+      - description: 每页数量
+        in: query
+        name: limit
+        type: integer
+      - description: 收藏夹 ID 或 null
+        in: query
+        name: folderId
+        type: string
+      - description: updatedAt|name|rating|lastWatched
+        in: query
+        name: sort
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/pagination.Result'
+      security:
+      - bearerAuth: []
+      summary: 收藏列表
+      tags:
+      - 收藏
+  /favorites/remove:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: episodeId
+        in: body
+        name: body
+        required: true
+        schema:
+          type: object
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - bearerAuth: []
+      summary: 取消收藏
+      tags:
+      - 收藏
+  /feedback:
+    get:
+      parameters:
+      - description: pending|read|replied
+        in: query
+        name: status
+        type: string
+      - description: 页码
+        in: query
+        name: page
+        type: integer
+      - description: 每页数量（默认20，无上限钳制）
+        in: query
+        name: limit
+        type: integer
+      responses:
+        "200":
+          description: list/total/page/totalPages
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - bearerAuth: []
+      summary: 反馈列表（管理）
+      tags:
+      - 反馈
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: type/content
+        in: body
+        name: body
+        required: true
+        schema:
+          type: object
+      responses:
+        "200":
+          description: message
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: 无效的反馈类型/内容不能为空/内容不能超过2000字
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - bearerAuth: []
+      summary: 提交反馈
+      tags:
+      - 反馈
+  /feedback/{id}:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: 反馈 ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: status/reply
+        in: body
+        name: body
+        required: true
+        schema:
+          type: object
+      responses:
+        "200":
+          description: 反馈文档
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: 无效的状态值
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - bearerAuth: []
+      summary: 处理/回复反馈
+      tags:
+      - 反馈
+  /feedback/my:
+    get:
+      parameters:
+      - description: 页码
+        in: query
+        name: page
+        type: integer
+      - description: 每页数量（默认20，上限100）
+        in: query
+        name: limit
+        type: integer
+      responses:
+        "200":
+          description: list/page/limit/total/totalPages
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - bearerAuth: []
+      summary: 我的反馈列表
+      tags:
+      - 反馈
+  /folders:
+    get:
+      parameters:
+      - description: follow|favorite
+        in: query
+        name: type
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              additionalProperties: true
+              type: object
+            type: array
+      security:
+      - bearerAuth: []
+      summary: 我的收藏夹列表
+      tags:
+      - 收藏夹
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: name/type
+        in: body
+        name: body
+        required: true
+        schema:
+          type: object
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Folder'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - bearerAuth: []
+      summary: 新建收藏夹
+      tags:
+      - 收藏夹
+  /folders/{id}:
+    delete:
+      parameters:
+      - description: 收藏夹 ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: message
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - bearerAuth: []
+      summary: 删除收藏夹
+      tags:
+      - 收藏夹
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: 收藏夹 ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: name/description（可选）
+        in: body
+        name: body
+        required: true
+        schema:
+          type: object
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Folder'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - bearerAuth: []
+      summary: 重命名/修改描述
+      tags:
+      - 收藏夹
+  /folders/{id}/items:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 收藏夹 ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: episodeId
+        in: body
+        name: body
+        required: true
+        schema:
+          type: object
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - bearerAuth: []
+      summary: 添加条目到收藏夹
+      tags:
+      - 收藏夹
+  /folders/{id}/items/{episodeId}:
+    delete:
+      parameters:
+      - description: 收藏夹 ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: 剧集 ID
+        in: path
+        name: episodeId
+        required: true
+        type: string
+      responses:
+        "200":
+          description: message
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - bearerAuth: []
+      summary: 从收藏夹移除条目
+      tags:
+      - 收藏夹
+  /folders/{id}/share:
+    delete:
+      parameters:
+      - description: 收藏夹 ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: message
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - bearerAuth: []
+      summary: 取消分享收藏夹
+      tags:
+      - 收藏夹
+    post:
+      parameters:
+      - description: 收藏夹 ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: shareToken
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - bearerAuth: []
+      summary: 分享收藏夹
+      tags:
+      - 收藏夹
+  /folders/reorder:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: folderIds 数组
+        in: body
+        name: body
+        required: true
+        schema:
+          type: object
+      responses:
+        "200":
+          description: message
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - bearerAuth: []
+      summary: 收藏夹排序
+      tags:
+      - 收藏夹
+  /folders/share-unclassified:
+    post:
+      responses:
+        "200":
+          description: shareToken
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - bearerAuth: []
+      summary: 分享默认收藏夹
+      tags:
+      - 收藏夹
+  /folders/shared/{shareToken}:
+    get:
+      parameters:
+      - description: 分享令牌
+        in: path
+        name: shareToken
+        required: true
+        type: string
+      responses:
+        "200":
+          description: name/description/type/count/episodes/createdAt/creatorId/creatorName
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: 公开访问分享收藏夹
+      tags:
+      - 收藏夹
+  /follows/add:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: episodeId/folderId
+        in: body
+        name: body
+        required: true
+        schema:
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 追番记录
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - bearerAuth: []
+      summary: 追番剧集
+      tags:
+      - 追番
+  /follows/check/{episodeId}:
+    get:
+      parameters:
+      - description: 剧集 ID
+        in: path
+        name: episodeId
+        required: true
+        type: string
+      responses:
+        "200":
+          description: isFollowing/followedAtEpisodes
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - bearerAuth: []
+      summary: 是否追番该剧集
+      tags:
+      - 追番
+  /follows/list:
+    get:
+      parameters:
+      - description: 页码
+        in: query
+        name: page
+        type: integer
+      - description: 每页数量
+        in: query
+        name: limit
+        type: integer
+      - description: 收藏夹 ID 或 null
+        in: query
+        name: folderId
+        type: string
+      - description: updatedAt|name|rating|lastWatched
+        in: query
+        name: sort
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/pagination.Result'
+      security:
+      - bearerAuth: []
+      summary: 追番列表
+      tags:
+      - 追番
+  /follows/remove:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: episodeId
+        in: body
+        name: body
+        required: true
+        schema:
+          type: object
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - bearerAuth: []
+      summary: 取消追番
+      tags:
+      - 追番
+  /friend-links:
+    get:
+      responses:
+        "200":
+          description: 友链对象
+          schema:
+            items:
+              additionalProperties: true
+              type: object
+            type: array
+      summary: 获取友链列表
+      tags:
+      - 友情链接
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: name/url 必填；其余字段可选
+        in: body
+        name: body
+        required: true
+        schema:
+          type: object
+      responses:
+        "200":
+          description: 友链对象
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: 参数校验失败
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - bearerAuth: []
+      summary: 直接创建友链
+      tags:
+      - 友情链接
+  /friend-links/{id}:
+    delete:
+      parameters:
+      - description: 友链 ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: 删除成功
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: 友链不存在
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - bearerAuth: []
+      summary: 删除友链
+      tags:
+      - 友情链接
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: 友链 ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: 可更新字段 + status
+        in: body
+        name: body
+        required: true
+        schema:
+          type: object
+      responses:
+        "200":
+          description: 友链对象
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: 参数校验失败
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: 友链不存在
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - bearerAuth: []
+      summary: 更新友链
+      tags:
+      - 友情链接
+  /friend-links/all:
+    get:
+      responses:
+        "200":
+          description: 友链对象
+          schema:
+            items:
+              additionalProperties: true
+              type: object
+            type: array
+      security:
+      - bearerAuth: []
+      summary: 全部友链（管理后台）
+      tags:
+      - 友情链接
+  /friend-links/apply:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: name/url 必填；logo/description/altcha
+        in: body
+        name: body
+        required: true
+        schema:
+          type: object
+      responses:
+        "200":
+          description: 申请已提交，等待管理员审核
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: 参数校验失败
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - bearerAuth: []
+      summary: 申请友情链接
+      tags:
+      - 友情链接
+  /friend-links/my-applications:
+    get:
+      responses:
+        "200":
+          description: 友链对象（createdAt 倒序）
+          schema:
+            items:
+              additionalProperties: true
+              type: object
+            type: array
+      security:
+      - bearerAuth: []
+      summary: 我的友链申请记录
+      tags:
+      - 友情链接
+  /histories:
+    delete:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - bearerAuth: []
+      summary: 清空观看历史
+      tags:
+      - 观看历史
+  /histories/{episodeId}:
+    delete:
+      parameters:
+      - description: 剧集 ID
+        in: path
+        name: episodeId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - bearerAuth: []
+      summary: 删除单条观看历史
+      tags:
+      - 观看历史
+  /histories/check/{episodeId}:
+    get:
+      parameters:
+      - description: 剧集 ID
+        in: path
+        name: episodeId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: watchedEpisodes/lastWatchedEpisodeNumber/lastWatched
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - bearerAuth: []
+      summary: 查询某剧集观看历史
+      tags:
+      - 观看历史
+  /histories/continue-watching:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 历史列表（episodeId 已关联展开）
+          schema:
+            items:
+              additionalProperties: true
+              type: object
+            type: array
+      security:
+      - bearerAuth: []
+      summary: 最近观看（10 条）
+      tags:
+      - 观看历史
+  /histories/list:
+    get:
+      parameters:
+      - description: 页码
+        in: query
+        name: page
+        type: integer
+      - description: 每页数量
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: list/page/limit/total/totalPages
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - bearerAuth: []
+      summary: 观看历史列表
+      tags:
+      - 观看历史
+  /histories/record:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: episodeId/episodeNumber
+        in: body
+        name: body
+        required: true
+        schema:
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 历史记录
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid episode number
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Episode not found
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - bearerAuth: []
+      summary: 记录观看历史
+      tags:
+      - 观看历史
+  /notifications/{id}:
+    delete:
+      parameters:
+      - description: 通知 ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: message
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - bearerAuth: []
+      summary: 删除通知
+      tags:
+      - 通知
+  /notifications/clear-read:
+    delete:
+      responses:
+        "200":
+          description: message
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - bearerAuth: []
+      summary: 清理已读通知
+      tags:
+      - 通知
+  /notifications/list:
+    get:
+      parameters:
+      - description: 页码（默认1）
+        in: query
+        name: page
+        type: integer
+      - description: 每页数量（默认20，≤100）
+        in: query
+        name: limit
+        type: integer
+      responses:
+        "200":
+          description: list/page/limit/total/totalPages
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - bearerAuth: []
+      summary: 通知列表
+      tags:
+      - 通知
+  /notifications/push/subscribe:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: subscription
+        in: body
+        name: body
+        required: true
+        schema:
+          type: object
+      responses:
+        "200":
+          description: message
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - bearerAuth: []
+      summary: 订阅 Web Push
+      tags:
+      - 通知
+  /notifications/push/unsubscribe:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: endpoint
+        in: body
+        name: body
+        required: true
+        schema:
+          type: object
+      responses:
+        "200":
+          description: message
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - bearerAuth: []
+      summary: 取消 Web Push 订阅
+      tags:
+      - 通知
+  /notifications/read-all:
+    put:
+      responses:
+        "200":
+          description: message
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - bearerAuth: []
+      summary: 全部标记为已读
+      tags:
+      - 通知
+  /notifications/read-episode/{episodeId}:
+    put:
+      parameters:
+      - description: 剧集 ID
+        in: path
+        name: episodeId
+        required: true
+        type: string
+      responses:
+        "200":
+          description: message
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - bearerAuth: []
+      summary: 某剧集通知标记为已读
+      tags:
+      - 通知
+  /notifications/read/{id}:
+    put:
+      parameters:
+      - description: 通知 ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: message
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - bearerAuth: []
+      summary: 单条通知标记为已读
+      tags:
+      - 通知
+  /notifications/stream:
+    get:
+      parameters:
+      - description: sse-ticket（GET /auth/sse-ticket 签发，30s 有效）
+        in: query
+        name: ticket
+        type: string
+      responses:
+        "200":
+          description: text/event-stream
+          schema:
+            type: string
+      summary: 通知实时推送（SSE）
+      tags:
+      - 通知
+  /notifications/subscribe-reminder:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: episodeId
+        in: body
+        name: body
+        required: true
+        schema:
+          type: object
+      responses:
+        "200":
+          description: message/subscribed
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - bearerAuth: []
+      summary: 订阅剧集更新提醒
+      tags:
+      - 通知
+  /notifications/unread-count:
+    get:
+      responses:
+        "200":
+          description: count
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - bearerAuth: []
+      summary: 未读通知数
+      tags:
+      - 通知
+  /notifications/vapid-public-key:
+    get:
+      responses:
+        "200":
+          description: publicKey
+          schema:
+            additionalProperties: true
+            type: object
+      summary: VAPID 公钥
+      tags:
+      - 通知
+  /ratings:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: episodeId/score
+        in: body
+        name: body
+        required: true
+        schema:
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: score/averageRating/ratingCount
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid rating data
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: 该剧集暂不可评分
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Episode not found
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - bearerAuth: []
+      summary: 提交评分
+      tags:
+      - 评分
+  /ratings/{episodeId}:
+    delete:
+      parameters:
+      - description: 剧集 ID
+        in: path
+        name: episodeId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: message/averageRating/ratingCount
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Rating not found
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - bearerAuth: []
+      summary: 删除评分
+      tags:
+      - 评分
+  /ratings/check/{episodeId}:
+    get:
+      parameters:
+      - description: 剧集 ID
+        in: path
+        name: episodeId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: score
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - bearerAuth: []
+      summary: 查询我的评分
+      tags:
+      - 评分
+  /reports:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: targetType/targetId/reason/description
+        in: body
+        name: body
+        required: true
+        schema:
+          type: object
+      responses:
+        "201":
+          description: 举报记录
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid target type / Invalid reason / 描述不能超过2000个字符 / Already
+            reported
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - bearerAuth: []
+      summary: 提交举报
+      tags:
+      - 举报
+  /reports/list:
+    get:
+      parameters:
+      - description: pending|resolved|dismissed
+        in: query
+        name: status
+        type: string
+      - description: 页码（默认 1）
+        in: query
+        name: page
+        type: integer
+      - description: 每页数量（默认 20）
+        in: query
+        name: limit
+        type: integer
+      responses:
+        "200":
+          description: reports/total/page/totalPages
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - bearerAuth: []
+      summary: 举报列表（可按状态筛选）
+      tags:
+      - 举报
+  /reports/resolve/{id}:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: 举报 ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: status/resolveNote
+        in: body
+        name: body
+        required: true
+        schema:
+          type: object
+      responses:
+        "200":
+          description: 处理后的举报记录
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid status
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Report not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - bearerAuth: []
+      summary: 处理举报（已采纳/未采纳，通知举报者）
+      tags:
+      - 举报
+  /review/all:
+    get:
+      parameters:
+      - description: 页码（默认 1）
+        in: query
+        name: page
+        type: integer
+      - description: 每页数量（默认 20，上限 100）
+        in: query
+        name: limit
+        type: integer
+      responses:
+        "200":
+          description: list/page/limit/total/totalPages
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - bearerAuth: []
+      summary: 全部剧集列表（审核用）
+      tags:
+      - 审核
+  /review/approve/{id}:
+    put:
+      parameters:
+      - description: 剧集 ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: note
+        in: body
+        name: body
+        required: true
+        schema:
+          type: object
+      responses:
+        "200":
+          description: 剧集对象
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Episode not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - bearerAuth: []
+      summary: 审核通过剧集（含应用待审核修改）
+      tags:
+      - 审核
+  /review/assign-editor/{episodeId}:
+    put:
+      parameters:
+      - description: 剧集 ID
+        in: path
+        name: episodeId
+        required: true
+        type: string
+      - description: editorId
+        in: body
+        name: body
+        required: true
+        schema:
+          type: object
+      responses:
+        "200":
+          description: 剧集对象（createdBy/allowedEditors 已关联展开）
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Editor not found / Episode not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - bearerAuth: []
+      summary: 分配剧集编辑者
+      tags:
+      - 审核
+  /review/pending:
+    get:
+      parameters:
+      - description: 页码（默认 1）
+        in: query
+        name: page
+        type: integer
+      - description: 每页数量（默认 20，上限 100）
+        in: query
+        name: limit
+        type: integer
+      responses:
+        "200":
+          description: list/page/limit/total/totalPages
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - bearerAuth: []
+      summary: 待审核剧集列表（pending 剧集 + 已审核剧集的待审核修改）
+      tags:
+      - 审核
+  /review/reject/{id}:
+    put:
+      parameters:
+      - description: 剧集 ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: note
+        in: body
+        name: body
+        required: true
+        schema:
+          type: object
+      responses:
+        "200":
+          description: 剧集对象
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Episode not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - bearerAuth: []
+      summary: 审核拒绝剧集（含清除待审核修改）
+      tags:
+      - 审核
+  /review/remove-editor/{episodeId}:
+    put:
+      parameters:
+      - description: 剧集 ID
+        in: path
+        name: episodeId
+        required: true
+        type: string
+      - description: editorId
+        in: body
+        name: body
+        required: true
+        schema:
+          type: object
+      responses:
+        "200":
+          description: 剧集对象（createdBy/allowedEditors 已关联展开）
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Episode not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - bearerAuth: []
+      summary: 移除剧集编辑者
+      tags:
+      - 审核
+  /rss:
+    get:
+      responses:
+        "200":
+          description: application/xml RSS 2.0 feed
+          schema:
+            type: string
+      summary: RSS 订阅（近 7 天更新剧集/单集）
+      tags:
+      - RSS
+  /rss/api-usage:
+    get:
+      parameters:
+      - description: 统计天数（默认 7）
+        in: query
+        name: days
+        type: integer
+      responses:
+        "200":
+          description: dailyTotals/topEndpoints/raw
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - bearerAuth: []
+      summary: 接口调用统计
+      tags:
+      - RSS
+  /saved-folders:
+    get:
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.SavedFolder'
+            type: array
+      security:
+      - bearerAuth: []
+      summary: 我收藏的他人收藏夹
+      tags:
+      - 收藏夹收藏项
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: shareToken/creatorName
+        in: body
+        name: body
+        required: true
+        schema:
+          type: object
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.SavedFolder'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - bearerAuth: []
+      summary: 收藏他人收藏夹
+      tags:
+      - 收藏夹收藏项
+  /saved-folders/{id}:
+    delete:
+      parameters:
+      - description: 收藏项 ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: message
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - bearerAuth: []
+      summary: 取消收藏他人收藏夹
+      tags:
+      - 收藏夹收藏项
+  /series:
+    get:
+      parameters:
+      - description: 页码（默认 1）
+        in: query
+        name: page
+        type: integer
+      - description: 每页数量（默认 50，上限 100）
+        in: query
+        name: limit
+        type: integer
+      responses:
+        "200":
+          description: list/page/limit/total/totalPages
+          schema:
+            additionalProperties: true
+            type: object
+      summary: 获取所有系列
+      tags:
+      - 系列
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: name/description/episodes
+        in: body
+        name: body
+        required: true
+        schema:
+          type: object
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/model.Series'
+        "400":
+          description: 名称必填
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - bearerAuth: []
+      summary: 创建新系列（需要创作者/管理员权限）
+      tags:
+      - 系列
+  /series/{id}:
+    delete:
+      parameters:
+      - description: 系列 ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: Deleted
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - bearerAuth: []
+      summary: 删除系列（需要管理员权限）
+      tags:
+      - 系列
+    get:
+      parameters:
+      - description: 系列 ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Series'
+        "404":
+          description: Not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: 根据ID获取系列详情
+      tags:
+      - 系列
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: 系列 ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: name/description/episodes
+        in: body
+        name: body
+        required: true
+        schema:
+          type: object
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Series'
+        "403":
+          description: 无权修改此系列
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - bearerAuth: []
+      summary: 更新系列信息（需要创作者/管理员权限）
+      tags:
+      - 系列
+  /site-content:
+    get:
+      responses:
+        "200":
+          description: 站点内容文档数组
+          schema:
+            items:
+              additionalProperties: true
+              type: object
+            type: array
+      security:
+      - bearerAuth: []
+      summary: 站点内容列表
+      tags:
+      - 站点内容
+  /site-content/{key}:
+    get:
+      parameters:
+      - description: 内容键（privacy/terms/about/settings/email）
+        in: path
+        name: key
+        required: true
+        type: string
+      responses:
+        "200":
+          description: 站点内容文档
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Content not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: 获取站点内容
+      tags:
+      - 站点内容
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: 内容键
+        in: path
+        name: key
+        required: true
+        type: string
+      - description: title/content
+        in: body
+        name: body
+        required: true
+        schema:
+          type: object
+      responses:
+        "200":
+          description: 站点内容文档
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - bearerAuth: []
+      summary: 更新站点内容
+      tags:
+      - 站点内容
+  /site-content/pwa-manifest:
+    get:
+      responses:
+        "200":
+          description: PWA manifest
+          schema:
+            additionalProperties: true
+            type: object
+      summary: PWA manifest
+      tags:
+      - 站点内容
+  /site-content/test-email:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: host/port/user/pass/fromName/to
+        in: body
+        name: body
+        required: true
+        schema:
+          type: object
+      responses:
+        "200":
+          description: 测试邮件发送成功，请检查收件箱
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: 配置缺失或发送失败
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - bearerAuth: []
+      summary: 发送测试邮件
+      tags:
+      - 站点内容
+  /site-content/upload:
+    post:
+      consumes:
+      - multipart/form-data
+      parameters:
+      - description: 图片（≤5MB）
+        in: formData
+        name: image
+        required: true
+        type: file
+      responses:
+        "200":
+          description: url
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - bearerAuth: []
+      summary: 上传站点图片
+      tags:
+      - 站点内容
+  /site-stats:
+    get:
+      responses:
+        "200":
+          description: users/episodes/online
+          schema:
+            additionalProperties: true
+            type: object
+      summary: 站点公开统计（用户数/剧集数/在线人数）
+      tags:
+      - 统计
+  /stats/activity-heatmap:
+    get:
+      responses:
+        "200":
+          description: date/count（365 天）
+          schema:
+            items:
+              additionalProperties: true
+              type: object
+            type: array
+      security:
+      - bearerAuth: []
+      summary: 一年活跃度热力图
+      tags:
+      - 统计
+  /stats/calendar:
+    get:
+      parameters:
+      - description: 年份（默认当前年）
+        in: query
+        name: year
+        type: integer
+      - description: 月份 1-12；0 或省略为整年
+        in: query
+        name: month
+        type: integer
+      responses:
+        "200":
+          description: year/month/calendar
+          schema:
+            additionalProperties: true
+            type: object
+      summary: 发布日历（按年/月查询已发布/排期/首播）
+      tags:
+      - 统计
+  /stats/episode-lifecycle:
+    get:
+      responses:
+        "200":
+          description: episodeId/title/weeks
+          schema:
+            items:
+              additionalProperties: true
+              type: object
+            type: array
+      security:
+      - bearerAuth: []
+      summary: 热门剧集生命周期（周浏览量曲线）
+      tags:
+      - 统计
+  /stats/overview:
+    get:
+      parameters:
+      - description: 周期 7d|30d（默认 7d）
+        in: query
+        name: period
+        type: string
+      responses:
+        "200":
+          description: 各类聚合统计
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - bearerAuth: []
+      summary: 后台数据总览
+      tags:
+      - 统计
+  /stats/realtime:
+    get:
+      responses:
+        "200":
+          description: onlineUsers/todayVisits/todayNewUsers/todayNewEpisodes
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - bearerAuth: []
+      summary: 实时统计（在线/今日访问/新用户/新剧集）
+      tags:
+      - 统计
+  /stats/recommendations/{episodeId}:
+    get:
+      parameters:
+      - description: 剧集 ID
+        in: path
+        name: episodeId
+        required: true
+        type: string
+      responses:
+        "200":
+          description: 相关剧集（含 __v）
+          schema:
+            items:
+              additionalProperties: true
+              type: object
+            type: array
+        "404":
+          description: Episode not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: 相关剧集推荐（标签/分类/浏览量混合打分）
+      tags:
+      - 统计
+  /stats/recommendations/collaborative:
+    get:
+      responses:
+        "200":
+          description: 剧集 + matchScore
+          schema:
+            items:
+              additionalProperties: true
+              type: object
+            type: array
+      security:
+      - bearerAuth: []
+      summary: 协作过滤推荐（基于相似用户高分评分）
+      tags:
+      - 统计
+  /stats/recommendations/personalized:
+    get:
+      responses:
+        "200":
+          description: 剧集 + reason/reasonName
+          schema:
+            items:
+              additionalProperties: true
+              type: object
+            type: array
+      security:
+      - bearerAuth: []
+      summary: 个性化推荐（标签/分类/热门混合打分）
+      tags:
+      - 统计
+  /translate:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: '{key, targetLang}'
+        in: body
+        name: body
+        required: true
+        schema:
+          type: object
+      responses:
+        "200":
+          description: translation（机器翻译失败为 null）
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Missing key or targetLang / Unsupported language
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "504":
+          description: Translation request timeout
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: 翻译文本（硬编码表 + 机器翻译）
+      tags:
+      - 翻译
+  /translate/batch:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: '{texts[], targetLang}'
+        in: body
+        name: body
+        required: true
+        schema:
+          type: object
+      responses:
+        "200":
+          description: translations
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Missing texts or targetLang / Unsupported language
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "504":
+          description: Translation request timeout
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: 批量翻译文本
+      tags:
+      - 翻译
   /user-sessions/{id}:
     delete:
       parameters:
@@ -821,50 +4434,6 @@ paths:
       summary: 上传头像
       tags:
       - 用户
-  /users/background-prefs:
-    put:
-      consumes:
-      - application/json
-      parameters:
-      - description: enabled/opacity/blur/image
-        in: body
-        name: body
-        required: true
-        schema:
-          type: object
-      responses:
-        "200":
-          description: backgroundPrefs
-          schema:
-            additionalProperties: true
-            type: object
-      security:
-      - bearerAuth: []
-      summary: 更新背景偏好
-      tags:
-      - 用户
-  /users/background-upload:
-    post:
-      consumes:
-      - multipart/form-data
-      parameters:
-      - description: 图片（≤5MB）
-        in: formData
-        name: image
-        required: true
-        type: file
-      responses:
-        "200":
-          description: url
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      security:
-      - bearerAuth: []
-      summary: 上传背景图
-      tags:
-      - 用户
   /users/export-my-data:
     get:
       parameters:
@@ -904,6 +4473,290 @@ paths:
       summary: 更新昵称
       tags:
       - 用户
+  /versions/{episodeId}:
+    get:
+      parameters:
+      - description: 剧集 ID
+        in: path
+        name: episodeId
+        required: true
+        type: string
+      - description: 页码（默认1）
+        in: query
+        name: page
+        type: integer
+      - description: 每页数量（默认20）
+        in: query
+        name: limit
+        type: integer
+      responses:
+        "200":
+          description: versions/page/limit/total/totalPages
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - bearerAuth: []
+      summary: 剧集版本历史
+      tags:
+      - 版本
+  /versions/{episodeId}/{version}:
+    get:
+      parameters:
+      - description: 剧集 ID
+        in: path
+        name: episodeId
+        required: true
+        type: string
+      - description: 版本号
+        in: path
+        name: version
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: 版本对象（含 data 快照与 changedBy）
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - bearerAuth: []
+      summary: 单个版本详情
+      tags:
+      - 版本
+  /versions/{episodeId}/diff/{v1}/{v2}:
+    get:
+      parameters:
+      - description: 剧集 ID
+        in: path
+        name: episodeId
+        required: true
+        type: string
+      - description: 旧版本号
+        in: path
+        name: v1
+        required: true
+        type: integer
+      - description: 新版本号
+        in: path
+        name: v2
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: field/oldValue/newValue 差异数组
+          schema:
+            items:
+              additionalProperties: true
+              type: object
+            type: array
+      security:
+      - bearerAuth: []
+      summary: 版本差异对比
+      tags:
+      - 版本
+  /versions/{episodeId}/rollback/{version}:
+    post:
+      parameters:
+      - description: 剧集 ID
+        in: path
+        name: episodeId
+        required: true
+        type: string
+      - description: 目标版本号
+        in: path
+        name: version
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: 回滚后的剧集对象
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - bearerAuth: []
+      summary: 回滚到指定版本
+      tags:
+      - 版本
+  /wallpapers/personal:
+    delete:
+      consumes:
+      - application/json
+      parameters:
+      - description: url
+        in: body
+        name: body
+        required: true
+        schema:
+          type: object
+      responses:
+        "200":
+          description: 已删除
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - bearerAuth: []
+      summary: 删除个人壁纸
+      tags:
+      - 壁纸
+    get:
+      responses:
+        "200":
+          description: 个人壁纸数组
+          schema:
+            items:
+              $ref: '#/definitions/model.Wallpaper'
+            type: array
+      security:
+      - bearerAuth: []
+      summary: 获取我的个人壁纸
+      tags:
+      - 壁纸
+    post:
+      consumes:
+      - multipart/form-data
+      parameters:
+      - description: 图片（≤8MB）
+        in: formData
+        name: image
+        required: true
+        type: file
+      - description: 名称
+        in: formData
+        name: name
+        type: string
+      responses:
+        "200":
+          description: url/name/addedAt
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - bearerAuth: []
+      summary: 上传个人壁纸
+      tags:
+      - 壁纸
+  /wallpapers/system:
+    get:
+      responses:
+        "200":
+          description: name/url/thumbnailUrl/sortOrder
+          schema:
+            items:
+              additionalProperties: true
+              type: object
+            type: array
+      summary: 获取启用的系统壁纸
+      tags:
+      - 壁纸
+    post:
+      consumes:
+      - multipart/form-data
+      parameters:
+      - description: 图片（≤8MB）
+        in: formData
+        name: image
+        required: true
+        type: file
+      - description: 名称
+        in: formData
+        name: name
+        type: string
+      - description: 是否启用（'false' 以外的值视为启用）
+        in: formData
+        name: enabled
+        type: string
+      - description: 排序（默认 0）
+        in: formData
+        name: sortOrder
+        type: integer
+      responses:
+        "200":
+          description: 壁纸对象
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - bearerAuth: []
+      summary: 上传系统壁纸
+      tags:
+      - 壁纸
+  /wallpapers/system/{id}:
+    delete:
+      parameters:
+      - description: 壁纸 ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: 已删除
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: 壁纸不存在
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - bearerAuth: []
+      summary: 删除系统壁纸
+      tags:
+      - 壁纸
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: 壁纸 ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: name/enabled/sortOrder
+        in: body
+        name: body
+        required: true
+        schema:
+          type: object
+      responses:
+        "200":
+          description: 壁纸对象
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: 壁纸不存在
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - bearerAuth: []
+      summary: 更新系统壁纸
+      tags:
+      - 壁纸
+  /wallpapers/system/all:
+    get:
+      responses:
+        "200":
+          description: 完整壁纸对象
+          schema:
+            items:
+              additionalProperties: true
+              type: object
+            type: array
+      security:
+      - bearerAuth: []
+      summary: 获取所有系统壁纸（管理后台）
+      tags:
+      - 壁纸
 securityDefinitions:
   bearerAuth:
     description: 输入 JWT access token（不含 Bearer 前缀；亦可通过 accessToken cookie）
