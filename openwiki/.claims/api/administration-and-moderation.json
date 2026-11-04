@@ -1,24 +1,14 @@
 {
   "schemaVersion": 1,
-  "pageVersion": "sha256:b69523de4cee601d06c8edfa5a2841a6c891430631a6dccc355f2fa1fff87d49",
+  "pageVersion": "sha256:7f790b89c0dd623bc01ffc0251de273cd36137f8485d049d328caabf85aef393",
   "claims": [
     {
       "id": "claim_ecba2947abd34fa08ccd26f57887e786",
       "statement": "The admin console separates creator-inclusive administration (verify, pending counts, verify-password) from admin-only creator listing and superadmin-only account and creator-profile administration, and attaches RequireEmailChanged to mutating superadmin routes.",
       "evidence": [
         {
-          "resource": "repo://internal/handler/admin.go#L60-L86",
-          "version": "repo-lines-v1:sha256:68b5e62f6cda6a0763b415708056923a9731a1358e8ed24f3543325415428f5f:eyJzZWxlY3RlZExpbmVDb3VudCI6MjcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAyYzQ1OGY1MGU4MWU2ZGYyMDMxYTI1NjUxMzE5NzI2ODg5MmE1OTA3ZGZlMzY2YjJlM2M1YmQyMGE1MGViOTUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImUyMmZhYTUzNWJkMmVhM2Q1MmU3NDFlZDQ1NDQzNWI3ZmU0OWU4MzU4NmU5NDNkOThkODJiYmZiMjRkMWY1YzUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjNjMjVjMjUxYWUyNTEwNjUzMzBkZjZmN2IwNGJiZjEyODdkMWY2ZjMwY2U4OTFjNzk4ZTczZmIyYWQ0MmI1NWEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImJhMjdhNjVmZWU0ZjE5ODVjOTcyOTVjNjZkZjRjMzJkNzQ0YWEwMDM5N2YzMjJjM2U3OTMwNmJkZjFiOGI5MzcifQ"
-        }
-      ]
-    },
-    {
-      "id": "claim_30a3bb108cab4dfd914473393013874a",
-      "statement": "Admin console login verifies Altcha, accepts account/email/username identifiers, admits only admin or superadmin roles, enforces account lockout, requires a verified email, rejects accounts with 2FA enabled by pointing them to the frontend login, and issues access plus jti-bearing refresh tokens with a persisted session.",
-      "evidence": [
-        {
-          "resource": "repo://internal/handler/admin.go#L101-L229",
-          "version": "repo-lines-v1:sha256:424f7c139ccc8915e9e479b027312c250be4657200d5257bc0d96235c2680e27:eyJzZWxlY3RlZExpbmVDb3VudCI6MTI5LCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiJmZWNkNGRkZmZlOGY5NDU0YWRhNGJjMDBlMTY4MTkyZDk5ZTdjZmYyOTgxYTAxNTUyZTEzYjRmYjI2ZTJkNWU0IiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiJlMjJmYWE1MzViZDJlYTNkNTJlNzQxZWQ0NTQ0MzViN2ZlNDllODM1ODZlOTQzZDk4ZDgyYmJmYjI0ZDFmNWM1IiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiJmZGRiNjI4NDg3Y2I1YmY5YTkzMDUxNjM0ODg1NDg2ZGRmMDg3ZWNjNmZmMzFiZGIzYmY0YTVlOTA0MGEwNjRhIiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MywiZm9sbG93aW5nQ29udGV4dEhhc2giOiJiZTAzOWQxZDQ4NWMzZjBlN2IyZGVmZjdiMjQyYzg0ODRlNGNmYWExMWRmZTVmNTIyN2NlMmYwYTA4NmE1YjgwIn0"
+          "resource": "repo://internal/handler/admin.go#L54-L77",
+          "version": "repo-lines-v1:sha256:69fcc8bc4267246a731613c2715cf521d8dc8dbc667ff861c2d5d294a5e3ce88:eyJzZWxlY3RlZExpbmVDb3VudCI6MjQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImVhMjQ5YzllYjE0ZDIwYmQ2OTk0NDU2Mzc1MDBjNzc0NTliYzQ1YjdlYTllMjdkODExNTQyODAwMjk5OGRiOTUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImZiNWY4ZWQxZTM5ZDIzZWZkZWU4ZWM4M2EyMmJjMzE1ZWM0MTQ2NzdiYzliMmYxMWMxNDQ1OGRkOGIyNWY1M2EiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6Ijk5YTgxMWQzNzcyNDlmMmY2MWU0ZWVkMTBmYTY0NDNkNWZkOWEwYzQ3ZWJiMmMyYjcwNDJmZjk5NzI3Y2QwNDkifQ"
         }
       ]
     },
@@ -27,8 +17,8 @@
       "statement": "Deleting a user from the admin console cascades across follows, histories, notifications, favorites, folders, feedbacks, sessions, push subscriptions, legacy and modern report fields, and ratings, then rebuilds rating aggregates for affected episodes and additionally clears saved folders, themes, and creator profiles.",
       "evidence": [
         {
-          "resource": "repo://internal/handler/admin.go#L580-L685",
-          "version": "repo-lines-v1:sha256:8a3dfc7b89f74088e4e11e855a70026c9b265499d6ba5ae2cf5f73d6e597d37c:eyJzZWxlY3RlZExpbmVDb3VudCI6MTA2LCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiIyNzIxOGIyMDNjZDExZWE1MTQyNzhlODY3ODU4ZTZiY2NjZTRmMDI1OWQ5N2Y3NGZlYjQ0MTg2ZTVmYjU0MmIyIiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiJlMjJmYWE1MzViZDJlYTNkNTJlNzQxZWQ0NTQ0MzViN2ZlNDllODM1ODZlOTQzZDk4ZDgyYmJmYjI0ZDFmNWM1IiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiI0NDMzZjJkNzIwNDliMDlmOTUwYzQ2MWZiYTcxZGNmOGYxM2Q1NzQ1NzcwZmI3OTA3ZDhkM2E2YTQ2OGNmNDU5IiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MywiZm9sbG93aW5nQ29udGV4dEhhc2giOiJhNDU4OTkyNGUyM2Q5YjU4ZGM4NDdkZWJlZGVhNGY5NDY5YjM2OGQ2NTY3YmNhY2RkNDJkYjcyOTRhOGMzNjBkIn0"
+          "resource": "repo://internal/handler/admin.go#L430-L547",
+          "version": "repo-lines-v1:sha256:ccf7ae20885b0f15b5345291585d7f9d705ee880386972500fe75e7ca9e7bee8:eyJzZWxlY3RlZExpbmVDb3VudCI6MTE4LCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiJjMDU0NDA1YjBjYjBmZmY5YjJlMmEwOTJhOWFhNzFmN2VhMDUyMmUwOTRjYmU2Mjc2MDVmMGFhNzNmMWY0NjA5IiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiIwYWNjNDY1YjUwNzliMDhlZDAxMzczMTU5MWJjNzU4NzBhNzk4YWEzMDkyYjE4ZjlhZWVhY2VkYjE1NThmNzhiIiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiIwMjhmMzc1NDg4MGM1YjliZDg0NDE3NmZhMTI1ODY4YjY1OGU0MDZkZGIxNjEwZGE0MzVhNmU5M2YyMTlkZjQ1IiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MywiZm9sbG93aW5nQ29udGV4dEhhc2giOiI5ZjJiMzliNWE4ZTYyN2Q4NWYzNzY4OWYxYjhiYjVlMjAzZjM5N2QyMmU3NWEyYmYwZTJkZjcxZDQxMWRkODFhIn0"
         }
       ]
     },
@@ -125,6 +115,6 @@
   ],
   "verification": {
     "by": "openwiki/0.7.2",
-    "at": "2026-11-03T16:50:44.301Z"
+    "at": "2026-11-04T03:17:38.088Z"
   }
 }

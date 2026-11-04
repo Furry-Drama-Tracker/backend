@@ -1,7 +1,7 @@
 ---
 type: architecture
 title: 请求生命周期与中间件管线
-description: 固定的 Gin 中间件顺序、请求体解析与清洗、CSRF 校验、限流挂载语义、双版本路由、静态上传，以及错误实际如何到达客户端。
+description: 固定的 Gin 中间件顺序、请求体解析与清洗、CSRF 校验、限流挂载语义、单前缀路由、静态上传，以及错误实际如何到达客户端。
 tags: [http, middleware, gin, rate-limiting, csrf, routing]
 sources:
   - id: openwiki-source-8cc3b2cd34ec48fbcbb82fd1
@@ -20,10 +20,10 @@ sources:
     resource: repo://internal/server/app.go
   - id: openwiki-source-ebbcecfb3e8c07ba5e940ccd
     resource: repo://internal/server/register_routes.go
-generated: { by: "opencode", at: "2026-11-03T16:50:44.301Z" }
+generated: { by: "opencode", at: "2026-11-04T03:17:38.088Z" }
 verified:
   - by: openwiki/0.7.2
-    at: 2026-11-03T16:50:44.301Z
+    at: 2026-11-04T03:17:38.088Z
 ---
 
 # 请求生命周期与中间件管线
@@ -49,7 +49,7 @@ gin.Recovery
   -> /api 组：全局限流（300/分钟）
        -> GET /api/health
        -> Swagger UI（仅开发环境）
-       -> 领域路由（每个同时挂载 /api 与 /api/v1）
+       -> 领域路由（单前缀挂载在 /api 下）
   -> /uploads 静态路由
   -> errors.Handler（最后注册）
 ```
@@ -71,7 +71,7 @@ gin.Recovery
 `BodyParse` 先给**所有**请求体套上 `http.MaxBytesReader` 硬上限，再决定是否解析 JSON/form。这一层也覆盖 multipart 与未知 Content-Type，防止后续 `SanitizeInput` 或 `FormFile` 无上限读取内存。
 
 - 全局硬上限：12 MB；备份导入路径为 51 MB。
-- JSON/form 解析上限：1 MB；`/api/backup/import` 与 `/api/v1/backup/import`（及子路径）的 JSON 为 50 MB。
+- JSON/form 解析上限：1 MB；`/api/backup/import`（及子路径）的 JSON 为 50 MB。
 - 超限返回 413 `request entity too large`。
 - JSON 语法错误返回 400。
 - 解析后的请求体存入 Gin 上下文供后续中间件使用，原始字节会还原到 `c.Request.Body`，使 handler 可以再次绑定。
@@ -109,25 +109,25 @@ gin.Recovery
 
 ## 限流
 
-全局限流器挂在 `/api` 路由组，因此覆盖包括 `/api/health` 与 `/api/v1/*` 在内的所有 API 路由。默认预算为每分钟 300 次。它显式跳过以 `/api/translate` 与 `/api/auth/captcha` 开头的路径。
+全局限流器挂在 `/api` 路由组，因此覆盖包括 `/api/health` 在内的所有 API 路由。默认预算为每分钟 300 次。它显式跳过以 `/api/translate` 与 `/api/auth/captcha` 开头的路径。
 
 端点限流器通过工厂在注册时调用 `middleware.RateLimit(spec, opts)` 挂到具体路由。挂载语义：
 
 - 无 mounts 的 spec 是全局型。
 - 有 mounts 的 spec 精确匹配 `/api/<mount>`，并以 `/api/<mount>/...` 前缀匹配子路径。
-- 端点型 spec 同时匹配 `/api/<mount>` 与 `/api/v1/<mount>`，防止攻击者通过 v1 镜像绕过登录/注册/2FA/邮箱限流。
+- 端点型 spec 精确匹配 `/api/<mount>`，并以 `/api/<mount>/...` 前缀匹配子路径；它不会匹配 `/api/v1/` 或其他前缀。
 - `AuthSpec` 仅在 `IsDev` 且 `SKIP_RATE_LIMIT=1` 时跳过。
 
 两个后果容易被忽略：
 
-1. 每次 `RateLimit` 调用都会创建带独立内存计数的新限流器。但 `RegisterRoutes` 用 `spec.Name|window|max` 做键缓存限流器，因此同一 spec 的所有路由（含 `/api` 与 `/api/v1` 镜像）共享同一计数器与预算。例如 2FA spec 挂在七个路由上，它们共用同一个 5 次/15 分钟桶。
+1. 每次 `RateLimit` 调用都会创建带独立内存计数的新限流器。但 `RegisterRoutes` 用 `spec.Name|window|max` 做键缓存限流器，因此同一 spec 的所有路由共享同一计数器与预算。例如 2FA spec 挂在七个路由上，它们共用同一个 5 次/15 分钟桶。
 2. 动态路由如 `/episodes/:id/view` 无法用挂载匹配表达，因此其配置的限流器永远不会触发。
 
 限流器使用 `ulule/limiter` 与内存存储，因此计数是固定窗口且进程本地的。响应包含 draft-6 `RateLimit-*` 头，429 时包含 `Retry-After`。`requestEmailChange` 限流器同时按来源 IP 与目标邮箱小写值限流，避免用不同邮箱刷验证邮件。
 
-## 双版本路由
+## 单前缀路由
 
-`router.MountDual(parent, "/x", register)` 调用 `register` 两次：一次在 `/api/x`，一次在 `/api/v1/x`。v1 组添加 `Deprecation: true` 与固定 `Sunset` 日期。handler 完全相同，响应形状没有差异；端点限流计数器也因注册期缓存而共享。
+`router.Mount(parent, "/x", register)` 只调用一次 `register(parent.Group("/x"))`，把领域 handler 注册到 `/api/x`。不存在 `/api/v1` 镜像，也不注入 `Deprecation`/`Sunset` 头（ADR-010 记录了这一破坏性变更）。`router.Mount` 的测试锁定 `/api/v1/ping` 必须返回 404，防止镜像被重新引入。
 
 领域 handler 常把根路径注册两次（`""` 与 `"/"`），以避免 Gin 自动尾斜杠重定向，因为接口契约要求两种形式都直接匹配而不返回 307。
 
@@ -144,7 +144,7 @@ handler 主要通过 `errors.AbortWithAppError` 显式渲染错误，它映射 `
 ## 修改时的顺序规则
 
 - 不要把 CSRF 校验移到 csrf-token 路由之前。
-- 不要把全局限流器移出 `/api` 组；v1 与 health 依赖它。
+- 不要把全局限流器移出 `/api` 组；`/api/health` 与所有领域路由依赖它。
 - 请求体解析必须早于清洗，因为清洗期望可读的请求体。
 - 安全头要尽早设置，确保错误响应也带有它们。
 - 新增中间件时，决定它属于路由前（全引擎）、`/api` 组（受限流）还是领域组（带守卫）。

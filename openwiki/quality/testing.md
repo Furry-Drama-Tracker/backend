@@ -22,15 +22,15 @@ sources:
     resource: repo://internal/server/series_test.go
   - id: openwiki-source-012f2c78e3b1446dfc35803f
     resource: repo://Makefile
-generated: { by: "opencode", at: "2026-11-03T16:50:44.301Z" }
+generated: { by: "opencode", at: "2026-11-04T03:17:38.088Z" }
 verified:
   - by: openwiki/0.7.2
-    at: 2026-11-03T16:50:44.301Z
+    at: 2026-11-04T03:17:38.088Z
 ---
 
 # 测试策略
 
-仓库没有专门测试运行器或框架，只使用标准 `go test`。33 个 `_test.go` 文件中共有约 179 个测试函数。大多数行为要么通过小型 Gin 路由的聚焦单元测试验证，要么通过基于真实 MongoDB 装配真实应用的 HTTP 集成测试验证。
+仓库没有专门测试运行器或框架，只使用标准 `go test`。34 个 `_test.go` 文件中共有约 179 个测试函数。大多数行为要么通过小型 Gin 路由的聚焦单元测试验证，要么通过基于真实 MongoDB 装配真实应用的 HTTP 集成测试验证。
 
 ## 前置条件与命令
 
@@ -58,6 +58,7 @@ go build ./...
 - `internal/ipregion`：本地 IP 处理与注入 fetch 的缓存行为。
 - `internal/security`：XSS 清洗与密码校验。
 - `internal/ratelimit`：spec 与 IP key 行为。
+- `internal/router`：锁定 `Mount` 只在 `/api` 下注册，`/api/v1` 返回 404 且不带 `Deprecation` 头。
 - `internal/upload`：图片校验、魔数、SVG 规则与路径安全。
 - `internal/altcha` 行为通过 service 测试覆盖：用官方库创建、求解并验证挑战。
 
@@ -72,7 +73,7 @@ go build ./...
 - 剧集、收藏夹、追番/收藏、管理及对应路由组；
 - 夹具在测试前后删除专用数据库，清空全局剧集缓存，设置临时上传目录，并只安装该领域需要的中间件（recovery、请求体解析、清洗、CSRF）。
 
-`internal/server` 包含端到端测试，用完整生产装配调用 `server.NewApp`，因此真实中间件链、路由表与 `/api` 加 `/api/v1` 挂载都会被覆盖。覆盖包括注册/登录/me/refresh、错误密码、2FA 登录、refresh 重用、通知与 SSE、历史与评分、举报/审核/统计、CMS 域、系列、RSS、翻译校验与备份导出/导入。
+`internal/server` 包含端到端测试，用完整生产装配调用 `server.NewApp`，因此真实中间件链与单前缀 `/api` 路由表都会被覆盖。覆盖包括注册/登录/me/refresh、错误密码、2FA 登录、refresh 重用、通知与 SSE、历史与评分、举报/审核/统计、CMS 域、系列、RSS、翻译校验与备份导出/导入。
 
 ## 夹具模式
 
@@ -97,6 +98,7 @@ go build ./...
 ## 覆盖较好的部分
 
 - 认证分支行为：错误密码、2FA、refresh 重用、重复注册、密码修改。
+- 单前缀路由：`router.Mount` 只在 `/api` 注册且 `/api/v1` 返回 404。
 - CSRF 与中间件契约细节。
 - 剧集可见性、审核门控、观看计数、单集通知、重新提交与删除。
 - 收藏夹分享、归属校验与未分类行为。

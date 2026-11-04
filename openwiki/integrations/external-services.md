@@ -16,10 +16,10 @@ sources:
     resource: repo://internal/service/auth_service.go
   - id: openwiki-source-1994cba008c20be8b9db7693
     resource: repo://internal/service/login.go
-generated: { by: "opencode", at: "2026-11-03T16:50:44.301Z" }
+generated: { by: "opencode", at: "2026-11-04T03:17:38.088Z" }
 verified:
   - by: openwiki/0.7.2
-    at: 2026-11-03T16:50:44.301Z
+    at: 2026-11-04T03:17:38.088Z
 ---
 
 # 外部服务
@@ -28,7 +28,7 @@ verified:
 
 ## Altcha 工作量证明
 
-Altcha 是注册、登录、密码重置、邮箱重发、邮箱变更请求、后台登录与友链申请的验证码机制，使用 `github.com/altcha-org/altcha-lib-go/v2` 实现。
+Altcha 是注册、登录、密码重置、邮箱重发、邮箱变更请求与友链申请的验证码机制，使用 `github.com/altcha-org/altcha-lib-go/v2` 实现。
 
 挑战生成使用固定参数：
 
@@ -48,7 +48,7 @@ HMAC 密钥在设置 `ALTCHA_HMAC_KEY` 时使用它，否则使用 `"altcha-" + 
 
 挑战签名的 canonical JSON 形态与部分前端实现不同，但后端只校验自己生成的挑战，因此不影响运行。
 
-失败返回 400 与固定消息“验证码错误或已过期”。后台管理域为自己的登录路由保留了一份独立的校验辅助函数。
+失败返回 400 与固定消息“验证码错误或已过期”。所有入口共用认证服务的同一套校验实现；独立的 `/api/admin/login` 及其辅助函数已随 ADR-012 删除。
 
 ## IP 地域查询
 

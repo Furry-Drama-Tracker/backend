@@ -12,6 +12,8 @@ sources:
     resource: repo://internal/config/config.go
   - id: openwiki-source-da21c4a01f369bb3503d0dfb
     resource: repo://internal/handler/csrf.go
+  - id: openwiki-source-f89e324c07065d291ea97e16
+    resource: repo://internal/handler/episodes.go
   - id: openwiki-source-7e5389f01ee56b40448faee1
     resource: repo://internal/handler/notifications.go
   - id: openwiki-source-7106c8455bb73d12832c8523
@@ -20,10 +22,10 @@ sources:
     resource: repo://internal/server/integration_test.go
   - id: openwiki-source-012f2c78e3b1446dfc35803f
     resource: repo://Makefile
-generated: { by: "opencode", at: "2026-11-03T16:50:44.301Z" }
+generated: { by: "opencode", at: "2026-11-04T03:17:38.088Z" }
 verified:
   - by: openwiki/0.7.2
-    at: 2026-11-03T16:50:44.301Z
+    at: 2026-11-04T03:17:38.088Z
 ---
 
 # 快速开始
@@ -95,7 +97,8 @@ go vet ./...
 
 ## 首先要知道的事
 
-- 每个领域路由也挂载在 `/api/v1`，并带固定弃用头；端点限流同时覆盖两个前缀。
+- 每个领域路由只挂载在 `/api` 下（单前缀，v1 镜像已移除）；端点限流只匹配 `/api/<mount>`，全局限流覆盖所有 `/api/*`。
+- 管理员与普通用户共用 `/api/auth/login`；登录后由 `GET /api/admin/verify` 校验后台权限，没有独立的 `/api/admin/login`。
 - 非 GET 请求需要 CSRF，419 表示 access 令牌过期。
 - Refresh 令牌带随机 `jti` 轮换；30 秒宽限期外的重用会吊销全部会话。带 `jti` 的 access 令牌也会在会话失效后立即被拒绝。
 - 索引创建、数据迁移与会话/通知/注销账号清理 cron 都在启动时执行，但失败只告警；Web Push 发送仍是空实现。不要假设它们成功。

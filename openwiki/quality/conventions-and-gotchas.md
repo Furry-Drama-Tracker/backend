@@ -16,16 +16,18 @@ sources:
     resource: repo://internal/ratelimit/limiter.go
   - id: openwiki-source-bd4263ae6284e6c27650b1e8
     resource: repo://internal/repository/idutil.go
-  - id: openwiki-source-f6a0016b0fdad43ad2e998f5
-    resource: repo://internal/router/dual.go
+  - id: openwiki-source-724dd1d09cfbc9ac4d7a0d9e
+    resource: repo://internal/router/mount_test.go
+  - id: openwiki-source-621b1cb81d01767478ec2637
+    resource: repo://internal/router/mount.go
   - id: openwiki-source-a8ba835229d442d09305d33e
     resource: repo://internal/security/xss.go
   - id: openwiki-source-ebbcecfb3e8c07ba5e940ccd
     resource: repo://internal/server/register_routes.go
-generated: { by: "opencode", at: "2026-11-03T16:50:44.301Z" }
+generated: { by: "opencode", at: "2026-11-04T03:17:38.088Z" }
 verified:
   - by: openwiki/0.7.2
-    at: 2026-11-03T16:50:44.301Z
+    at: 2026-11-04T03:17:38.088Z
 ---
 
 # 约定与有意保留的怪癖
@@ -61,10 +63,10 @@ verified:
 
 1. 添加 handler 方法：解析请求、调用 service 或 repository、写响应。存在 service 时把领域决策留在 service。
 2. 只有该领域有 service 时才加 service 逻辑；大多数领域直接调用 repository。
-3. 在 `internal/server/register_routes.go` 的对应 `MountDual` 块中注册路由。需要认证就加 `amw.Protect(...)`，需要限流就加 `rl(ratelimit.XxxSpec)`。路由会自动出现在 `/api` 与 `/api/v1`。
+3. 在 `internal/server/register_routes.go` 的对应 `router.Mount` 块中注册路由。需要认证就加 `amw.Protect(...)`，需要限流就加 `rl(ratelimit.XxxSpec)`。路由只会出现在 `/api` 下（单前缀，无 v1 镜像）。
 4. 如果端点要出现在 API 文档中，添加 Swagger 注解并用 `make docs` 重新生成 `docs/`。
 
-记住端点限流同时匹配 `/api` 与 `/api/v1`，且 `RegisterRoutes` 会按 spec 缓存限流器，因此共享同一 spec 的路由共用计数器。
+记住端点限流只匹配 `/api/<mount>` 精确与子路径，且 `RegisterRoutes` 会按 spec 缓存限流器，因此共享同一 spec 的路由共用计数器。
 
 ## 新增集合
 
@@ -92,7 +94,7 @@ verified:
 
 | 怪癖 | 原因 | 后果 |
 |---|---|---|
-| 端点限流同时匹配 `/api` 与 `/api/v1` | 防止 v1 镜像绕过登录/注册/2FA/邮箱限流 | 两个前缀共享同一计数器与预算 |
+| 端点限流只匹配 `/api/<mount>` 与子路径 | 单前缀路由（v1 镜像已移除） | 其他前缀（包括 `/api/v1`）不会触发端点限流 |
 | 共享 spec 的路由共用限流器 | `RegisterRoutes` 按 spec 名/窗口/上限缓存 | 2FA 预算在七个路由间共享，而不是各自独立 |
 | `ulule/limiter` 的固定窗口计数 | 替换旧滑动窗口的库选型 | `RateLimit-*` 与 `Retry-After` 是近似值；窗口边界的突发行为不同 |
 | `requestEmailChange` 的键是 IP + 小写 `newEmail` | 防止用不同邮箱刷验证邮件 | 修改 key 组成会重置既有计数 |
@@ -103,7 +105,6 @@ verified:
 | `personalWallpapers` 的 nil 序列化为 `[]` | 遗留输出形状 | 客户端可以始终按数组处理 |
 | `_id` 始终是 hex 字符串 | JSON 没有 ObjectID 类型 | 字符串 ID 在 Mongo 查询前必须规范化 |
 | `backgroundPrefs` 默认空图片、关闭、opacity 30、blur 0 | 遗留默认值 | 缺失字段不能被解释为零值 |
-| v1 响应带固定 `Deprecation` 与 `Sunset` 头 | 公开弃用承诺 | 修改日期是破坏性公告，不是代码清理 |
 | 一秒以内的成功 GET 不出现在请求日志 | 日志量控制 | 流量分析应使用 API 统计而非日志 |
 | 验证码与限流在内存中 | 单实例设计 | 多实例部署会破坏验证码并使限制按实例生效 |
 
@@ -124,7 +125,7 @@ verified:
 3. 是否改变存储格式（加密、哈希、BSON 标签、集合名）？
 4. 是否改变登录或注册分支顺序？
 5. 是否改变 CSRF、cookie 或令牌语义？
-6. 是否影响 `/api/v1` 镜像？
+6. 是否改变 `/api/<mount>` 的挂载，或让 `/api/v1` 镜像重新出现？
 
 任一答案为是，就把它当作有意的 API 变更，并运行完整测试套件。
 

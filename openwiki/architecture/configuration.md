@@ -23,7 +23,7 @@ sources:
 generated: { by: "opencode", at: "2026-11-03T16:50:44.301Z" }
 verified:
   - by: openwiki/0.7.2
-    at: 2026-11-03T16:50:44.301Z
+    at: 2026-11-04T03:17:38.088Z
 ---
 
 # 配置与环境变量

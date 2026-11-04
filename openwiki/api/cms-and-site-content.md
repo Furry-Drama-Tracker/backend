@@ -28,15 +28,15 @@ sources:
     resource: repo://internal/handler/wallpapers.go
   - id: openwiki-source-0b6d7f0465da2820a1a264ef
     resource: repo://internal/model/theme.go
-generated: { by: "opencode", at: "2026-11-03T16:50:44.301Z" }
+generated: { by: "opencode", at: "2026-11-04T03:17:38.088Z" }
 verified:
   - by: openwiki/0.7.2
-    at: 2026-11-03T16:50:44.301Z
+    at: 2026-11-04T03:17:38.088Z
 ---
 
 # CMS 与站点内容 API
 
-这些域共享 `cms_helpers.go` 工具，并遵循同一形态：公开读取面、登录用户自有资源，以及超管或管理员管理端点。所有路由都通过 `router.MountDual` 挂载，因此每个路径也存在于 `/api/v1` 下（带弃用头），并且每个请求都先经过全局中间件管线。
+这些域共享 `cms_helpers.go` 工具，并遵循同一形态：公开读取面、登录用户自有资源，以及超管或管理员管理端点。所有路由都通过 `router.Mount` 挂在 `/api` 下（单前缀，无 v1 镜像），并且每个请求都先经过全局中间件管线。
 
 ## 站点内容
 

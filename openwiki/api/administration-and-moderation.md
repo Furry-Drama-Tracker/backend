@@ -5,7 +5,7 @@ description: 后台管理、剧集审核与回收站、举报、统计、分类�
 tags: [api, admin, moderation, review, audit, statistics]
 verified:
   - by: openwiki/0.7.2
-    at: 2026-11-03T16:50:44.301Z
+    at: 2026-11-04T03:17:38.088Z
 sources:
   - id: openwiki-source-44e96c77b4637e4ff46c5518
     resource: repo://internal/handler/admin.go
@@ -23,18 +23,18 @@ sources:
     resource: repo://internal/handler/stats.go
   - id: openwiki-source-54e2988cad872a1deb6494f6
     resource: repo://internal/repository/episode_trash.go
-generated: { by: "opencode", at: "2026-11-03T16:50:44.301Z" }
+generated: { by: "opencode", at: "2026-11-04T03:17:38.088Z" }
 ---
 
 # 管理与审核 API
 
-管理面分散在多个挂载路由组中，而不是集中在单一包内。它们都位于受限流的 `/api` 组下，并由 `router.MountDual` 镜像到 `/api/v1`；每个 handler 都是薄 HTTP 层，直接调用 repository 或委托 service。鉴权通过 `middleware.Auth.Protect(...)` 的角色列表表达，部分域再叠加内联角色校验。
+管理面分散在多个挂载路由组中，而不是集中在单一包内。它们都位于受限流的 `/api` 组下，并通过 `router.Mount` 以单前缀挂载；每个 handler 都是薄 HTTP 层，直接调用 repository 或委托 service。鉴权通过 `middleware.Auth.Protect(...)` 的角色列表表达，部分域再叠加内联角色校验。
 
 ## 鉴权层级
 
 | 挂载点 | 读权限 | 写权限 |
 |---|---|---|
-| `/admin` | `login` 公开；`verify`、`pending-counts`、`creators`、`verify-password` 允许 `creator` / `admin` / `superadmin`；列表与创作者主页审核仅 `superadmin` | 仅 `superadmin`，且变更路由附加 `RequireEmailChanged` |
+| `/admin` | `verify`、`pending-counts`、`verify-password` 与 `logout` 允许 `creator` / `admin` / `superadmin`；`creators` 仅 `admin` / `superadmin`；账号列表与创作者主页管理仅 `superadmin` | 仅 `superadmin`，且变更路由附加 `RequireEmailChanged` |
 | `/review` | 先经 `Protect` 允许 `creator` / `admin` / `superadmin`，再由 `adminOnlyReview` 收窄为 `admin` / `superadmin` | 同上 |
 | `/episode-trash` | 先经 `Protect`，再由 `adminOnlyReview` 收窄 | 同上 |
 | `/reports` | 提交：任意登录用户；列表：`admin` / `superadmin` | 处理：`admin` / `superadmin` |
@@ -51,16 +51,13 @@ generated: { by: "opencode", at: "2026-11-03T16:50:44.301Z" }
 
 ## 后台管理
 
-`Admin.Register` 挂载后台端点。后台登录与公开登录是两条独立路径：
+`Admin.Register` 挂载后台端点。后台没有独立登录入口：
 
-1. 校验 Altcha（或开发环境 `x-dev-token` 绕过）。
-2. 按 `account`、`email`、`username` 的顺序回退解析账号。
-3. 角色不是 `admin` 或 `superadmin` 时返回 403。
-4. 账号锁定时返回 423；密码错误返回 400 并递增失败次数；邮箱未验证返回 403（开发环境的演示邮箱除外）。
-5. 已开启 2FA 的账号在此入口收到 403 与 `need2FA: true`，必须改用前台 `/api/auth/login` 完成两步验证。
-6. 签发 access 令牌与带随机 `jti` 的 refresh 令牌，写入 `usersessions` 文档，更新最后登录信息并设置鉴权 cookie。
+1. 管理员使用公开的 `POST /api/auth/login` 完成统一登录分支（Altcha、锁定、邮箱验证、设备验证与 2FA 全部生效）。
+2. 登录成功后调用 `GET /api/admin/verify` 校验后台权限并返回当前管理员信息；角色不足时由 `Protect` 返回 403。
+3. `POST /api/admin/logout` 与前台登出一致，吊销当前 refresh/access 会话并清除鉴权 cookie。
 
-该独立入口为兼容旧客户端而保留（不再仅限开发环境），但仍跳过新设备验证并直接拒绝 2FA 账号，也不写入审计记录。管理员日常应优先使用前台登录入口。
+历史上曾有独立的 `POST /api/admin/login`，但它缺少新设备验证与 2FA，只以“邮箱已验证且未开启 2FA”放行；该入口、`Admin.Login`、`AdminAuthSpec` 及只服务于它的 repository 方法均已移除（ADR-012），管理员统一走前台登录。后台登录不再是单独的锁定分支。
 
 账号管理分为三类角色：
 

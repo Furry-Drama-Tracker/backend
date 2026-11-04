@@ -20,10 +20,10 @@ sources:
     resource: repo://internal/service/password.go
   - id: openwiki-source-3f2309f0c3b4e4f8068472e9
     resource: repo://internal/service/register.go
-generated: { by: "opencode", at: "2026-11-03T16:50:44.301Z" }
+generated: { by: "opencode", at: "2026-11-04T03:17:38.088Z" }
 verified:
   - by: openwiki/0.7.2
-    at: 2026-11-03T16:50:44.301Z
+    at: 2026-11-04T03:17:38.088Z
 ---
 
 # 注册与登录流程
@@ -93,7 +93,7 @@ handler 把结果映射为响应：
 
 `users.loginAttempts` 与 `users.lockUntil` 实现锁定。默认五次尝试、30 分钟，可通过 `[security]` 配置。`repository.IsLocked` 把 `lockUntil`（Unix 毫秒）与当前时间比较。`IncLoginAttempts` 递增并设置锁定；如果已锁定，则重置为一次并清除锁定，这是防御分支。
 
-同一锁定也适用于后台登录（那里返回 423）以及 2FA 登录和邮箱变更请求（423）。修改密码时输入错误的当前密码同样会递增 `loginAttempts`，成功后才清零，因此反复猜当前密码也会触发锁定。
+同一锁定也适用于 2FA 登录和邮箱变更请求（423）；管理员与普通用户共用同一个登录入口，因此也走这里的通用凭据错误，而不再有返回 423 的独立后台登录分支。修改密码时输入错误的当前密码同样会递增 `loginAttempts`，成功后才清零，因此反复猜当前密码也会触发锁定。
 
 ## 设备验证链
 

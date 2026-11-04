@@ -1,14 +1,14 @@
 {
   "schemaVersion": 1,
-  "pageVersion": "sha256:6ed2ea12fa04766dda13af599d5686b7e86aedbd886433463d89df9025236873",
+  "pageVersion": "sha256:702ed15d4c966be9ef7a4e75d09f688bf8250b12304eedb4e4948a22e5dc38d1",
   "claims": [
     {
       "id": "claim_ad8616456be14998a10dc7de860bbbf0",
       "statement": "The engine applies middleware in the fixed order recovery, gzip, security headers, CORS, timeout, slow logger, body parsing, input sanitization, header sanitization, csrf-token route, CSRF, API tracker, request logger, then the rate-limited /api group.",
       "evidence": [
         {
-          "resource": "repo://internal/server/app.go#L51-L96",
-          "version": "repo-lines-v1:sha256:5dd34c32a8a1513cc1e6292cd34e85ae8df62fac17fcad7b3dd93be0c69a5d76:eyJzZWxlY3RlZExpbmVDb3VudCI6NDYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjgxNWQ3YzRmZThlMWVhMmRkNTk2MDQ0MWJhNTgzOGU1Yjc5NjY0YTNkYjgwYTQzODFhOWFkNTU5ZTMyZWE5MDMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjdlYjcwMjU3NTkzZGEwNmY2ODJhM2RkZGE1NGE5ZDI2MGQ0ZmM1MTRmNjQ1MjM3ZjVjYTc0YjA4ZjhkYTYxYTYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImQxMjYzNDNlNzFlOWRhODZiYjM2NTU1MzE0MzBlZjllYTdiMGVhZWM0YzhmNGFkZTkxYTE2N2NlMzEzOTI3YjkiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjRlZjZmNzE3MDQyNzFhZTczN2E5MmUxMzVlZmFhMjIzMmZhMTM1MzkwZTAxZGM1ZjExZDE5MjkzZWNjM2RjYzkifQ"
+          "resource": "repo://internal/server/app.go#L51-L94",
+          "version": "repo-lines-v1:sha256:90e053bdfad95cbc4867df07f50124500b84addaa4da575279288b128e13a699:eyJzZWxlY3RlZExpbmVDb3VudCI6NDQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ0ODVjMWYwNGUzOTllNzNjMTE4NzFkMTNmZjU4MDYxMGI3OWE3YjI5ZDRkZWVkYTE1MTVlOTcwNjE2NDAwYzkiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImQyZjc4Y2FkY2RmZTA2Yzc0OGEzNTMxOGJhNTU0YzlmOTQyMGNkMDFiOWI0YjM3MDU3OTY2YjU1MWJkNjM1MWIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjgyNDUyMjhhMjg5YTU1YzhjMjBmZTYzY2I2NWU4ZDUwYzVkZTc4MjhiZjcxMGQ1ZmJjNTNhYjc0ZmJjMWQ2OTEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImJmNDAwZTRkNmQ2NWFmZjk1OWY0YmYwMTVmNWYzNmQzMDQyNmUzNjVjNzY0YzdiNzJjMWNlYjgzYWJiMjczMzUifQ"
         }
       ]
     },
@@ -24,11 +24,11 @@
     },
     {
       "id": "claim_b43748502d7445bd96d1eafb70439c64",
-      "statement": "Body parsing applies to JSON and form-encoded requests with a 1 MB limit, raises the limit to 50 MB only for JSON backup import paths, and returns 413 for oversized bodies and 400 for invalid JSON.",
+      "statement": "Body parsing applies to JSON and form-encoded requests with a 1 MB limit, raises the limit to 50 MB only for JSON requests to /api/backup/import and its subpaths, and returns 413 for oversized bodies and 400 for invalid JSON.",
       "evidence": [
         {
-          "resource": "repo://internal/middleware/bodyparse.go#L58-L134",
-          "version": "repo-lines-v1:sha256:93ffd8a17228ea9efe904009af7f9706cfa781f6251c60ec5715d87b86b4d536:eyJzZWxlY3RlZExpbmVDb3VudCI6NzcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImE3M2ZlNjM4NTE0YTc2NGE2MDg2ZTYyNWUxMmU0NzVkMGQxNmZhYWMzNDAzNjdjYzRlNGU5YTYyMjVjYjI2NGUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImU4ZWVlZDYxY2Y2NjM3MzAzYjYyNzQwYjgzMzEyNDdkM2I4NmQ4ZWE2Y2UzYjdkYmY3ZGMyZDJmNzUyYmM0MzQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjE0NDAwYmExZWRlNGI1YzA1MDY4M2IwNWRmZmE1ZjIwMTRmOTJjMTA2YmE5MjdkOTE2YzU3NGE3YzVmMjRjYzEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjQ5ZTRhODQ1MzMzYzFhOGU5ZWJlMWIzZWRmMzg2ODQyNTNhMmYxZTlmY2FiOWQxMWViZDE3YzM3MGZlZjNjNjAifQ"
+          "resource": "repo://internal/middleware/bodyparse.go#L58-L142",
+          "version": "repo-lines-v1:sha256:54ba87929f97a9dfbab59a1dbf9297a0200e20c97f8cad1c044cd44f9658e024:eyJzZWxlY3RlZExpbmVDb3VudCI6ODUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImI5ODFjNGU1NDE0YzZiN2MzNTY3OWY2OTNmNmZhYzMzYzYyZWMyYzE3OGM0OTEyMDM0NTM2YTRjODE0OWE2ZDIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImM0YTcxZTY4YzBiZGJjOTU3MzA1NjdiM2E0ZWUzNDUxZTAyOTQ2OGU3YmUzNzFmOTk2ZTkxYmJlYWVkYmM5NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImE1YzEyYjk2YTNhMzc3MDlkMDY3YzAxYjNlOWVmNDgyZmQzYjY5MTQwMzRkMDRkNTQ1MWNjMmVhMTI4YzQ0MmMifQ"
         }
       ]
     },
@@ -41,36 +41,36 @@
           "version": "repo-lines-v1:sha256:293aaaea0fe83e5cfaec0c0a5e92714e44d286c2a0f622ad2c1130315f419ae9:eyJzZWxlY3RlZExpbmVDb3VudCI6MTksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjljNGU1NzE2NTQ2ZGZkNGYyODg4YjMxY2IxMDc3M2RiN2FlODlmMGRhZjFkMTkxODQ0ZDRmZDdiYmZmMjc3MTkiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjgyNzAwYWE1ZDBiNmYwY2RjMzQxZGE2MDU1YTI0ZmUyYzQxZWQ0Yjg5Y2Q3MTI2ODIwNjk4NjU0N2MyMDkzZTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImE3YWNlNzJlYjYwOTJmNjFiMGM0YWY4YWFmM2JmZWVmOWE2MmQzMzY5YmE5NmJkMzZjMjQwNDQ1YTQ4YjdmOGIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjoyLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjI4YTUxNjliZDY2YWNmYjM0YTU2ZWU4YTE5NGU3YmY3YjAyZDZhMjE3MzZkYWFhMjMxZDlmMTM2OTRlYjExM2YifQ"
         },
         {
-          "resource": "repo://internal/server/app.go#L71-L76",
-          "version": "repo-lines-v1:sha256:df6fff9e56da7a6fc6a1834dcd73c797e3ada49f6cbb5e84e55b7bafcc24a85f:eyJzZWxlY3RlZExpbmVDb3VudCI6NiwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiZWVhM2QwZDYyOWRmZjgwN2U2OWVhMjM0NDk3OWYyNTFjYTM1NDM5MmI2ZDJlNTQwMDMxZjY2Y2FjMzdkNzk4YiIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiOTRmZDZiMzhlNDBiMGY0MzQ3ZDg5ZjI2Yjg4ZTNkNGQ1NGFhYzg4ZjFjNGFmMDgwZTI4OWYyMWEzZTQ3MDg5MiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZTljZjkxMzhlYjU1ODJmOWRkYjMwNWY1NWFmNDI2NjlkMDc4ZTEyZmQwNzNjODUzNjBjNTZhMWY5OTlhNTE1NiIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiNTUzZGVhYzMyNTMyMjE2YmVhNWY2MDdiZTJlM2M2ODJhZjgxNzYzZjI0MDMxZjlmZTU2M2I5MDhmZDZhMTE5MSJ9"
+          "resource": "repo://internal/server/app.go#L72-L76",
+          "version": "repo-lines-v1:sha256:cd15511f27614067cf2bde2d33b4a362a3daac63c77aa78f89d4de5677143c62:eyJzZWxlY3RlZExpbmVDb3VudCI6NSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiY2E2ODc0N2RjOGI1OWU1NDM2YjhhODg2OWMyYjA1ZTA2YWMyYzgzYzg0MzhjZGFhODY0MGQ4NDU0YzlhMDVlNyIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNzUzYjQxNGFhYjcwYTlhZDdmZDcyNDBlMGFlYTRhOTE0OTA4MWM5YWFjODQxYmI2YjYzZTc5MzBhZDI0Y2Q1MiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiOWM3OTE5NzcxODkwYjAyNGUwOGRkOGZmZTkxYjVjYTM5MWNjMmI5NjdlZDA5NGY3MDE0OGE5MDEzMGRhOWVlOSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiMmMyMDczYmZiMzA3NTJjNTQ0NGYyNWY4ZDIyNDdmMmQ5OGMxOTIwZTliZmM2ZGNlOTUyM2VjMzc3YTViYzQyNCJ9"
         }
       ]
     },
     {
       "id": "claim_43f164fe197344b184e9886fa8cb865c",
-      "statement": "Endpoint rate limiters match both /api/<mount> and /api/v1/<mount> plus subpaths, while the global 300-per-minute limiter is attached to the /api group and skips /api/translate and /api/auth/captcha.",
+      "statement": "Endpoint rate limiters match only /api/<mount> and its subpaths, while the global 300-per-minute limiter is attached to the /api group and skips /api/translate and /api/auth/captcha.",
       "evidence": [
         {
-          "resource": "repo://internal/middleware/ratelimit.go#L58-L97",
-          "version": "repo-lines-v1:sha256:10e0e4b5d5da5981a6d9e0efdfd736b8d4f918f1ed0dbf825ddf8e6aa645a534:eyJzZWxlY3RlZExpbmVDb3VudCI6NDAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImY2YWM3N2M3MDczYzNkNDMxN2UwN2UwM2IzMjQ2ZmZiMzkxYzBkNTljODIyZjMxYTBlOTBlZjA2MmYyNTNiNGQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjgyNzAwYWE1ZDBiNmYwY2RjMzQxZGE2MDU1YTI0ZmUyYzQxZWQ0Yjg5Y2Q3MTI2ODIwNjk4NjU0N2MyMDkzZTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjliMTJjYjgzODY3OTI4ZTY0YmFhNjI0MjE4NTNlNDA1NTdkYjI0YjhhMzcyYzY5ZGI4MjEwOGIwOTkzODI5YTYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjI5NzkxMDE1MTcyODNjZTM2ODQ1ZjliY2U0OGUzNDQ3NmYzMzI2MjRjZWE0ZDRjNWM0MGFmNDNlMzg2MzhjNDIifQ"
+          "resource": "repo://internal/middleware/ratelimit.go#L46-L127",
+          "version": "repo-lines-v1:sha256:c46f9b06d015a65e07a95639f9dd968636783b77f4227c2a4b4447aae11a2071:eyJzZWxlY3RlZExpbmVDb3VudCI6ODIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjA1NWVkNTg1NmQ1ZjgzNGRjM2ZlZWU3MGMxYWRhZTBlZWFlZjk1YmViNzEwMDVjMmFhZWRhY2NlOTliOWFiZWIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjIxZDI5ZTg2MmVlNzI3ZTkwOWJkNjE0NzYwYWFmNTRlNjljMWUzYzUxNjQ3ZmI1ODIzNjBmNjdjNDk2ODBkYjgiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImYyNDhmM2JiNDI4ODc2YjRiMWY2YjVmOTllOWIwNTdkMWRhYjMxZDFkZjdiZDViNTYwZjMzNjBmM2Q1ZWQ0YWIifQ"
         },
         {
           "resource": "repo://internal/server/app.go#L78-L86",
-          "version": "repo-lines-v1:sha256:20a3356f9fdb26216a3c9d888a7bf232fe2fa58b3986846c03a68f25d1a1c8c1:eyJzZWxlY3RlZExpbmVDb3VudCI6OSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiYzAxZGFmZjRlODU1MzU4NGUwNTVlNTI0MDNiMDVlMzE2NTZhODk3NmQ5ZTEyNTRlZTQ1MGI5YzhhYzk0NWY0NSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMjZmZGZkYmM1ZjU3Njg2OTg1NWI2ZTM1ZjU5YmI2NmIxOTkwOTFjY2YwNjk3NTY2NGEzZGU0NWQzMWQ4NWZjYSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiMmFkMzlmZTFiOGEyOTE3YWVkMTBhZDk0MGQ3NTBjYzg1MWJmZmZjNzFlYWNiYzNjMWI1OWNjNTdkN2EzMjcwYyIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiMjBhOTFhMmQyNzVlNzU5YmIzMGI3N2IzOGQ5YWMwNGMyZWQzMDNkNTk4ZmU2MzI5YjE5MzMyYzkzYmUwZjE2MCJ9"
+          "version": "repo-lines-v1:sha256:28aa915c63eb529f1955fa05e23b2d142896ee62faeaa038db713de4314bf170:eyJzZWxlY3RlZExpbmVDb3VudCI6OSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiMTIzNGQyMzE3NzE2ZDc3MzgzOTcyZTQ4M2MxMDFjYWM5N2VmNTZiMjFjNThhMWZlZTE5MDJjMWZkNjEwNzVjMiIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiZmVkNTFhMThiYTIzYTQyNDhlOWE3MjhlZDRmMzE5YTM1YmUxYThmZGUxZDE4ODFhMjE3ZjYxZjU2NTMxN2U0NiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZWFhYmQ2ZGFjNGEyZjc2OTJmZTk0OTc5YWQ2ZWNlZDAzZjdhZjI5YzM5YjVmNDU2NjNhYTNkOWM3MTNiOWY3MiIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiNjdkNjRlZmZmZmE1OTc0ZDYwMjZmMzE5ZWQ4MDU3Mjk3NmQyOGNhZTkxNzRjYTk0YzMyZDM3YjA5YjcxZTU2MCJ9"
         }
       ]
     },
     {
       "id": "claim_b2da444c99294c5198501a1f9ebf5ced",
-      "statement": "Each RateLimit call constructs a new limiter and in-memory store, but RegisterRoutes caches one limiter per spec name, window, and max, so routes sharing a spec and the /api and /api/v1 mirrors share counters.",
+      "statement": "Each RateLimit call constructs a new limiter and in-memory store, but RegisterRoutes caches one limiter per spec name, window, and max, so routes sharing a spec share counters.",
       "evidence": [
         {
-          "resource": "repo://internal/middleware/ratelimit.go#L50-L71",
-          "version": "repo-lines-v1:sha256:ae402194af1dc2a47e1252def3720002fc252815e20ca6c3dacc9e8b8f47a33e:eyJzZWxlY3RlZExpbmVDb3VudCI6MjIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImI0YmQ0OWRmMGEwMzZmY2U2MTA0OGM1Yzk2MGE4YzE3YzIzODNmNzI3NjI4ZDRmMzRhMzcwODkzOGQwZmJiZTAiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjkzZDE0YWIwYWE1MWYxMzBmMWU3NmUyMGJhMjBlNGQ3MzdkYjA2MjZlNTY2ZjhiNTBhOGIwYzk0MGExNjk3OTMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijk0OWVjOTU4ZWMxOTI2ZmRkYzA5OGYyZjM4ZGI1MWViM2I2YWJkYzMyZTVjMGM5NTZiODI5MjI3NzE2NDlhOTciLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjZmZWY1ZDgyNjlhY2E1Y2ZmNmNhZTAyNjMyMzBhYzZhNjM0OGU4NzAxNDRhNzRkOTVhYTA3ZDQ5ODNhZWY0NzkifQ"
+          "resource": "repo://internal/middleware/ratelimit.go#L46-L127",
+          "version": "repo-lines-v1:sha256:c46f9b06d015a65e07a95639f9dd968636783b77f4227c2a4b4447aae11a2071:eyJzZWxlY3RlZExpbmVDb3VudCI6ODIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjA1NWVkNTg1NmQ1ZjgzNGRjM2ZlZWU3MGMxYWRhZTBlZWFlZjk1YmViNzEwMDVjMmFhZWRhY2NlOTliOWFiZWIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjIxZDI5ZTg2MmVlNzI3ZTkwOWJkNjE0NzYwYWFmNTRlNjljMWUzYzUxNjQ3ZmI1ODIzNjBmNjdjNDk2ODBkYjgiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImYyNDhmM2JiNDI4ODc2YjRiMWY2YjVmOTllOWIwNTdkMWRhYjMxZDFkZjdiZDViNTYwZjMzNjBmM2Q1ZWQ0YWIifQ"
         },
         {
-          "resource": "repo://internal/server/register_routes.go#L28-L39",
-          "version": "repo-lines-v1:sha256:8a56c14597b69e5ebede913d3b8733233078d1f3a09703dc374e40de4cf03746:eyJzZWxlY3RlZExpbmVDb3VudCI6MTIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImYyYmUwMjUwYzg1ODAxNzllMTQ1MzkyZmE3NTc0MDkwNmJhMDZjYjI5Y2RiOGIzOWNmYjc2NjNjYTMwMWJiN2QiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjkzZDE0YWIwYWE1MWYxMzBmMWU3NmUyMGJhMjBlNGQ3MzdkYjA2MjZlNTY2ZjhiNTBhOGIwYzk0MGExNjk3OTMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImQ1ZTBhZGE5OGQ4MWU0ZjMzODg4MjY2OTQxMzhmNjY4YTIwZDVhN2VjZGNmYWI3ZjRlZDY4ZWFlNGI5ZmJlN2EiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjhlOTRhYjdkYzY0Yjc1NWEzYzNlMjg2YzRmMDJmYzhmMGRhNGJmZTNlNmEzNWQwMzBlMmE2Mjk3ODJhMDU0YzYifQ"
+          "resource": "repo://internal/server/register_routes.go#L28-L38",
+          "version": "repo-lines-v1:sha256:34891b81ac97fb630271fddff3253f908b2c7b5c32fa396ad0f3b804f6d8eb04:eyJzZWxlY3RlZExpbmVDb3VudCI6MTEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxZDM5M2JmYmNmOTZiMTlkYzlkN2NkYjYwZGQ1Y2RmNjY4YWIyMzMyZTU4YmE2MjNiZTFmOWE1YTI3ZDQ3MWUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY3Y2RhODJkYTYwNjIzOGUwNWU2MjM5OTU2OWM1ZWUwMzk5MzQxOTY0OGFlNWQ0M2EyYmY4Y2Q2MzQ3ZjgyNjMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImNiMmViOWE3YThjZWI3ZDMwZDVkM2NiOTJkODIxZTVhMDBmMzgzNjFhNTQ1YWMxNzE1ZDMxZDVkMzc4MjZkMGMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImM5ZmViOTI5MjJlMmY2OTJlOGNlMmIwM2EyMzU1NjdiYmQyODgxZTYyZmFmNjBkYjg0Yzg0OTIxYjczYjJlNjYifQ"
         }
       ]
     },
@@ -99,12 +99,12 @@
       "statement": "Static /uploads routes are registered outside the rate-limited /api group and serve only allowed image extensions with immutable caching, a sandbox CSP, and traversal protection.",
       "evidence": [
         {
-          "resource": "repo://internal/server/app.go#L118-L145",
-          "version": "repo-lines-v1:sha256:cd862efe3eb5ac149223f69c4f1d7dabf0cdb11c67afa6f47f1d8b08459ade54:eyJzZWxlY3RlZExpbmVDb3VudCI6MjgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImU0OTQ1YTM0MTdkNTdjNTA1NDFkMGNhNTFkYTQxYWQ2OTQ4OTM1NjBkNTA4NjBiMWUxMWE4YWE1NGU3ZmM0YjgiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImUyMmZhYTUzNWJkMmVhM2Q1MmU3NDFlZDQ1NDQzNWI3ZmU0OWU4MzU4NmU5NDNkOThkODJiYmZiMjRkMWY1YzUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijk4MzIyZmI0MmRmOGU5YTlkMzljOWNlMTZmMjQ2ZTRkYmQ2MWI1YWUwZmFiOWU1Y2QyMTJmNTZmZTlhYWUzMmIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+          "resource": "repo://internal/server/app.go#L112-L144",
+          "version": "repo-lines-v1:sha256:352ef18b91c6b6604b0850465e5f54f658387a252e0a6e7e9ef39cd7e38c5f8d:eyJzZWxlY3RlZExpbmVDb3VudCI6MzMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjljOGQ5ZTVmMzRmMWJlOTExODkwZTMyNTkxYWQ3ZDRiNDk2MTUxYzRkZWY4YTI0ODEyYWEwOTVlNDI0NTRkODEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijc5Y2Q5N2ZhMWVlMmNiNDgzYWVlNDk1MGU5MzZmYjQxNmU0MDJmYjQwMzRiMjU3M2FjMGRmZTQ1ZjNhMDM0ZWQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
         },
         {
-          "resource": "repo://internal/server/app.go#L97-L108",
-          "version": "repo-lines-v1:sha256:e9246cca969264f1c8e3527ebedd12d1d76464033d7d1e346051979d15a3b845:eyJzZWxlY3RlZExpbmVDb3VudCI6MTIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImNjZWIwOTdmY2IxNmE0YTY0OTViZjUwZTIzYmM4OTUzOWJhOTBjOWM0NzczM2Q3MzgyZmFhOTMzN2YwYzQyNjUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImE1M2I2ZjQyMDQ3OTA5ZDQ1YzU3ZDljODFlMDA0ZmE1YzNkMjJhMTUwNjViNTBhYzFjNmUzNzNkYjZiODRmOWMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjdiNzliMmQwODBmMDJmYjRkMWM3NzVhYzlhMDRkZGFhOTUwY2UwMzk0NTczNDJjNmJhNjg1NjBhMTU1MDdiNjQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjFlMGU4NjA5ZDNiM2YzM2U0NDk5MTlmOGQ2MjVmZWY2ZWIwZmY1MGE0YjIxMjQ4OWEyNDM3ZjRkNzAyMWRmMjEifQ"
+          "resource": "repo://internal/server/app.go#L96-L102",
+          "version": "repo-lines-v1:sha256:8704e6976ebc601c9785cf2f5556e081efad1c2e6ba788c92df17933b881e311:eyJzZWxlY3RlZExpbmVDb3VudCI6NywiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiOTYxMWJjZGJjMzY5ZTBkNTkwMzVkZWUyNWIxODJhYWZmNjExMDMyMmY5ZDMwMDdmZWNmZTJiNTExNTFlZjk3ZSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiYWFlNTM2MjBkODUxNDEzMWM1NWY2NGZmMGFjMmYxNDgzNTM3M2RkNTNmZDM5MThhNzcyYzg4ZmNlZGRkNjVmMCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZmI2NjViYmYxOWEwNDE5NzFhODU3Y2E2Mzg3M2NhNDY3MDA3MDBhZTA4ZTFiZTBiZWIyMGY1YTAyNzRmZTllYyIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiMzZiYTFjODdmMGZkN2YxZDAyOTY5MmZlYTlhZWJiNDAwMjQxNGNiMDJiYWVkY2E4OTU4MjdmY2FkZDBhMzEzZCJ9"
         }
       ]
     },
@@ -113,14 +113,14 @@
       "statement": "errors.Handler is registered after all domain routes and the static upload routes.",
       "evidence": [
         {
-          "resource": "repo://internal/server/app.go#L95-L108",
-          "version": "repo-lines-v1:sha256:3ac010bb7713ce769ae80b911f2a4db90342185a8c441186b8ee7b14ee537d82:eyJzZWxlY3RlZExpbmVDb3VudCI6MTQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijk1NjZjMmIyYThjMjY5Y2FjYjhlYWU3YTY1YmZkMzg0NzM3ZjVhY2Q2MGQ5MjlhN2I5OTY2OWM5N2M0ZWE3ZGEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImE1M2I2ZjQyMDQ3OTA5ZDQ1YzU3ZDljODFlMDA0ZmE1YzNkMjJhMTUwNjViNTBhYzFjNmUzNzNkYjZiODRmOWMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjNjOGI2ZTc5ODkwYmFkMGM0ZWRlYTM0ODQxZjQ0ZTdkOGMwM2UwOWM0MjFmNzQ2YzI0MDUxYTZlNjMwMTQ0YzUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjFlMGU4NjA5ZDNiM2YzM2U0NDk5MTlmOGQ2MjVmZWY2ZWIwZmY1MGE0YjIxMjQ4OWEyNDM3ZjRkNzAyMWRmMjEifQ"
+          "resource": "repo://internal/server/app.go#L93-L107",
+          "version": "repo-lines-v1:sha256:6649a2f9466b9db18261676b7794183e192b81da121f25859ab75e8fd011076a:eyJzZWxlY3RlZExpbmVDb3VudCI6MTUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjM4MjI5MTNiMzJkMGMyNTQ3N2MwNjM5MGUwYjEzYzhkOGEyYjUwMWM2MDljNTgxZGRhZGVmMjk4MDdkZjJmNjkiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImRlYTkxMGI4ZjVlNzA2Y2VmNTNjNGY2ZWU2YWJkMTg5N2U0Njc5ODAyYzE0NWYzZTRiNzliZjk5OWRmNWQ1NjQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImYyMWY3ZDQ4MDQ3NGU2MzY2NzdiMjEzYzRlOTFiY2VmNGNjMWFiZDM0OTA4ZjZlMmQ1NTU4NWE2MTcyZDM4ZjciLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjRkNjM5ZWY0MTFlMWFjZDkzYjlkZjg1MGE2OTBhNDI5ZTM4Mjc5NzMyOWEyYjVlZjY5ZThmM2E4MDA5YmM2NGYifQ"
         }
       ]
     }
   ],
   "verification": {
     "by": "openwiki/0.7.2",
-    "at": "2026-11-03T16:50:44.301Z"
+    "at": "2026-11-04T03:17:38.088Z"
   }
 }

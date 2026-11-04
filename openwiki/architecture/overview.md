@@ -14,8 +14,8 @@ sources:
     resource: repo://internal/middleware/cache.go
   - id: openwiki-source-47b21f10ba3dc863e7bae4e5
     resource: repo://internal/repository/repos.go
-  - id: openwiki-source-f6a0016b0fdad43ad2e998f5
-    resource: repo://internal/router/dual.go
+  - id: openwiki-source-621b1cb81d01767478ec2637
+    resource: repo://internal/router/mount.go
   - id: openwiki-source-7106c8455bb73d12832c8523
     resource: repo://internal/server/app.go
   - id: openwiki-source-ebbcecfb3e8c07ba5e940ccd
@@ -24,10 +24,10 @@ sources:
     resource: repo://internal/service/auth_service.go
   - id: openwiki-source-62a9837f2b45c92ae81ca775
     resource: repo://internal/upload/upload.go
-generated: { by: "opencode", at: "2026-11-03T16:50:44.301Z" }
+generated: { by: "opencode", at: "2026-11-04T03:17:38.088Z" }
 verified:
   - by: openwiki/0.7.2
-    at: 2026-11-03T16:50:44.301Z
+    at: 2026-11-04T03:17:38.088Z
 ---
 
 # 架构总览
@@ -107,7 +107,7 @@ type Deps struct {
 |---|---|
 | `config` | 默认值、ini、`.env`、环境覆盖、致命校验、`IsDev` |
 | `server` | Gin 引擎、中间件管线、静态上传、路由注册 |
-| `router` | 在 `/api` 与 `/api/v1` 下双版本挂载并注入弃用头 |
+| `router` | 通过 `Mount` 把领域路由挂载到 `/api/<path>` 单前缀（无 v1 镜像、无弃用头） |
 | `middleware` | recovery、gzip、安全头、CORS、超时、日志、请求体解析、清洗、CSRF、鉴权、限流、API 统计、缓存 |
 | `handler` | HTTP 解析与响应组装；40 多个按领域分组的文件 |
 | `service` | 认证/账号领域逻辑：登录分支、refresh 轮换、设备链、2FA、邮箱变更、导出 |
@@ -137,10 +137,10 @@ type Deps struct {
 handler.NewX(repos, cfg, authMiddleware, rateLimiterFactory, optionalMail)
     └ Register(group)
         └ g.GET/POST/PUT/DELETE(path, guards..., handler)
-router.MountDual(apiGroup, "/x", handler.Register)
+router.Mount(apiGroup, "/x", handler.Register)
 ```
 
-`MountDual` 把同一组 handler 注册两次：一次在 `/api/x`，一次在 `/api/v1/x`，后者带 `Deprecation` 与 `Sunset` 头。守卫是普通 Gin handler，通常是 `Protect(roles...)` 与限流包装。
+`Mount` 把一组 handler 注册到 `/api/x` 一次。守卫是普通 Gin handler，通常是 `Protect(roles...)` 与限流包装。当前实现已移除 v1 镜像与 `Deprecation`/`Sunset` 头，所有领域端点只存在于 `/api` 下（ADR-010）。
 
 ## 数据归属
 

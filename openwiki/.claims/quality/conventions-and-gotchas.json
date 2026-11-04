@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "pageVersion": "sha256:de913b9fcf08ed6ca277937dcdf0c21069234b256721480f971b031d692aea9d",
+  "pageVersion": "sha256:9d15583f25b5e69a410bf2e163ad8b49f812658c3221c36576f81eb70e5ded09",
   "claims": [
     {
       "id": "claim_deb47bdd79be4295a6916727d8f6bc09",
@@ -24,15 +24,15 @@
     },
     {
       "id": "claim_d1d2d97f59cb4fc79d059b6e12d29045",
-      "statement": "Endpoint rate limiters match both /api and /api/v1, use fixed-window counting, and are cached per spec by RegisterRoutes so routes sharing a spec share counters.",
+      "statement": "Endpoint rate limiters match only /api/<mount> and its subpaths, use fixed-window counting, and are cached per spec by RegisterRoutes so routes sharing a spec share counters.",
       "evidence": [
         {
-          "resource": "repo://internal/middleware/ratelimit.go#L58-L71",
-          "version": "repo-lines-v1:sha256:278701f2523a644ecbc2dc2929ee4f032abbd8aa799d09735bf41ee9b0dd03b4:eyJzZWxlY3RlZExpbmVDb3VudCI6MTQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImY2YWM3N2M3MDczYzNkNDMxN2UwN2UwM2IzMjQ2ZmZiMzkxYzBkNTljODIyZjMxYTBlOTBlZjA2MmYyNTNiNGQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjkzZDE0YWIwYWE1MWYxMzBmMWU3NmUyMGJhMjBlNGQ3MzdkYjA2MjZlNTY2ZjhiNTBhOGIwYzk0MGExNjk3OTMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjliMTJjYjgzODY3OTI4ZTY0YmFhNjI0MjE4NTNlNDA1NTdkYjI0YjhhMzcyYzY5ZGI4MjEwOGIwOTkzODI5YTYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjZmZWY1ZDgyNjlhY2E1Y2ZmNmNhZTAyNjMyMzBhYzZhNjM0OGU4NzAxNDRhNzRkOTVhYTA3ZDQ5ODNhZWY0NzkifQ"
+          "resource": "repo://internal/middleware/ratelimit.go#L46-L127",
+          "version": "repo-lines-v1:sha256:c46f9b06d015a65e07a95639f9dd968636783b77f4227c2a4b4447aae11a2071:eyJzZWxlY3RlZExpbmVDb3VudCI6ODIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjA1NWVkNTg1NmQ1ZjgzNGRjM2ZlZWU3MGMxYWRhZTBlZWFlZjk1YmViNzEwMDVjMmFhZWRhY2NlOTliOWFiZWIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjIxZDI5ZTg2MmVlNzI3ZTkwOWJkNjE0NzYwYWFmNTRlNjljMWUzYzUxNjQ3ZmI1ODIzNjBmNjdjNDk2ODBkYjgiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImYyNDhmM2JiNDI4ODc2YjRiMWY2YjVmOTllOWIwNTdkMWRhYjMxZDFkZjdiZDViNTYwZjMzNjBmM2Q1ZWQ0YWIifQ"
         },
         {
-          "resource": "repo://internal/server/register_routes.go#L28-L39",
-          "version": "repo-lines-v1:sha256:8a56c14597b69e5ebede913d3b8733233078d1f3a09703dc374e40de4cf03746:eyJzZWxlY3RlZExpbmVDb3VudCI6MTIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImYyYmUwMjUwYzg1ODAxNzllMTQ1MzkyZmE3NTc0MDkwNmJhMDZjYjI5Y2RiOGIzOWNmYjc2NjNjYTMwMWJiN2QiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjkzZDE0YWIwYWE1MWYxMzBmMWU3NmUyMGJhMjBlNGQ3MzdkYjA2MjZlNTY2ZjhiNTBhOGIwYzk0MGExNjk3OTMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImQ1ZTBhZGE5OGQ4MWU0ZjMzODg4MjY2OTQxMzhmNjY4YTIwZDVhN2VjZGNmYWI3ZjRlZDY4ZWFlNGI5ZmJlN2EiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjhlOTRhYjdkYzY0Yjc1NWEzYzNlMjg2YzRmMDJmYzhmMGRhNGJmZTNlNmEzNWQwMzBlMmE2Mjk3ODJhMDU0YzYifQ"
+          "resource": "repo://internal/server/register_routes.go#L28-L38",
+          "version": "repo-lines-v1:sha256:34891b81ac97fb630271fddff3253f908b2c7b5c32fa396ad0f3b804f6d8eb04:eyJzZWxlY3RlZExpbmVDb3VudCI6MTEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxZDM5M2JmYmNmOTZiMTlkYzlkN2NkYjYwZGQ1Y2RmNjY4YWIyMzMyZTU4YmE2MjNiZTFmOWE1YTI3ZDQ3MWUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY3Y2RhODJkYTYwNjIzOGUwNWU2MjM5OTU2OWM1ZWUwMzk5MzQxOTY0OGFlNWQ0M2EyYmY4Y2Q2MzQ3ZjgyNjMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImNiMmViOWE3YThjZWI3ZDMwZDVkM2NiOTJkODIxZTVhMDBmMzgzNjFhNTQ1YWMxNzE1ZDMxZDVkMzc4MjZkMGMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImM5ZmViOTI5MjJlMmY2OTJlOGNlMmIwM2EyMzU1NjdiYmQyODgxZTYyZmFmNjBkYjg0Yzg0OTIxYjczYjJlNjYifQ"
         }
       ]
     },
@@ -41,12 +41,12 @@
       "statement": "The request-email-change limiter keys on the source IP plus the lowercased new email rather than IP alone, preventing verification-mail abuse with different addresses.",
       "evidence": [
         {
-          "resource": "repo://internal/middleware/ratelimit.go#L104-L109",
-          "version": "repo-lines-v1:sha256:40530b8272bd34b9fc4dbdb3f93300cd4960ffbdb4d2b6a18e18704b8b922894:eyJzZWxlY3RlZExpbmVDb3VudCI6NiwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiOTVjMGMxMGUyODM5MjgwZjFmMjAxYzJiMGVlM2MwZDQ0ZGFjNDRkZGFiZDNhZTRkNTVkOGVhNDcxYTJmODdlOCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiODI3MDBhYTVkMGI2ZjBjZGMzNDFkYTYwNTVhMjRmZTJjNDFlZDRiODljZDcxMjY4MjA2OTg2NTQ3YzIwOTNlMSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZmI3ODA5YWY2NjY5NjA2NjI1NDlhNDMyZDg5NjYzZDY0MjM0MjUzNWZhNDY4NjQ5YjQ2ZDUyOTllNTA0MmU2MSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiMmRkOWE5ZWJlM2NkYmE4YjFhZTM4ZjkwOWU3MGFiZmQ5ZTFjYTg0ODhlODVhMjBlZWU3YTk3M2VhNGRmYjEyMCJ9"
+          "resource": "repo://internal/middleware/ratelimit.go#L96-L101",
+          "version": "repo-lines-v1:sha256:9eaed5ea69ff5cf51cf4deadc3a55675f55db3015625b0dcea6fc486cbbc376e:eyJzZWxlY3RlZExpbmVDb3VudCI6NiwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiNjMwMzQyNmQ5NDEwYTg0MWNiZDVjYzAzZTlkZTdhNjk0MWNkNjZlYWU0MWFiOWE0ZTI5YmFjZjIzMjU3MDkyOCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNjRlZmM0OTQxOGQyNmRjZjEyOWIyMmE2YWEyMTEwOGNlZWMzNzY3N2EzMmQwOGU5ZDVmZWUzNWRkYTY2YmI5ZCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZjAxYjI4ZjA1NGIyZTBlMTRiMDhjYTljMTE2MTk3MWIwZWIzNmJhZDc5MTZmODFmYWY2ODJlY2JlZTliNTY5MiIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiNGU5MGFhODRhOWY0MjQ2OTFmYTg4Yjc1MTI4Y2MwYjUxZDY4OWJhMWYzNGU3YjYzMmViY2UyN2QwZDU0ZjViOCJ9"
         },
         {
-          "resource": "repo://internal/ratelimit/limiter.go#L125-L153",
-          "version": "repo-lines-v1:sha256:1a8591e07884986c9ca8747d13a825898eab2f0591bff9823f816f655cf4ecfb:eyJzZWxlY3RlZExpbmVDb3VudCI6MjksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjkzZDE0YWIwYWE1MWYxMzBmMWU3NmUyMGJhMjBlNGQ3MzdkYjA2MjZlNTY2ZjhiNTBhOGIwYzk0MGExNjk3OTMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImQ4NDE3MzZkNjQ3MjdkNmEzNjA3OTljMmFlMGU2NGU0MGE2NmMwMTlmMzU4NTQwZDM3OGMxNjZkZGQ1MzY2Y2EiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjhkYmRlM2NhNmEyYmNiYjI2OTg3ODdlNDUyY2U0NmFkZjg1NWY1MDQyNTllODg1MTZmYTk2NjcwY2QwNWEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjY2MGZjMjZlZmY0YmYxMWRiMjdhN2U1M2U1OWUwNjBjMzRjNjk2ZGQ5ZWQxYjMwMTRlNWUzMmU4Yjg0YzE4MDMifQ"
+          "resource": "repo://internal/ratelimit/limiter.go#L149-L159",
+          "version": "repo-lines-v1:sha256:e6f85c20e1603a565826f40f816a7be99a496d06588ac8022b560dc66f8772e4:eyJzZWxlY3RlZExpbmVDb3VudCI6MTEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY0Y2VmZmU3NjIyZWUyZjViMDlmOTlkOWEzZDg3ZDg0YTkzOWE5MTY3YzQ0YWI5ZTkzYTUyNGNiZTVkMTAwZjEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjkzYmY1MGY1OTAwNGI1MmI2YThiODk4MGQ0NmZmYjI0M2ZjYjU1N2E4MWQ5ZmVkNDQzNDYzYjUwZDRkMzc2ZWQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImQ0NTFjMjE1MzVkYzQyNmRiNDgxZGU3ODUwM2E4NWFhNGRkMWQzOGVjNTI2ZjExYzZkZWFkMGJkNTJhODVjOTEifQ"
         }
       ]
     },
@@ -55,22 +55,12 @@
       "statement": "XSS sanitization strips disallowed tags while keeping text rather than escaping markup, matching the documented bluemonday replacement decision.",
       "evidence": [
         {
-          "resource": "repo://docs/decisions.md#L45-L60",
+          "resource": "repo://docs/decisions.md#L44-L59",
           "version": "repo-lines-v1:sha256:2226fb5f9bef164cc7806a02f96fca5bc8b6e68ae20b6d8c2ab91a2e02435721:eyJzZWxlY3RlZExpbmVDb3VudCI6MTYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjBhODIwODI1NDAxYTc0NTIwODg4YzU2OTExN2I4Nzg1NjJkN2RiZjM0ZWRiZDhhYmQ5Y2RmYWM3ZWMzZjkzYzMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjdkMWMwYTI1NzQzMWZkNmE5Yzc5MTFlNzkzYzcwZWU0OTllNDdkNjQ3MzAwYmY1NGM3N2Q4MmYyYWZhZWE4ZjAiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjU0YTc1ZGIxZDdmNGNhYWVlNDJmNTJlMjUxMDM4YzFkMTU3YjIzMGNmYTNhN2UzOWU1ODAxNjJkMGQ1N2EyODUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjRmZmM2ZGVmOGI0N2I5NTA4ZjgwY2FkMjhiYmFhNmVkMjcyY2ZhYmVjZGQ3NDZkNzJjZTc4MGY2Yzc3NDg3NTgifQ"
         },
         {
           "resource": "repo://internal/security/xss.go#L32-L70",
           "version": "repo-lines-v1:sha256:e18aabc5a099f21d55d6fa4bbf7b3215fa75644e2506ecc68c7a569d4e6f8066:eyJzZWxlY3RlZExpbmVDb3VudCI6MzksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjYzNDRiMmI4NTg0M2U1YTM0ZGRmN2M2ZjFlMzJmNjU3M2MwZDc4OWIwYjcwMzZjMGU1NjRjN2M1NGYxOGYwNGEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjZjODg4N2UzYTFkOWNhYWY4MGJiOWRjNmI3ZjgxYWQzMTU0ZWZiN2JkMmEzZmUwMzExMjYyMDc4MzYxZjY2Y2EiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImJkOWY3YjM5ZDk4NzIxZTg3ZTgzOWI4ZjZhNzA0OGU1YjE0ZGJlMzBkZGNlOTA4OWQ3Y2Q0ZDZmMGE4OTk1YzQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjM5ODdlYWYwZmNkZGI0MWU4ZDAxMzIwMDA1YmI1YmJhMGFlOGUwOTQxNDJiNmY1ODk0NTA4NDE5YzZhYWQxY2UifQ"
-        }
-      ]
-    },
-    {
-      "id": "claim_b83aa8e45b4f44fb84d2dfd9aab3a80c",
-      "statement": "Dual-version routing adds fixed Deprecation and Sunset headers to every /api/v1 route.",
-      "evidence": [
-        {
-          "resource": "repo://internal/router/dual.go#L11-L30",
-          "version": "repo-lines-v1:sha256:c48a6d6a3d202b434d76ddb28208af11d1ccaaf0a96c220d8b658cc9e2767a4c:eyJzZWxlY3RlZExpbmVDb3VudCI6MjAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjI0MDcwZjk2NzA2NzYzMDY3NmYwMzNjYjZiZmRjMTE0NDRiODRiN2MwZTc0ZGRjNGJiYjFjZjg5NGVlYzJjMDEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjcyMmQwNjhiZDEyNmU3MGI4OWY3MzBkMzUxMTZiMTgxMzczYzY4YTNmNWMxYzUxZDA1NmNiMjZiNGI0NWI5NzEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImE4MzNhZWZlMmQ3OWZhZjE0NmQxMDA2NGMzNGUwYWE5NWMyNGE4ZGMzZjU2NmVkMjEwMDU0OWY5MGFlZWJkMTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjoxLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUyMmZhYTUzNWJkMmVhM2Q1MmU3NDFlZDQ1NDQzNWI3ZmU0OWU4MzU4NmU5NDNkOThkODJiYmZiMjRkMWY1YzUifQ"
         }
       ]
     },
@@ -83,10 +73,24 @@
           "version": "repo-lines-v1:sha256:0d8d65b648e8cffe45e2cb4656903a39cd7bfe27d0173476aa1b9991d4437032:eyJzZWxlY3RlZExpbmVDb3VudCI6NywiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiYjhmY2MzZGY4NzIwOTFhYTFjYjQ1ODI0ZTRkMzlmNjdiNjFmNWJjMDJkZmE5ZTQ1NTZkMjM4OTVhYmYyYTAxZCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMjRmMDg0YTJlNTc5YjEzYmRhZWU2MjZkOGRlZDZhMDIxZWQyZThkZjYzOThhOWI1YzUyODcxNDVlYTA1MzVlOCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiMzRjYjE4ZTQ3YzJiMTE3NmQ0ZDUwZGEyOTE5YTRjNDc0MmJjOGM5NjJmYTFkNjY3ZGY3N2I5MzllMDJhYWRhNCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjEsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZTIyZmFhNTM1YmQyZWEzZDUyZTc0MWVkNDU0NDM1YjdmZTQ5ZTgzNTg2ZTk0M2Q5OGQ4MmJiZmIyNGQxZjVjNSJ9"
         }
       ]
+    },
+    {
+      "id": "claim_4e913cda736c49fba457f14473b050c2",
+      "statement": "Single-prefix routing means /api/v1 routes are not registered and responses carry no Deprecation or Sunset headers.",
+      "evidence": [
+        {
+          "resource": "repo://internal/router/mount.go#L8-L12",
+          "version": "repo-lines-v1:sha256:925908e2772a2b57fecd0f04e6c09d4d4207152ca51964dceb4fc278b5895349:eyJzZWxlY3RlZExpbmVDb3VudCI6NSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiNzg5NzI4YTVlOWYwMGNiY2YzMWYwODI1MGUyODllMGRmN2M1NjM5ZDM4MzJjODBkY2VkMmU3NjljMjdiYjZlNyIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiZjhmZGEyMzIxM2RhOGI2ZjgwMzM4OWNkZmNiZGQ5ZTM2M2Q2NmY1NjYyNzFmMjAzY2Y3NDQ0YWY1YzBmODBkZCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiMDMxOTI0MjUxOGI2MDY1MTQ0NDU3MzQ0Y2FmZDI2NWZkOTliMmIwMjIyMzI4NWU4YjhhOGVkZDg5ZmU4NzNlMCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjEsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiNDEyY2EzNDVjY2Y3NWJmOWMwODA2YmNlNjk1YmU4ZGU4MDhiNzk5ODQyNTFhN2E1NGQyMDJjZjYxMDFkZDQ1MSJ9"
+        },
+        {
+          "resource": "repo://internal/router/mount_test.go#L12-L34",
+          "version": "repo-lines-v1:sha256:c3dadbb47b89c0d34c7b66b70011adcc3f2bcf40e38729d38d2e058e652c6938:eyJzZWxlY3RlZExpbmVDb3VudCI6MjMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjBjNmY4ZWQ2NWE2MThiOTY0NmQwNWM0NWRjYzQyNmQwZmI1ODlkODk2MzQ4ZWNlOTg0ZTgxMmY3NzA0N2QxNmMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImM3NGI0YWJjMWJiNjlhNTk5MzY4N2Q2MTVhZTNhOWU5ZmExYzVkMmEwMThkODU3MGZmMDJjNmRjMzIyNzI4NzgiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
     }
   ],
   "verification": {
     "by": "openwiki/0.7.2",
-    "at": "2026-11-03T16:50:44.301Z"
+    "at": "2026-11-04T03:17:38.088Z"
   }
 }
