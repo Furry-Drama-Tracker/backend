@@ -422,6 +422,86 @@ func TestEpisodesUpdateSingleBecameAvailable(t *testing.T) {
 	}
 }
 
+// TestEpisodesSingleEpisodeLabel 自定义显示序号（episodeLabel）：可写入/回读，
+// 详情列表透出，并优先用于追番通知文案；episodeNumber 仍用于计数。
+func TestEpisodesSingleEpisodeLabel(t *testing.T) {
+	repos, signer, ts := episodesTestApp(t)
+	adminID := primitive.NewObjectID().Hex()
+	insertUser(t, repos, adminID, "admin")
+	followerID := primitive.NewObjectID().Hex()
+	insertUser(t, repos, followerID, "user")
+	admin := newEPClient(t, ts.URL, mustToken(t, signer, adminID))
+
+	var created map[string]any
+	resp := admin.json("POST", "/api/episodes", map[string]any{
+		"title": "分段剧", "description": "d", "coverImage": "/uploads/c.png",
+	}, &created)
+	if resp.StatusCode != 201 {
+		t.Fatalf("create: %d", resp.StatusCode)
+	}
+	episodeID := created["_id"].(string)
+	episodeOID, _ := primitive.ObjectIDFromHex(episodeID)
+	followerOID, _ := primitive.ObjectIDFromHex(followerID)
+	if err := repos.Follows.FollowInsert(t.Context(), &model.Follow{
+		UserID: followerOID, EpisodeID: episodeOID, FollowedAtEpisodes: 0,
+	}); err != nil {
+		t.Fatalf("follow: %v", err)
+	}
+
+	var single map[string]any
+	resp = admin.json("POST", "/api/episodes/"+episodeID+"/episodes", map[string]any{
+		"episodeNumber": 1, "episodeLabel": " 1（上） ", "title": "第一集（上）",
+	}, &single)
+	if resp.StatusCode != 201 || single["episodeLabel"] != "1（上）" || single["episodeLabelCustom"] != "1（上）" {
+		t.Fatalf("create single label: %d %v", resp.StatusCode, single)
+	}
+	singleID := single["_id"].(string)
+
+	var ep map[string]any
+	resp = admin.json("GET", "/api/episodes/"+episodeID, nil, &ep)
+	if resp.StatusCode != 200 || ep["currentEpisodes"] != float64(1) {
+		t.Fatalf("detail: %d %v", resp.StatusCode, ep["currentEpisodes"])
+	}
+	list, _ := ep["episodes"].([]any)
+	if len(list) != 1 {
+		t.Fatalf("episodes list: %v", ep["episodes"])
+	}
+	if first, _ := list[0].(map[string]any); first["episodeLabel"] != "1（上）" || first["episodeLabelCustom"] != "1（上）" {
+		t.Fatalf("detail episodeLabel: %v", list[0])
+	}
+
+	notifs, err := repos.Notifications.FindByUser(t.Context(), followerOID, 1, 20)
+	if err != nil || len(notifs) != 1 {
+		t.Fatalf("notifications: %v %d", err, len(notifs))
+	}
+	if notifs[0].Message != "《分段剧》更新了1（上）" {
+		t.Fatalf("notification message: %q", notifs[0].Message)
+	}
+
+	resp = admin.json("PUT", "/api/episodes/single/"+singleID, map[string]any{"episodeLabel": "1（下）"}, &single)
+	if resp.StatusCode != 200 || single["episodeLabel"] != "1（下）" {
+		t.Fatalf("update label: %d %v", resp.StatusCode, single)
+	}
+	// 清空自定义值 → episodeLabel 回退为“第N集”（旧数据同理），
+	// episodeLabelCustom 为空串供表单回填。
+	resp = admin.json("PUT", "/api/episodes/single/"+singleID, map[string]any{"episodeLabel": ""}, &single)
+	if resp.StatusCode != 200 || single["episodeLabel"] != "第1集" || single["episodeLabelCustom"] != "" {
+		t.Fatalf("clear label: %d %v", resp.StatusCode, single)
+	}
+
+	// 旧数据：文档中完全没有 episodeLabel 字段。
+	var legacy map[string]any
+	resp = admin.json("POST", "/api/episodes/"+episodeID+"/episodes", map[string]any{
+		"episodeNumber": 2, "title": "旧数据单集",
+	}, &legacy)
+	if resp.StatusCode != 201 {
+		t.Fatalf("create legacy: %d %v", resp.StatusCode, legacy)
+	}
+	if legacy["episodeLabel"] != "第2集" || legacy["episodeLabelCustom"] != "" {
+		t.Fatalf("legacy fallback: %v", legacy)
+	}
+}
+
 // TestEpisodesResubmitAndDelete 重新提交审核 + 删除清理。
 func TestEpisodesResubmitAndDelete(t *testing.T) {
 	repos, signer, ts := episodesTestApp(t)

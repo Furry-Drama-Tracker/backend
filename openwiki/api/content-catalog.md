@@ -30,7 +30,7 @@ verified:
 
 ## 剧集目录与单集
 
-剧集文档包含多语言标题与简介、封面、集数计数、状态（`ongoing`、`completed`、`upcoming`）、分类与标签、平台链接、首播日期、审核字段（`reviewStatus`、`reviewNote`、`reviewedBy`、`reviewedAt`）、待审核改动字段，以及创作者/编辑者引用。剧集引用的单集存放在独立的 `singleepisodes` 集合中，并在详情响应里内嵌。
+剧集文档包含多语言标题与简介、封面、集数计数、状态（`ongoing`、`completed`、`upcoming`）、分类与标签、平台链接、首播日期、审核字段（`reviewStatus`、`reviewNote`、`reviewedBy`、`reviewedAt`）、待审核改动字段，以及创作者/编辑者引用。剧集引用的单集存放在独立的 `singleepisodes` 集合中，并在详情响应里内嵌。单集除整数 `episodeNumber`（排序与计数依据）外，还有自由字符串 `episodeLabel`（如 `1（上）`、`1（番外）`）：它仅用于展示。响应中的 `episodeLabel` 已由后端解析：未填写（含旧数据）时回退为 `第N集`；`episodeLabelCustom` 保留原始自定义值（空串表示未填写），供编辑表单回填，避免把回退文案写回数据库。通知、邮件、RSS 与更新日历同样按此回退。
 
 可见性受审核门控：
 

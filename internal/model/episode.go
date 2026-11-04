@@ -122,17 +122,20 @@ type SingleEpisode struct {
 	ID            primitive.ObjectID `bson:"_id,omitempty" json:"_id"`
 	EpisodeID     primitive.ObjectID `bson:"episodeId" json:"episodeId"`
 	EpisodeNumber int                `bson:"episodeNumber" json:"episodeNumber"`
-	Title         string             `bson:"title" json:"title"`
-	TitleEn       string             `bson:"titleEn" json:"titleEn"`
-	TitleJa       string             `bson:"titleJa" json:"titleJa"`
-	Duration      string             `bson:"duration" json:"duration"`
-	PlatformLinks primitive.M        `bson:"platformLinks" json:"platformLinks"`
-	Views         int64              `bson:"views" json:"views"`
-	ReleaseDate   *time.Time         `bson:"releaseDate" json:"releaseDate"`
-	ScheduledDate *time.Time         `bson:"scheduledDate" json:"scheduledDate"`
-	IsScheduled   bool               `bson:"isScheduled" json:"isScheduled"`
-	PremiereDate  *time.Time         `bson:"premiereDate" json:"premiereDate"`
-	IsUpcoming    bool               `bson:"isUpcoming" json:"isUpcoming"`
+	// EpisodeLabel 是显示用集数序号（自由字符串，如“1（上）”“1（番外）”）。
+	// 为空时前端/文案回退到 episodeNumber；episodeNumber 仍是排序与计数依据。
+	EpisodeLabel  string      `bson:"episodeLabel" json:"episodeLabel"`
+	Title         string      `bson:"title" json:"title"`
+	TitleEn       string      `bson:"titleEn" json:"titleEn"`
+	TitleJa       string      `bson:"titleJa" json:"titleJa"`
+	Duration      string      `bson:"duration" json:"duration"`
+	PlatformLinks primitive.M `bson:"platformLinks" json:"platformLinks"`
+	Views         int64       `bson:"views" json:"views"`
+	ReleaseDate   *time.Time  `bson:"releaseDate" json:"releaseDate"`
+	ScheduledDate *time.Time  `bson:"scheduledDate" json:"scheduledDate"`
+	IsScheduled   bool        `bson:"isScheduled" json:"isScheduled"`
+	PremiereDate  *time.Time  `bson:"premiereDate" json:"premiereDate"`
+	IsUpcoming    bool        `bson:"isUpcoming" json:"isUpcoming"`
 	// VersionKey 是文档版本键 __v。
 	VersionKey int `bson:"__v,omitempty" json:"__v"`
 }

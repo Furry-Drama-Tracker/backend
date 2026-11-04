@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"sort"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -229,6 +230,20 @@ func newEpisodeItem(ep model.Episode, se model.SingleEpisode) activityItem {
 	if se.ReleaseDate != nil {
 		sortTime = *se.ReleaseDate
 	}
+	epRef := episodeRefText(se.EpisodeNumber, se.EpisodeLabel)
+	epRefEn := fmt.Sprintf("Ep.%d", se.EpisodeNumber)
+	label := strings.TrimSpace(se.EpisodeLabel)
+	if label != "" {
+		epRefEn = label
+	}
+	metadata := gin.H{
+		"episodeNumber":      se.EpisodeNumber,
+		"singleEpisodeTitle": se.Title,
+		"singleEpisodeTitleEn": se.TitleEn,
+	}
+	if label != "" {
+		metadata["episodeLabel"] = label
+	}
 	return activityItem{
 		sortTime: sortTime,
 		obj: gin.H{
@@ -237,14 +252,10 @@ func newEpisodeItem(ep model.Episode, se model.SingleEpisode) activityItem {
 			"episodeTitle":  ep.Title,
 			"episodeTitleEn": ep.TitleEn,
 			"coverImage":    ep.CoverImage,
-			"description":   fmt.Sprintf("%s 发布了新单集：第%d集 %s", ep.Title, se.EpisodeNumber, se.Title),
-			"descriptionEn": fmt.Sprintf("%s released a new episode: Ep.%d %s", orFirstNonEmpty(ep.TitleEn, ep.Title), se.EpisodeNumber, orFirstNonEmpty(se.TitleEn, se.Title)),
+			"description":   fmt.Sprintf("%s 发布了新单集：%s %s", ep.Title, epRef, se.Title),
+			"descriptionEn": fmt.Sprintf("%s released a new episode: %s %s", orFirstNonEmpty(ep.TitleEn, ep.Title), epRefEn, orFirstNonEmpty(se.TitleEn, se.Title)),
 			"date":          date,
-			"metadata": gin.H{
-				"episodeNumber":      se.EpisodeNumber,
-				"singleEpisodeTitle": se.Title,
-				"singleEpisodeTitleEn": se.TitleEn,
-			},
+			"metadata":      metadata,
 		},
 	}
 }

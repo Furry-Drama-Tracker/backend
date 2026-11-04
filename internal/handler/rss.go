@@ -123,9 +123,9 @@ func (h *RSS) Feed(c *gin.Context) {
 			}
 			b.WriteString("<item><title>")
 			b.WriteString(escapeXML(title))
-			b.WriteString(" 第")
-			b.WriteString(strconv.Itoa(se.EpisodeNumber))
-			b.WriteString("集更新</title><link>")
+			b.WriteString(" ")
+			b.WriteString(escapeXML(episodeRefText(se.EpisodeNumber, se.EpisodeLabel)))
+			b.WriteString("更新</title><link>")
 			b.WriteString(siteURL)
 			b.WriteString("/episode/")
 			b.WriteString(se.EpisodeID.Hex())

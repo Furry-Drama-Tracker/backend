@@ -53,6 +53,7 @@ type RSSSingleEpisode struct {
 	ID            primitive.ObjectID `bson:"_id"`
 	EpisodeID     primitive.ObjectID `bson:"episodeId"`
 	EpisodeNumber int                `bson:"episodeNumber"`
+	EpisodeLabel  string             `bson:"episodeLabel"`
 	Title         string             `bson:"title"`
 	CreatedAt     time.Time          `bson:"createdAt"`
 }
@@ -66,7 +67,7 @@ func (r *SingleEpisodeRepo) RSSFindRecent(ctx context.Context, since time.Time) 
 		options.Find().
 			SetSort(bson.D{{Key: "createdAt", Value: -1}}).
 			SetLimit(20).
-			SetProjection(bson.M{"episodeId": 1, "episodeNumber": 1, "title": 1, "createdAt": 1}))
+			SetProjection(bson.M{"episodeId": 1, "episodeNumber": 1, "episodeLabel": 1, "title": 1, "createdAt": 1}))
 	if err != nil {
 		return nil, err
 	}

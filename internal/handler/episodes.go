@@ -697,6 +697,9 @@ func (h *Episodes) UpdateSingle(c *gin.Context) {
 	if v, ok := body["episodeNumber"]; ok {
 		updateData["episodeNumber"] = toInt(v)
 	}
+	if v, ok := body["episodeLabel"]; ok {
+		updateData["episodeLabel"] = strings.TrimSpace(asString(v))
+	}
 	if v, ok := body["title"]; ok {
 		updateData["title"] = asString(v)
 	}
@@ -784,7 +787,7 @@ func (h *Episodes) UpdateSingle(c *gin.Context) {
 			return
 		}
 		if episode != nil {
-			if err := h.notifyNewEpisode(ctx, single.EpisodeID, episode, single.EpisodeNumber, "available"); err != nil {
+			if err := h.notifyNewEpisode(ctx, single.EpisodeID, episode, single.EpisodeNumber, single.EpisodeLabel, "available"); err != nil {
 				serverError(c)
 				return
 			}
@@ -812,7 +815,7 @@ func (h *Episodes) UpdateSingle(c *gin.Context) {
 		}
 		infoChanged := false
 		infoFields := []string{"title", "titleEn", "titleJa", "duration", "scheduledDate",
-			"isScheduled", "premiereDate", "releaseDate", "episodeNumber"}
+			"isScheduled", "premiereDate", "releaseDate", "episodeNumber", "episodeLabel"}
 		for _, f := range infoFields {
 			if nv, ok := updateData[f]; ok {
 				// 日期字段按字符串比较：存量数据中的 Date 形态与新提交的字符串恒不相等，视为已变更（固定契约）。
@@ -837,7 +840,7 @@ func (h *Episodes) UpdateSingle(c *gin.Context) {
 				return
 			}
 			if episode != nil {
-				if err := h.notifyNewEpisode(ctx, single.EpisodeID, episode, single.EpisodeNumber, eventType); err != nil {
+				if err := h.notifyNewEpisode(ctx, single.EpisodeID, episode, single.EpisodeNumber, single.EpisodeLabel, eventType); err != nil {
 					serverError(c)
 					return
 				}
@@ -1038,6 +1041,7 @@ func (h *Episodes) CreateSingle(c *gin.Context) {
 	single := &model.SingleEpisode{
 		EpisodeID:     oid,
 		EpisodeNumber: toInt(body["episodeNumber"]),
+		EpisodeLabel:  strings.TrimSpace(asString(body["episodeLabel"])),
 		Title:         asString(body["title"]),
 		TitleEn:       orDefaultString(body["titleEn"], ""),
 		TitleJa:       orDefaultString(body["titleJa"], ""),
@@ -1089,37 +1093,41 @@ func (h *Episodes) CreateSingle(c *gin.Context) {
 		}
 		var eventType, notifMessage string
 		var metadata primitive.M
+		epUnit := episodeRefText(single.EpisodeNumber, single.EpisodeLabel)
 		if !isPreview {
 			eventType = "available"
-			notifMessage = fmt.Sprintf("《%s》更新了第%d集", updatedEpisode.Title, single.EpisodeNumber)
+			notifMessage = fmt.Sprintf("《%s》更新了%s", updatedEpisode.Title, epUnit)
 			metadata = primitive.M{"episodeNumber": single.EpisodeNumber, "isPreview": false}
 		} else if hasVideo {
 			eventType = "preview"
-			notifMessage = fmt.Sprintf("《%s》发布了第%d集预告", updatedEpisode.Title, single.EpisodeNumber)
+			notifMessage = fmt.Sprintf("《%s》发布了%s预告", updatedEpisode.Title, epUnit)
 			metadata = primitive.M{"episodeNumber": single.EpisodeNumber, "isPreview": true}
 		} else {
 			eventType = "preview_info"
-			notifMessage = fmt.Sprintf("《%s》第%d集预告信息已更新", updatedEpisode.Title, single.EpisodeNumber)
+			notifMessage = fmt.Sprintf("《%s》%s预告信息已更新", updatedEpisode.Title, epUnit)
 			metadata = primitive.M{"episodeNumber": single.EpisodeNumber, "isPreview": true, "previewUpdateType": "info"}
+		}
+		if single.EpisodeLabel != "" {
+			metadata["episodeLabel"] = single.EpisodeLabel
 		}
 		if err := h.insertFollowNotifications(ctx, followers, oid, updatedEpisode, notifMessage, metadata); err != nil {
 			serverError(c)
 			return
 		}
 		pushTitle := fmt.Sprintf("《%s》更新了", updatedEpisode.Title)
-		pushBody := fmt.Sprintf("第%d集已更新", single.EpisodeNumber)
+		pushBody := fmt.Sprintf("%s已更新", epUnit)
 		if isPreview {
 			if hasVideo {
 				pushTitle = fmt.Sprintf("《%s》新预告", updatedEpisode.Title)
-				pushBody = fmt.Sprintf("第%d集预告已发布", single.EpisodeNumber)
+				pushBody = fmt.Sprintf("%s预告已发布", epUnit)
 			} else {
 				pushTitle = fmt.Sprintf("《%s》预告信息更新", updatedEpisode.Title)
-				pushBody = fmt.Sprintf("第%d集预告信息已更新", single.EpisodeNumber)
+				pushBody = fmt.Sprintf("%s预告信息已更新", epUnit)
 			}
 		}
 		h.sendPushToUser(uniqueUserIDs(followers), pushTitle, pushBody, "/episode/"+idStr)
 		if h.shouldSendEpisodeEmail(idStr, single.EpisodeNumber, eventType) {
-			h.sendEpisodeUpdateEmails(ctx, oid, single.EpisodeNumber, eventType, updatedEpisode.Title, uniqueUserIDs(followers))
+			h.sendEpisodeUpdateEmails(ctx, oid, single.EpisodeNumber, single.EpisodeLabel, eventType, updatedEpisode.Title, uniqueUserIDs(followers))
 		}
 	}
 	c.JSON(201, singleEpisodeJSON(single))
@@ -1403,7 +1411,7 @@ func (h *Episodes) insertFollowNotifications(ctx context.Context, followers []mo
 // （站内通知 + Push + 邮件去重发送）。
 // eventType: available | preview | preview_video | preview_info。
 func (h *Episodes) notifyNewEpisode(ctx context.Context, episodeID primitive.ObjectID,
-	episode *model.Episode, epNum int, eventType string) error {
+	episode *model.Episode, epNum int, epLabel, eventType string) error {
 	followers, err := h.Repos.Follows.EpisodesFindByEpisode(ctx, episodeID)
 	if err != nil {
 		return err
@@ -1413,27 +1421,31 @@ func (h *Episodes) notifyNewEpisode(ctx context.Context, episodeID primitive.Obj
 	}
 	var notifMessage, pushTitle, pushBody string
 	var metadata primitive.M
+	epUnit := episodeRefText(epNum, epLabel)
 	switch eventType {
 	case "available":
-		notifMessage = fmt.Sprintf("《%s》更新了第%d集", episode.Title, epNum)
+		notifMessage = fmt.Sprintf("《%s》更新了%s", episode.Title, epUnit)
 		pushTitle = fmt.Sprintf("《%s》更新了", episode.Title)
-		pushBody = fmt.Sprintf("第%d集已更新", epNum)
+		pushBody = fmt.Sprintf("%s已更新", epUnit)
 		metadata = primitive.M{"episodeNumber": epNum, "isPreview": false}
 	case "preview":
-		notifMessage = fmt.Sprintf("《%s》发布了第%d集预告", episode.Title, epNum)
+		notifMessage = fmt.Sprintf("《%s》发布了%s预告", episode.Title, epUnit)
 		pushTitle = fmt.Sprintf("《%s》新预告", episode.Title)
-		pushBody = fmt.Sprintf("第%d集预告已发布", epNum)
+		pushBody = fmt.Sprintf("%s预告已发布", epUnit)
 		metadata = primitive.M{"episodeNumber": epNum, "isPreview": true}
 	case "preview_video":
-		notifMessage = fmt.Sprintf("《%s》第%d集预告视频已更新", episode.Title, epNum)
+		notifMessage = fmt.Sprintf("《%s》%s预告视频已更新", episode.Title, epUnit)
 		pushTitle = fmt.Sprintf("《%s》预告视频更新", episode.Title)
-		pushBody = fmt.Sprintf("第%d集预告视频已更新", epNum)
+		pushBody = fmt.Sprintf("%s预告视频已更新", epUnit)
 		metadata = primitive.M{"episodeNumber": epNum, "isPreview": true, "previewUpdateType": "video"}
 	default: // preview_info
-		notifMessage = fmt.Sprintf("《%s》第%d集预告信息已更新", episode.Title, epNum)
+		notifMessage = fmt.Sprintf("《%s》%s预告信息已更新", episode.Title, epUnit)
 		pushTitle = fmt.Sprintf("《%s》预告信息更新", episode.Title)
-		pushBody = fmt.Sprintf("第%d集预告信息已更新", epNum)
+		pushBody = fmt.Sprintf("%s预告信息已更新", epUnit)
 		metadata = primitive.M{"episodeNumber": epNum, "isPreview": true, "previewUpdateType": "info"}
+	}
+	if label := strings.TrimSpace(epLabel); label != "" {
+		metadata["episodeLabel"] = label
 	}
 	if err := h.insertFollowNotifications(ctx, followers, episodeID, episode, notifMessage, metadata); err != nil {
 		return err
@@ -1441,7 +1453,7 @@ func (h *Episodes) notifyNewEpisode(ctx context.Context, episodeID primitive.Obj
 	uids := uniqueUserIDs(followers)
 	h.sendPushToUser(uids, pushTitle, pushBody, "/episode/"+episodeID.Hex())
 	if h.shouldSendEpisodeEmail(episodeID.Hex(), epNum, eventType) {
-		h.sendEpisodeUpdateEmails(ctx, episodeID, epNum, eventType, episode.Title, uids)
+		h.sendEpisodeUpdateEmails(ctx, episodeID, epNum, epLabel, eventType, episode.Title, uids)
 	}
 	return nil
 }
@@ -1485,7 +1497,7 @@ func (h *Episodes) notifyEpisodeNumberChange(ctx context.Context, episodeID prim
 		fmt.Sprintf("更新至第%d集", newCurrentEpisodes), "/episode/"+episodeID.Hex())
 	for epNum := oldCurrentEpisodes + 1; epNum <= newCurrentEpisodes; epNum++ {
 		if h.shouldSendEpisodeEmail(episodeID.Hex(), epNum, "available") {
-			h.sendEpisodeUpdateEmails(ctx, episodeID, epNum, "available", episode.Title, uids)
+			h.sendEpisodeUpdateEmails(ctx, episodeID, epNum, "", "available", episode.Title, uids)
 		}
 	}
 	return nil
@@ -1526,7 +1538,7 @@ func (h *Episodes) shouldSendEpisodeEmail(episodeID string, epNum int, eventType
 // episodeUpdate 偏好的用户，固定契约）。
 // fire-and-forget：SMTP 发送在独立 goroutine 中进行，失败静默。
 func (h *Episodes) sendEpisodeUpdateEmails(ctx context.Context, episodeID primitive.ObjectID,
-	epNum int, eventType string, episodeTitle string, userIDs []primitive.ObjectID) {
+	epNum int, epLabel, eventType string, episodeTitle string, userIDs []primitive.ObjectID) {
 	if h.Mail == nil || len(userIDs) == 0 {
 		return
 	}
@@ -1542,7 +1554,7 @@ func (h *Episodes) sendEpisodeUpdateEmails(ctx context.Context, episodeID primit
 		if t.EpisodeUpdatePref != nil && !*t.EpisodeUpdatePref {
 			continue
 		}
-		to, title, body, preheader := h.buildEpisodeUpdateEmail(episodeTitle, epNum, eventType, t.Email)
+		to, title, body, preheader := h.buildEpisodeUpdateEmail(episodeTitle, epNum, epLabel, eventType, t.Email)
 		go func(to, subject, html, preheader string) {
 			h.Mail.SendNotificationEmail(context.Background(), to, subject, html, preheader)
 		}(to, title, body, preheader)
@@ -1551,8 +1563,15 @@ func (h *Episodes) sendEpisodeUpdateEmails(ctx context.Context, episodeID primit
 
 // buildEpisodeUpdateEmail 构造追番更新邮件（subject/body 按
 // available/preview/preview_video/preview_info 四种事件分支，文案是固定契约）。
-func (h *Episodes) buildEpisodeUpdateEmail(episodeTitle string, epNum int, eventType, to string) (string, string, string, string) {
+// epLabel 非空时用它替换“第N集/第 N 集”称呼（自定义显示序号）。
+func (h *Episodes) buildEpisodeUpdateEmail(episodeTitle string, epNum int, epLabel, eventType, to string) (string, string, string, string) {
 	episodeTitle = stdhtml.EscapeString(episodeTitle)
+	unitTight := fmt.Sprintf("第%d集", epNum)
+	unitLoose := fmt.Sprintf("第 %d 集", epNum)
+	if label := strings.TrimSpace(epLabel); label != "" {
+		unitTight = stdhtml.EscapeString(label)
+		unitLoose = unitTight
+	}
 	url := h.Config.Server.FrontendURL
 	if url == "" {
 		url = h.Config.Server.SiteURL
@@ -1562,34 +1581,34 @@ func (h *Episodes) buildEpisodeUpdateEmail(episodeTitle string, epNum int, event
 	}
 	switch eventType {
 	case "preview":
-		subject := fmt.Sprintf("《%s》发布了第%d集预告", episodeTitle, epNum)
+		subject := fmt.Sprintf("《%s》发布了%s预告", episodeTitle, unitTight)
 		body := `<h2 style="margin:0 0 16px;color:#1e293b;font-size:22px;font-weight:700;">追番预告提醒</h2>` +
 			`<p style="margin:0 0 16px;color:#475569;font-size:14px;">您关注的剧集发布了新预告！</p>` +
-			email.EmailInfoBox(fmt.Sprintf(`<p style="margin:0 0 4px;font-size:16px;font-weight:600;">《%s》</p><p style="margin:0;color:#64748b;">发布了第 %d 集预告</p>`, episodeTitle, epNum), "info") +
+			email.EmailInfoBox(fmt.Sprintf(`<p style="margin:0 0 4px;font-size:16px;font-weight:600;">《%s》</p><p style="margin:0;color:#64748b;">发布了%s预告</p>`, episodeTitle, unitLoose), "info") +
 			`<p style="margin:20px 0;">` + email.EmailButton("前往查看", url, "primary") + `</p>` +
 			`<p style="margin:0;color:#94a3b8;font-size:12px;">您可以在账号设置中关闭此类邮件通知。</p>`
 		return to, subject, body, "您关注的剧集发布了新预告"
 	case "preview_video":
-		subject := fmt.Sprintf("《%s》第%d集预告视频已更新", episodeTitle, epNum)
+		subject := fmt.Sprintf("《%s》%s预告视频已更新", episodeTitle, unitTight)
 		body := `<h2 style="margin:0 0 16px;color:#1e293b;font-size:22px;font-weight:700;">预告视频更新</h2>` +
 			`<p style="margin:0 0 16px;color:#475569;font-size:14px;">您关注的剧集预告视频有更新！</p>` +
-			email.EmailInfoBox(fmt.Sprintf(`<p style="margin:0 0 4px;font-size:16px;font-weight:600;">《%s》</p><p style="margin:0;color:#64748b;">第 %d 集预告视频已更新</p>`, episodeTitle, epNum), "info") +
+			email.EmailInfoBox(fmt.Sprintf(`<p style="margin:0 0 4px;font-size:16px;font-weight:600;">《%s》</p><p style="margin:0;color:#64748b;">%s预告视频已更新</p>`, episodeTitle, unitLoose), "info") +
 			`<p style="margin:20px 0;">` + email.EmailButton("前往查看", url, "primary") + `</p>` +
 			`<p style="margin:0;color:#94a3b8;font-size:12px;">您可以在账号设置中关闭此类邮件通知。</p>`
 		return to, subject, body, "您关注的剧集预告视频已更新"
 	case "preview_info":
-		subject := fmt.Sprintf("《%s》第%d集预告信息已更新", episodeTitle, epNum)
+		subject := fmt.Sprintf("《%s》%s预告信息已更新", episodeTitle, unitTight)
 		body := `<h2 style="margin:0 0 16px;color:#1e293b;font-size:22px;font-weight:700;">预告信息更新</h2>` +
 			`<p style="margin:0 0 16px;color:#475569;font-size:14px;">您关注的剧集预告信息有更新！</p>` +
-			email.EmailInfoBox(fmt.Sprintf(`<p style="margin:0 0 4px;font-size:16px;font-weight:600;">《%s》</p><p style="margin:0;color:#64748b;">第 %d 集预告信息已更新</p>`, episodeTitle, epNum), "info") +
+			email.EmailInfoBox(fmt.Sprintf(`<p style="margin:0 0 4px;font-size:16px;font-weight:600;">《%s》</p><p style="margin:0;color:#64748b;">%s预告信息已更新</p>`, episodeTitle, unitLoose), "info") +
 			`<p style="margin:20px 0;">` + email.EmailButton("前往查看", url, "primary") + `</p>` +
 			`<p style="margin:0;color:#94a3b8;font-size:12px;">您可以在账号设置中关闭此类邮件通知。</p>`
 		return to, subject, body, "您关注的剧集预告信息已更新"
 	default: // available
-		subject := fmt.Sprintf("《%s》更新了第%d集", episodeTitle, epNum)
+		subject := fmt.Sprintf("《%s》更新了%s", episodeTitle, unitTight)
 		body := `<h2 style="margin:0 0 16px;color:#1e293b;font-size:22px;font-weight:700;">追番更新提醒</h2>` +
 			`<p style="margin:0 0 16px;color:#475569;font-size:14px;">您关注的剧集有新更新啦！</p>` +
-			email.EmailInfoBox(fmt.Sprintf(`<p style="margin:0 0 4px;font-size:16px;font-weight:600;">《%s》</p><p style="margin:0;color:#64748b;">已更新至第 %d 集</p>`, episodeTitle, epNum), "info") +
+			email.EmailInfoBox(fmt.Sprintf(`<p style="margin:0 0 4px;font-size:16px;font-weight:600;">《%s》</p><p style="margin:0;color:#64748b;">已更新至%s</p>`, episodeTitle, unitLoose), "info") +
 			`<p style="margin:20px 0;">` + email.EmailButton("前往观看", url, "primary") + `</p>` +
 			`<p style="margin:0;color:#94a3b8;font-size:12px;">您可以在账号设置中关闭此类邮件通知。</p>`
 		return to, subject, body, "您关注的剧集有新更新"
@@ -1645,23 +1664,28 @@ func (h *Episodes) episodeJSON(e *model.Episode, users map[string]repository.Epi
 }
 
 // singleEpisodeJSON 组装单集响应对象。
+// episodeLabel 是展示用序号：未填写自定义值时由后端回退为“第N集”，
+// 便于旧数据与前端直接用该字段渲染；episodeLabelCustom 保留原始自定义值
+// （空串表示未填写），供编辑表单回填，避免把回退文案当作自定义值存回。
 func singleEpisodeJSON(s *model.SingleEpisode) gin.H {
 	return gin.H{
-		"_id":           s.ID.Hex(),
-		"episodeId":     s.EpisodeID.Hex(),
-		"episodeNumber": s.EpisodeNumber,
-		"title":         s.Title,
-		"titleEn":       s.TitleEn,
-		"titleJa":       s.TitleJa,
-		"duration":      s.Duration,
-		"platformLinks": orEmptyM(s.PlatformLinks),
-		"views":         s.Views,
-		"releaseDate":   s.ReleaseDate,
-		"scheduledDate": s.ScheduledDate,
-		"isScheduled":   s.IsScheduled,
-		"premiereDate":  s.PremiereDate,
-		"isUpcoming":    s.IsUpcoming,
-		"__v":           s.VersionKey,
+		"_id":                s.ID.Hex(),
+		"episodeId":          s.EpisodeID.Hex(),
+		"episodeNumber":      s.EpisodeNumber,
+		"episodeLabel":       episodeRefText(s.EpisodeNumber, s.EpisodeLabel),
+		"episodeLabelCustom": strings.TrimSpace(s.EpisodeLabel),
+		"title":              s.Title,
+		"titleEn":            s.TitleEn,
+		"titleJa":            s.TitleJa,
+		"duration":           s.Duration,
+		"platformLinks":      orEmptyM(s.PlatformLinks),
+		"views":              s.Views,
+		"releaseDate":        s.ReleaseDate,
+		"scheduledDate":      s.ScheduledDate,
+		"isScheduled":        s.IsScheduled,
+		"premiereDate":       s.PremiereDate,
+		"isUpcoming":         s.IsUpcoming,
+		"__v":                s.VersionKey,
 	}
 }
 
@@ -1857,6 +1881,15 @@ func asString(v any) string {
 		return s
 	}
 	return ""
+}
+
+// episodeRefText 返回集数在用户可见文案中的称呼：自定义 episodeLabel 优先，
+// 否则回退为“第N集”。
+func episodeRefText(epNum int, epLabel string) string {
+	if label := strings.TrimSpace(epLabel); label != "" {
+		return label
+	}
+	return fmt.Sprintf("第%d集", epNum)
 }
 
 // orDefaultString 提取字符串，缺失/空返回默认值。
@@ -2063,6 +2096,8 @@ func singleFieldValue(s *model.SingleEpisode, f string) any {
 		return s.Duration
 	case "episodeNumber":
 		return s.EpisodeNumber
+	case "episodeLabel":
+		return s.EpisodeLabel
 	case "isScheduled":
 		return s.IsScheduled
 	case "premiereDate":
