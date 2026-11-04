@@ -12,6 +12,8 @@ sources:
     resource: repo://internal/handler/announcements.go
   - id: openwiki-source-8c579850c9dce2d1167ef9a0
     resource: repo://internal/handler/creatorprofile.go
+  - id: openwiki-source-f89e324c07065d291ea97e16
+    resource: repo://internal/handler/episodes.go
   - id: openwiki-source-c71d9937fb8fe9a87857856e
     resource: repo://internal/handler/feedback.go
   - id: openwiki-source-d96aab034efe83a94d9977ae
@@ -28,10 +30,10 @@ sources:
     resource: repo://internal/handler/wallpapers.go
   - id: openwiki-source-0b6d7f0465da2820a1a264ef
     resource: repo://internal/model/theme.go
-generated: { by: "opencode", at: "2026-11-04T03:17:38.088Z" }
+generated: { by: "zcode", at: "2026-11-04T15:34:40.691Z" }
 verified:
   - by: openwiki/0.7.2
-    at: 2026-11-04T03:17:38.088Z
+    at: 2026-11-04T15:34:40.691Z
 ---
 
 # CMS 与站点内容 API
@@ -117,7 +119,7 @@ verified:
 2. 最近更新的已追剧集；
 3. 已追剧集的高分评分（`score >= 4`，最多 50 条）。
 
-条目按日期排序并在内存中分页。`GET /activity/public` 无需认证，改为聚合最近 30 个已发布单集、平均分至少 4 的前 10 个已审核剧集，以及最近更新的 10 个已审核剧集，固定最多返回 20 条。
+条目按日期排序并在内存中分页。新单集条目的集数称呼经 `episodeRefText` 解析——单集自定义显示序号非空时直接用它（英文描述同样用 label，否则 `Ep.N`），否则回退「第N集」；label 非空时还会写入条目 `metadata.episodeLabel`。`GET /activity/public` 无需认证，改为聚合最近 30 个已发布单集、平均分至少 4 的前 10 个已审核剧集，以及最近更新的 10 个已审核剧集，固定最多返回 20 条。
 
 ## 反馈
 

@@ -6,6 +6,8 @@ tags: [api, uploads, rss, translation, backup, pagination]
 sources:
   - id: openwiki-source-1649edbcafe0eab861fed46a
     resource: repo://internal/handler/backup.go
+  - id: openwiki-source-f89e324c07065d291ea97e16
+    resource: repo://internal/handler/episodes.go
   - id: openwiki-source-12bf4f6da3684593b4c87988
     resource: repo://internal/handler/rss.go
   - id: openwiki-source-3a7c36409770ce04e5cdeef4
@@ -20,10 +22,10 @@ sources:
     resource: repo://internal/upload/svg.go
   - id: openwiki-source-62a9837f2b45c92ae81ca775
     resource: repo://internal/upload/upload.go
-generated: { by: "opencode", at: "2026-11-03T16:50:44.301Z" }
+generated: { by: "zcode", at: "2026-11-04T15:34:40.691Z" }
 verified:
   - by: openwiki/0.7.2
-    at: 2026-11-04T03:17:38.088Z
+    at: 2026-11-04T15:34:40.691Z
 ---
 
 # 上传、RSS、翻译、备份与分页
@@ -80,7 +82,7 @@ SVG 上传走独立路径，因为它是文本且带脚本风险：
 `GET /api/rss` 公开，返回通过字符串拼接（而非 XML 编码器）构建的 RSS 2.0 XML。订阅覆盖固定七天窗口，包含：
 
 - 最近更新的剧集，标题带当前集数，链接到 `/episode/<id>`；
-- 最近发布的单集，链接方式相同。
+- 最近发布的单集，标题中的集数称呼经 `episodeRefText` 解析——单集自定义 `episodeLabel` 非空时用它（如「1（上）」），否则回退「第N集」，链接方式相同。
 
 站点名与描述来自站点内容，缺失时回退默认值。标题与描述会做 XML 转义。`GET /api/rss/api-usage` 仅超管可访问，返回 API 调用统计。
 

@@ -5,7 +5,7 @@ description: 后台管理、剧集审核与回收站、举报、统计、分类�
 tags: [api, admin, moderation, review, audit, statistics]
 verified:
   - by: openwiki/0.7.2
-    at: 2026-11-04T03:17:38.088Z
+    at: 2026-11-04T15:34:40.691Z
 sources:
   - id: openwiki-source-44e96c77b4637e4ff46c5518
     resource: repo://internal/handler/admin.go
@@ -13,6 +13,8 @@ sources:
     resource: repo://internal/handler/auditlogs.go
   - id: openwiki-source-2796508087fca859a79d72b7
     resource: repo://internal/handler/autostatus.go
+  - id: openwiki-source-f89e324c07065d291ea97e16
+    resource: repo://internal/handler/episodes.go
   - id: openwiki-source-c8c9d34df7c2b365c89ecb02
     resource: repo://internal/handler/episodetrash.go
   - id: openwiki-source-5892c79bee89b56ec4322f3f
@@ -23,7 +25,7 @@ sources:
     resource: repo://internal/handler/stats.go
   - id: openwiki-source-54e2988cad872a1deb6494f6
     resource: repo://internal/repository/episode_trash.go
-generated: { by: "opencode", at: "2026-11-04T03:17:38.088Z" }
+generated: { by: "zcode", at: "2026-11-04T15:34:40.691Z" }
 ---
 
 # 管理与审核 API
@@ -102,12 +104,12 @@ HTTP 层只暴露列表、版本日志、恢复与彻底删除，四者均为管
 
 ## 统计
 
-`Stats` 持有一个 `middleware.Cache`，TTL 五分钟、上限 200 条。`overview`、`activity-heatmap` 与 `episode-lifecycle` 按完整请求 URI 缓存；`/stats/realtime` 刻意绕过缓存，查询实时数据。
+`Stats` 持有一个 `middleware.Cache`，TTL 五分钟、上限 200 条。`overview`、`calendar`、`recommendations/:episodeId`（相关推荐）、`activity-heatmap` 与 `episode-lifecycle` 按完整请求 URI 缓存；`collaborative`、`personalized` 与 `/stats/realtime` 不走缓存，直接查询实时数据。
 
 - `overview` 接受 `7d`/`30d` 周期，聚合剧集、用户、追番、评分与举报计数，并返回高分、最多观看、最多追番榜单与活跃度趋势。
 - `realtime` 把最近五分钟活跃的会话计为在线用户，把本地午夜以来活跃的会话计为今日访问，并返回今日新增用户与新增剧集。
 - `episode-lifecycle` 根据剧集总观看量推导每周曲线，因此是近似值而非真实历史序列。
-- `calendar` 与 `recommendations/:episodeId` 公开；协同与个性化推荐需要登录。
+- `calendar` 与 `recommendations/:episodeId` 公开；协同与个性化推荐需要登录。更新日历响应在 `episodeNumber` 之外还带 `episodeLabel`：单集自定义显示序号非空时用它，否则回退为「第N集」（经 `episodeRefText` 解析）。
 
 ## 分类与轮播图
 

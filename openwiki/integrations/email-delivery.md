@@ -16,10 +16,12 @@ sources:
     resource: repo://internal/email/targetrate.go
   - id: openwiki-source-1af801b89db284f73af11010
     resource: repo://internal/email/templates.go
-generated: { by: "opencode", at: "2026-11-03T16:50:44.301Z" }
+  - id: openwiki-source-f89e324c07065d291ea97e16
+    resource: repo://internal/handler/episodes.go
+generated: { by: "zcode", at: "2026-11-04T15:34:40.691Z" }
 verified:
   - by: openwiki/0.7.2
-    at: 2026-11-03T16:50:44.301Z
+    at: 2026-11-04T15:34:40.691Z
 ---
 
 # 邮件发送
@@ -83,7 +85,7 @@ SMTP 配置只来自 `config.Email`，由 ini `[email]` 段或 `EMAIL_*` 环境�
 | `SendNewDeviceLoginEmail(to, device, ip, region, code, time)` | 设备详情加验证码，并附 Apple 版本号免责声明 |
 | `SendNotificationEmail(to, subject, html, preheader)` | 领域自建 HTML 的通用包装 |
 
-其他领域构建自己的 HTML 片段并调用 `SendNotificationEmail`；例如剧集更新、审核结果、反馈回复、公告与创作者主页审核通知。
+其他领域构建自己的 HTML 片段并调用 `SendNotificationEmail`；例如剧集更新、审核结果、反馈回复、公告与创作者主页审核通知。剧集更新邮件的集数称呼经 `episodeRefText` 一致解析：单集自定义 `episodeLabel` 非空时替换「第N集 / 第 N 集」称呼。
 
 ## 偏好门控
 

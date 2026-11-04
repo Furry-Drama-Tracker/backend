@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "pageVersion": "sha256:702ed15d4c966be9ef7a4e75d09f688bf8250b12304eedb4e4948a22e5dc38d1",
+  "pageVersion": "sha256:852e8af62e41164f8ae042ab96a0b777d5d0a26a65a0902690736386f4cc6ae9",
   "claims": [
     {
       "id": "claim_ad8616456be14998a10dc7de860bbbf0",
@@ -17,8 +17,8 @@
       "statement": "CORS rejects unknown origins with 403 CORS policy denied, allows listed origins with credentials, and answers valid preflights with 204 plus allowed methods and headers.",
       "evidence": [
         {
-          "resource": "repo://internal/middleware/cors.go#L16-L40",
-          "version": "repo-lines-v1:sha256:f5839b69aa4013d4cd4cf95cad304ddd7247ee7cb3fef312a3c5836436c9a686:eyJzZWxlY3RlZExpbmVDb3VudCI6MjUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjEyYWNjMjNjNzFjZjJmODU1ZjUzNmQxOGE2ODU5NjExMjNiZDgyYTRiNTAwNWE4M2E2OTgyZjNjODFkZjYzZGIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjkzZDE0YWIwYWE1MWYxMzBmMWU3NmUyMGJhMjBlNGQ3MzdkYjA2MjZlNTY2ZjhiNTBhOGIwYzk0MGExNjk3OTMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjEzNTJlNzEwMDQyMzBmMzc2MjNkMWRlNTIzZmRjMGFlMmExZGYyYjk0MTYzODIyZGY2NTZjZTE5NTY3MTFmOTIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjoxLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUyMmZhYTUzNWJkMmVhM2Q1MmU3NDFlZDQ1NDQzNWI3ZmU0OWU4MzU4NmU5NDNkOThkODJiYmZiMjRkMWY1YzUifQ"
+          "resource": "repo://internal/middleware/cors.go#L12-L40",
+          "version": "repo-lines-v1:sha256:9c5c62e7b8934e5f8caf03d6cdddaeb992b4407f71e80cd46ebfd8edc8fcfc31:eyJzZWxlY3RlZExpbmVDb3VudCI6MjksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImYxYjExNzAyZWM0MjZlOGUwYmEzN2FmYzkwYmEwY2NlOWM2ZGJhMDNjMWQ0YWU4NDkwYWM1MDEyMmNkODdlYmQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY3Y2RhODJkYTYwNjIzOGUwNWU2MjM5OTU2OWM1ZWUwMzk5MzQxOTY0OGFlNWQ0M2EyYmY4Y2Q2MzQ3ZjgyNjMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjQzY2UzOGY4ZjdiNDUxN2YxZjYxMzdmMGZiZDdkNWM5MTQzNjkzYjdmODYzM2MyMmI0OGRhOTM5YWFmNGVlMTAiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjoxLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEifQ"
         }
       ]
     },
@@ -37,12 +37,12 @@
       "statement": "CSRF enforcement is double-submit: non-GET requests fail with 403 when the cookie and header differ, the header is missing, or the cookie is missing, and GET /api/csrf-token is registered before enforcement.",
       "evidence": [
         {
-          "resource": "repo://internal/middleware/csrf.go#L13-L31",
-          "version": "repo-lines-v1:sha256:293aaaea0fe83e5cfaec0c0a5e92714e44d286c2a0f622ad2c1130315f419ae9:eyJzZWxlY3RlZExpbmVDb3VudCI6MTksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjljNGU1NzE2NTQ2ZGZkNGYyODg4YjMxY2IxMDc3M2RiN2FlODlmMGRhZjFkMTkxODQ0ZDRmZDdiYmZmMjc3MTkiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjgyNzAwYWE1ZDBiNmYwY2RjMzQxZGE2MDU1YTI0ZmUyYzQxZWQ0Yjg5Y2Q3MTI2ODIwNjk4NjU0N2MyMDkzZTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImE3YWNlNzJlYjYwOTJmNjFiMGM0YWY4YWFmM2JmZWVmOWE2MmQzMzY5YmE5NmJkMzZjMjQwNDQ1YTQ4YjdmOGIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjoyLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjI4YTUxNjliZDY2YWNmYjM0YTU2ZWU4YTE5NGU3YmY3YjAyZDZhMjE3MzZkYWFhMjMxZDlmMTM2OTRlYjExM2YifQ"
+          "resource": "repo://internal/middleware/csrf.go#L10-L31",
+          "version": "repo-lines-v1:sha256:3bc91d51a0fc6a4dde27a9b0995633b68fb4ac8ba2c4eb53ddd0005a97fc757d:eyJzZWxlY3RlZExpbmVDb3VudCI6MjIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImEyODBhNmMwMmRkY2VmMjBhNWMzOWZmZGUwZGY4ODI3ZmMyMmJhOWYwZmQ5YjI3M2YyOTE4NzBhMjhhMTlkMWUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY0ZWZjNDk0MThkMjZkY2YxMjliMjJhNmFhMjExMDhjZWVjMzc2NzdhMzJkMDhlOWQ1ZmVlMzVkZGE2NmJiOWQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijc4NTRjY2M1YjRkZTkwNDRiNDk1ZTU4Njk3NDk5M2M0ODAyZDhlOTIwODJjMjZiYzk2NDY3YjI4ZDUxZjZmZDgiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjoyLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImQwMzk5NDVmNzEzY2VjY2MyYTJiZTk4MWFiNWM1ZWVhMzdmOTVmOTc2OWU1NzVjZDhlZDlhOWZjYmFmZGYwNmEifQ"
         },
         {
-          "resource": "repo://internal/server/app.go#L72-L76",
-          "version": "repo-lines-v1:sha256:cd15511f27614067cf2bde2d33b4a362a3daac63c77aa78f89d4de5677143c62:eyJzZWxlY3RlZExpbmVDb3VudCI6NSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiY2E2ODc0N2RjOGI1OWU1NDM2YjhhODg2OWMyYjA1ZTA2YWMyYzgzYzg0MzhjZGFhODY0MGQ4NDU0YzlhMDVlNyIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNzUzYjQxNGFhYjcwYTlhZDdmZDcyNDBlMGFlYTRhOTE0OTA4MWM5YWFjODQxYmI2YjYzZTc5MzBhZDI0Y2Q1MiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiOWM3OTE5NzcxODkwYjAyNGUwOGRkOGZmZTkxYjVjYTM5MWNjMmI5NjdlZDA5NGY3MDE0OGE5MDEzMGRhOWVlOSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiMmMyMDczYmZiMzA3NTJjNTQ0NGYyNWY4ZDIyNDdmMmQ5OGMxOTIwZTliZmM2ZGNlOTUyM2VjMzc3YTViYzQyNCJ9"
+          "resource": "repo://internal/server/app.go#L70-L76",
+          "version": "repo-lines-v1:sha256:0c5f4560dc17ce0f64ba92dfca182a1fabd0e3e6629e8751f48ed1049e7d446c:eyJzZWxlY3RlZExpbmVDb3VudCI6NywiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiMDFiYTQ3MTljODBiNmZlOTExYjA5MWE3YzA1MTI0YjY0ZWVlY2U5NjRlMDljMDU4ZWY4Zjk4MDVkYWNhNTQ2YiIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNzUzYjQxNGFhYjcwYTlhZDdmZDcyNDBlMGFlYTRhOTE0OTA4MWM5YWFjODQxYmI2YjYzZTc5MzBhZDI0Y2Q1MiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiYzQ4YWIwOTQ0MmExMzFmODA2OGY3YmM2MmQwY2JmZTdjYzgxZGQ4MTNkYzI3ZmQwNjBiNzQ1MmU1YThiMDQ5OCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiMmMyMDczYmZiMzA3NTJjNTQ0NGYyNWY4ZDIyNDdmMmQ5OGMxOTIwZTliZmM2ZGNlOTUyM2VjMzc3YTViYzQyNCJ9"
         }
       ]
     },
@@ -79,18 +79,8 @@
       "statement": "API usage tracking counts only /api/ requests, buffers by method and route template plus UTC date, and flushes at 50 entries or every 60 seconds with silent failure.",
       "evidence": [
         {
-          "resource": "repo://internal/middleware/apitracker.go#L46-L120",
-          "version": "repo-lines-v1:sha256:d3889e45561a98610bf80d951d0792e70e3b9dad6e36af54599e3420e7debd57:eyJzZWxlY3RlZExpbmVDb3VudCI6NzUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImZmN2VjM2UyMWJlMDExZWEwNjRmYTVmYzYxMGIyZTIxNTc3ZTk4NWRkMmNmZGYxY2U1OGY0MzVjOWQyOTVlZTQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImQwOTAzMDI0ZDUxMDgzODY2OWFkMTgwNjA1MDY0NmMxYmYzZGVkMThhMTYzMDExZWZiZTFhMDQwNTE5MTMyYzkiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjM4MTlmOWNhYzJkZGY5ZTQzOTZhYjc5NWY2MjAxNzNlZWI1NjQzZDQ0N2FmYjgxZDBlNDFmYTdiZGRiYzhiMDEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImM0MTkxNTY3MWIyYzVmZmQ0ODgwMjFmNzU3Y2EwNzEzNTc4YjJlYzk5NTFkYWQ4YzA0ZGNiYjQ4YzgyNjQ5M2EifQ"
-        }
-      ]
-    },
-    {
-      "id": "claim_693f73bfa10c4dd6ac076a8bd9fe7847",
-      "statement": "Input sanitization rewrites JSON bodies and query strings, dropping keys that start with $ or contain a dot, skipping password-like fields, and intentionally leaving route params untouched.",
-      "evidence": [
-        {
-          "resource": "repo://internal/middleware/security.go#L27-L107",
-          "version": "repo-lines-v1:sha256:1f240b3f2908e631b29d4dacd46a26a125904d6f96282ded57311d64e1ea9667:eyJzZWxlY3RlZExpbmVDb3VudCI6ODEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijg1MDBiNmJkMmYwYzIzM2I2M2RjZjNlZDNhMmUzNDY3NjhlZTFiOTZmZTZkMjExMzAxY2M3ZTQ5NjgwOTFmMjYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImQzMGViZWEzM2IyNDJlZjQ1NzhkOGZmZDM0Y2Q4ODUyMWNlNjEwMjFkNjU0YTU5ZjRmOThjNDQzYWQwNmQ4NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImZkOTJiNzRjNjQ1YWI4MzFjZjgzZGI0OWY5NWI1OGFmMjA1ZTFiNWFiMGJjZjkyZDM0OTgxYWI1OGQwYTIwZGIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjoxLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUyMmZhYTUzNWJkMmVhM2Q1MmU3NDFlZDQ1NDQzNWI3ZmU0OWU4MzU4NmU5NDNkOThkODJiYmZiMjRkMWY1YzUifQ"
+          "resource": "repo://internal/middleware/apitracker.go#L46-L131",
+          "version": "repo-lines-v1:sha256:a4a944e5eaf611ecb8aefb1fae44c9ad32e977d237a9f15537b457c192716ccb:eyJzZWxlY3RlZExpbmVDb3VudCI6ODYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImI2ZDNjM2VkN2IxYmM5YTAxOGJlNDVkMzkzNDc1NTA1MDYzODIxYTI5OGNmNjEyZDFkMzUyZWY4ZDkzMGQzMTAiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImRmN2U4N2M5MGNiMTVjMDAyOGE1ZTQyMDQ2YTg1ZDkzMGY4ZGI0ZWVkMzFlYmJmYTQxYmM4NDgzMDNhODUyODAiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
         }
       ]
     },
@@ -117,10 +107,28 @@
           "version": "repo-lines-v1:sha256:6649a2f9466b9db18261676b7794183e192b81da121f25859ab75e8fd011076a:eyJzZWxlY3RlZExpbmVDb3VudCI6MTUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjM4MjI5MTNiMzJkMGMyNTQ3N2MwNjM5MGUwYjEzYzhkOGEyYjUwMWM2MDljNTgxZGRhZGVmMjk4MDdkZjJmNjkiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImRlYTkxMGI4ZjVlNzA2Y2VmNTNjNGY2ZWU2YWJkMTg5N2U0Njc5ODAyYzE0NWYzZTRiNzliZjk5OWRmNWQ1NjQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImYyMWY3ZDQ4MDQ3NGU2MzY2NzdiMjEzYzRlOTFiY2VmNGNjMWFiZDM0OTA4ZjZlMmQ1NTU4NWE2MTcyZDM4ZjciLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjRkNjM5ZWY0MTFlMWFjZDkzYjlkZjg1MGE2OTBhNDI5ZTM4Mjc5NzMyOWEyYjVlZjY5ZThmM2E4MDA5YmM2NGYifQ"
         }
       ]
+    },
+    {
+      "id": "claim_50aee4dc7fee4d8eab965cc4ab967cbf",
+      "statement": "Input sanitization rewrites JSON request bodies via UseNumber decode, sanitization, and re-marshal, and rewrites query strings by dropping only keys starting with $ — keys containing a dot are kept and values are not HTML-escaped — while password-like fields skip XSS rewriting and route params are intentionally untouched.",
+      "evidence": [
+        {
+          "resource": "repo://internal/middleware/security.go#L27-L33",
+          "version": "repo-lines-v1:sha256:b65051d764c174e7b4917a8d222dfae429de64f0aa9bf7f270b8e8f14eb372a8:eyJzZWxlY3RlZExpbmVDb3VudCI6NywiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiNjA0MWFhNmNkYzM0ZWYxZjkyNDUwYmM1MGUxNDM1YTg1ZmE3MTgzOTQ1NzFiZDRhNDVlMGI2NTk5MWY2MWM5NSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNjdjZGE4MmRhNjA2MjM4ZTA1ZTYyMzk5NTY5YzVlZTAzOTkzNDE5NjQ4YWU1ZDQzYTJiZjhjZDYzNDdmODI2MyIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZDBlNTI2OTg1NmRlOTlkNmEwYjdkMTEyZjcxNzY5NTE1NTVjMDY1NzQwMWUxNWZkMjE5NzhjOTg2MTQ0ODk5ZCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiNTZmOGE5ZTQ2MDI3NTA4ZWI4YmQ1MTRjMDJiNDAzMDMxYTlkNzkyZWVhOTNmN2NhNjhhNTE2M2RhNzUzYTRiNyJ9"
+        },
+        {
+          "resource": "repo://internal/middleware/security.go#L50-L108",
+          "version": "repo-lines-v1:sha256:d85992d75f9e3ebd2e0bd7ee7b075ab21fd04c8dea634838847ebdd174f5f8b6:eyJzZWxlY3RlZExpbmVDb3VudCI6NTksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImRhMThmYzhjZTJmZWQzNmQwMzBhYzQ0MTRjYTM5OTU0MWY3NjE5OGU0MzgzMjYyNzU3OGJhNTU2NTc2Mjg0NGMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzNjc4MWJjYzc2OTRhMDk4OWU3MDUyMjYyZThiNzk5YjY1MjA2YzA2MGU2ZWY5ZGY1NWY0YjZiNGViZmRlODUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        },
+        {
+          "resource": "repo://internal/security/xss.go#L32-L70",
+          "version": "repo-lines-v1:sha256:8057ae0ab77285bd27e6611cdbbe12671aa7fe47c21bf69d2e707015bc50fd71:eyJzZWxlY3RlZExpbmVDb3VudCI6MzksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAyMGIyYTE0OTY1NzQxNWI3YmRhMWY3NmIxODE2NjZhMWEyMjMzYjFkNmJlYzMzMjJlOGZjMjE4ZDYwZmZlZGQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY5Y2JkMzZmYmU4OWM1ZWUyZDRiOGNjYTdkOTg0MTE1ZGFjZDgwNTJmOWEyMjljMDdjMWUwNjgwMmFiZWZmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjUzZTBjODRlYjY0ODlkNzgxMTJjMzQ3M2FiODhjMWZhODkxYzhlNzY0NDYwMjc0Zjk5ODc1YmRiNzM4MzJkMzMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImYzNzVhYjYzYjY3NzliNWQ4MTg4YzU2MjJlNTBjZmJkNTRjODk1YWZhYjYyNGJmMTAyNGQ4OTk3OTE1MmQ0ZWMifQ"
+        }
+      ]
     }
   ],
   "verification": {
     "by": "openwiki/0.7.2",
-    "at": "2026-11-04T03:17:38.088Z"
+    "at": "2026-11-04T15:34:40.691Z"
   }
 }

@@ -22,15 +22,15 @@ sources:
     resource: repo://internal/server/series_test.go
   - id: openwiki-source-012f2c78e3b1446dfc35803f
     resource: repo://Makefile
-generated: { by: "opencode", at: "2026-11-04T03:17:38.088Z" }
+generated: { by: "zcode", at: "2026-11-04T15:34:40.691Z" }
 verified:
   - by: openwiki/0.7.2
-    at: 2026-11-04T03:17:38.088Z
+    at: 2026-11-04T15:34:40.691Z
 ---
 
 # 测试策略
 
-仓库没有专门测试运行器或框架，只使用标准 `go test`。34 个 `_test.go` 文件中共有约 179 个测试函数。大多数行为要么通过小型 Gin 路由的聚焦单元测试验证，要么通过基于真实 MongoDB 装配真实应用的 HTTP 集成测试验证。
+仓库没有专门测试运行器或框架，只使用标准 `go test`。34 个 `_test.go` 文件中共有约 177 个测试函数。大多数行为要么通过小型 Gin 路由的聚焦单元测试验证，要么通过基于真实 MongoDB 装配真实应用的 HTTP 集成测试验证。
 
 ## 前置条件与命令
 
@@ -100,7 +100,7 @@ go build ./...
 - 认证分支行为：错误密码、2FA、refresh 重用、重复注册、密码修改。
 - 单前缀路由：`router.Mount` 只在 `/api` 注册且 `/api/v1` 返回 404。
 - CSRF 与中间件契约细节。
-- 剧集可见性、审核门控、观看计数、单集通知、重新提交与删除。
+- 剧集可见性、审核门控、观看计数、单集通知、单集显示序号（`episodeLabel` 写入/回退/回填）、重新提交与删除。
 - 收藏夹分享、归属校验与未分类行为。
 - 管理级联、角色门控、审计日志列表。
 - 备份导入/导出与覆盖语义。

@@ -19,7 +19,7 @@ sources:
 generated: { by: "opencode", at: "2026-11-04T03:17:38.088Z" }
 verified:
   - by: openwiki/0.7.2
-    at: 2026-11-04T03:17:38.088Z
+    at: 2026-11-04T15:34:40.691Z
 ---
 
 # 外部服务

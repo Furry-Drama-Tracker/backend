@@ -16,6 +16,8 @@ sources:
     resource: repo://internal/middleware/ratelimit.go
   - id: openwiki-source-40b293d8b99aed27fbe9db06
     resource: repo://internal/middleware/security.go
+  - id: openwiki-source-a8ba835229d442d09305d33e
+    resource: repo://internal/security/xss.go
   - id: openwiki-source-7106c8455bb73d12832c8523
     resource: repo://internal/server/app.go
   - id: openwiki-source-ebbcecfb3e8c07ba5e940ccd
@@ -23,7 +25,7 @@ sources:
 generated: { by: "opencode", at: "2026-11-04T03:17:38.088Z" }
 verified:
   - by: openwiki/0.7.2
-    at: 2026-11-04T03:17:38.088Z
+    at: 2026-11-04T15:34:40.691Z
 ---
 
 # 请求生命周期与中间件管线

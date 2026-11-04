@@ -10,6 +10,8 @@ sources:
     resource: repo://docs/decisions.md
   - id: openwiki-source-9002449d5a813a8783166c8a
     resource: repo://internal/errors/apperror.go
+  - id: openwiki-source-f89e324c07065d291ea97e16
+    resource: repo://internal/handler/episodes.go
   - id: openwiki-source-f7cdef93f6fa51dc3ffc0594
     resource: repo://internal/middleware/ratelimit.go
   - id: openwiki-source-6e8f4534cd26274b5794f0ca
@@ -24,15 +26,15 @@ sources:
     resource: repo://internal/security/xss.go
   - id: openwiki-source-ebbcecfb3e8c07ba5e940ccd
     resource: repo://internal/server/register_routes.go
-generated: { by: "opencode", at: "2026-11-04T03:17:38.088Z" }
+generated: { by: "zcode", at: "2026-11-04T15:34:40.691Z" }
 verified:
   - by: openwiki/0.7.2
-    at: 2026-11-04T03:17:38.088Z
+    at: 2026-11-04T15:34:40.691Z
 ---
 
 # 约定与有意保留的怪癖
 
-本项目刻意保留旧实现的行为。若干看起来像缺陷的地方其实是兼容契约。经验法则是：任何会改变 HTTP 响应、状态码、message key、限流 key 或存储格式的改动都是行为变更，需要明确决策。
+本项目刻意保留旧实现的行为。若干看起来像缺陷的地方其实是兼容契约。经验法则是：任何会改变 HTTP 响应、状态码、message key、限流 key 或存储格式的改动都是行为变更，需要明确决策。固定文案同样属于契约；最近新增的例子是集数称呼——站内通知、Push、邮件、RSS 与更新日历统一经 `episodeRefText`（`internal/handler/episodes.go`）输出，避免各处各自拼「第N集」。
 
 ## 编码规则
 

@@ -12,6 +12,8 @@ sources:
     resource: repo://internal/middleware/auth.go
   - id: openwiki-source-6b98ba42af046aa58117648f
     resource: repo://internal/middleware/cache.go
+  - id: openwiki-source-f7cdef93f6fa51dc3ffc0594
+    resource: repo://internal/middleware/ratelimit.go
   - id: openwiki-source-47b21f10ba3dc863e7bae4e5
     resource: repo://internal/repository/repos.go
   - id: openwiki-source-621b1cb81d01767478ec2637
@@ -27,7 +29,7 @@ sources:
 generated: { by: "opencode", at: "2026-11-04T03:17:38.088Z" }
 verified:
   - by: openwiki/0.7.2
-    at: 2026-11-04T03:17:38.088Z
+    at: 2026-11-04T15:34:40.691Z
 ---
 
 # 架构总览

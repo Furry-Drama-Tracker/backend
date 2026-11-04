@@ -20,10 +20,10 @@ sources:
     resource: repo://internal/repository/push_subscription.go
   - id: openwiki-source-f7acf9d278285ec2e6b81113
     resource: repo://internal/service/auth_service.go
-generated: { by: "opencode", at: "2026-11-03T16:50:44.301Z" }
+generated: { by: "zcode", at: "2026-11-04T15:34:40.691Z" }
 verified:
   - by: openwiki/0.7.2
-    at: 2026-11-04T03:17:38.088Z
+    at: 2026-11-04T15:34:40.691Z
 ---
 
 # 通知与实时推送
@@ -45,6 +45,8 @@ verified:
 | `friend_link_apply` | 友链申请（发给超管） |
 | `feedback_reply` | 管理员反馈回复 |
 | `announcement` | 公告广播 |
+
+追番更新类通知（`new_episode`）的站内文案与 Push 正文按 `episodeRefText` 解析集数称呼——单集自定义 `episodeLabel` 非空时用它，否则回退「第N集」；label 非空时 metadata 还会携带 `episodeLabel`。
 
 ## 端点
 

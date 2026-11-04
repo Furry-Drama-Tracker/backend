@@ -4,10 +4,14 @@ title: 持久化与数据模型
 description: neo-server 如何在不使用 ODM 的情况下使用官方 MongoDB 驱动、集合与 BSON 模型如何组织、ID 与错误约定，以及启动时接线的索引与迁移如何容错执行。
 tags: [mongodb, persistence, repositories, models, indexes, migrations]
 sources:
+  - id: openwiki-source-f89e324c07065d291ea97e16
+    resource: repo://internal/handler/episodes.go
   - id: openwiki-source-90472325131c7abb6569a18c
     resource: repo://internal/indexes/indexes.go
   - id: openwiki-source-3ee71ed54dce769eb3daf020
     resource: repo://internal/migrate/migrate.go
+  - id: openwiki-source-073b77f6a5791985babef0c1
+    resource: repo://internal/model/episode.go
   - id: openwiki-source-c04b809e997b6644e3320acf
     resource: repo://internal/model/model.go
   - id: openwiki-source-d398759a1a3f0969ca03110a
@@ -20,10 +24,10 @@ sources:
     resource: repo://internal/repository/repos.go
   - id: openwiki-source-f9cd993b1da0967b3ad454b7
     resource: repo://internal/repository/user.go
-generated: { by: "opencode", at: "2026-11-03T16:50:44.301Z" }
+generated: { by: "zcode", at: "2026-11-04T15:34:40.691Z" }
 verified:
   - by: openwiki/0.7.2
-    at: 2026-11-03T16:50:44.301Z
+    at: 2026-11-04T15:34:40.691Z
 ---
 
 # 持久化与数据模型
@@ -83,6 +87,7 @@ neo-server 通过官方 Go 驱动（`go.mongodb.org/mongo-driver` v1）访问 Mo
 - 敏感字段除 handler 侧 DTO 外还使用 `json:"-"`：`password`、`twoFactorSecret`、`twoFactorBackupCodes`、`loginAttempts` 与 `lockUntil`。
 - MongoDB 的 `__v` 版本键建模为 `VersionKey int`，标签为 `bson:"__v,omitempty"`，响应中常输出 `__v`。
 - 遗留默认值通过显式构造函数表达，例如七个邮件通知偏好默认 true、背景偏好默认空图片与 opacity 30/blur 0、个人壁纸归一化为 `[]` 而非 `null`。
+- `singleepisodes` 的 `episodeLabel` 是显示用集数序号（自由字符串）：存量文档缺省为空串，读取时由响应层经 `episodeRefText` 回退为「第N集」，因此该字段无需数据迁移。
 - 部分文档携带只读不写的遗留字段，例如 `themeId` 与 `themeApplyIcons`/`themeApplyWallpaper`，读取时会迁移到双槽主题模型。
 
 模型文件按领域分组（`model.go` 放用户、会话、通知、审计、API 统计；另有 `episode.go`、`series.go`、`folder.go`、`theme.go` 等）。没有从标签推导 schema 的迁移框架。

@@ -1,14 +1,14 @@
 {
   "schemaVersion": 1,
-  "pageVersion": "sha256:71899efc14bcd43eaf0502fb43ddfd0480b9ffd844a253aa7b9fdcca399ffba4",
+  "pageVersion": "sha256:7c46edb3aabdd64e610e60a166eecceba569a6427baf7d9faa6bfb77b07bde25",
   "claims": [
     {
       "id": "claim_5dbfb384331346708453099adf64485f",
       "statement": "Image uploads require multipart form data, enforce a coarse body limit then the exact file size, filter extension and declared MIME type, write a random prefixed filename, and reject files whose first 12 bytes do not match a known image magic prefix after deleting them.",
       "evidence": [
         {
-          "resource": "repo://internal/upload/upload.go#L86-L178",
-          "version": "repo-lines-v1:sha256:bd9223a55f6fd27d6b77ef701ebadfc0658d8b9cb18c54a5bdc6b4a0a617e9a1:eyJzZWxlY3RlZExpbmVDb3VudCI6OTMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjkxYWQzZjQzYjQ5NTE4Mzc4M2Y4MjI2YjdhZTg0NzE4MWU0YWM3MzRlMmExYzFkODY1NjY5ZWMxZTgwM2FkNGEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ3YjMyMGQ3NzVmOTk0Y2QwYTA3MjM4NWIxNjc0ZDA2MGMzMTNmOTdhODNkMmVkZTBkN2ZkODNhYTEzZDRmODQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjA5M2U3YTFlNGUxOGYxNzgyZTYzOWQ5NjNlNDU0ZTEwOWY2MjRhNmE1MDE2YzRiOTRmNzcxODZkNjJkMDAzMjciLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjM4MjEwOWY5MjBkYWVkOGYyYjY0MjQ4NzE4YjYyMWUwMGIyZjMwZjc5ZmNmNDllMTEyMTdkMGExMmMxMGJlYjgifQ"
+          "resource": "repo://internal/upload/upload.go#L86-L193",
+          "version": "repo-lines-v1:sha256:ce14b262436414d14913af4e8234f9015d8ed22f6734babe568613c12b600989:eyJzZWxlY3RlZExpbmVDb3VudCI6MTA4LCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiJkMDgzMWIzNTUxMmFjZTBkNTQ4MTM3NzJjYWNiYzQ2ZGZjMWYzMzE1Nzg0MTcyYzlkYWMzNTk4NzEyZWEwNjczIiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiI2Mzc3MDFkMjJhYjJlZTIwZWM3YjIyZDAxMDYyMDczYWE3MTU4ZTBjM2JjNGE1MzJlNTdhYmE5N2UyZTFkYjYxIiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiI5ZDlhMzllNzQ1NDc1MmMwOGNiZDkwZmVhMWQ4ZjVjNDMyMmQ0M2Y4MjlmOTljYjhlYTlmNTFiZTM2ZjdmMGE5IiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MywiZm9sbG93aW5nQ29udGV4dEhhc2giOiIzMjVjZmIwNzJlMTY1MzY5NzNkZWM5YWRhNjRiOTZkMmZmN2RkYmMwMmI0ZDk3NWIyMzFhMTk0YWRjZWMxZGE0In0"
         }
       ]
     },
@@ -17,8 +17,8 @@
       "statement": "Upload file deletion rejects empty, dot, parent, separator-containing, and parent-traversal names and treats a missing file as success.",
       "evidence": [
         {
-          "resource": "repo://internal/upload/upload.go#L194-L203",
-          "version": "repo-lines-v1:sha256:b4165256698516038aeb4adf66659de35507b69aef9a53493ee936b3d7491dbb:eyJzZWxlY3RlZExpbmVDb3VudCI6MTAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjYzOWI3Zjg2OGE4Y2FjMDQ3NzUyOGQ2Zjc5NjFhMDM0YjU0ODMxMGJmOTdkYWRmNTM1YjY5Mzk2YTIxYjQ1MzIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImQzNTFhZTBkNGMyMmYxZWNhYmJkMTFhYzA4MGVjODUyMjllNTU3NTU2YjQyNmQ5YjhlN2I0NGJmYjEyYTBiMGIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijg1N2ZlYzg0M2RkYzQ0NzM5YzA2MGJmNWM1ZDJmNGRlMzBjMjdiYTBhZjhhNDZiYzlhZmQ0ODE5MmJjZjk1NTQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjoxLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUyMmZhYTUzNWJkMmVhM2Q1MmU3NDFlZDQ1NDQzNWI3ZmU0OWU4MzU4NmU5NDNkOThkODJiYmZiMjRkMWY1YzUifQ"
+          "resource": "repo://internal/upload/upload.go#L194-L204",
+          "version": "repo-lines-v1:sha256:f286d94d3add8a54aaa2877ce5340b8c892d94387e96d2151b322612229dc19b:eyJzZWxlY3RlZExpbmVDb3VudCI6MTEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImExZDY4NTY4NDlmNDhiYjI0NTRiODhhOGU1Y2JmNzYyYmJlMzA1ZjA4YjMwYjkyMGUzZjQ5MDdiMDg5YzlhN2EiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImIwZDBjYzc1MzFiMDhmYzlhMDM5MDBmMGJjMTU2M2FhZThjYzZlYzRkYjE5MWJjMWJkZGI3NmI2NDJiMTI0MTgiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
         }
       ]
     },
@@ -41,8 +41,8 @@
       "statement": "SVG icon uploads are limited to 1 MB, require the .svg extension, must start with an XML or svg declaration, and are validated by an XML parser that rejects forbidden elements, event attributes, dangerous URLs, and DOCTYPE/ENTITY declarations.",
       "evidence": [
         {
-          "resource": "repo://internal/upload/svg.go#L31-L138",
-          "version": "repo-lines-v1:sha256:471dceb1edb78dc1a91a312a0b480c2e471c278187a37adffd980e018a805b33:eyJzZWxlY3RlZExpbmVDb3VudCI6MTA4LCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiI0NjJlZWViOGRlMzFkODkxNTA4YzNhMTRjZDA1NzdmYTcwMzI3NjQ0ZjAxZWY3NGUwYzA0ZWJhYWJkNWY5ODE3IiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiJjZjdhZTZjY2FjZWMzYjMwOTU5ZDhmMTk1ODNkNWZhMzNjMjIxNjE1MDQyOWI3Y2Q5MWE0ZTE1OTcxYzA3OTVjIiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiJhZmFjNGEzNjY0NmVhYWE3NGRlOTQxNDY5Y2MxNDcwOTg5MDgyZmNlODU1NjZmMzNjNTkwODkzYzA3NGNjYzMxIiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MywiZm9sbG93aW5nQ29udGV4dEhhc2giOiIwZWM5MThlYzUxN2U4ZTdkMzAwMTM4ZTgzM2M0MDc2ZjBiYTNiOWM0MzhkNjFkODQxZDkzY2Y4MDcyNjZiNTk4In0"
+          "resource": "repo://internal/upload/svg.go#L24-L138",
+          "version": "repo-lines-v1:sha256:4e98e74b1bfd1ba5af08576fe71e7c76c6f0bead5a2897b34100c9d8d787794a:eyJzZWxlY3RlZExpbmVDb3VudCI6MTE1LCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiIyOTJlMTNkZWY1YjJlMThhNjEyODBjNGU1ODFlMmZhZjc2YzI2Y2ZkNDQ4M2VkN2ExMmJmNTg2Nzc1ZTg4MDE4IiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiIxYWIzOTY3NThkOGY2NWVhYjY1Y2E2ZGRiMzk4ZGZkOTcwNTk2NzhlMzQ3NjNlOTE1ZTM4MzBjYTYxNmQ5YzkyIiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiJkNTJjOTUyNGI0OGNiZjhiYWFjOGNjODc3ZWM1NzUxZmFmNGViY2NkMDBhOWRhZWYyZGIwNGJhODk5NzZkNTBmIiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MywiZm9sbG93aW5nQ29udGV4dEhhc2giOiI5Y2ExZjBlZmZkYzU3MWU0YTQ3M2JhM2JkNzJhOTQzMTcxZDNlNDUzYzU0YTVjNTcwMzg1Y2FjMDgxMzQ5MTk1In0"
         }
       ]
     },
@@ -51,8 +51,8 @@
       "statement": "The RSS feed is public and covers a fixed seven-day window of recently updated episodes and released single episodes.",
       "evidence": [
         {
-          "resource": "repo://internal/handler/rss.go#L58-L154",
-          "version": "repo-lines-v1:sha256:994f6e0e00862a2ff8e487369893243adbff43333bb0e1e5bcc1f4b1d0649d49:eyJzZWxlY3RlZExpbmVDb3VudCI6OTcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImU3OGJiYzljOWY2MGRkNzg1MzIyNmI4MzllNWI4ZjI2N2MyNTNiYmE4Y2M2ZDk4ZGZlNGQ5YzE5NTU1MWQwMjMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImZmM2M5MjQ4OGJiNzgyMDJlNTFmNjk3NTZmZTJjZTM4NTQ0ZTg3YWQwZTgxMGY5Zjg3MGFkMDQxNTRmZGM5ZjMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjAyOWE2NzExOWU2NWM0Y2YxYzBiYTMzOTUxNTk3MWIwZTA0NDliYWU0MjQzOGE4OTgxYWU5NDQ5YWI2NjFhZmEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImI3ZTE1ODdkM2RhMzdhMjlmNDM1MzczOTQ5MWVlNWMwOWNhZTk2YzE0OWFlYWE4MGY5NWQyMTczNGI1YzQxYTgifQ"
+          "resource": "repo://internal/handler/rss.go#L46-L154",
+          "version": "repo-lines-v1:sha256:ae87f0774acf69c414c8f4a64c446802bd7ce3149009e575ddd82d09722e3a7b:eyJzZWxlY3RlZExpbmVDb3VudCI6MTA5LCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiJjNjNkMzNlZTY3NjdkMjY2ZjVlZTMxMmVlMmM4YjliOTFhNjA3OWNiOGM3NDY2MzJmZTA4MDAyMjVkNjhiMjdkIiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiJhOGMyMGYyYzIwN2Y1NGU1YTQyMzNiYzVkN2JiMzI1MDk0ZWRmMGI0ZTJhYjZmYmEyNjI0NTY5MWEyMGI4N2QwIiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiIwOWI4ODY3MGRhZDAyYzAzOTlmN2FkOGU2ZTY3ZTcxNGRiMGIxZDIzZWUxZmRmODExNDg2ZjAzN2I1MTUxNWJmIiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MywiZm9sbG93aW5nQ29udGV4dEhhc2giOiI4ODViNDM4MWE5OTIxMDcwMWE4OTJjNmQ2MTM5OTAzMzVlYWE4NzljYzlmZDYxODVmZDA4NGJlYzNkZGM4YjQzIn0"
         }
       ]
     },
@@ -61,16 +61,12 @@
       "statement": "Translation returns Chinese targets unchanged, serves known UI keys from a hardcoded table, then falls back through a 24-hour 5000-entry cache, Azure when configured, MyMemory, and parallel Google and Bing, with a 20-second single-request timeout and 60-second batch timeout.",
       "evidence": [
         {
-          "resource": "repo://internal/handler/translate.go#L228-L242",
-          "version": "repo-lines-v1:sha256:72fa094b34ebacf26f750bce08dd0c517844ac95838d9a888450f36e3d4aae77:eyJzZWxlY3RlZExpbmVDb3VudCI6MTUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxYWY3YTViYTYxMTVlNjA5ZThkY2ZiNDY3ZTZmMjUzYzIxZWI5YzlkODFlNzQyZmRhZDYyNzZkZWE1Mzc0ODgiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjM2NDM2YTIzMmZkNWI3YTA3MDk5NjQ1NTM3NjI3ZjJkYTQxNmIwMGM5NDNjMjIzZjg1YzNlMGU1ODc2OTZmZWUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjU4ZTA5ZjE2NWFlYTQ1ODNhMWE0OTEwNDYzOWM3MjFjMjhlM2FhOGE4OWY0YTBiNzZmMDIwZTc0NzUxYzkwY2QiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImFkMDRmMTQ1NDU3NjVjNjcwOTg4ZDY1YTQyY2Q1Njg1YWY5MzFjOWY3NWVkYTkyMmE3NDk2ZTAyNTk0OTBkNDMifQ"
+          "resource": "repo://internal/handler/translate.go#L228-L296",
+          "version": "repo-lines-v1:sha256:b02e219232c5295d8f7a3703158233ed717bba5635d964bb56e28342754b3eca:eyJzZWxlY3RlZExpbmVDb3VudCI6NjksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjdhMzhlMTY0YTEzMGMzNWE5MTc5N2NjNGMzNjZiYzJlZjhjN2EyNzQ4OGFlYTA5ZTcxMTZiNjZiY2VkNzZmNzciLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjkzNGQwZmNlNjFmMzFmZjJkOWVkM2UxNDZlOGE5NjQ2ZWVmNjkyMjQ5ODdiNGI1ZWJjNmJkN2Q3YmNkMjhiYzIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImNjYmEwYzQwZjNlOGQ2ODg2YmI4OTVhODZmZjg2MWEyM2VlOTRlNjE1NmNjZDViNjBlMzVkMzQyMGM2MjIyN2MiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImNlMmJmNTMxM2M1YmI4Yjg1NDg2MjFkM2I4MGUwOTEzY2NhNGQwODAwMWI4NWMyNjljMjU5M2YxZWJlNGY5MTkifQ"
         },
         {
-          "resource": "repo://internal/handler/translate.go#L243-L296",
-          "version": "repo-lines-v1:sha256:1c4b9b05bb4c1786b9aa92c174eab1ac2dd67b2df6bc929661a5da2bd45b98b8:eyJzZWxlY3RlZExpbmVDb3VudCI6NTQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjliMDg4ZTJjNmExOTE4MDdmYTNlNDZmYWQ4YTMzOGRkZWMzN2EzZTMwODFmYjBjN2VmNWY3OGI3N2U2Y2I1MTUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjFlOTE2YzJhZmRkZTgyYWEwNTJlNWQxZjk0ZjdiNjI3NGNmNDIzOGY4NTJmNTQyNDkyNmMyNjIzNmQzNjVjN2QiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijk5ODBkNmM5NDk2NjRmNWUzMzRiYzRlNGY0ODIyNGVjZjE1MWNhNDczNzQ1M2NlOGJlYjBmNTE5NDYzOGM5ZjgiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjQwYzJjOTUwNTZkYzdjMDAwMjNlZDA3MWUwZjg3NjgwMGU1YjAxMDQyMTUwMzVjNTVkNGFmYjcwZGM0YTE3NzIifQ"
-        },
-        {
-          "resource": "repo://internal/handler/translate.go#L386-L460",
-          "version": "repo-lines-v1:sha256:c36d402459e2a36b3ea82dfd7b21232f82ab107d5a6e968b1b4d76e4a678c46c:eyJzZWxlY3RlZExpbmVDb3VudCI6NzUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImI5YjRlYjQxYzQ0YjBhODVmZjgzZjg0Y2RhMGNmMThmMmRkOWFlODdkZmM0OWI0NTcyNmI0NTYwZWE4ODkyMDMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjNhNjE2NzRkMGU0MDRmNjNhNmQ5ZDU5NTdhYjA2MjNlYzEzMGY5Yjc3NjczZGUxYjIwMDk2YTUyYTNmMzViMGYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjQxNjc5MTI2OWJjYjFjNDI0Zjg4MjgyZjZiOTQ5Yzk3ZTI1NjBjYzIyMDhkNTUzYzFmNDQ4ZTVjYjE4YzQ4NzMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjU0ODRmMTE3YmYzNzI5Y2RjMmQ1NjI1YzI3MmVhMDRhZDViZTE0NTRmZTIwNTY0NGRkMGEwZTQ1NTI0ODZkYzAifQ"
+          "resource": "repo://internal/handler/translate.go#L386-L454",
+          "version": "repo-lines-v1:sha256:e537b1fb5a168f9f7cf2c15897dabff7f72a3db67d7383ccdbdcd7921e66eba5:eyJzZWxlY3RlZExpbmVDb3VudCI6NjksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjdiNjRhOWQ0NTJiMmYxODE0M2MyOWU2MjAwOWYzODM1MzIyNWZjNzRhMDhlN2QyZDE0MzNjMGZjN2VjYTMxNGQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImExYzBhZjM2MzNhYTQ5NTczMWQ1NWExMTI2ODA2OGJjY2Y3MWY4OTk0YjY2ODI0ZTYxYzBjN2U0ODM3Yzk3ZGYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjlmODYxMjFmM2IwN2Q3NTNhNDA1Y2QyMTMxNTdkYTVjY2UwMTc1ZDVjNDc0YWRiOGM5YTI3MjIwMTM2YmNjY2EiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjRmZWZlYTE3YzM2Mzk4ZTA5ZTY1OWRhZTk1MDA4YjFmNGY0MGQ5MmNkZjVmYmJjYzE4OTNhYzNmYjA5ODhjNDIifQ"
         }
       ]
     },
@@ -79,12 +75,12 @@
       "statement": "Backup export covers a fixed 14-collection allow-list and removes password, login IP/region, and device info from exported users.",
       "evidence": [
         {
-          "resource": "repo://internal/handler/backup.go#L100-L141",
-          "version": "repo-lines-v1:sha256:f6135191ff9d89b6c1a070e3cca468cbd2c6c08a2c24c0cb4debe4d691fe0ad0:eyJzZWxlY3RlZExpbmVDb3VudCI6NDIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjA1ZGVlNmJkNjNkNGUxYWM3MTM3ZTc3OTQ4NmFlYzY3MmEwOTRlMjY0YmUyODMxYThjYWMzMjYzNjU4M2NhMWIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjllM2FjMTgyZGRjNTFhYjg3NmNlZmE1YTg2YWM1ZjNiNTA2NDQxMTNjMDFiOWJlMmY2MjA2MzYyODlhMWMxODUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImM3MGJhMjJjNWQwMTZiMTBkNzVjYzk2MzY3NTQzOWMzNTRlMjJjYWJlMGM4ZDk1ODM1YWU0ZWQwNDkzM2JkNjYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImNmNWQ5MGRlZGYwMWI4NjcxMmVjMTQ1M2M0MzQyNmIwNGMyMzlhMzFlNTIxYThjZWQyNDU4ZmI2MjJjNDZjYmIifQ"
+          "resource": "repo://internal/handler/backup.go#L248-L272",
+          "version": "repo-lines-v1:sha256:86432e13af1b10cc1166835cb5f4b39bb9c65653e3a0a3a8430f950be6e91c8a:eyJzZWxlY3RlZExpbmVDb3VudCI6MjUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImE2MzVhZTM1MGZhNzRjODMxNTgwNmQzYTFjMDBjNWJiOTA0N2ZlNDM4NGZhZDQzZWU0OTdiOTQ2MTY1OTU0OTYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjlmZDg4YTBhNDc4MzYxZTAxOWQ2MzMzMWRhNDgwMjE4YzQ3N2I2MDM1ZThjNGVmM2M1ODg3ZDY0MzRjZTBkMmYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjhlNjQ0NjkyNmEyMGRkOTJlNDNlYWI2MTIxNzgzNzEyZWVlZDQzZjJjMDFmZDNmNjJlNjhiZjFkNjk0OGRhN2YiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjZkOWM2Y2IwNDdkOGQ5ZjU3MWIxM2FmZGY0N2UxYmQ4ZTU1NTVhNjJmNzk3M2IxMjY3OWVlOTQ5MTc1ZGY3ZjYifQ"
         },
         {
-          "resource": "repo://internal/handler/backup.go#L248-L272",
-          "version": "repo-lines-v1:sha256:4840c4d76a68296c12083afbb5dabe07365f5688c56f6bf2c9b8f3c91b531519:eyJzZWxlY3RlZExpbmVDb3VudCI6MjUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjhhMjcyYzM0MTM3MGEyZWRhODA2OGQ1ZDY3OWMwNWY0MjFlZGY0MzY3YTA1MzgwZDg4YzVjZjIxNDE1NDYzN2QiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImFkNTlmNjA3MDU1NGI1NDljYjBkOTA3NmY4MGNlNjNmZGFhNzg5ZTIzODc5M2RiMzczODA5OTJiNThlODU5MTAiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjhmYTU0YjE5Njk3MWI2ODllNTNkYzQ0NGQxYWIwOTZlOTI5MzM2OGZhMDZmY2I2ZDhjZDlkNDMwZmU4MTc2NWIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjRhYzk4ZWMwMzlmYzU2ZTIyZDY0ODBhZjkyZWNmNzYwYWFkNTMwMmQzYWMzN2Q5OTAwNDM1MjFhYzFhYjAzNDkifQ"
+          "resource": "repo://internal/handler/backup.go#L85-L141",
+          "version": "repo-lines-v1:sha256:580f74058be673e930fbb0ac73d51ab840c36b8155fc95307516e6c7422048ac:eyJzZWxlY3RlZExpbmVDb3VudCI6NTcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImMzZTg2NjhkMTNhYzEzZDgzMzU0NzU0YWJkMTYyODQ3Mjg0NDY2ZTZhNGVhMTY3NDYwZmQyM2QyOTE5ZjI5ZTQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjVkNjdjZjkzYjgzOGY3Yzc3YTJiMjdhZmY5M2U2ODJmZjcwNDA5ZWFjMWM3NTM1NTI2MGQ5MjIwNzMwZDg3NmQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImU4M2Y1MWE5OTQ1NzE4NmYyMzZiOGE3ODBkNGMxNzI3ZTVkMWZiN2E4ZGQxMDc0MTUzZTcyYmNkMzMwODhmZWUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjY2NjNhOGUyNDQzNmY1OTUzZDRhMWQzMDkyOWNiNjQzNGY2YjA1YTdkZTUxZGYzM2M4NTcwZTc4NzRjYTc5YjQifQ"
         }
       ]
     },
@@ -93,8 +89,8 @@
       "statement": "Backup import enforces a 50 MB UTF-16 payload limit and 10000 documents per collection, skips non-allow-listed collections, filters documents through a field whitelist, and replaces collections transactionally only when overwrite is set.",
       "evidence": [
         {
-          "resource": "repo://internal/handler/backup.go#L142-L233",
-          "version": "repo-lines-v1:sha256:cd0b15ce9f1ef93ae4a8fbd96d6abeb88be97ce2054c89127eb36fbedc795cf2:eyJzZWxlY3RlZExpbmVDb3VudCI6OTIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImQyMmVmODBmYzI1NzE2NTk5YjdlY2EwNjY4N2Y2ZjE0MzFlZjg0MGNlMDEyYjlhNDE1Yzc1NmIxNWJjZWNmYmMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjU3M2E2YjZmNWM2NDVlOWUxODc2N2FjZDRkMDEyODQ3NzNiZTA1OGU1NDYzNmFlMDRhNzgyMmVhMDQzYTUyNjIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjZkYjJmYzcwZjBjOTZlMDhjZGYyOTdlYzc3NDAzZGY4NDhhMDRmNjQ1ZTkxOWUwMGMwOWZiZGZkZWNiY2UxMjAiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjM1ODdlOWNhYTAxYWE3MjU4OTFkYzYwNTg2ZTYwNDc4Y2VhMWE3OGVkY2FlOWI1Yzg4ZGVkZGY5ODBmMzRjZjIifQ"
+          "resource": "repo://internal/handler/backup.go#L142-L247",
+          "version": "repo-lines-v1:sha256:05e4464f8811c4ed8f98bd1b2f0d2889d5bbe045fb9d87aea5cfb556e1080963:eyJzZWxlY3RlZExpbmVDb3VudCI6MTA2LCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiIzNzI3MzJjMWNiZmZmOWFmZGIxN2VhMmY4NzVhYWUxMzEzZDYyZjAwMzhlNjJjODQwZWVjZGIyOTMwZmY5NzY4IiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiIyZThkZDMzNTM5MDlhNGRlMzdlM2NmZmMwOWQyZWE0MDY4NGYyNjNkM2I0MmJlYmM2MGJjYzYzN2IxMTVmNWMzIiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiJiMWNkNzBhNTJjOWZmNGYxNDdhNDJiNTE3Zjg2NmE4OWRiZGU5ZTk0Njg4NmE2MDFiNzY5NWQ4ZWEyMTU2NDNlIiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MywiZm9sbG93aW5nQ29udGV4dEhhc2giOiIyODgzYWJiZDc5YWQ5ODVhZjRkNTQ5YjU0MDA3YmVmYmQzMjMyNzA1MmRkYjBjZjIwYmMyMTlmMDg4ZjczY2EyIn0"
         }
       ]
     },
@@ -113,14 +109,32 @@
       "statement": "The shared pagination helper defaults page to 1, limit to 20, clamps limit into 1 through 100, and renders list, page, limit, total, and totalPages.",
       "evidence": [
         {
-          "resource": "repo://internal/pagination/paginate.go#L1-L68",
-          "version": "repo-lines-v1:sha256:56763a920bc781184834d817bc72e010ee43a231ff6b32d39d761ede2b9988a3:eyJzZWxlY3RlZExpbmVDb3VudCI6NjgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjRjNGNiMTkzNzk3MTNkODk5NWM4YWQ5MmQ5NDQzOTAzZTQ2M2NlZWQ3NDdhZjU1YzE1OTQ5MzMzZTc5MWE0MGUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImUyMmZhYTUzNWJkMmVhM2Q1MmU3NDFlZDQ1NDQzNWI3ZmU0OWU4MzU4NmU5NDNkOThkODJiYmZiMjRkMWY1YzUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+          "resource": "repo://internal/pagination/paginate.go#L1-L26",
+          "version": "repo-lines-v1:sha256:0e4cbcd6f465dd5a6d32efcee1b7b8989b0948b7ee7fe85e6390062b9d69bb15:eyJzZWxlY3RlZExpbmVDb3VudCI6MjYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImNjMDhjNWU4Zjc2MDhjMjBkM2RmNTViMjNmY2JkMzIyNWRmNGMwMGE4YzQ4OWRhZDNiNjYxNzI0NGI2NjJlMjAiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjEwZTRmODU4YjVkYjc5ZGM2YTYzY2U0N2RlMWQyYWJhNDdjYWMxMTZkMGQyMzkxNzMxMTAyZGViZWM2ZjM3NTciLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjlmZmMwY2ZjZDlmMWU5YjBlY2JhYzZhMzkwYWM3ZDNmOTE1YTZjOTI0MmIwZDdhZWQwNTI3NGExYWMwZmVkOWYifQ"
+        },
+        {
+          "resource": "repo://internal/pagination/paginate.go#L27-L68",
+          "version": "repo-lines-v1:sha256:13d7e6bc51f2f67e9a9d624bb60de114349b363c5e5526f525b7a616eb2a08a1:eyJzZWxlY3RlZExpbmVDb3VudCI6NDIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImJjMjIzMmVjYmE3Njk2NzU4ZGNiYmE1NDQ5OWVlNjVlY2I2YmUzOTYzZDQzNzA3YzYyNjUxYmFiMWUzNDEzMTAiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjMxNjU0YmNjOGE5Zjc0NDE4Nzk0YmJlNmRlODcxMDgwMDZkN2U1MzNmZjU1NzIzYWRkZmZmMzY5NWUzNjVhOTgiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_911daec63b5c41d6a45cd9522b25b193",
+      "statement": "RSS 单集条目标题中的集数称呼经 episodeRefText 解析（自定义 label 优先，回退「第N集」）；剧集条目标题仍使用 currentEpisodes 数字（「更新至第N集」）。",
+      "evidence": [
+        {
+          "resource": "repo://internal/handler/episodes.go#L1886-L1893",
+          "version": "repo-lines-v1:sha256:ae3e940214500a4760f082232d38ae176d2a8d56d008bf342766aa873df0da0b:eyJzZWxlY3RlZExpbmVDb3VudCI6OCwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiYjU5N2Q5Yjc3MmMxNDgyMTI5ZTYxYjRkYmYzM2FkNDhiNzkxYjY3MDNjYWJmNjJlMDI1ODJhMDM3MGJlNGQ3NyIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNDEyY2EzNDVjY2Y3NWJmOWMwODA2YmNlNjk1YmU4ZGU4MDhiNzk5ODQyNTFhN2E1NGQyMDJjZjYxMDFkZDQ1MSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNDQ1NjU1ODJiZmU4YzEzOTczNThjODg5OTkyN2M3NmJlNzkyYTBjODNkN2MwNDI4ZWJmOWQyZjY3YWUzZmVkZiIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiOGE5ZDc1NWEyYWMzODkxNjAwMGYyOGI2YWFiZTU3NTA0OGEyYzEzYWQ2MDBhZjkzNWE5ODM1NjQ3Y2FmZGRmZCJ9"
+        },
+        {
+          "resource": "repo://internal/handler/rss.go#L119-L135",
+          "version": "repo-lines-v1:sha256:89ecad615fcae251041010b26952dabfa79e0a7b0e07facbfe7161fd78d7b60a:eyJzZWxlY3RlZExpbmVDb3VudCI6MTcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQyOWFjZmJhOTQ4MzM3NmJkZjZlYWI0ODlkMDdlYzI1ODAyMDQ3NTNkNGM1NDc1MTFlOGRkN2ZkZTQzMTc4ZDAiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImFmNDVhZTA1N2U2MWY1MTI5YzJlMjMzZThjMjkzYTJlZGYzNjJhNTg0M2IyY2EwYzlhYzJhMjk0ZmQ2MWZkMDUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImI4MWE4ZmUxODRjMGExM2U4ODM4YWZmMTExMmNmNjlmOGU5M2QzYTQzZGFhOTU2ZDE2NzNlZTRlYzFjMDljODMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjRmYTc5YjEyMzAyYjA3MWEyZWQ4ZjZkMTYyZTIzYWIwMzdiNTI4OWYxMWU2YWVhNjViMzM2MmZiYWZlZjczZjkifQ"
         }
       ]
     }
   ],
   "verification": {
     "by": "openwiki/0.7.2",
-    "at": "2026-11-04T03:17:38.088Z"
+    "at": "2026-11-04T15:34:40.691Z"
   }
 }

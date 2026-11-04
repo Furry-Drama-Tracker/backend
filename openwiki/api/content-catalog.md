@@ -16,12 +16,14 @@ sources:
     resource: repo://internal/handler/series.go
   - id: openwiki-source-6b98ba42af046aa58117648f
     resource: repo://internal/middleware/cache.go
+  - id: openwiki-source-073b77f6a5791985babef0c1
+    resource: repo://internal/model/episode.go
   - id: openwiki-source-7dbb03889219204710573384
     resource: repo://internal/model/misc.go
-generated: { by: "opencode", at: "2026-11-03T16:50:44.301Z" }
+generated: { by: "zcode", at: "2026-11-04T15:34:40.691Z" }
 verified:
   - by: openwiki/0.7.2
-    at: 2026-11-04T03:17:38.088Z
+    at: 2026-11-04T15:34:40.691Z
 ---
 
 # 内容目录 API
@@ -60,6 +62,7 @@ verified:
 - `POST /episodes/:id/resubmit` 只对已拒绝剧集有效，会把审核字段重置为 pending。
 - `DELETE /episodes/:id` 不做物理删除，而是以原因 `deleted` 把文档移入剧集回收站；只有回收站彻底删除才会清理关联数据。创作者只能删除自己创建或被授权管理的剧集，管理角色不受此限。
 - 单集更新与删除同样校验归属：创作者只能操作其有权编辑的父剧集下的单集，越权返回 403。
+- 创建与更新单集都接受 `episodeLabel` 并去除首尾空白后持久化，作为显示用序号；`episodeNumber` 仍是排序、`currentEpisodes` 计数与已看/新更新判断依据。
 - 创建与更新会校验资源地址：`coverImage` 必须是 `/uploads/` 或 `http(s)`，`platformLinks` 经过清洗，`qqGroupLink` 必须是 `http(s)`。
 
 集数计数驱动通知：创建带 `available`、`preview`、`preview_video` 或 `preview_info` 事件的单集时，会为每个追番用户写入一条 `new_episode` 通知；直接编辑导致 `currentEpisodes` 增加时，会为每个新增集数通知追番用户。推送发送是空实现；邮件只发给邮箱已验证且保留 `episodeUpdate` 偏好的用户，并按剧集、集数、事件去重一小时。
