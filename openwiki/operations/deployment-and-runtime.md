@@ -3,9 +3,6 @@ type: operations
 title: 部署与运行时
 description: 构建目标、准确启动顺序、TCP 与 Unix socket 监听、服务器超时、优雅关停、目录初始化、systemd unit 与 ini 模板，以及多实例后果。
 tags: [deployment, runtime, systemd, startup, shutdown]
-verified:
-  - by: openwiki/0.7.2
-    at: 2026-11-02T17:41:59.592Z
 sources:
   - id: openwiki-source-0f6ed11169bd8e6b34b44280
     resource: repo://cmd/server/main.go
@@ -19,14 +16,15 @@ sources:
     resource: repo://internal/upload/svg.go
   - id: openwiki-source-012f2c78e3b1446dfc35803f
     resource: repo://Makefile
-  - id: openwiki-source-4b6409919cd6826ecddd2894
-    resource: repo://Makefile.win
-generated: { by: "opencode", at: "2026-11-02T17:41:59.592Z" }
+generated: { by: "opencode", at: "2026-11-03T16:50:44.301Z" }
+verified:
+  - by: openwiki/0.7.2
+    at: 2026-11-03T16:50:44.301Z
 ---
 
 # 部署与运行时
 
-后端是一个 Go 二进制，加上配置和两个可写目录。仓库中没有容器定义、CI 流水线或迁移步骤；部署就是构建、配置文件和进程守护。
+后端是一个 Go 二进制，加上配置和两个可写目录。仓库中没有容器定义或构建流水线；部署就是构建、配置文件和进程守护。schema 迁移与索引创建内置在启动流程中。
 
 ## 构建
 
@@ -34,36 +32,40 @@ Makefile 提供标准目标：
 
 | 目标 | 动作 |
 |---|---|
-| `make build` | `go build -o bin/furry-drama-be-neo ./cmd/server` |
+| `make build` | `go build -o bin/furry-drama-be-neo ./cmd/server`（Windows 目标带 `.exe`） |
+| `make release` | `go build -trimpath -ldflags "-s -w" -o bin/furry-drama-be-neo ./cmd/server` |
 | `make run` | `go run ./cmd/server` |
+| `make seed` | `go run ./cmd/seed-admin` 创建初始超管 |
 | `make test` | `go test ./...` |
 | `make vet` | `go vet ./...` |
 | `make fmt` | `gofmt -l -w .` |
 | `make docs` | 重新生成 Swagger 到 `docs/`（需要 `swag`） |
 | `make clean` | 删除二进制 |
 
-`Makefile.win` 为 NMAKE 镜像这些目标，二进制带 `.exe`。模块要求 Go 1.26 与可访问的 MongoDB。
+`GOOS`/`GOARCH` 通过环境变量传给 `go`，因此 `make release GOOS=linux GOARCH=arm64` 可直接交叉编译，输出名按目标平台决定是否带 `.exe`。`Makefile.win` 为 NMAKE 镜像这些目标（含 `release` 与 `seed`）。模块要求 Go 1.26 与可访问的 MongoDB。
 
 ## 启动顺序
 
 `cmd/server/main.go` 按顺序执行：
 
 1. 解析 `--config` 与 `--listen`。
-2. `config.Load`——缺少或过短的 `JWT_SECRET`，或缺少 `MONGO_URI`，以状态码 1 退出。
+2. `config.Load`——缺少或过短的 `JWT_SECRET`、过短的 `ENCRYPTION_KEY`，或缺少 `MONGO_URI`，以状态码 1 退出；弱密钥与占位 CORS 源只打印 `[SECURITY WARN]`。
 3. `repository.Connect`，15 秒上下文——连接或 ping 失败即退出。
 4. 构造 `Repos` 与 JWT 签名器。
-5. 从配置应用上传与图标目录；缺失时创建图标目录。
-6. 构建 Gin 应用。
-7. 创建监听器；失败即退出。
-8. 开始服务。
-9. 等待 SIGTERM/SIGINT 或服务错误。
-10. 用 10 秒超时关停并退出。
+5. 运行 `migrate.Run` 与 `indexes.Ensure`（60 秒上下文）；失败只打印 `[WARN]` 并继续启动。
+6. 启动 `cron.StartSessions`：过期会话、已读通知、到期注销账号清理。
+7. 应用上传与图标目录配置，并用 `MkdirAll` 创建两个目录；失败只告警。
+8. 构建 Gin 应用。
+9. 创建监听器；失败即退出。
+10. 开始服务。
+11. 等待 SIGTERM/SIGINT 或服务错误。
+12. 用 10 秒超时关停并退出。
 
-该顺序明显缺少：`migrate.Run`、`indexes.Ensure` 与 `cron.StartSessions`。启动时没有隐式 schema 迁移或索引创建，也没有清理调度器。需要时部署方必须外部处理。
+迁移、索引与清理任务已接线，但启动失败不会阻止进程继续，以便已有服务平滑升级。首次部署或数据重复时应检查启动日志并人工修复后重启。
 
 ## 可写目录
 
-- `uploads_dir`（默认 `./uploads`）是图片写入位置。**它不会自动创建**；目录不存在时上传会失败。它也是 `/uploads` 服务的根。
+- `uploads_dir`（默认 `./uploads`）是图片写入位置，启动时用 `MkdirAll` 创建（失败只告警），也是 `/uploads` 服务的根。
 - `icons_dir`（默认 `./uploads/icons`）在启动时与 SVG 上传前创建。返回 URL 始终为 `/uploads/icons/...`，因此上传根之外的自定义目录不会被内置静态路由服务。
 
 两者都应可被服务用户写入，并与二进制独立持久化。
@@ -76,7 +78,7 @@ Makefile 提供标准目标：
 - `unix:/path/to.sock` → Unix domain socket，先删除残留文件并设置权限 `0660`；
 - `unix:@name` → Linux abstract socket，无文件或权限。
 
-默认是 `tcp:0.0.0.0:5000`。缺少 flag 时使用 ini 的 `listen`，但要注意省略该键的 ini 会清空默认值而不是保留。
+默认是 `tcp:127.0.0.1:5000`（仅回环）。缺少 flag 时使用 ini 的 `listen`，但要注意省略该键的 ini 会清空默认值而不是保留。要从外部访问必须显式设置 `tcp:0.0.0.0:5000`。
 
 ## HTTP 服务器超时
 
@@ -143,18 +145,14 @@ Makefile 提供标准目标：
 ## 部署检查清单
 
 1. 构建二进制并放到 `ExecStart` 路径。
-2. 创建上传目录并确保归属。
-3. 编写包含密钥与真实 URL 的 ini。
-4. 如果是新数据库，外部创建索引并运行迁移。
-5. 启动服务并检查 `/api/health` 报告数据库已连接。
-6. 通过真实源验证 `/api/csrf-token` 与一个非 GET 端点。
-7. 确认 `/uploads/<已知文件>` 可访问并带有缓存头。
+2. 编写包含密钥与真实 URL 的 ini。
+3. 启动服务并检查 `/api/health` 报告数据库已连接。
+4. 检查启动日志中的 `[WARN]`：迁移、索引与目录创建失败不会阻止启动，但需要人工处理。
+5. 通过真实源验证 `/api/csrf-token` 与一个非 GET 端点。
+6. 确认 `/uploads/<已知文件>` 可访问并带有缓存头。
 
 ## 相关阅读
 
-<!-- openwiki: broken internal link [/openwiki/architecture/configuration.md] link "/openwiki/architecture/configuration.md" is root-absolute, which no real consumer resolves against the repository root (not a coding agent reading the page, not GitHub's Markdown renderer, not a local viewer); use a path relative to this file instead. Fix the href or restore the target, then delete this comment. -->
-- [配置与环境变量](/openwiki/architecture/configuration.md)——所有设置与优先级。
-<!-- openwiki: broken internal link [/openwiki/architecture/overview.md] link "/openwiki/architecture/overview.md" is root-absolute, which no real consumer resolves against the repository root (not a coding agent reading the page, not GitHub's Markdown renderer, not a local viewer); use a path relative to this file instead. Fix the href or restore the target, then delete this comment. -->
-- [架构总览](/openwiki/architecture/overview.md)——启动链的上下文。
-<!-- openwiki: broken internal link [/openwiki/operations/observability-and-background-jobs.md] link "/openwiki/operations/observability-and-background-jobs.md" is root-absolute, which no real consumer resolves against the repository root (not a coding agent reading the page, not GitHub's Markdown renderer, not a local viewer); use a path relative to this file instead. Fix the href or restore the target, then delete this comment. -->
-- [可观测性与后台任务](/openwiki/operations/observability-and-background-jobs.md)——日志与未接线任务。
+- [配置与环境变量](../architecture/configuration.md)——所有设置与优先级。
+- [架构总览](../architecture/overview.md)——启动链的上下文。
+- [可观测性与后台任务](observability-and-background-jobs.md)——日志、迁移与清理任务。

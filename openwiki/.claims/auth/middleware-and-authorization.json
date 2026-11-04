@@ -1,14 +1,14 @@
 {
   "schemaVersion": 1,
-  "pageVersion": "sha256:030c7b327e4d22cbcb92073fc349a97192cb5cc3ca7058d99ff0bc92ac97448e",
+  "pageVersion": "sha256:bd557c538cfe8cba92c3e244964b2ed3664745816bfa75566db4148901077b92",
   "claims": [
     {
       "id": "claim_83f01cf1f83a4206bbef06f8510e0e9b",
-      "statement": "Protect returns 401 for a missing token, 419 with auth.accessTokenExpired for an expired token, 401 for an invalid or non-access-purpose token, 401 when the user no longer exists, and 403 for a disallowed role.",
+      "statement": "Protect returns 401 for a missing token, 419 with auth.accessTokenExpired for an expired token, 401 for an invalid or non-access-purpose token, 401 when the user no longer exists, 401 invalidToken when a jti-bearing token's session is missing, inactive, or owned by another user, and 403 for a disallowed role.",
       "evidence": [
         {
-          "resource": "repo://internal/middleware/auth.go#L55-L110",
-          "version": "repo-lines-v1:sha256:25d1e7fe5c9308219a9fbd4052d512f9dd820c80d945dce726eca81dc8e27b0e:eyJzZWxlY3RlZExpbmVDb3VudCI6NTYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjRjMTU0Y2RhZWY4MmJhMzM4NjZhZjgzYTBmYjQ2Mjc3MDlmZGUwYWRmNmIzNWVjZTE2MzU1ZjQ1N2Y1NWVkNzQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY3Y2RhODJkYTYwNjIzOGUwNWU2MjM5OTU2OWM1ZWUwMzk5MzQxOTY0OGFlNWQ0M2EyYmY4Y2Q2MzQ3ZjgyNjMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjQxODUyY2FkZjA4ODY1MzNjNWMzZDNiYWUzOWY4MGU1NTNiN2ZkMDkwYzk5OGZiNWVjMGFjMGYyMzZmZTdlNTkiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImQ1NWExNmM3MGNiNjMxMzAyNWU4ZjYzMmI5ODFlZDE1OWFhOTVmYmRjOWY0NjYyMjIxYjA4Zjc3YWFhNmMwYmUifQ"
+          "resource": "repo://internal/middleware/auth.go#L47-L97",
+          "version": "repo-lines-v1:sha256:0c2d072523897058da39f813deff9f0c76ce7619870272056bd6bfd6184a2572:eyJzZWxlY3RlZExpbmVDb3VudCI6NTEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjNkYTMyOTA1NTI4ZjcxMzViNTc5YjljMTZiNzIxN2Q5NzI0MjNhNjA2NDVjYjlhOGYwMmEyZThlMDM5ZjY1MTciLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjRjYjZhZTQzYzU5NWQyYTAzOTFlYTg0ZDM3MDI0MmIwYzJkNzg3NmZhN2IyN2RjMjFiOWRjYjNhYjczYjFlMDgiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjNjYThhNjA4MGM5ZTNjNzkzZGY2OTNkZjQ4Mjc0NmRkY2ZmNWZhNmFlOTUyMTRhOGZkY2MxZTE3ODFiZWQ2ODUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjIyYWRjZDU4MGFmNDg5MGZhNGRkOWEzMWUyNWVmZTA2MzM1M2Q2YTY0YmU2Y2M2NTIzMjY2ZjExZTJlMDA5NjIifQ"
         }
       ]
     },
@@ -17,8 +17,8 @@
       "statement": "Protect accepts tokens with an empty purpose for backward compatibility, sets the user and raw token in the Gin context, and asynchronously updates session activity on success.",
       "evidence": [
         {
-          "resource": "repo://internal/middleware/auth.go#L70-L108",
-          "version": "repo-lines-v1:sha256:c87667609ca461907884b54bc6fd582bd3ed228ec98611686b378a64c27a5823:eyJzZWxlY3RlZExpbmVDb3VudCI6MzksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjIzMWU1OTc1N2UwNGNkM2IwYzYwY2FjNTYzYTZmOTEyNTM1NTI2NTg2OGU4N2NjOTQ2N2ZkNjkxOWNlOTFjZjIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImMwODA0ODdhYmMxMmExMDg1NmE2NTA0MDE2M2MwNDE0M2M2OWEwNTg1M2E1ZjIxMGE3NjJiZGFhYzM5YjQ4YzUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjAyNTE2ZGRkNWQ3NDc2NThiZTlmMTA2MTFkODY5MmUzMmUyNjIyZjBmNTg5ODBmMzM4ZGQzZTQ1MzZjODdkOWIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImZkNjgyN2I4Y2M0OWU1NTIyMWM4NjFjYTAyZDc5MmU2MThhYTJmMDI4MWQ2M2I0OTI1NWI3OGM3MDdlNTQxNjMifQ"
+          "resource": "repo://internal/middleware/auth.go#L47-L95",
+          "version": "repo-lines-v1:sha256:9f0bd400a413555779bf972e4f5b3a2f1062931f19c27b883553b02f7a059007:eyJzZWxlY3RlZExpbmVDb3VudCI6NDksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjNkYTMyOTA1NTI4ZjcxMzViNTc5YjljMTZiNzIxN2Q5NzI0MjNhNjA2NDVjYjlhOGYwMmEyZThlMDM5ZjY1MTciLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImUyMmZhYTUzNWJkMmVhM2Q1MmU3NDFlZDQ1NDQzNWI3ZmU0OWU4MzU4NmU5NDNkOThkODJiYmZiMjRkMWY1YzUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjNjYThhNjA4MGM5ZTNjNzkzZGY2OTNkZjQ4Mjc0NmRkY2ZmNWZhNmFlOTUyMTRhOGZkY2MxZTE3ODFiZWQ2ODUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjhlMTg0MTg3MWQwNGE4ZmMyMjAzODgxY2QzZjcwZGIzNDEyNWYyMTBkMjE2NjIwZTBjZjVjNjMxYTA2NDcyZjYifQ"
         }
       ]
     },
@@ -27,18 +27,18 @@
       "statement": "RequireEmailChanged blocks non-GET requests from a superadmin whose email is admin@furry09.com, except paths containing change-email, logout, or verify, returning 403 with forceEmailChange.",
       "evidence": [
         {
-          "resource": "repo://internal/middleware/auth.go#L112-L140",
-          "version": "repo-lines-v1:sha256:5abdbac255025d9c8b4896708d0e73592bc918898f086395e87210352ec45dae:eyJzZWxlY3RlZExpbmVDb3VudCI6MjksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjJkYmMxNmU4NjMwYTY5Zjc4MzQyYzUxMWQ1M2I1NDBkMzdiMzc0NWM5YjU1MWJjNmM3NWVmZmEyMzZiNWRiMTEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImU2ODA2ZjE1NWM1YWMxYWUyNzIyY2EwNmYyYWM5Y2FkY2I4ODFiOTEyM2NiNjI0YTNjMTA0NzViNDQ0OWRjMmUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImZkNjgyN2I4Y2M0OWU1NTIyMWM4NjFjYTAyZDc5MmU2MThhYTJmMDI4MWQ2M2I0OTI1NWI3OGM3MDdlNTQxNjMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImQ1ZTY1YTczN2E4ZmZmMDI3NTdkNTQyMGNiNWM2M2VlN2ZiYjgwOGU0OTUxMzEyYmVlMzBkZTg5Y2MzYjJjNTEifQ"
+          "resource": "repo://internal/middleware/auth.go#L99-L114",
+          "version": "repo-lines-v1:sha256:647b1d532f1677546ec9c8ebf1a67a5f7af0ef2f102c512d53eb7e01dfeb4e3a:eyJzZWxlY3RlZExpbmVDb3VudCI6MTYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQwYzEyYjZhNGQ0NWFjMzkzNzMyNDYyZGEwMWQ0NzZhYzFkZmQ0ZjI0ZWZhZGQ2ZTliNDk0NTJmODA3ZTI4NGUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjdlYjcwMjU3NTkzZGEwNmY2ODJhM2RkZGE1NGE5ZDI2MGQ0ZmM1MTRmNjQ1MjM3ZjVjYTc0YjA4ZjhkYTYxYTYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjhlMTg0MTg3MWQwNGE4ZmMyMjAzODgxY2QzZjcwZGIzNDEyNWYyMTBkMjE2NjIwZTBjZjVjNjMxYTA2NDcyZjYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImZhMmUxODRlNjkzYzczMzM4MDE2NDUyNTBiZGE4NzM2YzQ2ZjQ4MTIzOTVjMjJkMzRkNmY2Y2Y5ZWU5NTBmNjUifQ"
         }
       ]
     },
     {
       "id": "claim_3e851cbf63104fdc83b21b2f25252960",
-      "statement": "OptionalAuth silently continues on missing, invalid, or wrong-purpose tokens, and on success sets only the user context without the raw token or activity update.",
+      "statement": "OptionalAuth silently continues on missing, invalid, wrong-purpose, or revoked-session tokens, and on success sets only the user context without the raw token or activity update.",
       "evidence": [
         {
-          "resource": "repo://internal/middleware/optional_auth.go#L10-L38",
-          "version": "repo-lines-v1:sha256:0f3557dd697e45bc3e291bbf4ad4f56afdd803c837e151dd681ec1d0913a114f:eyJzZWxlY3RlZExpbmVDb3VudCI6MjksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjBlYzRlMGExMWZhOGRjYTQzNjc5NGM5NDQxYWM3ODcwZTczNWJmYjc1NDcxZWVmYTE3OGE0M2JlODYxOGRiMWYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImU3ZjhmOTYwYmQ1MzBkMTdlOWY0ZGJjNTdhYTUzMmU3YjNiOGFkYWM1ZTdjNjY4MzY5ZTQ3MDRiZDkyYjY5ZmEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+          "resource": "repo://internal/middleware/optional_auth.go#L13-L44",
+          "version": "repo-lines-v1:sha256:ea3f899fa399bd191df162afbcaa8ce94ee9eefe7d4987e3144dfff8f7fe4449:eyJzZWxlY3RlZExpbmVDb3VudCI6MzIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijg1OTM3ODdkMmFjMWM5ZTFiOTE0NDY1NmU4MTJiOGQzM2M0MGJkNDJjNmFjNjQxZmY4MDY5NjY1NjEwMTUzMTQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjkzZDE0YWIwYWE1MWYxMzBmMWU3NmUyMGJhMjBlNGQ3MzdkYjA2MjZlNTY2ZjhiNTBhOGIwYzk0MGExNjk3OTMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjRlOTE0ZjIxZGY0N2EyMjI4YjgyZGU4YmVhNWZkNGYzYzgxZjdhNDQxNzNiY2ZiYmZiZmQ3NDZjY2M1ZGRhYjAiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjoxLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUyMmZhYTUzNWJkMmVhM2Q1MmU3NDFlZDQ1NDQzNWI3ZmU0OWU4MzU4NmU5NDNkOThkODJiYmZiMjRkMWY1YzUifQ"
         }
       ]
     },
@@ -47,8 +47,8 @@
       "statement": "Access tokens are read from the Authorization Bearer header, then the accessToken cookie, then the legacy token cookie, and refresh tokens are read only from the refreshToken cookie.",
       "evidence": [
         {
-          "resource": "repo://internal/auth/cookies.go#L95-L126",
-          "version": "repo-lines-v1:sha256:2dbf0110b40d83364bed551a9a3edfc9b64f85f19cff19176fc61c169d6b8362:eyJzZWxlY3RlZExpbmVDb3VudCI6MzIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImY0Y2UwZjQxZWIyYjhjNWU5ZDBmNzJiYmI1Yjg3YTI2NTBhMjBmZDRhY2MwNWU2MWViMmE4NTAzZTg3MDllZDQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImQ0ZWFmMTk2YmQ2NjI4YjVkMzk3MTMzYTEwMDliMzI2ZWNjMzE4N2ZmODU0MGRiOTUzZDFkZmY1NmU3ZDgyZjgiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+          "resource": "repo://internal/auth/cookies.go#L107-L125",
+          "version": "repo-lines-v1:sha256:1923ad767909ce804eddec02522eb300916a37231b19f91239b2e33482ba311b:eyJzZWxlY3RlZExpbmVDb3VudCI6MTksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImExZDllYjcwNGU1ODY2NzgwZDA4MDM1OTM4ZTNkMTA3ZDE5MTA2OGZhYmE0OTAzZWQ1NGI2MWE0ZDUyY2E3ZmIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImRhYWRlNmNkYjY5ZjRiMmFiZTljMzQ5NmRiN2ZlZmY4YzhlM2RmNWM3YTgwZjllNjhmYmVlYjkxZWM3ZDU4MzIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijk5ZDBhMzg0MGIwY2E1ZmJhMDZhY2I3ZDY4NTcxZmQzN2VlNWIyYTQwOGY2MTkxMzkxN2QwZWU5ZTRjYWY5ZmIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjoxLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUyMmZhYTUzNWJkMmVhM2Q1MmU3NDFlZDQ1NDQzNWI3ZmU0OWU4MzU4NmU5NDNkOThkODJiYmZiMjRkMWY1YzUifQ"
         }
       ]
     },
@@ -57,12 +57,12 @@
       "statement": "The CSRF cookie is non-HttpOnly, SameSite Strict, path root, and defaults to 24 hours, while non-GET requests require the X-XSRF-TOKEN header to equal the cookie.",
       "evidence": [
         {
-          "resource": "repo://internal/auth/cookies.go#L30-L75",
-          "version": "repo-lines-v1:sha256:466bbd92e7a20a907e2b8de8011c82d696d0698be21d34856a81ee1fe55ed79d:eyJzZWxlY3RlZExpbmVDb3VudCI6NDYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImRlNmQ4ZjYwMmZlODAyNzI3NTA5NzQ1NjM3MDM3ZDczYmIyNWQ1MGM2MzY1MmE0MmQ0ZWNmYTBiMTFhNzI2YmUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjZjMTYyMWQ5NzFmNWZiYjM5ODUxOTFmMjM5MWZjYjc2YzA0MTYxMjE1ODVkNzQzNmY0Njk4Nzg5OWQ1YWNmZjIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImMwYTA1MGQ1ZDZmNzZhNGY5NmEwOTZiZWRiMGQ1MjYyMzIwYjEzMzNhNzY0YmIwOTMyMGIxODhmZDFhOTM0MDMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjY4Mzg2OTAxZjBmMWFkODlmNmNkMzg3NGMzNDUyN2YwNDk0ZjIyMTJmNzVmYjIxZDU1YTM0YmQ2ZWRhOTA1NGIifQ"
+          "resource": "repo://internal/auth/cookies.go#L51-L79",
+          "version": "repo-lines-v1:sha256:691fb7319fa6a076d6dd797f5dbd4a257496489e56f8076f2d98fe108892fe7c:eyJzZWxlY3RlZExpbmVDb3VudCI6MjksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijk0YjBiMjZlYTFjOThkZTkzYWIzNGQxZWNmNDhhNDg5NWZkNjIxODA5NzQ4Y2ZkNmFlMTQ2MmE3OTdkMTkyMzMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImY0NzA4YTVmNjA2MWIzNWNiY2RkZDM0NzE3NTIyZjEzY2M0M2ZkNDAxYTY5MzdlYzE4MjlhYjQyMjA3YTNhODgiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjY4NTNlZmJmZWVkNjEwNTEyOTFhMDllOGY4ODljNDdiYTRlZThiNmZlNDYzZjYwZWYxNzY4ZTg2NDY1YjEyYTMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImNjZDg0ZDFkNzNmZTA0ZDk2MDhiMThhZmFmNWJlOTFiZjA2NTJiZTU0MzkyNWVkMzk3NjkyOGNlMjk5MDlkNzcifQ"
         },
         {
-          "resource": "repo://internal/middleware/csrf.go#L13-L33",
-          "version": "repo-lines-v1:sha256:f57054389fcbf5d44a35b7b6111298e5a2b3cb051d9c78fd81f8589aeb7e40a5:eyJzZWxlY3RlZExpbmVDb3VudCI6MjEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ0ODEzYTBmNzJjNDQzOTQ3NDFlNzg5MWQ4N2ZjNjlkZGIxZjBkODk3ZjAyMzVjNzNmZmNlNDNkOTQ5ZGM1NTgiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjRmNWM4MGUwNTI1OTQwMzZiYzlhOGZkMTdlODk5NWFjNzQ1MjcwYThkNzJmY2NlMWZjMzYzZTk2MDczZmVjNjgiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+          "resource": "repo://internal/middleware/csrf.go#L13-L31",
+          "version": "repo-lines-v1:sha256:293aaaea0fe83e5cfaec0c0a5e92714e44d286c2a0f622ad2c1130315f419ae9:eyJzZWxlY3RlZExpbmVDb3VudCI6MTksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjljNGU1NzE2NTQ2ZGZkNGYyODg4YjMxY2IxMDc3M2RiN2FlODlmMGRhZjFkMTkxODQ0ZDRmZDdiYmZmMjc3MTkiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjgyNzAwYWE1ZDBiNmYwY2RjMzQxZGE2MDU1YTI0ZmUyYzQxZWQ0Yjg5Y2Q3MTI2ODIwNjk4NjU0N2MyMDkzZTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImE3YWNlNzJlYjYwOTJmNjFiMGM0YWY4YWFmM2JmZWVmOWE2MmQzMzY5YmE5NmJkMzZjMjQwNDQ1YTQ4YjdmOGIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjoyLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjI4YTUxNjliZDY2YWNmYjM0YTU2ZWU4YTE5NGU3YmY3YjAyZDZhMjE3MzZkYWFhMjMxZDlmMTM2OTRlYjExM2YifQ"
         }
       ]
     },
@@ -71,8 +71,8 @@
       "statement": "GET /api/csrf-token is registered before the CSRF validation middleware so it remains reachable without a token.",
       "evidence": [
         {
-          "resource": "repo://internal/server/app.go#L71-L76",
-          "version": "repo-lines-v1:sha256:3f9dfa25c7a3c68d9ad6325fae11c0bd7a4c0405f9f592abca78ba681ff4ffa2:eyJzZWxlY3RlZExpbmVDb3VudCI6NiwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiZjdmNjY0NDJkNWQ4MTI5MDk5YTg5NTc3YzVlYzE5MGI3NDdlNWI4NzUwOGY4ODIwNTgyY2YzMGJlMzIwYjE3MyIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNzUzYjQxNGFhYjcwYTlhZDdmZDcyNDBlMGFlYTRhOTE0OTA4MWM5YWFjODQxYmI2YjYzZTc5MzBhZDI0Y2Q1MiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiM2QzZGFiNDQwODI0ZjliZGE0YWU4ZDMwZDg3ZTRjZmM0MGNjZjkwMjlmMWFkMTdhYmFlODUxYTJiNTNjNjEyMSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiN2MzZTMxNTYxZjJiZGRkMGJjZjNhNzVlYWZjNzBiZGQ1MzgyMTFhZDk1ZDRiMmQ3YWYzMjIwODFjYjQ0YWY2YyJ9"
+          "resource": "repo://internal/server/app.go#L72-L76",
+          "version": "repo-lines-v1:sha256:f14cbbb1c5a1e7821cf2acc6de7d56c91bf9038092207e269d46244e1d9673ba:eyJzZWxlY3RlZExpbmVDb3VudCI6NSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiMTc0OGQyNjVlMTI3OTRhNWU3ZWNmZTRiOWEwOTA4MmZkOGFhNzQ0MjhjZGIyNDJmYmY1Y2YyMDQ3ZmEzZjFiNCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiOTRmZDZiMzhlNDBiMGY0MzQ3ZDg5ZjI2Yjg4ZTNkNGQ1NGFhYzg4ZjFjNGFmMDgwZTI4OWYyMWEzZTQ3MDg5MiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiODI4M2ZlNTgzMzUzZDA3OTZlOWUzZjM5NmM2OTdhNDhjMThiZmJlNjk4ZjA2ZDc3NzQ1ZmFmZjkyYmE3YTk3MSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiNTUzZGVhYzMyNTMyMjE2YmVhNWY2MDdiZTJlM2M2ODJhZjgxNzYzZjI0MDMxZjlmZTU2M2I5MDhmZDZhMTE5MSJ9"
         }
       ]
     },
@@ -81,12 +81,12 @@
       "statement": "The SSE stream authenticates separately with a 30-second sse-ticket JWT verified by purpose in the notifications handler rather than through Protect.",
       "evidence": [
         {
-          "resource": "repo://internal/handler/auth.go#L250-L258",
-          "version": "repo-lines-v1:sha256:061b0ed0016d16779c543b33ff9cedfdd1e9f7fe5af2727b6c8b91011ee41901:eyJzZWxlY3RlZExpbmVDb3VudCI6OSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiMDY1YTVhZTZkMjEyOTM0ZjRlOTBmNTUzNzY1NTZlZTExMDU1ZDg4ODIyOGNkNjExOTQ3ZTU3ZTcxOGM1M2ZkOCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNDEyY2EzNDVjY2Y3NWJmOWMwODA2YmNlNjk1YmU4ZGU4MDhiNzk5ODQyNTFhN2E1NGQyMDJjZjYxMDFkZDQ1MSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZjhiNTA5ZTY5MmU3NzU3ZmFiMDU3NzhmOGZlYWNhNzBhY2I4MWMwNmY0YWMxMWU5ZmRiZjVkOTFlYWFiYzk5NiIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjAsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZTNiMGM0NDI5OGZjMWMxNDlhZmJmNGM4OTk2ZmI5MjQyN2FlNDFlNDY0OWI5MzRjYTQ5NTk5MWI3ODUyYjg1NSJ9"
+          "resource": "repo://internal/handler/auth.go#L250-L257",
+          "version": "repo-lines-v1:sha256:0ce188d7f6b9fe698df964e564acb1657c14375c2d03adb4a9600983ce3a7fe1:eyJzZWxlY3RlZExpbmVDb3VudCI6OCwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiZWViMjFmYjA4ZmNlYjdjMWMwZTMyODI1ZGZlYWE0MGQ0MDQ3NWJhMzRkMTI5YTBjOWM3OGUxYzYwMGZmODllYyIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiYzMyYmEwYmE2NDQ3NWQ5ZTU4MzA4NzcwMDk2MDlmZWM4NTM4Nzk2MmIzYTU5NDBhNmMzM2YyNmNlZmQ1YWI2MyIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNTBjZjBhOWI3OTVkMDZjODYzM2IyNDEzMTQ5NTBhYTUwOGQzY2Q2NjFmYjg2YTJlMGRkYjMyNzI0YThhMTQ1ZSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjEsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZTIyZmFhNTM1YmQyZWEzZDUyZTc0MWVkNDU0NDM1YjdmZTQ5ZTgzNTg2ZTk0M2Q5OGQ4MmJiZmIyNGQxZjVjNSJ9"
         },
         {
-          "resource": "repo://internal/handler/notifications.go#L482-L498",
-          "version": "repo-lines-v1:sha256:845dffeb5383bd5b71a8dce7827297035f2cb390ed0b5320fe976de1c46b73e7:eyJzZWxlY3RlZExpbmVDb3VudCI6MTcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImI2ZDY1OWNhY2I0MzUzNTgwZDcwYWE5NjgwNzM5MThiM2IzOTc2ZDAwMWJlZjY2MmM2ZDJmYWY5YWJlZGQwMTUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjIxOGYxNjA3MmEzYTA1OTA4Zjc4ZjlhYzUyYzQ4NmQ5NTJmYzIzMzBmYWE3NWFlZDllZjBmMTc3MzA4MjU0MjUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjBmZTk4NDdlZjc3ODk0ZTM5YzI4NmRlOGVkYmQxOTgwYzMwNjkyZGQ3MzA0N2Q5Mzg3YjY2ODM3NTYwN2RmMmMifQ"
+          "resource": "repo://internal/handler/notifications.go#L527-L544",
+          "version": "repo-lines-v1:sha256:8b17c72006f11d3decbe8f359fee3b16c17db54ae3f824dfc81a008b180e8252:eyJzZWxlY3RlZExpbmVDb3VudCI6MTgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjgzMGRjN2MwZDhiNWQ4YWZkMTc1ODZmNmE5YWQ0NDQ1NzhmOWNiMmE5ZTEzMGZkOTlkYjE1M2ExYTM4ODBhMTkiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjdlYjcwMjU3NTkzZGEwNmY2ODJhM2RkZGE1NGE5ZDI2MGQ0ZmM1MTRmNjQ1MjM3ZjVjYTc0YjA4ZjhkYTYxYTYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjJkYmIyMTBjZDlkYjgxMThmNGM5Yzc3MzYyNmNlYWI2MjM2ZTY3MWQ2MjYyM2Y4MDYwMGIxMGM0YzczNGVkYmIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjZlNDJkN2MzNTMwMTE1ZTk2ZmNmYzdmNTZlODFmMmEzMThkMmUxMmQzMzg0YmY4YmUwMTZjMTJlMTU1MDhhOGEifQ"
         }
       ]
     },
@@ -95,14 +95,14 @@
       "statement": "Auth cookies are HttpOnly, SameSite Lax, secure only in production, with access at path root for 15 minutes and refresh at /api/auth for 7 days.",
       "evidence": [
         {
-          "resource": "repo://internal/auth/cookies.go#L77-L93",
-          "version": "repo-lines-v1:sha256:1c81cdc10367dffc20bd7d52bb24fafa58a371a5a767798f517211d8f4749792:eyJzZWxlY3RlZExpbmVDb3VudCI6MTcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjNlZDYyNDc0Y2ZmMzFlM2VjZGEwZDIxYzgwNzE0NTMwMzNjMDM5NDNjMDVhZWVkOWU0ZmJhYTAzNzIwMjZlMTEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjlhNmY1MjExYmE5N2VhNTdhZWJkM2Q5ODJmZGM5YTgzODBiODFjYmZjNDAxNTQyNDNjNGU4NGNmMDJhNWYzOTcifQ"
+          "resource": "repo://internal/auth/cookies.go#L81-L93",
+          "version": "repo-lines-v1:sha256:19c2039cf387e6793a2312f168a03a416c68b4d0e19f25b6f78fd44f925b9c2c:eyJzZWxlY3RlZExpbmVDb3VudCI6MTMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijk3Y2I0MWU4ZGM3NjM5OGFkMzQ0ZjJlN2JiNjhmZDk1NTI2ZDI3NjI3NDQ5OWZjYTBlOGRjNzVmMGRjOGRiOWEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImUyMmZhYTUzNWJkMmVhM2Q1MmU3NDFlZDQ1NDQzNWI3ZmU0OWU4MzU4NmU5NDNkOThkODJiYmZiMjRkMWY1YzUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjY2Y2Y3MzIyZDVjNmEyNDk3N2ZkNWNiMjQyMjkxZmU3MTAwMThiNGVjMmY3ZDg2ZWYxMGU3ZjVlYzM1MjViMzIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjljOTFiZmZjOGM3YmQwZGZmNzAyY2Q1M2Y4ZmQ4Y2JlMzA1NmQ0ODhiOTJlMDAyMzc2MzY1MzgzY2ViOGRmOGQifQ"
         }
       ]
     }
   ],
   "verification": {
     "by": "openwiki/0.7.2",
-    "at": "2026-11-02T17:41:59.592Z"
+    "at": "2026-11-03T16:50:44.301Z"
   }
 }

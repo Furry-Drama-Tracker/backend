@@ -3,9 +3,6 @@ type: quality
 title: 测试策略
 description: Go 单元与集成测试套件、MongoDB 依赖、两种应用夹具模式、带 CSRF 与 cookie 的 HTTP 辅助工具、覆盖范围以及仍存在的缺口。
 tags: [testing, go-test, integration, mongodb, regression]
-verified:
-  - by: openwiki/0.7.2
-    at: 2026-11-02T17:41:59.592Z
 sources:
   - id: openwiki-source-193053215eb2d471ac4f675e
     resource: repo://docs/contributing.md
@@ -25,12 +22,15 @@ sources:
     resource: repo://internal/server/series_test.go
   - id: openwiki-source-012f2c78e3b1446dfc35803f
     resource: repo://Makefile
-generated: { by: "opencode", at: "2026-11-02T17:41:59.592Z" }
+generated: { by: "opencode", at: "2026-11-03T16:50:44.301Z" }
+verified:
+  - by: openwiki/0.7.2
+    at: 2026-11-03T16:50:44.301Z
 ---
 
 # 测试策略
 
-仓库没有专门测试运行器或框架，只使用标准 `go test`。31 个 `_test.go` 文件中共有约 175 个测试函数。大多数行为要么通过小型 Gin 路由的聚焦单元测试验证，要么通过基于真实 MongoDB 装配真实应用的 HTTP 集成测试验证。
+仓库没有专门测试运行器或框架，只使用标准 `go test`。33 个 `_test.go` 文件中共有约 179 个测试函数。大多数行为要么通过小型 Gin 路由的聚焦单元测试验证，要么通过基于真实 MongoDB 装配真实应用的 HTTP 集成测试验证。
 
 ## 前置条件与命令
 
@@ -107,17 +107,14 @@ go build ./...
 
 ## 缺口
 
-- 没有测试断言 `cron.StartSessions`、`indexes.Ensure` 或 `migrate.Run` 已接入启动，因为它们没有接入。
+- 没有测试断言 `cron.StartSessions`、`indexes.Ensure` 或 `migrate.Run` 已在 `main` 中接线；这些启动路径仍靠人工检查启动日志。
 - Web Push 发送无法测试，因为它是空实现。
-- SSE 测试覆盖票据认证、连接与读取流程，但不覆盖负载广播，因为不存在广播。
+- SSE 测试覆盖票据认证、连接与读取流程；10 秒轮询广播依赖时间，缺少确定性测试。
 - 翻译测试避免真实提供方；Google/Bing/Azure 分支没有集成测试。
 - 没有覆盖率阈值，Makefile 中也没有 race detector 配置。
 
 ## 相关阅读
 
-<!-- openwiki: broken internal link [/openwiki/quickstart.md] link "/openwiki/quickstart.md" is root-absolute, which no real consumer resolves against the repository root (not a coding agent reading the page, not GitHub's Markdown renderer, not a local viewer); use a path relative to this file instead. Fix the href or restore the target, then delete this comment. -->
-- [快速开始](/openwiki/quickstart.md)——本地设置。
-<!-- openwiki: broken internal link [/openwiki/quality/conventions-and-gotchas.md] link "/openwiki/quality/conventions-and-gotchas.md" is root-absolute, which no real consumer resolves against the repository root (not a coding agent reading the page, not GitHub's Markdown renderer, not a local viewer); use a path relative to this file instead. Fix the href or restore the target, then delete this comment. -->
-- [约定与有意保留的怪癖](/openwiki/quality/conventions-and-gotchas.md)——测试保护的兼容规则。
-<!-- openwiki: broken internal link [/openwiki/architecture/request-lifecycle.md] link "/openwiki/architecture/request-lifecycle.md" is root-absolute, which no real consumer resolves against the repository root (not a coding agent reading the page, not GitHub's Markdown renderer, not a local viewer); use a path relative to this file instead. Fix the href or restore the target, then delete this comment. -->
-- [请求生命周期与中间件管线](/openwiki/architecture/request-lifecycle.md)——被断言的中间件。
+- [快速开始](../quickstart.md)——本地设置。
+- [约定与有意保留的怪癖](conventions-and-gotchas.md)——测试保护的兼容规则。
+- [请求生命周期与中间件管线](../architecture/request-lifecycle.md)——被断言的中间件。

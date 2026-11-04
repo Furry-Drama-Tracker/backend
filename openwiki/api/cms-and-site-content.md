@@ -3,9 +3,6 @@ type: api-domain
 title: CMS 与站点内容 API
 description: 公告、壁纸、友情链接、主题、SVG 图标、站点内容键、创作者主页、动态流与反馈的建模、权限门控，以及与邮件和通知的联动。
 tags: [api, cms, themes, icons, announcements, creator, feedback]
-verified:
-  - by: openwiki/0.7.2
-    at: 2026-11-02T17:41:59.592Z
 sources:
   - id: openwiki-source-b10e065a15408ca747b6184f
     resource: repo://internal/email/client.go
@@ -23,13 +20,18 @@ sources:
     resource: repo://internal/handler/icons.go
   - id: openwiki-source-2705037b16fa0486414860f8
     resource: repo://internal/handler/sitecontent.go
+  - id: openwiki-source-15ee0d2d5ffabd3428b4285a
+    resource: repo://internal/handler/sitestats.go
   - id: openwiki-source-eb2a947fd0238814b1b0335d
     resource: repo://internal/handler/themes.go
   - id: openwiki-source-35d6e9a38d44a46e10d5f6cf
     resource: repo://internal/handler/wallpapers.go
   - id: openwiki-source-0b6d7f0465da2820a1a264ef
     resource: repo://internal/model/theme.go
-generated: { by: "opencode", at: "2026-11-02T17:41:59.592Z" }
+generated: { by: "opencode", at: "2026-11-03T16:50:44.301Z" }
+verified:
+  - by: openwiki/0.7.2
+    at: 2026-11-03T16:50:44.301Z
 ---
 
 # CMS 与站点内容 API
@@ -41,11 +43,13 @@ generated: { by: "opencode", at: "2026-11-02T17:41:59.592Z" }
 `/site-content` 是 `sitecontents` 集合之上的键值存储。默认键顺序为 `privacy`、`terms`、`about`、`settings`，`List` 会惰性创建缺失的默认文档，因此后台总能看到四个键。
 
 - `GET /:key` 公开，但 `key=email` 例外：它由内联超管校验保护。`email` 键由运行时配置合成而非存储：host、port、user、from name 和 `enabled` 标志，密码始终为空。
-- `PUT /:key` 仅超管可用，并直接拒绝 `email`，因为 SMTP 凭据通过 ini 或环境变量配置，而不是数据库。
+- `PUT /:key` 仅超管可用，并直接拒绝 `email`，因为 SMTP 凭据通过 ini 或环境变量配置，而不是数据库。更新 `about` 与 `settings` 时 `content` 必须是合法 JSON。
 - `GET /`（管理员）返回全部键，缺失时按需创建默认值。
 - `POST /upload` 接收最大 5 MB 的图片并返回 `/uploads/...` URL。
 - `POST /test-email` 使用请求体提供的凭据发送测试邮件。
 - `GET /pwa-manifest` 公开，根据 `settings` 内容 JSON 推导 Web App Manifest（名称、短名、图标、颜色）。
+
+读取 `privacy`、`terms`、`about`、`settings` 时，如果存储内容不是合法 JSON 而 HTML 反转义后合法，会返回反转义结果以兼容旧版全局 HTML 转义造成的损坏；该修复只在读取时生效，不写回数据库。`email` 键响应带 `Cache-Control: no-store`。
 
 `settings` 文档还支撑事务邮件的品牌信息：邮件客户端从 `settings` 读取站点名与导航 Logo，从 `about` 读取 ICP、公安备案与版本号，两者缓存五分钟。这是 CMS 内容与出站邮件之间的主要耦合。
 
@@ -53,7 +57,7 @@ generated: { by: "opencode", at: "2026-11-02T17:41:59.592Z" }
 
 公告由超管管理，所有路由（包括读）都附加 `RequireEmailChanged`。公开面是 `GET /active`（可按 `popup` 或 `banner` 渠道过滤，由 repository 限制条数）和 `GET /:id`。
 
-创建接受四种固定类型（`info`、`warning`、`maintenance`、`update`），其他类型会落到通用 500 路径。新建公告在 active 且 `publishAt` 不在未来时会立即广播。更新时，如果 `active`、`sendNotification` 或 `sendEmail` 从 false 变为 true，会先重置对应的已发送标志再重新广播，避免被去重逻辑压制。删除公告时也会删除引用它的通知中心条目。
+创建接受四种固定类型（`info`、`warning`、`maintenance`、`update`），其他类型会落到通用 500 路径。`link` 为空或必须是 `http`/`https`，否则返回 400。新建公告在 active 且 `publishAt` 不在未来时会立即广播。更新时，如果 `active`、`sendNotification` 或 `sendEmail` 从 false 变为 true，会先重置对应的已发送标志再重新广播，避免被去重逻辑压制。删除公告时也会删除引用它的通知中心条目。
 
 广播有两条独立通道：
 
@@ -100,7 +104,7 @@ generated: { by: "opencode", at: "2026-11-02T17:41:59.592Z" }
 `/creator-profile` 区分公开与私有视图：
 
 - `GET /my-profile` 对 `creator`、`admin`、`superadmin` 开放；首次访问会根据用户名创建默认主页。
-- `PUT /my-profile` 从不修改线上字段。它写入 `pendingChanges` 并设置 `reviewStatus=pending`，在超管批准前公开主页保持不变。简介截断为 500 个字符。
+- `PUT /my-profile` 从不修改线上字段。它写入 `pendingChanges` 并设置 `reviewStatus=pending`，在超管批准前公开主页保持不变。简介截断为 500 个字符。头像必须是 `/uploads/` 站内路径或 `http(s)` URL，`socialLinks` 会经过清洗与数量/长度校验，`qqGroupLink` 必须是 `http(s)`。
 - `GET /public/:id` 与 `GET /by-creator/:creatorId` 公开，只返回已通过的字段以及该创作者的已审核剧集；待审核改动、审核状态和审核备注会被剥离。
 
 `/creator` 工作台暴露 `GET /my-episodes`（用户作为创作者、授权编辑或自定义作者参与的剧集）与 `GET /editable`（用户可编辑的已审核剧集），两者都要求创作者角色。
@@ -121,17 +125,19 @@ generated: { by: "opencode", at: "2026-11-02T17:41:59.592Z" }
 
 用户可以列出自己的反馈；管理员可以列出全部反馈并更新状态（`pending`、`read`、`replied`）以及最多 1000 字符的回复。保存非空回复会创建带 50 字符预览的 `feedback_reply` 通知，并在用户邮箱已验证且开启 `feedbackReply` 偏好时异步发送邮件。管理员列表的 `limit` 没有上限钳制，这一点与大多数分页端点不同。
 
+## 站点统计
+
+`GET /api/site-stats` 是新增的公开端点，返回首页所需的规模数据：`users`（用户总数）、`episodes`（已审核剧集数）与 `online`（最近 10 分钟活跃会话数）。响应带 15 秒进程内缓存与 `Cache-Control: public, max-age=15`；在线人数查询失败时降级为 0，用户数与剧集数查询失败则返回 500。响应只含聚合计数，不含任何用户标识。
+
 ## 横切注意点
 
 - 对于 Gin 默认尾斜杠重定向会破坏契约的公开端点，会有意同时注册 `""` 与 `"/"`。
 - 上传 handler 返回本地化错误消息，并依赖 `internal/upload` 做扩展名、MIME、魔数与大小校验。
+- 超管写端点（站点内容、公告、壁纸、图标、主题、友链）普遍附加 `RequireEmailChanged` 与上传/写入限流；个人壁纸与主题文件删除只允许清理带对应前缀（`wallpaper-`、`theme-wallpaper-`）且未被引用的文件，避免通过 URL 删除任意上传文件。
 - 多个 handler 带有 fire-and-forget 的通知与邮件副作用；这些失败不会回滚主写入。
 
 ## 相关阅读
 
-<!-- openwiki: broken internal link [/openwiki/api/utilities-and-uploads.md] link "/openwiki/api/utilities-and-uploads.md" is root-absolute, which no real consumer resolves against the repository root (not a coding agent reading the page, not GitHub's Markdown renderer, not a local viewer); use a path relative to this file instead. Fix the href or restore the target, then delete this comment. -->
-- [上传、RSS、翻译、备份与分页](/openwiki/api/utilities-and-uploads.md)——共享上传实现。
-<!-- openwiki: broken internal link [/openwiki/integrations/email-delivery.md] link "/openwiki/integrations/email-delivery.md" is root-absolute, which no real consumer resolves against the repository root (not a coding agent reading the page, not GitHub's Markdown renderer, not a local viewer); use a path relative to this file instead. Fix the href or restore the target, then delete this comment. -->
-- [邮件发送](/openwiki/integrations/email-delivery.md)——模板辅助函数与按收件人限流。
-<!-- openwiki: broken internal link [/openwiki/integrations/external-services.md] link "/openwiki/integrations/external-services.md" is root-absolute, which no real consumer resolves against the repository root (not a coding agent reading the page, not GitHub's Markdown renderer, not a local viewer); use a path relative to this file instead. Fix the href or restore the target, then delete this comment. -->
-- [外部服务](/openwiki/integrations/external-services.md)——友链申请使用的 Altcha 校验。
+- [上传、RSS、翻译、备份与分页](utilities-and-uploads.md)——共享上传实现。
+- [邮件发送](../integrations/email-delivery.md)——模板辅助函数与按收件人限流。
+- [外部服务](../integrations/external-services.md)——友链申请使用的 Altcha 校验。

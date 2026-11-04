@@ -3,12 +3,7 @@ type: architecture
 title: 请求生命周期与中间件管线
 description: 固定的 Gin 中间件顺序、请求体解析与清洗、CSRF 校验、限流挂载语义、双版本路由、静态上传，以及错误实际如何到达客户端。
 tags: [http, middleware, gin, rate-limiting, csrf, routing]
-verified:
-  - by: openwiki/0.7.2
-    at: 2026-11-02T17:41:59.592Z
 sources:
-  - id: openwiki-source-3a7c36409770ce04e5cdeef4
-    resource: repo://internal/handler/translate.go
   - id: openwiki-source-8cc3b2cd34ec48fbcbb82fd1
     resource: repo://internal/middleware/apitracker.go
   - id: openwiki-source-dbaf2c53f5cefea8a8bb2ff3
@@ -23,7 +18,12 @@ sources:
     resource: repo://internal/middleware/security.go
   - id: openwiki-source-7106c8455bb73d12832c8523
     resource: repo://internal/server/app.go
-generated: { by: "opencode", at: "2026-11-02T17:41:59.592Z" }
+  - id: openwiki-source-ebbcecfb3e8c07ba5e940ccd
+    resource: repo://internal/server/register_routes.go
+generated: { by: "opencode", at: "2026-11-03T16:50:44.301Z" }
+verified:
+  - by: openwiki/0.7.2
+    at: 2026-11-03T16:50:44.301Z
 ---
 
 # 请求生命周期与中间件管线
@@ -56,7 +56,7 @@ gin.Recovery
 
 ### Recovery、压缩与响应头
 
-`gin.Recovery` 把 panic 转为 500 响应。Gzip 在客户端接受 gzip 时压缩响应，排除已压缩的图片扩展名（含 webp）。`SecurityHeaders` 为每个响应设置 CSP、一年含子域的 HSTS、`X-Frame-Options: SAMEORIGIN`、`nosniff`、`Referrer-Policy: no-referrer`、`X-XSS-Protection: 0` 及相关头。
+`gin.Recovery` 把 panic 转为 500 响应。Gzip 在客户端接受 gzip 时压缩响应，排除已压缩的图片扩展名（含 webp）。`SecurityHeaders` 为每个响应设置 CSP（`img-src` 允许 `https:` 以支持外链封面）、一年含子域的 HSTS、`X-Frame-Options: SAMEORIGIN`、`nosniff`、`Referrer-Policy: no-referrer`、`Permissions-Policy`（关闭相机/麦克风/定位/支付）、`X-XSS-Protection: 0` 及相关头。
 
 ### CORS
 
@@ -68,21 +68,22 @@ gin.Recovery
 
 ### 请求体解析
 
-`BodyParse` 只解析 JSON（`application/json` 或 `application/*+json`）与表单编码请求体。其他内容类型原样通过，特别是 multipart 上传，稍后由上传 handler 读取。
+`BodyParse` 先给**所有**请求体套上 `http.MaxBytesReader` 硬上限，再决定是否解析 JSON/form。这一层也覆盖 multipart 与未知 Content-Type，防止后续 `SanitizeInput` 或 `FormFile` 无上限读取内存。
 
-- 普通上限：1 MB。
-- `/api/backup/import` 与 `/api/v1/backup/import`（及子路径）为 50 MB，但仅限 JSON。
+- 全局硬上限：12 MB；备份导入路径为 51 MB。
+- JSON/form 解析上限：1 MB；`/api/backup/import` 与 `/api/v1/backup/import`（及子路径）的 JSON 为 50 MB。
 - 超限返回 413 `request entity too large`。
 - JSON 语法错误返回 400。
 - 解析后的请求体存入 Gin 上下文供后续中间件使用，原始字节会还原到 `c.Request.Body`，使 handler 可以再次绑定。
+- 非 JSON/form 内容类型原样通过，特别是 multipart 上传，稍后由上传 handler 读取。
 
 ### 输入清洗
 
 `SanitizeInput` 在请求体解析之后运行：
 
 - JSON 请求体用 `UseNumber` 解码、递归清洗、重新序列化并替换。
-- 查询值被清洗并重写；以 `$` 开头或包含 `.` 的键会被丢弃，防止 NoSQL 操作符注入。
-- 路由参数值就地清洗。
+- 查询字符串只丢弃以 `$` 开头的键，防止 NoSQL 操作符注入；查询**值不做 HTML 转义**，否则 URL、搜索词和链接里的 `&` 会被改成 `&amp;`。含 `.` 的键不再被丢弃。
+- 路由参数不做清洗：它们是固定 ID/枚举，转义会破坏合法字符。
 - 密码类字段（`password`、`newPassword`、`currentPassword`、`confirmPassword`、`oldPassword`）跳过 XSS 重写。
 
 清洗器会剥除不允许的 HTML 标签而不是转义，保留文本内容。这是相对旧 `xss` 库的有意偏离。
@@ -114,25 +115,25 @@ gin.Recovery
 
 - 无 mounts 的 spec 是全局型。
 - 有 mounts 的 spec 精确匹配 `/api/<mount>`，并以 `/api/<mount>/...` 前缀匹配子路径。
-- 端点型 spec **永不**匹配 `/api/v1/...`；这一不对称是记录在案的契约，不是 bug。
+- 端点型 spec 同时匹配 `/api/<mount>` 与 `/api/v1/<mount>`，防止攻击者通过 v1 镜像绕过登录/注册/2FA/邮箱限流。
 - `AuthSpec` 仅在 `IsDev` 且 `SKIP_RATE_LIMIT=1` 时跳过。
 
 两个后果容易被忽略：
 
-1. 每次 `RateLimit` 调用都会创建带独立内存计数的新限流器。跨多个路由复用同一 spec 会产生每路由独立计数，而不是共享预算。例如 2FA spec 挂在七个路由上，因此每个路由都有各自的 5 次/15 分钟桶。
+1. 每次 `RateLimit` 调用都会创建带独立内存计数的新限流器。但 `RegisterRoutes` 用 `spec.Name|window|max` 做键缓存限流器，因此同一 spec 的所有路由（含 `/api` 与 `/api/v1` 镜像）共享同一计数器与预算。例如 2FA spec 挂在七个路由上，它们共用同一个 5 次/15 分钟桶。
 2. 动态路由如 `/episodes/:id/view` 无法用挂载匹配表达，因此其配置的限流器永远不会触发。
 
-限流器使用 `ulule/limiter` 与内存存储，因此计数是固定窗口且进程本地的。响应包含 draft-6 `RateLimit-*` 头，429 时包含 `Retry-After`。`requestEmailChange` 限流器刻意以 `[object Object]:<小写 newEmail>` 为键而不是 IP，保留历史怪癖。
+限流器使用 `ulule/limiter` 与内存存储，因此计数是固定窗口且进程本地的。响应包含 draft-6 `RateLimit-*` 头，429 时包含 `Retry-After`。`requestEmailChange` 限流器同时按来源 IP 与目标邮箱小写值限流，避免用不同邮箱刷验证邮件。
 
 ## 双版本路由
 
-`router.MountDual(parent, "/x", register)` 调用 `register` 两次：一次在 `/api/x`，一次在 `/api/v1/x`。v1 组添加 `Deprecation: true` 与固定 `Sunset` 日期。handler 完全相同，因此除头与端点限流不对称外，两个版本的响应形状没有差异。
+`router.MountDual(parent, "/x", register)` 调用 `register` 两次：一次在 `/api/x`，一次在 `/api/v1/x`。v1 组添加 `Deprecation: true` 与固定 `Sunset` 日期。handler 完全相同，响应形状没有差异；端点限流计数器也因注册期缓存而共享。
 
 领域 handler 常把根路径注册两次（`""` 与 `"/"`），以避免 Gin 自动尾斜杠重定向，因为接口契约要求两种形式都直接匹配而不返回 307。
 
 ## 静态上传
 
-`/uploads/*filepath` 注册在引擎上、`/api` 组之外，因此不被 API 统计且不受全局限流影响。支持 GET 与 HEAD。包含 `..` 的路径、目录与缺失文件返回 404。存在文件获得七天不可变缓存、`nosniff`、`noindex` 与 inline disposition。
+`/uploads/*filepath` 注册在引擎上、`/api` 组之外，因此不被 API 统计且不受全局限流影响。支持 GET 与 HEAD。只服务 `.jpg`、`.jpeg`、`.png`、`.gif`、`.webp`、`.svg` 六种扩展名；包含 `..` 的路径、目录、其他扩展名与缺失文件返回 404。存在文件获得七天不可变缓存、`nosniff`、`noindex`、inline disposition 与 sandbox CSP，确保直接打开 SVG 也不会执行脚本。
 
 ## 错误渲染
 
@@ -150,9 +151,6 @@ handler 主要通过 `errors.AbortWithAppError` 显式渲染错误，它映射 `
 
 ## 相关阅读
 
-<!-- openwiki: broken internal link [/openwiki/architecture/overview.md] link "/openwiki/architecture/overview.md" is root-absolute, which no real consumer resolves against the repository root (not a coding agent reading the page, not GitHub's Markdown renderer, not a local viewer); use a path relative to this file instead. Fix the href or restore the target, then delete this comment. -->
-- [架构总览](/openwiki/architecture/overview.md)——包边界。
-<!-- openwiki: broken internal link [/openwiki/auth/middleware-and-authorization.md] link "/openwiki/auth/middleware-and-authorization.md" is root-absolute, which no real consumer resolves against the repository root (not a coding agent reading the page, not GitHub's Markdown renderer, not a local viewer); use a path relative to this file instead. Fix the href or restore the target, then delete this comment. -->
-- [鉴权中间件与角色](/openwiki/auth/middleware-and-authorization.md)——`Protect` 行为。
-<!-- openwiki: broken internal link [/openwiki/auth/session-and-token-lifecycle.md] link "/openwiki/auth/session-and-token-lifecycle.md" is root-absolute, which no real consumer resolves against the repository root (not a coding agent reading the page, not GitHub's Markdown renderer, not a local viewer); use a path relative to this file instead. Fix the href or restore the target, then delete this comment. -->
-- [会话与令牌生命周期](/openwiki/auth/session-and-token-lifecycle.md)——cookie 与令牌语义。
+- [架构总览](overview.md)——包边界。
+- [鉴权中间件与角色](../auth/middleware-and-authorization.md)——`Protect` 行为。
+- [会话与令牌生命周期](../auth/session-and-token-lifecycle.md)——cookie 与令牌语义。

@@ -3,10 +3,9 @@ type: auth-flow
 title: 会话与令牌生命周期
 description: 双令牌模型、JWT claims 与 purpose、cookie 路径、会话存储、refresh 轮换与 30 秒宽限期重用检测、419/409/401 语义、登出吊销以及会话管理端点。
 tags: [auth, jwt, refresh, sessions, cookies]
-verified:
-  - by: openwiki/0.7.2
-    at: 2026-11-02T17:41:59.592Z
 sources:
+  - id: openwiki-source-0f6ed11169bd8e6b34b44280
+    resource: repo://cmd/server/main.go
   - id: openwiki-source-d30e65659972429c2c50cf5a
     resource: repo://internal/auth/cookies.go
   - id: openwiki-source-be8c32ef9eb79a8172d00695
@@ -17,9 +16,14 @@ sources:
     resource: repo://internal/handler/auth.go
   - id: openwiki-source-b5df54b08f2ac1045e8ab7c9
     resource: repo://internal/repository/session.go
+  - id: openwiki-source-f7acf9d278285ec2e6b81113
+    resource: repo://internal/service/auth_service.go
   - id: openwiki-source-27784338c57fd749bd43470e
     resource: repo://internal/service/refresh.go
-generated: { by: "opencode", at: "2026-11-02T17:41:59.592Z" }
+generated: { by: "opencode", at: "2026-11-03T16:50:44.301Z" }
+verified:
+  - by: openwiki/0.7.2
+    at: 2026-11-03T16:50:44.301Z
 ---
 
 # 会话与令牌生命周期
@@ -28,7 +32,7 @@ generated: { by: "opencode", at: "2026-11-02T17:41:59.592Z" }
 
 ## 令牌形态
 
-- **Access 令牌**：HS256，默认 15 分钟，purpose `access`，claim `id` 为用户 hex ID。
+- **Access 令牌**：HS256，默认 15 分钟，purpose `access`，claim `id` 为用户 hex ID，以及由 24 个随机字节生成的 `jti`。
 - **Refresh 令牌**：HS256，默认 7 天，purpose `refresh`，claim `id`，以及由 24 个随机字节生成的 `jti`。
 - **特殊 purpose 令牌**：`2fa-challenge`（5 分钟）、`device-verify`、`reset-password`、`email-change`（1 小时）与 `sse-ticket`（30 秒）。它们使用同一签名器，但 `Protect` 会因其 purpose 不是 `access` 而拒绝。
 
@@ -47,15 +51,17 @@ refresh cookie 的窄路径意味着刷新与登出请求必须位于 `/api/auth
 
 ## 会话存储
 
-`usersessions` 文档包含用户 ID、refresh 令牌的 SHA-256 hex 哈希（`refreshTokenHash`）、设备信息、IP、`isActive`、`loginAt`、`lastActiveAt` 与 `logoutAt`。Access 令牌从不存储。`auth.HashToken` 是普通 SHA-256 hex 摘要，不能改变，否则既有哈希无法比较。
+`usersessions` 文档包含用户 ID、refresh 令牌的 SHA-256 hex 哈希（`refreshTokenHash`）、access 令牌的 SHA-256 hex 哈希（`tokenHash`）、设备信息、IP、`isActive`、`loginAt`、`lastActiveAt` 与 `logoutAt`。只存哈希，不存令牌原文。`auth.HashToken` 是普通 SHA-256 hex 摘要，不能改变，否则既有哈希无法比较。
+
+`Protect` 对带 `jti` 的 access 令牌按 `tokenHash` 反查会话；会话被登出、改密或管理员下线后，access 令牌立即失效。没有 `jti` 的历史令牌跳过该检查，最多再存活一个 access TTL。
 
 ## 签发
 
 登录或设备确认成功后，`IssueSession`：
 
-1. 签发 access 令牌；
+1. 签发带新 `jti` 的 access 令牌；
 2. 签发带新 `jti` 的 refresh 令牌；
-3. 插入包含 refresh 哈希、设备信息、IP 与时间戳的会话；
+3. 插入包含 access 哈希、refresh 哈希、设备信息、IP 与时间戳的会话；
 4. 设置 cookie；
 5. 异步写审计记录。
 
@@ -73,7 +79,7 @@ refresh cookie 的窄路径意味着刷新与登出请求必须位于 `/api/auth
 - 会话在 **30 秒**内被置为无效 → **409** `auth.concurrentRefresh`。这被视为合法并发刷新，例如多个标签页。handler **不会**清除 cookie，也**不会**吊销会话。
 - 否则 → **401** `auth.refreshTokenReuse`。该用户所有活跃会话都会被置为无效，强制重新登录。
 
-成功占用后加载用户并轮换：新 access 令牌、带新 `jti` 的新 refresh 令牌、继承设备信息与原登录时间的新会话，以及新 cookie。旧会话保持非活跃。
+成功占用后加载用户并轮换：带新 `jti` 的新 access 令牌、带新 `jti` 的新 refresh 令牌、继承设备信息与原登录时间且记录两者哈希的新会话，以及新 cookie。旧会话保持非活跃。
 
 `jti` 是安全关键。没有它，同一秒内的两次轮换可能签发出字节完全相同的 refresh 令牌，存储哈希也会与新会话匹配，重用检测会静默失效。
 
@@ -111,7 +117,7 @@ refresh cookie 的窄路径意味着刷新与登出请求必须位于 `/api/auth
 
 ## 会话清理
 
-`internal/cron` 包含一个任务，把 `lastActiveAt` 超过 30 天的活跃会话标记为无效，每小时运行。它没有从 `main` 启动，因此过期会话目前会保持活跃，除非任务被接线或索引/清理被外部执行。cron 包中记录的不活跃窗口同样是 30 天。
+`internal/cron` 包含一个任务，把 `lastActiveAt` 超过 30 天的活跃会话标记为无效，每小时运行。`cron.StartSessions` 已由 `cmd/server/main.go` 在开始监听之前启动，因此清理会随进程运行；进程退出时通过 context 取消。cron 包中记录的不活跃窗口同样是 30 天。
 
 ## 多实例影响
 
@@ -119,9 +125,6 @@ refresh cookie 的窄路径意味着刷新与登出请求必须位于 `/api/auth
 
 ## 相关阅读
 
-<!-- openwiki: broken internal link [/openwiki/auth/login-and-registration.md] link "/openwiki/auth/login-and-registration.md" is root-absolute, which no real consumer resolves against the repository root (not a coding agent reading the page, not GitHub's Markdown renderer, not a local viewer); use a path relative to this file instead. Fix the href or restore the target, then delete this comment. -->
-- [注册与登录流程](/openwiki/auth/login-and-registration.md)——会话最初如何创建。
-<!-- openwiki: broken internal link [/openwiki/auth/middleware-and-authorization.md] link "/openwiki/auth/middleware-and-authorization.md" is root-absolute, which no real consumer resolves against the repository root (not a coding agent reading the page, not GitHub's Markdown renderer, not a local viewer); use a path relative to this file instead. Fix the href or restore the target, then delete this comment. -->
-- [鉴权中间件与角色](/openwiki/auth/middleware-and-authorization.md)——419 处理与守卫行为。
-<!-- openwiki: broken internal link [/openwiki/api/notifications-and-realtime.md] link "/openwiki/api/notifications-and-realtime.md" is root-absolute, which no real consumer resolves against the repository root (not a coding agent reading the page, not GitHub's Markdown renderer, not a local viewer); use a path relative to this file instead. Fix the href or restore the target, then delete this comment. -->
-- [通知与实时推送](/openwiki/api/notifications-and-realtime.md)——SSE 票据变体。
+- [注册与登录流程](login-and-registration.md)——会话最初如何创建。
+- [鉴权中间件与角色](middleware-and-authorization.md)——419 处理与守卫行为。
+- [通知与实时推送](../api/notifications-and-realtime.md)——SSE 票据变体。

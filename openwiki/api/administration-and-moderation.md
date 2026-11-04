@@ -5,7 +5,7 @@ description: 后台管理、剧集审核与回收站、举报、统计、分类�
 tags: [api, admin, moderation, review, audit, statistics]
 verified:
   - by: openwiki/0.7.2
-    at: 2026-11-02T17:41:59.592Z
+    at: 2026-11-03T16:50:44.301Z
 sources:
   - id: openwiki-source-44e96c77b4637e4ff46c5518
     resource: repo://internal/handler/admin.go
@@ -21,11 +21,9 @@ sources:
     resource: repo://internal/handler/review.go
   - id: openwiki-source-8bf4cd0f9bad70a28fad32ec
     resource: repo://internal/handler/stats.go
-  - id: openwiki-source-a759557a449edc99daccb392
-    resource: repo://internal/middleware/auth.go
   - id: openwiki-source-54e2988cad872a1deb6494f6
     resource: repo://internal/repository/episode_trash.go
-generated: { by: "opencode", at: "2026-11-02T17:41:59.592Z" }
+generated: { by: "opencode", at: "2026-11-03T16:50:44.301Z" }
 ---
 
 # 管理与审核 API
@@ -36,7 +34,7 @@ generated: { by: "opencode", at: "2026-11-02T17:41:59.592Z" }
 
 | 挂载点 | 读权限 | 写权限 |
 |---|---|---|
-| `/admin` | `verify`、`pending-counts`、`creators`、`verify-password` 允许 `creator` / `admin` / `superadmin`；列表与创作者主页审核仅 `superadmin` | 仅 `superadmin`，且变更路由附加 `RequireEmailChanged` |
+| `/admin` | `login` 公开；`verify`、`pending-counts`、`creators`、`verify-password` 允许 `creator` / `admin` / `superadmin`；列表与创作者主页审核仅 `superadmin` | 仅 `superadmin`，且变更路由附加 `RequireEmailChanged` |
 | `/review` | 先经 `Protect` 允许 `creator` / `admin` / `superadmin`，再由 `adminOnlyReview` 收窄为 `admin` / `superadmin` | 同上 |
 | `/episode-trash` | 先经 `Protect`，再由 `adminOnlyReview` 收窄 | 同上 |
 | `/reports` | 提交：任意登录用户；列表：`admin` / `superadmin` | 处理：`admin` / `superadmin` |
@@ -59,15 +57,16 @@ generated: { by: "opencode", at: "2026-11-02T17:41:59.592Z" }
 2. 按 `account`、`email`、`username` 的顺序回退解析账号。
 3. 角色不是 `admin` 或 `superadmin` 时返回 403。
 4. 账号锁定时返回 423；密码错误返回 400 并递增失败次数；邮箱未验证返回 403（开发环境的演示邮箱除外）。
-5. 签发 access 令牌与带随机 `jti` 的 refresh 令牌，写入 `usersessions` 文档，更新最后登录信息并设置鉴权 cookie。
+5. 已开启 2FA 的账号在此入口收到 403 与 `need2FA: true`，必须改用前台 `/api/auth/login` 完成两步验证。
+6. 签发 access 令牌与带随机 `jti` 的 refresh 令牌，写入 `usersessions` 文档，更新最后登录信息并设置鉴权 cookie。
 
-与公开登录不同，后台登录不会执行新设备验证或 2FA 分支，也不会写入审计记录。
+该独立入口为兼容旧客户端而保留（不再仅限开发环境），但仍跳过新设备验证并直接拒绝 2FA 账号，也不写入审计记录。管理员日常应优先使用前台登录入口。
 
 账号管理分为三类角色：
 
 - `RegisterAccount` 只接受 `admin` 和 `creator` 角色，使用共享密码强度规则，推导或校验唯一 `accountId`，将用户创建为邮箱已验证；创作者账号会尝试创建 `CreatorProfile`（失败静默），并发送“账号已创建”邮件。
-- `DeleteAccount` 拒绝删除自己、拒绝删除最后一个 `superadmin`，且只接受管理或创作者账号。它删除用户及其会话。
-- `DeleteUser` 执行完整级联：追番、历史、通知、收藏、收藏夹、反馈、会话、推送订阅与举报（举报按遗留字段 `reporter` 匹配），删除该用户的评分，然后对每个受影响的剧集重算平均分与评分人数。
+- `DeleteAccount` 拒绝删除自己、拒绝删除最后一个 `superadmin`，且只接受管理或创作者账号。删除委托 `service.PurgeUserData` 做 best-effort 级联清理（单个集合失败不阻断），比 `DeleteUser` 宽松。
+- `DeleteUser` 执行完整级联：追番、历史、通知、收藏、收藏夹、反馈、会话、推送订阅与举报（举报同时按遗留字段 `reporter` 与 `reporterId` 清理），删除该用户的评分，然后对每个受影响的剧集重算平均分与评分人数；随后继续清理收藏夹收藏项、主题与创作者主页。任一步失败即返回 500。
 - `UpdateRole` 接受 `user`、`creator`、`admin`、`superadmin`；拒绝修改自己、拒绝降级最后一个 `superadmin`，并在账号变为 `creator` 时创建 `CreatorProfile`。
 - `ToggleAdminAccess` 在普通 `user` 与 `admin` 之间切换，但拒绝操作 `superadmin` 或 `creator` 账号。
 
@@ -148,9 +147,6 @@ HTTP 层只暴露列表、版本日志、恢复与彻底删除，四者均为管
 
 ## 相关阅读
 
-<!-- openwiki: broken internal link [/openwiki/api/content-catalog.md] link "/openwiki/api/content-catalog.md" is root-absolute, which no real consumer resolves against the repository root (not a coding agent reading the page, not GitHub's Markdown renderer, not a local viewer); use a path relative to this file instead. Fix the href or restore the target, then delete this comment. -->
-- [内容目录 API](/openwiki/api/content-catalog.md)——被审核的剧集文档。
-<!-- openwiki: broken internal link [/openwiki/auth/middleware-and-authorization.md] link "/openwiki/auth/middleware-and-authorization.md" is root-absolute, which no real consumer resolves against the repository root (not a coding agent reading the page, not GitHub's Markdown renderer, not a local viewer); use a path relative to this file instead. Fix the href or restore the target, then delete this comment. -->
-- [鉴权中间件与角色](/openwiki/auth/middleware-and-authorization.md)——`Protect` 状态码与 `RequireEmailChanged`。
-<!-- openwiki: broken internal link [/openwiki/integrations/email-delivery.md] link "/openwiki/integrations/email-delivery.md" is root-absolute, which no real consumer resolves against the repository root (not a coding agent reading the page, not GitHub's Markdown renderer, not a local viewer); use a path relative to this file instead. Fix the href or restore the target, then delete this comment. -->
-- [邮件发送](/openwiki/integrations/email-delivery.md)——审核与追番通知邮件。
+- [内容目录 API](content-catalog.md)——被审核的剧集文档。
+- [鉴权中间件与角色](../auth/middleware-and-authorization.md)——`Protect` 状态码与 `RequireEmailChanged`。
+- [邮件发送](../integrations/email-delivery.md)——审核与追番通知邮件。

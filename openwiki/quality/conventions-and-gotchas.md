@@ -3,9 +3,6 @@ type: quality
 title: 约定与有意保留的怪癖
 description: Go 后端编码规则、新增端点/集合/定时任务/配置项的配方，以及不得擅自修复的既有兼容性怪癖。
 tags: [conventions, gotchas, compatibility, code-style]
-verified:
-  - by: openwiki/0.7.2
-    at: 2026-11-02T17:41:59.592Z
 sources:
   - id: openwiki-source-193053215eb2d471ac4f675e
     resource: repo://docs/contributing.md
@@ -23,7 +20,12 @@ sources:
     resource: repo://internal/router/dual.go
   - id: openwiki-source-a8ba835229d442d09305d33e
     resource: repo://internal/security/xss.go
-generated: { by: "opencode", at: "2026-11-02T17:41:59.592Z" }
+  - id: openwiki-source-ebbcecfb3e8c07ba5e940ccd
+    resource: repo://internal/server/register_routes.go
+generated: { by: "opencode", at: "2026-11-03T16:50:44.301Z" }
+verified:
+  - by: openwiki/0.7.2
+    at: 2026-11-03T16:50:44.301Z
 ---
 
 # 约定与有意保留的怪癖
@@ -62,19 +64,19 @@ generated: { by: "opencode", at: "2026-11-02T17:41:59.592Z" }
 3. 在 `internal/server/register_routes.go` 的对应 `MountDual` 块中注册路由。需要认证就加 `amw.Protect(...)`，需要限流就加 `rl(ratelimit.XxxSpec)`。路由会自动出现在 `/api` 与 `/api/v1`。
 4. 如果端点要出现在 API 文档中，添加 Swagger 注解并用 `make docs` 重新生成 `docs/`。
 
-记住端点限流不匹配 `/api/v1`，且每次 `rl(spec)` 调用都会创建独立限流器。
+记住端点限流同时匹配 `/api` 与 `/api/v1`，且 `RegisterRoutes` 会按 spec 缓存限流器，因此共享同一 spec 的路由共用计数器。
 
 ## 新增集合
 
 1. 在 `internal/model` 添加模型结构体，BSON 标签匹配存储文档形态，JSON 标签匹配响应契约。
 2. 在 `internal/repository` 添加 repository 文件与接收 Mongo 集合的构造函数。
 3. 在 `repository.NewRepos` 中把 repository 字段注册到 `Repos`。
-4. 如果唯一性、TTL 或查询性能需要，把索引加到 `internal/indexes`——记住 `Ensure` 不会在启动时调用。
-5. 如果既有文档需要转换，在 `internal/migrate` 添加带 `settings` 标记的幂等迁移。
+4. 如果唯一性、TTL 或查询性能需要，把索引加到 `internal/indexes`——`Ensure` 在启动时执行，失败只告警。
+5. 如果既有文档需要转换，在 `internal/migrate` 添加带 `settings` 标记的幂等迁移；它同样在启动时执行。
 
 ## 新增后台任务
 
-遵循 cron 包模式：goroutine、对齐的首次运行、ticker、上下文取消与日志。然后真正从入口或装配函数启动它。现有任务虽已定义但未启动，仅复制该包是不够的。
+遵循 cron 包模式：goroutine、对齐的首次运行、ticker、上下文取消与日志。然后在 `cron.StartSessions` 中注册；该函数已由 `main` 在开始监听前启动。新增任务时注意首个执行点的语义，以及 ctx 取消时 goroutine 能及时退出。
 
 ## 新增配置项
 
@@ -90,11 +92,13 @@ generated: { by: "opencode", at: "2026-11-02T17:41:59.592Z" }
 
 | 怪癖 | 原因 | 后果 |
 |---|---|---|
-| 端点限流永不作用于 `/api/v1` | 遗留挂载契约 | v1 在端点上实际不受限，但仍受全局限流覆盖 |
-| 共享 spec 的每个路由仍有独立限流器实例 | 每次 `rl(spec)` 都构造限流器 | 2FA 预算按端点独立，而不是七个路由共享 |
+| 端点限流同时匹配 `/api` 与 `/api/v1` | 防止 v1 镜像绕过登录/注册/2FA/邮箱限流 | 两个前缀共享同一计数器与预算 |
+| 共享 spec 的路由共用限流器 | `RegisterRoutes` 按 spec 名/窗口/上限缓存 | 2FA 预算在七个路由间共享，而不是各自独立 |
 | `ulule/limiter` 的固定窗口计数 | 替换旧滑动窗口的库选型 | `RateLimit-*` 与 `Retry-After` 是近似值；窗口边界的突发行为不同 |
-| `requestEmailChange` 的键是 `[object Object]:<email>` | 历史 key 生成器怪癖 | 它按新邮箱而非 IP 限流；修改会重置既有计数 |
+| `requestEmailChange` 的键是 IP + 小写 `newEmail` | 防止用不同邮箱刷验证邮件 | 修改 key 组成会重置既有计数 |
 | XSS 清洗剥除不允许标签而不是转义 | 用 `bluemonday` 替换旧 `xss` 库 | 用户 HTML 会丢失标签，而不是显示转义标记 |
+| 查询字符串只剥离以 `$` 开头的键，值不做 HTML 转义 | 避免把 `&` 改成 `&amp;` 破坏 URL/搜索词 | 含 `.` 的键不再被丢弃；路由参数完全不清洗 |
+| 登录/注册邮箱先 trim 再转小写 | 避免大小写不同的重复账号与登录失败 | 新增入口必须复用同一规范化 |
 | 动态观看路由永远不命中其配置的限流器 | 挂载匹配基于前缀，无法表达 `:id` | 十分钟的每 IP 观看冷却是真正的去重机制 |
 | `personalWallpapers` 的 nil 序列化为 `[]` | 遗留输出形状 | 客户端可以始终按数组处理 |
 | `_id` 始终是 hex 字符串 | JSON 没有 ObjectID 类型 | 字符串 ID 在 Mongo 查询前必须规范化 |
@@ -103,15 +107,13 @@ generated: { by: "opencode", at: "2026-11-02T17:41:59.592Z" }
 | 一秒以内的成功 GET 不出现在请求日志 | 日志量控制 | 流量分析应使用 API 统计而非日志 |
 | 验证码与限流在内存中 | 单实例设计 | 多实例部署会破坏验证码并使限制按实例生效 |
 
-## 已知未接线的内容
+## 启动时接线的行为
 
-这些是当前状态事实，不是背书：
-
-- `indexes.Ensure` 从未调用，因此新数据库没有唯一或 TTL 索引，除非外部创建。
-- `migrate.Run` 从未调用，因此 account ID、角色与创作者主页迁移不会自动运行。
-- `cron.StartSessions` 从未调用，因此会话与已读通知清理不会发生。
-- Web Push 发送是空实现，尽管订阅会被存储。
-- SSE 流维护连接但从不广播通知负载。
+- `indexes.Ensure` 在开始监听前执行；`users`、`usersessions`、`histories`、`notifications` 等集合的唯一与 TTL 索引会自动创建。失败只打印 `[WARN]` 并继续启动。
+- `migrate.Run` 同样在启动时执行，account ID、角色与创作者主页迁移会自动运行；失败告警后继续。
+- `cron.StartSessions` 启动会话清理、已读通知清理与到期注销账号清理。
+- Web Push 发送仍是空实现，尽管订阅会被存储。
+- SSE 流每 10 秒轮询数据库并向连接推送 `notification` 事件，但连接簿记仍是进程本地的。
 
 ## 兼容性检查清单
 
@@ -128,9 +130,6 @@ generated: { by: "opencode", at: "2026-11-02T17:41:59.592Z" }
 
 ## 相关阅读
 
-<!-- openwiki: broken internal link [/openwiki/architecture/overview.md] link "/openwiki/architecture/overview.md" is root-absolute, which no real consumer resolves against the repository root (not a coding agent reading the page, not GitHub's Markdown renderer, not a local viewer); use a path relative to this file instead. Fix the href or restore the target, then delete this comment. -->
-- [架构总览](/openwiki/architecture/overview.md)——这些规则保护的分层。
-<!-- openwiki: broken internal link [/openwiki/architecture/request-lifecycle.md] link "/openwiki/architecture/request-lifecycle.md" is root-absolute, which no real consumer resolves against the repository root (not a coding agent reading the page, not GitHub's Markdown renderer, not a local viewer); use a path relative to this file instead. Fix the href or restore the target, then delete this comment. -->
-- [请求生命周期与中间件管线](/openwiki/architecture/request-lifecycle.md)——限流与 CSRF 机制。
-<!-- openwiki: broken internal link [/openwiki/quality/testing.md] link "/openwiki/quality/testing.md" is root-absolute, which no real consumer resolves against the repository root (not a coding agent reading the page, not GitHub's Markdown renderer, not a local viewer); use a path relative to this file instead. Fix the href or restore the target, then delete this comment. -->
-- [测试策略](/openwiki/quality/testing.md)——回归闸门。
+- [架构总览](../architecture/overview.md)——这些规则保护的分层。
+- [请求生命周期与中间件管线](../architecture/request-lifecycle.md)——限流与 CSRF 机制。
+- [测试策略](testing.md)——回归闸门。

@@ -3,9 +3,6 @@ type: integration
 title: 邮件发送
 description: go-mail SMTP 客户端、配置来源、按收件人限流、事务邮件模板、发送方法、测试邮件路径，以及仅写入 stderr 的操作日志。
 tags: [email, smtp, notifications, templates, rate-limiting]
-verified:
-  - by: openwiki/0.7.2
-    at: 2026-11-02T17:41:59.592Z
 sources:
   - id: openwiki-source-7cbcc11e6fe12221a8c16292
     resource: repo://internal/email/client_test.go
@@ -19,7 +16,10 @@ sources:
     resource: repo://internal/email/targetrate.go
   - id: openwiki-source-1af801b89db284f73af11010
     resource: repo://internal/email/templates.go
-generated: { by: "opencode", at: "2026-11-02T17:41:59.592Z" }
+generated: { by: "opencode", at: "2026-11-03T16:50:44.301Z" }
+verified:
+  - by: openwiki/0.7.2
+    at: 2026-11-03T16:50:44.301Z
 ---
 
 # 邮件发送
@@ -106,9 +106,6 @@ SMTP 配置只来自 `config.Email`，由 ini `[email]` 段或 `EMAIL_*` 环境�
 
 ## 相关阅读
 
-<!-- openwiki: broken internal link [/openwiki/api/notifications-and-realtime.md] link "/openwiki/api/notifications-and-realtime.md" is root-absolute, which no real consumer resolves against the repository root (not a coding agent reading the page, not GitHub's Markdown renderer, not a local viewer); use a path relative to this file instead. Fix the href or restore the target, then delete this comment. -->
-- [通知与实时推送](/openwiki/api/notifications-and-realtime.md)——偏好键与站内通知。
-<!-- openwiki: broken internal link [/openwiki/auth/account-security.md] link "/openwiki/auth/account-security.md" is root-absolute, which no real consumer resolves against the repository root (not a coding agent reading the page, not GitHub's Markdown renderer, not a local viewer); use a path relative to this file instead. Fix the href or restore the target, then delete this comment. -->
-- [账号安全能力](/openwiki/auth/account-security.md)——验证与重置流程。
-<!-- openwiki: broken internal link [/openwiki/operations/observability-and-background-jobs.md] link "/openwiki/operations/observability-and-background-jobs.md" is root-absolute, which no real consumer resolves against the repository root (not a coding agent reading the page, not GitHub's Markdown renderer, not a local viewer); use a path relative to this file instead. Fix the href or restore the target, then delete this comment. -->
-- [可观测性与后台任务](/openwiki/operations/observability-and-background-jobs.md)——stdout 与 stderr 日志分流。
+- [通知与实时推送](../api/notifications-and-realtime.md)——偏好键与站内通知。
+- [账号安全能力](../auth/account-security.md)——验证与重置流程。
+- [可观测性与后台任务](../operations/observability-and-background-jobs.md)——stdout 与 stderr 日志分流。

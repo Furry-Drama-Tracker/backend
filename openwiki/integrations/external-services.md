@@ -3,9 +3,6 @@ type: integration
 title: 外部服务
 description: Altcha 工作量证明集成及其密钥派生、带缓存上限与失败回退的 ipapi.co 地域查询，以及只暴露配置却从不用于发送的 VAPID 设置。
 tags: [integration, altcha, geolocation, vapid, external-apis]
-verified:
-  - by: openwiki/0.7.2
-    at: 2026-11-02T17:41:59.592Z
 sources:
   - id: openwiki-source-a8910515ddd14810ad43f5c1
     resource: repo://internal/config/config.go
@@ -19,7 +16,10 @@ sources:
     resource: repo://internal/service/auth_service.go
   - id: openwiki-source-1994cba008c20be8b9db7693
     resource: repo://internal/service/login.go
-generated: { by: "opencode", at: "2026-11-02T17:41:59.592Z" }
+generated: { by: "opencode", at: "2026-11-03T16:50:44.301Z" }
+verified:
+  - by: openwiki/0.7.2
+    at: 2026-11-03T16:50:44.301Z
 ---
 
 # 外部服务
@@ -69,7 +69,7 @@ HMAC 密钥在设置 `ALTCHA_HMAC_KEY` 时使用它，否则使用 `"altcha-" + 
 
 `VAPIDConfig` 持有 `PublicKey`、`PrivateKey` 与 `Subject`，由 `[vapid]` ini 段或 `VAPID_PUBLIC_KEY`、`VAPID_PRIVATE_KEY`、`VAPID_SUBJECT` 填充。
 
-- `GET /notifications/vapid-public-key` 公开，返回 `{"publicKey": "<key>"}`，未配置时为 `null`。
+- `GET /notifications/vapid-public-key` 公开，只有当公钥与私钥都配置时才返回 `{"publicKey": "<key>"}`，否则为 `null`。这样前端不会在缺少私钥、无法真正推送时误以为 Web Push 可用。
 - 推送订阅文档存储 endpoint 与密钥，由通知域管理。
 - 私钥与 subject 没有被任何发送器使用。
 
@@ -87,9 +87,6 @@ Web Push 投递尚未实现：每个领域的 `sendPushToUser` 辅助函数都�
 
 ## 相关阅读
 
-<!-- openwiki: broken internal link [/openwiki/architecture/configuration.md] link "/openwiki/architecture/configuration.md" is root-absolute, which no real consumer resolves against the repository root (not a coding agent reading the page, not GitHub's Markdown renderer, not a local viewer); use a path relative to this file instead. Fix the href or restore the target, then delete this comment. -->
-- [配置与环境变量](/openwiki/architecture/configuration.md)——密钥与 VAPID 配置。
-<!-- openwiki: broken internal link [/openwiki/auth/login-and-registration.md] link "/openwiki/auth/login-and-registration.md" is root-absolute, which no real consumer resolves against the repository root (not a coding agent reading the page, not GitHub's Markdown renderer, not a local viewer); use a path relative to this file instead. Fix the href or restore the target, then delete this comment. -->
-- [注册与登录流程](/openwiki/auth/login-and-registration.md)——验证码与地域查询所在位置。
-<!-- openwiki: broken internal link [/openwiki/api/notifications-and-realtime.md] link "/openwiki/api/notifications-and-realtime.md" is root-absolute, which no real consumer resolves against the repository root (not a coding agent reading the page, not GitHub's Markdown renderer, not a local viewer); use a path relative to this file instead. Fix the href or restore the target, then delete this comment. -->
-- [通知与实时推送](/openwiki/api/notifications-and-realtime.md)——推送订阅及其当前空发送器。
+- [配置与环境变量](../architecture/configuration.md)——密钥与 VAPID 配置。
+- [注册与登录流程](../auth/login-and-registration.md)——验证码与地域查询所在位置。
+- [通知与实时推送](../api/notifications-and-realtime.md)——推送订阅及其当前空发送器。

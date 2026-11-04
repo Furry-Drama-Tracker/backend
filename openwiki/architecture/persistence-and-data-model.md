@@ -1,14 +1,9 @@
 ---
 type: architecture
 title: 持久化与数据模型
-description: neo-server 如何在不使用 ODM 的情况下使用官方 MongoDB 驱动、集合与 BSON 模型如何组织、ID 与错误约定，以及存在但未接入启动流程的索引与迁移包。
+description: neo-server 如何在不使用 ODM 的情况下使用官方 MongoDB 驱动、集合与 BSON 模型如何组织、ID 与错误约定，以及启动时接线的索引与迁移如何容错执行。
 tags: [mongodb, persistence, repositories, models, indexes, migrations]
-verified:
-  - by: openwiki/0.7.2
-    at: 2026-11-02T17:41:59.592Z
 sources:
-  - id: openwiki-source-0f6ed11169bd8e6b34b44280
-    resource: repo://cmd/server/main.go
   - id: openwiki-source-90472325131c7abb6569a18c
     resource: repo://internal/indexes/indexes.go
   - id: openwiki-source-3ee71ed54dce769eb3daf020
@@ -25,7 +20,10 @@ sources:
     resource: repo://internal/repository/repos.go
   - id: openwiki-source-f9cd993b1da0967b3ad454b7
     resource: repo://internal/repository/user.go
-generated: { by: "opencode", at: "2026-11-02T17:41:59.592Z" }
+generated: { by: "opencode", at: "2026-11-03T16:50:44.301Z" }
+verified:
+  - by: openwiki/0.7.2
+    at: 2026-11-03T16:50:44.301Z
 ---
 
 # 持久化与数据模型
@@ -108,20 +106,24 @@ repository 使用共享的 10 秒 `contextTimeout`，每个操作创建子上下
 `internal/indexes` 包含幂等的 `Ensure(ctx, db)`，会创建以下索引：
 
 - `users`：唯一 `email`、唯一 `accountId`；
-- `usersessions`：`userId+isActive`、`isActive+lastActiveAt`、唯一稀疏 `refreshTokenHash`；
+- `usersessions`：`userId+isActive`、`isActive+lastActiveAt`、唯一稀疏 `refreshTokenHash`、唯一稀疏 `tokenHash`；
 - `usedtokens`：唯一 `tokenHash`、`expiresAt` TTL；
 - `histories`：`lastWatched` TTL（365 天）、`userId+lastWatched`；
-- `notifications`：`userId+isRead`、`createdAt` TTL（90 天）；
+- `notifications`：`userId+isRead`、`createdAt` TTL（90 天）、`userId+createdAt`；
 - `ratings`：唯一 `userId+episodeId`、`episodeId`；
 - `follows` 与 `favorites`：唯一 `userId+episodeId`；
 - `auditlogs`：`createdAt`、`adminId`、`userId`；
 - `apiusages`：唯一 `endpoint+date`；
 - `sitecontents`：唯一 `key`；
-- `folders`：`userId+type`。
+- `folders`：`userId+type`；`savedfolders`：`userId`；
+- `episodes`：审核状态组合索引、`createdBy`、`allowedEditors`、`customAuthors`、`tags`、`category`、`premiereDate`；
+- `series`：`createdBy`、`createdAt`；
+- `themes`：`ownerId`、`isSystem+enabled`、`status`、`isDefault`；
+- `reports`：`reporterId+status`、`status+createdAt`。
 
-创建按名称幂等：已存在则跳过，"already exists" 错误视为容忍。
+创建按名称幂等：已存在则跳过，"already exists" 错误视为容忍。单个索引失败（常见于历史重复数据）不会阻断其余索引，错误被聚合后返回给调用方。
 
-**接线缺口：** `indexes.Ensure` 没有从 `main` 或任何地方调用。迁移与 cron 同样如此。因此新数据库只有外部创建的索引，依赖唯一索引的重复键处理（追番、收藏、评分、用户、会话）在索引建立前不会按预期工作。
+**启动接线：** `indexes.Ensure` 在 `main` 中、开始监听之前调用。失败只打印 `[WARN]` 并继续启动，因此依赖唯一索引的重复键处理（追番、收藏、评分、用户、会话）在索引冲突未修复前仍可能失效。
 
 ## 迁移
 
@@ -131,19 +133,17 @@ repository 使用共享的 10 秒 `contextTimeout`，每个操作创建子上下
 2. `role_migration_v1`——把遗留 `adminAccess: true` 用户转为 `role: "admin"`，并移除所有用户的 `adminAccess` 字段。
 3. `creatorProfile_migration_v1`——删除旧 `adminId_1` 索引，把 `adminId` 重命名为 `creatorId`，并为缺少主页的 creator、admin、superadmin 用户创建初始主页。
 
-每个迁移先检查 `settings.GetFlag`，成功后写入 `{done: true}`。`migrate.Run` 在首个错误处停止。与索引一样，当前入口不会调用它，因此需要这些转换的遗留数据必须外部迁移。
+每个迁移先检查 `settings.GetFlag`，成功后写入 `{done: true}`。`migrate.Run` 在首个错误处停止。它在 `main` 中先于索引创建、先于开始监听执行；失败只打印 `[WARN]` 并继续启动，因此遗留数据转换失败时需要人工处理后重启。
 
 ## 运维影响
 
-- 由于索引创建与迁移目前是手动的，部署手册必须在依赖重复拒绝、会话清理或历史/通知过期之前创建唯一与 TTL 索引并运行迁移。
-- 模型描述的历史 TTL 与通知 TTL 依赖索引；没有索引时文档不会自动删除。
+- 索引创建与迁移在启动时自动执行，但失败只告警；首次部署或历史数据重复时应检查启动日志并人工修复后重启。
+- 模型描述的历史 TTL 与通知 TTL 依赖索引；索引创建失败时文档不会自动删除。
 - 回收站搬移与备份导入是仅有的多集合事务路径；大多数 repository 操作是单文档的，依靠唯一索引或原子 `findOneAndUpdate` 保证正确性。
+- 账号注销的级联清理由 `service.PurgeUserData` 统一实现，cron 与管理员删号共用；清理是 best-effort，单个集合失败不阻断其余。
 
 ## 相关阅读
 
-<!-- openwiki: broken internal link [/openwiki/api/content-catalog.md] link "/openwiki/api/content-catalog.md" is root-absolute, which no real consumer resolves against the repository root (not a coding agent reading the page, not GitHub's Markdown renderer, not a local viewer); use a path relative to this file instead. Fix the href or restore the target, then delete this comment. -->
-- [内容目录 API](/openwiki/api/content-catalog.md)——剧集、系列与用户内容库文档的使用。
-<!-- openwiki: broken internal link [/openwiki/architecture/overview.md] link "/openwiki/architecture/overview.md" is root-absolute, which no real consumer resolves against the repository root (not a coding agent reading the page, not GitHub's Markdown renderer, not a local viewer); use a path relative to this file instead. Fix the href or restore the target, then delete this comment. -->
-- [架构总览](/openwiki/architecture/overview.md)——包边界与依赖注入。
-<!-- openwiki: broken internal link [/openwiki/operations/observability-and-background-jobs.md] link "/openwiki/operations/observability-and-background-jobs.md" is root-absolute, which no real consumer resolves against the repository root (not a coding agent reading the page, not GitHub's Markdown renderer, not a local viewer); use a path relative to this file instead. Fix the href or restore the target, then delete this comment. -->
-- [可观测性与后台任务](/openwiki/operations/observability-and-background-jobs.md)——cron 与索引接线状态。
+- [内容目录 API](../api/content-catalog.md)——剧集、系列与用户内容库文档的使用。
+- [架构总览](overview.md)——包边界与依赖注入。
+- [可观测性与后台任务](../operations/observability-and-background-jobs.md)——cron、迁移与索引接线状态。

@@ -3,9 +3,6 @@ type: auth-flow
 title: 注册与登录流程
 description: 注册与登录的有序校验分支、Altcha 工作量证明、账号锁定、注销清理、邮箱与设备验证、2FA 挑战、会话签发，以及串联这些流程的内存验证码存储。
 tags: [auth, login, registration, altcha, device-verification, 2fa]
-verified:
-  - by: openwiki/0.7.2
-    at: 2026-11-02T17:41:59.592Z
 sources:
   - id: openwiki-source-6ca2ae0d44448102cf549f8a
     resource: repo://internal/code/store.go
@@ -19,14 +16,21 @@ sources:
     resource: repo://internal/service/device.go
   - id: openwiki-source-1994cba008c20be8b9db7693
     resource: repo://internal/service/login.go
+  - id: openwiki-source-ca7fc5574740b07d87bb29b5
+    resource: repo://internal/service/password.go
   - id: openwiki-source-3f2309f0c3b4e4f8068472e9
     resource: repo://internal/service/register.go
-generated: { by: "opencode", at: "2026-11-02T17:41:59.592Z" }
+generated: { by: "opencode", at: "2026-11-03T16:50:44.301Z" }
+verified:
+  - by: openwiki/0.7.2
+    at: 2026-11-03T16:50:44.301Z
 ---
 
 # 注册与登录流程
 
 注册与登录是服务中最敏感的契约路径。分支顺序与状态码被视为固定，因为前端依赖响应标志。`POST /auth/register` 与 `POST /auth/login` 是 `service.AuthService` 之上的薄 handler；下面的顺序就是实际实现顺序。
+
+注册、登录、忘记密码与 2FA 登录都会先对邮箱做 `strings.ToLower(strings.TrimSpace(...))`，因此数据库中的邮箱视为大小写不敏感；新增入口必须复用同样的规范化，否则会查不到既有账号。
 
 ## Altcha 工作量证明
 
@@ -52,6 +56,8 @@ generated: { by: "opencode", at: "2026-11-02T17:41:59.592Z" }
 8. 邮箱唯一性——失败返回 `emailTaken: true` 供前端引导。
 9. account ID 唯一性。
 
+邮箱在校验前已被 trim 并转为小写，因此 `Foo@Example.com` 与 `foo@example.com` 被视为同一账号。
+
 随后哈希密码、解析 User-Agent、构建设备信息、解析 IP 地域，创建 `role: "user"`、`isEmailVerified: false`、带默认通知与背景偏好、空壁纸数组的用户。六位验证码被存储并异步发送邮件。
 
 成功返回 200 与 `{message, email, needVerification: true}`。重复键竞态映射为 400“该信息已被使用”。
@@ -61,14 +67,14 @@ generated: { by: "opencode", at: "2026-11-02T17:41:59.592Z" }
 `service.Login` 严格按以下顺序执行：
 
 1. **Altcha**——失败返回 400“验证码错误或已过期”。
-2. **按邮箱查找账号**——不存在返回 400 并附带 `accountNotFound: true`。
+2. **按邮箱查找账号**——邮箱不存在时返回通用 400“用户名或密码错误”，不再附带 `accountNotFound`，避免账号枚举。
 3. **锁定检查**——返回通用凭据错误而不是锁定专用消息，避免暴露锁定状态。
-4. **注销宽限期**——如果已过七天删除截止时间，service 尝试物理清理，然后返回通用凭据错误。如果清理失败，流程继续，因此清理失败不会阻塞登录。
+4. **注销宽限期**——如果已过七天删除截止时间，调用 `PurgeUserData` 做级联物理清理，然后返回通用凭据错误。如果清理失败，流程继续，因此清理失败不会阻塞登录。
 5. **密码校验**——失败递增 `loginAttempts` 并返回通用 400。
 6. **重置失败计数**——密码正确时清零。
 7. **邮箱验证**——未验证（且未跳过）时生成并发送验证码，结果为 `NeedVerification`。
 8. **演示/跳过自动验证**——开发环境中演示邮箱自动标记为已验证。
-9. **新设备检测**——如果用户至少有一个活跃会话且没有任何会话使用相同 User-Agent，生成并发送登录码，结果为 `NeedDeviceVerify`，并携带解析出的浏览器、操作系统与 IP。
+9. **新设备检测**——如果没有任何活跃会话使用相同 User-Agent，生成并发送登录码，结果为 `NeedDeviceVerify`，并携带解析出的浏览器、操作系统与 IP。这里不再要求“用户已有会话”；只要邮件服务可用，任何未识别设备都要验证。SMTP 未配置时（`GetConfig` 失败）退化为仅密码登录，避免整站无法登录。
 10. **2FA**——已启用时签发五分钟的 `2fa-challenge` 令牌并返回 `Need2FA`。
 11. **成功**——保存设备信息、最后登录时间/IP/地域，签发会话，并在启用时异步发送新设备通知邮件。
 
@@ -87,7 +93,7 @@ handler 把结果映射为响应：
 
 `users.loginAttempts` 与 `users.lockUntil` 实现锁定。默认五次尝试、30 分钟，可通过 `[security]` 配置。`repository.IsLocked` 把 `lockUntil`（Unix 毫秒）与当前时间比较。`IncLoginAttempts` 递增并设置锁定；如果已锁定，则重置为一次并清除锁定，这是防御分支。
 
-同一锁定也适用于后台登录（那里返回 423）以及 2FA 登录和邮箱变更请求（423）。
+同一锁定也适用于后台登录（那里返回 423）以及 2FA 登录和邮箱变更请求（423）。修改密码时输入错误的当前密码同样会递增 `loginAttempts`，成功后才清零，因此反复猜当前密码也会触发锁定。
 
 ## 设备验证链
 
@@ -117,13 +123,10 @@ handler 把结果映射为响应：
 
 ## 会话签发
 
-所有成功登录路径最终汇聚到 `IssueSession`：签发 15 分钟 access 令牌、带随机 `jti` 的 7 天 refresh 令牌，把 refresh 哈希连同设备信息与 IP 写入 `usersessions` 文档，设置鉴权 cookie，并异步写审计记录。
+所有成功登录路径最终汇聚到 `IssueSession`：签发 15 分钟 access 令牌（带随机 `jti`）、带随机 `jti` 的 7 天 refresh 令牌，把 access 与 refresh 的 SHA-256 哈希连同设备信息与 IP 写入 `usersessions` 文档，设置鉴权 cookie，并异步写审计记录。access 令牌的 `tokenHash` 让中间件可以在会话被吊销后拒绝仍然有效的 access 令牌。
 
 ## 相关阅读
 
-<!-- openwiki: broken internal link [/openwiki/auth/session-and-token-lifecycle.md] link "/openwiki/auth/session-and-token-lifecycle.md" is root-absolute, which no real consumer resolves against the repository root (not a coding agent reading the page, not GitHub's Markdown renderer, not a local viewer); use a path relative to this file instead. Fix the href or restore the target, then delete this comment. -->
-- [会话与令牌生命周期](/openwiki/auth/session-and-token-lifecycle.md)——轮换与重用检测。
-<!-- openwiki: broken internal link [/openwiki/auth/account-security.md] link "/openwiki/auth/account-security.md" is root-absolute, which no real consumer resolves against the repository root (not a coding agent reading the page, not GitHub's Markdown renderer, not a local viewer); use a path relative to this file instead. Fix the href or restore the target, then delete this comment. -->
-- [账号安全能力](/openwiki/auth/account-security.md)——密码、2FA 与邮箱变更细节。
-<!-- openwiki: broken internal link [/openwiki/integrations/external-services.md] link "/openwiki/integrations/external-services.md" is root-absolute, which no real consumer resolves against the repository root (not a coding agent reading the page, not GitHub's Markdown renderer, not a local viewer); use a path relative to this file instead. Fix the href or restore the target, then delete this comment. -->
-- [外部服务](/openwiki/integrations/external-services.md)——Altcha 与 IP 地域行为。
+- [会话与令牌生命周期](session-and-token-lifecycle.md)——轮换与重用检测。
+- [账号安全能力](account-security.md)——密码、2FA 与邮箱变更细节。
+- [外部服务](../integrations/external-services.md)——Altcha 与 IP 地域行为。

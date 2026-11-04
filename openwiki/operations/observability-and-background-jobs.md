@@ -1,12 +1,11 @@
 ---
 type: operations
 title: 可观测性与后台任务
-description: 写入 stdout 的结构化日志、请求与慢请求日志、API 调用统计聚合、审计日志来源、清理定时任务，以及启动时未接入的迁移与索引包。
+description: 写入 stdout 的结构化日志、请求与慢请求日志、API 调用统计聚合、审计日志来源、启动时接线的清理定时任务，以及迁移与索引的容错执行。
 tags: [operations, logging, metrics, audit, cron, jobs]
-verified:
-  - by: openwiki/0.7.2
-    at: 2026-11-02T17:41:59.592Z
 sources:
+  - id: openwiki-source-0f6ed11169bd8e6b34b44280
+    resource: repo://cmd/server/main.go
   - id: openwiki-source-6ca2ae0d44448102cf549f8a
     resource: repo://internal/code/store.go
   - id: openwiki-source-95acc6f0848493b78312ab3f
@@ -31,7 +30,10 @@ sources:
     resource: repo://internal/service/auth_service.go
   - id: openwiki-source-ca7fc5574740b07d87bb29b5
     resource: repo://internal/service/password.go
-generated: { by: "opencode", at: "2026-11-02T17:41:59.592Z" }
+generated: { by: "opencode", at: "2026-11-03T16:50:44.301Z" }
+verified:
+  - by: openwiki/0.7.2
+    at: 2026-11-03T16:50:44.301Z
 ---
 
 # 可观测性与后台任务
@@ -86,14 +88,15 @@ Gin 在开发环境使用 debug 模式，生产环境使用 release 模式。因
 
 ## 定时任务
 
-`internal/cron` 定义两个任务：
+`internal/cron` 定义三个任务：
 
 | 任务 | 计划 | 动作 |
 |---|---|---|
 | 会话清理 | 每小时整点 | 把 `lastActiveAt` 超过 30 天的活跃会话标记为不活跃 |
 | 已读通知清理 | 每天本地时间 03:00 | 删除超过 30 天的已读通知 |
+| 注销账号清理 | 每 6 小时，启动后首次延迟 6 小时 | 物理删除 `deletionRequestedAt` 超过 7 天宽限期的用户，并调用 `PurgeUserData` 级联清理 |
 
-每个任务运行在独立 goroutine 中，先对齐到下一次执行时间，然后用 ticker 驱动。取消上下文会停止循环。cron 包还记录了两个未实现的 TODO：宽限期后物理删除账号，以及自动完结系列并通知追番用户。
+每个任务运行在独立 goroutine 中，先对齐到下一次执行时间，然后用 ticker 驱动。取消上下文会停止循环。启动后首次延迟 6 小时是为了避免升级/重启瞬间批量删除历史注销申请，给运维留出核查窗口。cron 包仍保留自动完结连载剧的 TODO。
 
 通知 TTL 在索引包中还表达为 90 天索引，这与 cron 任务的 30 天已读清理是不同保留窗口。
 
@@ -104,15 +107,10 @@ Gin 在开发环境使用 debug 模式，生产环境使用 release 模式。因
 - API 使用统计刷新循环，在构造 `APITracker` 中间件时创建；
 - 邮件目标限流清理，由 `RegisterRoutes` 每 10 分钟启动；
 - 验证码清理循环，在认证服务创建两个 code store 时启动；
-- 翻译批处理 worker，由 translate handler 构造函数启动。
+- 翻译批处理 worker，由 translate handler 构造函数启动；
+- `cron.StartSessions` 启动的三个清理任务，由 `main` 在开始监听前调用。
 
-以下内容**不会**启动，因为没有任何调用：
-
-- `cron.StartSessions`；
-- `indexes.Ensure`；
-- `migrate.Run`。
-
-因此文档与模型描述的清理、索引与迁移行为，当前入口永远不会激活。需要 30 天会话过期、30 天已读通知清理、TTL 索引或遗留数据迁移的部署，必须外部执行或把它们接线。
+`indexes.Ensure` 与 `migrate.Run` 也在开始监听前执行，但它们是同步调用而非 goroutine，失败只打印 `[WARN]` 并继续启动。因此文档与模型描述的清理、索引与迁移行为都已激活；部署时仍需检查启动日志中的告警，并在数据重复或迁移失败时人工处理后重启。
 
 ## 健康检查
 
@@ -123,13 +121,10 @@ Gin 在开发环境使用 debug 模式，生产环境使用 release 模式。因
 - 数据库压力下，API 统计缓冲丢失与审计静默失败是预期行为。
 - 成功的 GET 流量按设计在日志中体现不足。
 - 内存缓冲与计数在重启后重置。
-- 没有 cron 与索引接线时，数据保留完全依赖外部维护。
+- 迁移、索引或清理任务失败不会阻止启动；应监控启动日志与后续运行日志。
 
 ## 相关阅读
 
-<!-- openwiki: broken internal link [/openwiki/operations/deployment-and-runtime.md] link "/openwiki/operations/deployment-and-runtime.md" is root-absolute, which no real consumer resolves against the repository root (not a coding agent reading the page, not GitHub's Markdown renderer, not a local viewer); use a path relative to this file instead. Fix the href or restore the target, then delete this comment. -->
-- [部署与运行时](/openwiki/operations/deployment-and-runtime.md)——进程守护与启动顺序。
-<!-- openwiki: broken internal link [/openwiki/architecture/persistence-and-data-model.md] link "/openwiki/architecture/persistence-and-data-model.md" is root-absolute, which no real consumer resolves against the repository root (not a coding agent reading the page, not GitHub's Markdown renderer, not a local viewer); use a path relative to this file instead. Fix the href or restore the target, then delete this comment. -->
-- [持久化与数据模型](/openwiki/architecture/persistence-and-data-model.md)——索引与迁移定义。
-<!-- openwiki: broken internal link [/openwiki/api/administration-and-moderation.md] link "/openwiki/api/administration-and-moderation.md" is root-absolute, which no real consumer resolves against the repository root (not a coding agent reading the page, not GitHub's Markdown renderer, not a local viewer); use a path relative to this file instead. Fix the href or restore the target, then delete this comment. -->
-- [管理与审核 API](/openwiki/api/administration-and-moderation.md)——审计日志端点的访问规则。
+- [部署与运行时](deployment-and-runtime.md)——进程守护与启动顺序。
+- [持久化与数据模型](../architecture/persistence-and-data-model.md)——索引与迁移定义。
+- [管理与审核 API](../api/administration-and-moderation.md)——审计日志端点的访问规则。

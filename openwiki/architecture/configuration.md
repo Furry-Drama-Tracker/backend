@@ -1,14 +1,15 @@
 ---
 type: config
 title: 配置与环境变量
-description: neo-server 如何加载默认值、按 OS 区分的 ini、可选 .env 与真实环境变量，哪些值是密钥，以及 IsDev 与启动致命校验如何影响运行时行为。
+description: neo-server 如何加载默认值、按 OS 区分的 ini、可选 .env 与真实环境变量，哪些值是密钥，以及 IsDev、启动致命校验与安全告警如何影响运行时行为。
 tags: [configuration, environment, ini, secrets, startup]
-verified:
-  - by: openwiki/0.7.2
-    at: 2026-11-02T17:41:59.592Z
 sources:
+  - id: openwiki-source-0f6ed11169bd8e6b34b44280
+    resource: repo://cmd/server/main.go
   - id: openwiki-source-6e11d7a3d9cd222e5ed01aed
     resource: repo://deploy/furry-drama-be-neo.ini
+  - id: openwiki-source-883d642125c25de6f4b25f17
+    resource: repo://internal/auth/fieldcrypto.go
   - id: openwiki-source-a8910515ddd14810ad43f5c1
     resource: repo://internal/config/config.go
   - id: openwiki-source-b10e065a15408ca747b6184f
@@ -19,7 +20,10 @@ sources:
     resource: repo://internal/server/app.go
   - id: openwiki-source-f7acf9d278285ec2e6b81113
     resource: repo://internal/service/auth_service.go
-generated: { by: "opencode", at: "2026-11-02T17:41:59.592Z" }
+generated: { by: "opencode", at: "2026-11-03T16:50:44.301Z" }
+verified:
+  - by: openwiki/0.7.2
+    at: 2026-11-03T16:50:44.301Z
 ---
 
 # 配置与环境变量
@@ -41,13 +45,16 @@ generated: { by: "opencode", at: "2026-11-02T17:41:59.592Z" }
 
 `Load(path)` 依次执行：
 
-1. 初始化默认值（监听 `tcp:0.0.0.0:5000`、端口 5000、`NODE_ENV=development`、前端/站点 URL `http://localhost:3000`、上传目录 `./uploads`、图标目录 `./uploads/icons`、localhost 3000/3001/3002/5000 的 CORS 白名单、数据库连接池 10、access TTL 15 分钟、refresh TTL 168 小时、邮件端口 465、登录限制 5 次/30 分钟、CSRF 有效期 24 小时、演示邮箱 `demo@furry09.com`）。
+1. 初始化默认值（监听 `tcp:127.0.0.1:5000`、端口 5000、`NODE_ENV=development`、前端/站点 URL `http://localhost:3000`、上传目录 `./uploads`、图标目录 `./uploads/icons`、CORS 源留空、数据库连接池 10、access TTL 15 分钟、refresh TTL 168 小时、邮件端口 465、登录限制 5 次/30 分钟、CSRF 有效期 24 小时、演示邮箱 `demo@furry09.com`）。
 2. 从当前目录加载 `.env`。
 3. 解析配置路径：显式路径必须存在且可解析，默认路径缺失时静默跳过。
 4. 如果存在 ini，应用到配置。
 5. 应用环境变量覆盖。
 6. 派生 `IsDev`。
-7. 执行致命校验。
+7. 执行 CORS 源兜底（见下节）。
+8. 执行致命校验。
+
+CORS 源兜底发生在 `IsDev` 派生之后、校验之前：如果 `allow_origins` 仍为空，开发环境填入 localhost 3000/3001/3002/5000 白名单；生产环境则从 `frontend_url` 与 `site_url` 去掉尾部斜杠后派生，避免漏配 `ALLOWED_ORIGINS` 时把所有同源 POST 都拒绝。
 
 默认 ini 路径在包初始化时按 OS 选择：
 
@@ -95,19 +102,29 @@ ini 文件分为 `[server]`、`[database]`、`[jwt]`、`[email]`、`[vapid]` 与
 - 5xx 响应是否暴露内部消息与堆栈；
 - 是否启用演示邮箱跳过验证。
 
-## 致命校验
+## 启动校验与告警
 
-以下情况启动返回错误，`main` 以状态码 1 退出：
+以下情况 `validate()` 返回错误，`main` 以状态码 1 退出：
 
 - 缺少 `JWT_SECRET`；
 - `JWT_SECRET` 短于 32 字符（`MinSecretLen`）；
+- 设置了 `ENCRYPTION_KEY` 但短于 32 字符；
 - 缺少 `MONGO_URI`。
 
-其他情况都不致命。特别是 SMTP、VAPID 或上传目录未配置不会阻止进程启动，相关功能在运行时降级。
+其余都是告警而非致命，便于已有服务拉取新代码后平滑升级：
+
+- `JWT_SECRET` 是示例或历史弱密钥（`change-me`、含 `example`、`secret`、`jwt-secret`、`changeme`、`password`、`furry-drama-tracker-secret-key-2024` 等）时，`Cfg.JWT.WeakSecret` 置位，`main` 打印 `[SECURITY WARN]` 并提示轮换前先设置 `ENCRYPTION_KEY=旧密钥` 以兼容既有 2FA/邮件加密数据。
+- 生产环境下 `allow_origins` 为空，或仍含 `localhost`/`127.0.0.1`/`example.com` 时，`Cfg.Server.InsecureOrigins` 置位，`main` 打印 `[SECURITY WARN]`。
+- 迁移与索引创建失败只打印 `[WARN]` 并继续启动，首次部署或数据重复时应尽快人工处理后重启。
+- SMTP、VAPID 或上传目录未配置不会阻止进程启动，相关功能在运行时降级。
+
+`internal/config/config_test.go` 用历史生产配置（弱密钥 + 占位 CORS 域）断言 `validate()` 不报错且两个告警标志都置位，作为平滑升级行为的回归闸门。
 
 ## 密钥
 
 敏感值为 `JWT.Secret`、`JWT.EncryptionKey`、`JWT.AltchaHMACKey`、`JWT.DevAPIToken`、`Email.Pass` 与 `VAPID.PrivateKey`。部署模板建议文件权限 `600`，并通过 systemd 环境变量传递密钥而不是写入 ini。`EncryptionKey` 缺省时回退到 `JWT.Secret` 以兼容遗留加密字段，`AltchaHMACKey` 缺省时回退到由 `JWT_SECRET` 派生。
+
+弱密钥不再阻止启动，但会触发 `Cfg.JWT.WeakSecret` 与启动告警。轮换顺序很重要：先把 `ENCRYPTION_KEY` 设为旧密钥，再替换 `JWT_SECRET`，否则既有 2FA secret 与加密邮件字段将无法解密。
 
 ## 认证之外的消费者
 
@@ -116,7 +133,7 @@ ini 文件分为 `[server]`、`[database]`、`[jwt]`、`[email]`、`[vapid]` 与
 - **邮件**：`[email]` 与 `EMAIL_*` 提供给 SMTP 客户端；数据库中的邮件配置已不再读取。
 - **VAPID**：`[vapid]` 与 `VAPID_*` 返回给客户端并随推送订阅存储，尽管推送发送尚未实现。
 - **上传**：`uploads_dir` 与 `icons_dir` 选择存储位置；服务器从上传目录提供 `/uploads`。
-- **CORS**：`allow_origins` 加默认 localhost 列表。
+- **CORS**：`allow_origins` 非空时整体替换默认列表；为空时按环境兜底（开发用 localhost 列表，生产从 `frontend_url`/`site_url` 派生）。
 - **限流**：`SKIP_RATE_LIMIT=1` 设置 `security.rate_limit_skip` 并传给中间件选项。
 - **CSRF**：`security.csrf_max_age_h` 设置 `XSRF-TOKEN` cookie 生命周期。
 - **站点 URL**：`frontend_url` 与 `site_url` 用于邮件和生成链接。
@@ -124,15 +141,13 @@ ini 文件分为 `[server]`、`[database]`、`[jwt]`、`[email]`、`[vapid]` 与
 ## 怪癖
 
 - `applyINI` 会无条件从对应段赋值 `listen`、`database.uri`、`database.name`、`jwt.secret`、`jwt.encryption_key`、`jwt.altcha_hmac_key` 以及邮件 host/user/pass/from-name。省略这些键的 ini 会清空之前的默认值，而不是保留。缺失 secret 或 URI 随后会失败校验；缺失 `listen` 会留下空监听地址。
+- 内置默认监听是回环地址 `tcp:127.0.0.1:5000`。要从外部访问必须显式设置 `listen = tcp:0.0.0.0:5000`（ini）或 `--listen=tcp:0.0.0.0:5000`。
 - `database.min`、`database.select` 与 `database.sock` 存在于结构体和 ini 模板中，但没有任何消费者。
 - `server.port` 会被解析，但监听器不使用。
 - 由于 `.env` 是非覆盖语义，shell 导出的变量总是优先，这正是 CI 与 systemd 覆盖机制成立的原因。
 
 ## 相关阅读
 
-<!-- openwiki: broken internal link [/openwiki/operations/deployment-and-runtime.md] link "/openwiki/operations/deployment-and-runtime.md" is root-absolute, which no real consumer resolves against the repository root (not a coding agent reading the page, not GitHub's Markdown renderer, not a local viewer); use a path relative to this file instead. Fix the href or restore the target, then delete this comment. -->
-- [部署与运行时](/openwiki/operations/deployment-and-runtime.md)——加载后的值如何被使用。
-<!-- openwiki: broken internal link [/openwiki/auth/account-security.md] link "/openwiki/auth/account-security.md" is root-absolute, which no real consumer resolves against the repository root (not a coding agent reading the page, not GitHub's Markdown renderer, not a local viewer); use a path relative to this file instead. Fix the href or restore the target, then delete this comment. -->
-- [账号安全能力](/openwiki/auth/account-security.md)——加密密钥派生。
-<!-- openwiki: broken internal link [/openwiki/integrations/external-services.md] link "/openwiki/integrations/external-services.md" is root-absolute, which no real consumer resolves against the repository root (not a coding agent reading the page, not GitHub's Markdown renderer, not a local viewer); use a path relative to this file instead. Fix the href or restore the target, then delete this comment. -->
-- [外部服务](/openwiki/integrations/external-services.md)——Altcha 与 VAPID 使用。
+- [部署与运行时](../operations/deployment-and-runtime.md)——加载后的值如何被使用。
+- [账号安全能力](../auth/account-security.md)——加密密钥派生。
+- [外部服务](../integrations/external-services.md)——Altcha 与 VAPID 使用。

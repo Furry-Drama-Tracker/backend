@@ -3,9 +3,6 @@ type: api-domain
 title: 内容目录 API
 description: 剧集与系列目录、审核门控的写入路径、观看计数与缓存，以及用户追番、收藏、收藏夹、历史与评分域的行为。
 tags: [api, episodes, series, follows, favorites, folders, histories, ratings]
-verified:
-  - by: openwiki/0.7.2
-    at: 2026-11-02T17:41:59.592Z
 sources:
   - id: openwiki-source-f89e324c07065d291ea97e16
     resource: repo://internal/handler/episodes.go
@@ -21,7 +18,10 @@ sources:
     resource: repo://internal/middleware/cache.go
   - id: openwiki-source-7dbb03889219204710573384
     resource: repo://internal/model/misc.go
-generated: { by: "opencode", at: "2026-11-02T17:41:59.592Z" }
+generated: { by: "opencode", at: "2026-11-03T16:50:44.301Z" }
+verified:
+  - by: openwiki/0.7.2
+    at: 2026-11-03T16:50:44.301Z
 ---
 
 # 内容目录 API
@@ -58,7 +58,9 @@ generated: { by: "opencode", at: "2026-11-02T17:41:59.592Z" }
 - `PUT /episodes/:id` 会先把编辑前文档快照写入 `episodeversions`。版本历史上限 50 条，超出时丢弃最旧记录。
 - 创作者编辑已通过剧集时，改动存入 `pendingChanges`，线上文档继续提供旧内容，直到管理员批准。创作者编辑待审核或已拒绝剧集时，字段直接写入且状态回到 `pending`。管理员绕过待审核机制。
 - `POST /episodes/:id/resubmit` 只对已拒绝剧集有效，会把审核字段重置为 pending。
-- `DELETE /episodes/:id` 不做物理删除，而是以原因 `deleted` 把文档移入剧集回收站；只有回收站彻底删除才会清理关联数据。
+- `DELETE /episodes/:id` 不做物理删除，而是以原因 `deleted` 把文档移入剧集回收站；只有回收站彻底删除才会清理关联数据。创作者只能删除自己创建或被授权管理的剧集，管理角色不受此限。
+- 单集更新与删除同样校验归属：创作者只能操作其有权编辑的父剧集下的单集，越权返回 403。
+- 创建与更新会校验资源地址：`coverImage` 必须是 `/uploads/` 或 `http(s)`，`platformLinks` 经过清洗，`qqGroupLink` 必须是 `http(s)`。
 
 集数计数驱动通知：创建带 `available`、`preview`、`preview_video` 或 `preview_info` 事件的单集时，会为每个追番用户写入一条 `new_episode` 通知；直接编辑导致 `currentEpisodes` 增加时，会为每个新增集数通知追番用户。推送发送是空实现；邮件只发给邮箱已验证且保留 `episodeUpdate` 偏好的用户，并按剧集、集数、事件去重一小时。
 
@@ -66,13 +68,13 @@ generated: { by: "opencode", at: "2026-11-02T17:41:59.592Z" }
 
 系列是剧集 ID 的有序数组加多语言名称与简介。列表与详情响应会把这些 ID 填充为剧集投影：列表投影包含标题、封面、计数、状态和评分；详情投影额外包含简介、分类、标签和观看量。系列分页默认每页 50 条（不是共享默认的 20），并钳制到 100。
 
-创建要求名称和 creator 及以上角色。更新会校验归属：创作者只能修改自己创建的系列，管理员与超管可以修改任意系列。删除系列只移除系列文档，引用的剧集不受影响。
+创建要求名称和 creator 及以上角色。更新会校验归属：创作者只能修改自己创建的系列，管理员与超管可以修改任意系列；删除同样校验归属，创作者删除他人系列返回 403。删除系列只移除系列文档，引用的剧集不受影响。
 
 ## 追番
 
 `/follows` 全部需要认证。
 
-- `POST /add` 校验剧集存在且已通过，然后把 `followedAtEpisodes` 存为追番时的当前集数。唯一索引冲突会变成 400 `Already following`。
+- `POST /add` 校验剧集存在且已通过，然后把 `followedAtEpisodes` 存为追番时的当前集数。提供 `folderId` 时必须存在且属于当前用户，否则 400。唯一索引冲突会变成 400 `Already following`。
 - `POST /remove` 幂等。
 - `GET /list` 使用共享 `pagination` 包分页，并关联剧集与收藏夹对象。按 `name` 或 `rating` 排序时最多加载 `page*limit + 100` 条并在内存排序，因为这些字段位于剧集文档上。
 - `GET /check/:episodeId` 返回 `isFollowing`，没有追番时省略 `followedAtEpisodes`。
@@ -113,9 +115,6 @@ generated: { by: "opencode", at: "2026-11-02T17:41:59.592Z" }
 
 ## 相关阅读
 
-<!-- openwiki: broken internal link [/openwiki/api/administration-and-moderation.md] link "/openwiki/api/administration-and-moderation.md" is root-absolute, which no real consumer resolves against the repository root (not a coding agent reading the page, not GitHub's Markdown renderer, not a local viewer); use a path relative to this file instead. Fix the href or restore the target, then delete this comment. -->
-- [管理与审核 API](/openwiki/api/administration-and-moderation.md)——通过/拒绝与回收站语义。
-<!-- openwiki: broken internal link [/openwiki/api/utilities-and-uploads.md] link "/openwiki/api/utilities-and-uploads.md" is root-absolute, which no real consumer resolves against the repository root (not a coding agent reading the page, not GitHub's Markdown renderer, not a local viewer); use a path relative to this file instead. Fix the href or restore the target, then delete this comment. -->
-- [上传、RSS、翻译、备份与分页](/openwiki/api/utilities-and-uploads.md)——封面上传与分页。
-<!-- openwiki: broken internal link [/openwiki/architecture/persistence-and-data-model.md] link "/openwiki/architecture/persistence-and-data-model.md" is root-absolute, which no real consumer resolves against the repository root (not a coding agent reading the page, not GitHub's Markdown renderer, not a local viewer); use a path relative to this file instead. Fix the href or restore the target, then delete this comment. -->
-- [持久化与数据模型](/openwiki/architecture/persistence-and-data-model.md)——集合布局与 ObjectID 处理。
+- [管理与审核 API](administration-and-moderation.md)——通过/拒绝与回收站语义。
+- [上传、RSS、翻译、备份与分页](utilities-and-uploads.md)——封面上传与分页。
+- [持久化与数据模型](../architecture/persistence-and-data-model.md)——集合布局与 ObjectID 处理。

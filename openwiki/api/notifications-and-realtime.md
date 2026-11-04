@@ -3,9 +3,6 @@ type: api-domain
 title: 通知与实时推送
 description: 通知文档与端点、SSE 流的票据认证与连接上限、邮件通知偏好，以及已存储但不会发送的 Web Push 订阅。
 tags: [api, notifications, sse, push, email]
-verified:
-  - by: openwiki/0.7.2
-    at: 2026-11-02T17:41:59.592Z
 sources:
   - id: openwiki-source-314bd77139a7d3c62ed804bf
     resource: repo://internal/handler/auth.go
@@ -23,12 +20,15 @@ sources:
     resource: repo://internal/repository/push_subscription.go
   - id: openwiki-source-f7acf9d278285ec2e6b81113
     resource: repo://internal/service/auth_service.go
-generated: { by: "opencode", at: "2026-11-02T17:41:59.592Z" }
+generated: { by: "opencode", at: "2026-11-03T16:50:44.301Z" }
+verified:
+  - by: openwiki/0.7.2
+    at: 2026-11-03T16:50:44.301Z
 ---
 
 # 通知与实时推送
 
-通知投递分为持久化的站内通知，以及两种完成度不同的传输方式：目前只维护连接的 SSE 流，和没有发送器的 Web Push 订阅登记。
+通知投递分为持久化的站内通知，以及两种完成度不同的传输方式：通过数据库轮询推送新通知的 SSE 流，和没有发送器的 Web Push 订阅登记。
 
 ## 通知文档
 
@@ -78,9 +78,9 @@ generated: { by: "opencode", at: "2026-11-02T17:41:59.592Z" }
 - 全局最多 500 条并发连接；
 - 每个用户最多 5 条连接，第 6 条会取消最旧的连接。
 
-handler 写入 SSE 头（`text/event-stream`、`no-cache`、`keep-alive`、`X-Accel-Buffering: no`），发出 `connected` 事件，然后循环等待四种条件：上下文取消、客户端关闭、30 分钟连接超时、30 秒心跳（`:heartbeat`）。超限时发送 `error` 事件并结束流；每 IP 检查发生在 `connected` 之前，全局上限检查发生在它之后。
+handler 写入 SSE 头（`text/event-stream`、`no-cache`、`keep-alive`、`X-Accel-Buffering: no`），清除服务端 WriteTimeout 对该连接的写截止时间，发出 `connected` 事件，然后循环等待五种条件：上下文取消、客户端关闭、30 分钟连接超时、30 秒心跳（`:heartbeat`）、以及每 10 秒一次的通知轮询。超限时发送 `error` 事件并结束流；每 IP 检查发生在 `connected` 之前，全局上限检查发生在它之后。
 
-当前的重要限制：连接登记只用于计数与驱逐。没有任何 handler 向 `sseClients` 广播通知负载，因此流永远不会投递真实通知事件。客户端仍需轮询 `/list` 或 `/unread-count` 获取内容。由于登记是进程本地的，上限与驱逐也不跨实例生效。
+通知轮询以数据库为唯一事实来源：每 10 秒读取当前用户最近 50 条通知与未读数，把 `createdAt` 晚于连接游标的条目作为 `event: notification` 事件推送，负载包含 `notification` 与 `unreadCount`。因此多实例与重启后仍能工作，代价是每连接每 10 秒一次数据库查询。连接登记本身仍是进程本地的，上限与驱逐不跨实例生效。
 
 ## 邮件通知偏好
 
@@ -98,7 +98,7 @@ handler 写入 SSE 头（`text/event-stream`、`no-cache`、`keep-alive`、`X-Ac
 
 订阅端点可用：subscribe 按 endpoint upsert，unsubscribe 幂等删除，账号删除会级联移除该用户的全部订阅。
 
-发送不可用：每个领域的 `sendPushToUser` 辅助函数都是显式空实现，VAPID 配置只作为公钥暴露给客户端。因此即使订阅存在，也永远不会投递 Web Push 消息。
+发送不可用：每个领域的 `sendPushToUser` 辅助函数都是显式空实现，VAPID 配置只在公钥与私钥都已配置时通过 `/vapid-public-key` 暴露给客户端。因此即使订阅存在，也永远不会投递 Web Push 消息。
 
 ## 与其他领域的关系
 
@@ -108,9 +108,6 @@ handler 写入 SSE 头（`text/event-stream`、`no-cache`、`keep-alive`、`X-Ac
 
 ## 相关阅读
 
-<!-- openwiki: broken internal link [/openwiki/auth/session-and-token-lifecycle.md] link "/openwiki/auth/session-and-token-lifecycle.md" is root-absolute, which no real consumer resolves against the repository root (not a coding agent reading the page, not GitHub's Markdown renderer, not a local viewer); use a path relative to this file instead. Fix the href or restore the target, then delete this comment. -->
-- [会话与令牌生命周期](/openwiki/auth/session-and-token-lifecycle.md)——令牌 purpose 与签名。
-<!-- openwiki: broken internal link [/openwiki/integrations/email-delivery.md] link "/openwiki/integrations/email-delivery.md" is root-absolute, which no real consumer resolves against the repository root (not a coding agent reading the page, not GitHub's Markdown renderer, not a local viewer); use a path relative to this file instead. Fix the href or restore the target, then delete this comment. -->
-- [邮件发送](/openwiki/integrations/email-delivery.md)——实际邮件传输与偏好检查。
-<!-- openwiki: broken internal link [/openwiki/integrations/external-services.md] link "/openwiki/integrations/external-services.md" is root-absolute, which no real consumer resolves against the repository root (not a coding agent reading the page, not GitHub's Markdown renderer, not a local viewer); use a path relative to this file instead. Fix the href or restore the target, then delete this comment. -->
-- [外部服务](/openwiki/integrations/external-services.md)——VAPID 配置。
+- [会话与令牌生命周期](../auth/session-and-token-lifecycle.md)——令牌 purpose 与签名。
+- [邮件发送](../integrations/email-delivery.md)——实际邮件传输与偏好检查。
+- [外部服务](../integrations/external-services.md)——VAPID 配置。

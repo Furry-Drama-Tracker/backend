@@ -1,18 +1,18 @@
 {
   "schemaVersion": 1,
-  "pageVersion": "sha256:860cc01cb76fc836bebc8750d5432580651b69a9096d38e69c8d9482d7958efd",
+  "pageVersion": "sha256:13048d37a110a1b7bc4e8b4fbc6503f72e13922352b4efc03694e5c61396cb64",
   "claims": [
     {
       "id": "claim_09482ef07d8a452c86d343f79cad3cfb",
-      "statement": "Access tokens are HS256 with a 15-minute default lifetime and access purpose, while refresh tokens last 7 days by default, carry purpose refresh, and include a random jti; verification forces HS256.",
+      "statement": "Access tokens are HS256 with a 15-minute default lifetime, access purpose, and a random jti, while refresh tokens last 7 days by default, carry purpose refresh, and also include a random jti; verification forces HS256.",
       "evidence": [
         {
-          "resource": "repo://internal/auth/cookies.go#L20-L30",
-          "version": "repo-lines-v1:sha256:affb57330d3cdfea16da69d50df0fd8255e5f1e260f6325a7a05efd62673ddcf:eyJzZWxlY3RlZExpbmVDb3VudCI6MTEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImZhZmJhMDUyN2MzOTUzYzRiNmUwZTViNTczOWJhODM2MTJmODA1M2JjZGM5NDY2NzMwMTkzY2QxZDU5MGI0MDgiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImRlNmQ4ZjYwMmZlODAyNzI3NTA5NzQ1NjM3MDM3ZDczYmIyNWQ1MGM2MzY1MmE0MmQ0ZWNmYTBiMTFhNzI2YmUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjRiYWE5YjRjMjBmY2EzN2UzZjZlYjJmMDQ2MjE1NGNkMGM3MWY0NTFjZmJhYTkxMWE4NmZmNDY5ZmUyMGM1ZGYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzMWJmZDA4Mzg2N2EzNTdjMzRiYjQzODQ5NzEyY2E5MjJjOGZkZDljOTVhZmM1YWY1N2JlNTcwODdiZGMyYTYifQ"
+          "resource": "repo://internal/auth/jwt.go#L22-L90",
+          "version": "repo-lines-v1:sha256:b7979765847af0149ec86933f2fe268add34607e7b1ebcdf31b2c6268acbe34d:eyJzZWxlY3RlZExpbmVDb3VudCI6NjksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjI3MDZlMjNiN2QwMTBlY2VhMTRkODMwOWU2MzNlYjkxMmNhZDBkOTA4Y2NkYWZkY2I2YmVkOTRiNzNhZDM2YjYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImUyMmZhYTUzNWJkMmVhM2Q1MmU3NDFlZDQ1NDQzNWI3ZmU0OWU4MzU4NmU5NDNkOThkODJiYmZiMjRkMWY1YzUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjAwZjFjYWU2YTgwZDZiMGQ4MGRhYzAwMzFjZjA4NzVlZGFlYTc0N2E2OTk5ZTU3OGU0OTQyZTM2N2RmOTA4MzEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImVjZTNkZDk5NTM4MmJlY2U1NDU2YTNjNTEyZjUyNzk5NDYwOTMzMzhjZmY4NmZhMDc0ZmM0MmFkYTE2Yzc0NmQifQ"
         },
         {
-          "resource": "repo://internal/auth/jwt.go#L20-L90",
-          "version": "repo-lines-v1:sha256:ea6178f0278f1b7792d15735e37ba646e743874a996784f34e86f2a105e6ff3f:eyJzZWxlY3RlZExpbmVDb3VudCI6NzEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImE1Zjg3ZjkxZGI1YTVlYTA0MGU0NjIxZmJlMjU3OWVjZmU0Njc4Mjg2NGZjYzkyZDAzNmRjOTAwYmZkZmNhMDIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjI1MmFhYWRjOTU4ZmUyNWRhMDMzOTcxM2VjNGE2NGUwM2YxNjI1NGMzMjc5OTQ0Njc5NjA0MDI4NDY1NTcwZGYifQ"
+          "resource": "repo://internal/service/auth_service.go#L167-L180",
+          "version": "repo-lines-v1:sha256:2e741e00a9b28d194f867bd92bf424fc11f1f5cb6250c75265b7b615055c9404:eyJzZWxlY3RlZExpbmVDb3VudCI6MTQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjNlZDJiYWM1ZWRjNDI4OWY0ZjE0Y2EyZDBjMTRlZjFlZmQxZWI0M2I0Y2IyNmZjNTUwMjNiNjZjMDM3NjJjZDQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImEzMjdjNDA4MDg0YmI3NTc1MDQ2MWY4M2E0NDQxNzg0OTBhMjQ3NGRlNDZiNmFlZTc4MGU3NDc0ZWVmZDBlYTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjAzMDFiN2Q3ZDU1MWZhYzJjZTBjMmY5MDY0NmYzMTcxZTQ2MjE3YjlhNTRlMzE3ZGUwNjAxYThmNDkyMTQzMTciLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjRjMDhkODcwNGY2NjY3MmQ3NDFjNzRhMTlmYTMwYTYxYzdjMGQwN2EzZGQxMmRhMmYzNGQ5NDFmYzY2MmQxMWQifQ"
         }
       ]
     },
@@ -21,8 +21,8 @@
       "statement": "Auth cookies are HttpOnly and SameSite Lax, with accessToken at path root for 15 minutes and refreshToken at /api/auth for 7 days, secure only in production.",
       "evidence": [
         {
-          "resource": "repo://internal/auth/cookies.go#L77-L93",
-          "version": "repo-lines-v1:sha256:1c81cdc10367dffc20bd7d52bb24fafa58a371a5a767798f517211d8f4749792:eyJzZWxlY3RlZExpbmVDb3VudCI6MTcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjNlZDYyNDc0Y2ZmMzFlM2VjZGEwZDIxYzgwNzE0NTMwMzNjMDM5NDNjMDVhZWVkOWU0ZmJhYTAzNzIwMjZlMTEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjlhNmY1MjExYmE5N2VhNTdhZWJkM2Q5ODJmZGM5YTgzODBiODFjYmZjNDAxNTQyNDNjNGU4NGNmMDJhNWYzOTcifQ"
+          "resource": "repo://internal/auth/cookies.go#L81-L93",
+          "version": "repo-lines-v1:sha256:19c2039cf387e6793a2312f168a03a416c68b4d0e19f25b6f78fd44f925b9c2c:eyJzZWxlY3RlZExpbmVDb3VudCI6MTMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijk3Y2I0MWU4ZGM3NjM5OGFkMzQ0ZjJlN2JiNjhmZDk1NTI2ZDI3NjI3NDQ5OWZjYTBlOGRjNzVmMGRjOGRiOWEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImUyMmZhYTUzNWJkMmVhM2Q1MmU3NDFlZDQ1NDQzNWI3ZmU0OWU4MzU4NmU5NDNkOThkODJiYmZiMjRkMWY1YzUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjY2Y2Y3MzIyZDVjNmEyNDk3N2ZkNWNiMjQyMjkxZmU3MTAwMThiNGVjMmY3ZDg2ZWYxMGU3ZjVlYzM1MjViMzIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjljOTFiZmZjOGM3YmQwZGZmNzAyY2Q1M2Y4ZmQ4Y2JlMzA1NmQ0ODhiOTJlMDAyMzc2MzY1MzgzY2ViOGRmOGQifQ"
         }
       ]
     },
@@ -31,8 +31,8 @@
       "statement": "Refresh rotation atomically claims the active session by refresh-token hash and deactivates it with a logout timestamp, so only one concurrent request can win.",
       "evidence": [
         {
-          "resource": "repo://internal/repository/session.go#L47-L70",
-          "version": "repo-lines-v1:sha256:f4243c0b28a4f9776202756b5752e6dd839a10cf4e29c3289a2a79035a9d1e90:eyJzZWxlY3RlZExpbmVDb3VudCI6MjQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjExOTVkMWNlZDBhMDc3ZTlhNmVjNWRlYWMzODVkMGE4NjY2OWQ2MTUwOTJjZmMxZmI3MTJjZDQ4MWFmYjk4NzAiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImFjOTExODhiZDBmMjI4YmY1NDY0Zjg5ZDBlZjViY2VjNWY3YjZlMGMyZWVmOWIzNzYxNDYxZjY3NjA4YzE4NDQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjQzYTMxNTA4ZjE4MGIyMzQ3YWYzOTVlNjFhMDUxZGMyOTg2OWY4N2E2MDY4ZjhlOTIxOThkNWZmY2IxZDk2OWEifQ"
+          "resource": "repo://internal/repository/session.go#L52-L68",
+          "version": "repo-lines-v1:sha256:4912b112f3e323d5a6dcd4bfc7b2631ba76ffec8102517adcaabbec34cb2352a:eyJzZWxlY3RlZExpbmVDb3VudCI6MTcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjZiZTZlN2Y3MGU2NmI3ZTM1Zjg5MDg3YzdhZmUzMzE1YTBmNjgxYTBjZjllNDEyMDRjNTMyZTg5NzUyMTM0ZDkiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjdlYjcwMjU3NTkzZGEwNmY2ODJhM2RkZGE1NGE5ZDI2MGQ0ZmM1MTRmNjQ1MjM3ZjVjYTc0YjA4ZjhkYTYxYTYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImE4YmI3ZWI5OWM4NWE3Y2UwZjU2Njk3MTVlMmY0NzIyZTA4NDMwNjE4NGQ3MzI5OGExNzJlMGIxMmNiYTcyY2QiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjgwMTM0YjE0YmQ0ZWNjZjAwYzQ1NmQzYjAzMGZmMjU3M2ZmMjk1MjQ3NWM5NDk3MWUyMmNjNDYzZGQwZTJkMjMifQ"
         }
       ]
     },
@@ -41,22 +41,22 @@
       "statement": "A refresh claim miss within 30 seconds of logout returns 409 concurrent refresh without revoking sessions, while any later reuse deactivates all of the user's active sessions and returns 401 reuse detected.",
       "evidence": [
         {
-          "resource": "repo://internal/service/refresh.go#L60-L105",
-          "version": "repo-lines-v1:sha256:a41f02bfca7b31d1348214046a936573b87eb0236b68b1c017a75d99bc751f46:eyJzZWxlY3RlZExpbmVDb3VudCI6NDYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjNlMWVlOGVkMDExNjNkYTdlMzAzODdiY2U5NGEzN2I4YTJmODRkMDcxMGNmYjk5NzE4NmU3NTFlODczZGNjOGMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjU4YWM2YmVkYTM4ZTAwYjRmY2NlODkyYjJmNjExOWIzNTU0NTI5ZDZjYWVmZDdhMGYxNDg0YmUwYWUwMzk1YTgiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjMxNGQ0MmNmNWYyYjNmY2M5YTNhNTM1ZTQ5ZGEwYjI3ODBlMTU1NDExMzM0YjM3ODU3NDllODkzZjFlZTE1MjIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjE2MzFiNmUyY2EwN2Q4YmFmMGViNDRlNzQ5ZGJmNDkwYjM5MmUzYTUzNGVmNjEwMjI3NzExNDZjZGY5YWYxYTIifQ"
+          "resource": "repo://internal/service/refresh.go#L60-L79",
+          "version": "repo-lines-v1:sha256:f81afd5d38bc8bd2d6e4b03707adf98d75d343d6c8af3a47633b3100e68a8fbc:eyJzZWxlY3RlZExpbmVDb3VudCI6MjAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImZiZWRlYzkxMzMzZTlkZTcyNmE2YzNiNDgzMDFlYjE5MWRjMzlmYzEyYmQyZTMyNDc2MTVkMmQ4YTlhNTg4NTUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImUyMmZhYTUzNWJkMmVhM2Q1MmU3NDFlZDQ1NDQzNWI3ZmU0OWU4MzU4NmU5NDNkOThkODJiYmZiMjRkMWY1YzUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImNkNGNmNmE1YzZlMjBkOTljOTMzYzg0ZDQ4YWJkY2Y2NWMxODI3ZGU5ZTEwYTM0ZmM4NzZjODcyMmIzMTVmODIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImI3ZWIwMjkwNTM5NDIzZDM0ODVhMWU0MzdiNWVmZTE1ZWVlMzQyYmYyZTBiNTRkMTc4MzcwOGVlOGEzZDgxNjIifQ"
         }
       ]
     },
     {
       "id": "claim_afd5d24e7f6a41caaa141342a2266eb8",
-      "statement": "The refresh handler clears auth cookies for every error except 409, and a successful rotation issues new access and refresh tokens with a new jti in a new session.",
+      "statement": "The refresh handler clears auth cookies for every error except 409, and a successful rotation issues new access and refresh tokens, each with a new jti, and stores both hashes in a new session.",
       "evidence": [
         {
           "resource": "repo://internal/handler/auth.go#L208-L232",
-          "version": "repo-lines-v1:sha256:5d6e9574903a4a08f12e42f347bb403534bfbd661b7b4691feb0601620c10f53:eyJzZWxlY3RlZExpbmVDb3VudCI6MjUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjgwZmY3Y2QyYTA2NTMwNzE3MjMxOGZkZjM0ZGUwZjVkMjQ3NzgwZWI5NDFlNjgzMjc5NTEzMjk5YjJhMGY5ZDkiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImE3MGE4OGUwMzJkOWYwMjEzZjhlYmM5YzcxOTA1ZDdlOGY3YjkyYzAyMjRkYjk1ZDQwMTFkYWRkM2FlNDQwNzYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjY4YjkxZGY5YjhiODUzNzBlMTZiZjk5ZTNmOGIwOWMyZWI0NjJhNzE2NjMzN2JjYTY5OGY1N2NiMGVkZWI3ZmEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjMzNmM5NzcyOGNlOWYxMjdhMDgwMDgzZmFmNWQzOGYwMWEwYjRmZTM4Y2FlMWI2YTkyZGI2MzM0ODAyZGIxYzQifQ"
+          "version": "repo-lines-v1:sha256:4a414d5437a2b394492c40641ab2d3d72499b5cd146e85e78064998c619fd0bb:eyJzZWxlY3RlZExpbmVDb3VudCI6MjUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjIwNWZlZGExODdjYTM3MjI5ZDNkMTc0ZGNjOGZhYWJiNTAzOWY0NmQ3YjI2Yjg4N2Y0MjcwZDhiYTE1YjlkZGIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQwYTAzYTI3YmM2MTk4OWZlOTFhMWVkOWFhZTU1MGMzZTcyYTcyMmRjODY1NjFkNDgyMTJjY2M1OWFhYTliODMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjhkZmNiZTcwN2NlYTZkNmRiZmY2M2YwMjllMWE5YTBlYzMyNjdhN2RhZGVmMjlhNGM4YWExMGRmNjA0OGY1MmEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjAwZTUyMjU3MDllMjUxN2U0M2Y4YjA2ZmRhZDJkMzY2YTFlNGI1MWYyYWM2YjVmY2ZmNzg0Mjc1M2QzYzM3ODMifQ"
         },
         {
-          "resource": "repo://internal/service/refresh.go#L105-L123",
-          "version": "repo-lines-v1:sha256:17d18d0cbe270a4f5e7bc68ed03f79e03b624fa5df8967492068fec3c86c8926:eyJzZWxlY3RlZExpbmVDb3VudCI6MTksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjU4YWM2YmVkYTM4ZTAwYjRmY2NlODkyYjJmNjExOWIzNTU0NTI5ZDZjYWVmZDdhMGYxNDg0YmUwYWUwMzk1YTgiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjE2NmM3YzY4YzNhNDU1ODc0YWJjNDc3YWE5YzgyODdhNGQ0NGU4ZDNlOWE2YTU1ODgxNDliYTZmMzZhZTBjNzYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+          "resource": "repo://internal/service/refresh.go#L83-L107",
+          "version": "repo-lines-v1:sha256:75c2853807a9ad7f71de0759219d0d3acffe16b3d64512bf9f63bd3307afdb21:eyJzZWxlY3RlZExpbmVDb3VudCI6MjUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjI3YjM3M2Q5Y2I1NzJlMGYwOWIxZjA0ZDk3MzgyYTNkOTVhNmRiMjU4ZDlhMTk3MDQxODRiYTljM2I3YjRkYTQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjVhZWI5MTY0MTY1ZjJjNjE5NWRhN2FjNTQzYmQzNjgyMzdlNDQzNzIyZWVhOWQyNzdjNDM1NzY2M2M1NGZiNDkiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImI3ZWIwMjkwNTM5NDIzZDM0ODVhMWU0MzdiNWVmZTE1ZWVlMzQyYmYyZTBiNTRkMTc4MzcwOGVlOGEzZDgxNjIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImFmMzkxYTc2ZjFkMGQ3MzA2NmFkZDMwNmJhYjIzYzg2ZWMxZWM5OWY2MTA3NmUwZTE4MjM5ZjNiY2IxOTA1ODQifQ"
         }
       ]
     },
@@ -65,38 +65,46 @@
       "statement": "Logout performs dual revocation by deactivating the session matching the refresh-token hash and the session matching the access-token hash before clearing cookies.",
       "evidence": [
         {
-          "resource": "repo://internal/service/refresh.go#L100-L123",
-          "version": "repo-lines-v1:sha256:10d2eb6a5623ea9365fcd8f97e57a7d45e8379a4ec0f78ff45b034f2d8844e25:eyJzZWxlY3RlZExpbmVDb3VudCI6MjQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImM5Y2I0MjE3NjJlN2JjNTRiZTMzZmQ5NDRjYjE3NjM5YTk1OWFkMmNmZGIyYWMxNWIwNjFlYTQ2M2MxMmE2NTMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjEwMjBjMmY3YWZiNjkwZTJkYzdjZTU2ZmQwYzA0ZWQ3YzRhNmMwMDUzNDhhNjJiOTVhMTIwNzljYzBhYzJhODMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+          "resource": "repo://internal/service/refresh.go#L112-L123",
+          "version": "repo-lines-v1:sha256:90bfa3da16f3f21cc5ad3038b7b0f4f1cf9d1ba7385cbf0d6a20aa30d25679fb:eyJzZWxlY3RlZExpbmVDb3VudCI6MTIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjVhYzcwMjk2YzNmNTRlODM5MmFlZDM0NmMwMDZiNmNmY2E3NmM4MTRkNjE1ZDhlODJkNjRjYmRiYWVkMWM3M2EiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImYyOTkzNzdlM2EwYTYxMjA0ZjYxY2YzMmFkNjEyMGM4ZTQ1NWY3YjgyZjI4ZDgxMzZkNTFkMTUzMjRiMmUxYjMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjAwODc1YWU2MmJiM2FkNWY0Yzk2MWFiMzk1NjcyOTUxYzNlMDdlOGFiNjFjMTk0NWUyNjJkZGUwN2ZkNWJjY2MiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjoxLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUyMmZhYTUzNWJkMmVhM2Q1MmU3NDFlZDQ1NDQzNWI3ZmU0OWU4MzU4NmU5NDNkOThkODJiYmZiMjRkMWY1YzUifQ"
         }
       ]
     },
     {
       "id": "claim_48ffeb532c104d9286784276d99df28e",
-      "statement": "Sessions store only a SHA-256 hex hash of the refresh token along with device info, IP, activity timestamps, and an active flag; access tokens are not stored.",
+      "statement": "Sessions store SHA-256 hex hashes of both the refresh token and the access token along with device info, IP, activity timestamps, and an active flag, never the raw tokens.",
       "evidence": [
         {
-          "resource": "repo://internal/auth/jwt.go#L95-L100",
-          "version": "repo-lines-v1:sha256:ec4a9d26be2751f7e0322a3025519b21cc743c110c08699c3f4f91463d7c4515:eyJzZWxlY3RlZExpbmVDb3VudCI6NiwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiYWEzYTFkY2RmMmI4M2MzYTVmMTUyMWZiYWYwY2M0ZWQ2ZjZjMDlmYzI2MzI5ZmJjMDZiOWFjMzkwMzE3ZDJlNyIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiOTdjYzlmMDQ1ZWE5YTUyYTZkZTFlNzQzN2MzM2RmNWFlYWUzOWYyMTAyYzRlM2Y2ZTRjZDY0MmQ5MzBiZjI3YiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiMDJhNDE3ZDM4YTZlMzUyMTQ5MTRlNjhiMjc0YTQ4OWNkMmM4MGU1OTFlMTk4MDNlZmIxYjRmMmU5NDZlZjc3YSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiMzQ5Yjc0NzczYWI1MTQxNTE5ZmZhZTg2MDYwZDE2Njc0N2ZjZGZiN2Q0Mzg4NGVhZWZhNTU2NTc3NjE1ZDY4NyJ9"
+          "resource": "repo://internal/auth/jwt.go#L94-L98",
+          "version": "repo-lines-v1:sha256:a97a00d25e902e305d68c1c283bf44108df56dd792d6091635567707ca99de38:eyJzZWxlY3RlZExpbmVDb3VudCI6NSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiNjM0ODUwMTRmMDM3NWRjOWZiY2ZjMmI4Zjk1ZDE2YjgwY2MzM2I3NjJjOWJjMjZjMDdiOGNmMjE0MTk0NTQ2ZiIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiN2ViNzAyNTc1OTNkYTA2ZjY4MmEzZGRkYTU0YTlkMjYwZDRmYzUxNGY2NDUyMzdmNWNhNzRiMDhmOGRhNjFhNiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZWNlM2RkOTk1MzgyYmVjZTU0NTZhM2M1MTJmNTI3OTk0NjA5MzMzOGNmZjg2ZmEwNzRmYzQyYWRhMTZjNzQ2ZCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiNjU4OGZlNGI2ODc4ZWZhM2E2YjExNDhkZjM5YjM3Mjk2YmE5MzJkY2IzZDMwMzYwYjkzMmE2Mjg3NTQ0ZTYxNiJ9"
         },
         {
-          "resource": "repo://internal/repository/session.go#L30-L45",
-          "version": "repo-lines-v1:sha256:7e15f9edbc73f9ef01cf5af718a35e2c39a23452d826e82acf4ceba9f190d9d4:eyJzZWxlY3RlZExpbmVDb3VudCI6MTYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImY2ZDA5MDEwOWU1ZTNjZGU0ZTQ2MTZlMWZiODgxM2U3NGQxN2UzN2RlM2U1NmE0NjQ0ZDJhZjdmNzc5NzNhNGYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY3Y2RhODJkYTYwNjIzOGUwNWU2MjM5OTU2OWM1ZWUwMzk5MzQxOTY0OGFlNWQ0M2EyYmY4Y2Q2MzQ3ZjgyNjMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImY4MmNiYzIwNWVkYzY3MzQ2Yjg5NTYyMzE2NGNiZTkwYjM4NGZjMzM4NmE0NmE4MGI4MzM4NTViYzgzMjFkY2MiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6Ijg3ODk5NGFjNmQ5MTQzYThkZDI5ZTRjZmQzODY4NDQwNjRkOTkzNDVhZGZiN2M5ZGZkYmNiODY2NmY1NzllZTcifQ"
+          "resource": "repo://internal/repository/session.go#L30-L36",
+          "version": "repo-lines-v1:sha256:bc80d07573cae0afdb8116099dc125ab9d98a5683eb77de2d127301ef85ceee2:eyJzZWxlY3RlZExpbmVDb3VudCI6NywiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiZmIyYjJiYTFhNzYxMTE3YWIyOWVjODZiNzZjYTRhMjNlMTFlMjRlM2Q3ZTI3MGM3NGI5NTdjZjA4OGMwNmM5OSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiN2ViNzAyNTc1OTNkYTA2ZjY4MmEzZGRkYTU0YTlkMjYwZDRmYzUxNGY2NDUyMzdmNWNhNzRiMDhmOGRhNjFhNiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiY2I1MmQzYTUxOGQwMmZlNTJhN2QwZDU4YTM1NzE1YmU1YTQyN2E5NzVmMWQwMTE2NDBiZTM3MWY2NzIzYjgzMSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiN2NhY2EwMDdlY2Q0MjIzNmRmMDc4YzRjYTQ4YWUyYjBiMGUyY2RlMzhmYWY0MDIxNTUxN2ZjYzhlOTVkZjVjYSJ9"
+        },
+        {
+          "resource": "repo://internal/service/refresh.go#L93-L102",
+          "version": "repo-lines-v1:sha256:11ec8aa55475c9fa184a6c3f4d5b50aa327559cad9dcae906b132a6d6ac8d356:eyJzZWxlY3RlZExpbmVDb3VudCI6MTAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjM1NDNkNzA5ZDBkM2Y4NjhiOTA0NTU4OGMxYmRhNjg1OTIzNDMyMDAxNzgzMzY5NDM2ZmM1MDhkZTA4YzM3ODYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjkzZDE0YWIwYWE1MWYxMzBmMWU3NmUyMGJhMjBlNGQ3MzdkYjA2MjZlNTY2ZjhiNTBhOGIwYzk0MGExNjk3OTMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjQxMzhmMTdiNDE0OGIyYzdkYWY3YzFiYTcxYzhiNzIzZDdjMTk3YmU1NDg2NTZmMzlmZDMyZjAyMDU1YWMwOGEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjVjOGFmYjA1MTA2MTUyZDNjMmUyZTg2NTNhZTUwYjhmZDFmNjc2ZjcyMGFjMTBhY2EwOTIyNDA4NDQyNTZiYjQifQ"
         }
       ]
     },
     {
       "id": "claim_34c146fba7c74f039e63b95548f36eed",
-      "statement": "The session cleanup job marks sessions inactive when lastActiveAt is older than 30 days on an hourly schedule, but it is not started by the server entrypoint.",
+      "statement": "The session cleanup job marks sessions inactive when lastActiveAt is older than 30 days on an hourly schedule, and cmd/server starts it before listening and cancels it on shutdown.",
       "evidence": [
         {
-          "resource": "repo://internal/cron/cron.go#L20-L70",
-          "version": "repo-lines-v1:sha256:adb703759e4cdd37983d281d896058c1c70888ad6ed139f9aa06fc24a06970c1:eyJzZWxlY3RlZExpbmVDb3VudCI6NTEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImZhZmJhMDUyN2MzOTUzYzRiNmUwZTViNTczOWJhODM2MTJmODA1M2JjZGM5NDY2NzMwMTkzY2QxZDU5MGI0MDgiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ1OTRjYjY5ZWQ3MDE1ZmZkOTUzNzhhNjRkNjI2NmEwYTY1MjE3OGY5ZjgyYzcwOTBlMDVmODkyMDQ2Y2M1OTgiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImM3Y2M1ZmMzNzk2ZTJkNmZiNTg1ODY1MjFmZDllOTRlOTdiNmUxYTUzNjAyM2Q1OWUzNTJjYmRmMzAwYzdhMWEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjkyZGJjODFiN2Y2NmE1OWNjZWRmYTc5NWNiM2RlMTFlNDUwYzY0ZWExMDg0YmZmNzcxOTM0NDU4MzZkNGEzODMifQ"
+          "resource": "repo://cmd/server/main.go#L90-L93",
+          "version": "repo-lines-v1:sha256:ac9af8ff44fc7249367edca7ad1e5b74d419bcfd46c5f641fa6bf3751750bdf6:eyJzZWxlY3RlZExpbmVDb3VudCI6NCwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiNzNkM2Y1NjVkMzJiNDZiMjk1NTIxYTcyMjY2MDkwY2MwMjdjNDM3OTYzMDE2ZGQ3ZWEwOGQ5NGE0YzBiZjU3MCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiN2ViNzAyNTc1OTNkYTA2ZjY4MmEzZGRkYTU0YTlkMjYwZDRmYzUxNGY2NDUyMzdmNWNhNzRiMDhmOGRhNjFhNiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNGJiOGViYzExNWZhYjllN2I1OTYyNjI0OTc3N2VkMzBkM2JkYmE2MmYyMTdjN2VhOWNiYmEwMmU3NjJjZGM2MyIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiNmY5NWU3NDBjNmFhMjYxNmQ4M2Q5ZmY0Y2ViYjhlYzVmMDdhMTJiOGZmMzM3ZWNlMjZjZGJhMmY1YWUzMDgwMiJ9"
+        },
+        {
+          "resource": "repo://internal/cron/cron.go#L38-L51",
+          "version": "repo-lines-v1:sha256:31e7d86deba28133d9d6d96c8e9c07a7297da184961db68c25b64bf05b52938f:eyJzZWxlY3RlZExpbmVDb3VudCI6MTQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImViNjBjOTdjMGNmYzVlMjdmNzdlNDhjNzE2OTcyNzhlNDllYzk1ZDY1NmU3MzgyYjdmNzk0NzlmYzRhNzUwNDYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImUyMmZhYTUzNWJkMmVhM2Q1MmU3NDFlZDQ1NDQzNWI3ZmU0OWU4MzU4NmU5NDNkOThkODJiYmZiMjRkMWY1YzUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjY0OTZiNWY1Nzk1ZGQzOTIzMGFhYzQzNTNmNDBkZTZlZmU2ZDRmNjZmODczOWFlZjJjYjNmOTY0NDZkNGUwMzQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjNlZDExYTViMDc3ODBmZjM2N2ViOWE0MWNjZDExYTgyZjQ2NzU3NWRkNWE5NzZlNmY0ZjJhYzQyZmE2OTM2MTUifQ"
         }
       ]
     }
   ],
   "verification": {
     "by": "openwiki/0.7.2",
-    "at": "2026-11-02T17:41:59.592Z"
+    "at": "2026-11-03T16:50:44.301Z"
   }
 }

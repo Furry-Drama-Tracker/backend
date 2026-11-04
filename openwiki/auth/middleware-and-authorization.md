@@ -3,9 +3,6 @@ type: security
 title: 鉴权中间件与角色
 description: Protect 中间件的准确失败结果、角色常量与角色路由、默认超管邮箱的 RequireEmailChanged、可选鉴权、CSRF 双提交 cookie，以及 SSE 票据校验。
 tags: [auth, authorization, roles, middleware, csrf, cookies]
-verified:
-  - by: openwiki/0.7.2
-    at: 2026-11-02T17:41:59.592Z
 sources:
   - id: openwiki-source-d30e65659972429c2c50cf5a
     resource: repo://internal/auth/cookies.go
@@ -21,7 +18,10 @@ sources:
     resource: repo://internal/middleware/optional_auth.go
   - id: openwiki-source-7106c8455bb73d12832c8523
     resource: repo://internal/server/app.go
-generated: { by: "opencode", at: "2026-11-02T17:41:59.592Z" }
+generated: { by: "opencode", at: "2026-11-03T16:50:44.301Z" }
+verified:
+  - by: openwiki/0.7.2
+    at: 2026-11-03T16:50:44.301Z
 ---
 
 # 鉴权中间件与角色
@@ -42,7 +42,7 @@ generated: { by: "opencode", at: "2026-11-02T17:41:59.592Z" }
 
 ## Protect 的结果
 
-`Protect(allowedRoles...)` 返回一个 Gin handler，有五种失败模式。状态码与 messageKey 是固定契约：
+`Protect(allowedRoles...)` 返回一个 Gin handler，有六种失败模式。状态码与 messageKey 是固定契约：
 
 | 条件 | 状态码 | 响应体 |
 |---|---|---|
@@ -50,9 +50,12 @@ generated: { by: "opencode", at: "2026-11-02T17:41:59.592Z" }
 | 令牌过期 | 419 | `{"message":"Access token expired","messageKey":"auth.accessTokenExpired"}` |
 | 令牌非法、签名错误或 purpose 非 access | 401 | `invalidToken` |
 | 用户已不存在 | 401 | `auth.userNotFound` |
+| 令牌带 `jti` 但会话已失效、不存在或不属于该用户 | 401 | `{"message":"Not authorized, token revoked","messageKey":"auth.invalidToken"}` |
 | 角色不在允许列表 | 403 | `{"message":"Not authorized","messageKey":"auth.forbidden"}` |
 
 空 purpose 被视为 access，以兼容旧令牌；其他任何 purpose 都会被拒绝。成功时把用户存入 `auth.user`、原始令牌存入 `auth.token`，然后启动一个 fire-and-forget 的会话活跃时间更新。
+
+带 `jti` 的 access 令牌会额外查询 `usersessions.tokenHash`：登出、改密或管理员下线让会话失活后，access 令牌立即失效，而不是等到 15 分钟自然过期。历史上没有 `jti` 的旧令牌跳过该检查，最多再存活一个 access TTL，用于平滑过渡。
 
 419 不是标准 HTTP 状态，但它是前端调用 `/api/auth/refresh` 的信号。
 
@@ -79,7 +82,7 @@ generated: { by: "opencode", at: "2026-11-02T17:41:59.592Z" }
 
 ## 可选鉴权
 
-`OptionalAuth` 用于对登录用户行为不同的公开端点，例如剧集详情与友链申请。它尝试相同的 access token 提取与校验，但在缺失、非法或 purpose 错误时静默放行。与 `Protect` 不同，它：
+`OptionalAuth` 用于对登录用户行为不同的公开端点，例如剧集详情与友链申请。它尝试相同的 access token 提取与校验，但在缺失、非法、purpose 错误或带 `jti` 的令牌对应会话已失效时静默放行。与 `Protect` 不同，它：
 
 - 不设置原始令牌上下文键；
 - 不更新活跃时间；
@@ -114,9 +117,6 @@ SSE 通知流不使用 `Protect`，因为 EventSource 不能设置 `Authorizatio
 
 ## 相关阅读
 
-<!-- openwiki: broken internal link [/openwiki/architecture/request-lifecycle.md] link "/openwiki/architecture/request-lifecycle.md" is root-absolute, which no real consumer resolves against the repository root (not a coding agent reading the page, not GitHub's Markdown renderer, not a local viewer); use a path relative to this file instead. Fix the href or restore the target, then delete this comment. -->
-- [请求生命周期与中间件管线](/openwiki/architecture/request-lifecycle.md)——CSRF 与守卫在链中的位置。
-<!-- openwiki: broken internal link [/openwiki/auth/session-and-token-lifecycle.md] link "/openwiki/auth/session-and-token-lifecycle.md" is root-absolute, which no real consumer resolves against the repository root (not a coding agent reading the page, not GitHub's Markdown renderer, not a local viewer); use a path relative to this file instead. Fix the href or restore the target, then delete this comment. -->
-- [会话与令牌生命周期](/openwiki/auth/session-and-token-lifecycle.md)——refresh 轮换与 419 处理。
-<!-- openwiki: broken internal link [/openwiki/api/administration-and-moderation.md] link "/openwiki/api/administration-and-moderation.md" is root-absolute, which no real consumer resolves against the repository root (not a coding agent reading the page, not GitHub's Markdown renderer, not a local viewer); use a path relative to this file instead. Fix the href or restore the target, then delete this comment. -->
-- [管理与审核 API](/openwiki/api/administration-and-moderation.md)——角色门控的管理路由。
+- [请求生命周期与中间件管线](../architecture/request-lifecycle.md)——CSRF 与守卫在链中的位置。
+- [会话与令牌生命周期](session-and-token-lifecycle.md)——refresh 轮换与 419 处理。
+- [管理与审核 API](../api/administration-and-moderation.md)——角色门控的管理路由。

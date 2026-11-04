@@ -3,9 +3,6 @@ type: api-domain
 title: 上传、RSS、翻译、备份与分页
 description: 共享图片与 SVG 上传校验、静态上传服务、RSS 订阅、翻译提供方回退、整库备份导出/导入限制，以及通用分页契约。
 tags: [api, uploads, rss, translation, backup, pagination]
-verified:
-  - by: openwiki/0.7.2
-    at: 2026-11-02T17:41:59.592Z
 sources:
   - id: openwiki-source-1649edbcafe0eab861fed46a
     resource: repo://internal/handler/backup.go
@@ -23,7 +20,10 @@ sources:
     resource: repo://internal/upload/svg.go
   - id: openwiki-source-62a9837f2b45c92ae81ca775
     resource: repo://internal/upload/upload.go
-generated: { by: "opencode", at: "2026-11-02T17:41:59.592Z" }
+generated: { by: "opencode", at: "2026-11-03T16:50:44.301Z" }
+verified:
+  - by: openwiki/0.7.2
+    at: 2026-11-03T16:50:44.301Z
 ---
 
 # 上传、RSS、翻译、备份与分页
@@ -37,7 +37,7 @@ generated: { by: "opencode", at: "2026-11-02T17:41:59.592Z" }
 1. 请求必须是 `multipart/form-data`，否则返回 `ErrNoFile`。
 2. 整个 multipart 请求体被 `http.MaxBytesReader` 包裹在 `maxBytes + 1 MB` 的粗限内。超出返回 `UploadError{Code: "LIMIT_FILE_SIZE"}`。
 3. 文件自身大小精确对比 `maxBytes`，因此 multipart 开销不计入文件限制。
-4. 小写扩展名必须匹配 `/jpeg|jpg|png|gif|webp/`（子串匹配，非锚定），声明的 `Content-Type` 必须匹配 `^image/(jpeg|png|gif|webp)$`。失败返回 `LIMIT_FILE_TYPE`。
+4. 小写扩展名必须完整匹配 `.jpg`/`.jpeg`/`.png`/`.gif`/`.webp`（锚定匹配，避免 `.notjpg` 绕过），声明的 `Content-Type` 必须匹配 `^image/(jpeg|png|gif|webp)$`。失败返回 `LIMIT_FILE_TYPE`。
 5. 文件写入配置的上传目录，文件名为 `<prefix>-<32 位 hex><原扩展名>`。
 6. 前 12 字节经 base64 编码后必须匹配已知魔数前缀；失败会删除文件并返回 `BAD_MAGIC`。
 
@@ -57,6 +57,9 @@ handler 把 `UploadError` 代码翻译为固定用户消息：超限返回 400 �
 - `X-Content-Type-Options: nosniff`
 - `X-Robots-Tag: noindex`
 - `Content-Disposition: inline`
+- `Content-Security-Policy: default-src 'none'; img-src 'self' data:; style-src 'unsafe-inline'; sandbox`
+
+只服务 `.jpg`、`.jpeg`、`.png`、`.gif`、`.webp`、`.svg` 六种扩展名，其他历史文件一律 404，避免上传目录中的 HTML/JS 被同源执行。沙箱 CSP 进一步保证直接打开 SVG 时脚本不会运行。
 
 由于文件名是内容不可变的随机名，替换图片会产生新 URL，旧 URL 可以无限缓存。
 
@@ -64,11 +67,11 @@ handler 把 `UploadError` 代码翻译为固定用户消息：超限返回 400 �
 
 SVG 上传走独立路径，因为它是文本且带脚本风险：
 
-- 最大 1 MB。
+- 最大 1 MB，请求体额外放宽 1 MB 以容纳 multipart 开销。
 - 扩展名必须为 `.svg`。
 - MIME 可为 `image/svg+xml` 或几种为拖拽上传容忍的 XML/纯文本/二进制类型。
-- 去掉 UTF-8 BOM 与前导空白后，内容必须以 `<?xml` 或 `<svg` 开头。
-- 小写内容不得包含 `<script`。
+- 去掉 UTF-8 BOM 与首尾空白后，内容必须以 `<?xml` 或 `<svg` 开头。
+- 使用 XML 解析器做结构化校验：必须是单一 `<svg>` 根元素；拒绝 `script`、`foreignObject`、`iframe`、`object`、`embed`、`link`、`style`、`animate`、`set`、`discard`；拒绝 `on*` 事件属性、`javascript:`/`vbscript:`/`data:`/`file:` 等危险 URL 与 `@import`；拒绝 `DOCTYPE`/`ENTITY` 及非 `xml` 处理指令以防 XXE。`href`/`src` 只允许锚点、站内相对路径或 `http(s)`。
 
 文件写入 `IconsDir`（默认 `./uploads/icons`，可由配置覆盖），文件名为 `icon-<32 位 hex>.svg`，返回 URL 为 `/uploads/icons/<文件名>`。静态上传路由只服务上传目录下的文件，因此自定义图标目录若在外部，需要自行挂载静态服务。
 
@@ -126,9 +129,6 @@ HTTP 请求体限制对 `/api/backup/import` 单独放宽到 50 MB，且只对 J
 
 ## 相关阅读
 
-<!-- openwiki: broken internal link [/openwiki/architecture/request-lifecycle.md] link "/openwiki/architecture/request-lifecycle.md" is root-absolute, which no real consumer resolves against the repository root (not a coding agent reading the page, not GitHub's Markdown renderer, not a local viewer); use a path relative to this file instead. Fix the href or restore the target, then delete this comment. -->
-- [请求生命周期与中间件管线](/openwiki/architecture/request-lifecycle.md)——请求体大小限制与静态路由位置。
-<!-- openwiki: broken internal link [/openwiki/api/content-catalog.md] link "/openwiki/api/content-catalog.md" is root-absolute, which no real consumer resolves against the repository root (not a coding agent reading the page, not GitHub's Markdown renderer, not a local viewer); use a path relative to this file instead. Fix the href or restore the target, then delete this comment. -->
-- [内容目录 API](/openwiki/api/content-catalog.md)——上传调用点。
-<!-- openwiki: broken internal link [/openwiki/operations/deployment-and-runtime.md] link "/openwiki/operations/deployment-and-runtime.md" is root-absolute, which no real consumer resolves against the repository root (not a coding agent reading the page, not GitHub's Markdown renderer, not a local viewer); use a path relative to this file instead. Fix the href or restore the target, then delete this comment. -->
-- [部署与运行时](/openwiki/operations/deployment-and-runtime.md)——上传与图标目录配置。
+- [请求生命周期与中间件管线](../architecture/request-lifecycle.md)——请求体大小限制与静态路由位置。
+- [内容目录 API](content-catalog.md)——上传调用点。
+- [部署与运行时](../operations/deployment-and-runtime.md)——上传与图标目录配置。

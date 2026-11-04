@@ -3,9 +3,6 @@ type: security
 title: 账号安全能力
 description: 密码哈希与强度规则、密码修改与重置、带备用码的 TOTP 双因素认证、加密字段存储、邮箱验证与变更、通知偏好、账号注销以及个人数据导出。
 tags: [security, password, 2fa, encryption, email-verification, account-deletion]
-verified:
-  - by: openwiki/0.7.2
-    at: 2026-11-02T17:41:59.592Z
 sources:
   - id: openwiki-source-00f455935383887d3bff9d53
     resource: repo://internal/auth/bcrypt.go
@@ -13,6 +10,8 @@ sources:
     resource: repo://internal/auth/fieldcrypto.go
   - id: openwiki-source-c167b655890cdbda616b14d7
     resource: repo://internal/auth/totp.go
+  - id: openwiki-source-95acc6f0848493b78312ab3f
+    resource: repo://internal/cron/cron.go
   - id: openwiki-source-dd013bc1bb1449fcd2111f58
     resource: repo://internal/handler/twofactor.go
   - id: openwiki-source-98ac6fe2e30d23a1386f80db
@@ -29,7 +28,12 @@ sources:
     resource: repo://internal/service/login.go
   - id: openwiki-source-ca7fc5574740b07d87bb29b5
     resource: repo://internal/service/password.go
-generated: { by: "opencode", at: "2026-11-02T17:41:59.592Z" }
+  - id: openwiki-source-d97c9077329c5637a8dbc18d
+    resource: repo://internal/service/purge.go
+generated: { by: "opencode", at: "2026-11-03T16:50:44.301Z" }
+verified:
+  - by: openwiki/0.7.2
+    at: 2026-11-03T16:50:44.301Z
 ---
 
 # 账号安全能力
@@ -130,7 +134,12 @@ otpauth URL 使用 account ID 与 issuer `FurryDrama`。启用、验证与关闭
 1. `POST /auth/request-deletion` 写入 `deletionRequestedAt` 并审计。第二次请求返回 400。
 2. 用户可以用 `POST /auth/cancel-deletion` 取消，或用 `GET /auth/deletion-status` 查看截止时间。
 
-宽限期为七天。没有定时任务会删除账号。相反，当宽限期后尝试登录时，登录流程会物理删除用户及关联的追番、历史、通知、收藏、评分、举报、反馈与会话，然后返回通用“用户名或密码错误”，不暴露删除事实。这意味着只有账号在宽限期后再次被使用时，删除才会真正完成。
+宽限期为七天，有两条路径会真正删除：
+
+1. **定时任务**：`cron.StartSessions` 每 6 小时执行一次注销清理；为避免升级/重启瞬间批量删除历史申请，进程启动后第一次执行延迟 6 小时。
+2. **宽限期后登录**：登录流程发现已过期，会先物理删除再返回通用“用户名或密码错误”，不暴露删除事实。
+
+两条路径都调用 `service.PurgeUserData` 做 best-effort 级联清理：追番、历史、通知、收藏、评分、举报、反馈、会话、文件夹、收藏夹收藏项、创作者主页、主题与推送订阅；删除评分后重算受影响剧集的平均分。用户创建的剧集等公共内容保留，因为可能涉及其他协作者。单个集合清理失败不阻断后续步骤，最终以用户删除是否成功为准。
 
 ## 个人数据导出
 
@@ -149,9 +158,6 @@ otpauth URL 使用 account ID 与 issuer `FurryDrama`。启用、验证与关闭
 
 ## 相关阅读
 
-<!-- openwiki: broken internal link [/openwiki/architecture/configuration.md] link "/openwiki/architecture/configuration.md" is root-absolute, which no real consumer resolves against the repository root (not a coding agent reading the page, not GitHub's Markdown renderer, not a local viewer); use a path relative to this file instead. Fix the href or restore the target, then delete this comment. -->
-- [配置与环境变量](/openwiki/architecture/configuration.md)——加密与 Altcha 密钥来源。
-<!-- openwiki: broken internal link [/openwiki/auth/login-and-registration.md] link "/openwiki/auth/login-and-registration.md" is root-absolute, which no real consumer resolves against the repository root (not a coding agent reading the page, not GitHub's Markdown renderer, not a local viewer); use a path relative to this file instead. Fix the href or restore the target, then delete this comment. -->
-- [注册与登录流程](/openwiki/auth/login-and-registration.md)——登录时的物理删除与 2FA 分支。
-<!-- openwiki: broken internal link [/openwiki/integrations/email-delivery.md] link "/openwiki/integrations/email-delivery.md" is root-absolute, which no real consumer resolves against the repository root (not a coding agent reading the page, not GitHub's Markdown renderer, not a local viewer); use a path relative to this file instead. Fix the href or restore the target, then delete this comment. -->
-- [邮件发送](/openwiki/integrations/email-delivery.md)——验证与重置邮件模板。
+- [配置与环境变量](../architecture/configuration.md)——加密与 Altcha 密钥来源。
+- [注册与登录流程](login-and-registration.md)——登录时的物理删除与 2FA 分支。
+- [邮件发送](../integrations/email-delivery.md)——验证与重置邮件模板。

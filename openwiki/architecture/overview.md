@@ -3,14 +3,9 @@ type: architecture
 title: 架构总览
 description: neo-server 的分层包结构、从 main 开始的显式依赖注入链、各 internal 包的职责，以及文档所述分层比理想情况更松散的地方。
 tags: [architecture, layers, dependency-injection, packages, gin]
-verified:
-  - by: openwiki/0.7.2
-    at: 2026-11-02T17:41:59.592Z
 sources:
   - id: openwiki-source-0f6ed11169bd8e6b34b44280
     resource: repo://cmd/server/main.go
-  - id: openwiki-source-95acc6f0848493b78312ab3f
-    resource: repo://internal/cron/cron.go
   - id: openwiki-source-f89e324c07065d291ea97e16
     resource: repo://internal/handler/episodes.go
   - id: openwiki-source-a759557a449edc99daccb392
@@ -29,7 +24,10 @@ sources:
     resource: repo://internal/service/auth_service.go
   - id: openwiki-source-62a9837f2b45c92ae81ca775
     resource: repo://internal/upload/upload.go
-generated: { by: "opencode", at: "2026-11-02T17:41:59.592Z" }
+generated: { by: "opencode", at: "2026-11-03T16:50:44.301Z" }
+verified:
+  - by: openwiki/0.7.2
+    at: 2026-11-03T16:50:44.301Z
 ---
 
 # 架构总览
@@ -66,15 +64,17 @@ middleware  handler  <-- HTTP 关注点
 `cmd/server/main.go` 只做这些事：
 
 1. 解析 `--config` 与 `--listen`。
-2. `config.Load`——缺少或过短的密钥会致命退出。
+2. `config.Load`——缺少、过短或不合规的密钥会致命退出；示例/历史弱密钥与占位生产 CORS 源只打印 `[SECURITY WARN]`。
 3. `repository.Connect`——用 15 秒上下文连接并 ping MongoDB。
 4. `repository.NewRepos`——针对命名集合构造全部 repository。
 5. `auth.NewSigner`——用配置的 secret 构造 JWT 签名器。
-6. 配置上传与图标目录，并创建图标目录。
-7. `server.NewApp(server.Deps{...})`——装配中间件与路由。
-8. 创建 TCP 或 Unix 监听器，开始服务，等待 SIGTERM/SIGINT 并执行 10 秒优雅关停。
+6. 运行启动迁移与索引创建；失败只打印 `[WARN]` 并继续，避免已有数据导致服务无法启动。
+7. 启动后台清理任务（会话、已读通知、到期注销账号）。
+8. 配置上传与图标目录，并创建两个目录。
+9. `server.NewApp(server.Deps{...})`——装配中间件与路由。
+10. 创建 TCP 或 Unix 监听器，开始服务，等待 SIGTERM/SIGINT 并执行 10 秒优雅关停。
 
-迁移、索引与定时任务包虽然存在，但没有从 `main` 调用。它们的缺席是接线缺口，而不是有意的运行时行为；详见运维页面。
+迁移、索引与定时任务都已接线，但采用“失败告警继续”的平滑升级策略；详见运维页面。
 
 ## 依赖注入
 
@@ -123,9 +123,9 @@ type Deps struct {
 | `upload` | 图片与 SVG 存储、校验、删除 |
 | `pagination` | 共享 `page`/`limit` 解析与结果形状 |
 | `logging` | debug 或 info 级别的 slog 文本日志 |
-| `migrate` | 幂等启动数据迁移（当前未接线） |
-| `indexes` | 幂等索引创建（当前未接线） |
-| `cron` | 会话与通知清理任务（当前未接线） |
+| `migrate` | 幂等启动数据迁移（启动时调用，失败告警继续） |
+| `indexes` | 幂等索引创建（启动时调用，单个冲突不阻断其余） |
+| `cron` | 会话、已读通知与到期注销账号清理任务 |
 
 `internal/audit` 与 `internal/testutil` 是空目录；审计日志在 repository/model 层实现，测试辅助函数位于各测试文件内。
 
@@ -152,9 +152,6 @@ ADR 记录了取舍：独立仓库与 AGPL 许可、显式四层分离、构造�
 
 ## 相关阅读
 
-<!-- openwiki: broken internal link [/openwiki/architecture/request-lifecycle.md] link "/openwiki/architecture/request-lifecycle.md" is root-absolute, which no real consumer resolves against the repository root (not a coding agent reading the page, not GitHub's Markdown renderer, not a local viewer); use a path relative to this file instead. Fix the href or restore the target, then delete this comment. -->
-- [请求生命周期与中间件管线](/openwiki/architecture/request-lifecycle.md)——准确的中间件顺序。
-<!-- openwiki: broken internal link [/openwiki/architecture/persistence-and-data-model.md] link "/openwiki/architecture/persistence-and-data-model.md" is root-absolute, which no real consumer resolves against the repository root (not a coding agent reading the page, not GitHub's Markdown renderer, not a local viewer); use a path relative to this file instead. Fix the href or restore the target, then delete this comment. -->
-- [持久化与数据模型](/openwiki/architecture/persistence-and-data-model.md)——集合与 ObjectID 规则。
-<!-- openwiki: broken internal link [/openwiki/quality/conventions-and-gotchas.md] link "/openwiki/quality/conventions-and-gotchas.md" is root-absolute, which no real consumer resolves against the repository root (not a coding agent reading the page, not GitHub's Markdown renderer, not a local viewer); use a path relative to this file instead. Fix the href or restore the target, then delete this comment. -->
-- [约定与有意保留的怪癖](/openwiki/quality/conventions-and-gotchas.md)——不能被“清理”的规则。
+- [请求生命周期与中间件管线](request-lifecycle.md)——准确的中间件顺序。
+- [持久化与数据模型](persistence-and-data-model.md)——集合与 ObjectID 规则。
+- [约定与有意保留的怪癖](../quality/conventions-and-gotchas.md)——不能被“清理”的规则。
