@@ -170,7 +170,23 @@ func SaveSVGHeader(file *multipart.FileHeader) (string, error) {
 	}
 	filename := fmt.Sprintf("icon-%s.svg", randHex(16))
 	dstPath := filepath.Join(IconsDir, filename)
-	if err := os.WriteFile(dstPath, buf, 0o644); err != nil {
+	// O_EXCL：文件名随机，正常不会冲突；同时避免覆盖已有文件或跟随符号链接。
+	dst, err := os.OpenFile(dstPath, os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0o644)
+	if err != nil {
+		return "", fmt.Errorf("保存上传文件失败: %w", err)
+	}
+	if _, err := dst.Write(buf); err != nil {
+		_ = dst.Close()
+		_ = os.Remove(dstPath)
+		return "", fmt.Errorf("保存上传文件失败: %w", err)
+	}
+	if err := dst.Close(); err != nil {
+		_ = os.Remove(dstPath)
+		return "", fmt.Errorf("保存上传文件失败: %w", err)
+	}
+	// 兜底去执行位（Windows 为空操作）；失败则删除文件，避免留下未知权限的文件。
+	if err := stripExecBits(dstPath); err != nil {
+		_ = os.Remove(dstPath)
 		return "", fmt.Errorf("保存上传文件失败: %w", err)
 	}
 	return "/uploads/icons/" + filename, nil

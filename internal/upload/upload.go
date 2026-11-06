@@ -139,7 +139,8 @@ func saveToDisk(file *multipart.FileHeader, dstPath string) error {
 		return err
 	}
 	defer src.Close()
-	dst, err := os.Create(dstPath)
+	// O_EXCL：文件名随机，正常不会冲突；同时避免覆盖已有文件或跟随符号链接。
+	dst, err := os.OpenFile(dstPath, os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0o644)
 	if err != nil {
 		return err
 	}
@@ -152,6 +153,11 @@ func saveToDisk(file *multipart.FileHeader, dstPath string) error {
 	if closeErr != nil {
 		_ = os.Remove(dstPath)
 		return closeErr
+	}
+	// 兜底去执行位（Windows 为空操作）；失败则删除文件，避免留下未知权限的文件。
+	if err := stripExecBits(dstPath); err != nil {
+		_ = os.Remove(dstPath)
+		return err
 	}
 	return nil
 }
