@@ -116,6 +116,11 @@ func iconNameFromFilename(filename string) string {
 
 // List GET /api/icons/list：启用图标列表 + 组件映射表（公开，前端图标引擎用）。
 // 响应 {"icons": [...], "mappings": {"nav.home": "/uploads/icons/x.svg", ...}}。
+// @Summary 获取启用图标与组件映射表
+// @Tags 图标
+// @Produce json
+// @Success 200 {object} map[string]any "icons/mappings"
+// @Router /icons/list [get]
 func (h *Icons) List(c *gin.Context) {
 	list, err := h.Repos.Icons.FindEnabled(c.Request.Context())
 	if err != nil {
@@ -134,6 +139,13 @@ func (h *Icons) List(c *gin.Context) {
 }
 
 // AdminAll GET /api/icons/all（superadmin）：全部图标（含禁用）。
+// @Summary 全部图标（管理端）
+// @Tags 图标
+// @Security bearerAuth
+// @Produce json
+// @Success 200 {array} map[string]any "图标数组（含禁用）"
+// @Failure 403 {object} map[string]any
+// @Router /icons/all [get]
 func (h *Icons) AdminAll(c *gin.Context) {
 	list, err := h.Repos.Icons.FindAll(c.Request.Context())
 	if err != nil {
@@ -150,6 +162,16 @@ func (h *Icons) AdminAll(c *gin.Context) {
 // Upload POST /api/icons/upload（superadmin）：批量上传 SVG 图标。
 // multipart 字段 files（多文件）或 file（单文件）；可选表单 category（默认 general）。
 // 响应 {"created": [...], "failed": [{"filename", "error"}]}。
+// @Summary 批量上传 SVG 图标
+// @Tags 图标
+// @Security bearerAuth
+// @Accept multipart/form-data
+// @Produce json
+// @Param files formData []file false "SVG 图标（可多选，最多 50 个；也接受单文件字段 file）"
+// @Param category formData string false "分类（默认 general）"
+// @Success 200 {object} map[string]any "created/failed"
+// @Failure 400 {object} map[string]any
+// @Router /icons/upload [post]
 func (h *Icons) Upload(c *gin.Context) {
 	form, err := c.MultipartForm()
 	if err != nil {
@@ -202,6 +224,17 @@ func (h *Icons) Upload(c *gin.Context) {
 }
 
 // Update PUT /api/icons/:id（superadmin）：更新图标名称/分类/映射/描述/启用状态。
+// @Summary 更新图标
+// @Tags 图标
+// @Security bearerAuth
+// @Accept json
+// @Produce json
+// @Param id path string true "图标 ID"
+// @Param body body object true "name/category/description/enabled/mappings（可选）"
+// @Success 200 {object} map[string]any "图标对象"
+// @Failure 400 {object} map[string]any
+// @Failure 404 {object} map[string]any
+// @Router /icons/{id} [put]
 func (h *Icons) Update(c *gin.Context) {
 	oid, err := primitive.ObjectIDFromHex(c.Param("id"))
 	if err != nil {
@@ -262,6 +295,14 @@ func (h *Icons) Update(c *gin.Context) {
 }
 
 // Delete DELETE /api/icons/:id（superadmin）：删除图标文档与磁盘文件。
+// @Summary 删除图标
+// @Tags 图标
+// @Security bearerAuth
+// @Produce json
+// @Param id path string true "图标 ID"
+// @Success 200 {object} map[string]string "message"
+// @Failure 404 {object} map[string]any
+// @Router /icons/{id} [delete]
 func (h *Icons) Delete(c *gin.Context) {
 	oid, err := primitive.ObjectIDFromHex(c.Param("id"))
 	if err != nil {

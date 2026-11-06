@@ -14,6 +14,11 @@ import (
 
 // CSRF 处理器：GET /api/csrf-token。签发 XSRF-TOKEN cookie（非 httpOnly）并返回 {csrfToken}。
 // 注册在 CSRF 校验中间件与限流器之前（顺序是固定契约）。
+// @Summary 获取 CSRF token
+// @Tags 系统
+// @Produce json
+// @Success 200 {object} map[string]string "csrfToken"
+// @Router /csrf-token [get]
 func CSRF(cfg *config.Config) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		token := auth.SetCSRFCookie(c, !cfg.IsDev, cfg.Security.CSRFMaxAgeHours)
@@ -23,6 +28,12 @@ func CSRF(cfg *config.Config) gin.HandlerFunc {
 
 // Health 处理器：GET /api/health。Ping MongoDB，成功 200 失败 503。
 // timestamp 为 ISO8601 UTC 毫秒精度（固定契约）。
+// @Summary 健康检查
+// @Tags 系统
+// @Produce json
+// @Success 200 {object} map[string]string "status/timestamp/db"
+// @Failure 503 {object} map[string]string "status/timestamp/db"
+// @Router /health [get]
 func Health(db *mongo.Database) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		ctx, cancel := context.WithTimeout(c.Request.Context(), 2*time.Second)

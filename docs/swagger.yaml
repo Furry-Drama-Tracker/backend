@@ -1769,6 +1769,20 @@ paths:
       summary: 创作中心-我的剧集
       tags:
       - 创作者
+  /csrf-token:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: csrfToken
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: 获取 CSRF token
+      tags:
+      - 系统
   /episode-trash:
     get:
       parameters:
@@ -2981,6 +2995,26 @@ paths:
       summary: 我的友链申请记录
       tags:
       - 友情链接
+  /health:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: status/timestamp/db
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "503":
+          description: status/timestamp/db
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: 健康检查
+      tags:
+      - 系统
   /histories:
     delete:
       produces:
@@ -3115,6 +3149,140 @@ paths:
       summary: 记录观看历史
       tags:
       - 观看历史
+  /icons/{id}:
+    delete:
+      parameters:
+      - description: 图标 ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: message
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - bearerAuth: []
+      summary: 删除图标
+      tags:
+      - 图标
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: 图标 ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: name/category/description/enabled/mappings（可选）
+        in: body
+        name: body
+        required: true
+        schema:
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 图标对象
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - bearerAuth: []
+      summary: 更新图标
+      tags:
+      - 图标
+  /icons/all:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 图标数组（含禁用）
+          schema:
+            items:
+              additionalProperties: true
+              type: object
+            type: array
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - bearerAuth: []
+      summary: 全部图标（管理端）
+      tags:
+      - 图标
+  /icons/list:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: icons/mappings
+          schema:
+            additionalProperties: true
+            type: object
+      summary: 获取启用图标与组件映射表
+      tags:
+      - 图标
+  /icons/upload:
+    post:
+      consumes:
+      - multipart/form-data
+      parameters:
+      - collectionFormat: csv
+        description: SVG 图标（可多选，最多 50 个；也接受单文件字段 file）
+        in: formData
+        items:
+          type: file
+        name: files
+        type: array
+      - description: 分类（默认 general）
+        in: formData
+        name: category
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: created/failed
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - bearerAuth: []
+      summary: 批量上传 SVG 图标
+      tags:
+      - 图标
   /notifications/{id}:
     delete:
       parameters:
@@ -4177,6 +4345,480 @@ paths:
       summary: 个性化推荐（标签/分类/热门混合打分）
       tags:
       - 统计
+  /themes:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: name/description/wallpaperUrl/wallpaperThumb/icons/accentColor/isSystem
+        in: body
+        name: body
+        required: true
+        schema:
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 主题对象
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - bearerAuth: []
+      summary: 创建主题
+      tags:
+      - 主题
+  /themes/{id}:
+    delete:
+      parameters:
+      - description: 主题 ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: message
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - bearerAuth: []
+      summary: 删除主题
+      tags:
+      - 主题
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: 主题 ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: name/description/wallpaperUrl/wallpaperThumb/icons/accentColor（可选）
+        in: body
+        name: body
+        required: true
+        schema:
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 主题对象
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - bearerAuth: []
+      summary: 更新主题
+      tags:
+      - 主题
+  /themes/{id}/admin:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: 主题 ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: isSystem/enabled/isDefault（可选）
+        in: body
+        name: body
+        required: true
+        schema:
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 主题对象
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - bearerAuth: []
+      summary: 管理主题类型与状态
+      tags:
+      - 主题
+  /themes/{id}/default:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 主题 ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: default（缺省 true；false 取消默认）
+        in: body
+        name: body
+        schema:
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 主题对象
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - bearerAuth: []
+      summary: 设置/取消站点默认主题
+      tags:
+      - 主题
+  /themes/{id}/review:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 主题 ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: action(approve|reject)/note
+        in: body
+        name: body
+        required: true
+        schema:
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 主题对象
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - bearerAuth: []
+      summary: 审核个人主题
+      tags:
+      - 主题
+  /themes/{id}/submit:
+    post:
+      parameters:
+      - description: 主题 ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 主题对象
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - bearerAuth: []
+      summary: 提交个人主题审核
+      tags:
+      - 主题
+  /themes/active:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: theme（无默认主题时为 null）
+          schema:
+            additionalProperties: true
+            type: object
+      summary: 获取站点默认主题
+      tags:
+      - 主题
+  /themes/all:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 主题数组（含个人/待审核）
+          schema:
+            items:
+              additionalProperties: true
+              type: object
+            type: array
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - bearerAuth: []
+      summary: 全部主题（管理端）
+      tags:
+      - 主题
+  /themes/background-prefs:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: opacity(0-100)/blur(0-40)/enabled 至少其一
+        in: body
+        name: body
+        required: true
+        schema:
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: backgroundPrefs
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - bearerAuth: []
+      summary: 更新背景显示偏好
+      tags:
+      - 主题
+  /themes/list:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 主题公开视图数组
+          schema:
+            items:
+              additionalProperties: true
+              type: object
+            type: array
+      summary: 获取可选系统主题列表
+      tags:
+      - 主题
+  /themes/my:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 个人主题数组
+          schema:
+            items:
+              additionalProperties: true
+              type: object
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - bearerAuth: []
+      summary: 获取我的个人主题
+      tags:
+      - 主题
+  /themes/my/selection:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: wallpaperTheme/iconsTheme/wallpaperIsDefault/iconsIsDefault
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - bearerAuth: []
+      summary: 获取当前用户生效主题
+      tags:
+      - 主题
+  /themes/selection:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: wallpaperThemeId/iconsThemeId（空串清空；兼容 themeId/applyIcons/applyWallpaper）
+        in: body
+        name: body
+        required: true
+        schema:
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: wallpaperTheme/iconsTheme/backgroundPrefs/accentColor
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: 无权使用该主题
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: 主题不存在
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - bearerAuth: []
+      summary: 设置用户背景/图标两槽主题
+      tags:
+      - 主题
+  /themes/upload-icon:
+    post:
+      consumes:
+      - multipart/form-data
+      parameters:
+      - description: SVG 图标（≤1MB）
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: url
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - bearerAuth: []
+      summary: 上传主题图标
+      tags:
+      - 主题
+  /themes/upload-wallpaper:
+    post:
+      consumes:
+      - multipart/form-data
+      parameters:
+      - description: 图片（≤8MB）
+        in: formData
+        name: image
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: url
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - bearerAuth: []
+      summary: 上传主题壁纸
+      tags:
+      - 主题
   /translate:
     post:
       consumes:

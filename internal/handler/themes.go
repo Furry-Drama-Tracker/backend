@@ -209,6 +209,11 @@ func isSuperUser(c *gin.Context) bool {
 }
 
 // Active GET /api/themes/active：获取站点默认主题（公开，全站加载时调用）。
+// @Summary 获取站点默认主题
+// @Tags 主题
+// @Produce json
+// @Success 200 {object} map[string]any "theme（无默认主题时为 null）"
+// @Router /themes/active [get]
 func (h *Themes) Active(c *gin.Context) {
 	t, err := h.Repos.Themes.FindDefault(c.Request.Context())
 	if err != nil {
@@ -223,6 +228,11 @@ func (h *Themes) Active(c *gin.Context) {
 }
 
 // List GET /api/themes/list：获取全部可选系统主题（公开）。
+// @Summary 获取可选系统主题列表
+// @Tags 主题
+// @Produce json
+// @Success 200 {array} map[string]any "主题公开视图数组"
+// @Router /themes/list [get]
 func (h *Themes) List(c *gin.Context) {
 	list, err := h.Repos.Themes.FindSystemEnabled(c.Request.Context())
 	if err != nil {
@@ -237,6 +247,13 @@ func (h *Themes) List(c *gin.Context) {
 }
 
 // MyList GET /api/themes/my：获取我的全部个人主题。
+// @Summary 获取我的个人主题
+// @Tags 主题
+// @Security bearerAuth
+// @Produce json
+// @Success 200 {array} map[string]any "个人主题数组"
+// @Failure 401 {object} map[string]any
+// @Router /themes/my [get]
 func (h *Themes) MyList(c *gin.Context) {
 	user, _ := middleware.GetUser(c)
 	list, err := h.Repos.Themes.FindByOwner(c.Request.Context(), user.ID)
@@ -293,6 +310,13 @@ func (h *Themes) resolveThemeSlot(ctx context.Context, c *gin.Context, user *mod
 //   - wallpaperTheme / iconsTheme：两槽当前主题（无则为 null，回落站点默认主题）；
 //   - wallpaperIsDefault / iconsIsDefault：该槽是否为默认主题兜底（非用户主动选择）；
 //   - 兼容旧单主题字段：按 applyIcons/applyWallpaper 拆分到对应槽。
+// @Summary 获取当前用户生效主题
+// @Tags 主题
+// @Security bearerAuth
+// @Produce json
+// @Success 200 {object} map[string]any "wallpaperTheme/iconsTheme/wallpaperIsDefault/iconsIsDefault"
+// @Failure 401 {object} map[string]any
+// @Router /themes/my/selection [get]
 func (h *Themes) MySelection(c *gin.Context) {
 	user, _ := middleware.GetUser(c)
 	ctx := c.Request.Context()
@@ -377,6 +401,17 @@ func bodyBool(body map[string]any, key string, def bool) bool {
 // 该槽保持不变；兼容旧 body { themeId, applyIcons, applyWallpaper }（拆到对应槽）。
 // 壁纸槽变更时同步写入/清空用户背景偏好（多端生效）；响应含两槽主题与背景偏好，
 // 以及被设置主题的主题色（有则前端应用、无则保持）。
+// @Summary 设置用户背景/图标两槽主题
+// @Tags 主题
+// @Security bearerAuth
+// @Accept json
+// @Produce json
+// @Param body body object true "wallpaperThemeId/iconsThemeId（空串清空；兼容 themeId/applyIcons/applyWallpaper）"
+// @Success 200 {object} map[string]any "wallpaperTheme/iconsTheme/backgroundPrefs/accentColor"
+// @Failure 400 {object} map[string]any
+// @Failure 403 {object} map[string]any "无权使用该主题"
+// @Failure 404 {object} map[string]any "主题不存在"
+// @Router /themes/selection [put]
 func (h *Themes) SetSelection(c *gin.Context) {
 	body := cmsReadBody(c)
 	user, _ := middleware.GetUser(c)
@@ -545,6 +580,15 @@ func (h *Themes) findValidatedTheme(c *gin.Context, raw string, forWallpaper boo
 
 // UpdateBackgroundPrefs PUT /api/themes/background-prefs：用户调整当前背景的
 // 透明度 / 模糊度 / 单独开关（不改 image——壁纸图片由主题槽驱动）。
+// @Summary 更新背景显示偏好
+// @Tags 主题
+// @Security bearerAuth
+// @Accept json
+// @Produce json
+// @Param body body object true "opacity(0-100)/blur(0-40)/enabled 至少其一"
+// @Success 200 {object} map[string]any "backgroundPrefs"
+// @Failure 400 {object} map[string]any
+// @Router /themes/background-prefs [put]
 func (h *Themes) UpdateBackgroundPrefs(c *gin.Context) {
 	body := cmsReadBody(c)
 	user, _ := middleware.GetUser(c)
@@ -588,6 +632,15 @@ func (h *Themes) UpdateBackgroundPrefs(c *gin.Context) {
 // Create POST /api/themes：创建主题（壁纸 + 图标组合包）。
 // 普通用户创建个人主题（draft，仅自己可见）；超管可传 isSystem:true 直接创建
 // 启用的系统主题。主题必须包含壁纸或图标至少其一。
+// @Summary 创建主题
+// @Tags 主题
+// @Security bearerAuth
+// @Accept json
+// @Produce json
+// @Param body body object true "name/description/wallpaperUrl/wallpaperThumb/icons/accentColor/isSystem"
+// @Success 200 {object} map[string]any "主题对象"
+// @Failure 400 {object} map[string]any
+// @Router /themes [post]
 func (h *Themes) Create(c *gin.Context) {
 	body := cmsReadBody(c)
 	name := strings.TrimSpace(asString(body["name"]))
@@ -665,6 +718,18 @@ func canEditTheme(c *gin.Context, t *model.Theme) bool {
 // Update PUT /api/themes/:id：更新主题（名称/描述/壁纸/图标）。
 // 系统主题仅超管可改；个人主题仅 owner 可改。
 // 显式提交壁纸/图标字段时，最终内容必须仍包含壁纸或图标至少其一。
+// @Summary 更新主题
+// @Tags 主题
+// @Security bearerAuth
+// @Accept json
+// @Produce json
+// @Param id path string true "主题 ID"
+// @Param body body object true "name/description/wallpaperUrl/wallpaperThumb/icons/accentColor（可选）"
+// @Success 200 {object} map[string]any "主题对象"
+// @Failure 400 {object} map[string]any
+// @Failure 403 {object} map[string]any
+// @Failure 404 {object} map[string]any
+// @Router /themes/{id} [put]
 func (h *Themes) Update(c *gin.Context) {
 	oid, err := primitive.ObjectIDFromHex(c.Param("id"))
 	if err != nil {
@@ -760,6 +825,15 @@ func (h *Themes) Update(c *gin.Context) {
 
 // Delete DELETE /api/themes/:id：删除主题（owner 或超管）。
 // 删除默认主题时同时清除引用该主题的用户的 themeId。
+// @Summary 删除主题
+// @Tags 主题
+// @Security bearerAuth
+// @Produce json
+// @Param id path string true "主题 ID"
+// @Success 200 {object} map[string]string "message"
+// @Failure 403 {object} map[string]any
+// @Failure 404 {object} map[string]any
+// @Router /themes/{id} [delete]
 func (h *Themes) Delete(c *gin.Context) {
 	oid, err := primitive.ObjectIDFromHex(c.Param("id"))
 	if err != nil {
@@ -827,6 +901,16 @@ func (h *Themes) removeUnreferencedThemeFiles(ctx context.Context, t *model.Them
 }
 
 // Submit POST /api/themes/:id/submit：owner 提交个人主题审核。
+// @Summary 提交个人主题审核
+// @Tags 主题
+// @Security bearerAuth
+// @Produce json
+// @Param id path string true "主题 ID"
+// @Success 200 {object} map[string]any "主题对象"
+// @Failure 400 {object} map[string]any
+// @Failure 403 {object} map[string]any
+// @Failure 404 {object} map[string]any
+// @Router /themes/{id}/submit [post]
 func (h *Themes) Submit(c *gin.Context) {
 	oid, err := primitive.ObjectIDFromHex(c.Param("id"))
 	if err != nil {
@@ -868,6 +952,13 @@ func (h *Themes) Submit(c *gin.Context) {
 }
 
 // AdminAll GET /api/themes/all（superadmin）：全部主题（含个人/待审核）。
+// @Summary 全部主题（管理端）
+// @Tags 主题
+// @Security bearerAuth
+// @Produce json
+// @Success 200 {array} map[string]any "主题数组（含个人/待审核）"
+// @Failure 403 {object} map[string]any
+// @Router /themes/all [get]
 func (h *Themes) AdminAll(c *gin.Context) {
 	list, err := h.Repos.Themes.FindAllAdmin(c.Request.Context())
 	if err != nil {
@@ -884,6 +975,17 @@ func (h *Themes) AdminAll(c *gin.Context) {
 // Review POST /api/themes/:id/review（superadmin）：审核个人主题。
 // approve → 变为系统主题（isSystem=true, status=approved, enabled=true）；
 // reject  → 保持个人主题（status=rejected，可带驳回原因）。
+// @Summary 审核个人主题
+// @Tags 主题
+// @Security bearerAuth
+// @Accept json
+// @Produce json
+// @Param id path string true "主题 ID"
+// @Param body body object true "action(approve|reject)/note"
+// @Success 200 {object} map[string]any "主题对象"
+// @Failure 400 {object} map[string]any
+// @Failure 404 {object} map[string]any
+// @Router /themes/{id}/review [post]
 func (h *Themes) Review(c *gin.Context) {
 	oid, err := primitive.ObjectIDFromHex(c.Param("id"))
 	if err != nil {
@@ -957,6 +1059,17 @@ func (h *Themes) notifyThemeReviewResult(t *model.Theme, action, note string) {
 // body: {"default": true|false}，缺省视为 true（兼容旧「设为默认」调用）。
 //   - true：设为默认（仅限启用的系统主题），并清除其它主题的默认标记；
 //   - false：取消该主题的默认标记，取消后站点允许没有任何默认主题。
+// @Summary 设置/取消站点默认主题
+// @Tags 主题
+// @Security bearerAuth
+// @Accept json
+// @Produce json
+// @Param id path string true "主题 ID"
+// @Param body body object false "default（缺省 true；false 取消默认）"
+// @Success 200 {object} map[string]any "主题对象"
+// @Failure 400 {object} map[string]any
+// @Failure 404 {object} map[string]any
+// @Router /themes/{id}/default [post]
 func (h *Themes) SetDefault(c *gin.Context) {
 	oid, err := primitive.ObjectIDFromHex(c.Param("id"))
 	if err != nil {
@@ -1013,6 +1126,17 @@ func (h *Themes) SetDefault(c *gin.Context) {
 
 // AdminUpdate PUT /api/themes/:id/admin（superadmin）：管理主题类型与状态。
 // 可将个人主题升级为系统主题（或反向降级）、启用/停用系统主题。
+// @Summary 管理主题类型与状态
+// @Tags 主题
+// @Security bearerAuth
+// @Accept json
+// @Produce json
+// @Param id path string true "主题 ID"
+// @Param body body object true "isSystem/enabled/isDefault（可选）"
+// @Success 200 {object} map[string]any "主题对象"
+// @Failure 400 {object} map[string]any
+// @Failure 404 {object} map[string]any
+// @Router /themes/{id}/admin [put]
 func (h *Themes) AdminUpdate(c *gin.Context) {
 	oid, err := primitive.ObjectIDFromHex(c.Param("id"))
 	if err != nil {
@@ -1095,6 +1219,15 @@ func (h *Themes) AdminUpdate(c *gin.Context) {
 
 // UploadWallpaper POST /api/themes/upload-wallpaper（登录用户 + ≤8MB 图片）。
 // 上传主题用壁纸，返回 {"url": "/uploads/theme-wallpaper-xxx.png"}。
+// @Summary 上传主题壁纸
+// @Tags 主题
+// @Security bearerAuth
+// @Accept multipart/form-data
+// @Produce json
+// @Param image formData file true "图片（≤8MB）"
+// @Success 200 {object} map[string]string "url"
+// @Failure 400 {object} map[string]any
+// @Router /themes/upload-wallpaper [post]
 func (h *Themes) UploadWallpaper(c *gin.Context) {
 	url, err := upload.SaveImage(c, "image", "theme-wallpaper", 8<<20)
 	if err != nil {
@@ -1106,6 +1239,15 @@ func (h *Themes) UploadWallpaper(c *gin.Context) {
 
 // UploadIcon POST /api/themes/upload-icon（登录用户 + ≤1MB SVG）。
 // 上传主题用图标，返回 {"url": "/uploads/icons/icon-xxx.svg"}。
+// @Summary 上传主题图标
+// @Tags 主题
+// @Security bearerAuth
+// @Accept multipart/form-data
+// @Produce json
+// @Param file formData file true "SVG 图标（≤1MB）"
+// @Success 200 {object} map[string]string "url"
+// @Failure 400 {object} map[string]any
+// @Router /themes/upload-icon [post]
 func (h *Themes) UploadIcon(c *gin.Context) {
 	url, err := upload.SaveSVG(c, "file")
 	if err != nil {
