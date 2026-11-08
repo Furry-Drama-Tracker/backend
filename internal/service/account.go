@@ -6,9 +6,9 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/xiedada05/furry-drama-be-neo/internal/auth"
-	"github.com/xiedada05/furry-drama-be-neo/internal/errors"
-	"github.com/xiedada05/furry-drama-be-neo/internal/model"
+	"github.com/Furry-Drama-Tracker/backend/internal/auth"
+	"github.com/Furry-Drama-Tracker/backend/internal/errors"
+	"github.com/Furry-Drama-Tracker/backend/internal/model"
 )
 
 // DeletionResult 是注销申请状态。

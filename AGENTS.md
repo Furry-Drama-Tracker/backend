@@ -3,7 +3,7 @@
 Go/Gin 版兽剧聚合平台后端，前端零改动对接。
 
 - 独立 git 仓库，license AGPL-3.0-or-later（见 LICENSE.md）
-- module `github.com/xiedada05/furry-drama-be-neo`，Go 1.26
+- module `github.com/Furry-Drama-Tracker/backend`，Go 1.26
 - 官方 `go.mongodb.org/mongo-driver`（v1，无 ODM），手写 repository
 
 ## Commands

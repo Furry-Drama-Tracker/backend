@@ -16,13 +16,13 @@ import (
 	altchalib "github.com/altcha-org/altcha-lib-go/v2"
 	"github.com/gin-gonic/gin"
 
-	"github.com/xiedada05/furry-drama-be-neo/internal/auth"
-	"github.com/xiedada05/furry-drama-be-neo/internal/code"
-	"github.com/xiedada05/furry-drama-be-neo/internal/config"
-	"github.com/xiedada05/furry-drama-be-neo/internal/email"
-	"github.com/xiedada05/furry-drama-be-neo/internal/ipregion"
-	"github.com/xiedada05/furry-drama-be-neo/internal/model"
-	"github.com/xiedada05/furry-drama-be-neo/internal/repository"
+	"github.com/Furry-Drama-Tracker/backend/internal/auth"
+	"github.com/Furry-Drama-Tracker/backend/internal/code"
+	"github.com/Furry-Drama-Tracker/backend/internal/config"
+	"github.com/Furry-Drama-Tracker/backend/internal/email"
+	"github.com/Furry-Drama-Tracker/backend/internal/ipregion"
+	"github.com/Furry-Drama-Tracker/backend/internal/model"
+	"github.com/Furry-Drama-Tracker/backend/internal/repository"
 )
 
 // DefaultSuperAdminEmail 是超管默认邮箱（requireEmailChanged 判定）。

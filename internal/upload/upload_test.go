@@ -15,7 +15,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	apperrors "github.com/xiedada05/furry-drama-be-neo/internal/errors"
+	apperrors "github.com/Furry-Drama-Tracker/backend/internal/errors"
 )
 
 // setupTest 把上传目录切到临时目录，测试结束恢复。

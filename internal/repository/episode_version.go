@@ -10,7 +10,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 
-	"github.com/xiedada05/furry-drama-be-neo/internal/model"
+	"github.com/Furry-Drama-Tracker/backend/internal/model"
 )
 
 // EpisodeVersionRepo 剧集版本仓储（episodeversions 集合，episodeId+version 唯一）。

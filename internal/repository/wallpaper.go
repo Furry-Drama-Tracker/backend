@@ -10,7 +10,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 
-	"github.com/xiedada05/furry-drama-be-neo/internal/model"
+	"github.com/Furry-Drama-Tracker/backend/internal/model"
 )
 
 // WallpaperRepo 系统壁纸仓储（systemwallpapers 集合）。

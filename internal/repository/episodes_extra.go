@@ -7,7 +7,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo/options"
 
-	"github.com/xiedada05/furry-drama-be-neo/internal/model"
+	"github.com/Furry-Drama-Tracker/backend/internal/model"
 )
 
 // 本文件为收藏夹域跨域访问 episodes 集合的方法，挂到已有

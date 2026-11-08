@@ -11,7 +11,7 @@ import (
 	ulule "github.com/ulule/limiter/v3"
 	memory "github.com/ulule/limiter/v3/drivers/store/memory"
 
-	"github.com/xiedada05/furry-drama-be-neo/internal/ratelimit"
+	"github.com/Furry-Drama-Tracker/backend/internal/ratelimit"
 )
 
 // RateLimitOpts 是 RateLimit 的挂载与开关参数。

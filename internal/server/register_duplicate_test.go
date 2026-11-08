@@ -11,10 +11,10 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/xiedada05/furry-drama-be-neo/internal/auth"
-	"github.com/xiedada05/furry-drama-be-neo/internal/config"
-	"github.com/xiedada05/furry-drama-be-neo/internal/repository"
-	"github.com/xiedada05/furry-drama-be-neo/internal/server"
+	"github.com/Furry-Drama-Tracker/backend/internal/auth"
+	"github.com/Furry-Drama-Tracker/backend/internal/config"
+	"github.com/Furry-Drama-Tracker/backend/internal/repository"
+	"github.com/Furry-Drama-Tracker/backend/internal/server"
 )
 
 // registerTestServer 组装 register 测试专用服务器（独立库 neo_register_test）。

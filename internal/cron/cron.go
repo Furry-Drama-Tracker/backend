@@ -9,8 +9,8 @@ import (
 	"log/slog"
 	"time"
 
-	"github.com/xiedada05/furry-drama-be-neo/internal/repository"
-	"github.com/xiedada05/furry-drama-be-neo/internal/service"
+	"github.com/Furry-Drama-Tracker/backend/internal/repository"
+	"github.com/Furry-Drama-Tracker/backend/internal/service"
 )
 
 const (

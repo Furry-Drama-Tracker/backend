@@ -4,7 +4,7 @@
 
 - Go 1.26，Gin，官方 `go.mongodb.org/mongo-driver`（v1，无 ODM）
 - 独立 git 仓库，license AGPL-3.0-or-later
-- module `github.com/xiedada05/furry-drama-be-neo`
+- module `github.com/Furry-Drama-Tracker/backend`
 
 ## 文档导航（维护者必读）
 

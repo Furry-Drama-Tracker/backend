@@ -9,7 +9,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 
-	"github.com/xiedada05/furry-drama-be-neo/internal/model"
+	"github.com/Furry-Drama-Tracker/backend/internal/model"
 )
 
 // ExportData 是 /export-my-data 的 JSON 结构（字段集为固定契约，勿增删）。

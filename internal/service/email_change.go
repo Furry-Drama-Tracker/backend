@@ -8,12 +8,12 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/xiedada05/furry-drama-be-neo/internal/auth"
-	"github.com/xiedada05/furry-drama-be-neo/internal/code"
-	"github.com/xiedada05/furry-drama-be-neo/internal/email"
-	"github.com/xiedada05/furry-drama-be-neo/internal/errors"
-	"github.com/xiedada05/furry-drama-be-neo/internal/model"
-	"github.com/xiedada05/furry-drama-be-neo/internal/repository"
+	"github.com/Furry-Drama-Tracker/backend/internal/auth"
+	"github.com/Furry-Drama-Tracker/backend/internal/code"
+	"github.com/Furry-Drama-Tracker/backend/internal/email"
+	"github.com/Furry-Drama-Tracker/backend/internal/errors"
+	"github.com/Furry-Drama-Tracker/backend/internal/model"
+	"github.com/Furry-Drama-Tracker/backend/internal/repository"
 )
 
 // ChangeEmail PUT /api/auth/change-email（superAdminProtect，超管强制改邮箱）。

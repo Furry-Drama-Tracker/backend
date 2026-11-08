@@ -8,7 +8,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 
-	"github.com/xiedada05/furry-drama-be-neo/internal/model"
+	"github.com/Furry-Drama-Tracker/backend/internal/model"
 )
 
 // UsedTokenRepo 一次性令牌去重仓储（usedtokens，expiresAt 建 TTL 索引自动删除）。

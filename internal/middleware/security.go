@@ -11,7 +11,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/xiedada05/furry-drama-be-neo/internal/security"
+	"github.com/Furry-Drama-Tracker/backend/internal/security"
 )
 
 // SanitizeInput 清洗输入：递归清洗请求 body（JSON）、query 与 params 中的字符串值；剥离以 $ 开头或含 . 的键

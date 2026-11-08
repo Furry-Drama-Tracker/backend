@@ -6,7 +6,7 @@
 
 ## ADR-001 独立仓库 + AGPL 许可
 
-- **决策**：neo-server 是独立 git 仓库（非 furry-drama-tracker 子目录模块），license AGPL-3.0-or-later，module `github.com/xiedada05/furry-drama-be-neo`。
+- **决策**：neo-server 是独立 git 仓库（非 furry-drama-tracker 子目录模块），license AGPL-3.0-or-later，module `github.com/Furry-Drama-Tracker/backend`。
 - **背景**：后端独立于前端仓库演进，用户指定独立仓库、继续 AGPL。
 - **取舍**：独立仓库避免污染其他项目的 git 历史；代价是与前端仓库的接口变更需手动同步。
 

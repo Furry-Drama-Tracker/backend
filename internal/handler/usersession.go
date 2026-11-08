@@ -7,9 +7,9 @@ import (
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 
-	"github.com/xiedada05/furry-drama-be-neo/internal/auth"
-	"github.com/xiedada05/furry-drama-be-neo/internal/middleware"
-	"github.com/xiedada05/furry-drama-be-neo/internal/model"
+	"github.com/Furry-Drama-Tracker/backend/internal/auth"
+	"github.com/Furry-Drama-Tracker/backend/internal/middleware"
+	"github.com/Furry-Drama-Tracker/backend/internal/model"
 )
 
 // sessionJSON 组装会话对象（含 isCurrent 标记）。

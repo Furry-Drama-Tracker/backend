@@ -8,10 +8,10 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/xiedada05/furry-drama-be-neo/internal/auth"
-	"github.com/xiedada05/furry-drama-be-neo/internal/code"
-	"github.com/xiedada05/furry-drama-be-neo/internal/errors"
-	"github.com/xiedada05/furry-drama-be-neo/internal/repository"
+	"github.com/Furry-Drama-Tracker/backend/internal/auth"
+	"github.com/Furry-Drama-Tracker/backend/internal/code"
+	"github.com/Furry-Drama-Tracker/backend/internal/errors"
+	"github.com/Furry-Drama-Tracker/backend/internal/repository"
 )
 
 // DeviceVerifyResult 是 verify-device 的响应。

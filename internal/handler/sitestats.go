@@ -8,7 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
 
-	"github.com/xiedada05/furry-drama-be-neo/internal/repository"
+	"github.com/Furry-Drama-Tracker/backend/internal/repository"
 )
 
 // SiteStats 前台公开站点规模数据（用户数 / 剧集数 / 在线人数）。

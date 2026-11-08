@@ -14,10 +14,10 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 
-	"github.com/xiedada05/furry-drama-be-neo/internal/auth"
-	"github.com/xiedada05/furry-drama-be-neo/internal/config"
-	"github.com/xiedada05/furry-drama-be-neo/internal/repository"
-	"github.com/xiedada05/furry-drama-be-neo/internal/server"
+	"github.com/Furry-Drama-Tracker/backend/internal/auth"
+	"github.com/Furry-Drama-Tracker/backend/internal/config"
+	"github.com/Furry-Drama-Tracker/backend/internal/repository"
+	"github.com/Furry-Drama-Tracker/backend/internal/server"
 )
 
 // cbvApp 构造 categories/banners/auto-status/versions 四域测试应用（独立库）。

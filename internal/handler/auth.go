@@ -5,11 +5,11 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/xiedada05/furry-drama-be-neo/internal/auth"
-	"github.com/xiedada05/furry-drama-be-neo/internal/config"
-	"github.com/xiedada05/furry-drama-be-neo/internal/errors"
-	"github.com/xiedada05/furry-drama-be-neo/internal/middleware"
-	"github.com/xiedada05/furry-drama-be-neo/internal/service"
+	"github.com/Furry-Drama-Tracker/backend/internal/auth"
+	"github.com/Furry-Drama-Tracker/backend/internal/config"
+	"github.com/Furry-Drama-Tracker/backend/internal/errors"
+	"github.com/Furry-Drama-Tracker/backend/internal/middleware"
+	"github.com/Furry-Drama-Tracker/backend/internal/service"
 )
 
 // Auth 是认证/用户域 handler 容器。

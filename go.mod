@@ -1,4 +1,4 @@
-module github.com/xiedada05/furry-drama-be-neo
+module github.com/Furry-Drama-Tracker/backend
 
 go 1.26.5
 

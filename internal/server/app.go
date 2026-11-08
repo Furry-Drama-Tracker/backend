@@ -27,16 +27,16 @@ import (
 	ginSwagger "github.com/swaggo/gin-swagger"
 	"go.mongodb.org/mongo-driver/mongo"
 
-	_ "github.com/xiedada05/furry-drama-be-neo/docs" // swag init 生成的 OpenAPI spec（init 注册）
-	"github.com/xiedada05/furry-drama-be-neo/internal/auth"
-	"github.com/xiedada05/furry-drama-be-neo/internal/config"
-	"github.com/xiedada05/furry-drama-be-neo/internal/errors"
-	"github.com/xiedada05/furry-drama-be-neo/internal/handler"
-	"github.com/xiedada05/furry-drama-be-neo/internal/logging"
-	"github.com/xiedada05/furry-drama-be-neo/internal/middleware"
-	"github.com/xiedada05/furry-drama-be-neo/internal/ratelimit"
-	"github.com/xiedada05/furry-drama-be-neo/internal/repository"
-	"github.com/xiedada05/furry-drama-be-neo/internal/upload"
+	_ "github.com/Furry-Drama-Tracker/backend/docs" // swag init 生成的 OpenAPI spec（init 注册）
+	"github.com/Furry-Drama-Tracker/backend/internal/auth"
+	"github.com/Furry-Drama-Tracker/backend/internal/config"
+	"github.com/Furry-Drama-Tracker/backend/internal/errors"
+	"github.com/Furry-Drama-Tracker/backend/internal/handler"
+	"github.com/Furry-Drama-Tracker/backend/internal/logging"
+	"github.com/Furry-Drama-Tracker/backend/internal/middleware"
+	"github.com/Furry-Drama-Tracker/backend/internal/ratelimit"
+	"github.com/Furry-Drama-Tracker/backend/internal/repository"
+	"github.com/Furry-Drama-Tracker/backend/internal/upload"
 )
 
 // Deps 是装配 Gin 引擎所需的全部依赖。

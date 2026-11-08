@@ -8,7 +8,7 @@ import (
 
 	altcha "github.com/altcha-org/altcha-lib-go/v2"
 
-	"github.com/xiedada05/furry-drama-be-neo/internal/config"
+	"github.com/Furry-Drama-Tracker/backend/internal/config"
 )
 
 const altchaTestSecret = "aaaabbbbccccddddeeeeffff00001111"

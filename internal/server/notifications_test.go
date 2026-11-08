@@ -16,11 +16,11 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 
-	"github.com/xiedada05/furry-drama-be-neo/internal/auth"
-	"github.com/xiedada05/furry-drama-be-neo/internal/config"
-	"github.com/xiedada05/furry-drama-be-neo/internal/model"
-	"github.com/xiedada05/furry-drama-be-neo/internal/repository"
-	"github.com/xiedada05/furry-drama-be-neo/internal/server"
+	"github.com/Furry-Drama-Tracker/backend/internal/auth"
+	"github.com/Furry-Drama-Tracker/backend/internal/config"
+	"github.com/Furry-Drama-Tracker/backend/internal/model"
+	"github.com/Furry-Drama-Tracker/backend/internal/repository"
+	"github.com/Furry-Drama-Tracker/backend/internal/server"
 )
 
 // notificationsTestServer 组装通知域测试专用服务器（独立库 neo_notifications_test）。

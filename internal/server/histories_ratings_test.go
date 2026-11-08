@@ -17,13 +17,13 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 
-	"github.com/xiedada05/furry-drama-be-neo/internal/auth"
-	"github.com/xiedada05/furry-drama-be-neo/internal/config"
-	"github.com/xiedada05/furry-drama-be-neo/internal/handler"
-	"github.com/xiedada05/furry-drama-be-neo/internal/middleware"
-	"github.com/xiedada05/furry-drama-be-neo/internal/model"
-	"github.com/xiedada05/furry-drama-be-neo/internal/ratelimit"
-	"github.com/xiedada05/furry-drama-be-neo/internal/repository"
+	"github.com/Furry-Drama-Tracker/backend/internal/auth"
+	"github.com/Furry-Drama-Tracker/backend/internal/config"
+	"github.com/Furry-Drama-Tracker/backend/internal/handler"
+	"github.com/Furry-Drama-Tracker/backend/internal/middleware"
+	"github.com/Furry-Drama-Tracker/backend/internal/model"
+	"github.com/Furry-Drama-Tracker/backend/internal/ratelimit"
+	"github.com/Furry-Drama-Tracker/backend/internal/repository"
 )
 
 // newHrServer 组装只挂载 /api/histories 与 /api/ratios 的测试服务器

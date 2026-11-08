@@ -6,11 +6,11 @@ import (
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
 
-	"github.com/xiedada05/furry-drama-be-neo/internal/config"
-	"github.com/xiedada05/furry-drama-be-neo/internal/middleware"
-	"github.com/xiedada05/furry-drama-be-neo/internal/model"
-	"github.com/xiedada05/furry-drama-be-neo/internal/ratelimit"
-	"github.com/xiedada05/furry-drama-be-neo/internal/repository"
+	"github.com/Furry-Drama-Tracker/backend/internal/config"
+	"github.com/Furry-Drama-Tracker/backend/internal/middleware"
+	"github.com/Furry-Drama-Tracker/backend/internal/model"
+	"github.com/Furry-Drama-Tracker/backend/internal/ratelimit"
+	"github.com/Furry-Drama-Tracker/backend/internal/repository"
 )
 
 // AuditLogs 是审计日志域（/api/audit-logs）handler 容器（单个端点）。

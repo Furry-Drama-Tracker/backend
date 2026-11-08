@@ -11,7 +11,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/xiedada05/furry-drama-be-neo/internal/ratelimit"
+	"github.com/Furry-Drama-Tracker/backend/internal/ratelimit"
 )
 
 // do 执行一次请求（供本包测试通用）。

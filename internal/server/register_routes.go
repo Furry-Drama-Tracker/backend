@@ -6,13 +6,13 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/xiedada05/furry-drama-be-neo/internal/email"
-	"github.com/xiedada05/furry-drama-be-neo/internal/handler"
-	"github.com/xiedada05/furry-drama-be-neo/internal/ipregion"
-	"github.com/xiedada05/furry-drama-be-neo/internal/middleware"
-	"github.com/xiedada05/furry-drama-be-neo/internal/ratelimit"
-	"github.com/xiedada05/furry-drama-be-neo/internal/router"
-	"github.com/xiedada05/furry-drama-be-neo/internal/service"
+	"github.com/Furry-Drama-Tracker/backend/internal/email"
+	"github.com/Furry-Drama-Tracker/backend/internal/handler"
+	"github.com/Furry-Drama-Tracker/backend/internal/ipregion"
+	"github.com/Furry-Drama-Tracker/backend/internal/middleware"
+	"github.com/Furry-Drama-Tracker/backend/internal/ratelimit"
+	"github.com/Furry-Drama-Tracker/backend/internal/router"
+	"github.com/Furry-Drama-Tracker/backend/internal/service"
 )
 
 // RegisterRoutes 挂载第一段业务路由（认证 + 用户域）到受限流的 /api 路由组下。

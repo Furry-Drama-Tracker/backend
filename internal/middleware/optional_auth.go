@@ -3,7 +3,7 @@ package middleware
 import (
 	"github.com/gin-gonic/gin"
 
-	"github.com/xiedada05/furry-drama-be-neo/internal/auth"
+	"github.com/Furry-Drama-Tracker/backend/internal/auth"
 )
 
 // OptionalAuth 构造可选鉴权中间件：尝试解析 access token，

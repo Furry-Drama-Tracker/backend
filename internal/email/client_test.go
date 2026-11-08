@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/xiedada05/furry-drama-be-neo/internal/config"
+	"github.com/Furry-Drama-Tracker/backend/internal/config"
 )
 
 func newTestClient() *Client {

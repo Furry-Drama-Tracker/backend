@@ -15,8 +15,8 @@ import (
 
 	"github.com/wneessen/go-mail"
 
-	"github.com/xiedada05/furry-drama-be-neo/internal/config"
-	"github.com/xiedada05/furry-drama-be-neo/internal/repository"
+	"github.com/Furry-Drama-Tracker/backend/internal/config"
+	"github.com/Furry-Drama-Tracker/backend/internal/repository"
 )
 
 // Config 是 SMTP 配置（来自 ini [email] 段 / 环境变量 EMAIL_*）。

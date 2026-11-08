@@ -32,14 +32,14 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/xiedada05/furry-drama-be-neo/internal/auth"
-	"github.com/xiedada05/furry-drama-be-neo/internal/config"
-	"github.com/xiedada05/furry-drama-be-neo/internal/cron"
-	"github.com/xiedada05/furry-drama-be-neo/internal/indexes"
-	"github.com/xiedada05/furry-drama-be-neo/internal/migrate"
-	"github.com/xiedada05/furry-drama-be-neo/internal/repository"
-	"github.com/xiedada05/furry-drama-be-neo/internal/server"
-	"github.com/xiedada05/furry-drama-be-neo/internal/upload"
+	"github.com/Furry-Drama-Tracker/backend/internal/auth"
+	"github.com/Furry-Drama-Tracker/backend/internal/config"
+	"github.com/Furry-Drama-Tracker/backend/internal/cron"
+	"github.com/Furry-Drama-Tracker/backend/internal/indexes"
+	"github.com/Furry-Drama-Tracker/backend/internal/migrate"
+	"github.com/Furry-Drama-Tracker/backend/internal/repository"
+	"github.com/Furry-Drama-Tracker/backend/internal/server"
+	"github.com/Furry-Drama-Tracker/backend/internal/upload"
 )
 
 func main() {

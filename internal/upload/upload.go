@@ -27,7 +27,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	apperrors "github.com/xiedada05/furry-drama-be-neo/internal/errors"
+	apperrors "github.com/Furry-Drama-Tracker/backend/internal/errors"
 )
 
 // DefaultUploadsDir 与 config.ServerConfig.UploadsDir 的默认值一致（./uploads）。

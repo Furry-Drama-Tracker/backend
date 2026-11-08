@@ -5,7 +5,7 @@ import (
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
 
-	"github.com/xiedada05/furry-drama-be-neo/internal/repository"
+	"github.com/Furry-Drama-Tracker/backend/internal/repository"
 )
 
 // PurgeUserData 完整删除用户及其个人数据（账号注销/管理员删号共用）。

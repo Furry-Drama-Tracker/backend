@@ -8,7 +8,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/xiedada05/furry-drama-be-neo/internal/repository"
+	"github.com/Furry-Drama-Tracker/backend/internal/repository"
 )
 
 // 接口调用统计缓冲参数（固定值，勿随意改——影响统计口径）。

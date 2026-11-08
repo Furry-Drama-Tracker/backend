@@ -4,7 +4,7 @@ package middleware
 import (
 	"github.com/gin-gonic/gin"
 
-	"github.com/xiedada05/furry-drama-be-neo/internal/auth"
+	"github.com/Furry-Drama-Tracker/backend/internal/auth"
 )
 
 // CSRF 校验中间件：对非 GET 请求校验 XSRF-TOKEN cookie 与 X-XSRF-TOKEN header
