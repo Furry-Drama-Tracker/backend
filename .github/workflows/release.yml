@@ -1,0 +1,75 @@
+name: release
+
+# 滚动发布：每次推送触发 8 目标无 CGO 构建；main 分支推送把产物覆盖发布到
+# tag=latest 的 Release（先删后建，/releases/latest 永远指向最新构建）。
+# 构建参数与 make release 一致：-trimpath -ldflags "-s -w"（剥离符号与调试信息）。
+# Windows 产物自动链接仓库内 cmd/server/rsrc_windows_*.syso（应用图标+版本元数据）。
+# CI 干净检出使 Go 自动烙入 vcs.revision，无 +dirty；产物随代码变化，构建可复现。
+
+on:
+  push:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { goos: linux,   goarch: "386" }
+          - { goos: linux,   goarch: amd64 }
+          - { goos: linux,   goarch: arm64 }
+          - { goos: windows, goarch: "386" }
+          - { goos: windows, goarch: amd64 }
+          - { goos: windows, goarch: arm64 }
+          - { goos: darwin,  goarch: amd64 }
+          - { goos: darwin,  goarch: arm64 }   # macOS 不构建 32 位
+    env:
+      CGO_ENABLED: "0"
+      GOOS: ${{ matrix.goos }}
+      GOARCH: ${{ matrix.goarch }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Build
+        run: |
+          EXT=$([ "${{ matrix.goos }}" = windows ] && echo .exe || true)
+          go build -trimpath -ldflags "-s -w" \
+            -o "dist/furry-drama-be-neo-${{ matrix.goos }}-${{ matrix.goarch }}${EXT}" \
+            ./cmd/server
+      - uses: actions/upload-artifact@v4
+        with:
+          name: furry-drama-be-neo-${{ matrix.goos }}-${{ matrix.goarch }}
+          path: dist/*
+
+  publish:
+    # 仅 main 的推送覆盖发布；其他分支只构建不发布
+    if: github.ref == 'refs/heads/main'
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+      - name: Generate checksums
+        run: cd dist && sha256sum * > checksums.txt
+      - name: Replace rolling release (tag: latest)
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          gh release delete latest --cleanup-tag --yes 2>/dev/null || true
+          gh release create latest dist/* \
+            --title "滚动构建 $(date -u '+%Y-%m-%d %H:%M UTC') @ ${GITHUB_SHA::7}" \
+            --notes "自动构建于提交 ${GITHUB_SHA}（HEAD）。每次推送覆盖本页全部产物；SHA-256 校验和见 checksums.txt。"
