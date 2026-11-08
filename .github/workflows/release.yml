@@ -71,5 +71,5 @@ jobs:
         run: |
           gh release delete latest --cleanup-tag --yes 2>/dev/null || true
           gh release create latest dist/* \
-            --title "滚动构建 $(date -u '+%Y-%m-%d %H:%M UTC') @ ${GITHUB_SHA::7}" \
-            --notes "自动构建于提交 ${GITHUB_SHA}（HEAD）。每次推送覆盖本页全部产物；SHA-256 校验和见 checksums.txt。"
+            --title "latest" \
+            --notes "Automated build of the latest commit on main. Assets are replaced on every push; SHA-256 checksums are in checksums.txt."
