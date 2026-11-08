@@ -64,7 +64,7 @@ jobs:
           merge-multiple: true
       - name: Generate checksums
         run: cd dist && sha256sum * > checksums.txt
-      - name: Replace rolling release (tag: latest)
+      - name: Replace rolling release (tag latest)
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
