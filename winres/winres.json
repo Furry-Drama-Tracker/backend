@@ -1,0 +1,39 @@
+{
+  "RT_GROUP_ICON": {
+    "APP": {
+      "0000": "../FDT-Icon.ico"
+    }
+  },
+  "RT_VERSION": {
+    "#1": {
+      "0000": {
+        "fixed": {
+          "file_version": "0.0.0.0",
+          "product_version": "0.0.0.0"
+        },
+        "info": {
+          "0804": {
+            "ProductName": "兽剧通后端服务",
+            "FileDescription": "兽剧通后端服务",
+            "CompanyName": "09兽、谢大大",
+            "FileVersion": "0.0.0.0",
+            "ProductVersion": "0.0.0.0",
+            "OriginalFilename": "furry-drama-be-neo.exe",
+            "LegalCopyright": "Copyright (c) 2026 Furry Drama Tracker. Licensed under GNU Affero General Public License Version 3.",
+            "Comments": "https://github.com/Furry-Drama-Tracker/backend\nhttps://fdt.xiedada.net/"
+          },
+          "0409": {
+            "ProductName": "Furry Drama Tracker Back-end Service",
+            "FileDescription": "Furry Drama Tracker Back-end Service",
+            "CompanyName": "Furry09, Xiedada",
+            "FileVersion": "0.0.0.0",
+            "ProductVersion": "0.0.0.0",
+            "OriginalFilename": "furry-drama-be-neo.exe",
+            "LegalCopyright": "Copyright (c) 2026 Furry Drama Tracker. Licensed under GNU Affero General Public License Version 3.",
+            "Comments": "https://github.com/Furry-Drama-Tracker/backend\nhttps://fdt.xiedada.net/"
+          }
+        }
+      }
+    }
+  }
+}
