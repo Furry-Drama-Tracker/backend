@@ -54,7 +54,7 @@ func rssTranslateBackupApp(t *testing.T) (*httptest.Server, *mongo.Database, *re
 	repos := repository.NewRepos(db, cfg.Security.LoginMaxAttempts, cfg.Security.LoginLockMinutes)
 	signer := auth.NewSigner(cfg.JWT.Secret)
 	amw := middleware.NewAuth(repos, signer)
-	opts := middleware.RateLimitOpts{TrustXFF: false, IsDev: true}
+	opts := middleware.RateLimitOpts{IsDev: true}
 	rl := func(spec ratelimit.Spec) gin.HandlerFunc { return middleware.RateLimit(spec, opts) }
 
 	r := gin.New()

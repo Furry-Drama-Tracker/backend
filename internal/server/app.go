@@ -56,13 +56,42 @@ func NewApp(d Deps) *gin.Engine {
 	}
 	r := gin.New()
 	r.Use(gin.Recovery())
+	log := logging.New(d.Config.IsDev)
+
+	// ---- 客户端 IP 识别（gin c.ClientIP，配置见 [server] trust_proxy_headers 等）----
+	// 信任开关缺省沿用历史行为：生产信任、开发不信任。
+	srv := d.Config.Server
+	trust := !d.Config.IsDev
+	if srv.TrustProxyHeaders != nil {
+		trust = *srv.TrustProxyHeaders
+	}
+	if !trust {
+		// 关闭后 c.ClientIP() 一律返回 RemoteAddr，代理标头被整体无视。
+		r.ForwardedByClientIP = false
+	}
+	// trusted_proxies 缺省不配 = gin 默认信任全部来源（与历史手写解析一致）；
+	// 配置后（如 ESA → 本机反代拓扑填 127.0.0.1,::1）非受信来源直连伪造的
+	// 代理标头会被整体忽略，重复同名标头合并后从右往左回溯取非受信值。
+	if srv.TrustedProxies != nil {
+		if err := r.SetTrustedProxies(srv.TrustedProxies); err != nil {
+			// validate() 已拦截非法格式，此处为防御性兜底：保留 gin 默认信任状态。
+			log.Warn("trusted_proxies 解析失败，忽略该配置", "err", err)
+		}
+	}
+	// 标头清单与优先级可配置（缺省 CF-Connecting-IP > X-Real-IP > X-Forwarded-For：
+	// CF 头由 ESA/CDN 边缘覆盖写入最可信；X-Real-IP 可能被中间层写成本地/节点 IP，仅作兜底）。
+	r.RemoteIPHeaders = srv.ProxyIPHeaders
+	if srv.ProxyTrustedPlatform != "" {
+		// 注意：TrustedPlatform 分支不校验来源与 IP 格式（非空即信），
+		// 仅应在前置网关保证覆盖写入该头时启用。
+		r.TrustedPlatform = srv.ProxyTrustedPlatform
+	}
 
 	// ---- 全局中间件（顺序为固定契约，勿重排）----
 	r.Use(middleware.Gzip())
 	r.Use(middleware.SecurityHeaders())
 	r.Use(middleware.CORS(d.Config.Server.AllowOrigins))
 	r.Use(middleware.Timeout())
-	log := logging.New(d.Config.IsDev)
 	r.Use(middleware.SlowLogger(log, d.Config.IsDev))
 	r.Use(middleware.BodyParse())
 	r.Use(middleware.SanitizeInput())
@@ -73,11 +102,10 @@ func NewApp(d Deps) *gin.Engine {
 
 	r.Use(middleware.CSRF())
 	r.Use(middleware.APITracker(d.Repos.ApiUsage))
-	r.Use(middleware.RequestLogger(log, !d.Config.IsDev)) // trustXFF 仅生产
+	r.Use(middleware.RequestLogger(log))
 
 	// ---- 受限流路由组 /api（globalLimiter 300/min，含 health）----
 	opts := middleware.RateLimitOpts{
-		TrustXFF:      !d.Config.IsDev,
 		IsDev:         d.Config.IsDev,
 		SkipRateLimit: d.Config.Security.RateLimitSkip,
 	}

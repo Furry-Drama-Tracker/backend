@@ -8,7 +8,6 @@ import (
 	"encoding/base64"
 	"encoding/hex"
 	"encoding/json"
-	"net"
 	"regexp"
 	"strings"
 	"time"
@@ -210,12 +209,11 @@ func (s *AuthService) Audit(ctx context.Context, u *model.User, action, target, 
 	})
 }
 
-// ClientIP 提取客户端 IP（优先单值头/XFF 首值，规则固定）。
+// ClientIP 返回客户端 IP。解析规则由引擎级代理标头配置统一决定
+// （server/app.go 按 [server] 配置装配：标头清单、信任开关、受信代理来源校验），
+// 本层不再手写解析。
 func (s *AuthService) ClientIP(c *gin.Context) string {
-	if s.Config.IsDev {
-		return clientIPFromRequest(c)
-	}
-	return clientIPFromRequest(c)
+	return c.ClientIP()
 }
 
 // EmailRegex 是邮箱格式校验（对齐 register L169）。
@@ -231,24 +229,4 @@ func containsFoldSlice(list []string, v string) bool {
 		}
 	}
 	return false
-}
-
-// clientIPFromRequest 从 X-Real-IP / X-Forwarded-For 首值或 RemoteAddr 提取客户端 IP。
-func clientIPFromRequest(c *gin.Context) string {
-	if ip := strings.TrimSpace(c.GetHeader("X-Real-IP")); ip != "" {
-		return ip
-	}
-	if xff := c.GetHeader("X-Forwarded-For"); xff != "" {
-		if idx := strings.IndexByte(xff, ','); idx >= 0 {
-			xff = xff[:idx]
-		}
-		if ip := strings.TrimSpace(xff); ip != "" {
-			return ip
-		}
-	}
-	host, _, err := net.SplitHostPort(c.Request.RemoteAddr)
-	if err != nil {
-		return c.Request.RemoteAddr
-	}
-	return host
 }

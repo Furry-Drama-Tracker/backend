@@ -132,7 +132,7 @@ func TestRequestLoggerConditions(t *testing.T) {
 	log := slog.New(cap)
 
 	r := gin.New()
-	r.Use(RequestLogger(log, false))
+	r.Use(RequestLogger(log))
 	r.GET("/fast", func(c *gin.Context) { c.JSON(200, gin.H{"ok": true}) })
 	r.POST("/write", func(c *gin.Context) { c.JSON(200, gin.H{"ok": true}) })
 	r.GET("/err", func(c *gin.Context) { c.JSON(400, gin.H{"message": "bad"}) })
@@ -154,7 +154,7 @@ func TestRequestLoggerSlow(t *testing.T) {
 	log := slog.New(cap)
 
 	r := gin.New()
-	r.Use(RequestLogger(log, false))
+	r.Use(RequestLogger(log))
 	r.GET("/slow", func(c *gin.Context) {
 		time.Sleep(1100 * time.Millisecond)
 		c.JSON(200, gin.H{"ok": true})

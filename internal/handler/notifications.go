@@ -3,10 +3,8 @@ package handler
 import (
 	"context"
 	"encoding/json"
-	"net"
 	"net/http"
 	"strconv"
-	"strings"
 	"sync"
 	"time"
 
@@ -106,7 +104,7 @@ func (h *Notifications) Stream(c *gin.Context) {
 		return
 	}
 
-	ip := h.clientIP(c)
+	ip := c.ClientIP()
 	var client *sseClient
 	var ipAdded, registered bool
 	defer func() {
@@ -564,25 +562,6 @@ func (h *Notifications) decSSEIPLocked(ip string) {
 	} else {
 		delete(h.sseIPCounts, ip)
 	}
-}
-
-// clientIP 提取客户端 IP（生产优先 X-Real-IP，其次 X-Forwarded-For 首值）。
-func (h *Notifications) clientIP(c *gin.Context) string {
-	if !h.Config.IsDev {
-		if xri := strings.TrimSpace(c.GetHeader("X-Real-IP")); xri != "" {
-			return xri
-		}
-		if xff := c.GetHeader("X-Forwarded-For"); xff != "" {
-			if first := ratelimit.NormalizeXFF(xff); first != "" {
-				return first
-			}
-		}
-	}
-	host, _, err := net.SplitHostPort(c.Request.RemoteAddr)
-	if err != nil {
-		return c.Request.RemoteAddr
-	}
-	return host
 }
 
 // notificationsPageLimit 分页参数钳制（固定契约）：

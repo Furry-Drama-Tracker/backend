@@ -95,3 +95,15 @@
 - **决策**：移除 `POST /api/admin/login`、`Admin.Login`、`AdminAuthSpec` 以及只服务于它的 `AdminFindByIdentifierWithAuth` / `AdminUpdateLastLogin`。管理员统一走 `POST /api/auth/login`，之后用 `/api/admin/verify` 校验后台权限。
 - **背景**：旧 Express 后端有独立管理员表与登录入口；迁移后管理员已是 `users` 集合中带 `admin`/`superadmin` 角色的普通账号，原入口没有独立数据模型支撑。现有前端从不调用该路径（`apiEndpoints.js` 里的 `ADMIN.LOGIN` 常量已删除）。
 - **取舍**：删除重复且更弱的认证路径——它缺少新设备验证、2FA 与注销宽限检查，仅以“邮箱已验证 + 未开启 2FA”作为放行条件。任何未知外部调用方会收到 404；已确认无此类客户端。
+
+## ADR-013 客户端 IP 识别统一走 gin `c.ClientIP()`（配置化代理标头）
+
+- **决策**：删除 4 处手写的 clientIP 解析（`middleware/ratelimit.go`、`service/auth_service.go`、`handler/episodes.go`、`handler/notifications.go`），全仓库统一用 gin 原生 `c.ClientIP()`；标头信任策略由引擎装配（`server/app.go`）按 `[server]` 配置决定：`trust_proxy_headers`（*bool，缺省=沿用 `!IsDev`：生产信任/开发不信任）、`proxy_ip_headers`（缺省 `CF-Connecting-IP, X-Real-IP, X-Forwarded-For`）、`trusted_proxies`（IP/CIDR 清单，缺省不配=gin 默认信任全部来源）、`proxy_trusted_platform`（单一无条件最高优先标头，默认不启用）。同名环境变量 `TRUST_PROXY_HEADERS` / `PROXY_IP_HEADERS` / `TRUSTED_PROXIES` / `PROXY_TRUSTED_PLATFORM` 可覆盖；`trusted_proxies` 格式错误属启动致命校验。
+- **背景**：生产部署为访客 → 阿里云 ESA（「托管转换 → 添加真实客户端 IP 标头」自定义标头名 `CF-Connecting-IP`，边缘覆盖写入真实访客 IP）→ 源站本机反代（Caddy/Nginx）→ Go。旧实现 `X-Real-IP` 优先级最高，但本机反代写出的 X-Real-IP 是它看到的 TCP 对端（=ESA 节点 IP），导致真实 IP 被"莫名其妙覆盖"成 CDN 节点地址；且旧实现不校验请求来源，直连即可伪造标头绕过限流。gin v1.12 的 ClientIP 机制（来源 ∈ trustedCIDRs 才读标头、重复同名标头合并后从右往左回溯取非受信值）正面解决这两个问题。
+- **取舍 / 行为变化**：
+  - 生产默认解析顺序由 `X-Real-IP > XFF 首值 > CF` 改为 **`CF > X-Real-IP > XFF 首值`**（本项目部署下即修复节点 IP 覆盖问题）；
+  - auth_service 开发环境从"无条件信头"改为默认不信（可 `TRUST_PROXY_HEADERS=1` 打开）；
+  - 非法 IP 格式的标头值被 gin `validateHeader` 拒绝（旧实现原样采信）；IPv4-mapped IPv6 归一化输出（`::ffff:1.2.3.4` → `1.2.3.4`）；
+  - `trusted_proxies` 配置后 XFF 从右往左取第一个非受信代理 IP（未配置时信任全部=取首值，与旧语义一致）；`RateLimit` 限流 key、viewLog 去重、SSE per-IP 计数随之变化属于预期修正；
+  - `proxy_trusted_platform` 分支不校验来源与格式（非空即信），仅应在前置网关保证覆盖写入该头时启用；
+  - `requestEmailChange` 限流 key 仍为 IP+目标邮箱（ADR-005 契约不变）。

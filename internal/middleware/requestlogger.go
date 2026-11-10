@@ -73,9 +73,9 @@ func SlowLogger(log *slog.Logger, isDev bool) gin.HandlerFunc {
 
 // RequestLogger 通用请求日志：仅当
 // duration>1000ms 或 status>=400 或方法非 GET 时输出。级别：5xx=ERROR、
-// 4xx=WARN、duration>1000ms=WARN、其余=INFO。trustXFF 生产传 true 以正确
-// 解析客户端真实 IP（信任第一层代理）。
-func RequestLogger(log *slog.Logger, trustXFF bool) gin.HandlerFunc {
+// 4xx=WARN、duration>1000ms=WARN、其余=INFO。IP 取 c.ClientIP()，其标头
+// 信任策略由引擎装配（server/app.go 按 [server] 配置）统一决定。
+func RequestLogger(log *slog.Logger) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		start := time.Now()
 		c.Next()
@@ -103,7 +103,7 @@ func RequestLogger(log *slog.Logger, trustXFF bool) gin.HandlerFunc {
 			"path", path,
 			"status", status,
 			"duration_ms", duration.Milliseconds(),
-			"ip", clientIP(c, trustXFF),
+			"ip", c.ClientIP(),
 			"userId", userIDFromContext(c),
 		)
 	}

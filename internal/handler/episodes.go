@@ -5,7 +5,6 @@ import (
 	"fmt"
 	stdhtml "html"
 	"math"
-	"net"
 	"regexp"
 	"sort"
 	"strconv"
@@ -622,7 +621,7 @@ func (h *Episodes) IncView(c *gin.Context) {
 		return
 	}
 
-	viewKey := idStr + "_" + h.clientIP(c)
+	viewKey := idStr + "_" + c.ClientIP()
 	now := time.Now()
 	h.viewMu.Lock()
 	lastView, ok := h.viewLog[viewKey]
@@ -1779,25 +1778,6 @@ func (h *Episodes) readJSONBody(c *gin.Context) map[string]any {
 // serverError 渲染 500（响应体固定为 {message:'Server error'}，勿改文案）。
 func serverError(c *gin.Context) {
 	c.JSON(500, gin.H{"message": "Server error"})
-}
-
-// clientIP 提取客户端 IP（生产优先 X-Real-IP，其次 X-Forwarded-For 首值）。
-func (h *Episodes) clientIP(c *gin.Context) string {
-	if !h.Config.IsDev {
-		if xri := strings.TrimSpace(c.GetHeader("X-Real-IP")); xri != "" {
-			return xri
-		}
-		if xff := c.GetHeader("X-Forwarded-For"); xff != "" {
-			if first := ratelimit.NormalizeXFF(xff); first != "" {
-				return first
-			}
-		}
-	}
-	host, _, err := net.SplitHostPort(c.Request.RemoteAddr)
-	if err != nil {
-		return c.Request.RemoteAddr
-	}
-	return host
 }
 
 // pruneViewLogLocked 清理过期/超限的观看去重记录（超 10000 条时按冷却期淘汰）。

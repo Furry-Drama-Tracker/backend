@@ -16,6 +16,7 @@ package config
 
 import (
 	"fmt"
+	"net"
 	"os"
 	"runtime"
 	"strconv"
@@ -65,6 +66,21 @@ type ServerConfig struct {
 	// InsecureOrigins 表示生产环境 CORS 源仍是 localhost/example.com 等占位值。
 	// 仅告警不阻止启动，避免已有服务因配置检查而中断。
 	InsecureOrigins bool
+
+	// TrustProxyHeaders 是否信任反向代理标头识别客户端 IP（gin ClientIP）。
+	// nil=未配置 → 沿用历史行为：生产（!IsDev）信任、开发不信任。
+	TrustProxyHeaders *bool
+	// ProxyIPHeaders 是按序尝试的代理标头清单（c.ClientIP 逐个取首个有效 IP）。
+	// 缺省 CF-Connecting-IP（ESA/CF 等边缘覆盖写入，最可信）> X-Real-IP > X-Forwarded-For。
+	ProxyIPHeaders []string
+	// TrustedProxies 是受信代理的 IP/CIDR 清单；nil=未配置 → gin 默认信任全部
+	// 来源（等价于历史手写实现：不校验请求来源）。配置后（如本机反代 127.0.0.1,::1）
+	// 非受信来源直连伪造的代理标头将被整体忽略。
+	TrustedProxies []string
+	// ProxyTrustedPlatform 是无条件最高优先的单一标头（gin TrustedPlatform）。
+	// 空=不启用。该分支不校验请求来源与 IP 格式（非空即信），
+	// 仅应在前置网关保证覆盖写入该头时设置。
+	ProxyTrustedPlatform string
 }
 
 // DatabaseConfig MongoDB 连接配置。
@@ -203,6 +219,9 @@ func defaults() *Config {
 			UploadsDir:   defaultUploadsDir,
 			IconsDir:     defaultIconsDir,
 			AllowOrigins: nil,
+			ProxyIPHeaders: []string{
+				"CF-Connecting-IP", "X-Real-IP", "X-Forwarded-For",
+			},
 		},
 		Database: DatabaseConfig{
 			Pool: 10, Min: 2, Select: 10, Sock: 45,
@@ -242,6 +261,18 @@ func applyINI(cfg *Config, data []byte) error {
 	if port := server.Key("port").MustInt(0); port > 0 {
 		cfg.Server.Port = port
 	}
+	if v := server.Key("trust_proxy_headers").String(); v != "" {
+		if b, err := strconv.ParseBool(v); err == nil {
+			cfg.Server.TrustProxyHeaders = &b
+		}
+	}
+	if v := server.Key("proxy_ip_headers").String(); v != "" {
+		cfg.Server.ProxyIPHeaders = splitTrim(v)
+	}
+	if v := server.Key("trusted_proxies").String(); v != "" {
+		cfg.Server.TrustedProxies = splitTrim(v)
+	}
+	cfg.Server.ProxyTrustedPlatform = server.Key("proxy_trusted_platform").String()
 
 	db := f.Section("database")
 	cfg.Database.URI = db.Key("uri").String()
@@ -324,6 +355,18 @@ func applyEnv(cfg *Config) {
 	if v := os.Getenv("NODE_ENV"); v != "" {
 		cfg.Server.NodeEnv = v
 	}
+	if v := os.Getenv("TRUST_PROXY_HEADERS"); v != "" {
+		if b, err := strconv.ParseBool(v); err == nil {
+			cfg.Server.TrustProxyHeaders = &b
+		}
+	}
+	if v := os.Getenv("PROXY_IP_HEADERS"); v != "" {
+		cfg.Server.ProxyIPHeaders = splitTrim(v)
+	}
+	if v := os.Getenv("TRUSTED_PROXIES"); v != "" {
+		cfg.Server.TrustedProxies = splitTrim(v)
+	}
+	setStr(&cfg.Server.ProxyTrustedPlatform, os.Getenv("PROXY_TRUSTED_PLATFORM"))
 	if v := os.Getenv("SKIP_RATE_LIMIT"); v == "1" {
 		cfg.Security.RateLimitSkip = true
 	}
@@ -345,6 +388,15 @@ func (c *Config) validate() error {
 	}
 	if c.Database.URI == "" {
 		return fmt.Errorf("缺少 MONGO_URI（ini [database].uri 或环境变量 MONGO_URI）")
+	}
+	// trusted_proxies 是启动致命校验：格式错误直接退出，避免到装配阶段
+	// 才发现（SetTrustedProxies 失败会静默退回信任全部来源的错误状态）。
+	for _, p := range c.Server.TrustedProxies {
+		if net.ParseIP(p) == nil {
+			if _, _, err := net.ParseCIDR(p); err != nil {
+				return fmt.Errorf("trusted_proxies 项 %q 不是合法 IP 或 CIDR 段", p)
+			}
+		}
 	}
 	if !c.IsDev {
 		if len(c.Server.AllowOrigins) == 0 {

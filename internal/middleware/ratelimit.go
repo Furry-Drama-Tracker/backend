@@ -2,7 +2,6 @@ package middleware
 
 import (
 	"fmt"
-	"net"
 	"strconv"
 	"strings"
 	"time"
@@ -16,9 +15,6 @@ import (
 
 // RateLimitOpts 是 RateLimit 的挂载与开关参数。
 type RateLimitOpts struct {
-	// TrustXFF 生产环境为 true：优先取 X-Forwarded-For 首值作为客户端 IP
-	// （信任代理=1，取 XFF 链上第一个地址）。开发环境忽略该头。
-	TrustXFF bool
 	// IsDev 等价于 NODE_ENV !== 'production'。
 	IsDev bool
 	// SkipRateLimit 对应 SKIP_RATE_LIMIT=1。
@@ -93,7 +89,9 @@ func RateLimit(spec ratelimit.Spec, opts RateLimitOpts) gin.HandlerFunc {
 			return
 		}
 
-		ip := clientIP(c, opts.TrustXFF)
+		// 客户端 IP 解析统一走引擎级 c.ClientIP()（标头清单/信任开关/受信代理
+		// 来源校验由 server/app.go 按 [server] 配置装配）。
+		ip := c.ClientIP()
 		key := spec.Name + ":" + ratelimit.IPKey(ip)
 		if spec.Name == ratelimit.RequestEmailChangeName {
 			// 同时按来源 IP 与目标邮箱限流，避免攻击者用不同邮箱刷验证邮件。
@@ -136,36 +134,4 @@ func newEmailFromBody(c *gin.Context) string {
 		return v
 	}
 	return "unknown"
-}
-
-// clientIP 解析客户端 IP：生产（trustXFF）优先使用反向代理覆盖写入的
-// X-Real-IP，其次 X-Forwarded-For 首值，最后才是 Cloudflare 头。
-//
-// 不能优先信任 CF-Connecting-IP：普通客户端可以自行伪造该头，经 Caddy/Nginx
-// 转发后绕过限流。Caddy 配置应覆盖 X-Real-IP/X-Forwarded-For；若使用 Cloudflare，
-// 应在 Caddy 配置 trusted_proxies 后再决定是否信任 CF 头。
-func clientIP(c *gin.Context, trustXFF bool) string {
-	if trustXFF {
-		if xri := strings.TrimSpace(c.GetHeader("X-Real-IP")); xri != "" {
-			return xri
-		}
-		if xff := c.GetHeader("X-Forwarded-For"); xff != "" {
-			if first := ratelimit.NormalizeXFF(xff); first != "" {
-				return first
-			}
-		}
-		if cf := strings.TrimSpace(c.GetHeader("CF-Connecting-IP")); cf != "" {
-			return cf
-		}
-	}
-	return remoteIP(c.Request.RemoteAddr)
-}
-
-// remoteIP 去掉 "IP:port" 中的端口（兼容 "[v6]:port"）。
-func remoteIP(addr string) string {
-	host, _, err := net.SplitHostPort(addr)
-	if err != nil {
-		return addr
-	}
-	return host
 }
