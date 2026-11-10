@@ -110,9 +110,14 @@ func (r *UserRepo) ExistsByAccountID(ctx context.Context, accountID string) (boo
 // Create 插入用户；唯一键冲突返回 IsDuplicateKey(err)。
 // 落库后把驱动生成的 _id 回填到 struct，
 // 使调用方随后可读 u.ID（bson omitempty 会省略零值 _id，驱动不会自动回填）。
+// createdAt 未显式设置时补当前时间（对齐 feedback/announcement 仓储的默认值形态，
+// 避免零值 time.Time 以 0001-01-01 落库）。
 func (r *UserRepo) Create(ctx context.Context, u *model.User) error {
 	ctx, cancel := r.newCtx(ctx)
 	defer cancel()
+	if u.CreatedAt.IsZero() {
+		u.CreatedAt = time.Now().UTC().Truncate(time.Millisecond)
+	}
 	res, err := r.coll.InsertOne(ctx, u)
 	if mongo.IsDuplicateKeyError(err) {
 		return errDuplicateKey
