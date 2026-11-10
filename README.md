@@ -1,12 +1,110 @@
-# neo-server
+<div align="center">
 
-兽剧聚合平台后端（Go/Gin）。前端零改动对接。
+<img src="FDT-Icon.png" alt="兽剧通" width="128" height="128" />
 
-- Go 1.26，Gin，官方 `go.mongodb.org/mongo-driver`（v1，无 ODM）
-- 独立 git 仓库，license AGPL-3.0-or-later
-- module `github.com/Furry-Drama-Tracker/backend`
+<h1>兽剧通</h1>
 
-## 文档导航（维护者必读）
+<h3>兽剧聚合平台（Furry Drama Tracker） · 后端服务</h3>
+
+<p>
+  <a href="https://github.com/Furry-Drama-Tracker/backend/releases/latest"><img src="https://img.shields.io/badge/release-latest-2ea44f" alt="Release"></a>
+  <img src="https://img.shields.io/badge/Go-1.26-00ADD8?logo=go&logoColor=white" alt="Go 1.26">
+  <img src="https://img.shields.io/badge/platform-Linux%20%7C%20Windows%20%7C%20macOS-6b7280" alt="Platform">
+  <a href="LICENSE.md"><img src="https://img.shields.io/badge/license-AGPL--3.0--or--later-0f9d58" alt="License AGPL-3.0-or-later"></a>
+  <a href="https://fdt.xiedada.net/"><img src="https://img.shields.io/badge/website-fdt.xiedada.net-ff69b4" alt="Website"></a>
+</p>
+
+<p>
+  <a href="https://fdt.xiedada.net/"><b>🌐 打开网站</b></a> ·
+  <a href="#普通用户请看这里">普通用户</a> ·
+  <a href="#想自己搭建一套">自己搭建</a> ·
+  <a href="#常见问题">常见问题</a> ·
+  <a href="https://github.com/Furry-Drama-Tracker/backend/issues">反馈问题</a> ·
+  <a href="#开发者文档导航">开发者文档</a>
+</p>
+
+</div>
+
+---
+
+**一句话**：[兽剧通](https://fdt.xiedada.net/) 是用来「追兽剧」的网站，这个仓库是它在服务器上运行的那半边程序（后端服务）。
+
+> 💡 **只是来看剧、追剧、评分的普通访客，不需要下载或安装任何东西** —— 直接打开网站就行，读「[普通用户请看这里](#普通用户请看这里)」就够，后面的内容都是给要自己搭建的人看的。
+
+---
+
+## 普通用户请看这里
+
+### 怎么用
+
+1. 浏览器打开 **<https://fdt.xiedada.net/>**（手机、电脑都可以）。
+2. 注册一个账号，就能浏览剧集、搜索、关注创作者、收藏和评分。
+3. 手机上可以点浏览器的「添加到主屏幕」，用起来和 App 差不多 —— **兽剧通没有单独的 App**，网站本身就是入口。
+
+不需要购买、不需要安装、也不需要懂任何技术。你在网站上看到的每一部剧、每一条收藏，背后都由本仓库这套程序提供。
+
+### 遇到问题怎么办
+
+| 情况 | 该怎么办 |
+|---|---|
+| 忘了密码 | 回到网站登录页，点「忘记密码」，按邮件里的链接重设 |
+| 收不到验证邮件 | 先查垃圾箱/广告箱；仍收不到就等几分钟再试，或用网站内的反馈入口联系运营方 |
+| 网站打不开、转圈 | 先换个网络或浏览器试试；都打不开说明是运营方服务器的问题，等一等或反馈 |
+| 想注销账号、找回数据 | 通过网站内的「反馈」联系运营方处理（账号数据在运营方的服务器上，不在本仓库里） |
+| 看到违规内容、想举报 | 使用网站内的「举报」入口 |
+| 想提建议、报 bug | 到 [Issues](https://github.com/Furry-Drama-Tracker/backend/issues) 提，**但千万别把密码、验证码贴到公开页面** |
+
+> 这个仓库里装的是「服务器程序」本身，**不包含任何用户数据**。你的账号、收藏、评分都存放在运营方的服务器里，由运营方维护。
+
+---
+
+## 想自己搭建一套
+
+想在自己服务器上跑一套兽剧通？可以，但**需要一点命令行基础**（装数据库、填配置、启动程序），大约 15 分钟。不熟悉的话用现成网站就好。
+
+1. **准备**：一台服务器（Linux / Windows 均可）+ 一个 MongoDB（本机安装，或用 [MongoDB Atlas](https://www.mongodb.com/atlas) 免费版）。网页界面在[前端仓库](https://github.com/furry09shou/furry-drama-tracker-frontend)，本仓库只有后端。
+2. **下载**：到 [Releases](https://github.com/Furry-Drama-Tracker/backend/releases/latest) 取对应系统的单文件程序（Linux / macOS 记得先 `chmod +x`）。
+3. **配置**：复制 [`.env.example`](.env.example) 为 `.env`，至少填 `MONGO_URI` 和至少 32 位的随机 `JWT_SECRET`（`openssl rand -hex 32`；Windows 用 `[guid]::NewGuid().ToString('N') + [guid]::NewGuid().ToString('N')`）。
+4. **启动**：运行程序，浏览器打开 <http://localhost:5000/api/health>，看到 `"status": "ok"` 就成功了。默认只监听 `127.0.0.1`，对外访问请用 Nginx / Caddy 反向代理并配 HTTPS。
+5. **建管理员**：`make seed`（或 `go run ./cmd/seed-admin`，需 Go；按报错填 `SUPERADMIN_*` 环境变量）。
+
+> 启动失败多半是 `JWT_SECRET` 太短或 MongoDB 没启动。完整步骤、systemd、备份与排错见 [docs/contributing.md](docs/contributing.md) 和 [`deploy/`](deploy/)。
+
+---
+
+## 它能做什么
+
+- **追剧**：搜索、按分类/标签筛选剧集，看简介、集数与更新状态。
+- **追更**：关注剧集和创作者，收藏到自己的文件夹，用「更新日历」看接下来哪天更新。
+- **打分与记录**：评分、写记录，历史记录随时翻。
+- **账号体系**：邮箱验证、两步验证（2FA）、设备管理、密码找回。
+- **后台管理**：剧集/分类/轮播图维护、内容审核、举报处理、数据统计、审计日志。
+
+---
+
+## 常见问题
+
+**有手机 App 吗？**
+没有独立 App。网站支持「添加到主屏幕」（PWA），图标和体验接近 App，离线也能打开部分页面。
+
+**我不懂技术，能用这个吗？**
+能，而且你就是主要用户 —— 直接开网站用。本仓库只是网站的后台程序，你不需要碰它。
+
+**网站和这个仓库是什么关系？**
+<https://fdt.xiedada.net/> 是运营方用这套程序搭起来的线上站。同一套程序可以部署到任意服务器，数据各自独立。
+
+**开源吗？我能改成自己的站吗？**
+可以，代码以 **AGPL-3.0-or-later** 发布：自建、修改都行，但对外提供服务时要保留版权声明并公开你的修改。
+
+**为什么仓库里只有后端，没有网页？**
+前后端是各自独立的仓库。网页界面在[前端仓库](https://github.com/furry09shou/furry-drama-tracker-frontend)，两边通过 `/api` 接口对接。
+
+**以后换服务器，我的收藏会丢吗？**
+收藏跟着数据库走。把数据库和 `uploads_dir` 上传目录一起带走，换机器也能原样恢复。
+
+---
+
+## 开发者文档导航
 
 | 文档 | 内容 |
 |---|---|
@@ -17,22 +115,14 @@
 | [/api/docs](http://localhost:5000/api/docs) | Swagger UI（运行时，覆盖全部端点，非生产） |
 | [AGENTS.md](AGENTS.md) | 接口契约 + 行为铁律（并行开发锚点） |
 
-## 快速开始
+## 开发与构建
 
 ```bash
-make build                        # 或：go build -o bin/furry-drama-be-neo ./cmd/server
-# 开发（.env 自动加载，无需 --config）
-./bin/furry-drama-be-neo
-# 或开发（env 覆盖）
-JWT_SECRET=... MONGO_URI=mongodb://127.0.0.1:27017/furry_drama_tracker NODE_ENV=development \
-  ./bin/furry-drama-be-neo --listen=tcp:0.0.0.0:5000
-# 或生产（ini 配置，路径按 OS 区分）
-./bin/furry-drama-be-neo --config=/etc/furry-drama-tracker/backend.ini
-# Unix socket
-./bin/furry-drama-be-neo --config=/etc/furry-drama-tracker/backend.ini --listen=unix:/run/furry-drama-be-neo.sock
+go build ./...                     # 编译全部
+make build                         # 或：go build -o bin/furry-drama-be-neo ./cmd/server
+make release                       # 发布构建：-trimpath + 剥离符号表/调试信息
+make run                           # go run ./cmd/server
 ```
-
-常用命令（`make -n <target>` 预览；Windows 用 `nmake /f Makefile.win`）：
 
 | 目标 | 作用 |
 |---|---|
@@ -46,8 +136,15 @@ JWT_SECRET=... MONGO_URI=mongodb://127.0.0.1:27017/furry_drama_tracker NODE_ENV=
 `GOOS`/`GOARCH` 会作为环境变量传给 `go`，可直接交叉编译：
 `make release GOOS=linux GOARCH=arm64`（非 Windows 目标的输出不带 `.exe`）。
 需要不同文件名时覆盖 `BINARY`，例如
-`make release GOOS=windows GOARCH=amd64 BINARY=bin/server.exe`。Windows 下等价写法为
-`nmake /f Makefile.win release GOOS=linux GOARCH=arm64`。
+`make release GOOS=windows GOARCH=amd64 BINARY=bin/server.exe`。
+Windows 下等价写法为 `nmake /f Makefile.win release GOOS=linux GOARCH=arm64`。
+
+单元 + 集成测试需本地 mongod 于 `127.0.0.1:27017`，是行为回归闸门：
+
+```bash
+go test ./...
+go vet ./...
+```
 
 ## 配置
 
@@ -55,7 +152,7 @@ JWT_SECRET=... MONGO_URI=mongodb://127.0.0.1:27017/furry_drama_tracker NODE_ENV=
 
 ### `.env` 文件（开发推荐）
 
-启动时自动读取当前目录的 `.env` 文件（如果存在），将其中**未在真实环境中设置**的变量注入。格式兼容 dotenv（`KEY=VALUE`，支持 `#` 注释、`export` 前缀、引号包裹），实现与 `.env` 惯例的向下兼容。
+启动时自动读取当前目录的 `.env` 文件（如果存在），将其中**未在真实环境中设置**的变量注入。格式兼容 dotenv（`KEY=VALUE`，支持 `#` 注释、`export` 前缀、引号包裹）。模板见 [.env.example](.env.example)。
 
 ### ini 配置文件（生产推荐）
 
@@ -67,24 +164,15 @@ JWT_SECRET=... MONGO_URI=mongodb://127.0.0.1:27017/furry_drama_tracker NODE_ENV=
 | macOS | `/Library/Application Support/furry-drama-tracker/backend.ini` |
 | Windows | `C:\ProgramData\furry-drama-tracker\backend.ini` |
 
-section：`[server] [database] [jwt] [email] [vapid] [security]`。模板见 `deploy/furry-drama-be-neo.ini`。
+section：`[server] [database] [jwt] [email] [vapid] [security]`。模板见 [`deploy/furry-drama-be-neo.ini`](deploy/furry-drama-be-neo.ini)。
 
 ### 环境变量
 
-**同名环境变量优先于 ini 和 .env**（供 systemd 注入密钥、CI 注入 DEV_API_TOKEN 等）。兼容 `.env` 变量名：`JWT_SECRET MONGO_URI ENCRYPTION_KEY ALTCHA_HMAC_KEY FRONTEND_URL SITE_URL ALLOWED_ORIGINS EMAIL_* VAPID_* DEMO_EMAILS DEV_API_TOKEN PORT NODE_ENV SKIP_RATE_LIMIT`。
+**同名环境变量优先于 ini 和 .env**（供 systemd 注入密钥、CI 注入 DEV_API_TOKEN 等）。兼容 `.env` 变量名：`JWT_SECRET MONGO_URI ENCRYPTION_KEY ALTCHA_HMAC_KEY FRONTEND_URL SITE_URL ALLOWED_ORIGINS EMAIL_* VAPID_* DEMO_EMAILS DEV_API_TOKEN PORT NODE_ENV SKIP_RATE_LIMIT`。客户端 IP 识别（代理标头信任策略，ADR-013）：`TRUST_PROXY_HEADERS PROXY_IP_HEADERS TRUSTED_PROXIES PROXY_TRUSTED_PLATFORM`。
 
 启动致命校验：缺 `JWT_SECRET`（或 < 32 字符）/ `MONGO_URI` → 退出 1。示例/历史弱密钥与生产 CORS 占位域名仅输出安全告警，不阻止已有服务启动；升级后应尽快轮换/修正。
 
-## 测试与验证
-
-```bash
-go test ./...                          # 单元 + 集成测试（需 mongod 于 127.0.0.1:27017）——行为回归闸门
-go vet ./...                           # 静态检查
-```
-
-集成测试覆盖关键流程（登录/2FA/refresh 重用/各业务域），改了任何影响 HTTP 响应的代码后必须跑全绿。
-
-## 架构
+## 技术架构
 
 ```
 cmd/server/            入口（--config/--listen、TCP/Unix 监听、优雅关停）
@@ -141,3 +229,9 @@ deploy/                systemd unit + ini 模板 + run.sh
 - **工具**：rss、translate、backup
 
 全部端点经 `router.Mount` 挂载在 `/api` 下（v1 镜像已移除）。
+
+## 许可证
+
+以 [AGPL-3.0-or-later](LICENSE.md) 发布。自建、修改均可；对外提供服务时需保留版权声明并公开修改后的源码。
+
+Copyright (c) 2026 Furry Drama Tracker。
