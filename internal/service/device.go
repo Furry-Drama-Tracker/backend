@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"crypto/subtle"
 	"strings"
 	"time"
 
@@ -11,6 +10,7 @@ import (
 	"github.com/Furry-Drama-Tracker/backend/internal/auth"
 	"github.com/Furry-Drama-Tracker/backend/internal/code"
 	"github.com/Furry-Drama-Tracker/backend/internal/errors"
+	"github.com/Furry-Drama-Tracker/backend/internal/model"
 	"github.com/Furry-Drama-Tracker/backend/internal/repository"
 )
 
@@ -149,35 +149,34 @@ func (s *AuthService) Login2FA(c *gin.Context, emailAddr, challenge, token strin
 
 	keyHex := auth.FieldKey(s.Config.JWT.EncryptionKey, s.Config.JWT.Secret)
 	secret := auth.DecryptField(user.TwoFactorSecret, keyHex)
-	backupCodes := auth.DecryptArray(user.TwoFactorBackupCodes, keyHex)
+	// 备份码匹配 + 消费：命中时返回已升级为哈希格式的剩余数组。
+	remaining, backupHit := auth.ConsumeBackupCode(user.TwoFactorBackupCodes, token, keyHex)
 
-	totpOK := secret != "" && auth.VerifyTOTP(secret, token)
-	backupHit := false
-	for _, bc := range backupCodes {
-		if timingSafeEq(bc, token) {
-			backupHit = true
-			break
-		}
+	var totpStep int64
+	totpOK := false
+	if secret != "" {
+		totpStep, totpOK = auth.VerifyTOTPStep(secret, token, time.Now())
 	}
 	if !totpOK && !backupHit {
-		_ = s.Repos.Users.IncLoginAttempts(c.Request.Context(), user.ID)
-		nextAttempts := user.LoginAttempts + 1
-		if repository.IsLocked(user) || nextAttempts >= s.Config.Security.LoginMaxAttempts {
-			return nil, errors.New(423, "账号已被锁定，请30分钟后再试")
+		return nil, s.rejectTwoFactor(c.Request.Context(), user)
+	}
+	// TOTP 一次性消费：同一时间步只能被接受一次（防重放）。
+	if totpOK {
+		accepted, err := s.Repos.Users.MarkTOTPStepUsed(c.Request.Context(), user.ID, totpStep)
+		if err != nil {
+			return nil, errors.New(500, "服务器错误")
 		}
-		return nil, errors.New(400, "验证码无效")
+		if !accepted {
+			return nil, s.rejectTwoFactor(c.Request.Context(), user)
+		}
+		// 下方 Save 为整文档替换，需同步内存值以免把刚写入的标记回滚。
+		user.TwoFactorLastStep = totpStep
 	}
 	_ = s.Repos.Users.ResetLoginAttempts(c.Request.Context(), user.ID)
 
-	// 备份码命中 → 消耗该码。
+	// 备份码命中 → 已消费，写回（同时把旧格式就地升级为哈希）。
 	if backupHit {
-		remaining := make([]string, 0, len(backupCodes))
-		for _, bc := range backupCodes {
-			if !timingSafeEq(bc, token) {
-				remaining = append(remaining, bc)
-			}
-		}
-		user.TwoFactorBackupCodes = auth.EncryptArray(remaining, keyHex)
+		user.TwoFactorBackupCodes = remaining
 	}
 
 	ua := c.Request.UserAgent()
@@ -208,9 +207,13 @@ func (s *AuthService) Login2FA(c *gin.Context, emailAddr, challenge, token strin
 	return &LoginResult{User: user}, nil
 }
 
-func timingSafeEq(a, b string) bool {
-	if len(a) != len(b) {
-		return false
+// rejectTwoFactor 处理 2FA 校验失败：累计失败次数，达到阈值时返回 423 锁定，
+// 否则返回 400 验证码无效（失败计数不清零，重放同样计入）。
+func (s *AuthService) rejectTwoFactor(ctx context.Context, user *model.User) error {
+	_ = s.Repos.Users.IncLoginAttempts(ctx, user.ID)
+	nextAttempts := user.LoginAttempts + 1
+	if repository.IsLocked(user) || nextAttempts >= s.Config.Security.LoginMaxAttempts {
+		return errors.New(423, "账号已被锁定，请30分钟后再试")
 	}
-	return subtle.ConstantTimeCompare([]byte(a), []byte(b)) == 1
+	return errors.New(400, "验证码无效")
 }

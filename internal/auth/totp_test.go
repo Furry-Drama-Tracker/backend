@@ -126,6 +126,64 @@ func TestVerifyTOTPNowSelfConsistent(t *testing.T) {
 	}
 }
 
+// TestVerifyTOTPStep 验证返回的命中时间步（一次性消费依赖该值判定重放）。
+func TestVerifyTOTPStep(t *testing.T) {
+	at := time.Unix(nodeTOTPTime, 0)
+	current := nodeTOTPTime / TimeStep
+
+	cases := []struct {
+		name string
+		code string
+		step int64
+		ok   bool
+	}{
+		{"当前步", nodeTOTPCode, current, true},
+		{"前一步（窗口内）", nodeTOTPPrevCode, current - 1, true},
+		{"后一步（窗口内）", nodeTOTPNextCode, current + 1, true},
+		{"窗口外", nodeTOTPFarCode, -1, false},
+		{"非数字", "abcdef", -1, false},
+		{"位数不足", "12345", -1, false},
+		{"空串", "", -1, false},
+	}
+	for _, c := range cases {
+		step, ok := VerifyTOTPStep(nodeTOTPSecret, c.code, at)
+		if ok != c.ok || step != c.step {
+			t.Fatalf("%s: VerifyTOTPStep=%d,%v want %d,%v", c.name, step, ok, c.step, c.ok)
+		}
+	}
+
+	// 非法 secret 一律不命中且不 panic。
+	if step, ok := VerifyTOTPStep("not-base64!!", nodeTOTPCode, at); ok || step != -1 {
+		t.Fatalf("invalid secret should not verify: %d,%v", step, ok)
+	}
+}
+
+// TestVerifyTOTPStepStableWithinSameStep 验证"同一步内重复提交得到同一个 step id"
+// （重放防护依赖该性质），以及窗口滑动后旧码最终失效。
+func TestVerifyTOTPStepStableWithinSameStep(t *testing.T) {
+	base := time.Unix(nodeTOTPTime, 0)
+	first, ok := VerifyTOTPStep(nodeTOTPSecret, nodeTOTPCode, base)
+	if !ok {
+		t.Fatal("baseline code must verify")
+	}
+	// 同一步内任意时刻 → 同一个 step id。
+	if second, ok2 := VerifyTOTPStep(nodeTOTPSecret, nodeTOTPCode, base.Add(29*time.Second)); !ok2 || second != first {
+		t.Fatalf("same step must yield same id: %d/%v (first=%d)", second, ok2, first)
+	}
+	// ±1 窗口容忍：下一个窗口里旧码仍可能命中，但返回的仍是它自己的步长（不前移）。
+	if third, ok3 := VerifyTOTPStep(nodeTOTPSecret, nodeTOTPCode, base.Add(30*time.Second)); !ok3 || third != first {
+		t.Fatalf("window tolerance must keep original step id: %d/%v (first=%d)", third, ok3, first)
+	}
+	// 新一步的码 → 新的 step id。
+	if nextStep, ok4 := VerifyTOTPStep(nodeTOTPSecret, nodeTOTPNextCode, base.Add(30*time.Second)); !ok4 || nextStep == first {
+		t.Fatalf("next step code must yield new id: %d/%v (first=%d)", nextStep, ok4, first)
+	}
+	// 移出窗口 → 不再命中。
+	if _, ok5 := VerifyTOTPStep(nodeTOTPSecret, nodeTOTPCode, base.Add(60*time.Second)); ok5 {
+		t.Fatal("code must be rejected once outside the window")
+	}
+}
+
 // computeTOTPNodeFormula 复制 TOTP 标准码生成公式（供自洽测试，
 // 独立于包内实现）。
 func computeTOTPNodeFormula(secret string, at time.Time) string {

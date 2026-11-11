@@ -40,7 +40,7 @@
 
 ## ADR-006 认证：双 token + refresh 轮换 + jti
 
-- **决策**：access JWT 15min（无状态，不查库）+ refresh JWT 7d（轮换，**必须带随机 jti**）。refresh 原子取用并作废，重用检测：30s 并发宽限内 → 409（不吊销），超期 → 吊销全部会话。
+- **决策**：access JWT 15min（无状态，不查库）+ refresh JWT 7d（轮换，**必须带随机 jti**）。refresh 原子取用并作废，重用检测：2min 并发宽限内 → 409（不吊销），超期 → 吊销全部会话。
 - **背景**：**关键教训：若 refresh 不带 jti，同一秒内轮换会签发相同 token → 重用检测失效**。jti（`randomBytes(24).hex`）保证唯一。
 - **取舍**：jti 是安全关键，不可省略。409 并发宽限是 UX 权衡（多标签页并发刷新不误伤），但超期重用必须吊销。
 
@@ -107,3 +107,35 @@
   - `trusted_proxies` 配置后 XFF 从右往左取第一个非受信代理 IP（未配置时信任全部=取首值，与旧语义一致）；`RateLimit` 限流 key、viewLog 去重、SSE per-IP 计数随之变化属于预期修正；
   - `proxy_trusted_platform` 分支不校验来源与格式（非空即信），仅应在前置网关保证覆盖写入该头时启用；
   - `requestEmailChange` 限流 key 仍为 IP+目标邮箱（ADR-005 契约不变）。
+
+## ADR-014 2FA 加固：enable 不降级 / 备份码哈希 / TOTP 一次性消费
+
+- **决策**（三项均为纯服务端行为，不改变任何响应字段）：
+  1. POST /api/2fa/enable 在 	woFactorEnabled=true 时返回 **400**，不再用新 secret 覆盖既有配置（原实现会顺带写入 	woFactorEnabled=false）；
+  2. 备份码改为**单向哈希**存储，格式 `bc:<sha256 hex>`（`internal/auth/backupcode.go`）；旧数据仍是 AES 密文（`enc:`），读取时兼容并在命中时就地升级整个数组；
+  3. TOTP 增加**一次性消费**：登录成功后把命中的时间步写入 `users.twoFactorLastStep`，同一步的重复提交按校验失败处理（计入失败次数）——满足 NIST SP 800-63B「同一 OTP 在有效期内只能被接受一次」。
+- **背景**：/2fa/enable 原本不检查既有状态，而 `SetTwoFactorSetup` 会写 `twoFactorEnabled=false`——结果是**一个有效会话就能在不知道任何 TOTP 的情况下关掉 2FA**（比需要 TOTP/备份码的 `/2fa/disable` 更弱）。备份码是等效于口令的凭据，可逆加密意味着密钥泄露即全部泄露。TOTP 无步长记录则可被窗口内重放。
+- **替代方案**：
+  - 备份码用 bcrypt：更慢（10 个码 × cost12 ≈ 数秒/次登录），且备份码是高熵随机值（64 位），无字典攻击面，快哈希已足够（GitHub 同做法）；
+  - 给备份码加 pepper（HMAC）：更强，但与 `ENCRYPTION_KEY` 轮换耦合，且当前无独立的 2FA 专用密钥；
+  - 挑战令牌一次性消费：**未采纳**，因为客户端需要在同一挑战内重试 TOTP（改为"成功才消费"仍需客户端契约确认，见待办）。
+- **取舍 / 兼容性**：
+  - 已启用 2FA 的用户若再次点"开启"，现在收到 400 而非静默重置；前端只应展示开启入口一次（现有 UI 已按状态切换）；
+  - 旧备份码在**首次使用**时自动升级，未使用的旧码保持密文直到被使用；
+  - 一次性消费只作用于 `/auth/login-2fa`（认证入口）；`/2fa/disable`、`/2fa/verify`、`/2fa/verify-enable` 不记步长——避免"启用 2FA 的码不能立刻用于登录"这类体验倒退；
+  - `TwoFactorLastStep` 是瞬时反重放计数，不参与备份导出白名单（`handler/backup.go`），恢复后会失效（可接受）。
+## ADR-015 refresh 独立限流 + 并发宽限放宽到 2min
+
+- **决策**：
+  1. /api/auth/refresh 从 TwoFactorSpec（5 次/15min）中摘出，改用新增的 RefreshSpec（**60 次/15min**，atelimit.RefreshName）；TwoFactorSpec 保留其余 6 个 2FA/设备端点；
+  2. service.ConcurrentRefreshGrace 由 **30s** 放宽到 **2min**；同时删除 middleware 包里那份从未被使用、且已与 service 版本重复定义的 ConcurrentRefreshGrace（消除常量漂移源）。
+- **背景**：/auth/refresh 被挂在 2FA 暴力破解限流器上，等于让"正常令牌轮换"与"TOTP 试错"共享 5 次/15min 配额。access 只有 15min，单用户约 4 次/小时刷新；移动网络大量用户共享运营商 NAT 出口 IP，任一用户把配额用掉，整片区用户在剩余窗口内全部 429 —— 而前端把 refresh 失败当作登出处理，表现为"用着用着突然掉登录"（并连带触发重新登录 → 新设备验证码）。
+- **替代方案**：
+  - 按用户而非 IP 限流：能精确隔离，但 middleware.RateLimit 的 key 生成是 IP 语义，改造面更大，留待后续；
+  - 直接关闭 refresh 限流：失去 DoS 兜底，不采纳；
+  - 宽限期保持 30s：会把"移动端后台挂起后迟到的请求"误判为 token 重用并吊销全部会话，正是要修的问题。
+- **取舍 / 兼容性**：
+  - 响应契约不变（409/401 语义、messageKey 均未改），仅阈值与时限变化；
+  - 60/15min 仍保留 DoS 约束：refresh token 是高熵随机串，不存在被爆破的现实风险，故按可用性优先；
+  - 宽限期 2min 远小于 access TTL（15min），不影响"真实重用必须吊销全部会话"的语义；
+  - 新增回归测试 TestRefreshBurstNotRateLimited（连续 8 次轮换不得 429），旧配置下第 6 次即失败。

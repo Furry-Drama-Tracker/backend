@@ -88,7 +88,7 @@ go build ./...         # 编译检查
 |---|---|
 | 前端所有写操作 403 | CSRF：cookie `XSRF-TOKEN` 与 header `X-XSRF-TOKEN` 必须相等；检查 `/api/csrf-token` 是否被限流/失败 |
 | 登录后很快被登出 | access 过期（419）→ 前端自动 refresh；若 refresh 失败查会话吊销逻辑（重用检测）；确认 refresh token 带 jti |
-| refresh 返回 409 | 并发刷新宽限（30s 内旧 token 再用）——正常行为，非错误 |
+| refresh 返回 409 | 并发刷新宽限（2min 内旧 token 再用）——正常行为，非错误 |
 | 429 过早触发 | 限流窗口/计数；dev 环境设 `SKIP_RATE_LIMIT=1` 跳过 auth 限流 |
 | 邮箱验证码收不到 | 检查 SMTP 配置（ini [email] 或 env EMAIL_*）；目标邮箱限流 10 封/h；dev 用 `DEV_API_TOKEN` + `x-dev-token` 头绕过 |
 | 2FA 验证失败 | secret 是 base64（既有数据兼容），`internal/auth/totp.go` 内部转 base32 用 pquerna；确认 ENCRYPTION_KEY 或 JWT_SECRET 与存储时一致 |

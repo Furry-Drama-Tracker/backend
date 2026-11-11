@@ -202,7 +202,7 @@ deploy/                systemd unit + ini 模板 + run.sh
 
 - **双 token**：access 15m（无状态 JWT）+ refresh 7d（轮换，含随机 jti）。`refreshToken` cookie path=`/api/auth`。
 - **419** = access 过期（`auth.accessTokenExpired`），前端自动调 `/api/auth/refresh`。
-- **refresh 重用检测**：原子取用并作废；30s 并发宽限内 → 409（不吊销），超期 → 401 且吊销全部会话。
+- **refresh 重用检测**：原子取用并作废；2min 并发宽限内 → 409（不吊销），超期 → 401 且吊销全部会话。
 - **CSRF**：非 GET 请求校验 `XSRF-TOKEN` cookie 与 `X-XSRF-TOKEN` header 双拷贝相等（三态 403）。
 - **Altcha PoW 验证码**：SHA-256 cost 10000；`DEV_API_TOKEN` + `x-dev-token` 头可绕过（仅开发）。
 - **账号锁定**：5 次失败锁 30 分钟（`loginAttempts`/`lockUntil`）。

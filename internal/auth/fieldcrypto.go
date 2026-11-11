@@ -17,7 +17,9 @@ import (
 //   - 输出格式 "enc:<iv hex>:<ct hex>"（iv 16 随机字节）
 //   - 已有 "enc:" 前缀或空值原样返回（不重复加密）
 //
-// 用途：twoFactorSecret / twoFactorBackupCodes / SiteContent email.pass。
+// 用途：twoFactorSecret / SiteContent email.pass。
+// 注意：twoFactorBackupCodes 已改为单向哈希存储（见 backupcode.go），不再走这里；
+// DecryptArray 仍保留以兼容"旧格式备份码"的读取（升级路径）。
 // 必须兼容解密既有加密数据——算法与 key 派生固定，勿改（改了旧数据将无法解密）。
 
 // FieldKey 派生 32 字节 AES key：sha256(encryptionKey 或 jwtSecret) 的 hex 表示。

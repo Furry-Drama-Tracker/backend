@@ -229,6 +229,157 @@ func TestTwoFactorLoginFlow(t *testing.T) {
 	}
 }
 
+// backupCodesFrom 从 /2fa/enable 响应里取出明文备份码。
+func backupCodesFrom(t *testing.T, setup map[string]any) []string {
+	t.Helper()
+	raw, ok := setup["backupCodes"].([]any)
+	if !ok || len(raw) == 0 {
+		t.Fatalf("enable response missing backupCodes: %v", setup)
+	}
+	out := make([]string, 0, len(raw))
+	for _, v := range raw {
+		if s, ok := v.(string); ok && s != "" {
+			out = append(out, s)
+		}
+	}
+	if len(out) == 0 {
+		t.Fatalf("enable response has no non-empty backup codes: %v", raw)
+	}
+	return out
+}
+
+// enable2FA 完成 enable → verify-enable 两步，返回 secret 与明文备份码。
+func enable2FA(t *testing.T, c *client) (string, []string) {
+	t.Helper()
+	var setup map[string]any
+	if resp := c.json("POST", "/api/2fa/enable", nil, &setup); resp.StatusCode != 200 || setup["secret"] == nil {
+		t.Fatalf("2fa enable: %d body=%v", resp.StatusCode, setup)
+	}
+	secret, _ := setup["secret"].(string)
+	codes := backupCodesFrom(t, setup)
+
+	var ver map[string]any
+	code := totpCode(secret, time.Now())
+	if resp := c.json("POST", "/api/2fa/verify-enable", map[string]any{"token": code}, &ver); resp.StatusCode != 200 {
+		t.Fatalf("2fa verify-enable: %d body=%v", resp.StatusCode, ver)
+	}
+	return secret, codes
+}
+
+// TestTwoFactorEnableTwiceRejected 已启用 2FA 后再次调用 /2fa/enable 必须被拒绝，
+// 否则一次带有效会话的请求就能把 2FA 静默关闭（twoFactorEnabled=false）。
+func TestTwoFactorEnableTwiceRejected(t *testing.T) {
+	ts := testServer(t)
+	c := newClient(t, ts.URL)
+	email := "it2fa_re_" + fmt.Sprintf("%d", time.Now().UnixNano()%1e7) + "@test.com"
+	c.registerAndLogin(email)
+
+	enable2FA(t, c)
+
+	// 第二次 enable：必须 400。
+	var again map[string]any
+	resp := c.json("POST", "/api/2fa/enable", nil, &again)
+	if resp.StatusCode != 400 {
+		t.Fatalf("second 2fa enable must be rejected: %d body=%v", resp.StatusCode, again)
+	}
+
+	// 2FA 仍应处于启用状态：登录继续返回 need2FA。
+	var login map[string]any
+	resp = c.json("POST", "/api/auth/login", map[string]any{"email": email, "password": "pass1234"}, &login)
+	if resp.StatusCode != 200 || login["need2FA"] != true {
+		t.Fatalf("2FA must remain enabled after rejected re-enable: %d body=%v", resp.StatusCode, login)
+	}
+}
+
+// TestTwoFactorTOTPReplayRejected 同一时间步的 TOTP 码只能被接受一次。
+func TestTwoFactorTOTPReplayRejected(t *testing.T) {
+	ts := testServer(t)
+	c := newClient(t, ts.URL)
+	email := "it2fa_rp_" + fmt.Sprintf("%d", time.Now().UnixNano()%1e7) + "@test.com"
+	c.registerAndLogin(email)
+	secret, _ := enable2FA(t, c)
+
+	// 第一次登录：拿到挑战并用当前步长的码通过。
+	var login map[string]any
+	if resp := c.json("POST", "/api/auth/login", map[string]any{"email": email, "password": "pass1234"}, &login); resp.StatusCode != 200 {
+		t.Fatalf("login: %d body=%v", resp.StatusCode, login)
+	}
+	challenge, _ := login["twoFactorChallenge"].(string)
+	if challenge == "" {
+		t.Fatalf("missing challenge: %v", login)
+	}
+	code := totpCode(secret, time.Now())
+	var okBody map[string]any
+	if resp := c.json("POST", "/api/auth/login-2fa", map[string]any{
+		"email": email, "twoFactorToken": code, "twoFactorChallenge": challenge,
+	}, &okBody); resp.StatusCode != 200 || okBody["_id"] == nil {
+		t.Fatalf("first login-2fa: %d body=%v", resp.StatusCode, okBody)
+	}
+
+	// 同一个码（同一时间步）重放：必须 400。
+	var replay map[string]any
+	resp := c.json("POST", "/api/auth/login-2fa", map[string]any{
+		"email": email, "twoFactorToken": code, "twoFactorChallenge": challenge,
+	}, &replay)
+	if resp.StatusCode != 400 {
+		t.Fatalf("TOTP replay must be rejected: %d body=%v", resp.StatusCode, replay)
+	}
+}
+
+// TestTwoFactorBackupCodeConsumed 备份码登录一次后即失效（哈希存储 + 一次性消费）。
+func TestTwoFactorBackupCodeConsumed(t *testing.T) {
+	ts := testServer(t)
+	c := newClient(t, ts.URL)
+	email := "it2fa_bc_" + fmt.Sprintf("%d", time.Now().UnixNano()%1e7) + "@test.com"
+	c.registerAndLogin(email)
+	_, codes := enable2FA(t, c)
+	backup := codes[0]
+
+	loginWith := func(token string) (int, map[string]any) {
+		var login map[string]any
+		if resp := c.json("POST", "/api/auth/login", map[string]any{"email": email, "password": "pass1234"}, &login); resp.StatusCode != 200 {
+			t.Fatalf("login: %d body=%v", resp.StatusCode, login)
+		}
+		challenge, _ := login["twoFactorChallenge"].(string)
+		var out map[string]any
+		resp := c.json("POST", "/api/auth/login-2fa", map[string]any{
+			"email": email, "twoFactorToken": token, "twoFactorChallenge": challenge,
+		}, &out)
+		return resp.StatusCode, out
+	}
+
+	if status, body := loginWith(backup); status != 200 || body["_id"] == nil {
+		t.Fatalf("backup code login: %d body=%v", status, body)
+	}
+	// 已消费：同一备份码必须失效。
+	if status, body := loginWith(backup); status != 400 {
+		t.Fatalf("consumed backup code must be rejected: %d body=%v", status, body)
+	}
+	// 其余备份码仍然可用（只消费命中的那一个）。
+	if status, body := loginWith(codes[1]); status != 200 || body["_id"] == nil {
+		t.Fatalf("other backup code should still work: %d body=%v", status, body)
+	}
+}
+
+// TestRefreshBurstNotRateLimited 连续轮换 8 次不应触发限流。
+// 回归点：/auth/refresh 原先挂在 2FA 桶（5 次/15min），正常多标签页/长会话
+// 刷新会被打成 429，前端把 429 当登出 → 用户莫名掉登录。
+func TestRefreshBurstNotRateLimited(t *testing.T) {
+	ts := testServer(t)
+	c := newClient(t, ts.URL)
+	email := "it_refresh_" + fmt.Sprintf("%d", time.Now().UnixNano()%1e7) + "@test.com"
+	c.registerAndLogin(email)
+
+	const rounds = 8 // 超出旧 2FA 桶的 5/15min 阈值
+	for i := 0; i < rounds; i++ {
+		var out map[string]any
+		resp := c.json("POST", "/api/auth/refresh", nil, &out)
+		if resp.StatusCode != 200 {
+			t.Fatalf("refresh #%d must not be rate limited: %d body=%v", i+1, resp.StatusCode, out)
+		}
+	}
+}
+
 // TestRefreshReuse 旧 refresh 重用 → 401 reuse（吊销全部 session）。
 func TestRefreshReuse(t *testing.T) {
 	ts := testServer(t)
@@ -267,7 +418,7 @@ func TestRefreshReuse(t *testing.T) {
 	defer resp2.Body.Close()
 	var rb map[string]any
 	_ = json.NewDecoder(resp2.Body).Decode(&rb)
-	// 轮换后立即重试旧 token：30s 并发宽限内 → 409 concurrentRefresh；超期 → 401 reuse。
+	// 轮换后立即重试旧 token：2min 并发宽限内 → 409 concurrentRefresh；超期 → 401 reuse。
 	// 两者都证明旧 refresh 不再被接受为成功登录。
 	if resp2.StatusCode != 409 && resp2.StatusCode != 401 {
 		t.Fatalf("refresh reuse: %d body=%v", resp2.StatusCode, rb)

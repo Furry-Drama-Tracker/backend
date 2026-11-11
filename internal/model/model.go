@@ -36,6 +36,7 @@ type User struct {
 	TwoFactorEnabled       bool                   `bson:"twoFactorEnabled" json:"twoFactorEnabled"`
 	TwoFactorSecret        string                 `bson:"twoFactorSecret" json:"-"`
 	TwoFactorBackupCodes   []string               `bson:"twoFactorBackupCodes" json:"-"`
+	TwoFactorLastStep      int64                  `bson:"twoFactorLastStep" json:"-"` // 最近被接受的 TOTP 时间步（Unix 秒/30），用于拒绝同一步重放
 	EmailNotificationPrefs EmailNotificationPrefs `bson:"emailNotificationPrefs" json:"emailNotificationPrefs"`
 	BackgroundPrefs        BackgroundPrefs        `bson:"backgroundPrefs" json:"backgroundPrefs"`
 	PersonalWallpapers     []Wallpaper            `bson:"personalWallpapers" json:"personalWallpapers"`

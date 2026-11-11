@@ -82,7 +82,7 @@ deploy/               systemd unit + ini 模板 + run.sh
 ## 行为一致性铁律
 
 1. **双 token**：access 15m / refresh 7d，HS256；`refreshToken` cookie path=`/api/auth`；419=access 过期（`auth.accessTokenExpired`）
-2. **refresh 轮换 + 重用**：原子 findOneAndUpdate 取用作废；未抢到且 logoutAt 在 30s 并发宽限内 → **409**（`auth.concurrentRefresh`，不清 cookie 不吊销）；否则吊销全部 → 401（`auth.refreshTokenReuse`）
+2. **refresh 轮换 + 重用**：原子 findOneAndUpdate 取用作废；未抢到且 logoutAt 在 **2min** 并发宽限内 → **409**（`auth.concurrentRefresh`，不清 cookie 不吊销）；否则吊销全部 → 401（`auth.refreshTokenReuse`）
 3. **CSRF 三态** 403
 4. **登录分支顺序**：altcha→锁定→删除宽限→密码→邮箱(403 needVerification)→设备(403 needDeviceVerify)→2FA(200 need2FA)→成功；状态码不能乱
 5. **AES-256-CBC**：key=`sha256(ENCRYPTION_KEY 或 JWT_SECRET)`（二选一非拼接），格式 `enc:iv:ct`，兼容既有加密数据

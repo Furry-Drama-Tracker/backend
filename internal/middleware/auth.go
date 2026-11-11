@@ -16,8 +16,9 @@ const ContextUserKey = "auth.user"
 // ContextAuthTokenKey 是 gin.Context 中原始 access token 的键。
 const ContextAuthTokenKey = "auth.token"
 
-// ConcurrentRefreshGrace 是 refresh 轮换并发宽限期（固定 30s，勿改）。
-const ConcurrentRefreshGrace = 30 * time.Second
+// 并发刷新宽限期（ConcurrentRefreshGrace）定义在 service 包：
+// service.ConcurrentRefreshGrace = 2 分钟。本包不再重复定义数值，
+// 避免两处常量漂移（历史上曾出现 middleware/service 各有一份 30s 的重复定义）。
 
 // Role 常量（与既有 User 模型 enum 一致，勿改）。
 const (

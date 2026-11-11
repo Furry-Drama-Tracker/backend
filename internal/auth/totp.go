@@ -67,29 +67,43 @@ func VerifyTOTPAt(secret, token string, at time.Time) bool {
 	return verifyTOTPAt(secret, token, at)
 }
 
+// VerifyTOTPStep 同 VerifyTOTP，但额外返回命中的时间步（Unix 秒 / TimeStep）；
+// 未命中返回 -1。调用方用该步做一次性消费——同一时间步不得被接受两次，
+// 以实现 NIST SP 800-63B 要求的 OTP 重放防护。
+func VerifyTOTPStep(secret, token string, at time.Time) (int64, bool) {
+	return verifyTOTPStepAt(secret, token, at)
+}
+
 // verifyTOTPAt 的逐字段行为是固定契约，用 pquerna hotp 计算：
 //   - token 非 6 位数字字符串 → false
 //   - secret 按标准 base64 解码（解码失败 → false）
 //   - 字节重新编码为 base32（保字节）供 pquerna 使用
 //   - 窗口 [-1, +1]，步长 30s，HMAC-SHA1
 func verifyTOTPAt(secret, token string, at time.Time) bool {
+	_, ok := verifyTOTPStepAt(secret, token, at)
+	return ok
+}
+
+// verifyTOTPStepAt 是 verifyTOTPAt 的带步长版本：命中时返回具体时间步。
+// 窗口顺序与参数是固定契约（-1 → 0 → +1），勿改。
+func verifyTOTPStepAt(secret, token string, at time.Time) (int64, bool) {
 	if !isSixDigit(token) {
-		return false
+		return -1, false
 	}
 	secretBytes, err := base64.StdEncoding.DecodeString(secret)
 	if err != nil {
-		return false
+		return -1, false
 	}
 	b32 := strings.TrimRight(base32.StdEncoding.EncodeToString(secretBytes), "=")
 	opts := hotp.ValidateOpts{Digits: otp.DigitsSix, Algorithm: otp.AlgorithmSHA1}
 	currentStep := at.Unix() / TimeStep
 	for i := -TOTPWindow; i <= TOTPWindow; i++ {
-		counter := uint64(currentStep + int64(i))
-		if ok, err := hotp.ValidateCustom(token, counter, b32, opts); err == nil && ok {
-			return true
+		step := currentStep + int64(i)
+		if ok, err := hotp.ValidateCustom(token, uint64(step), b32, opts); err == nil && ok {
+			return step, true
 		}
 	}
-	return false
+	return -1, false
 }
 
 // isSixDigit 校验 token 恰好为 6 位十进制数字（等价 /^\d{6}$/）。

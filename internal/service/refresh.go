@@ -13,8 +13,13 @@ import (
 	"github.com/Furry-Drama-Tracker/backend/internal/repository"
 )
 
-// ConcurrentRefreshGrace 是并发宽限期（固定 30s，勿改）。
-const ConcurrentRefreshGrace = 30 * time.Second
+// ConcurrentRefreshGrace 是 refresh 轮换的并发宽限期：旧 token 在轮换后这么多
+// 时间内再次提交，判定为并发刷新（多标签页/弱网重发）而非重用攻击 → 409（不吊销）。
+//
+// 取值 2 分钟：30s 的旧值会把"移动端后台挂起后迟到的请求"误判为 token 重用，
+// 进而吊销该用户全部会话（表现为用户莫名掉登录）。上限受 access TTL（15min）约束，
+// 宽限期远小于 TTL，不影响"真实重用必须吊销"的语义。
+const ConcurrentRefreshGrace = 2 * time.Minute
 
 // RefreshResult 是 refresh 校验通过后的结果。
 type RefreshResult struct {

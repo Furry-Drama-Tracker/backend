@@ -38,7 +38,7 @@
 | POST | `/auth/register` | 公开 | 3/h | `{accountId,username,email,password,deviceInfo?,altcha}`；accountId 3-20 `[a-zA-Z0-9_]`，密码≥8含字母数字 | 200 `{message,email,needVerification:true}`；400 各类校验文案 |
 | POST | `/auth/login` | 公开 | 5/15min | `{email,password,deviceInfo?,altcha}` | 200 用户对象 或 `{need2FA,email,twoFactorChallenge}`；403 `{needVerification}` / `{needDeviceVerify,deviceInfo}` |
 | POST | `/auth/logout` | 登录 | — | — | 200 `{message:"退出成功"}` |
-| POST | `/auth/refresh` | refresh cookie | 5/15min | 需 `refreshToken` cookie | 200 用户对象（轮换新 cookie）；401/409 |
+| POST | `/auth/refresh` | refresh cookie | 60/15min | 需 `refreshToken` cookie | 200 用户对象（轮换新 cookie）；401/409 |
 | GET | `/auth/me` | 登录 | — | — | 200 `{_id,accountId,username,email,isEmailVerified,role,avatar,emailNotificationPrefs,backgroundPrefs,personalWallpapers}` |
 | GET | `/auth/sse-ticket` | 登录 | — | — | 200 `{ticket}`（30s JWT，SSE 用） |
 | POST | `/auth/verify-device` | 公开 | 5/15min | `{token}`（device-verify JWT） | 200 `{verified:true,loginCode}`；400 各类 |
@@ -76,7 +76,7 @@
 
 | 方法 | 路径 | 鉴权 | 请求要点 | 响应要点 |
 |---|---|---|---|---|
-| POST | `/2fa/enable` | 登录 | — | 200 `{secret,backupCodes,otpauthUrl}`（secret 为 base64，AES 加密存储） |
+| POST | `/2fa/enable` | 登录 | — | 200 `{secret,backupCodes,otpauthUrl}`（secret 为 base64，AES 加密存储；备份码仅返回明文，库内存哈希）；**已启用时 400**（必须先 disable 才能重新注册） |
 | POST | `/2fa/verify-enable` | 登录 | `{token}`（TOTP） | 200 `{message:"2FA enabled successfully"}` |
 | POST | `/2fa/disable` | 登录 | `{token}`（TOTP 或备份码） | 200 `{message:"2FA disabled successfully"}` |
 | POST | `/2fa/verify` | 登录 | `{token}` | 200 `{verified:true}` |
@@ -455,7 +455,7 @@ Stats 域带 `middleware.Cache`（TTL 5min、上限 200 条，按完整 URI 缓�
 | `auth.accessTokenExpired` | **419** | access 过期 | **自动调 /api/auth/refresh** |
 | `auth.noRefreshToken` | 401 | refresh cookie 缺失 | 跳登录 |
 | `auth.refreshTokenExpired` | 401 | refresh 过期 | 跳登录 |
-| `auth.concurrentRefresh` | 409 | 并发刷新宽限（30s 内旧 token） | 静默重试 |
+| `auth.concurrentRefresh` | 409 | 并发刷新宽限（2min 内旧 token） | 静默重试 |
 | `auth.refreshTokenReuse` | 401 | 重用检测（吊销全部会话） | 跳登录 |
 
 其他错误：限流 429 `{message}`；登录分支 403（`needVerification`/`needDeviceVerify`，**不带 messageKey**，前端按字段分支）；普通校验错误 400 `{message}`（中文文案）；服务端错误 500 `{message:"服务器内部错误"}`（生产隐藏详情）。**对象 ID 格式非法通常表现为 500**（与旧 API 一致的有意怪癖）。

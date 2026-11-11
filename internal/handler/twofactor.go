@@ -15,6 +15,7 @@ func (h *Auth) twoFactorKeyHex() string {
 }
 
 // Enable2FA POST /api/2fa/enable（protect）：生成 TOTP secret + 备份码并加密存储。
+// 已启用时直接拒绝——否则一次带有效会话的请求就能把 2FA 静默关掉（twoFactorEnabled=false）。
 // @Summary 开启 2FA（生成密钥）
 // @Tags 2FA
 // @Security bearerAuth
@@ -28,11 +29,18 @@ func (h *Auth) Enable2FA(c *gin.Context) {
 		c.JSON(500, gin.H{"message": "服务器错误"})
 		return
 	}
+	// 已启用：不允许用 enable 覆盖既有 secret（那等价于无验证关闭 2FA）。
+	// 需要重置请先走 /2fa/disable（要求 TOTP 或备份码）。
+	if u.TwoFactorEnabled {
+		c.JSON(400, gin.H{"message": "2FA already enabled; disable it before re-enrolling"})
+		return
+	}
 	secret := auth.GenerateSecret()
 	backup := auth.GenerateBackupCodes()
 	keyHex := h.twoFactorKeyHex()
+	// secret 需要可逆（要复算 TOTP），备份码只需单向验证 → 只存哈希。
 	if err := h.Svc.Repos.Users.SetTwoFactorSetup(c.Request.Context(), user.ID,
-		auth.EncryptField(secret, keyHex), auth.EncryptArray(backup, keyHex), false); err != nil {
+		auth.EncryptField(secret, keyHex), auth.HashBackupCodes(backup), false); err != nil {
 		c.JSON(500, gin.H{"message": "服务器错误"})
 		return
 	}
@@ -94,15 +102,12 @@ func (h *Auth) Disable2FA(c *gin.Context) {
 	}
 	keyHex := h.twoFactorKeyHex()
 	secret := auth.DecryptField(u.TwoFactorSecret, keyHex)
-	codes := auth.DecryptArray(u.TwoFactorBackupCodes, keyHex)
-	if !auth.VerifyTOTP(secret, req.Token) && !matchBackupCode(codes, req.Token) {
+	// 备份码命中即视为消费（命中旧格式时一并升级为哈希）；随后 DisableTwoFactor
+	// 会清空全部备份码，故无需另行写回。
+	_, backupHit := auth.ConsumeBackupCode(u.TwoFactorBackupCodes, req.Token, keyHex)
+	if !auth.VerifyTOTP(secret, req.Token) && !backupHit {
 		c.JSON(400, gin.H{"message": "Invalid verification code"})
 		return
-	}
-	// 备份码命中 → 消耗。
-	if matchBackupCode(codes, req.Token) {
-		_ = h.Svc.Repos.Users.SetTwoFactorSetup(c.Request.Context(), user.ID,
-			u.TwoFactorSecret, auth.EncryptArray(removeBackupCode(codes, req.Token), keyHex), true)
 	}
 	if err := h.Svc.Repos.Users.DisableTwoFactor(c.Request.Context(), user.ID); err != nil {
 		c.JSON(500, gin.H{"message": "服务器错误"})
@@ -133,33 +138,15 @@ func (h *Auth) Verify2FA(c *gin.Context) {
 	}
 	keyHex := h.twoFactorKeyHex()
 	secret := auth.DecryptField(u.TwoFactorSecret, keyHex)
-	codes := auth.DecryptArray(u.TwoFactorBackupCodes, keyHex)
-	if !auth.VerifyTOTP(secret, req.Token) && !matchBackupCode(codes, req.Token) {
+	remaining, backupHit := auth.ConsumeBackupCode(u.TwoFactorBackupCodes, req.Token, keyHex)
+	if !auth.VerifyTOTP(secret, req.Token) && !backupHit {
 		c.JSON(400, gin.H{"message": "Invalid verification code"})
 		return
 	}
-	if matchBackupCode(codes, req.Token) {
+	// 备份码命中 → 消费该码（remaining 已是哈希格式，直接落库）。
+	if backupHit {
 		_ = h.Svc.Repos.Users.SetTwoFactorSetup(c.Request.Context(), user.ID,
-			u.TwoFactorSecret, auth.EncryptArray(removeBackupCode(codes, req.Token), keyHex), true)
+			u.TwoFactorSecret, remaining, true)
 	}
 	c.JSON(200, gin.H{"verified": true})
-}
-
-func matchBackupCode(codes []string, token string) bool {
-	for _, c := range codes {
-		if c == token {
-			return true
-		}
-	}
-	return false
-}
-
-func removeBackupCode(codes []string, token string) []string {
-	out := make([]string, 0, len(codes))
-	for _, c := range codes {
-		if c != token {
-			out = append(out, c)
-		}
-	}
-	return out
 }

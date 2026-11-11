@@ -414,6 +414,26 @@ func (r *UserRepo) SetTwoFactorSetup(ctx context.Context, id any, secretEnc stri
 	return err
 }
 
+// MarkTOTPStepUsed 原子地消费一个 TOTP 时间步：仅当库中记录的步长小于 step
+// （或字段不存在）时才更新成功并返回 true。返回 false 表示该步已被使用，
+// 调用方必须把本次校验按重放拒绝（NIST SP 800-63B 一次性 OTP 要求）。
+//
+// 条件更新保证并发下只有一次成功（不使用读-改-写，避免竞态）。
+func (r *UserRepo) MarkTOTPStepUsed(ctx context.Context, id any, step int64) (bool, error) {
+	ctx, cancel := r.newCtx(ctx)
+	defer cancel()
+	res, err := r.coll.UpdateOne(ctx,
+		bson.M{"_id": ToObjectID(id), "$or": bson.A{
+			bson.M{"twoFactorLastStep": bson.M{"$exists": false}},
+			bson.M{"twoFactorLastStep": bson.M{"$lt": step}},
+		}},
+		bson.M{"$set": bson.M{"twoFactorLastStep": step}})
+	if err != nil {
+		return false, err
+	}
+	return res.MatchedCount > 0, nil
+}
+
 // EnableTwoFactor 置 twoFactorEnabled=true（POST /verify-enable）。
 func (r *UserRepo) EnableTwoFactor(ctx context.Context, id any) error {
 	ctx, cancel := r.newCtx(ctx)
