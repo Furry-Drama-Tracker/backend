@@ -1,8 +1,11 @@
 ---
 type: auth-flow
 title: 注册与登录流程
-description: 注册与登录的有序校验分支、Altcha 工作量证明、账号锁定、注销清理、邮箱与设备验证、2FA 挑战、会话签发，以及串联这些流程的内存验证码存储。
+description: 注册与登录的有序校验分支、Altcha 工作量证明、账号锁定、注销清理、邮箱与设备验证、带一次性时间步消费的 2FA 挑战、会话签发，以及串联这些流程的内存验证码存储。
 tags: [auth, login, registration, altcha, device-verification, 2fa]
+verified:
+  - by: openwiki/0.7.2
+    at: 2026-11-11T16:33:08.526Z
 sources:
   - id: openwiki-source-6ca2ae0d44448102cf549f8a
     resource: repo://internal/code/store.go
@@ -20,10 +23,7 @@ sources:
     resource: repo://internal/service/password.go
   - id: openwiki-source-3f2309f0c3b4e4f8068472e9
     resource: repo://internal/service/register.go
-generated: { by: "opencode", at: "2026-11-04T03:17:38.088Z" }
-verified:
-  - by: openwiki/0.7.2
-    at: 2026-11-04T15:34:40.691Z
+generated: { by: "zcode", at: "2026-11-11T16:33:08.526Z" }
 ---
 
 # 注册与登录流程
@@ -58,7 +58,7 @@ verified:
 
 邮箱在校验前已被 trim 并转为小写，因此 `Foo@Example.com` 与 `foo@example.com` 被视为同一账号。
 
-随后哈希密码、解析 User-Agent、构建设备信息、解析 IP 地域，创建 `role: "user"`、`isEmailVerified: false`、带默认通知与背景偏好、空壁纸数组的用户。六位验证码被存储并异步发送邮件。
+随后哈希密码、解析 User-Agent、构建设备信息、解析 IP 地域（默认禁用态下记为「未知」），创建 `role: "user"`、`isEmailVerified: false`、带默认通知与背景偏好、空壁纸数组的用户——`UserRepo.Create` 在 `createdAt` 为零值时补当前时间（UTC 毫秒对齐），因此注册不会再把 `ISODate("0001-01-01")` 落库。六位验证码被存储并异步发送邮件。
 
 成功返回 200 与 `{message, email, needVerification: true}`。重复键竞态映射为 400“该信息已被使用”。
 
@@ -74,7 +74,7 @@ verified:
 6. **重置失败计数**——密码正确时清零。
 7. **邮箱验证**——未验证（且未跳过）时生成并发送验证码，结果为 `NeedVerification`。
 8. **演示/跳过自动验证**——开发环境中演示邮箱自动标记为已验证。
-9. **新设备检测**——如果没有任何活跃会话使用相同 User-Agent，生成并发送登录码，结果为 `NeedDeviceVerify`，并携带解析出的浏览器、操作系统与 IP。这里不再要求“用户已有会话”；只要邮件服务可用，任何未识别设备都要验证。SMTP 未配置时（`GetConfig` 失败）退化为仅密码登录，避免整站无法登录。
+9. **新设备检测**——如果没有任何活跃会话使用相同 User-Agent，生成并发送登录码，结果为 `NeedDeviceVerify`，并携带解析出的浏览器、操作系统与 IP。这里不再要求“用户已有会话”；只要邮件服务可用，任何未识别设备都要验证。SMTP 未配置时（`GetConfig` 失败）退化为仅密码登录，避免整站无法登录。IP 地域解析默认禁用（`ip_region_enabled` 缺省 false，数据出境合规），`LastLoginRegion` 记为「未知」；显式开启后才外呼 ipapi.co。
 10. **2FA**——已启用时签发五分钟的 `2fa-challenge` 令牌并返回 `Need2FA`。
 11. **成功**——保存设备信息、最后登录时间/IP/地域，签发会话，并在启用时异步发送新设备通知邮件。
 
@@ -107,7 +107,7 @@ handler 把结果映射为响应：
 
 ## 2FA 登录
 
-`POST /auth/login-2fa` 接收邮箱、挑战令牌、TOTP 或备用码，以及可选设备信息。它校验令牌 purpose，加载带 2FA 机密的用户，确认挑战 subject 与用户匹配，重新检查锁定与邮箱验证，解密 secret 与备用码，并接受有效 TOTP 或备用码。使用过的备用码会被移除并重新加密剩余数组。失败会递增尝试次数，达到阈值时可能返回 423。成功保存设备信息并签发会话。
+`POST /auth/login-2fa` 接收邮箱、挑战令牌、TOTP 或备用码，以及可选设备信息。它校验令牌 purpose，加载带 2FA 机密的用户，确认挑战 subject 与用户匹配，重新检查锁定与邮箱验证，解密 secret，并接受有效 TOTP 或备用码。TOTP 命中的时间步通过 `users.twoFactorLastStep` 原子标记做一次性消费——同一步重复提交按校验失败处理并记录 `twofa_replay` 诊断事件（仅作用于本端点，“开启 2FA 用的码不能立刻用于登录”的体验不受影响）。使用过的备用码由 `auth.ConsumeBackupCode` 移除，剩余数组就地升级为哈希格式落库。失败会递增尝试次数，达到阈值时可能返回 423。成功保存设备信息并签发会话。
 
 ## 验证码存储
 

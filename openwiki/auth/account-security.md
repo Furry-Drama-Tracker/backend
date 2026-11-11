@@ -1,9 +1,14 @@
 ---
 type: security
 title: 账号安全能力
-description: 密码哈希与强度规则、密码修改与重置、带备用码的 TOTP 双因素认证、加密字段存储、邮箱验证与变更、通知偏好、账号注销以及个人数据导出。
+description: 密码哈希与强度规则、密码修改与重置、带哈希备用码与一次性时间步的 TOTP 双因素认证、加密字段存储、邮箱验证与变更、通知偏好、账号注销以及个人数据导出。
 tags: [security, password, 2fa, encryption, email-verification, account-deletion]
+verified:
+  - by: openwiki/0.7.2
+    at: 2026-11-11T16:33:08.526Z
 sources:
+  - id: openwiki-source-d32d831ce74c9c76796fd705
+    resource: repo://internal/auth/backupcode.go
   - id: openwiki-source-00f455935383887d3bff9d53
     resource: repo://internal/auth/bcrypt.go
   - id: openwiki-source-883d642125c25de6f4b25f17
@@ -16,6 +21,8 @@ sources:
     resource: repo://internal/handler/twofactor.go
   - id: openwiki-source-98ac6fe2e30d23a1386f80db
     resource: repo://internal/handler/users.go
+  - id: openwiki-source-b5df54b08f2ac1045e8ab7c9
+    resource: repo://internal/repository/session.go
   - id: openwiki-source-2f0a9f6450f4986a4c7d8914
     resource: repo://internal/service/account.go
   - id: openwiki-source-f7acf9d278285ec2e6b81113
@@ -30,10 +37,7 @@ sources:
     resource: repo://internal/service/password.go
   - id: openwiki-source-d97c9077329c5637a8dbc18d
     resource: repo://internal/service/purge.go
-generated: { by: "opencode", at: "2026-11-03T16:50:44.301Z" }
-verified:
-  - by: openwiki/0.7.2
-    at: 2026-11-04T15:34:40.691Z
+generated: { by: "zcode", at: "2026-11-11T16:33:08.526Z" }
 ---
 
 # 账号安全能力
@@ -83,13 +87,19 @@ verified:
 
 | 路由 | 行为 |
 |---|---|
-| `POST /2fa/enable` | 生成 secret 与备用码，加密存储，返回 secret、备用码与 otpauth URL，但仍保持 2FA 关闭 |
+| `POST /2fa/enable` | **已启用时返回 400**；未启用时生成 secret 与备用码，secret 加密、备用码哈希存储，返回 secret、备用码与 otpauth URL，但仍保持 2FA 关闭 |
 | `POST /2fa/verify-enable` | 要求有效 TOTP，然后设置 `twoFactorEnabled` |
-| `POST /2fa/verify` | 校验 TOTP 或备用码；使用过的备用码会被消费 |
+| `POST /2fa/verify` | 校验 TOTP 或备用码；使用过的备用码会被消费（剩余数组以哈希格式落库） |
 | `POST /2fa/disable` | 要求 TOTP 或备用码，若使用备用码则消费，然后关闭 2FA |
 | `POST /auth/login-2fa` | 使用 2FA 挑战令牌完成登录（见登录流程） |
 
-otpauth URL 使用 account ID 与 issuer `FurryDrama`。启用、验证与关闭都会写审计记录。备用码比较是普通字符串相等，而登录路径使用常量时间比较。
+otpauth URL 使用 account ID 与 issuer `FurryDrama`。启用、验证与关闭都会写审计记录。
+
+### 2FA 加固（ADR-014，纯服务端，响应字段不变）
+
+- **enable 不再降级**：旧实现不检查状态，对已启用账号调用 `/2fa/enable` 会把 `twoFactorEnabled` 写回 `false`——一个有效会话即可在无 TOTP 的情况下关闭 2FA，比要求验证码的 `/2fa/disable` 更弱。现在已启用时直接 400，重置必须先走 `/2fa/disable`。
+- **备份码单向哈希存储**：`auth.HashBackupCodes` 以 `bc:<sha256 hex>` 前缀存储（备份码是 64 位高熵随机值，快哈希即可；bcrypt 会让单次登录多出数秒）。旧数据（AES 密文 `enc:` 或明文）在首次命中时由 `auth.ConsumeBackupCode` 整组就地升级为哈希格式，比对使用常量时间比较。
+- **TOTP 一次性消费**：`auth.VerifyTOTPStep` 返回命中的时间步（窗口顺序 `-1 → 0 → +1` 固定契约，未命中返回 -1），登录成功后 `users.twoFactorLastStep` 以原子条件更新标记该步；同一步重复提交按校验失败处理并记录 `twofa_replay` 事件（NIST SP 800-63B 一次性 OTP）。仅作用于 `/auth/login-2fa`，避免“开启 2FA 用的码不能立刻用于登录”的体验倒退。
 
 ## 加密字段
 

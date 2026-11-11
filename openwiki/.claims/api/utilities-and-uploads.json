@@ -1,14 +1,14 @@
 {
   "schemaVersion": 1,
-  "pageVersion": "sha256:7c46edb3aabdd64e610e60a166eecceba569a6427baf7d9faa6bfb77b07bde25",
+  "pageVersion": "sha256:80ff3a5c646fe6afe7633687d168515490ef88079475b243ab0701d6e01fc1d3",
   "claims": [
     {
       "id": "claim_5dbfb384331346708453099adf64485f",
       "statement": "Image uploads require multipart form data, enforce a coarse body limit then the exact file size, filter extension and declared MIME type, write a random prefixed filename, and reject files whose first 12 bytes do not match a known image magic prefix after deleting them.",
       "evidence": [
         {
-          "resource": "repo://internal/upload/upload.go#L86-L193",
-          "version": "repo-lines-v1:sha256:ce14b262436414d14913af4e8234f9015d8ed22f6734babe568613c12b600989:eyJzZWxlY3RlZExpbmVDb3VudCI6MTA4LCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiJkMDgzMWIzNTUxMmFjZTBkNTQ4MTM3NzJjYWNiYzQ2ZGZjMWYzMzE1Nzg0MTcyYzlkYWMzNTk4NzEyZWEwNjczIiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiI2Mzc3MDFkMjJhYjJlZTIwZWM3YjIyZDAxMDYyMDczYWE3MTU4ZTBjM2JjNGE1MzJlNTdhYmE5N2UyZTFkYjYxIiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiI5ZDlhMzllNzQ1NDc1MmMwOGNiZDkwZmVhMWQ4ZjVjNDMyMmQ0M2Y4MjlmOTljYjhlYTlmNTFiZTM2ZjdmMGE5IiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MywiZm9sbG93aW5nQ29udGV4dEhhc2giOiIzMjVjZmIwNzJlMTY1MzY5NzNkZWM5YWRhNjRiOTZkMmZmN2RkYmMwMmI0ZDk3NWIyMzFhMTk0YWRjZWMxZGE0In0"
+          "resource": "repo://internal/upload/upload.go#L86-L199",
+          "version": "repo-lines-v1:sha256:d6ce4eb680063fc67086a12fa225bbfebcfd1cf87b6b10a3071ed56b4268271e:eyJzZWxlY3RlZExpbmVDb3VudCI6MTE0LCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiJkMDgzMWIzNTUxMmFjZTBkNTQ4MTM3NzJjYWNiYzQ2ZGZjMWYzMzE1Nzg0MTcyYzlkYWMzNTk4NzEyZWEwNjczIiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiI2Mzc3MDFkMjJhYjJlZTIwZWM3YjIyZDAxMDYyMDczYWE3MTU4ZTBjM2JjNGE1MzJlNTdhYmE5N2UyZTFkYjYxIiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiI5ZDlhMzllNzQ1NDc1MmMwOGNiZDkwZmVhMWQ4ZjVjNDMyMmQ0M2Y4MjlmOTljYjhlYTlmNTFiZTM2ZjdmMGE5IiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MywiZm9sbG93aW5nQ29udGV4dEhhc2giOiIzMjVjZmIwNzJlMTY1MzY5NzNkZWM5YWRhNjRiOTZkMmZmN2RkYmMwMmI0ZDk3NWIyMzFhMTk0YWRjZWMxZGE0In0"
         }
       ]
     },
@@ -17,7 +17,7 @@
       "statement": "Upload file deletion rejects empty, dot, parent, separator-containing, and parent-traversal names and treats a missing file as success.",
       "evidence": [
         {
-          "resource": "repo://internal/upload/upload.go#L194-L204",
+          "resource": "repo://internal/upload/upload.go#L200-L210",
           "version": "repo-lines-v1:sha256:f286d94d3add8a54aaa2877ce5340b8c892d94387e96d2151b322612229dc19b:eyJzZWxlY3RlZExpbmVDb3VudCI6MTEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImExZDY4NTY4NDlmNDhiYjI0NTRiODhhOGU1Y2JmNzYyYmJlMzA1ZjA4YjMwYjkyMGUzZjQ5MDdiMDg5YzlhN2EiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImIwZDBjYzc1MzFiMDhmYzlhMDM5MDBmMGJjMTU2M2FhZThjYzZlYzRkYjE5MWJjMWJkZGI3NmI2NDJiMTI0MTgiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
         }
       ]
@@ -27,11 +27,11 @@
       "statement": "Static uploads are served outside the API rate-limited group with seven-day immutable caching, nosniff, noindex, inline disposition, a sandbox CSP, an image-extension allow-list, and 404 for traversal attempts, directories, and missing files.",
       "evidence": [
         {
-          "resource": "repo://internal/server/app.go#L112-L144",
+          "resource": "repo://internal/server/app.go#L150-L182",
           "version": "repo-lines-v1:sha256:352ef18b91c6b6604b0850465e5f54f658387a252e0a6e7e9ef39cd7e38c5f8d:eyJzZWxlY3RlZExpbmVDb3VudCI6MzMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjljOGQ5ZTVmMzRmMWJlOTExODkwZTMyNTkxYWQ3ZDRiNDk2MTUxYzRkZWY4YTI0ODEyYWEwOTVlNDI0NTRkODEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijc5Y2Q5N2ZhMWVlMmNiNDgzYWVlNDk1MGU5MzZmYjQxNmU0MDJmYjQwMzRiMjU3M2FjMGRmZTQ1ZjNhMDM0ZWQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
         },
         {
-          "resource": "repo://internal/server/app.go#L96-L102",
+          "resource": "repo://internal/server/app.go#L134-L140",
           "version": "repo-lines-v1:sha256:8704e6976ebc601c9785cf2f5556e081efad1c2e6ba788c92df17933b881e311:eyJzZWxlY3RlZExpbmVDb3VudCI6NywiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiOTYxMWJjZGJjMzY5ZTBkNTkwMzVkZWUyNWIxODJhYWZmNjExMDMyMmY5ZDMwMDdmZWNmZTJiNTExNTFlZjk3ZSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiYWFlNTM2MjBkODUxNDEzMWM1NWY2NGZmMGFjMmYxNDgzNTM3M2RkNTNmZDM5MThhNzcyYzg4ZmNlZGRkNjVmMCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZmI2NjViYmYxOWEwNDE5NzFhODU3Y2E2Mzg3M2NhNDY3MDA3MDBhZTA4ZTFiZTBiZWIyMGY1YTAyNzRmZTllYyIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiMzZiYTFjODdmMGZkN2YxZDAyOTY5MmZlYTlhZWJiNDAwMjQxNGNiMDJiYWVkY2E4OTU4MjdmY2FkZDBhMzEzZCJ9"
         }
       ]
@@ -123,7 +123,7 @@
       "statement": "RSS 单集条目标题中的集数称呼经 episodeRefText 解析（自定义 label 优先，回退「第N集」）；剧集条目标题仍使用 currentEpisodes 数字（「更新至第N集」）。",
       "evidence": [
         {
-          "resource": "repo://internal/handler/episodes.go#L1886-L1893",
+          "resource": "repo://internal/handler/episodes.go#L1866-L1873",
           "version": "repo-lines-v1:sha256:ae3e940214500a4760f082232d38ae176d2a8d56d008bf342766aa873df0da0b:eyJzZWxlY3RlZExpbmVDb3VudCI6OCwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiYjU5N2Q5Yjc3MmMxNDgyMTI5ZTYxYjRkYmYzM2FkNDhiNzkxYjY3MDNjYWJmNjJlMDI1ODJhMDM3MGJlNGQ3NyIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNDEyY2EzNDVjY2Y3NWJmOWMwODA2YmNlNjk1YmU4ZGU4MDhiNzk5ODQyNTFhN2E1NGQyMDJjZjYxMDFkZDQ1MSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNDQ1NjU1ODJiZmU4YzEzOTczNThjODg5OTkyN2M3NmJlNzkyYTBjODNkN2MwNDI4ZWJmOWQyZjY3YWUzZmVkZiIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiOGE5ZDc1NWEyYWMzODkxNjAwMGYyOGI2YWFiZTU3NTA0OGEyYzEzYWQ2MDBhZjkzNWE5ODM1NjQ3Y2FmZGRmZCJ9"
         },
         {
@@ -131,10 +131,30 @@
           "version": "repo-lines-v1:sha256:89ecad615fcae251041010b26952dabfa79e0a7b0e07facbfe7161fd78d7b60a:eyJzZWxlY3RlZExpbmVDb3VudCI6MTcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQyOWFjZmJhOTQ4MzM3NmJkZjZlYWI0ODlkMDdlYzI1ODAyMDQ3NTNkNGM1NDc1MTFlOGRkN2ZkZTQzMTc4ZDAiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImFmNDVhZTA1N2U2MWY1MTI5YzJlMjMzZThjMjkzYTJlZGYzNjJhNTg0M2IyY2EwYzlhYzJhMjk0ZmQ2MWZkMDUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImI4MWE4ZmUxODRjMGExM2U4ODM4YWZmMTExMmNmNjlmOGU5M2QzYTQzZGFhOTU2ZDE2NzNlZTRlYzFjMDljODMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjRmYTc5YjEyMzAyYjA3MWEyZWQ4ZjZkMTYyZTIzYWIwMzdiNTI4OWYxMWU2YWVhNjViMzM2MmZiYWZlZjczZjkifQ"
         }
       ]
+    },
+    {
+      "id": "claim_bed03bc45e504338bf1bb4328f7c2fcb",
+      "statement": "上传落盘 saveToDisk 改用 os.OpenFile(O_WRONLY|O_CREATE|O_EXCL)：文件名随机，避免覆盖已有文件或跟随符号链接；落盘后 stripExecBits 强制移除可执行位（Unix 为 Mode()&^0o111，Windows 为空操作），剥离失败则删除文件并返回错误。",
+      "evidence": [
+        {
+          "resource": "repo://internal/upload/upload.go#L136-L165",
+          "version": "repo-lines-v1:sha256:440bcd59ba2f2c125f39e14df112f23ea526d349e515d9433efa91da85ad9236:eyJzZWxlY3RlZExpbmVDb3VudCI6MzAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjIyNmFmZWJlYmYzMWY0MGUwNWFkYTIzYzNiZTVhODljYzYwNWVjYTc0YTFhZWU4YmZhMmE1NjJiOGMwMjQ0NzMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImIzYjE3MTlmNmNjMGM3OGQ4MmMzMjdiMzUzNDU5ZDU1YWNhMjIwMWE1OGNhMDJlYmNkZWY4YmZkZjU2NjQ4YmMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImE3OTU3YTcwY2U4ZTUwNGNlZjU0ZTMxZWU5Yjk1YjA4ZjZjODg5MjM1MzRjNjVlZjE2NDEzZmNjYmM2N2Q4MDIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjhkYWUzYjNiZDNkMjZhNzQ5YzI1YTQ4ZTk0NjBhOWY0ODQwOTU3OGU0YzA3YjEzYmUxMzU3OGM3OWI0ZGU5NjUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_d45154a8a82144c398a996b3d4b82874",
+      "statement": "SVG 保存路径 SaveSVGHeader 同样使用 O_EXCL 打开目标文件并在写入后剥离执行位，失败即删除文件；图标包上传端点停用期间该路径仅在恢复上传时使用。",
+      "evidence": [
+        {
+          "resource": "repo://internal/upload/svg.go#L170-L195",
+          "version": "repo-lines-v1:sha256:c603765137df8cb48b31ab308b84ebafd6e3749121608adfe1908ab9508ca404:eyJzZWxlY3RlZExpbmVDb3VudCI6MjYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY3Y2RhODJkYTYwNjIzOGUwNWU2MjM5OTU2OWM1ZWUwMzk5MzQxOTY0OGFlNWQ0M2EyYmY4Y2Q2MzQ3ZjgyNjMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjU5MWYwYzMyYWIzNWY2N2JkN2YyMGQwNGY2OGFlZDk5YzMzZDBlNzg2Y2Q4NjI5ZmM0MzAyMjRkM2I4ZmE1MmQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjhiN2MzYWZhMzZkMWUwMjY2ZmMzNDYwNWM5MmQxMWJlNTk0Y2Y2ODViNmIzZTkxYmZhYjA5YzRlN2M2YzllYTAiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImY5ODlmMzk2NThjZjc0MTAyOTE1NGQ3ZGU0MjU3MWIzODM2NWM0NjNlNmY1ZTllNTZhNGNmNDJiZTg5ZDk3NzEifQ"
+        }
+      ]
     }
   ],
   "verification": {
     "by": "openwiki/0.7.2",
-    "at": "2026-11-04T15:34:40.691Z"
+    "at": "2026-11-11T16:33:08.526Z"
   }
 }

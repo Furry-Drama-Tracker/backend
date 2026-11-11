@@ -1,14 +1,14 @@
 {
   "schemaVersion": 1,
-  "pageVersion": "sha256:1051381a6df6dd3fa66e35099845b05105736cef1eb68d8ad8431b682a4045bc",
+  "pageVersion": "sha256:16839a1542ef94c430cecd0468169448806b563c580f98650b9b9a94516a02a7",
   "claims": [
     {
       "id": "claim_deb47bdd79be4295a6916727d8f6bc09",
-      "statement": "Project conventions require godoc comments on exports, AppError-based domain errors, stable message keys, downward-only dependencies, ToObjectID for ID filters, and go test/vet/build as the verification gate.",
+      "statement": "项目约定不变：导出符号写 godoc、领域错误用 AppError、messageKey 稳定、依赖只向下、ID 过滤用 ToObjectID、go test/vet/build 为验证闸门；文档已随模块路径迁移更新。",
       "evidence": [
         {
-          "resource": "repo://docs/contributing.md#L60-L101",
-          "version": "repo-lines-v1:sha256:f23579d0258f9f213138a622de211ac845b18ecb2477fa382d72d33ca2de2d9d:eyJzZWxlY3RlZExpbmVDb3VudCI6NDIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjBjOWQyOGVlYTk0YTBiYTFiOTI4NzM2MmExY2Y1YWJjOGU0MDM4ZTk0YjFlOTQ1Y2EzMmQ2OWI3MGM2ZGRkNmYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImM0ZDM4OGQ3NzYwM2I0M2EyMGY2ZDg4YmU5YjJiZWI0ZmEwYjAyNTA1MDRiNjAwYTlmOTM5Njg2NWQ0MWU4NWIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjI4N2JkNGVmNWYwYjU3OTUzMWZkNjRkZGQ0MzY4MTM3NmI1ZjlhNWIwZGJiN2FkNzBjNTdkNGRkNTAwNWNhODQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+          "resource": "repo://docs/contributing.md#L56-L101",
+          "version": "repo-lines-v1:sha256:faf738a007a84c4ff5e9af2c7f1db3187e5ddca12eff0a9e213fd53cfe4d001f:eyJzZWxlY3RlZExpbmVDb3VudCI6NDYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjA1OTZmNmI5MzNkNmJhMDE4ODQ2NmY0MGVkOWFhMDY5YTNhZTU5YTZjYTA2MmZhN2RhNGQ4YzIxMzhjN2JjNTYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImM0ZDM4OGQ3NzYwM2I0M2EyMGY2ZDg4YmU5YjJiZWI0ZmEwYjAyNTA1MDRiNjAwYTlmOTM5Njg2NWQ0MWU4NWIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjViMGExODFmOWU3OWU1YmU1Y2Y5ZDEyMjVmMjNhODZkMGJhZmI3OTljYmQ2ZDE1ODhhMzEzZDZkMDY3M2FjNTYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
         }
       ]
     },
@@ -24,39 +24,39 @@
     },
     {
       "id": "claim_d1d2d97f59cb4fc79d059b6e12d29045",
-      "statement": "Endpoint rate limiters match only /api/<mount> and its subpaths, use fixed-window counting, and are cached per spec by RegisterRoutes so routes sharing a spec share counters.",
+      "statement": "端点限流器仍只匹配 /api/<mount> 与子路径、固定窗口计数，并由 RegisterRoutes 按 spec 名/窗口/上限缓存限流器（共享 spec 共享计数器）；限流键统一使用引擎级 c.ClientIP()，429 时输出 ratelimited 认证事件。",
       "evidence": [
         {
-          "resource": "repo://internal/middleware/ratelimit.go#L46-L127",
-          "version": "repo-lines-v1:sha256:c46f9b06d015a65e07a95639f9dd968636783b77f4227c2a4b4447aae11a2071:eyJzZWxlY3RlZExpbmVDb3VudCI6ODIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjA1NWVkNTg1NmQ1ZjgzNGRjM2ZlZWU3MGMxYWRhZTBlZWFlZjk1YmViNzEwMDVjMmFhZWRhY2NlOTliOWFiZWIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjIxZDI5ZTg2MmVlNzI3ZTkwOWJkNjE0NzYwYWFmNTRlNjljMWUzYzUxNjQ3ZmI1ODIzNjBmNjdjNDk2ODBkYjgiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImYyNDhmM2JiNDI4ODc2YjRiMWY2YjVmOTllOWIwNTdkMWRhYjMxZDFkZjdiZDViNTYwZjMzNjBmM2Q1ZWQ0YWIifQ"
+          "resource": "repo://internal/middleware/ratelimit.go#L47-L142",
+          "version": "repo-lines-v1:sha256:86ced4ce07bc48db528c955ad719e8c7d1fe32422aaec923f05616d47b376742:eyJzZWxlY3RlZExpbmVDb3VudCI6OTYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjA1NWVkNTg1NmQ1ZjgzNGRjM2ZlZWU3MGMxYWRhZTBlZWFlZjk1YmViNzEwMDVjMmFhZWRhY2NlOTliOWFiZWIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjIxZDI5ZTg2MmVlNzI3ZTkwOWJkNjE0NzYwYWFmNTRlNjljMWUzYzUxNjQ3ZmI1ODIzNjBmNjdjNDk2ODBkYjgiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImYyNDhmM2JiNDI4ODc2YjRiMWY2YjVmOTllOWIwNTdkMWRhYjMxZDFkZjdiZDViNTYwZjMzNjBmM2Q1ZWQ0YWIifQ"
         },
         {
-          "resource": "repo://internal/server/register_routes.go#L28-L38",
-          "version": "repo-lines-v1:sha256:34891b81ac97fb630271fddff3253f908b2c7b5c32fa396ad0f3b804f6d8eb04:eyJzZWxlY3RlZExpbmVDb3VudCI6MTEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxZDM5M2JmYmNmOTZiMTlkYzlkN2NkYjYwZGQ1Y2RmNjY4YWIyMzMyZTU4YmE2MjNiZTFmOWE1YTI3ZDQ3MWUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY3Y2RhODJkYTYwNjIzOGUwNWU2MjM5OTU2OWM1ZWUwMzk5MzQxOTY0OGFlNWQ0M2EyYmY4Y2Q2MzQ3ZjgyNjMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImNiMmViOWE3YThjZWI3ZDMwZDVkM2NiOTJkODIxZTVhMDBmMzgzNjFhNTQ1YWMxNzE1ZDMxZDVkMzc4MjZkMGMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImM5ZmViOTI5MjJlMmY2OTJlOGNlMmIwM2EyMzU1NjdiYmQyODgxZTYyZmFmNjBkYjg0Yzg0OTIxYjczYjJlNjYifQ"
+          "resource": "repo://internal/server/register_routes.go#L36-L52",
+          "version": "repo-lines-v1:sha256:cabb07f3a74dec9dc33c5f77d3e315f89bb8d2eb08b374623895557f3d865c81:eyJzZWxlY3RlZExpbmVDb3VudCI6MTcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjMyM2FhMTQzOWE1ZGJiNzczNzQ2NDdjNjJmMjdhZTYyYTY0YzJiZjJhMTdlYzIyZGIxMDdjNmZhMTUxZWEzZTEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY2MzBmMjg3NDU1YzVhMmQ1NzgwN2UzNTRhNjEyNGZkNzI4YjNhMmY4N2RjMjM0YzMxMzJlNmYyM2UyNjczMDEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijk0NmVmOTAyN2U5YzdiOTRhODJhNmYwMjM4YWIyMGFjNTExZmY1YTgzN2RlYWJkOGQ4OTQxNDcwODgzMTdhYjkiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6Ijg1NTRiZDA5NDU3M2YwNmZhMmQ2MGQ5MDQ0ODVjNGRmZDFjNzAxODFmMzlkMmYwMTBhMTc1ZDExYjIyNDBiYmIifQ"
         }
       ]
     },
     {
       "id": "claim_6254d1654f59497db71a566b0f42d098",
-      "statement": "The request-email-change limiter keys on the source IP plus the lowercased new email rather than IP alone, preventing verification-mail abuse with different addresses.",
+      "statement": "requestEmailChange 限流器的键仍是来源 IP + 小写目标邮箱（而非仅 IP），防止用不同邮箱刷验证邮件；IP 现取自 c.ClientIP()。",
       "evidence": [
         {
-          "resource": "repo://internal/middleware/ratelimit.go#L96-L101",
-          "version": "repo-lines-v1:sha256:9eaed5ea69ff5cf51cf4deadc3a55675f55db3015625b0dcea6fc486cbbc376e:eyJzZWxlY3RlZExpbmVDb3VudCI6NiwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiNjMwMzQyNmQ5NDEwYTg0MWNiZDVjYzAzZTlkZTdhNjk0MWNkNjZlYWU0MWFiOWE0ZTI5YmFjZjIzMjU3MDkyOCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNjRlZmM0OTQxOGQyNmRjZjEyOWIyMmE2YWEyMTEwOGNlZWMzNzY3N2EzMmQwOGU5ZDVmZWUzNWRkYTY2YmI5ZCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZjAxYjI4ZjA1NGIyZTBlMTRiMDhjYTljMTE2MTk3MWIwZWIzNmJhZDc5MTZmODFmYWY2ODJlY2JlZTliNTY5MiIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiNGU5MGFhODRhOWY0MjQ2OTFmYTg4Yjc1MTI4Y2MwYjUxZDY4OWJhMWYzNGU3YjYzMmViY2UyN2QwZDU0ZjViOCJ9"
+          "resource": "repo://internal/middleware/ratelimit.go#L99-L105",
+          "version": "repo-lines-v1:sha256:56ceaf279c53f2ab8afcf9b4220ff192a3d675cfb79e419b312e251b40cdf508:eyJzZWxlY3RlZExpbmVDb3VudCI6NywiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiNmI0ZTUzODFiMDBlNGU2NWNkMWQ3OGFiNjBjZmVmNmE3ZjhkMTlmYzc5ZGM0YTNmMmFlYjVlZDM4YTVkOGU1YyIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMDFiYTQ3MTljODBiNmZlOTExYjA5MWE3YzA1MTI0YjY0ZWVlY2U5NjRlMDljMDU4ZWY4Zjk4MDVkYWNhNTQ2YiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNmY1ODcyZTQ0ODY4ZDFmYzk0ODI3YTZiMTVlMGY4ODE3Njg5YWYzOGIyODI0Y2YwM2VmZDQwZWU0Y2Y3Mjk3YyIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZjhhZGU3ZmQ5MTE5NzM5NDJjNjY2NDcyMjkwODcxOWQxYzQzMWIyZjk2MTA4MWFhZjM2OWUyYjkwZDcyNGM0MSJ9"
         },
         {
-          "resource": "repo://internal/ratelimit/limiter.go#L149-L159",
-          "version": "repo-lines-v1:sha256:e6f85c20e1603a565826f40f816a7be99a496d06588ac8022b560dc66f8772e4:eyJzZWxlY3RlZExpbmVDb3VudCI6MTEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY0Y2VmZmU3NjIyZWUyZjViMDlmOTlkOWEzZDg3ZDg0YTkzOWE5MTY3YzQ0YWI5ZTkzYTUyNGNiZTVkMTAwZjEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjkzYmY1MGY1OTAwNGI1MmI2YThiODk4MGQ0NmZmYjI0M2ZjYjU1N2E4MWQ5ZmVkNDQzNDYzYjUwZDRkMzc2ZWQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImQ0NTFjMjE1MzVkYzQyNmRiNDgxZGU3ODUwM2E4NWFhNGRkMWQzOGVjNTI2ZjExYzZkZWFkMGJkNTJhODVjOTEifQ"
+          "resource": "repo://internal/ratelimit/limiter.go#L88-L102",
+          "version": "repo-lines-v1:sha256:34cbd3b1fe9d7273cb12f857e73bacbf71cde3fce4fd217743a4045dab24156e:eyJzZWxlY3RlZExpbmVDb3VudCI6MTUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImM3M2VhMjUzNDdjYzdmNjBlZGU4NjlhZjgzOGM3MjVlNDNiOGVjZDg5NWQwYTg5NzVhODg4N2I0MDc5MzJjZmUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImE1NmM5OTYyNTY4ZjQ5ZTc0MmQ3ZjE3ZjIzZGI3MTgwZjgwNjg2YWFjOWNlNGVmMzg5NjhlM2EwMDU5ZDUyMTAiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijg3MWIxMDY1ZTk3ODcwNTY1ZmExMmFhOTg3MWEwNTI2ODM5ZGEwMzQzMmViN2ExNGM0Y2QwNWY4ODhiNTA3MjgiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjJhMWRhNTM0N2EyZTFiMmM0NzVmYzE4NmJlZDMzNjVmZmFkYzE5M2E1NzQ1YzIwYWM3MjNhYzZjOTMxZWExNDEifQ"
         }
       ]
     },
     {
       "id": "claim_3659554e27ba4b15bea8a5fdb8869ca2",
-      "statement": "XSS sanitization strips disallowed tags while keeping text rather than escaping markup, matching the documented bluemonday replacement decision.",
+      "statement": "XSS 清洗仍剥除不允许的标签而保留文本（不转义标记），与 bluemonday 替换决策一致；该决策在 docs/decisions.md 中的位置随新增 ADR-013..017 后移。",
       "evidence": [
         {
-          "resource": "repo://docs/decisions.md#L44-L60",
-          "version": "repo-lines-v1:sha256:c5a81c101e5f3ffea4fefc389ee404f6c2556598a44f033e3ed4902b3e13565e:eyJzZWxlY3RlZExpbmVDb3VudCI6MTcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjJkZTUyZTMxMjJiNzRmZGQwNTg1MzE3ZGExODQyYWMzYmM3YWMxM2VlMWUzNDg1ZDU0MTJjNzNlMTY5ZTZhZWIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImE2ODJlZmUxMTFkNjNkZmY1ZDEzODFlMjUwZDFkM2U2NDc3MTEwNDZjODdhNTZmZWM5MmNmNzhmMmYzYWI2NGYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjdlYjJlYTJiMTI2YjM0OTllNTFhZTMwZWI5NDFhYjBlMjQ1YzE1MTM2YTg3YzMxZDMxZDBhODgzODI5NmQ4OWQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjBhZDVlYjM2ZjQyNmJjN2VkMjRmNThhOGE4ZDgxM2Q2MmYzMGYyNGU3OTA0OTg3ZDcyNmY0YzdmNjlmOGJlZTIifQ"
+          "resource": "repo://docs/decisions.md",
+          "version": "repo-file-v1:sha256:a844efc24d2d9c595466f0df1969589689df5a422084fb2905925cda8b7a1e98"
         },
         {
           "resource": "repo://internal/security/xss.go#L32-L70",
@@ -93,11 +93,11 @@
       "statement": "集数称呼是新的固定契约：站内通知、Push、邮件、RSS 与更新日历的集数文案统一经 episodeRefText(episodeNumber, episodeLabel) 输出——自定义 label 非空时用它，否则回退「第N集」。",
       "evidence": [
         {
-          "resource": "repo://internal/handler/episodes.go#L1093-L1115",
+          "resource": "repo://internal/handler/episodes.go#L1092-L1114",
           "version": "repo-lines-v1:sha256:0becba5f6a8e45d656d6384f09bb04acfefd52ac0b54978875e25c11379f46df:eyJzZWxlY3RlZExpbmVDb3VudCI6MjMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY0ZWZjNDk0MThkMjZkY2YxMjliMjJhNmFhMjExMDhjZWVjMzc2NzdhMzJkMDhlOWQ1ZmVlMzVkZGE2NmJiOWQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjUxMzE0NTFkYjBiMWY4ZWUyNDgzNzRjZmI2NTg3Y2Q3ODQ4Mjk2MTA5OTExNzhkY2QwNDBkMzgwZGQ0ZTFlM2UiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjcwM2ZlYTkwY2VlYTdmY2I2Y2QyOTBmNjU1ZDM4ZmVmYThlOWFiZWE3NmI0MGY2M2IyMjNjYThlZWMzYzVlODYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjZmMDAwYmYyOGU4OTlhMDQ2NWU4MzM5YmQzODY3YWIyNDQ4Y2NjNjg3MWIyNGUxMmY5ZmRkNTg0YTYzZTU1YTcifQ"
         },
         {
-          "resource": "repo://internal/handler/episodes.go#L1886-L1893",
+          "resource": "repo://internal/handler/episodes.go#L1866-L1873",
           "version": "repo-lines-v1:sha256:ae3e940214500a4760f082232d38ae176d2a8d56d008bf342766aa873df0da0b:eyJzZWxlY3RlZExpbmVDb3VudCI6OCwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiYjU5N2Q5Yjc3MmMxNDgyMTI5ZTYxYjRkYmYzM2FkNDhiNzkxYjY3MDNjYWJmNjJlMDI1ODJhMDM3MGJlNGQ3NyIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNDEyY2EzNDVjY2Y3NWJmOWMwODA2YmNlNjk1YmU4ZGU4MDhiNzk5ODQyNTFhN2E1NGQyMDJjZjYxMDFkZDQ1MSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNDQ1NjU1ODJiZmU4YzEzOTczNThjODg5OTkyN2M3NmJlNzkyYTBjODNkN2MwNDI4ZWJmOWQyZjY3YWUzZmVkZiIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiOGE5ZDc1NWEyYWMzODkxNjAwMGYyOGI2YWFiZTU3NTA0OGEyYzEzYWQ2MDBhZjkzNWE5ODM1NjQ3Y2FmZGRmZCJ9"
         }
       ]
@@ -105,6 +105,6 @@
   ],
   "verification": {
     "by": "openwiki/0.7.2",
-    "at": "2026-11-04T15:34:40.691Z"
+    "at": "2026-11-11T16:33:08.526Z"
   }
 }

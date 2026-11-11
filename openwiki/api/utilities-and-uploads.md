@@ -1,8 +1,11 @@
 ---
 type: api-domain
 title: 上传、RSS、翻译、备份与分页
-description: 共享图片与 SVG 上传校验、静态上传服务、RSS 订阅、翻译提供方回退、整库备份导出/导入限制，以及通用分页契约。
+description: 共享图片与 SVG 上传校验与落盘安全（O_EXCL、剥离执行位）、静态上传服务、RSS 订阅、翻译提供方回退、整库备份导出/导入限制，以及通用分页契约。
 tags: [api, uploads, rss, translation, backup, pagination]
+verified:
+  - by: openwiki/0.7.2
+    at: 2026-11-11T16:33:08.526Z
 sources:
   - id: openwiki-source-1649edbcafe0eab861fed46a
     resource: repo://internal/handler/backup.go
@@ -22,10 +25,7 @@ sources:
     resource: repo://internal/upload/svg.go
   - id: openwiki-source-62a9837f2b45c92ae81ca775
     resource: repo://internal/upload/upload.go
-generated: { by: "zcode", at: "2026-11-04T15:34:40.691Z" }
-verified:
-  - by: openwiki/0.7.2
-    at: 2026-11-04T15:34:40.691Z
+generated: { by: "zcode", at: "2026-11-11T16:33:08.526Z" }
 ---
 
 # 上传、RSS、翻译、备份与分页
@@ -42,6 +42,11 @@ verified:
 4. 小写扩展名必须完整匹配 `.jpg`/`.jpeg`/`.png`/`.gif`/`.webp`（锚定匹配，避免 `.notjpg` 绕过），声明的 `Content-Type` 必须匹配 `^image/(jpeg|png|gif|webp)$`。失败返回 `LIMIT_FILE_TYPE`。
 5. 文件写入配置的上传目录，文件名为 `<prefix>-<32 位 hex><原扩展名>`。
 6. 前 12 字节经 base64 编码后必须匹配已知魔数前缀；失败会删除文件并返回 `BAD_MAGIC`。
+
+落盘有两条硬性安全约束（`saveToDisk`）：
+
+- 目标文件用 `os.OpenFile(O_WRONLY|O_CREATE|O_EXCL)` 打开：文件名随机，正常不会冲突，同时避免覆盖已有文件或跟随符号链接。
+- 落盘后 `stripExecBits` 强制移除可执行位（Unix 为 `Mode() & ^0o111`，保留读写位；Windows 无 Unix 执行位，为空操作）。剥离失败会删除该文件并返回错误，避免留下未知权限的文件。
 
 返回 URL 为 `/uploads/<文件名>`。`maxBytes <= 0` 时默认 5 MB。调用方选择不同前缀与限制，例如封面 5 MB、壁纸与主题资源 8 MB、站点内容图片 5 MB。
 
@@ -75,7 +80,9 @@ SVG 上传走独立路径，因为它是文本且带脚本风险：
 - 去掉 UTF-8 BOM 与首尾空白后，内容必须以 `<?xml` 或 `<svg` 开头。
 - 使用 XML 解析器做结构化校验：必须是单一 `<svg>` 根元素；拒绝 `script`、`foreignObject`、`iframe`、`object`、`embed`、`link`、`style`、`animate`、`set`、`discard`；拒绝 `on*` 事件属性、`javascript:`/`vbscript:`/`data:`/`file:` 等危险 URL 与 `@import`；拒绝 `DOCTYPE`/`ENTITY` 及非 `xml` 处理指令以防 XXE。`href`/`src` 只允许锚点、站内相对路径或 `http(s)`。
 
-文件写入 `IconsDir`（默认 `./uploads/icons`，可由配置覆盖），文件名为 `icon-<32 位 hex>.svg`，返回 URL 为 `/uploads/icons/<文件名>`。静态上传路由只服务上传目录下的文件，因此自定义图标目录若在外部，需要自行挂载静态服务。
+文件写入 `IconsDir`（默认 `./uploads/icons`，可由配置覆盖），文件名为 `icon-<32 位 hex>.svg`，返回 URL 为 `/uploads/icons/<文件名>`。与图片落盘相同，`SaveSVGHeader` 同样使用 `O_EXCL` 打开并在写入后剥离执行位，失败即删除文件。静态上传路由只服务上传目录下的文件，因此自定义图标目录若在外部，需要自行挂载静态服务。
+
+注意：图标包上传端点（`POST /api/icons/upload` 与 `POST /api/themes/upload-icon`）当前已停用（路由注册被注释），SVG 保存路径仅为恢复上传时使用，详见 CMS 页面。
 
 ## RSS
 
@@ -133,4 +140,5 @@ HTTP 请求体限制对 `/api/backup/import` 单独放宽到 50 MB，且只对 J
 
 - [请求生命周期与中间件管线](../architecture/request-lifecycle.md)——请求体大小限制与静态路由位置。
 - [内容目录 API](content-catalog.md)——上传调用点。
+- [CMS 与站点内容 API](cms-and-site-content.md)——图标/主题图标上传端点的停用状态。
 - [部署与运行时](../operations/deployment-and-runtime.md)——上传与图标目录配置。

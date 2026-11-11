@@ -1,8 +1,11 @@
 ---
 type: security
 title: 鉴权中间件与角色
-description: Protect 中间件的准确失败结果、角色常量与角色路由、默认超管邮箱的 RequireEmailChanged、可选鉴权、CSRF 双提交 cookie，以及 SSE 票据校验。
+description: Protect 中间件的准确失败结果与会话吊销诊断事件、角色常量与角色路由、默认超管邮箱的 RequireEmailChanged、可选鉴权、CSRF 双提交 cookie，以及 SSE 票据校验。
 tags: [auth, authorization, roles, middleware, csrf, cookies]
+verified:
+  - by: openwiki/0.7.2
+    at: 2026-11-11T16:33:08.526Z
 sources:
   - id: openwiki-source-d30e65659972429c2c50cf5a
     resource: repo://internal/auth/cookies.go
@@ -18,15 +21,12 @@ sources:
     resource: repo://internal/middleware/optional_auth.go
   - id: openwiki-source-7106c8455bb73d12832c8523
     resource: repo://internal/server/app.go
-generated: { by: "opencode", at: "2026-11-03T16:50:44.301Z" }
-verified:
-  - by: openwiki/0.7.2
-    at: 2026-11-04T15:34:40.691Z
+generated: { by: "zcode", at: "2026-11-11T16:33:08.526Z" }
 ---
 
 # 鉴权中间件与角色
 
-鉴权由 `middleware.Auth` 实施，这是一个持有 repository 聚合与 JWT 签名器的小容器。它暴露三个守卫：`Protect`、`RequireEmailChanged` 与 `OptionalAuth`。令牌提取与 cookie 行为位于 `internal/auth`。
+鉴权由 `middleware.Auth` 实施，这是一个持有 repository 聚合、JWT 签名器与可选 `authlog.Recorder`（`Rec` 字段，nil 时静默）的小容器。它暴露三个守卫：`Protect`、`RequireEmailChanged` 与 `OptionalAuth`。令牌提取与 cookie 行为位于 `internal/auth`。
 
 ## 令牌提取
 
@@ -56,6 +56,8 @@ verified:
 空 purpose 被视为 access，以兼容旧令牌；其他任何 purpose 都会被拒绝。成功时把用户存入 `auth.user`、原始令牌存入 `auth.token`，然后启动一个 fire-and-forget 的会话活跃时间更新。
 
 带 `jti` 的 access 令牌会额外查询 `usersessions.tokenHash`：登出、改密或管理员下线让会话失活后，access 令牌立即失效，而不是等到 15 分钟自然过期。历史上没有 `jti` 的旧令牌跳过该检查，最多再存活一个 access TTL，用于平滑过渡。
+
+会话检查失败时，`Protect` 还会通过 `Rec` 记录一条 `session_revoked` 认证诊断事件：`reason` 取会话文档的 `revokeReason`（记录它为何被吊销），`detail` 区分"session lookup failed"（查询失败）与"session user mismatch"（会话不属于该用户），并带 IP、UA 与路径——这是"用户莫名掉登录"排障的核心证据。响应本身不变，仍是 401 `auth.invalidToken`。
 
 419 不是标准 HTTP 状态，但它是前端调用 `/api/auth/refresh` 的信号。
 
@@ -114,6 +116,11 @@ SSE 通知流不使用 `Protect`，因为 EventSource 不能设置 `Authorizatio
 - Access 令牌：HttpOnly、`SameSite=Lax`、15 分钟、路径 `/`、仅生产环境 secure。
 - Refresh 令牌：HttpOnly、`SameSite=Lax`、7 天、路径 `/api/auth`、仅生产环境 secure。
 - 清除鉴权 cookie 时会为两个路径以及遗留 `token` cookie 写入过期 HttpOnly cookie；生产环境清除时使用 `SameSite=Strict`。
+
+## 排障语境
+
+- 419（access 过期）触发前端调用 `/api/auth/refresh`；refresh 独立使用 `RefreshSpec`（60/15min），不再与 2FA 桶（5/15min，挂六处路由）共享配额。
+- 429（限流命中）时中间件输出 `event=ratelimited` 诊断日志，带限流器名（spec 名）、路径、IP 与 Retry-After——排障时可直接在 journalctl 中按 `event=ratelimited reason=<spec>` 过滤，不再只有一个 429 状态码。
 
 ## 相关阅读
 

@@ -1,24 +1,32 @@
 {
   "schemaVersion": 1,
-  "pageVersion": "sha256:1b8c9a5e4d0e30fe31484adce343e2eae7a3e3306846adfa9a4afb6c1d856acb",
+  "pageVersion": "sha256:8cbcc4dd0644bff0c81ef4abcbb76dc90884fc957239742fc21f3bddce4b32d0",
   "claims": [
     {
       "id": "claim_83f01cf1f83a4206bbef06f8510e0e9b",
-      "statement": "Protect returns 401 for a missing token, 419 with auth.accessTokenExpired for an expired token, 401 for an invalid or non-access-purpose token, 401 when the user no longer exists, 401 invalidToken when a jti-bearing token's session is missing, inactive, or owned by another user, and 403 for a disallowed role.",
+      "statement": "Protect 的六种失败模式不变（无令牌 401、过期 419、非法/非 access purpose 401、用户不存在 401、jti 会话缺失/失活/非属主 401 invalidToken、角色不允许 403）；jti 会话检查失败时另记录 session_revoked 认证事件：reason 取 sess.RevokeReason，detail 区分 lookup failed 与 user mismatch，响应不变。",
       "evidence": [
         {
-          "resource": "repo://internal/middleware/auth.go#L47-L98",
-          "version": "repo-lines-v1:sha256:88fd291e0d3613b5157dbcd02bd16e1203ccfa5bad11e77f97bbb6cf503f67b7:eyJzZWxlY3RlZExpbmVDb3VudCI6NTIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjZkZWRhY2ViMzQ2NDJhMGIxZWJhMDVmZTQ0YTc0YmNhNTIyNTg4NDllOTU4ZjliM2Q2ZGQ5NmI2ZjVjYWE0ZjAiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImNhYzFjMWJiYmM2YzdmNjkwNDY3ZjFlMTIwMTA1NGNiNTk3MDQ2YTc1NjUxMTBiN2UzNjMyMmUyZDQ2YmVkOTAiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjljMmZiYjEwZTQwZjcxODc5MzA5OGI5YWE3N2ExZjg3MWJkYjhiZmU4ZTlmMzg5ODdmM2I0OTgwOTY1YjE0ZTIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImYyOTVlNDk3Mzg2NzIwZjVjMjhmMjI2Y2M2NzIxMDk3YzJkYjU3NTQ3ZGYzOTcwMWQwMzhkMTM4M2M2ZWMwYjgifQ"
+          "resource": "repo://internal/middleware/auth.go#L33-L40",
+          "version": "repo-lines-v1:sha256:df631032fbbcf4ae2f70469a79a1cfb5965f5accb50dbaeffe3ceeed51d7bc91:eyJzZWxlY3RlZExpbmVDb3VudCI6OCwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiYjdhYWVhMjYzOGMyZWU3OWQzYjBmNjg4ZDFkMmQyMTUxZDRhNjhmZmY3MmI0YmU3ZjRiMmQyZTBjZDU4YTUzZSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiZWIzNDc3MTdiZmQ4YTExMmQ3YmY4MzZkZTQ3OGEyYTcyZWI4MGFjMjk4MzI5MGI5ZDQ4Yjg3NjE1ZGUwNTQ2YSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiOTBkZGFhZTNiNThjOGY1YjBlNzExZTY1ODA1ZWJiM2I4ZDY1ZTc3NGI1YWM4ZGVkZGUwMGU5Mjk2OGU4YmQzZSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiY2NlOTc5YjRiMTVhNmZmNWQ5NjNhMjhiZWMwZTAyNmQ0NzZjM2M5MjBjNTVjZjU1YzdlNTUwZmMzMWVmZTQ4ZSJ9"
+        },
+        {
+          "resource": "repo://internal/middleware/auth.go#L51-L107",
+          "version": "repo-lines-v1:sha256:e4a04768ad6a5c4277a633c1bc35b23a3a65884c6293c1b2c0d4724584e09d4a:eyJzZWxlY3RlZExpbmVDb3VudCI6NTcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjZkZWRhY2ViMzQ2NDJhMGIxZWJhMDVmZTQ0YTc0YmNhNTIyNTg4NDllOTU4ZjliM2Q2ZGQ5NmI2ZjVjYWE0ZjAiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijg4NzE3OGVjNzhiM2M5ZDI4YjM4ODUyNWJkODQ5ZGUwYTAxMGYyOThhYmRkNTc4ZmMyNjBlMjdkMmZhNWZiODIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjljMmZiYjEwZTQwZjcxODc5MzA5OGI5YWE3N2ExZjg3MWJkYjhiZmU4ZTlmMzg5ODdmM2I0OTgwOTY1YjE0ZTIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjQwY2I5ZDczNGQ4ZTZlYjc2MzAyZTM1YzE5MjQ2OGVhMmMxYjFjMzk3NmFkZTA5ZmYyZjQzNzUxYjc0ZGNhMjAifQ"
         }
       ]
     },
     {
       "id": "claim_59536bb3ff2b4f6d8fa64bb00a76efa2",
-      "statement": "Protect accepts tokens with an empty purpose for backward compatibility, sets the user and raw token in the Gin context, and asynchronously updates session activity on success.",
+      "statement": "Protect 仍兼容空 purpose 令牌（视为 access），成功时把用户与原始令牌写入 Gin 上下文并异步更新会话活跃时间；middleware.Auth 新增可选 Rec 字段（authlog.Recorder，nil 时静默）。",
       "evidence": [
         {
-          "resource": "repo://internal/middleware/auth.go#L45-L95",
-          "version": "repo-lines-v1:sha256:61d05e5d524f057227ec45f89a17da7de39b3f9573443d04a87ad16c6e7fc00d:eyJzZWxlY3RlZExpbmVDb3VudCI6NTEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjcwOGNkMzUxZTczM2MxMzU1ZmRhMWJmNjA4OTdjZTdjMTNlMDYzNWE4OTZjZjFmNmVjNTkxYjYzNzFmMWNlYTciLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjAwNjQ4MTRiY2YzYWY3ZDE5NGJlODYyOTdiNmIzYzA2OTcyYTc4M2E0ZmM1ZmE5YjFkNmMwMWZkM2FhMTZmMDUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjlhMzJkZDdiNDQ4OWU5MzBhNTVjNmUwNGIyZjBkMzgyMDE2ZDgxMDA3MzU2YmM4OTE0NzY3MDYwMzJlOWMyMGQifQ"
+          "resource": "repo://internal/middleware/auth.go#L108-L120",
+          "version": "repo-lines-v1:sha256:d532d973e4621c4a2dd3d2c6caaaec55806ec10116c7ab6cc04d4d02579ed252:eyJzZWxlY3RlZExpbmVDb3VudCI6MTMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImU2ODA2ZjE1NWM1YWMxYWUyNzIyY2EwNmYyYWM5Y2FkY2I4ODFiOTEyM2NiNjI0YTNjMTA0NzViNDQ0OWRjMmUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijg4OTkwYjk3MDgwMWUwM2UzNjJjZjI2OGYxOGZlZDBkZTc0M2Q5YmExOTJkMDA3ZDBmYjIwMWNkMDY0MTQxODAiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImZkMzYxZjU3NzdkN2YxNDM5YjRhMDZiM2E2MDljNzRhYWM2NGIyOGIzZTdjNTc3MGYwZDkwY2NiZTBhOGJjNjciLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImYyOTY0MDc5YzNjNWM4MTUyMGVmMzNhMmI5ZDJlMTVhMWI4NGQ3MjgwZGI4NTkwZGNkNjU3NDdlM2UwMTJhNDAifQ"
+        },
+        {
+          "resource": "repo://internal/middleware/auth.go#L33-L40",
+          "version": "repo-lines-v1:sha256:df631032fbbcf4ae2f70469a79a1cfb5965f5accb50dbaeffe3ceeed51d7bc91:eyJzZWxlY3RlZExpbmVDb3VudCI6OCwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiYjdhYWVhMjYzOGMyZWU3OWQzYjBmNjg4ZDFkMmQyMTUxZDRhNjhmZmY3MmI0YmU3ZjRiMmQyZTBjZDU4YTUzZSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiZWIzNDc3MTdiZmQ4YTExMmQ3YmY4MzZkZTQ3OGEyYTcyZWI4MGFjMjk4MzI5MGI5ZDQ4Yjg3NjE1ZGUwNTQ2YSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiOTBkZGFhZTNiNThjOGY1YjBlNzExZTY1ODA1ZWJiM2I4ZDY1ZTc3NGI1YWM4ZGVkZGUwMGU5Mjk2OGU4YmQzZSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiY2NlOTc5YjRiMTVhNmZmNWQ5NjNhMjhiZWMwZTAyNmQ0NzZjM2M5MjBjNTVjZjU1YzdlNTUwZmMzMWVmZTQ4ZSJ9"
         }
       ]
     },
@@ -27,7 +35,7 @@
       "statement": "RequireEmailChanged blocks non-GET requests from a superadmin whose email is admin@furry09.com, except paths containing change-email, logout, or verify, returning 403 with forceEmailChange.",
       "evidence": [
         {
-          "resource": "repo://internal/middleware/auth.go#L99-L115",
+          "resource": "repo://internal/middleware/auth.go#L126-L142",
           "version": "repo-lines-v1:sha256:d27ceeecf54be5c15d802c40ea750ee7d94cdf5269700591565924dac81adeaf:eyJzZWxlY3RlZExpbmVDb3VudCI6MTcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjU5MWFkYjdiZjQ4MTBjNDAxMWUxN2M3YmE2MWYzODU1YzgwZTRlY2RhZmQxODJjYmI3MTJkMjM5Yzc0M2RhZjgiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjI2NmQ5MjRjZThiNTRiZDZiNzViZmM2YjBjMjEyNzg3MjFmMWYxNzAwZjhmYmJkOGM0YWQ5YTUwZjQ2NTMyZDkiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjlhMzJkZDdiNDQ4OWU5MzBhNTVjNmUwNGIyZjBkMzgyMDE2ZDgxMDA3MzU2YmM4OTE0NzY3MDYwMzJlOWMyMGQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjlmMmQ0MzJjN2NlZWNiZWI1OWVjNjhlYzk0NjNmMjIzZDc1NGVmM2VjZDNjMDRjNzNmMDk2NmUyY2EwNjUzZjQifQ"
         }
       ]
@@ -71,7 +79,7 @@
       "statement": "GET /api/csrf-token is registered before the CSRF validation middleware so it remains reachable without a token.",
       "evidence": [
         {
-          "resource": "repo://internal/server/app.go#L72-L74",
+          "resource": "repo://internal/server/app.go#L110-L112",
           "version": "repo-lines-v1:sha256:6483e48daa17e81b9b859080e2898b10ac011bf4bc92b5946cbeb7665b042d70:eyJzZWxlY3RlZExpbmVDb3VudCI6MywiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiY2E2ODc0N2RjOGI1OWU1NDM2YjhhODg2OWMyYjA1ZTA2YWMyYzgzYzg0MzhjZGFhODY0MGQ4NDU0YzlhMDVlNyIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNDkzMDlmOGVkZmQ2M2Q5NTNhZGExNTI0MDExN2RkZDkzYmNjY2UwNjk2MWU2MTc0ZjJlODVmYTEwYmYxYzYwYSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiOWM3OTE5NzcxODkwYjAyNGUwOGRkOGZmZTkxYjVjYTM5MWNjMmI5NjdlZDA5NGY3MDE0OGE5MDEzMGRhOWVlOSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZWFhYmQ2ZGFjNGEyZjc2OTJmZTk0OTc5YWQ2ZWNlZDAzZjdhZjI5YzM5YjVmNDU2NjNhYTNkOWM3MTNiOWY3MiJ9"
         }
       ]
@@ -81,11 +89,11 @@
       "statement": "The SSE stream authenticates separately with a 30-second sse-ticket JWT verified by purpose in the notifications handler rather than through Protect.",
       "evidence": [
         {
-          "resource": "repo://internal/handler/auth.go#L242-L258",
+          "resource": "repo://internal/handler/auth.go#L271-L287",
           "version": "repo-lines-v1:sha256:e93237180d3d07fcac360dcff9463a660471150e71482af06e8e993d5f2dbaea:eyJzZWxlY3RlZExpbmVDb3VudCI6MTcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjYyMjc1Zjc4NmNhM2VjZWI3NTQxY2U0MDEwNTEzNDUwYTU4ZmQ4MzdjOWNlMDc0MTUxZDNkNjNmODc5NDMxNDEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjAzYWU0ZTRhZDE2YjQwYjNkOWY3NzRhYTRlZDdkN2IzODdkYmI1NDc2NzlkZDliZWVlZjBiNThiYzY1N2Q4ZjUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
         },
         {
-          "resource": "repo://internal/handler/notifications.go#L527-L543",
+          "resource": "repo://internal/handler/notifications.go#L525-L541",
           "version": "repo-lines-v1:sha256:845dffeb5383bd5b71a8dce7827297035f2cb390ed0b5320fe976de1c46b73e7:eyJzZWxlY3RlZExpbmVDb3VudCI6MTcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImI2ZDY1OWNhY2I0MzUzNTgwZDcwYWE5NjgwNzM5MThiM2IzOTc2ZDAwMWJlZjY2MmM2ZDJmYWY5YWJlZGQwMTUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjIxOGYxNjA3MmEzYTA1OTA4Zjc4ZjlhYzUyYzQ4NmQ5NTJmYzIzMzBmYWE3NWFlZDllZjBmMTc3MzA4MjU0MjUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjBmZTk4NDdlZjc3ODk0ZTM5YzI4NmRlOGVkYmQxOTgwYzMwNjkyZGQ3MzA0N2Q5Mzg3YjY2ODM3NTYwN2RmMmMifQ"
         }
       ]
@@ -103,6 +111,6 @@
   ],
   "verification": {
     "by": "openwiki/0.7.2",
-    "at": "2026-11-04T15:34:40.691Z"
+    "at": "2026-11-11T16:33:08.526Z"
   }
 }

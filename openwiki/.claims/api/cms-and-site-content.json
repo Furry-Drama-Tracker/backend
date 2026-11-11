@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "pageVersion": "sha256:8c8ff50d6ac69ca46754df7e2429981e169ce528fafcb5a02062cbe735bfc040",
+  "pageVersion": "sha256:b2e2c681c89051e64df46d2fe719770d2ab89aed0a6197de9fcd40a394cc5d61",
   "claims": [
     {
       "id": "claim_99db9eec0b584b638ff12791e5258fc1",
@@ -73,8 +73,8 @@
       "statement": "Theme selection uses independent wallpaper and icon slots that fall back to the site default when unset, while the legacy single themeId plus apply flags are migrated into those slots and stale references are cleared.",
       "evidence": [
         {
-          "resource": "repo://internal/handler/themes.go#L272-L366",
-          "version": "repo-lines-v1:sha256:89cf86536e69d8cb0a350548f45885a1e7731dccae098b8178ddd84b7e46deb0:eyJzZWxlY3RlZExpbmVDb3VudCI6OTUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImE0YzZlNDk4MTI1ZGI3YjY2ZmM1NTZlZTIyNzQwMjVjMTAzN2YyODJiMmJkOTBiZWJmOGJiNWIyNzYzYWY3ZDciLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4NzNmNmE3ZjJhYWQzZmU1Yzc3NDEzZjg1MjhlYWM2NWEzMDk1ZTk5MmM0NmU5YjBmYzFkYmFhYzRkYzQzMDQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjU5MmU1ODc1N2M0YThiMGJlYWNlNTNiZTg5YTQ2OTYyY2NkZWI2MjY3OWM0MDBhMGZkYmEwMWE0NGM3MTRmMjgiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjU4ZmU0NDIyMzhjODNiNzVhOTFhYWE5NGQ0YTZjYzFmZjU1OThjNThjZjU2YjE0ZmNkN2FlY2Q5Yjk0ODExNjMifQ"
+          "resource": "repo://internal/handler/themes.go#L293-L394",
+          "version": "repo-lines-v1:sha256:c34adf5a09c6d322670bcb709d284944bf208027329695535047a88e6583d937:eyJzZWxlY3RlZExpbmVDb3VudCI6MTAyLCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiJhNGM2ZTQ5ODEyNWRiN2I2NmZjNTU2ZWUyMjc0MDI1YzEwMzdmMjgyYjJiZDkwYmViZjhiYjViMjc2M2FmN2Q3IiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiI0ODczZjZhN2YyYWFkM2ZlNWM3NzQxM2Y4NTI4ZWFjNjVhMzA5NWU5OTJjNDZlOWIwZmMxZGJhYWM0ZGM0MzA0IiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiI1OTJlNTg3NTdjNGE4YjBiZWFjZTUzYmU4OWE0Njk2MmNjZGViNjI2NzljNDAwYTBmZGJhMDFhNDRjNzE0ZjI4IiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MywiZm9sbG93aW5nQ29udGV4dEhhc2giOiI1OGZlNDQyMjM4YzgzYjc1YTkxYWFhOTRkNGE2Y2MxZmY1NTk4YzU4Y2Y1NmIxNGZjZDdhZWNkOWI5NDgxMTYzIn0"
         }
       ]
     },
@@ -83,11 +83,11 @@
       "statement": "Theme review approval promotes a personal theme to an enabled system theme, rejection keeps it personal with a review note, and only one enabled system theme can hold the site-default flag.",
       "evidence": [
         {
-          "resource": "repo://internal/handler/themes.go#L887-L958",
+          "resource": "repo://internal/handler/themes.go#L993-L1064",
           "version": "repo-lines-v1:sha256:5ca76f4311de54923c04ec15c21493e9258613680819e9e49aee5717a3265209:eyJzZWxlY3RlZExpbmVDb3VudCI6NzIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ2ZGUyYjYwMjcwNmUxNDgyYzI1MGZkNWViNjhhNDNiZWMyYmQzYWMyMGZkZDdmYjBmMGRkYTFmZTA0NWQyNmUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjRmOTM0NGEzNDBlY2FkNmU0NzIyZGVhNDYwNWI4ZTYwYWYxNjJiNjZiN2I0YjI2M2U2OTI5YjA0ZTljYjg3NWMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImNiNmY0YmE0M2UxMWNmYzAxODQ4ZjdkZTFkYzIxN2QxYmMxYWIwMWM3YjJkNjc2MDE0YjViMTQwMmYzMDExMTQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6Ijk0OGVlZDM5NjMwZDBmZWQ4ZWMxMDMxMjY2NGNmNzBlOGU0MDQyOTBkNDEzMTBiMDY2MjNmMzBiMWI4OTNkYjMifQ"
         },
         {
-          "resource": "repo://internal/handler/themes.go#L960-L1015",
+          "resource": "repo://internal/handler/themes.go#L1077-L1132",
           "version": "repo-lines-v1:sha256:8778d7427d83b19a68d743c3863fcd580c5a1ac1e6de69ff2fb6cd7e7a2e6274:eyJzZWxlY3RlZExpbmVDb3VudCI6NTYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjZiZDMwMjAxZTllOGRlNTQ3MmRkZTM0NDhhNzUzMmQ5OWZiNjljMjcwZDdhOTc4YzE1Y2VjOWYzODdlYTdkMGIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijk3NzEyMGYyMzkzNmM1MjM4YzA0ODEzMWRkZmM4YWY2MmMzOWFiNzNjNGJkZThiNjk0OTRjZjVhZjQ0NzI1MGUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImY4MWU2ZDhhMGRjNDM0MTRjMTljZDkxYzk4MDcxZjhiY2I4ZWYzNzIzNjBiY2NkYTlhYmYwMjQwNTlmMDVkNjMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjJmNDY2ZmRiMDIwNzIwM2JkZDQzM2ZjYmIwMGFhZjRiY2YxNDRmMDkzNzZkNjNhMGFjOTU3YzcyOWExNmVmYjYifQ"
         },
         {
@@ -101,11 +101,11 @@
       "statement": "The public icon listing returns enabled icons plus a flattened component-key-to-URL map, and batch SVG upload is superadmin-only with a maximum of 50 files per request and per-file failure reporting.",
       "evidence": [
         {
-          "resource": "repo://internal/handler/icons.go#L119-L136",
+          "resource": "repo://internal/handler/icons.go#L128-L145",
           "version": "repo-lines-v1:sha256:7cc29598d2b78515ff59e62b54592667ed97147bcb53f786798f91f2b0ef4a14:eyJzZWxlY3RlZExpbmVDb3VudCI6MTgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQyZDhhYTk4MzZmZjBjNDI3NzAxOTE1MTJhZjY3MzNjYmM4YzU3NDRjOGQ0ZDI0OGM4ZGZjYmZlZmFjNjU2ZDgiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImIzNjU3YTQyYTczYzg4MjUxNTY3ZjVhMzc1OWIyNTk4MTkwMzFkMDA3YTVhMWIyNjQ4YmEzZWJkYWUzYThkMzAiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImVkMDBjZGVmYWQ3NjE0OWZhNTRhOWU2NDgyYjNhOWM3MWM4NjA3NmRiODhhODMzMzhiZTE5MjAwMTI0NzcyY2YiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImJjZjIxYTEyOWYyMmE3ZTE2M2UxY2U5MjhhZDc2OTRiMzA0ZGE3NWMyYTQ3NzEyM2I4MTg5YzMyYzFhNmMxNjUifQ"
         },
         {
-          "resource": "repo://internal/handler/icons.go#L153-L204",
+          "resource": "repo://internal/handler/icons.go#L179-L230",
           "version": "repo-lines-v1:sha256:4b1ccb61d197ce639048b21b944ad0106caffa98aa7e114556a3732dac1704b0:eyJzZWxlY3RlZExpbmVDb3VudCI6NTIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImI0ZWU5MmZkODFlMmI5OWVlMTEyZDU2YjczMzFlYTViMjJjZWM4YWFkZjAzZGE4NDBkMjhkODExNzY4ZWUxOTMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImNkZmMwYjAxZTM3NGYzN2Y2NmRkY2QyZDA1NTE0NDU2OGFmZDUxODg2YTg3ZDI5YWVlZGI3MTM1Y2FjNzM3ZWUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjBmMWVjOGRiYjMxZmJmNzJkNTA5OGY4OTg4MWE0MDRmMjg2NThiOWU3ZTkyMGVmMWQxZmM3NTZiYjcxNzAzNDUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjAxZDlkNTVjMjhiOGQ0ZTQ5MjA0MDU1NzhmNjljOWM3MzA1ZjUzYzA5OGVhNTUxMDA5OTU3ODJlMWFiM2NmZGUifQ"
         }
       ]
@@ -185,14 +185,34 @@
           "version": "repo-lines-v1:sha256:3c4d733bfeaca97bc327b0632563ec18f0934d393d661f5c51a0cec77c694967:eyJzZWxlY3RlZExpbmVDb3VudCI6MzcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjBmZjJjNDI4YTBmODE4NjE1YjA0OGUwYmEwZWY5YzA5ZjZkY2QxYmRhMTRiNWEzMzFiYzk0MmQ0ZjMxZmZhNjEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjlmNGQ3Zjk0NzdiOTg4YjM3NWE1MmNhZTY4NmViOTIyYmNiYjc3ZTFmODQ0NTg1ZGQxMDQwMjEwODY3YTFiODQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjZmODdkNjY0MmQwMjk3ZmFlM2NkYzhhZTAxYWI4YWNjZWNmZDQ4NDQ3NWExMzc4MDdhY2RjYTNmOGU1ZTc5MzMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjgzMDdmMGRhZTI5N2U5ZWRhYWZmOGVmYjQ0ODBhNzAxMDUzOTY5Mjc3NDA5NmU4ZmQzYWZhMzQ1ZTIzYjljMzYifQ"
         },
         {
-          "resource": "repo://internal/handler/episodes.go#L1886-L1893",
+          "resource": "repo://internal/handler/episodes.go#L1866-L1873",
           "version": "repo-lines-v1:sha256:ae3e940214500a4760f082232d38ae176d2a8d56d008bf342766aa873df0da0b:eyJzZWxlY3RlZExpbmVDb3VudCI6OCwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiYjU5N2Q5Yjc3MmMxNDgyMTI5ZTYxYjRkYmYzM2FkNDhiNzkxYjY3MDNjYWJmNjJlMDI1ODJhMDM3MGJlNGQ3NyIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNDEyY2EzNDVjY2Y3NWJmOWMwODA2YmNlNjk1YmU4ZGU4MDhiNzk5ODQyNTFhN2E1NGQyMDJjZjYxMDFkZDQ1MSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNDQ1NjU1ODJiZmU4YzEzOTczNThjODg5OTkyN2M3NmJlNzkyYTBjODNkN2MwNDI4ZWJmOWQyZjY3YWUzZmVkZiIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiOGE5ZDc1NWEyYWMzODkxNjAwMGYyOGI2YWFiZTU3NTA0OGEyYzEzYWQ2MDBhZjkzNWE5ODM1NjQ3Y2FmZGRmZCJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_f9b61cf9a5074ca89e305c6af5b557fd",
+      "statement": "图标包上传端点 POST /api/icons/upload 的路由注册在 Icons.Register 中被注释停用：端点对客户端表现为不存在，IconsDir 不再被新上传写入；GET /list、GET /all、PUT /:id、DELETE /:id 仍正常挂载，恢复只需取消该行注释。",
+      "evidence": [
+        {
+          "resource": "repo://internal/handler/icons.go#L40-L55",
+          "version": "repo-lines-v1:sha256:3324902c288b0cd1339f08d19eeb4fc82518f39330b216e6c3d8a24807294dcf:eyJzZWxlY3RlZExpbmVDb3VudCI6MTYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjAzZmQ1YzE2NjFjMjYwZGQzYzQyMGU1YjZhNmE0ODVjM2MzOWRiM2E0M2ZiNDJlYzIyMjk1OGY4YmZhODFjZTciLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImY2ZDNkYWM2OGVhZDgwNzZmNjlhODI5NDg5ZjFkZmIzZDdiMmU1MDc5ODk5NTQ1MmFmZTQ1MDAwNjBkNWYzZTIifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_cd1795972b0e4043a4aca45073f6909c",
+      "statement": "主题图标上传端点 POST /api/themes/upload-icon 的路由注册在 Themes.Register 中被注释停用，而壁纸上传 POST /api/themes/upload-wallpaper 与主题选择/读取端点（含主题 JSON 的 icons 字段）全部保持原样，既有图标主题不受影响。",
+      "evidence": [
+        {
+          "resource": "repo://internal/handler/themes.go#L53-L71",
+          "version": "repo-lines-v1:sha256:ff914b8432a6d48dfbab723675d03bbf81e12d22ddbc2258f9511139ac08993e:eyJzZWxlY3RlZExpbmVDb3VudCI6MTksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjUxNjZiM2FiZDUwZDk2Yjc1NzM0YTcyNjdlODhjYjIwOGM1YmYyYTY0MjZiOGNhMTM0NDA5NjNiYmQ2YTQxMGIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijk5YjVhYWI1YTg0OTJmNWZmMTk2MTU5NTZhYmRkOWVlZTQzNDEyNDY2NDk3N2VjNDg4ZDAzZDVlZjAxNDAwZWEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6Ijc5MDZhMGIyMWFmZTdhNjEwYTgwYjNlZTk1NWMyZjc5YjYxZGU5NjhlMWY0ZTYxMTcxNTY3NmFlMzU3ZjViNjQifQ"
         }
       ]
     }
   ],
   "verification": {
     "by": "openwiki/0.7.2",
-    "at": "2026-11-04T15:34:40.691Z"
+    "at": "2026-11-11T16:33:08.526Z"
   }
 }

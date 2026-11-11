@@ -1,8 +1,11 @@
 ---
 type: operations
 title: 可观测性与后台任务
-description: 写入 stdout 的结构化日志、请求与慢请求日志、API 调用统计聚合、审计日志来源、启动时接线的清理定时任务，以及迁移与索引的容错执行。
+description: 写入 stdout 的结构化日志、认证诊断事件双出口（stderr + authevents）、请求与慢请求日志、API 调用统计聚合、审计日志来源、启动时接线的清理定时任务，以及迁移与索引的容错执行。
 tags: [operations, logging, metrics, audit, cron, jobs]
+verified:
+  - by: openwiki/0.7.2
+    at: 2026-11-11T16:33:08.526Z
 sources:
   - id: openwiki-source-0f6ed11169bd8e6b34b44280
     resource: repo://cmd/server/main.go
@@ -26,19 +29,27 @@ sources:
     resource: repo://internal/repository/misc_repos.go
   - id: openwiki-source-ebbcecfb3e8c07ba5e940ccd
     resource: repo://internal/server/register_routes.go
-  - id: openwiki-source-f7acf9d278285ec2e6b81113
-    resource: repo://internal/service/auth_service.go
   - id: openwiki-source-ca7fc5574740b07d87bb29b5
     resource: repo://internal/service/password.go
-generated: { by: "opencode", at: "2026-11-03T16:50:44.301Z" }
-verified:
-  - by: openwiki/0.7.2
-    at: 2026-11-04T15:34:40.691Z
+generated: { by: "zcode", at: "2026-11-11T16:33:08.526Z" }
 ---
 
 # 可观测性与后台任务
 
-可观测性刻意保持轻量：结构化文本日志、一个 API 调用计数器，以及一个审计集合。除 `/api/health` 外，没有 metrics 端点、链路追踪或健康看板。
+可观测性刻意保持轻量：结构化文本日志、认证诊断事件、一个 API 调用计数器，以及一个审计集合。除 `/api/health` 外，没有 metrics 端点、链路追踪或健康看板。
+
+## 认证诊断事件（authlog，ADR-016）
+
+`authlog.Recorder` 是认证链路的排障记录器，有两个出口，各有用途：
+
+- **结构化日志写 stderr**：`event=session_revoked reason=refresh_reuse ...`，现场可直接 `journalctl -u <unit> | grep 'event='` 过滤；
+- **`authevents` 集合异步落库**（30 天 TTL）：日志轮转/重启后仍可回溯，由 `cmd/diag` 汇总为时间线。
+
+只记录**失败与吊销**类事件（正常登录成功不记，量级很小），覆盖六类：`session_revoked`（带吊销原因）、`refresh_grace`（409 宽限）、`refresh_reuse`（401 吊销全部）、`refresh_invalid`（缺 cookie/过期/非法）、`twofa_replay`（TOTP 同一时间步重放）与 `ratelimited`（429，reason 为限流器名——此前日志里只有一个 429 状态码，无法区分登录、refresh 还是全局限流命中）。
+
+落库是 fire-and-forget：独立 3 秒超时上下文（与请求解耦，响应返回后仍写完），失败只记一行 warn；按 `event + 来源（userId/email/ip）` 30 秒节流，避免被吊销令牌卡住的客户端一次页面刷新就把集合写爆。`Record` 的 nil receiver 安全，log/repo 任一为 nil 时只走另一出口。
+
+**cmd/diag** 是只读排障命令（`make diag ARGS="..."`）：`-user=<邮箱|ObjectID> -days=7` 输出该用户的会话墓碑与事件时间线并给出结论（`reasonHint`/`eventHint` 把每个 revokeReason/事件翻译成可执行建议，如"宽限期当前为 2 分钟"）；`-recent -hours=6` 看全局最近事件分布以判断是否大面积故障。
 
 ## 日志
 
@@ -58,7 +69,7 @@ Gin 在开发环境使用 debug 模式，生产环境使用 release 模式。因
 - 开发环境：状态至少 400、耗时超过一秒，或路径包含 `/list`、`/histories`、`/follows` 时记录；超过一秒会附加 `level=SLOW`；
 - 生产环境：只以 WARN 记录超过三秒的请求。
 
-`RequestLogger` 在鉴权之后运行，当方法不是 GET、状态至少 400 或耗时超过一秒时记录。字段包括 method、path、status、duration、解析后的客户端 IP，以及上下文中的 user ID。5xx 为 ERROR，4xx 或慢请求为 WARN，其余为 INFO。
+`RequestLogger` 在鉴权之后运行，当方法不是 GET、状态至少 400 或耗时超过一秒时记录。字段包括 method、path、status、duration、客户端 IP（统一取自 `c.ClientIP()`；签名已简化为 `RequestLogger(log)`，不再接收 trustXFF 参数），以及上下文中的 user ID。5xx 为 ERROR，4xx 或慢请求为 WARN，其余为 INFO。
 
 由于一秒以内且状态低于 400 的 GET 请求会被跳过，普通读取不会记录。这降低了日志量，但也意味着成功的公开流量在请求日志中不可见。
 
@@ -92,7 +103,7 @@ Gin 在开发环境使用 debug 模式，生产环境使用 release 模式。因
 
 | 任务 | 计划 | 动作 |
 |---|---|---|
-| 会话清理 | 每小时整点 | 把 `lastActiveAt` 超过 30 天的活跃会话标记为不活跃 |
+| 会话清理 | 每小时整点 | 把 `lastActiveAt` 超过 30 天的活跃会话标记为不活跃，写入 `revokeReason=expired` |
 | 已读通知清理 | 每天本地时间 03:00 | 删除超过 30 天的已读通知 |
 | 注销账号清理 | 每 6 小时，启动后首次延迟 6 小时 | 物理删除 `deletionRequestedAt` 超过 7 天宽限期的用户，并调用 `PurgeUserData` 级联清理 |
 

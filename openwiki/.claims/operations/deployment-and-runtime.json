@@ -1,14 +1,14 @@
 {
   "schemaVersion": 1,
-  "pageVersion": "sha256:5da5fb4a827d8c57d9435fa34b62ef6b6ad46d93413c0265316c1ab2fd6b0422",
+  "pageVersion": "sha256:a5f5ee5fe272f02558f01f6cca3cd5496353dc9b1c2d5e5918fc14fc7ef797f1",
   "claims": [
     {
       "id": "claim_5048775d39784f869d86ba80c02f62d9",
-      "statement": "Startup parses flags, loads configuration and logs weak-secret and placeholder-CORS warnings, connects and pings MongoDB, builds repositories and the signer, runs migrations and index creation as warnings, starts cleanup cron jobs, creates the upload and icon directories, assembles Gin, listens, and waits for SIGTERM or SIGINT.",
+      "statement": "启动顺序：解析 flags → 加载配置并打弱密钥/占位 CORS/IP 地域开关告警 → 连接并 ping MongoDB → 构造 Repos 与签名器 → 迁移与索引（告警不阻断）→ 启动清理 cron → 创建上传与图标目录 → 装配 Gin → 监听并等待 SIGTERM/SIGINT。",
       "evidence": [
         {
-          "resource": "repo://cmd/server/main.go#L45-L111",
-          "version": "repo-lines-v1:sha256:e1130a4cde26fe32692af5999208d766a16fd8ff47f9cc64814e616c0a4cc10b:eyJzZWxlY3RlZExpbmVDb3VudCI6NjcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjMxNWQ2NGY5NzFiMjRmNzAxZDM0Yzc3ZjEyNWFkOTNkNzBiN2I0MGEwMmMwMjM2YjA0NTM5M2UyNGJmNmI1ZmQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImY3OTY4MmVhNzVjNGZmMjk5OWIxZmI3OWQyYzg5OTdhZTliNTZiYmVlNGE1NzM1MDNhMDlmNDE1MjQzODY5NzMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjNkNWZlNmE1ZTJiZTgzYTk5Y2NhM2FkMzdhNTU2NTcxY2FiYzJmZWI0MDkwYjNkZTM2YTdhZjI0Y2QyYmViNmUifQ"
+          "resource": "repo://cmd/server/main.go#L45-L115",
+          "version": "repo-lines-v1:sha256:cca4e0a68285a83678de434f83b49e777984cb107de18cb9b811a15e88546008:eyJzZWxlY3RlZExpbmVDb3VudCI6NzEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjMxNWQ2NGY5NzFiMjRmNzAxZDM0Yzc3ZjEyNWFkOTNkNzBiN2I0MGEwMmMwMjM2YjA0NTM5M2UyNGJmNmI1ZmQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY3Y2RhODJkYTYwNjIzOGUwNWU2MjM5OTU2OWM1ZWUwMzk5MzQxOTY0OGFlNWQ0M2EyYmY4Y2Q2MzQ3ZjgyNjMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijk5N2FhOTZlM2Q5ZDhhNTVhNzI1ZGUyN2IxNGUzZjIxMzhiYTc2NTdhMDZmYzA4NmVhYTYwZTc1MzU2Njg0OGIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImE4Mzc2OGFiNjIyYzMzYTE2M2I0M2I5ZTA5NjQ3OGVkNWVhMmE5ZDhjYTgyMjllMGU2MWRmZThiZDRjZDEzYmQifQ"
         }
       ]
     },
@@ -17,7 +17,7 @@
       "statement": "Graceful shutdown uses a 10-second context, while the server enforces a 65-second read-header timeout, 30-second read and write timeouts, and a 5-second idle timeout.",
       "evidence": [
         {
-          "resource": "repo://cmd/server/main.go#L110-L143",
+          "resource": "repo://cmd/server/main.go#L117-L150",
           "version": "repo-lines-v1:sha256:bb6df499ed53ba733dde1544f7f826e32fb71a557a6559f13b51d4f4e4768f31:eyJzZWxlY3RlZExpbmVDb3VudCI6MzQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjNlNmM4ZmQxODA2ZDkxNDg3OWI1MTYzZGJjNGE4MzgzZDNmZWE2ODYyODg5NTZlNzUxMWI1ZTEzNWNjNmY3NjAiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImEyNzZkYTFkMmZlZTNiMTc4NGU0ZDBiYjU2YmI2YWFiYjU0M2MwZjZmYmRlMDY0M2E3NTMyYTQ0MTBhNmU0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjhjNTU1YzRkNzAyMmZmZTQyZjA1NjlkOTNkOWZkNDQ3Nzg0MmM4MjUxZGExYjY3NWIyMGE2ZDQ5Mjg0ODBhODUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImRlNTAzZmU0NTM3NTQwYzhiY2ZhYmRiZDY3NWY5YmRhZWFkMjViYjJkNDkxY2ViZTM2YzAwNjU2YjE0YTQwNGIifQ"
         }
       ]
@@ -27,7 +27,7 @@
       "statement": "Both the uploads directory and the icon directory are created at startup with MkdirAll as warnings on failure, and the icon directory is also created before SVG writes.",
       "evidence": [
         {
-          "resource": "repo://cmd/server/main.go#L93-L102",
+          "resource": "repo://cmd/server/main.go#L100-L109",
           "version": "repo-lines-v1:sha256:1b1c4d9afa7e03d538fab6d3bf49046c12ce8549a0c98ecf622a598949508293:eyJzZWxlY3RlZExpbmVDb3VudCI6MTAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY3Y2RhODJkYTYwNjIzOGUwNWU2MjM5OTU2OWM1ZWUwMzk5MzQxOTY0OGFlNWQ0M2EyYmY4Y2Q2MzQ3ZjgyNjMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijc0NTRiYzM1NTZmYzUxZTE4NmNlYzNkOWZjOWMwMDc1YzI3MmI4ODFmNjg2YThmODliNmEyMzNmZTdjZDllNTgiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjhhYWE2MzgyMGJiNzA5MWM2ODcwNjhlN2FjNmM4ZTFhZDQ2MWJmNTRmOTI4OGQ3MDg4MTBjZjMxYjFkZDFhOGUifQ"
         },
         {
@@ -41,18 +41,18 @@
       "statement": "The listener supports tcp host-port, Unix socket paths with stale-file removal and 0660 permissions, and Linux abstract Unix sockets.",
       "evidence": [
         {
-          "resource": "repo://cmd/server/main.go#L144-L173",
+          "resource": "repo://cmd/server/main.go#L151-L180",
           "version": "repo-lines-v1:sha256:13e7f8676d6276359104663fca4de89b7b4b43ec2a45af4bf536253e89f217a3:eyJzZWxlY3RlZExpbmVDb3VudCI6MzAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImJlYjhlM2U5NGE1N2NkYjA5NmYyMDQwYmUxMDQxOWI0ZmNhNTczYWE5ZTU1MzZlNjM2MGNhOTg5ODg4MzM5MTgiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjYyOTcwZTQxNWI2NjYyNmIzOWYwOThjMDZjZTE1YTBiZWFhOTZlN2NiZjZmNmQwZTFkYjNhNTA3Y2EwZjU2ODIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjoxLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEifQ"
         }
       ]
     },
     {
       "id": "claim_146b71762d43484aa66b0bebb4ed0c0e",
-      "statement": "The Makefile provides build, release, run, seed, test, vet, fmt, docs, and clean targets, with a Windows NMAKE equivalent.",
+      "statement": "Makefile 提供 build、release、run、seed、test、vet、fmt、docs、diag（go run ./cmd/diag $(ARGS)，只读认证排障）与 clean 目标；Makefile.win 为 NMAKE 等价实现（含 diag）。",
       "evidence": [
         {
-          "resource": "repo://Makefile#L1-L55",
-          "version": "repo-lines-v1:sha256:9a126504d9179ef6c7498b557db0a4902b821b5908161249b9875b479e04b27a:eyJzZWxlY3RlZExpbmVDb3VudCI6NTUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImYwYmYwZTViNWUxOWFiYTE1ZTg1NTMwZmFjMzRiOGU1MTc0YjA0YjA1OTY3YjYyY2M2NmU0ODM5YWRiZTRlYWMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY5OWVhM2YyMTExMWM2YzQ5ZjY1NDNhZjE5ODYwMmQ5YmI2NzU0NmYwZTUxMTA5NTdjNmRhZDAxMjY1YThiMzAiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+          "resource": "repo://Makefile#L25-L61",
+          "version": "repo-lines-v1:sha256:2e1e0172c4e2e6ebd78a6d6ca96d5494c6d8cc9071d3890bf1be10d815812cbb:eyJzZWxlY3RlZExpbmVDb3VudCI6MzcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY5OWVhM2YyMTExMWM2YzQ5ZjY1NDNhZjE5ODYwMmQ5YmI2NzU0NmYwZTUxMTA5NTdjNmRhZDAxMjY1YThiMzAiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImRmNTdiMmJkMjNiNWM0ZTc2ODBmMTI1ODExNWZiMjZmNzZiZWY1ZTE5YTVlNGQ4ZjJlZjAwYzI3MGY3ZDFhYTEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
         }
       ]
     },
@@ -78,17 +78,31 @@
     },
     {
       "id": "claim_91461108de234f3f8010ac753a6beb3d",
-      "statement": "The ini template documents server, database, jwt, email, vapid, and security sections with production-oriented values and recommends file mode 600 because it contains secrets.",
+      "statement": "ini 模板记录 server（含 trust_proxy_headers/proxy_ip_headers/trusted_proxies/proxy_trusted_platform 注释块）、database、jwt、email、vapid、security（含 ip_region_enabled = false 及合规注释）六段生产取向默认值，并建议 chmod 600（含密钥）。",
       "evidence": [
         {
-          "resource": "repo://deploy/furry-drama-be-neo.ini#L9-L61",
-          "version": "repo-lines-v1:sha256:46cc404bf4855805a8051217c104f63d56d410adfb343c2beba12432b55f9bfd:eyJzZWxlY3RlZExpbmVDb3VudCI6NTMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjZkOTNlNzcwNDU5NDBiNTRmZjE0MGMwNTkzYTFkZjJmYzUyYmJlZjFjMWVjMWMzMTYxOGQyMjkzNDM5MzRmMTciLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijc4ZTgzOTI5N2ZjZThjNzE2ZjM0ZGQwODA2YjRjNTAzY2MyM2QwM2Y4Yzg1NmJkNzEyMTI1MWE4ODQyMzllNmMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+          "resource": "repo://deploy/furry-drama-be-neo.ini#L9-L80",
+          "version": "repo-lines-v1:sha256:2736a6f2f720f679a0145cb24ff17311cd7778a81f47bf486c43950817ef0cac:eyJzZWxlY3RlZExpbmVDb3VudCI6NzIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjYzMDk0Njg2NDI3YjNmNDA4MTc0NGNjYThjNTU2ODYzZDJiZWUwY2ExZTIxMWQ4NGNlODZlM2Y4ZWY3ZDExYzMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijc4ZTgzOTI5N2ZjZThjNzE2ZjM0ZGQwODA2YjRjNTAzY2MyM2QwM2Y4Yzg1NmJkNzEyMTI1MWE4ODQyMzllNmMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_db708901f1864d28b3f602560c580d90",
+      "statement": "CI（release.yml）每次推送构建 8 目标（linux/windows/darwin × 386/amd64/arm64，CGO_ENABLED=0，-trimpath -ldflags \"-s -w\"），main 推送覆盖发布到 tag=latest 滚动 Release（先删后建含 checksums.txt，concurrency cancel-in-progress）；Windows 产物自动链接 cmd/server/rsrc_windows_*.syso（go-winres 由 winres/winres.json 生成的图标与版本元数据）。",
+      "evidence": [
+        {
+          "resource": "repo://.github/workflows/release.yml#L1-L74",
+          "version": "repo-lines-v1:sha256:d23c66b8991b57d5fbc0cec1e2ce18c0ed62b82ef8a87099141d4eed9dadb9a3:eyJzZWxlY3RlZExpbmVDb3VudCI6NzQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImFlYTc1NThiZWJjYmVjMzAxMjIzOTlhZjE1MmM0ZjQ1MzBiZDdiMTc4ZTQ3MGM4NzY4YjU4Njg2OTljNWQ4YTgiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImQ4ZTdmOGQ0YzBiYTFkOGNmOWJiYmEzOGE5ZTQ2ODE1ZDIwZGVmYmE4NzY2ZGM2ZjkyNjdlZWRhNzdlN2Q0ZDUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        },
+        {
+          "resource": "repo://winres/winres.json#L1-L39",
+          "version": "repo-lines-v1:sha256:a8f1fd5887495cd43b69c44813792cf2f68ecafddbf45deaa0635540935618bb:eyJzZWxlY3RlZExpbmVDb3VudCI6MzksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImE2ZmIwOGZkYTFhY2I5NTdiNjExNmJkMzc4MTFhMWZlNDFhMDE2MTFjMDYzMWVkYmY3ODZkNjg4OWEyN2E1NWMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
         }
       ]
     }
   ],
   "verification": {
     "by": "openwiki/0.7.2",
-    "at": "2026-11-04T15:34:40.691Z"
+    "at": "2026-11-11T16:33:08.526Z"
   }
 }

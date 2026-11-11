@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "pageVersion": "sha256:6fddb8477677e4fa9819b7ea0d52d32c41a3b26f87dade3d2537edf43c7e43ad",
+  "pageVersion": "sha256:3af555d62608a07dcd60715d65fe78e9c17cdf26916a761df0d52f7519578196",
   "claims": [
     {
       "id": "claim_813d5398a03447928aea6cd62fb23b94",
@@ -14,15 +14,15 @@
     },
     {
       "id": "claim_0ee72f7aa24749ddbeb5a6b2592bd84a",
-      "statement": "Repos is a flat aggregate whose fields map to lowercase plural collections such as users, usersessions, episodes, singleepisodes, and systemwallpapers, with push subscriptions and the trash repository constructed outside it.",
+      "statement": "Repos 仍是指向小写复数集合的扁平聚合（users、usersessions、episodes、singleepisodes、systemwallpapers 等，现新增 AuthEvents → authevents），推送订阅与回收站 repository 仍在聚合外构造。",
       "evidence": [
         {
           "resource": "repo://internal/repository/push_subscription.go#L21-L29",
           "version": "repo-lines-v1:sha256:c417b1dfdc377100c0dd9ef9e42c6305e34d5f383df8ce41a87837ae9e1914bb:eyJzZWxlY3RlZExpbmVDb3VudCI6OSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiMzIzYTY1MjgzMWJmODVmNjNiMjE5NmQ3MDFjZmE4MTY1YzBjODhlMDBmZmVjZGJhZjMxNDQ1MzFkN2Q3OWUyMiIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMjQyMDNhOGYyYzQwYjZjYTQxNjI1YWZkMTdkN2YwZGRkMGM5NzE2MDgyZDk1YzI1N2RhODNiNDA3YmM0ZmExOSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiMzczM2M2ZjliNDRjZDk4NDYwZDdlN2E3MDExZTkwY2ViNmU3ODU1ZWY4MjRlODE1ZTA5Zjg3NDIzNjIwYmMwZSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiOGI5ZThhMGEwMzNhMjdmZGVlZTM4NGY5Zjg0ZDNkMTNjNzdhN2RlZjE0ODNkOWM4YzQ1NzJlNWRhY2I3N2MzZCJ9"
         },
         {
-          "resource": "repo://internal/repository/repos.go#L16-L86",
-          "version": "repo-lines-v1:sha256:27d014397445cbfac7011ffcdaac0a50ceaf1d6036eeda0fba4a6aff104e2494:eyJzZWxlY3RlZExpbmVDb3VudCI6NzEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjI1NGNlZTFiMTdkMjgyMjAwMTMzOGRiN2Y2OThiMzdhNTFiMTE3Y2JjZTU1MzkzOGUyMmM2MWMxYjRjMGJiYTEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImViMjQyZjk2MzhkYTlmYjU4YTI5NGU4NjgyNDJkOGIwZmVmNWI4YmQwMGFkOTY4MDVkNWM1MGZlMjFlMDQ1YjAiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImVhMmU2ZDQxODhhM2MxMmE4MTNhYzJkMmRmYzMxN2M2NTY1MzM3MjQ5ZjYxNWZmMzQ3OGY4MmZjYjVkOWFiMGEifQ"
+          "resource": "repo://internal/repository/repos.go#L16-L90",
+          "version": "repo-lines-v1:sha256:29f105eb513a6b75d306547067574d9d00369a17556420686ba5b2565ad0e0b9:eyJzZWxlY3RlZExpbmVDb3VudCI6NzUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjI1NGNlZTFiMTdkMjgyMjAwMTMzOGRiN2Y2OThiMzdhNTFiMTE3Y2JjZTU1MzkzOGUyMmM2MWMxYjRjMGJiYTEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjIyMTJhODUzMGVkMTY1ZGMwODdlZTM4YzBjZjQ4NzUzMjQ5YmFiZWM3ZThmNzc5MWU3YWQzZTE3ZTNhMTRiOWYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImViMjQyZjk2MzhkYTlmYjU4YTI5NGU4NjgyNDJkOGIwZmVmNWI4YmQwMGFkOTY4MDVkNWM1MGZlMjFlMDQ1YjAiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjoxLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImM4YzVmY2RlYTkwZjA5NjU3YTQzOGNhOTRkMWNjMWU5Yzk0OTNmMGQ1MGJkYmRhN2M2YTM1ZThlYjU1OTg3MmMifQ"
         }
       ]
     },
@@ -31,11 +31,11 @@
       "statement": "Models map documents with bson tags and JSON tags, hide password and 2FA and lockout fields from JSON, model the __v version key, and normalize legacy defaults through explicit constructors.",
       "evidence": [
         {
-          "resource": "repo://internal/model/model.go#L20-L60",
-          "version": "repo-lines-v1:sha256:2193965206d8279d9228316114fc50a165ae9eccda0aef4f3bf6cf57a8c697a7:eyJzZWxlY3RlZExpbmVDb3VudCI6NDEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjdjYmVkOTkwMDUyMzU4MDBmMzRjNGYzNzIyNDlhYWUzYmI1MDM3Y2QxZTFjYjU0MDZkMmQwNjA3N2Q4NDJkM2MiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImFlYjU3ZjBjZDA3MDMxZTBlY2M3MTljOGJiYmY2NzkzY2UwMmQ5YTdkYjY4ZDY0MjhkOWUwY2UwMGM5OThiMWMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjcxMmNkNTBiMWYwNGRlYTIwNjAwZTcyOGM4YmZiNjYxZTM4N2U2ZTE3ZTgyYTcwYjlhZjFhN2IxODk1ZDdkYzMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjBkNDU1ZWU4ZmE1ZjJhZDIyYjEyYjQ4ZGQxNWZkMDI5ODJmMzE4Y2E0YzRjMzI4YjM3ODVjMjhiZTk1M2MyOTQifQ"
+          "resource": "repo://internal/model/model.go#L20-L61",
+          "version": "repo-lines-v1:sha256:15fa2c4df6ef65a94432ed892388fc5a64e8773782ba1e6dfe3ecb6c3c75cfe8:eyJzZWxlY3RlZExpbmVDb3VudCI6NDIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjdjYmVkOTkwMDUyMzU4MDBmMzRjNGYzNzIyNDlhYWUzYmI1MDM3Y2QxZTFjYjU0MDZkMmQwNjA3N2Q4NDJkM2MiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImFlYjU3ZjBjZDA3MDMxZTBlY2M3MTljOGJiYmY2NzkzY2UwMmQ5YTdkYjY4ZDY0MjhkOWUwY2UwMGM5OThiMWMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjcxMmNkNTBiMWYwNGRlYTIwNjAwZTcyOGM4YmZiNjYxZTM4N2U2ZTE3ZTgyYTcwYjlhZjFhN2IxODk1ZDdkYzMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjBkNDU1ZWU4ZmE1ZjJhZDIyYjEyYjQ4ZGQxNWZkMDI5ODJmMzE4Y2E0YzRjMzI4YjM3ODVjMjhiZTk1M2MyOTQifQ"
         },
         {
-          "resource": "repo://internal/model/model.go#L75-L107",
+          "resource": "repo://internal/model/model.go#L76-L108",
           "version": "repo-lines-v1:sha256:f2b823792940a2bd035d777f8c3e09dae2cd023a5be6a65cf81b1859f16fa890:eyJzZWxlY3RlZExpbmVDb3VudCI6MzMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImY4NzkyYzZkMjQxOWYyMDc2Y2I5Y2Q2NWNiODc3MTE4ZjU1MjZmZDVjYjdlOTY5YzQ5ZjgzZDI1NWI5YjA5YzUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjcwMmM4OWZlN2I0YmQ0ZWE1YzVmZWE1NjkwNWVlYTY3ODhjZWZhMzE1NTM4NDRjMjVlYzdmNTY4NWY5ZmU2ZGIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjZlYTViMGFkODg1MmE4NDZlNDgzOTZjZTQxMWVhYmZkYWQyODk1ZDBkNWZkYjMwYmVkMWUwNDBjYWUzYjkxOTQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjNiY2M5ZjVkYjdjMTBjYzdjMjMwOTdmNWZjOWQ1ZmJjMDM1ZWYxNGNmM2M1Y2E4OGIyNmY5YzQyNTVmYTlhODAifQ"
         }
       ]
@@ -62,11 +62,11 @@
     },
     {
       "id": "claim_3150083fe0c643febce1165e6ed3d549",
-      "statement": "The indexes package defines unique and TTL indexes for users, sessions, tokens, histories, notifications, ratings, follows, favorites, audit logs, API usage, site content, folders, episodes, series, themes, and reports, creating them by name idempotently and continuing past individual failures.",
+      "statement": "indexes 包为 users、sessions、tokens、histories、notifications、ratings、follows、favorites、auditlogs、authevents（userId+at、email+at、at TTL 30 天）、apiusages、sitecontents、folders、episodes、series、themes 与 reports 定义唯一/TTL 索引，按名称幂等创建且单个失败不阻断其余。",
       "evidence": [
         {
-          "resource": "repo://internal/indexes/indexes.go#L45-L129",
-          "version": "repo-lines-v1:sha256:c54c7ab7c91b9689c2e2c065c8db7b8834003d76d39ddd028db369a5c9820221:eyJzZWxlY3RlZExpbmVDb3VudCI6ODUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjU0Nzg5MGI4NDM2OTQ5Y2E1ZjY4NGM5NTllODA5N2Y4ZDYyMDU3MTVmN2RiNzY5M2MyNGQyOWY3ZjQ2NWI4MmQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjE4Mjg2Njk3ODQzNjQ4YjAwZWM1ZTczNTliYmMzZjZlM2UxZWRhMzg2NWNlYTJmZDViMzI2OWE3OTA1YTMxOTkiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijc1MWU1ZTk3NjY0MzliNDExZTY5MGQ1Njc5NWI3Mjc0ZjRlYTQ2MzNiMmE2YmJiMzBhMTdiYzAzNzU3YjYwMmYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjBmM2E0OTMyOTI1MGRlNjAzNzA0MDIxZTUyZjljNGI3YTk3ODBkYjg2ZjM1NDRlMGI3NjA1NDRlZTVjOGE4ZTcifQ"
+          "resource": "repo://internal/indexes/indexes.go#L45-L135",
+          "version": "repo-lines-v1:sha256:d8c0c24347dadfb1bde06abc9710c015784222a6c9f0b62bacdb54e4cf66f300:eyJzZWxlY3RlZExpbmVDb3VudCI6OTEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjU0Nzg5MGI4NDM2OTQ5Y2E1ZjY4NGM5NTllODA5N2Y4ZDYyMDU3MTVmN2RiNzY5M2MyNGQyOWY3ZjQ2NWI4MmQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjE4Mjg2Njk3ODQzNjQ4YjAwZWM1ZTczNTliYmMzZjZlM2UxZWRhMzg2NWNlYTJmZDViMzI2OWE3OTA1YTMxOTkiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijc1MWU1ZTk3NjY0MzliNDExZTY5MGQ1Njc5NWI3Mjc0ZjRlYTQ2MzNiMmE2YmJiMzBhMTdiYzAzNzU3YjYwMmYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjBmM2E0OTMyOTI1MGRlNjAzNzA0MDIxZTUyZjljNGI3YTk3ODBkYjg2ZjM1NDRlMGI3NjA1NDRlZTVjOGE4ZTcifQ"
         }
       ]
     },
@@ -93,7 +93,7 @@
       "statement": "SingleEpisode 模型携带 episodeLabel 字段（bson:\"episodeLabel\"，显示用集数序号）；存量文档缺省为空串，不做数据迁移，读取时由响应层 singleEpisodeJSON 经 episodeRefText 回退为「第N集」。",
       "evidence": [
         {
-          "resource": "repo://internal/handler/episodes.go#L1670-L1690",
+          "resource": "repo://internal/handler/episodes.go#L1669-L1689",
           "version": "repo-lines-v1:sha256:597e17f0719e3c4173f320f44b4f06fdddfb3ed86e35643ccd22819ba33278e0:eyJzZWxlY3RlZExpbmVDb3VudCI6MjEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjBmMzdhNGM2MGM2YjcyMTQyOTQ5ZjcyMzRhOWM3MzU0MTk2MmRkMTNlYTk3NzE3NzQ1NWFiOTkxZGMyZTc5YTQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjRmMGMwZGIzOWVlNzgyOWJiZWM4NGE2NTZjNjRlODk1M2VjMmJlMzhlMDdlYjZlNDA2N2M3OWQ1MWFlMTAyN2EiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjVmNmRkMDY1NDY2YTFhZWYyN2RkZjRkNDQ3OTBkMDFkN2EzMzhmYmUxZjE0Zjg2M2IwZTFiZTI0ZTdlM2E2NmIifQ"
         },
         {
@@ -105,6 +105,6 @@
   ],
   "verification": {
     "by": "openwiki/0.7.2",
-    "at": "2026-11-04T15:34:40.691Z"
+    "at": "2026-11-11T16:33:08.526Z"
   }
 }

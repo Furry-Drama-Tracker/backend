@@ -1,17 +1,17 @@
 {
   "schemaVersion": 1,
-  "pageVersion": "sha256:54bc7f65fa33449c7a0f048ee5aa1ddaf2370a85a725c7d00a00fb66207efcf8",
+  "pageVersion": "sha256:2d3fbb5d0b5acd166601a9f93984f7f5524c7c6ed7e32c24f8da477327184ccb",
   "claims": [
     {
       "id": "claim_9d5c0f9d432440f1b13cc0b99d629064",
       "statement": "Altcha challenges use SHA-256 with cost 10000, key length 32, prefix 00, and a five-minute expiry, and verification accepts a matching x-dev-token as a bypass before decoding the payload.",
       "evidence": [
         {
-          "resource": "repo://internal/service/auth_service.go#L74-L97",
+          "resource": "repo://internal/service/auth_service.go#L77-L100",
           "version": "repo-lines-v1:sha256:b7e60d1b56198b5e272a2a788c3274c60dae3d86774219dad8b5bbb7575a2407:eyJzZWxlY3RlZExpbmVDb3VudCI6MjQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjZhMGVhM2MwNDIwYmExOGVkNTUwNmQzY2U2YTZkMmYyYzA3NDY5OGU5ZTIxYTQ1ZTNmYmE2OTk2NDFjOGQ3YTYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjAxZjZjNTFjOWNiY2VkMGYwMzY0MWI1ZjkyYjcxMWIzM2YyZTFmZTg3YWQ0Y2I5MmU2OWFmMzgxMmM1NTRlZTkiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImU4ZDQ4ZTNmNGJiOWQwZDU0MGU5YWZkNDRiNjIxMzQ5OWI4N2VkNzVjMTVmZjA3OTg2ZDNkZTI1NmU5NWQwZDgifQ"
         },
         {
-          "resource": "repo://internal/service/auth_service.go#L98-L113",
+          "resource": "repo://internal/service/auth_service.go#L101-L116",
           "version": "repo-lines-v1:sha256:9960c9877508b8b74257bb36bc17f8f3e469b930c616455f248f8698ef8e7b15:eyJzZWxlY3RlZExpbmVDb3VudCI6MTYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY3NThjMGRmZmM2ODJlYjFlZmI3MTExMzBlMWY0MjFjZGY1YTkxNGVlOGIzYzc5NjZiNmI2NWU1NGNhYjRiYjgiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijk4YWJmMTY1NzBkM2JlZjE4NzhkNzAwMWZhZWUxOWFjYzM4MmUwYTUyOGVjYmQ3ZDQ5Y2YwZTkyYjAzMmNmYTgiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjlmYjlmMjA4OGJlYmJkZDQyOTFmMjE4NzFkMzI2NjY2OGU4ODhhYjQxM2RjOWVlZjkzNmM4NzMxY2EwZmQ3MDMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjFlNTk2MmRhY2RkM2U0ODUxMDkzYmUyZjA0Yjg5NGYxZDQ4MTMxMDdkY2M0MGZjNWYwYjE1YmQ0ZjRhOWVhMWYifQ"
         }
       ]
@@ -21,7 +21,7 @@
       "statement": "The Altcha HMAC secret is ALTCHA_HMAC_KEY when set, otherwise the hex SHA-256 of altcha- concatenated with JWT_SECRET.",
       "evidence": [
         {
-          "resource": "repo://internal/service/auth_service.go#L63-L70",
+          "resource": "repo://internal/service/auth_service.go#L66-L73",
           "version": "repo-lines-v1:sha256:f5844a082f2d6671489d97d39fc42b2b20aa5b27c4798580c7848ba4da0121f5:eyJzZWxlY3RlZExpbmVDb3VudCI6OCwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiNTRkZjg5OWNlNGM0NzM2NmQ5YjlmNzAzZmQyMjhjNmVmODZkZGIyNDRmMDQzMzEzMmU3N2NjY2IxOGIxZjkwZCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNDEyY2EzNDVjY2Y3NWJmOWMwODA2YmNlNjk1YmU4ZGU4MDhiNzk5ODQyNTFhN2E1NGQyMDJjZjYxMDFkZDQ1MSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNzY0Y2ViNzE5MmEyZGM2MjY5MGYwYTM4N2FhMDEyOTlmZmJiY2NkMGU4OGU0ZDIzMmRhOTQwNDBlY2FiYzgxMSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiMDFmNmM1MWM5Y2JjZWQwZjAzNjQxYjVmOTJiNzExYjMzZjJlMWZlODdhZDRjYjkyZTY5YWYzODEyYzU1NGVlOSJ9"
         }
       ]
@@ -31,26 +31,26 @@
       "statement": "IP region lookup returns a local marker for loopback addresses and otherwise calls ipapi.co for country, region, and city with a five-second timeout, joining non-empty parts with a separator.",
       "evidence": [
         {
-          "resource": "repo://internal/ipregion/client.go#L57-L74",
+          "resource": "repo://internal/ipregion/client.go#L69-L86",
           "version": "repo-lines-v1:sha256:5fe8bb7a328a877aa722682bd5030a80b15f225a96c2f5a90d07d9d10db97147:eyJzZWxlY3RlZExpbmVDb3VudCI6MTgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjBhZGI5MWMxYzE3Zjc4ZmEwMTg0Y2NjOTE2MDJkMmYxZGExODE1ZWU2ZmMyZWMzN2I1ZjU5MzYyOWVkMGU4ODQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjAzZGQ3MmIxYjQwZWI2ZWVkZThkNDQ0NjNkYWI2ZGRlYzRjZDA5OTFkMDZhNTAxNzA0NDNhZjZkYzg0YjAyMzUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImE5YTY0ZGVjNGE0ODc2MjFlYTMxMGI4ZWNkMjI4N2IzOGQ4YjNmMTQyYzU1ZmQ1NDU3NzY4Y2QzZTljM2RlODYifQ"
         },
         {
-          "resource": "repo://internal/ipregion/client.go#L75-L107",
+          "resource": "repo://internal/ipregion/client.go#L87-L119",
           "version": "repo-lines-v1:sha256:a9ba651b07eaf91267ab071cc1584f7b6246a61d975170b463c15765624e933f:eyJzZWxlY3RlZExpbmVDb3VudCI6MzMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ2OTJmNDc3MDNkMWUxYTk4MTVjYzE1M2U0NGZlMjQ0NGQwZjg0NzY5NDRiNGQ2YjZmNDYwMWEwYzE2NTdjMDAiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjBkZTdlYmNlZWNmYTRkZDY3NGNiNDRhMTM1NzJhMDY4ODY3YjFhZjVhNzc4YTJlMWI0MzIzZDhiNDRlY2Y2Y2YiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
         }
       ]
     },
     {
       "id": "claim_08f0484958e0481aa7541a9a9bb31581",
-      "statement": "IP region results are cached in an LRU of at most 1000 entries with a 24-hour TTL, and an expired entry is removed and refetched on access.",
+      "statement": "IP 地域结果仍以 hashicorp/golang-lru 缓存（上限 1000 条、TTL 24 小时，过期条目在读取时移除并重新请求），但该缓存仅在显式开启（ip_region_enabled/IP_REGION_ENABLED）时生效；默认装配 NewDisabled() 本地 IP 返回「本地」、其余「未知」且不发任何网络请求。",
       "evidence": [
         {
-          "resource": "repo://internal/ipregion/client.go#L17-L21",
-          "version": "repo-lines-v1:sha256:71f2240d94157c3909efa2d65c1ea18a172c56227ef1977d47f232bf655117bc:eyJzZWxlY3RlZExpbmVDb3VudCI6NSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiYWZmYjBmN2IyZmYwZGRlM2NjMGZiYjQ4ZjA0NDhiNTcxOWI2ZmEzYzEzOTYyNWQwN2JmNmFhN2VlNzg2YTBlZSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiM2NmMzkzOGNlZTE4NDk1OGRmNjlmNzUyYjc2MmFjMDRkMGMxOWQ5MDQ0MGU0MjUzMGIwMjliNTY1MGVlZTYyMSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiMzM1MjJmMGM0YTlkNTgzNGM4NGJhMjZlMmM2N2M2ODkxY2M5MzYzN2Y1ZmIzYzk0MDZhZDM0ZmI2MDM0NWU2MSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZjRiYjFmZDg1OGE3N2Y1ZGZmYTRhYjAwYzEyNGM2OWNjYWI1MzNlNTg1YTM2MGI0ODQ4YWM0NDgyZWQ1OWFmNyJ9"
+          "resource": "repo://internal/ipregion/client.go#L17-L24",
+          "version": "repo-lines-v1:sha256:8c4bb4f4863ef05d086bb0d19b54a7b0a0c360343a98b58acdec9d84cdb903aa:eyJzZWxlY3RlZExpbmVDb3VudCI6OCwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiZGNlODdiNjgxOGEyODg0ZTgzZDMxYzczOTgwZjQ4MjQ2OTk4NzFiZDBkMWIwYjJjZDliN2MzZjViMTViMTE2ZCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMDFiYTQ3MTljODBiNmZlOTExYjA5MWE3YzA1MTI0YjY0ZWVlY2U5NjRlMDljMDU4ZWY4Zjk4MDVkYWNhNTQ2YiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZTc3OTg4MjRhMjEyZjJjOWY0ZjI2ODhhZWIyNjg0OTljNTNlMzE1ODJiYWVmOTc1YTZhYTcxOGVjZTc4OGMxZCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiNmE0YmM1ZDBhODYwODdiNDQyYWVlNTEzOGNiZGU3NzkxNWQ3YWZiMzA5YWY2Mjk4YjZlYTE5ZGY1N2JmNzkwMiJ9"
         },
         {
-          "resource": "repo://internal/ipregion/client.go#L43-L58",
-          "version": "repo-lines-v1:sha256:e5d4d24aa375ee176a74d254d201239ba8984f5662c6ffcd1be4e8c44c416e7f:eyJzZWxlY3RlZExpbmVDb3VudCI6MTYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjMzNzA4ZTU0YTYyMzVlZTNkZGE0NmJmYzhhYmIyYWNiNjAxNGY3MWUzY2JlNjI2MGZjMGI1YzZhZWJjMDRhNDkiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImQ5MjY2MzYxNTVkMmMzM2VhZTQ5ZDYyYTU4NTdjMDljZjhiZDExZGRkMGEyNmNkY2JjOTNlNWY2ODk2MjVmYjkiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImNlMTIxNzY0ZDU5NjRiYzBmMmNlYmUzZjQ1ZjI0MTdhMmZhMTlhZTA1ZTMwZjhlMGMyYjQ0OTdkYjUzOGFhNWEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImU0MzAxNzJiOTAzM2ExNWVhZWVkZDQyZGYwYzQ5NjBmOTFlZWEwNWQ3YmRmM2EzZDgxNzQ2ZTM5N2M0NTQ3ZTMifQ"
+          "resource": "repo://internal/ipregion/client.go#L70-L95",
+          "version": "repo-lines-v1:sha256:5d328cab7e70867fb9f362f4008cd21c50b50c70a3e5febdd3bb6a79f7dc8b61:eyJzZWxlY3RlZExpbmVDb3VudCI6MjYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImQ5MjY2MzYxNTVkMmMzM2VhZTQ5ZDYyYTU4NTdjMDljZjhiZDExZGRkMGEyNmNkY2JjOTNlNWY2ODk2MjVmYjkiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjE0YTQ4OWJkNTY1NjA3MzA5NDFkMTBjYWZlYmQwYjM2ZWJhNjA2OThmMWNhZWRlODAyZjIyMWRhM2ExNDA2MjYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjgxODBmNDQzNDE0MzU5NjI5MTRiMGIwMDBjMmY5N2Q4ODg0NmRiODhmNjA4Yzc1YmU1NTg0MDE3NGVkNWI3MDMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjBlMjM3MTA5YzZkZmE4ZjlkZGE0ZGYxZDU5MWI2MDg4OTFkM2I4MDU3M2MwMGVlNzk4MDI2YWMwZWQ3Y2YyNGUifQ"
         }
       ]
     },
@@ -59,7 +59,7 @@
       "statement": "IP region lookup failures fall back to an unknown marker, and the lookup is synchronous during login and registration before the user is saved.",
       "evidence": [
         {
-          "resource": "repo://internal/ipregion/client.go#L75-L107",
+          "resource": "repo://internal/ipregion/client.go#L87-L119",
           "version": "repo-lines-v1:sha256:a9ba651b07eaf91267ab071cc1584f7b6246a61d975170b463c15765624e933f:eyJzZWxlY3RlZExpbmVDb3VudCI6MzMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ2OTJmNDc3MDNkMWUxYTk4MTVjYzE1M2U0NGZlMjQ0NGQwZjg0NzY5NDRiNGQ2YjZmNDYwMWEwYzE2NTdjMDAiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjBkZTdlYmNlZWNmYTRkZDY3NGNiNDRhMTM1NzJhMDY4ODY3YjFhZjVhNzc4YTJlMWI0MzIzZDhiNDRlY2Y2Y2YiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
         },
         {
@@ -73,11 +73,11 @@
       "statement": "VAPID public key, private key, and subject are configurable through ini or environment variables, and the public key endpoint returns the key only when both public and private keys are configured, otherwise null.",
       "evidence": [
         {
-          "resource": "repo://internal/config/config.go#L103-L108",
+          "resource": "repo://internal/config/config.go#L119-L124",
           "version": "repo-lines-v1:sha256:40430e9d62dbbd0dd5944884e3b8dcbfe649edfdac18fd0fbc3fc69bf9f41d26:eyJzZWxlY3RlZExpbmVDb3VudCI6NiwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiODA5NjI3ZGZmZmRiM2UwYzMyMTFlZjVhMGE0YjM3MzQwMmQ1YTNhOTBhNDA5MzZkZjFjZDVhZWFmNzFhN2YzMSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNDEyY2EzNDVjY2Y3NWJmOWMwODA2YmNlNjk1YmU4ZGU4MDhiNzk5ODQyNTFhN2E1NGQyMDJjZjYxMDFkZDQ1MSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNTM0OTdmMmM4MDBmMWU5ZGE3ODljZDhkYTEwNWYxOWY3ZTZkZWJmZDcwMWRjYzE3NTUzNTYzNDY5NGU4NjQ2OCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiNmRmNDU4NjA0YzI2Nzk1ODliMGMzNTVjZTVmNmU0ZGM2Y2FmYjgwYWY1MTZmNjQ0MDJmMzkzZGQzY2U1OWM5MCJ9"
         },
         {
-          "resource": "repo://internal/handler/notifications.go#L447-L454",
+          "resource": "repo://internal/handler/notifications.go#L445-L452",
           "version": "repo-lines-v1:sha256:d8c507dfacb2da3a10452369cc02ed7134438c69bf357564a1b347a57619bb82:eyJzZWxlY3RlZExpbmVDb3VudCI6OCwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiNGExYmVmMDJiNDZiODQ1OGM3MzJkMGI3YmQyOGE4MGVjMTg5ODlkNDJhZGIwYTg3MTIyOGVhNjQxYjJmNmE3YyIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNDEyY2EzNDVjY2Y3NWJmOWMwODA2YmNlNjk1YmU4ZGU4MDhiNzk5ODQyNTFhN2E1NGQyMDJjZjYxMDFkZDQ1MSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiYTM0MmVlODAyMjc1NWVmOGMyNDkxNWQ0YTMwNDc4NTJmNGY3M2VlYzllZTE3Yjk4ZGJjNmMxOGNiNjFiYzZiZSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiOWI3Mzk2NjMyODBmYzQ3NjVkNjUzYTJlYWE5NzYzMDU5ZDM5ZmI3Y2IzMmRmNTYzNzMwMzM3MTk5OGJkNzQ3YiJ9"
         }
       ]
@@ -95,6 +95,6 @@
   ],
   "verification": {
     "by": "openwiki/0.7.2",
-    "at": "2026-11-04T15:34:40.691Z"
+    "at": "2026-11-11T16:33:08.526Z"
   }
 }

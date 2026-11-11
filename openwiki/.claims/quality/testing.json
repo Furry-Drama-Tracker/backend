@@ -1,28 +1,28 @@
 {
   "schemaVersion": 1,
-  "pageVersion": "sha256:ba0f14681ef37526263ed9179e5db87db0c81620467acff9a02723bf78ff8978",
+  "pageVersion": "sha256:4bd1f9926ccef9cb38bae4a4b7e67cc12ce4e1a168536f6c3c2d46c80553a781",
   "claims": [
     {
       "id": "claim_56a4f99a099548d1b930f956550caa7e",
-      "statement": "The Makefile exposes test, vet, and build targets, and the suite is run as go test ./... with the expectation that go test is the behavior regression gate.",
+      "statement": "Makefile 暴露 test/vet/build（另有 run/seed/fmt/docs/diag）目标，套件以 go test ./... 运行并作为行为回归闸门；CI（release.yml）只构建不跑测试，本地 go test 仍是唯一回归闸门。",
       "evidence": [
         {
-          "resource": "repo://Makefile#L1-L55",
-          "version": "repo-lines-v1:sha256:9a126504d9179ef6c7498b557db0a4902b821b5908161249b9875b479e04b27a:eyJzZWxlY3RlZExpbmVDb3VudCI6NTUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImYwYmYwZTViNWUxOWFiYTE1ZTg1NTMwZmFjMzRiOGU1MTc0YjA0YjA1OTY3YjYyY2M2NmU0ODM5YWRiZTRlYWMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY5OWVhM2YyMTExMWM2YzQ5ZjY1NDNhZjE5ODYwMmQ5YmI2NzU0NmYwZTUxMTA5NTdjNmRhZDAxMjY1YThiMzAiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+          "resource": "repo://Makefile#L30-L61",
+          "version": "repo-lines-v1:sha256:e50634c7fe54e5c3c3d6665e3dea8eeb9b0e202cbe1873aae6892274f38156c3:eyJzZWxlY3RlZExpbmVDb3VudCI6MzIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY5OWVhM2YyMTExMWM2YzQ5ZjY1NDNhZjE5ODYwMmQ5YmI2NzU0NmYwZTUxMTA5NTdjNmRhZDAxMjY1YThiMzAiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImMzZGViOTUxNmQ4M2E1ZTQzODJlYzZhMjc3ZDg4MjU3YWQ4MjgzNWFkN2FmMjJmODg3NGQ1NDc4MzkzZGQ4NmUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
         },
         {
-          "resource": "repo://docs/contributing.md#L20-L36",
-          "version": "repo-lines-v1:sha256:94d207cf87b8f9ba66403ebc86f95f46eafbec7d042889c5e701ca54e71fba6d:eyJzZWxlY3RlZExpbmVDb3VudCI6MTcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImFjNWZiNTMxZGUyYTQ3ZjE1YzAxMDgwNWRmZTUzOTlhODgwZTRhMzg0M2I0N2M0MGVjMmU5MWE0MTA5ZGY5ZmEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjY4YTA0YjlmNzA2Y2U3MGYzM2U0Zjc1YWEzMDY0Y2ZkY2IyMGM2NDIyZWNmNmU4Y2FlODk3MGZiYzQ4MzlkZjkiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImM2NjJlOWEyNmQ4ZjNiM2MwYzgyYzRjNDYwOWQzNDUyZjQ2NGZlMjczNjdiYTE1NTlkOTg4NDUxYzBkNmMzMjYifQ"
+          "resource": "repo://docs/contributing.md",
+          "version": "repo-file-v1:sha256:004a53a6029b909ac41e4fba8c340e76d57f4e17cefa7237dbad63f3696513cd"
         }
       ]
     },
     {
       "id": "claim_fbe42990f60e43d2afc25fc6fea2252c",
-      "statement": "Full-server integration tests construct the real application with server.NewApp against MongoDB at 127.0.0.1:27017 and drop the test database during cleanup.",
+      "statement": "端到端集成测试用 server.NewApp 对 127.0.0.1:27017 的真实 MongoDB 装配完整应用，并在清理时删除测试数据库。",
       "evidence": [
         {
-          "resource": "repo://internal/server/integration_test.go#L28-L65",
-          "version": "repo-lines-v1:sha256:6181cb007eeda79d6e12ef734921938d0ef2b37030a294c9ecc26c5392eb47b8:eyJzZWxlY3RlZExpbmVDb3VudCI6MzgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjcxMGEzZTk1ZGZhMWYwNzg1NDA0ZTQwNGJkN2UyZDY0ZjhhZTgyMjAzNWI3ZDVjNGI5ODI4ZGYwYjdiMTBmYjkiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImQ4YjFjNzI5YTJiMmVjNDg2ZGZmY2M5ZDI1ZDJmMjRhZTI4YmI4ZWJlNTJlNWVmODE5MmU2ZDViOGYzOTkyNzAiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImEwYWI4ZGMyYTFhMjk0YWE4MWU1YmIzOTc0NzYwMzY4NTVlNjc5MmZiMmVlMWEyNjZkZTRmNjBiNjVlYTRlYzkifQ"
+          "resource": "repo://internal/server/integration_test.go#L28-L70",
+          "version": "repo-lines-v1:sha256:662db4b91957b7c4b541636189af75b3b8c2ceed2297a3c38890b5c2d8f5a6b2:eyJzZWxlY3RlZExpbmVDb3VudCI6NDMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImZhZmJhMDUyN2MzOTUzYzRiNmUwZTViNTczOWJhODM2MTJmODA1M2JjZGM5NDY2NzMwMTkzY2QxZDU5MGI0MDgiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjhlM2Y3YjUwOTRjM2NiMzZmODA2NmQ1MmJkODJjYjE2MjUzZjVjZDUxOWU5MWI5NGE2MGJjNWQ1NWNjMGNjYzUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjEwZjc4MDBmNTQwZDRmMTFmZGIwMWY3MzQ3ZTg1NzhhYzJlNmI4NTkwMTNmOWYxNzNkOGYxMjkxNzQ4MmM1MjIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjUyNjI0NWZkODY3OGUwN2VlN2U4MzUxZTNjYmQxNmQyNjNlNWQ5NTIxM2EwNTZlY2I1ZmFhN2M1MWNlYTVmM2QifQ"
         }
       ]
     },
@@ -38,11 +38,11 @@
     },
     {
       "id": "claim_b88acf8d1b7642a4b33b9bd7b0a5b8b8",
-      "statement": "Test database naming uses both a fixed neo_integration_test database with drop-before-and-after and unique per-run names for newer suites.",
+      "statement": "测试数据库命名共存两种策略：固定名 neo_integration_test（测试前后删除）与较新套件的唯一名（如 neo_series_test_<UnixNano>）；仓储级 user_test.go 另由 FDT_TEST_MONGO_URI 门控（未设置跳过）。",
       "evidence": [
         {
-          "resource": "repo://internal/server/integration_test.go#L28-L45",
-          "version": "repo-lines-v1:sha256:5a4530cc9800664929bf2ab03c57967cc1e3194adabc8421e71110a84a2e84a5:eyJzZWxlY3RlZExpbmVDb3VudCI6MTgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjcxMGEzZTk1ZGZhMWYwNzg1NDA0ZTQwNGJkN2UyZDY0ZjhhZTgyMjAzNWI3ZDVjNGI5ODI4ZGYwYjdiMTBmYjkiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImQ4YjFjNzI5YTJiMmVjNDg2ZGZmY2M5ZDI1ZDJmMjRhZTI4YmI4ZWJlNTJlNWVmODE5MmU2ZDViOGYzOTkyNzAiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImQwNWZlZDgwNmIxY2E2OTIxMGZkNWNjNjFlNGZiNzE3NmM1NTZiMmQ2OTRjMzNkZWEyNTFjOGQ2ZDk4ODQ4MGUifQ"
+          "resource": "repo://internal/server/integration_test.go#L28-L50",
+          "version": "repo-lines-v1:sha256:ccef5198b850a4ec46f7cb8a42910cc10c5e020c1450b11013557eb493e20f06:eyJzZWxlY3RlZExpbmVDb3VudCI6MjMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImZhZmJhMDUyN2MzOTUzYzRiNmUwZTViNTczOWJhODM2MTJmODA1M2JjZGM5NDY2NzMwMTkzY2QxZDU5MGI0MDgiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImU3N2FhZTA3NDQ5Nzk5YTE3ZTcwY2Q0MzhlYzY5MGI5NTQ3MTAxNWE5ZmFjY2VjN2FmZjE2NTI4MTZlNTBiYzkiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjEwZjc4MDBmNTQwZDRmMTFmZGIwMWY3MzQ3ZTg1NzhhYzJlNmI4NTkwMTNmOWYxNzNkOGYxMjkxNzQ4MmM1MjIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImY1NDE5NDNmYmYxZWMzMDNiZjY5ODQyNjEzZTA2NmE1OGMwOWVjNmUzYWExNDE0YWZiYzViYzg4MDUyOTU0OTcifQ"
         },
         {
           "resource": "repo://internal/server/series_test.go#L25-L49",
@@ -55,7 +55,7 @@
       "statement": "Test HTTP clients use a cookie jar, fetch a CSRF token first, and attach the matching header to non-GET requests.",
       "evidence": [
         {
-          "resource": "repo://internal/server/integration_test.go#L66-L111",
+          "resource": "repo://internal/server/integration_test.go#L75-L120",
           "version": "repo-lines-v1:sha256:abbf9dc28626d84e31bd2a9e5e8d77bceb12f511e153380eca2b619b8a86b456:eyJzZWxlY3RlZExpbmVDb3VudCI6NDYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijc0MDYwYmM2OWRkNWQ3ZGNjMDBmOTk5NzgyMThlZjcyMjMxODUwODZlYTAwOGUxODM1MWUxOWMwOTVmZmU0N2UiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijc2ODFmMTNhZWRjODYyZmEzN2Q2Yzk3ZDZmOWI0N2MwOWFkYjQwMTE0MWIwOGVjY2FhZmZiNGUzOGZjMjkyODciLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImE5ZmY5ZmUxM2MzNWJkMjkzOGM5MTVkMWVlYWUyYWEyZjZhN2UxOTViNGFjOWY0ZWNjMTI3NTQzNDRlYjZjYjQifQ"
         }
       ]
@@ -101,6 +101,6 @@
   ],
   "verification": {
     "by": "openwiki/0.7.2",
-    "at": "2026-11-04T15:34:40.691Z"
+    "at": "2026-11-11T16:33:08.526Z"
   }
 }

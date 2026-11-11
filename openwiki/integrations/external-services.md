@@ -1,8 +1,11 @@
 ---
 type: integration
 title: 外部服务
-description: Altcha 工作量证明集成及其密钥派生、带缓存上限与失败回退的 ipapi.co 地域查询，以及只暴露配置却从不用于发送的 VAPID 设置。
+description: Altcha 工作量证明集成及其密钥派生、默认禁用（可选开启 ipapi.co）的 IP 地域解析与本地离线库替换缝，以及只暴露配置却从不用于发送的 VAPID 设置。
 tags: [integration, altcha, geolocation, vapid, external-apis]
+verified:
+  - by: openwiki/0.7.2
+    at: 2026-11-11T16:33:08.526Z
 sources:
   - id: openwiki-source-a8910515ddd14810ad43f5c1
     resource: repo://internal/config/config.go
@@ -16,10 +19,7 @@ sources:
     resource: repo://internal/service/auth_service.go
   - id: openwiki-source-1994cba008c20be8b9db7693
     resource: repo://internal/service/login.go
-generated: { by: "opencode", at: "2026-11-04T03:17:38.088Z" }
-verified:
-  - by: openwiki/0.7.2
-    at: 2026-11-04T15:34:40.691Z
+generated: { by: "zcode", at: "2026-11-11T16:33:08.526Z" }
 ---
 
 # 外部服务
@@ -50,20 +50,18 @@ HMAC 密钥在设置 `ALTCHA_HMAC_KEY` 时使用它，否则使用 `"altcha-" + 
 
 失败返回 400 与固定消息“验证码错误或已过期”。所有入口共用认证服务的同一套校验实现；独立的 `/api/admin/login` 及其辅助函数已随 ADR-012 删除。
 
-## IP 地域查询
+## IP 地域查询（默认禁用，ADR-017）
 
-`ipregion` 把客户端 IP 解析为可读地域，用于登录历史与新设备邮件展示。
+`ipregion` 把客户端 IP 解析为可读地域，用于登录历史与新设备邮件展示。按数据出境合规要求，该能力**默认禁用**：
 
-- 本地地址 `127.0.0.1`、`::1`、`::ffff:127.0.0.1` 直接返回 `本地`，不发网络请求。
-- 其他地址调用 `https://ipapi.co/<ip>/json/`，使用五秒上下文超时与自定义 User-Agent。
-- 响应字段 `country_name`、`region`、`city` 用 ` · ` 连接，忽略空部分。
-- 请求、解码或空结果失败都返回 `未知`。
+- 默认装配走 `ipregion.NewDisabled()`：本地地址 `127.0.0.1`、`::1`、`::ffff:127.0.0.1` 仍返回 `本地`，其余 IP 一律返回 `未知`，**不发任何网络请求**。登录、注册、设备确认与 2FA 登录不再把客户端 IP 发给第三方。
+- 仅当 `cfg.Security.IPRegionEnabled` 为 true（`[security].ip_region_enabled` 或环境变量 `IP_REGION_ENABLED` 显式开启）时，`register_routes.go` 才装配真正的 `ipregion.NewClient` 并外呼 `https://ipapi.co/<ip>/json/`（五秒超时、自定义 User-Agent，响应字段 `country_name`/`region`/`city` 用 ` · ` 连接，失败回退 `未知`）。
+- `cmd/server/main.go` 启动时打印开关状态：误开时打 `[SECURITY WARN]` 提示认证流程会向 ipapi.co 发送客户端 IP（数据出境）。
+- 切换本地离线库的扩展缝：把装配处换成 `ipregion.NewClient(<本地查询函数>)` 即可，service 侧零改动。
 
-缓存使用 `hashicorp/golang-lru`，最多 1000 条，TTL 24 小时。过期在读取时检查；过期条目会被移除并重新请求。LRU 上限意味着流量 IP 很分散时可能提前淘汰热点条目。
+开启时的缓存行为不变：`hashicorp/golang-lru`，最多 1000 条，TTL 24 小时。过期在读取时检查；过期条目会被移除并重新请求。LRU 上限意味着流量 IP 很分散时可能提前淘汰热点条目。
 
-查询是同步的：登录、注册、设备确认与 2FA 登录都会在保存用户前内联调用 `GetRegion`。因此 `ipapi.co` 响应慢时，缓存未命中的这些请求最多可能增加五秒。没有熔断或后台预取。
-
-由于是第三方 API，缓存未命中时 IP 地址会离开服务器。代码中没有退出开关。
+查询是同步的：登录、注册、设备确认与 2FA 登录都会在保存用户前内联调用 `GetRegion`。因此显式开启后 `ipapi.co` 响应慢时，缓存未命中的这些请求最多可能增加五秒。没有熔断或后台预取。
 
 ## VAPID 与 Web Push
 
@@ -82,8 +80,9 @@ Web Push 投递尚未实现：每个领域的 `sendPushToUser` 辅助函数都�
 ## 运维注意点
 
 - Altcha 与 ipapi.co 失败都是降级而非崩溃：验证码失败会阻止请求，地域失败回退 `未知`。
-- ipapi.co 没有重试、退避或共享 HTTP 客户端调优；它使用 `http.DefaultClient` 加每请求上下文超时。
-- 两个集成都通过可注入函数测试（邮件用 `SetSendMail`，ipregion 用 `NewClient(fetch)`），因此单元测试不需要网络。
+- IP 地域解析默认关闭，认证路径少一个外部故障点；`LastLoginRegion` 与新设备提醒邮件的地域一行显示 `未知`（本就是外呼失败的兜底值），响应字段不变。
+- 显式开启后的 ipapi.co 没有重试、退避或共享 HTTP 客户端调优；它使用 `http.DefaultClient` 加每请求上下文超时。
+- 两个集成都通过可注入函数测试（邮件用 `SetSendMail`，ipregion 用 `NewClient(fetch)` 与 `NewDisabled()`），因此单元测试不需要网络。
 
 ## 相关阅读
 

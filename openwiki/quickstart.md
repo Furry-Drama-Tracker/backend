@@ -1,8 +1,11 @@
 ---
 type: guide
 title: 快速开始
-description: neo-server 是什么、最短的构建与运行路径、无法启动时缺失的配置，以及按任务查阅后续页面。
+description: neo-server 是什么、最短的构建与运行路径、无法启动时缺失的配置、认证排障入口 make diag，以及按任务查阅后续页面。
 tags: [quickstart, setup, navigation]
+verified:
+  - by: openwiki/0.7.2
+    at: 2026-11-11T16:33:08.526Z
 sources:
   - id: openwiki-source-0f6ed11169bd8e6b34b44280
     resource: repo://cmd/server/main.go
@@ -22,10 +25,7 @@ sources:
     resource: repo://internal/server/integration_test.go
   - id: openwiki-source-012f2c78e3b1446dfc35803f
     resource: repo://Makefile
-generated: { by: "opencode", at: "2026-11-04T03:17:38.088Z" }
-verified:
-  - by: openwiki/0.7.2
-    at: 2026-11-04T15:34:40.691Z
+generated: { by: "zcode", at: "2026-11-11T16:33:08.526Z" }
 ---
 
 # 快速开始
@@ -47,7 +47,7 @@ make build
 ./bin/furry-drama-be-neo
 ```
 
-发布构建用 `make release`（`-trimpath -ldflags "-s -w"`），需要初始超管时用 `make seed`。
+发布构建用 `make release`（`-trimpath -ldflags "-s -w"`），需要初始超管时用 `make seed`，认证排障用 `make diag ARGS="-user=<邮箱|ObjectID> -days=7"`（只读，输出会话墓碑 + 认证事件时间线）。
 
 开发时创建 `backend/.env`，至少包含：
 
@@ -73,7 +73,7 @@ go test ./...    # 单元与集成测试；集成测试需要 127.0.0.1:27017 �
 go vet ./...
 ```
 
-`go test ./...` 是行为回归闸门。没有 CI 流水线，因此必须本地运行。
+`go test ./...` 是行为回归闸门，必须本地运行：CI（`.github/workflows/release.yml`）只做 8 目标交叉构建与滚动发布（main 推送覆盖 tag=latest 的 Release），不跑测试。
 
 ## 接下来读什么
 
@@ -100,6 +100,7 @@ go vet ./...
 - 每个领域路由只挂载在 `/api` 下（单前缀，v1 镜像已移除）；端点限流只匹配 `/api/<mount>`，全局限流覆盖所有 `/api/*`。
 - 管理员与普通用户共用 `/api/auth/login`；登录后由 `GET /api/admin/verify` 校验后台权限，没有独立的 `/api/admin/login`。
 - 非 GET 请求需要 CSRF，419 表示 access 令牌过期。
-- Refresh 令牌带随机 `jti` 轮换；30 秒宽限期外的重用会吊销全部会话。带 `jti` 的 access 令牌也会在会话失效后立即被拒绝。
+- Refresh 令牌带随机 `jti` 轮换；2 分钟并发宽限期外的重用会吊销全部会话（`/auth/refresh` 有独立的 60 次/15 分钟限流，不与 2FA 桶共享）。带 `jti` 的 access 令牌也会在会话失效后立即被拒绝。用户报"掉登录"时用 `make diag` 查会话吊销原因与认证事件。
+- IP 地域解析默认禁用（`IP_REGION_ENABLED`/`ip_region_enabled` 缺省 false，数据出境合规）：登录/注册不外呼 ipapi.co，`LastLoginRegion` 记为「未知」；代理标头信任策略由 `[server]` 的 `trust_proxy_headers`/`proxy_ip_headers`/`trusted_proxies` 配置装配。
 - 索引创建、数据迁移与会话/通知/注销账号清理 cron 都在启动时执行，但失败只告警；Web Push 发送仍是空实现。不要假设它们成功。
 - 验证码、限流计数、剧集缓存与 SSE 连接状态是进程本地的，多实例部署需要共享存储。

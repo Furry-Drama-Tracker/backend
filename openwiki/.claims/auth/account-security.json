@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "pageVersion": "sha256:d7341bd68dddd839c1dac29f426d34f3329e0ba84735a573458842b7116ed206",
+  "pageVersion": "sha256:cfc753f97e15103bc7f3d326f8890f0e9ea7425355e0ac4396d07d14eb514b6c",
   "claims": [
     {
       "id": "claim_3dc757f78d214ae8806c94eae0464b20",
@@ -17,8 +17,8 @@
       "statement": "Sensitive fields use AES-256-CBC with a key derived as sha256 of ENCRYPTION_KEY when set or JWT_SECRET otherwise, and are stored as enc:iv:ct with a random 16-byte IV; empty and already-encrypted values pass through.",
       "evidence": [
         {
-          "resource": "repo://internal/auth/fieldcrypto.go#L17-L99",
-          "version": "repo-lines-v1:sha256:3cca411415fc8b7dabd850d64051d1fa6b8158debb740b3b4726ffcf53454473:eyJzZWxlY3RlZExpbmVDb3VudCI6ODMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAwYmZjMDAwZmMwNmJlMzlmMzg2YzJjYmE1NGRhYjEyYWEzY2Q0YjhmNzMxZWQyNDg2ZWZiNWFiYzNlZTUwMjkiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImQzZDVjNDA5NGE4N2QyMjI4MzAyYTgyYzc4MTUwMDFlYTQ2YThhZTdhZjIyZmZmNDk0MjJlZTI2Y2E3ZTkzYWIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImY2YTA4ZjQxOTJlM2NjOWFkOWI0MDliMDgzZmIxNGYwYTRiODU2YWI1ZmEyYThmMzVjYzVmMDUwZDNhNGNkZDMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjgyODBhY2E2MGNjYzJjYmYzZWJjMjhiNGJmMzI0MzZmZDNkNTA2ZWYzZDZkNjg0ZmI3N2MxZTllOWMxM2Q5ZmMifQ"
+          "resource": "repo://internal/auth/fieldcrypto.go#L17-L101",
+          "version": "repo-lines-v1:sha256:313d35226e0281150be33961b6bba86ee5487f3055e7fcc2d21c076e377fa217:eyJzZWxlY3RlZExpbmVDb3VudCI6ODUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAwYmZjMDAwZmMwNmJlMzlmMzg2YzJjYmE1NGRhYjEyYWEzY2Q0YjhmNzMxZWQyNDg2ZWZiNWFiYzNlZTUwMjkiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImQzZDVjNDA5NGE4N2QyMjI4MzAyYTgyYzc4MTUwMDFlYTQ2YThhZTdhZjIyZmZmNDk0MjJlZTI2Y2E3ZTkzYWIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImY2YTA4ZjQxOTJlM2NjOWFkOWI0MDliMDgzZmIxNGYwYTRiODU2YWI1ZmEyYThmMzVjYzVmMDUwZDNhNGNkZDMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjgyODBhY2E2MGNjYzJjYmYzZWJjMjhiNGJmMzI0MzZmZDNkNTA2ZWYzZDZkNjg0ZmI3N2MxZTllOWMxM2Q5ZmMifQ"
         }
       ]
     },
@@ -27,8 +27,8 @@
       "statement": "TOTP uses HMAC-SHA1, a 30-second step, six digits, and a plus-or-minus-one-step window, with a base64-encoded 20-byte secret and ten 16-hex-character backup codes.",
       "evidence": [
         {
-          "resource": "repo://internal/auth/totp.go#L22-L107",
-          "version": "repo-lines-v1:sha256:659836d4910b8a91a8cc6310a0943cd87f1aa0c87c9eab58a2696f70699d330f:eyJzZWxlY3RlZExpbmVDb3VudCI6ODYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImQwZDk4NmIwZGY3ZTljNDdhYTc4MmIwNjYwOTQ2OWJjOGVlY2E0NzYxMmI4MzhjZjgyOWRkYTRiY2RkZDMzMjkiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjAyZDNlMGU3NTcyMTRjYTgyMmExYTk4MjQxNDczZDI4OWRmMzcwNjU3N2U3MWNiZmUzZjZhZDQ3MDRlNWY5OTQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+          "resource": "repo://internal/auth/totp.go#L22-L121",
+          "version": "repo-lines-v1:sha256:b00a4546be5843012d81471a4d20d9d6b8f5b165b36863e48853728541cbcb80:eyJzZWxlY3RlZExpbmVDb3VudCI6MTAwLCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiJkMGQ5ODZiMGRmN2U5YzQ3YWE3ODJiMDY2MDk0NjliYzhlZWNhNDc2MTJiODM4Y2Y4MjlkZGE0YmNkZGQzMzI5IiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiI0MTJjYTM0NWNjZjc1YmY5YzA4MDZiY2U2OTViZThkZTgwOGI3OTk4NDI1MWE3YTU0ZDIwMmNmNjEwMWRkNDUxIiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiIwMmQzZTBlNzU3MjE0Y2E4MjJhMWE5ODI0MTQ3M2QyODlkZjM3MDY1NzdlNzFjYmZlM2Y2YWQ0NzA0ZTVmOTk0IiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MCwiZm9sbG93aW5nQ29udGV4dEhhc2giOiJlM2IwYzQ0Mjk4ZmMxYzE0OWFmYmY0Yzg5OTZmYjkyNDI3YWU0MWU0NjQ5YjkzNGNhNDk1OTkxYjc4NTJiODU1In0"
         }
       ]
     },
@@ -37,22 +37,22 @@
       "statement": "Changing a password validates strength, verifies the current password, updates the hash, revokes all sessions, clears cookies, and writes an audit entry.",
       "evidence": [
         {
-          "resource": "repo://internal/service/password.go#L16-L42",
-          "version": "repo-lines-v1:sha256:ec8d7a7c7aa39c8927b11bb2c06a84c13fe49f0689b9e24f7b5e2b138f74ec65:eyJzZWxlY3RlZExpbmVDb3VudCI6MjcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjI5NzRmZTZmOTAwYjA3OWFiOTQ1MGNkNTBjMThhYTJhMTIxYTExNjRjMzgxYzRmMTM2ZDczMmU3OWViODU5ODkiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImU1NzBhYjI0M2UwYTJjODkwNDY5YjQ5ZWM0YjZiZjNiMDhmNTI4ZWNiMDQyYzVhNjA5ZTE4YTJhNGIwNTg2YmMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImZkMmM2ZmVkNGE0NzhjYzlhZDljNThhMjk5OWVlMDY0MDJlOGJhNDhmZGNmMmE1MTFlOWUyZWJjNGM4ZjQ0YTIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjdmMzQzOGM0MmI1MjdhNzg3OWMxMzA4MmE3ZDk5YmE2Y2RhZGNlYTFiMGIwOGFmNGVhYTRjZDRjNmQxNjM5ZjgifQ"
+          "resource": "repo://internal/service/password.go#L17-L43",
+          "version": "repo-lines-v1:sha256:d4de44b8f6d97831d4efd511aa83c80f6bec640d0e16ed799df70907cd5409fc:eyJzZWxlY3RlZExpbmVDb3VudCI6MjcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjI5NzRmZTZmOTAwYjA3OWFiOTQ1MGNkNTBjMThhYTJhMTIxYTExNjRjMzgxYzRmMTM2ZDczMmU3OWViODU5ODkiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImU1NzBhYjI0M2UwYTJjODkwNDY5YjQ5ZWM0YjZiZjNiMDhmNTI4ZWNiMDQyYzVhNjA5ZTE4YTJhNGIwNTg2YmMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImZkMmM2ZmVkNGE0NzhjYzlhZDljNThhMjk5OWVlMDY0MDJlOGJhNDhmZGNmMmE1MTFlOWUyZWJjNGM4ZjQ0YTIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjdmMzQzOGM0MmI1MjdhNzg3OWMxMzA4MmE3ZDk5YmE2Y2RhZGNlYTFiMGIwOGFmNGVhYTRjZDRjNmQxNjM5ZjgifQ"
         }
       ]
     },
     {
       "id": "claim_4d791f3afbd840f2a07bad3cc4849bb6",
-      "statement": "Password reset tokens have the reset-password purpose and a one-hour lifetime, are single-use via the usedtokens store, and resetting revokes all sessions; the forgot-password response is identical whether or not the account exists.",
+      "statement": "密码重置令牌 purpose 为 reset-password、一小时有效，经 usedtokens 强制一次性使用，重置成功后以 password_reset 原因吊销全部会话；忘记密码响应不区分账号是否存在。",
       "evidence": [
         {
-          "resource": "repo://internal/service/password.go#L44-L64",
-          "version": "repo-lines-v1:sha256:1fdbb602e055d27f2ad955fd9bd228896fa748d91d3bb974a86706cdb50bc630:eyJzZWxlY3RlZExpbmVDb3VudCI6MjEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijc1NmU0NjYyMDFmYzJmYTYyZmM4ODg2MTQ1NTBlMmE4NzFmMDA2YWIwZWY2ZWZjNTFhNDliYTI0ODIxMjUxODgiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjRmMzFlNmIxYjNjOGUzZGIwMmZhMWJmNjNlMjQ2OTRlZTMyMjVjMzRiMzRlOWE0NjQ3YWU1ZWY1ZDUzMzcwN2MiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjQ5ZDkwNzI0YWIwNjk1ZjQ1N2VmYmYwMGJlNmQ4NDcxODRmOWNiNzE4YTc3YTdmYzMwOTAyZGEwMTY1NWNkYmMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImJhMDgyYzA0NzAxNzdjMDBlMmY4MzRlN2YyYzZjMTc1MTkyY2I3ZDljYjU1NzRiNjc5NmJhNmNlZTkxNGE1YzQifQ"
+          "resource": "repo://internal/repository/session.go#L143-L162",
+          "version": "repo-lines-v1:sha256:49bef667e4d4d187bfbe48e85323a1fd6b687de1a19c59beddb9ae01f43268d5:eyJzZWxlY3RlZExpbmVDb3VudCI6MjAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImY3MmYzYmIyNGViOWUyYTk4Y2MzY2Y2MzZlMGViYTBjODRmNGJlYThhNDdmYTE0Zjc5NTUxNmFkMDgyZTE2MGUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImZjNmY2MDBhMjc5NWM4ZDk4MzNiZTRmODk0OGQyMGI3YWI5N2ZmNTc2NTBjOWY3MTNjODVkMmYxZDY3ZWM2MWQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImY4MjE3MzdlNzY0OTg0ODEzMjAyZTRiNWJlOTc1NWUwODU2NWQ5MGEwNjZlNzAxMjJmNDY3Y2M4ZmY1NzQ5ODIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImM0M2VhY2JmYmUwM2UyZmY4YjM4ODdjNWI2OGE5MDFlZjM2NjE3MmFlMWY5MGMzMGFkYTA0Yjk3NjBkMDNiNmQifQ"
         },
         {
-          "resource": "repo://internal/service/password.go#L66-L104",
-          "version": "repo-lines-v1:sha256:5ef958e12398105f9ec1728bebb039ea050a205a0582f63e39d4bcc37c3bd81e:eyJzZWxlY3RlZExpbmVDb3VudCI6MzksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImRkNzcyNjQxZDZiYmIwYjIzMjM0NjIwYjg3NjlhY2E0MDM0ZDE4NWVkNzIzMjNkMWE1NmQxMGI5ZjQxY2M2ZGMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImViMTY2YTYxODFkMTJiYjg0YTU0ZWZjZjVjNmNiMGNmODRiM2RkZjJlZGE2YjM1N2QzMmRlODBjNWQwZDkwYzAiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjgwMTRkMWMwNzBkNjVhOWI5MTgzZTZiNDA5OTI5ODRkOTgwNTZiNjA0NWQwODU5MjM3MTIwMTJkMDdiNGRmYzYifQ"
+          "resource": "repo://internal/service/password.go#L45-L109",
+          "version": "repo-lines-v1:sha256:c67911321f1c007d89c795869851288073cd23ba0f4528885f6a7c366fabf6dd:eyJzZWxlY3RlZExpbmVDb3VudCI6NjUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijc1NmU0NjYyMDFmYzJmYTYyZmM4ODg2MTQ1NTBlMmE4NzFmMDA2YWIwZWY2ZWZjNTFhNDliYTI0ODIxMjUxODgiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjQ5ZDkwNzI0YWIwNjk1ZjQ1N2VmYmYwMGJlNmQ4NDcxODRmOWNiNzE4YTc3YTdmYzMwOTAyZGEwMTY1NWNkYmMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
         }
       ]
     },
@@ -80,7 +80,7 @@
         },
         {
           "resource": "repo://internal/service/email_change.go#L234-L262",
-          "version": "repo-lines-v1:sha256:29448de31cf3717d3c2da583247da1bad5474f19e1cf7b4b0707b3b73b4ef670:eyJzZWxlY3RlZExpbmVDb3VudCI6MjksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImVjMWZiZWE3MGY2Mzk1ZGExZmFiODg5N2JhMDE3MDM2ZjA1NjVlNThmNzZhYjdkZGYyNDk3YjQ1MjM4MWMzMTEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjdmNzM1ZjIyNTYzZTczYmU4M2I5YTEwMDM4MWFjN2ExYzYwMGYzOTZiOTVlNGU4ZGMyYzc0Zjc0YTZmYzM5M2YiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjE5MzdhMzQ5YTI0YmVmYmM4NTlhODNkYjJiYTg5YWU4NTVhOGU3YzgxYzg3MjNhMDZmYTM5YzFmODU1YWViMzEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjoyLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImE3YzdhYzY4NTgxNTE3Njk4Y2EzOWFlYjc1ODI3YWQxMjY3ZTc2NTI0YTIxMzA0NDg3ZjNiYjhmNGQzYWY2NjAifQ"
+          "version": "repo-lines-v1:sha256:97235e49793c1e8fe57216f0610ac094771b56c05765f9cfa7ff3eaa6ae7e8ef:eyJzZWxlY3RlZExpbmVDb3VudCI6MjksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImVjMWZiZWE3MGY2Mzk1ZGExZmFiODg5N2JhMDE3MDM2ZjA1NjVlNThmNzZhYjdkZGYyNDk3YjQ1MjM4MWMzMTEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjFkMjdmODc3M2QzN2MwYmI1ZmQ4ZWFiYWUwY2E1ZGEwNWU3NDJiNTJmMzA0MDVmNzliYjAzMzIzMDFhNDYyNjUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjE5MzdhMzQ5YTI0YmVmYmM4NTlhODNkYjJiYTg5YWU4NTVhOGU3YzgxYzg3MjNhMDZmYTM5YzFmODU1YWViMzEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjoyLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImE3YzdhYzY4NTgxNTE3Njk4Y2EzOWFlYjc1ODI3YWQxMjY3ZTc2NTI0YTIxMzA0NDg3ZjNiYjhmNGQzYWY2NjAifQ"
         }
       ]
     },
@@ -89,7 +89,7 @@
       "statement": "Account deletion records a seven-day grace deadline; a cron job purges expired requests every six hours with the first run delayed six hours after startup, and a login attempted after the deadline also purges the user through the shared best-effort PurgeUserData cascade before returning a generic credential error.",
       "evidence": [
         {
-          "resource": "repo://internal/cron/cron.go#L38-L52",
+          "resource": "repo://internal/cron/cron.go#L39-L53",
           "version": "repo-lines-v1:sha256:53beb46a97e9fc68658ec177291432e9b4ae52c82485db5e99e6cbfc2d5789af:eyJzZWxlY3RlZExpbmVDb3VudCI6MTUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijg1ZWUwYjI1NmFkNmU2NzIxYTM3ZjE4MWZhZmQxMjRhNjJlNmMyNjFhZGY1NTZhN2IyMjJlOGFjNDQ5NDU0ZGEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjFiZTllNzAxZjQ4ZTU4ZTc3NWUxZGI4NDRlZWJiYTFiN2NjZmE1ZmZhMTBiNjA2M2NiM2M4YTJjMDM0ZjVlZGMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjJjYjkwMzhmODYzYzYxNjA2N2Y0YjJhMDUxYTkxNjMwZTkzZjljMGYxNTViZDlhOGVjMWZkNWRmMmM3MzJhMzYifQ"
         },
         {
@@ -126,17 +126,21 @@
     },
     {
       "id": "claim_2daf5de21f734446a0cffd64617f85e0",
-      "statement": "Enabling 2FA generates and encrypts a secret plus backup codes but leaves 2FA disabled until a valid TOTP is confirmed; disabling and verification consume a backup code when one is used.",
+      "statement": "开启 2FA 生成并存储 secret（AES 加密）与备用码（bc:<sha256> 单向哈希）但仍保持关闭直到 verify-enable 验证有效 TOTP；已启用时 /2fa/enable 直接返回 400（旧实现会把 twoFactorEnabled 写回 false）；disable/verify 使用 auth.ConsumeBackupCode 消费命中的备用码，剩余数组就地升级为哈希格式落库。",
       "evidence": [
         {
-          "resource": "repo://internal/handler/twofactor.go#L24-L147",
-          "version": "repo-lines-v1:sha256:f024c1b288a2916f2b1024d0a7ecc8bced1a1f47b1033ff0a314489f63b074ef:eyJzZWxlY3RlZExpbmVDb3VudCI6MTI0LCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiIzMmQyZGMxYjQ1MTI3ZjY4ZjE0ZDgzNTQ0ZDM2MzFlNWY2MTI3M2Y5ODNmMDkwZmI3YzdiOGRmZjY2OTMyZDNmIiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiIwMWJhNDcxOWM4MGI2ZmU5MTFiMDkxYTdjMDUxMjRiNjRlZWVjZTk2NGUwOWMwNThlZjhmOTgwNWRhY2E1NDZiIiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiI3OTNjOWM0MTAzNTY0YWFhNTlhY2U5YjRkZDAxOGU3MTExMWQyNTQzZGJkYjU0NjU2ZmJiZGFiZmU2M2YzZmJmIiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MywiZm9sbG93aW5nQ29udGV4dEhhc2giOiI5YjNlMmEzNTQ1YzA5ZDM3ZTYyMjYzZGMwNWEyYjI5MzdiNzMyN2IwYWRlYWMwNmMwODA5ZmRjM2RiMjQ4NGU5In0"
+          "resource": "repo://internal/auth/backupcode.go#L23-L64",
+          "version": "repo-lines-v1:sha256:4542fbff0b7806211ff6f6e5fefd105d17527ccb9cf59e190eb12dbaacdbfe46:eyJzZWxlY3RlZExpbmVDb3VudCI6NDIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxMjc1Mjc1NDZlMzIzYTZkZTJjMjA2MDg5YmI3ZTQyMjkzNzQ0ODNjYjA2MDkxZWY0YjZmNjhmOGFjNGRmYmYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY3Y2RhODJkYTYwNjIzOGUwNWU2MjM5OTU2OWM1ZWUwMzk5MzQxOTY0OGFlNWQ0M2EyYmY4Y2Q2MzQ3ZjgyNjMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImEzMmMyZDg3OTVjMWQ5ZTRiZDVkMmFmMTkwNjViYzcwYmIxMWNjNzIyMjc1ODc4ZmI5MjQ2YTk1MmYwNzY2ZGIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImI4Njg5NWM3MzRkMTA2NzczNGQwOGEyODE1YWEyNmIzNDZiY2M1OTgxZTFlMDliMzlhZjdiNjJhNmJiMDZhMGQifQ"
+        },
+        {
+          "resource": "repo://internal/handler/twofactor.go#L25-L50",
+          "version": "repo-lines-v1:sha256:8ff653004b81bb5df983e00058e117d59507f1995d8c500a786e60a42f874bcf:eyJzZWxlY3RlZExpbmVDb3VudCI6MjYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjMyZDJkYzFiNDUxMjdmNjhmMTRkODM1NDRkMzYzMWU1ZjYxMjczZjk4M2YwOTBmYjdjN2I4ZGZmNjY5MzJkM2YiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijc5M2M5YzQxMDM1NjRhYWE1OWFjZTliNGRkMDE4ZTcxMTExZDI1NDNkYmRiNTQ2NTZmYmJkYWJmZTYzZjNmYmYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjNjYzhiMjQyZDc2ZWJlNGNjYzBiZjkyODMyOTFlYjViZmI2ZTU4YzNkZTA5YTkwYWFkM2JlMjJiY2RjMzU5MDAifQ"
         }
       ]
     }
   ],
   "verification": {
     "by": "openwiki/0.7.2",
-    "at": "2026-11-04T15:34:40.691Z"
+    "at": "2026-11-11T16:33:08.526Z"
   }
 }

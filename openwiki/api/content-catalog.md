@@ -3,6 +3,9 @@ type: api-domain
 title: 内容目录 API
 description: 剧集与系列目录、审核门控的写入路径、观看计数与缓存，以及用户追番、收藏、收藏夹、历史与评分域的行为。
 tags: [api, episodes, series, follows, favorites, folders, histories, ratings]
+verified:
+  - by: openwiki/0.7.2
+    at: 2026-11-11T16:33:08.526Z
 sources:
   - id: openwiki-source-f89e324c07065d291ea97e16
     resource: repo://internal/handler/episodes.go
@@ -20,10 +23,7 @@ sources:
     resource: repo://internal/model/episode.go
   - id: openwiki-source-7dbb03889219204710573384
     resource: repo://internal/model/misc.go
-generated: { by: "zcode", at: "2026-11-04T15:34:40.691Z" }
-verified:
-  - by: openwiki/0.7.2
-    at: 2026-11-04T15:34:40.691Z
+generated: { by: "zcode", at: "2026-11-11T16:33:08.526Z" }
 ---
 
 # 内容目录 API
@@ -50,7 +50,9 @@ verified:
 
 ### 观看计数
 
-`PUT /episodes/:id/view` 先确认剧集已审核通过才计数。随后按 `episodeId + clientIP` 应用内存冷却：十分钟内重复观看直接返回当前剧集而不递增。观看日志会择机清理，且是进程本地的，因此不会跨实例去重。
+`PUT /episodes/:id/view` 先确认剧集已审核通过才计数。随后按 `episodeId + 客户端IP` 应用内存冷却：十分钟内重复观看直接返回当前剧集而不递增。观看日志会择机清理，且是进程本地的，因此不会跨实例去重。
+
+客户端 IP 统一取自 gin 的 `c.ClientIP()`：观看计数不再维护手写的 X-Real-IP/XFF 解析，标头信任策略（信任开关、标头清单、受信代理来源）由 `[server]` 配置在引擎级装配（见请求生命周期页面）。
 
 该路由注册了 `ratelimit.ViewSpec`，但端点限流只匹配字面挂载路径，而实际路径包含 `:id` 段，所以限流不会触发。十分钟的 handler 内冷却才是有效保护。
 
@@ -121,3 +123,4 @@ verified:
 - [管理与审核 API](administration-and-moderation.md)——通过/拒绝与回收站语义。
 - [上传、RSS、翻译、备份与分页](utilities-and-uploads.md)——封面上传与分页。
 - [持久化与数据模型](../architecture/persistence-and-data-model.md)——集合布局与 ObjectID 处理。
+- [请求生命周期与中间件管线](../architecture/request-lifecycle.md)——客户端 IP 的统一解析策略。

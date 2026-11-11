@@ -1,8 +1,11 @@
 ---
 type: architecture
 title: 请求生命周期与中间件管线
-description: 固定的 Gin 中间件顺序、请求体解析与清洗、CSRF 校验、限流挂载语义、单前缀路由、静态上传，以及错误实际如何到达客户端。
+description: 固定的 Gin 中间件顺序、引擎级客户端 IP 识别装配、请求体解析与清洗、CSRF 校验、限流挂载语义与 429 诊断日志、单前缀路由、静态上传，以及错误实际如何到达客户端。
 tags: [http, middleware, gin, rate-limiting, csrf, routing]
+verified:
+  - by: openwiki/0.7.2
+    at: 2026-11-11T16:33:08.526Z
 sources:
   - id: openwiki-source-8cc3b2cd34ec48fbcbb82fd1
     resource: repo://internal/middleware/apitracker.go
@@ -22,10 +25,7 @@ sources:
     resource: repo://internal/server/app.go
   - id: openwiki-source-ebbcecfb3e8c07ba5e940ccd
     resource: repo://internal/server/register_routes.go
-generated: { by: "opencode", at: "2026-11-04T03:17:38.088Z" }
-verified:
-  - by: openwiki/0.7.2
-    at: 2026-11-04T15:34:40.691Z
+generated: { by: "zcode", at: "2026-11-11T16:33:08.526Z" }
 ---
 
 # 请求生命周期与中间件管线
@@ -55,6 +55,19 @@ gin.Recovery
   -> /uploads 静态路由
   -> errors.Handler（最后注册）
 ```
+
+在中间件之前，`NewApp` 还做两件装配：构造 `authlog.Recorder`（stderr 结构化日志 + `authevents` 落库）供鉴权链与限流器使用；并按 `[server]` 配置装配客户端 IP 识别（详见下文）。
+
+### 客户端 IP 识别（引擎级装配）
+
+全仓库的客户端 IP 统一来自 gin 的 `c.ClientIP()`，不再有各中间件/`handler` 手写的 X-Real-IP/XFF 解析。信任策略由 `server/app.go` 按 `[server]` 配置装配到引擎上：
+
+- `trust_proxy_headers`：缺省沿用历史行为（生产信任、开发不信任）；关闭时 `ForwardedByClientIP=false`，`c.ClientIP()` 一律返回 RemoteAddr；
+- `trusted_proxies`：配置后经 `SetTrustedProxies` 校验请求来源，非受信来源直连伪造的代理标头被整体忽略（缺省不配 = 信任全部，与旧行为一致）；
+- `proxy_ip_headers`：写入引擎的 `RemoteIPHeaders`，缺省 `CF-Connecting-IP,X-Real-IP,X-Forwarded-For`（ESA/CF 边缘覆盖写入的 CF 头优先）；
+- `proxy_trusted_platform`：设置 gin `TrustedPlatform`（单一无条件最高优先标头，非空即信，默认不启用）。
+
+依赖客户端 IP 的消费方包括：限流键（`spec.Name + IPKey(c.ClientIP())`）、请求日志、SSE 每 IP 连接上限、观看冷却、审计与认证事件记录。
 
 ### Recovery、压缩与响应头
 
@@ -90,7 +103,7 @@ gin.Recovery
 
 清洗器会剥除不允许的 HTML 标签而不是转义，保留文本内容。这是相对旧 `xss` 库的有意偏离。
 
-`SanitizeHeaders` 只清洗 `Referer` 头。它刻意不碰 `X-Forwarded-For` 与 `X-Real-IP`，因为限流键依赖它们。
+`SanitizeHeaders` 只清洗 `Referer` 头。它刻意不碰 `X-Forwarded-For` 与 `X-Real-IP`，因为引擎级 `c.ClientIP()` 配置（标头清单与受信代理校验）要原样读取它们。
 
 ### CSRF
 
@@ -107,7 +120,7 @@ gin.Recovery
 
 `APITracker` 统计路径以 `/api/` 开头的请求，键为 `METHOD 路由模板` 与 UTC 日期。它缓冲 50 条或 60 秒后把计数 upsert 到 `apiusages`。单次刷新失败静默。
 
-`RequestLogger` 只记录非 GET 请求、状态至少 400 的响应或超过一秒的请求。`SlowLogger` 额外标记开发环境慢请求，并记录生产环境超过三秒的请求。日志经 slog 写入 stdout；邮件日志写入 stderr。
+`RequestLogger` 只记录非 GET 请求、状态至少 400 的响应或超过一秒的请求（其签名已简化为 `RequestLogger(log)`，不再接收 trustXFF 参数，IP 取 `c.ClientIP()`）。`SlowLogger` 额外标记开发环境慢请求，并记录生产环境超过三秒的请求。日志经 slog 写入 stdout；邮件日志写入 stderr。
 
 ## 限流
 
@@ -122,10 +135,12 @@ gin.Recovery
 
 两个后果容易被忽略：
 
-1. 每次 `RateLimit` 调用都会创建带独立内存计数的新限流器。但 `RegisterRoutes` 用 `spec.Name|window|max` 做键缓存限流器，因此同一 spec 的所有路由共享同一计数器与预算。例如 2FA spec 挂在七个路由上，它们共用同一个 5 次/15 分钟桶。
+1. 每次 `RateLimit` 调用都会创建带独立内存计数的新限流器。但 `RegisterRoutes` 用 `spec.Name|window|max` 做键缓存限流器，因此同一 spec 的所有路由共享同一计数器与预算。例如 2FA spec 挂在六个路由上（`/auth/login-2fa`、`/2fa/verify-enable`、`/2fa/disable`、`/2fa/verify`、`/auth/verify-device`、`/auth/confirm-device-login`），它们共用同一个 5 次/15 分钟桶；`/auth/refresh` 不在此列，它使用独立的 `RefreshSpec`（60 次/15 分钟）。
 2. 动态路由如 `/episodes/:id/view` 无法用挂载匹配表达，因此其配置的限流器永远不会触发。
 
 限流器使用 `ulule/limiter` 与内存存储，因此计数是固定窗口且进程本地的。响应包含 draft-6 `RateLimit-*` 头，429 时包含 `Retry-After`。`requestEmailChange` 限流器同时按来源 IP 与目标邮箱小写值限流，避免用不同邮箱刷验证邮件。
+
+429 命中时，中间件还会通过 `RateLimitOpts.Log` 输出一条认证诊断事件：`event=ratelimited`，带限流器名（spec 名写入 reason）、路径、IP 与 retry_after 秒数——在此之前日志里只有一个 429 状态码，无法区分是登录、refresh 还是全局限流命中。
 
 ## 单前缀路由
 

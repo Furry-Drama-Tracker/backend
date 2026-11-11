@@ -3,6 +3,9 @@ type: api-domain
 title: 通知与实时推送
 description: 通知文档与端点、SSE 流的票据认证与连接上限、邮件通知偏好，以及已存储但不会发送的 Web Push 订阅。
 tags: [api, notifications, sse, push, email]
+verified:
+  - by: openwiki/0.7.2
+    at: 2026-11-11T16:33:08.526Z
 sources:
   - id: openwiki-source-314bd77139a7d3c62ed804bf
     resource: repo://internal/handler/auth.go
@@ -20,10 +23,7 @@ sources:
     resource: repo://internal/repository/push_subscription.go
   - id: openwiki-source-f7acf9d278285ec2e6b81113
     resource: repo://internal/service/auth_service.go
-generated: { by: "zcode", at: "2026-11-04T15:34:40.691Z" }
-verified:
-  - by: openwiki/0.7.2
-    at: 2026-11-04T15:34:40.691Z
+generated: { by: "zcode", at: "2026-11-11T16:33:08.526Z" }
 ---
 
 # 通知与实时推送
@@ -80,6 +80,8 @@ verified:
 - 全局最多 500 条并发连接；
 - 每个用户最多 5 条连接，第 6 条会取消最旧的连接。
 
+每 IP 上限中的客户端 IP 统一取自 gin 的 `c.ClientIP()`：SSE 流不再维护手写的 `clientIP` 方法，标头信任策略由 `[server]` 配置在引擎级装配（见请求生命周期页面）。上限数值本身不变。
+
 handler 写入 SSE 头（`text/event-stream`、`no-cache`、`keep-alive`、`X-Accel-Buffering: no`），清除服务端 WriteTimeout 对该连接的写截止时间，发出 `connected` 事件，然后循环等待五种条件：上下文取消、客户端关闭、30 分钟连接超时、30 秒心跳（`:heartbeat`）、以及每 10 秒一次的通知轮询。超限时发送 `error` 事件并结束流；每 IP 检查发生在 `connected` 之前，全局上限检查发生在它之后。
 
 通知轮询以数据库为唯一事实来源：每 10 秒读取当前用户最近 50 条通知与未读数，把 `createdAt` 晚于连接游标的条目作为 `event: notification` 事件推送，负载包含 `notification` 与 `unreadCount`。因此多实例与重启后仍能工作，代价是每连接每 10 秒一次数据库查询。连接登记本身仍是进程本地的，上限与驱逐不跨实例生效。
@@ -113,3 +115,4 @@ handler 写入 SSE 头（`text/event-stream`、`no-cache`、`keep-alive`、`X-Ac
 - [会话与令牌生命周期](../auth/session-and-token-lifecycle.md)——令牌 purpose 与签名。
 - [邮件发送](../integrations/email-delivery.md)——实际邮件传输与偏好检查。
 - [外部服务](../integrations/external-services.md)——VAPID 配置。
+- [请求生命周期与中间件管线](../architecture/request-lifecycle.md)——客户端 IP 的统一解析策略。

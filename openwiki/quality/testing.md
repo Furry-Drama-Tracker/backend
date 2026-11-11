@@ -1,8 +1,11 @@
 ---
 type: quality
 title: 测试策略
-description: Go 单元与集成测试套件、MongoDB 依赖、两种应用夹具模式、带 CSRF 与 cookie 的 HTTP 辅助工具、覆盖范围以及仍存在的缺口。
+description: Go 单元与集成测试套件、MongoDB 依赖、两种应用夹具模式、带 CSRF 与 cookie 的 HTTP 辅助工具、认证排障链路的新覆盖，以及仍存在的缺口。
 tags: [testing, go-test, integration, mongodb, regression]
+verified:
+  - by: openwiki/0.7.2
+    at: 2026-11-11T16:33:08.526Z
 sources:
   - id: openwiki-source-193053215eb2d471ac4f675e
     resource: repo://docs/contributing.md
@@ -22,15 +25,12 @@ sources:
     resource: repo://internal/server/series_test.go
   - id: openwiki-source-012f2c78e3b1446dfc35803f
     resource: repo://Makefile
-generated: { by: "zcode", at: "2026-11-04T15:34:40.691Z" }
-verified:
-  - by: openwiki/0.7.2
-    at: 2026-11-04T15:34:40.691Z
+generated: { by: "zcode", at: "2026-11-11T16:33:08.526Z" }
 ---
 
 # 测试策略
 
-仓库没有专门测试运行器或框架，只使用标准 `go test`。34 个 `_test.go` 文件中共有约 177 个测试函数。大多数行为要么通过小型 Gin 路由的聚焦单元测试验证，要么通过基于真实 MongoDB 装配真实应用的 HTTP 集成测试验证。
+仓库没有专门测试运行器或框架，只使用标准 `go test`。37 个 `_test.go` 文件中共有约 202 个测试函数。大多数行为要么通过小型 Gin 路由的聚焦单元测试验证，要么通过基于真实 MongoDB 装配真实应用的 HTTP 集成测试验证。
 
 ## 前置条件与命令
 
@@ -42,7 +42,7 @@ go vet ./...
 go build ./...
 ```
 
-没有 CI 流水线。`go test ./...` 是记录在案的行为回归闸门，贡献指南要求在影响 HTTP 行为的改动后运行它，外加 `go vet` 与构建。
+CI 只构建不测试：`.github/workflows/release.yml` 在每次推送时做 8 目标交叉构建并滚动发布（见部署页面），不运行测试套件。因此 `go test ./...` 仍是记录在案的本地行为回归闸门，贡献指南要求在影响 HTTP 行为的改动后运行它，外加 `go vet` 与构建。
 
 需要 MongoDB 的测试连接 `mongodb://127.0.0.1:27017`；不可用时失败而不是跳过。不访问数据库的单元测试可以单独运行，但通常以 `./...` 调用，因此本地 `mongod` 是整套测试的实际基线。
 
@@ -50,8 +50,8 @@ go build ./...
 
 以下包测试纯逻辑或可注入逻辑，不需要 MongoDB：
 
-- `internal/middleware`：安全头、CORS、请求体解析、CSRF、限流、API 统计、超时与日志辅助，使用 `httptest`。
-- `internal/auth`：bcrypt 哈希与比较、字段加密往返与兼容性、TOTP 向量。
+- `internal/middleware`：安全头、CORS、请求体解析、CSRF、限流（含代理标头信任策略与受信代理来源用例 `TestRateLimitClientIPHeaders`/`TestRateLimitClientIPTrustedProxies`）、API 统计、超时与日志辅助，使用 `httptest`。
+- `internal/auth`：bcrypt 哈希与比较、字段加密往返与兼容性、TOTP 向量与一次性时间步（`VerifyTOTPStep`）、备份码哈希格式与旧 AES/明文数据就地升级（`backupcode_test.go`）。
 - `internal/code`：验证码 TTL、尝试次数与清理。
 - `internal/cron`：调度对齐辅助函数。
 - `internal/email`：目标限流、未配置 SMTP 行为与注入发送点。
@@ -59,10 +59,12 @@ go build ./...
 - `internal/security`：XSS 清洗与密码校验。
 - `internal/ratelimit`：spec 与 IP key 行为。
 - `internal/router`：锁定 `Mount` 只在 `/api` 下注册，`/api/v1` 返回 404 且不带 `Deprecation` 头。
-- `internal/upload`：图片校验、魔数、SVG 规则与路径安全。
+- `internal/upload`：图片校验、魔数、SVG 规则与路径安全，以及 Unix 落盘权限回归（`perm_unix_test.go`：落盘后执行位被剥离、`O_EXCL` 不覆盖已有文件）。
 - `internal/altcha` 行为通过 service 测试覆盖：用官方库创建、求解并验证挑战。
 
-这些测试快速且确定；外部网络调用由注入函数替换。
+这些测试快速且确定；外部网络调用由注入函数替换（ipregion 另有 `NewDisabled()` 不外呼的用例）。
+
+`internal/repository/user_test.go` 是仓储级集成测试，由环境变量 `FDT_TEST_MONGO_URI` 门控——未设置时跳过（不像服务端集成测试那样失败）；覆盖 `createdAt` 零值兜底与显式值保留两条路径，并断言落库原始文档。
 
 ## 数据库测试
 
@@ -73,7 +75,7 @@ go build ./...
 - 剧集、收藏夹、追番/收藏、管理及对应路由组；
 - 夹具在测试前后删除专用数据库，清空全局剧集缓存，设置临时上传目录，并只安装该领域需要的中间件（recovery、请求体解析、清洗、CSRF）。
 
-`internal/server` 包含端到端测试，用完整生产装配调用 `server.NewApp`，因此真实中间件链与单前缀 `/api` 路由表都会被覆盖。覆盖包括注册/登录/me/refresh、错误密码、2FA 登录、refresh 重用、通知与 SSE、历史与评分、举报/审核/统计、CMS 域、系列、RSS、翻译校验与备份导出/导入。
+`internal/server` 包含端到端测试，用完整生产装配调用 `server.NewApp`，因此真实中间件链与单前缀 `/api` 路由表都会被覆盖。覆盖包括注册/登录/me/refresh、错误密码、2FA 登录、refresh 重用、通知与 SSE、历史与评分、举报/审核/统计、CMS 域、系列、RSS、翻译校验与备份导出/导入。认证排障链路新增的用例：`TestTwoFactorEnableTwiceRejected`（已启用时 enable 返回 400）、TOTP 同一时间步重放被拒、备份码消费后失效、refresh 连续 8 次轮换不触发 429（`RefreshSpec` 独立配额）、`TestSessionRevokeReasonAndEvent`（吊销原因与 session_revoked 事件）、`TestRefreshInvalidEventRecorded`（refresh_invalid 事件）。
 
 ## 夹具模式
 

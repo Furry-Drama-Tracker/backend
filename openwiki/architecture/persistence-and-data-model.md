@@ -1,8 +1,11 @@
 ---
 type: architecture
 title: 持久化与数据模型
-description: neo-server 如何在不使用 ODM 的情况下使用官方 MongoDB 驱动、集合与 BSON 模型如何组织、ID 与错误约定，以及启动时接线的索引与迁移如何容错执行。
+description: neo-server 如何在不使用 ODM 的情况下使用官方 MongoDB 驱动、集合与 BSON 模型如何组织（含会话吊销原因与认证事件）、ID 与错误约定，以及启动时接线的索引与迁移如何容错执行。
 tags: [mongodb, persistence, repositories, models, indexes, migrations]
+verified:
+  - by: openwiki/0.7.2
+    at: 2026-11-11T16:33:08.526Z
 sources:
   - id: openwiki-source-f89e324c07065d291ea97e16
     resource: repo://internal/handler/episodes.go
@@ -24,10 +27,7 @@ sources:
     resource: repo://internal/repository/repos.go
   - id: openwiki-source-f9cd993b1da0967b3ad454b7
     resource: repo://internal/repository/user.go
-generated: { by: "zcode", at: "2026-11-04T15:34:40.691Z" }
-verified:
-  - by: openwiki/0.7.2
-    at: 2026-11-04T15:34:40.691Z
+generated: { by: "zcode", at: "2026-11-11T16:33:08.526Z" }
 ---
 
 # 持久化与数据模型
@@ -56,6 +56,7 @@ neo-server 通过官方 Go 驱动（`go.mongodb.org/mongo-driver` v1）访问 Mo
 | `UsedTokens` | `usedtokens` |
 | `Notifications` | `notifications` |
 | `AuditLogs` | `auditlogs` |
+| `AuthEvents` | `authevents` |
 | `ApiUsage` | `apiusages` |
 | `SiteContents` | `sitecontents` |
 | `Settings` | `settings` |
@@ -90,6 +91,12 @@ neo-server 通过官方 Go 驱动（`go.mongodb.org/mongo-driver` v1）访问 Mo
 - `singleepisodes` 的 `episodeLabel` 是显示用集数序号（自由字符串）：存量文档缺省为空串，读取时由响应层经 `episodeRefText` 回退为「第N集」，因此该字段无需数据迁移。
 - 部分文档携带只读不写的遗留字段，例如 `themeId` 与 `themeApplyIcons`/`themeApplyWallpaper`，读取时会迁移到双槽主题模型。
 
+认证链路新增三个存储契约：
+
+- `usersessions.revokeReason`（`model.Revoke*` 常量）是会话被置为 inactive 的原因墓碑：`logout`（登出）、`rotated`（refresh 轮换，正常）、`password_changed`、`password_reset`、`email_changed`、`refresh_reuse`（重用检测命中）、`user_revoked`/`user_revoked_all`（用户自助下线）、`admin_revoked`（管理员强制下线）与 `expired`（30 天无活跃被 cron 清理）。它只存在于库与日志，不进 API 响应。
+- `users.twoFactorLastStep` 记录最近被接受的 TOTP 时间步（Unix 秒 / 30），`UserRepo.MarkTOTPStepUsed` 以原子条件更新实现一次性消费，用于拒绝同一时间步重放。
+- `UserRepo.Create` 在 `createdAt` 为零值时补当前时间（UTC、毫秒对齐），显式赋值不受影响；这修复了 `/api/auth/register` 把 `ISODate("0001-01-01")` 落库的问题。
+
 模型文件按领域分组（`model.go` 放用户、会话、通知、审计、API 统计；另有 `episode.go`、`series.go`、`folder.go`、`theme.go` 等）。没有从标签推导 schema 的迁移框架。
 
 ## ID 规范化
@@ -118,6 +125,7 @@ repository 使用共享的 10 秒 `contextTimeout`，每个操作创建子上下
 - `ratings`：唯一 `userId+episodeId`、`episodeId`；
 - `follows` 与 `favorites`：唯一 `userId+episodeId`；
 - `auditlogs`：`createdAt`、`adminId`、`userId`；
+- `authevents`：`userId+at`、`email+at`、`at` TTL（30 天）——认证诊断事件的保留期由 TTL 索引决定；
 - `apiusages`：唯一 `endpoint+date`；
 - `sitecontents`：唯一 `key`；
 - `folders`：`userId+type`；`savedfolders`：`userId`；
@@ -143,7 +151,7 @@ repository 使用共享的 10 秒 `contextTimeout`，每个操作创建子上下
 ## 运维影响
 
 - 索引创建与迁移在启动时自动执行，但失败只告警；首次部署或历史数据重复时应检查启动日志并人工修复后重启。
-- 模型描述的历史 TTL 与通知 TTL 依赖索引；索引创建失败时文档不会自动删除。
+- 模型描述的历史 TTL 与通知 TTL 依赖索引；索引创建失败时文档不会自动删除。`authevents` 的 30 天 TTL 同理——只增不改的认证事件靠该索引自动过期，无手动清理路径。
 - 回收站搬移与备份导入是仅有的多集合事务路径；大多数 repository 操作是单文档的，依靠唯一索引或原子 `findOneAndUpdate` 保证正确性。
 - 账号注销的级联清理由 `service.PurgeUserData` 统一实现，cron 与管理员删号共用；清理是 best-effort，单个集合失败不阻断其余。
 

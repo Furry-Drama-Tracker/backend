@@ -1,8 +1,11 @@
 ---
 type: quality
 title: 约定与有意保留的怪癖
-description: Go 后端编码规则、新增端点/集合/定时任务/配置项的配方，以及不得擅自修复的既有兼容性怪癖。
+description: Go 后端编码规则、新增端点/集合/定时任务/配置项的配方、不得擅自修复的既有兼容性怪癖，以及近期 ADR（ADR-013 至 ADR-017）的取舍。
 tags: [conventions, gotchas, compatibility, code-style]
+verified:
+  - by: openwiki/0.7.2
+    at: 2026-11-11T16:33:08.526Z
 sources:
   - id: openwiki-source-193053215eb2d471ac4f675e
     resource: repo://docs/contributing.md
@@ -26,15 +29,12 @@ sources:
     resource: repo://internal/security/xss.go
   - id: openwiki-source-ebbcecfb3e8c07ba5e940ccd
     resource: repo://internal/server/register_routes.go
-generated: { by: "zcode", at: "2026-11-04T15:34:40.691Z" }
-verified:
-  - by: openwiki/0.7.2
-    at: 2026-11-04T15:34:40.691Z
+generated: { by: "zcode", at: "2026-11-11T16:33:08.526Z" }
 ---
 
 # 约定与有意保留的怪癖
 
-本项目刻意保留旧实现的行为。若干看起来像缺陷的地方其实是兼容契约。经验法则是：任何会改变 HTTP 响应、状态码、message key、限流 key 或存储格式的改动都是行为变更，需要明确决策。固定文案同样属于契约；最近新增的例子是集数称呼——站内通知、Push、邮件、RSS 与更新日历统一经 `episodeRefText`（`internal/handler/episodes.go`）输出，避免各处各自拼「第N集」。
+本项目刻意保留旧实现的行为。若干看起来像缺陷的地方其实是兼容契约。经验法则是：任何会改变 HTTP 响应、状态码、message key、限流 key 或存储格式的改动都是行为变更，需要明确决策。固定文案同样属于契约；最近新增的例子是集数称呼——站内通知、Push、邮件、RSS 与更新日历统一经 `episodeRefText`（`internal/handler/episodes.go`）输出，避免各处各自拼「第N集」。近期决策见 `docs/decisions.md`：ADR-013（客户端 IP 统一走 gin `c.ClientIP()`，代理标头信任策略可配置）、ADR-014（2FA 加固：enable 不降级 / 备份码哈希 / TOTP 一次性消费）、ADR-015（refresh 独立限流 + 并发宽限放宽到 2 分钟）、ADR-016（认证排障：会话墓碑 + authevents + cmd/diag）、ADR-017（IP 地域解析默认禁用 + 本地实现替换缝）。模块路径已迁移至 `github.com/Furry-Drama-Tracker/backend`，全部导入路径与文档同步更新。
 
 ## 编码规则
 
@@ -97,7 +97,8 @@ verified:
 | 怪癖 | 原因 | 后果 |
 |---|---|---|
 | 端点限流只匹配 `/api/<mount>` 与子路径 | 单前缀路由（v1 镜像已移除） | 其他前缀（包括 `/api/v1`）不会触发端点限流 |
-| 共享 spec 的路由共用限流器 | `RegisterRoutes` 按 spec 名/窗口/上限缓存 | 2FA 预算在七个路由间共享，而不是各自独立 |
+| 共享 spec 的路由共用限流器 | `RegisterRoutes` 按 spec 名/窗口/上限缓存 | 2FA 预算在六个路由间共享（不再含 `/auth/refresh`）；refresh 用独立 `RefreshSpec`（60/15min），见 ADR-015 |
+| 客户端 IP 解析统一走 gin `c.ClientIP()` | 删除 4 处手写 X-Real-IP/XFF 解析（ADR-013） | 标头信任策略由 `[server]` 配置在引擎级装配；改限流/审计 key 组成会重置既有计数 |
 | `ulule/limiter` 的固定窗口计数 | 替换旧滑动窗口的库选型 | `RateLimit-*` 与 `Retry-After` 是近似值；窗口边界的突发行为不同 |
 | `requestEmailChange` 的键是 IP + 小写 `newEmail` | 防止用不同邮箱刷验证邮件 | 修改 key 组成会重置既有计数 |
 | XSS 清洗剥除不允许标签而不是转义 | 用 `bluemonday` 替换旧 `xss` 库 | 用户 HTML 会丢失标签，而不是显示转义标记 |

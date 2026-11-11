@@ -1,8 +1,11 @@
 ---
 type: api-domain
 title: CMS 与站点内容 API
-description: 公告、壁纸、友情链接、主题、SVG 图标、站点内容键、创作者主页、动态流与反馈的建模、权限门控，以及与邮件和通知的联动。
+description: 公告、壁纸、友情链接、主题、SVG 图标、站点内容键、创作者主页、动态流与反馈的建模、权限门控，与邮件和通知的联动，以及图标上传端点的停用状态。
 tags: [api, cms, themes, icons, announcements, creator, feedback]
+verified:
+  - by: openwiki/0.7.2
+    at: 2026-11-11T16:33:08.526Z
 sources:
   - id: openwiki-source-b10e065a15408ca747b6184f
     resource: repo://internal/email/client.go
@@ -30,10 +33,7 @@ sources:
     resource: repo://internal/handler/wallpapers.go
   - id: openwiki-source-0b6d7f0465da2820a1a264ef
     resource: repo://internal/model/theme.go
-generated: { by: "zcode", at: "2026-11-04T15:34:40.691Z" }
-verified:
-  - by: openwiki/0.7.2
-    at: 2026-11-04T15:34:40.691Z
+generated: { by: "zcode", at: "2026-11-11T16:33:08.526Z" }
 ---
 
 # CMS 与站点内容 API
@@ -95,11 +95,15 @@ verified:
 
 主题资源必须是站内 `/uploads/` 路径或 `http(s)` URL，图标键必须匹配组件键正则，最多 64 个图标映射，`misc.logo` 不允许被主题覆盖。壁纸与图标上传上限为 8 MB。
 
+**图标上传已停用（主题只保留壁纸）：** `POST /api/themes/upload-icon` 的路由注册被注释掉，端点对客户端表现为不存在，上传目录不再被写入。壁纸上传（`POST /api/themes/upload-wallpaper`）、主题选择（`GET /my/selection`、`PUT /selection`）与既有图标主题的读取（主题 JSON 的 `icons` 字段、`GET /themes/list`）全部保持原样，线上已有图标主题不受影响。恢复时取消 `Themes.Register` 中对应那一行注释即可。
+
 ## SVG 图标
 
 `/icons` 管理存储在可配置 `IconsDir`（默认 `./uploads/icons`）下的 SVG 文件。公开 `GET /list` 返回启用图标以及从组件键到 URL 的扁平 `mappings` 对象，供前端图标引擎消费。
 
-上传仅超管可用，接受 `files`（多文件）或 `file`（单文件），单次最多 50 个文件，分类默认 `general`。每个文件走 SVG 专用保存路径，单文件失败会进入 `failed` 数组而不使整批失败。更新会校验名称长度、分类长度、描述长度、映射与启用状态。删除会移除文档及其文件。
+**图标包上传已停用：** `POST /api/icons/upload` 的路由注册被注释掉（与主题图标上传同一次决策——主题只保留壁纸），端点对客户端表现为不存在，`IconsDir` 不再被新上传写入。读取链路（`GET /icons/list`、`GET /icons/all`）与管理端点（`PUT /:id`、`DELETE /:id`，仍要求超管与 `RequireEmailChanged`）照常挂载，线上既有图标文件与图标映射不受影响。恢复时取消 `Icons.Register` 中对应那一行注释即可。
+
+上传 handler 本身保留（恢复即用）：仅超管可用，接受 `files`（多文件）或 `file`（单文件），单次最多 50 个文件，分类默认 `general`。每个文件走 SVG 专用保存路径，单文件失败会进入 `failed` 数组而不使整批失败。更新会校验名称长度、分类长度、描述长度、映射与启用状态。删除会移除文档及其文件。
 
 ## 创作者主页与创作中心
 
@@ -135,11 +139,11 @@ verified:
 
 - 对于 Gin 默认尾斜杠重定向会破坏契约的公开端点，会有意同时注册 `""` 与 `"/"`。
 - 上传 handler 返回本地化错误消息，并依赖 `internal/upload` 做扩展名、MIME、魔数与大小校验。
-- 超管写端点（站点内容、公告、壁纸、图标、主题、友链）普遍附加 `RequireEmailChanged` 与上传/写入限流；个人壁纸与主题文件删除只允许清理带对应前缀（`wallpaper-`、`theme-wallpaper-`）且未被引用的文件，避免通过 URL 删除任意上传文件。
+- 超管写端点（站点内容、公告、壁纸、友链、主题壁纸上传）普遍附加 `RequireEmailChanged` 与上传/写入限流；图标包与主题图标两类上传端点当前已停用（路由注册被注释）。个人壁纸与主题文件删除只允许清理带对应前缀（`wallpaper-`、`theme-wallpaper-`）且未被引用的文件，避免通过 URL 删除任意上传文件。
 - 多个 handler 带有 fire-and-forget 的通知与邮件副作用；这些失败不会回滚主写入。
 
 ## 相关阅读
 
-- [上传、RSS、翻译、备份与分页](utilities-and-uploads.md)——共享上传实现。
+- [上传、RSS、翻译、备份与分页](utilities-and-uploads.md)——共享上传实现与落盘安全约束。
 - [邮件发送](../integrations/email-delivery.md)——模板辅助函数与按收件人限流。
 - [外部服务](../integrations/external-services.md)——友链申请使用的 Altcha 校验。

@@ -1,9 +1,14 @@
 ---
 type: operations
 title: 部署与运行时
-description: 构建目标、准确启动顺序、TCP 与 Unix socket 监听、服务器超时、优雅关停、目录初始化、systemd unit 与 ini 模板，以及多实例后果。
-tags: [deployment, runtime, systemd, startup, shutdown]
+description: 构建目标与 CI 滚动发布、认证排障命令 make diag、准确启动顺序、TCP 与 Unix socket 监听、服务器超时、优雅关停、目录初始化、systemd unit 与 ini 模板，以及多实例后果。
+tags: [deployment, runtime, systemd, startup, shutdown, ci]
+verified:
+  - by: openwiki/0.7.2
+    at: 2026-11-11T16:33:08.526Z
 sources:
+  - id: openwiki-source-4d1d392666be6dfdd7a91a2e
+    resource: repo://.github/workflows/release.yml
   - id: openwiki-source-0f6ed11169bd8e6b34b44280
     resource: repo://cmd/server/main.go
   - id: openwiki-source-6e11d7a3d9cd222e5ed01aed
@@ -16,15 +21,14 @@ sources:
     resource: repo://internal/upload/svg.go
   - id: openwiki-source-012f2c78e3b1446dfc35803f
     resource: repo://Makefile
-generated: { by: "opencode", at: "2026-11-03T16:50:44.301Z" }
-verified:
-  - by: openwiki/0.7.2
-    at: 2026-11-04T15:34:40.691Z
+  - id: openwiki-source-1ffe96277832af9ddb17aa8f
+    resource: repo://winres/winres.json
+generated: { by: "zcode", at: "2026-11-11T16:33:08.526Z" }
 ---
 
 # 部署与运行时
 
-后端是一个 Go 二进制，加上配置和两个可写目录。仓库中没有容器定义或构建流水线；部署就是构建、配置文件和进程守护。schema 迁移与索引创建内置在启动流程中。
+后端是一个 Go 二进制，加上配置和两个可写目录。仓库有一个构建与滚动发布的 CI 流水线（不跑测试）；部署就是构建、配置文件和进程守护。schema 迁移与索引创建内置在启动流程中。模块路径为 `github.com/Furry-Drama-Tracker/backend`。
 
 ## 构建
 
@@ -40,16 +44,27 @@ Makefile 提供标准目标：
 | `make vet` | `go vet ./...` |
 | `make fmt` | `gofmt -l -w .` |
 | `make docs` | 重新生成 Swagger 到 `docs/`（需要 `swag`） |
+| `make diag` | 认证排障（只读）：`go run ./cmd/diag $(ARGS)`，如 `make diag ARGS="-user=<邮箱或ObjectID> -days=7"` 或 `make diag ARGS="-recent -hours=6"` |
 | `make clean` | 删除二进制 |
 
-`GOOS`/`GOARCH` 通过环境变量传给 `go`，因此 `make release GOOS=linux GOARCH=arm64` 可直接交叉编译，输出名按目标平台决定是否带 `.exe`。`Makefile.win` 为 NMAKE 镜像这些目标（含 `release` 与 `seed`）。模块要求 Go 1.26 与可访问的 MongoDB。
+`GOOS`/`GOARCH` 通过环境变量传给 `go`，因此 `make release GOOS=linux GOARCH=arm64` 可直接交叉编译，输出名按目标平台决定是否带 `.exe`。`Makefile.win` 为 NMAKE 镜像这些目标（含 `release`、`seed` 与 `diag`）。模块要求 Go 1.26 与可访问的 MongoDB。
+
+Windows 可执行文件内嵌应用图标与版本元数据：`FDT-Icon.ico` 经 go-winres 由 `winres/winres.json` 编译为 `cmd/server/rsrc_windows_{amd64,386,arm64}.syso`，任意 Windows 目标的 `go build` 自动链接（非 Windows 目标按文件名后缀忽略）。资源含 RT_GROUP_ICON（应用图标）与 RT_VERSION（双语产品名"兽剧通后端服务"/英文、AGPL-3.0 版权、仓库地址；版本号 0.0.0.0 占位）。更换图标后重跑 `go run github.com/tc-hib/go-winres@latest make --in winres/winres.json --out cmd/server/rsrc --arch amd64,386,arm64`。
+
+## CI 滚动发布
+
+`.github/workflows/release.yml` 是仓库唯一 CI 文件（只有构建与发布，不跑测试）：
+
+- 每次推送触发 8 目标交叉构建：linux/windows/darwin × 386/amd64/arm64（macOS 无 32 位），`CGO_ENABLED=0`，参数与 `make release` 一致（`-trimpath -ldflags "-s -w"`）。
+- `main` 分支推送额外把产物覆盖发布到 tag=`latest` 的滚动 Release：先删后建（`gh release delete latest --cleanup-tag`），含 `checksums.txt`；`concurrency: release, cancel-in-progress` 保证只保留最新一次。
+- CI 干净检出使 Go 自动烙入 `vcs.revision`，无 `+dirty`，产物随代码变化可复现。
 
 ## 启动顺序
 
 `cmd/server/main.go` 按顺序执行：
 
 1. 解析 `--config` 与 `--listen`。
-2. `config.Load`——缺少或过短的 `JWT_SECRET`、过短的 `ENCRYPTION_KEY`，或缺少 `MONGO_URI`，以状态码 1 退出；弱密钥与占位 CORS 源只打印 `[SECURITY WARN]`。
+2. `config.Load`——缺少或过短的 `JWT_SECRET`、过短的 `ENCRYPTION_KEY`，或缺少 `MONGO_URI`，以状态码 1 退出；弱密钥与占位 CORS 源只打印 `[SECURITY WARN]`；随后打印 IP 地域解析开关状态（误开时打 `[SECURITY WARN]` 提示数据出境）。
 3. `repository.Connect`，15 秒上下文——连接或 ping 失败即退出。
 4. 构造 `Repos` 与 JWT 签名器。
 5. 运行 `migrate.Run` 与 `indexes.Ensure`（60 秒上下文）；失败只打印 `[WARN]` 并继续启动。
@@ -120,8 +135,9 @@ Makefile 提供标准目标：
 3. 设置 `[database].uri` 与可选 `name`；
 4. 把 `uploads_dir` 设为持久可写路径；
 5. 如需邮件，配置 `[email]`；
-6. 把 `allow_origins` 设为真实前端源；
-7. 可选地显式设置 `encryption_key` 与 `altcha_hmac_key`。
+6. 把 `allow_origins` 设为真实前端源；按反代拓扑核对 `[server]` 代理标头四键（`trust_proxy_headers`、`proxy_ip_headers`、`trusted_proxies`、`proxy_trusted_platform`，ESA → 本机反代拓扑建议 `trusted_proxies = 127.0.0.1, ::1`）；
+7. 保持 `[security].ip_region_enabled = false`（数据出境合规，ADR-017）；
+8. 可选地显式设置 `encryption_key` 与 `altcha_hmac_key`。
 
 该文件包含密钥，建议 `chmod 600`。
 

@@ -1,8 +1,11 @@
 ---
 type: config
 title: 配置与环境变量
-description: neo-server 如何加载默认值、按 OS 区分的 ini、可选 .env 与真实环境变量，哪些值是密钥，以及 IsDev、启动致命校验与安全告警如何影响运行时行为。
+description: neo-server 如何加载默认值、按 OS 区分的 ini、可选 .env 与真实环境变量，哪些值是密钥，以及 IsDev、代理标头信任策略、IP 地域开关、启动致命校验与安全告警如何影响运行时行为。
 tags: [configuration, environment, ini, secrets, startup]
+verified:
+  - by: openwiki/0.7.2
+    at: 2026-11-11T16:33:08.526Z
 sources:
   - id: openwiki-source-0f6ed11169bd8e6b34b44280
     resource: repo://cmd/server/main.go
@@ -20,10 +23,7 @@ sources:
     resource: repo://internal/server/app.go
   - id: openwiki-source-f7acf9d278285ec2e6b81113
     resource: repo://internal/service/auth_service.go
-generated: { by: "opencode", at: "2026-11-03T16:50:44.301Z" }
-verified:
-  - by: openwiki/0.7.2
-    at: 2026-11-04T15:34:40.691Z
+generated: { by: "zcode", at: "2026-11-11T16:33:08.526Z" }
 ---
 
 # 配置与环境变量
@@ -45,7 +45,7 @@ verified:
 
 `Load(path)` 依次执行：
 
-1. 初始化默认值（监听 `tcp:127.0.0.1:5000`、端口 5000、`NODE_ENV=development`、前端/站点 URL `http://localhost:3000`、上传目录 `./uploads`、图标目录 `./uploads/icons`、CORS 源留空、数据库连接池 10、access TTL 15 分钟、refresh TTL 168 小时、邮件端口 465、登录限制 5 次/30 分钟、CSRF 有效期 24 小时、演示邮箱 `demo@furry09.com`）。
+1. 初始化默认值（监听 `tcp:127.0.0.1:5000`、端口 5000、`NODE_ENV=development`、前端/站点 URL `http://localhost:3000`、上传目录 `./uploads`、图标目录 `./uploads/icons`、CORS 源留空、代理标头清单 `CF-Connecting-IP,X-Real-IP,X-Forwarded-For`、IP 地域解析关闭、数据库连接池 10、access TTL 15 分钟、refresh TTL 168 小时、邮件端口 465、登录限制 5 次/30 分钟、CSRF 有效期 24 小时、演示邮箱 `demo@furry09.com`）。
 2. 从当前目录加载 `.env`。
 3. 解析配置路径：显式路径必须存在且可解析，默认路径缺失时静默跳过。
 4. 如果存在 ini，应用到配置。
@@ -70,18 +70,27 @@ ini 文件分为 `[server]`、`[database]`、`[jwt]`、`[email]`、`[vapid]` 与
 
 | 段 | 键 |
 |---|---|
-| `server` | `listen`、`node_env`、`frontend_url`、`site_url`、`uploads_dir`、`icons_dir`、`allow_origins`、`port` |
+| `server` | `listen`、`node_env`、`frontend_url`、`site_url`、`uploads_dir`、`icons_dir`、`allow_origins`、`port`、`trust_proxy_headers`、`proxy_ip_headers`、`trusted_proxies`、`proxy_trusted_platform` |
 | `database` | `uri`、`name`、`pool_size` |
 | `jwt` | `secret`、`encryption_key`、`altcha_hmac_key`、`access_ttl`、`refresh_ttl`、`dev_api_token`、`demo_emails` |
 | `email` | `host`、`port`、`user`、`pass`、`from_name` |
 | `vapid` | `public_key`、`private_key`、`subject` |
-| `security` | `login_max_attempts`、`login_lock_minutes`、`csrf_max_age_h` |
+| `security` | `login_max_attempts`、`login_lock_minutes`、`csrf_max_age_h`、`ip_region_enabled` |
 
 时长使用 Go 语法（`15m`、`168h`）。非法时长会被忽略，保留之前的值。
 
+`[server]` 的代理标头四键决定客户端 IP 识别策略（限流、审计与登录记录都依赖）：
+
+- `trust_proxy_headers`：是否信任反向代理标头；省略时沿用历史行为——生产（`!IsDev`）信任、开发不信任。
+- `proxy_ip_headers`：按序尝试的标头清单，缺省 `CF-Connecting-IP,X-Real-IP,X-Forwarded-For`（ESA/CF 边缘覆盖写入的 CF 头最优先；X-Real-IP 可能被中间层写成本地/节点 IP，仅作兜底）。
+- `trusted_proxies`：受信代理的 IP/CIDR 清单；不配 = gin 默认信任全部来源（与旧手写解析一致）。配置后（如 ESA → 本机反代拓扑填 `127.0.0.1,::1`），非受信来源直连伪造的代理标头会被整体忽略。
+- `proxy_trusted_platform`：单一无条件最高优先标头（gin TrustedPlatform），非空即信、不校验来源与格式，仅应在前置网关保证覆盖写入时启用；默认不启用。
+
+`[security].ip_region_enabled` 控制 IP → 地域解析（登录/注册/设备确认记录与提醒邮件），缺省 `false`：该能力会外呼第三方 ipapi.co，属数据出境，合规要求下保持关闭（ADR-017），待换成本地离线库后再开启。
+
 ## 环境变量覆盖
 
-`applyEnv` 只识别固定集合：`JWT_SECRET`、`MONGO_URI`、`ENCRYPTION_KEY`、`ALTCHA_HMAC_KEY`、`FRONTEND_URL`、`SITE_URL`、`ICONS_DIR`、`ALLOWED_ORIGINS`、`EMAIL_HOST`、`EMAIL_PORT`、`EMAIL_USER`、`EMAIL_PASS`、`EMAIL_FROM_NAME`、`VAPID_PUBLIC_KEY`、`VAPID_PRIVATE_KEY`、`VAPID_SUBJECT`、`DEMO_EMAILS`、`DEV_API_TOKEN`、`PORT`、`NODE_ENV` 与 `SKIP_RATE_LIMIT`。
+`applyEnv` 只识别固定集合：`JWT_SECRET`、`MONGO_URI`、`ENCRYPTION_KEY`、`ALTCHA_HMAC_KEY`、`FRONTEND_URL`、`SITE_URL`、`ICONS_DIR`、`ALLOWED_ORIGINS`、`EMAIL_HOST`、`EMAIL_PORT`、`EMAIL_USER`、`EMAIL_PASS`、`EMAIL_FROM_NAME`、`VAPID_PUBLIC_KEY`、`VAPID_PRIVATE_KEY`、`VAPID_SUBJECT`、`DEMO_EMAILS`、`DEV_API_TOKEN`、`PORT`、`NODE_ENV`、`SKIP_RATE_LIMIT`、`TRUST_PROXY_HEADERS`、`PROXY_IP_HEADERS`、`TRUSTED_PROXIES`、`PROXY_TRUSTED_PLATFORM` 与 `IP_REGION_ENABLED`。
 
 行为细节：
 
@@ -98,7 +107,7 @@ ini 文件分为 `[server]`、`[database]`、`[jwt]`、`[email]`、`[vapid]` 与
 - Gin debug 还是 release 模式；
 - 鉴权 cookie 是否 secure；
 - 是否挂载 Swagger UI 到 `/api/docs`；
-- 限流与请求日志是否在生产环境信任 `X-Forwarded-For`；
+- 代理标头信任开关的**缺省值**（生产信任、开发不信任；`trust_proxy_headers`/`TRUST_PROXY_HEADERS` 显式设置时覆盖，实际的标头解析统一走 gin `c.ClientIP()`，见下文代理标头四键）；
 - 5xx 响应是否暴露内部消息与堆栈；
 - 是否启用演示邮箱跳过验证。
 
@@ -109,12 +118,14 @@ ini 文件分为 `[server]`、`[database]`、`[jwt]`、`[email]`、`[vapid]` 与
 - 缺少 `JWT_SECRET`；
 - `JWT_SECRET` 短于 32 字符（`MinSecretLen`）；
 - 设置了 `ENCRYPTION_KEY` 但短于 32 字符；
-- 缺少 `MONGO_URI`。
+- 缺少 `MONGO_URI`；
+- `trusted_proxies` 中存在既不是合法 IP 也不是 CIDR 段的项——这是启动致命校验，避免到装配阶段才发现（`SetTrustedProxies` 失败会静默退回信任全部来源的错误状态）。
 
 其余都是告警而非致命，便于已有服务拉取新代码后平滑升级：
 
 - `JWT_SECRET` 是示例或历史弱密钥（`change-me`、含 `example`、`secret`、`jwt-secret`、`changeme`、`password`、`furry-drama-tracker-secret-key-2024` 等）时，`Cfg.JWT.WeakSecret` 置位，`main` 打印 `[SECURITY WARN]` 并提示轮换前先设置 `ENCRYPTION_KEY=旧密钥` 以兼容既有 2FA/邮件加密数据。
 - 生产环境下 `allow_origins` 为空，或仍含 `localhost`/`127.0.0.1`/`example.com` 时，`Cfg.Server.InsecureOrigins` 置位，`main` 打印 `[SECURITY WARN]`。
+- IP 地域解析开关会在启动时打印状态：误开（`ip_region_enabled=true`）时打 `[SECURITY WARN]` 提示认证流程会向 ipapi.co 发送客户端 IP（数据出境）；关闭时打印提示"LastLoginRegion 记为 未知，待本地离线库就绪后再开启"。
 - 迁移与索引创建失败只打印 `[WARN]` 并继续启动，首次部署或数据重复时应尽快人工处理后重启。
 - SMTP、VAPID 或上传目录未配置不会阻止进程启动，相关功能在运行时降级。
 

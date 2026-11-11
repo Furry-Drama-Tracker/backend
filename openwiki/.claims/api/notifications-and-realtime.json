@@ -1,17 +1,17 @@
 {
   "schemaVersion": 1,
-  "pageVersion": "sha256:900e337fc37e7a32aa4a042cc6392dbbb283c9b58e74c0dd19c904d381393d3a",
+  "pageVersion": "sha256:928cf0e19bbdb2cc046def511b7d131562e13639585eac6416cadac33b1d2ee6",
   "claims": [
     {
       "id": "claim_36fbd8cc553944c6b27fbd9bea38abbd",
       "statement": "Notification documents in the notifications collection carry userId, optional episode references, type, link, message, metadata, isRead, and creation time, and responses render episodeId as hex or null and empty metadata as an empty object.",
       "evidence": [
         {
-          "resource": "repo://internal/handler/notifications.go#L611-L630",
+          "resource": "repo://internal/handler/notifications.go#L590-L609",
           "version": "repo-lines-v1:sha256:c6decb97cde4312b9a3e279a7ea25c32c13ae43cde6634a736e86527f5e03ea3:eyJzZWxlY3RlZExpbmVDb3VudCI6MjAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImM3N2ZhMjEyZTc1NTcxOTMzNjc0NzVhYjZhOWU1YzNhZDU4YTk1MThiOTIwZDZiOTI5YTdiYjcxOWNlMmYyNjUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImU0ZjM5NGUzYWFmYzM1NDQwNzliZTQzNmZkMzE0YTM5ZWY4NWQwMmM2ZGVlNmI2ZWRlMGZhMWExMWZmOGZjYTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
         },
         {
-          "resource": "repo://internal/model/model.go#L134-L147",
+          "resource": "repo://internal/model/model.go#L138-L151",
           "version": "repo-lines-v1:sha256:c0490ddffff2d901087418198e11ba4c91dec4f8310563fa435dc50374e2ea74:eyJzZWxlY3RlZExpbmVDb3VudCI6MTQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjU2YTU0YWFlNDgyMjIwN2ZiNjAxMGNjYzBmMDQ4MDFmOGY1NzkwMDRlOTUwOTdjNGI4MzY5YWQ1MTA0M2UyM2UiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjJiNGQ0ZTEzODI5MmNiMzAxZjRjMTAyNzJiN2ZjYTdlMDE0NDg3YTM3YmE4NjE3MGMzZjQ0ZjQ2MjVhOGJiNjIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjZjYWFiMTE5MTVlOWM3NDFmMWZmOGViN2RjYWMwOWFhMmJhZWMzMGJkZTI2NjFjYTMxYWE1Zjg0YjNmNDU4ZWEifQ"
         }
       ]
@@ -21,16 +21,16 @@
       "statement": "The SSE stream authenticates with a 30-second sse-ticket JWT delivered by GET /auth/sse-ticket, enforces 10 connections per IP, 500 globally, and 5 per user with oldest-connection eviction.",
       "evidence": [
         {
-          "resource": "repo://internal/handler/auth.go#L250-L258",
+          "resource": "repo://internal/handler/auth.go#L279-L287",
           "version": "repo-lines-v1:sha256:061b0ed0016d16779c543b33ff9cedfdd1e9f7fe5af2727b6c8b91011ee41901:eyJzZWxlY3RlZExpbmVDb3VudCI6OSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiMDY1YTVhZTZkMjEyOTM0ZjRlOTBmNTUzNzY1NTZlZTExMDU1ZDg4ODIyOGNkNjExOTQ3ZTU3ZTcxOGM1M2ZkOCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNDEyY2EzNDVjY2Y3NWJmOWMwODA2YmNlNjk1YmU4ZGU4MDhiNzk5ODQyNTFhN2E1NGQyMDJjZjYxMDFkZDQ1MSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZjhiNTA5ZTY5MmU3NzU3ZmFiMDU3NzhmOGZlYWNhNzBhY2I4MWMwNmY0YWMxMWU5ZmRiZjVkOTFlYWFiYzk5NiIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjAsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZTNiMGM0NDI5OGZjMWMxNDlhZmJmNGM4OTk2ZmI5MjQyN2FlNDFlNDY0OWI5MzRjYTQ5NTk5MWI3ODUyYjg1NSJ9"
         },
         {
-          "resource": "repo://internal/handler/notifications.go#L25-L31",
+          "resource": "repo://internal/handler/notifications.go#L23-L29",
           "version": "repo-lines-v1:sha256:cb219791c962a1252bc4650e07dd7cbec18c73bbc06a30d9e8205d4e3aadc733:eyJzZWxlY3RlZExpbmVDb3VudCI6NywiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiZDBkOTg2YjBkZjdlOWM0N2FhNzgyYjA2NjA5NDY5YmM4ZWVjYTQ3NjEyYjgzOGNmODI5ZGRhNGJjZGRkMzMyOSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiYTExMDczMDFlYTE1ZWQ4MjdhZmQ2OGE3ZTUzNzA1NTFjZjRmZWQyM2RhMTk4ZTkyYWRhYjdkMjNmODQ5NmQ3OSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiMjAyYjQwNjYzMDIwZTcwZDlhYzk4OWMzODFkMjE5NDEyOGE2MjFjNzEyNzU5OGIyZDkxNTRkOWNhYmM2OGVkMCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZjcwNDhiZjc2OWI5Mzk0ZTcxMzM2MGVhOGM1ZTZiN2QxMDI2NzUyNjM2MjlmNTc1MjRkOTVlMjM0MjRhZGM4YSJ9"
         },
         {
-          "resource": "repo://internal/handler/notifications.go#L98-L247",
-          "version": "repo-lines-v1:sha256:db587c684481924eb4cf4de88493456d763f079e1763a598e04e21a7925d9b20:eyJzZWxlY3RlZExpbmVDb3VudCI6MTUwLCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiIyMDA0OTQ1YzQ3NmI4M2JjNGExODM2YWZkZDBkYjc0ZDcyNTQyNDg5OWIzYjBjMDVkNGRjOGYxMjUwNDU4MDMyIiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiJmZmQyNTAyMGMyMGVhZDdiZTQ1N2FiNGE1MzQ5MjM0YTY0NjM3N2VlNTgyODk0OWMzMDRhODMxZWIyNzNiODdiIiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiI1NmE2NWVkZmI3YTg4MzhiODdmOTI3OTZlMzUzZjQ1NzA4NThhNDNlMzJmMmYzYjRhOTYwNTVkYzA0OTMyZjYyIiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MywiZm9sbG93aW5nQ29udGV4dEhhc2giOiI2YTY2YzU3OTkwYzIwNWYwNTljNjRiNTQ4OWVlYzMyNjkxMzdmN2JiZDljN2EzMzlmMGNhMmQzNzY2ZDdhYTYxIn0"
+          "resource": "repo://internal/handler/notifications.go#L96-L245",
+          "version": "repo-lines-v1:sha256:61772d65ab861da32454f86ba8d55e88a8c0478a84fc95bdab4cb2926b639259:eyJzZWxlY3RlZExpbmVDb3VudCI6MTUwLCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiIyMDA0OTQ1YzQ3NmI4M2JjNGExODM2YWZkZDBkYjc0ZDcyNTQyNDg5OWIzYjBjMDVkNGRjOGYxMjUwNDU4MDMyIiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiJmZmQyNTAyMGMyMGVhZDdiZTQ1N2FiNGE1MzQ5MjM0YTY0NjM3N2VlNTgyODk0OWMzMDRhODMxZWIyNzNiODdiIiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiI1NmE2NWVkZmI3YTg4MzhiODdmOTI3OTZlMzUzZjQ1NzA4NThhNDNlMzJmMmYzYjRhOTYwNTVkYzA0OTMyZjYyIiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MywiZm9sbG93aW5nQ29udGV4dEhhc2giOiI2YTY2YzU3OTkwYzIwNWYwNTljNjRiNTQ4OWVlYzMyNjkxMzdmN2JiZDljN2EzMzlmMGNhMmQzNzY2ZDdhYTYxIn0"
         }
       ]
     },
@@ -39,15 +39,15 @@
       "statement": "The SSE stream emits a connected event, heartbeats, limit errors, and notification events produced by a 10-second per-connection database poll of the user's recent notifications and unread count, rather than by in-memory broadcast.",
       "evidence": [
         {
-          "resource": "repo://internal/handler/notifications.go#L143-L178",
+          "resource": "repo://internal/handler/notifications.go#L141-L176",
           "version": "repo-lines-v1:sha256:0c90297b313a76624c893b60a1c2b32b6257a41953a2e4022d764be823b6d137:eyJzZWxlY3RlZExpbmVDb3VudCI6MzYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImRlMGFkZTFiYjBkNDk4YmU3NmI0ZWZkYzY0NWQ3N2E0NTc3NDM3YzZhYjI1ZmE0N2UzNjAwNjhhYjJjZDE5ODciLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImYwMGI4MDhmZTU4YzA3NTkxZWEyNGM3Y2MxMDllY2Y2YmEyZDg3NmUxMzliODViZTdjZTQ0MzY5NWU1ZGNmOTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijk2NDI3MDljYWFjYTcyMmNmODM5OGQwYWUyNjQxNzc3OTg0MDAzMWNlZWY3ZGNhMzcxMDA0ZGJkODY1YWJlNjgiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjIzYWYzNTlmZTBkNzFhMjUzNTU1MWM1YWUxYTBhZDZkMjI4OTllY2Y5ODAxMTljYWRlMzBjZDdhNDdmYjY2MjIifQ"
         },
         {
-          "resource": "repo://internal/handler/notifications.go#L201-L235",
+          "resource": "repo://internal/handler/notifications.go#L199-L233",
           "version": "repo-lines-v1:sha256:cf6ec90f2967889c12fe4ae5eae6b084702f4603b2b750ea29ccebb383bfc69a:eyJzZWxlY3RlZExpbmVDb3VudCI6MzUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjlmZWI4NThlYTgyZDVhNjM1Mjc0ZDc3M2MwMzc5OWM2ZmFlZjNjMzE5ZjM2YzAzMDQ3MzE4N2FiOTU3OTZkOTkiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY0ZWZjNDk0MThkMjZkY2YxMjliMjJhNmFhMjExMDhjZWVjMzc2NzdhMzJkMDhlOWQ1ZmVlMzVkZGE2NmJiOWQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImI1NzIxY2ZjMzczM2NiNmMzNzBmMzQxZDA4OTg1MWFlZTdlOGVlNDI1MzBhZjkyM2YxYTk3YzFkM2QyY2U0ZWQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImYyOTY0MDc5YzNjNWM4MTUyMGVmMzNhMmI5ZDJlMTVhMWI4NGQ3MjgwZGI4NTkwZGNkNjU3NDdlM2UwMTJhNDAifQ"
         },
         {
-          "resource": "repo://internal/handler/notifications.go#L545-L558",
+          "resource": "repo://internal/handler/notifications.go#L543-L556",
           "version": "repo-lines-v1:sha256:d3dc84597f7023cc75e5bb5f30f6069dda3b0d3414f5a19744f1dde0b0e9f52a:eyJzZWxlY3RlZExpbmVDb3VudCI6MTQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ2M2JiMjU5ZWI5MDkzNWExMzhiM2E0OTZlMjVjMjE5YTQwNGNlNGQ5NmIxYTYwNzNiOTNkMjkxNTA4MWVlODciLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImFkMjM4MmRkYTI2OTU3NGE3Y2FmODA1MDk1MmI2ZjE0NjU2NWRkOTVkYWVkNDgyY2ZkNzAzZDA2MzBlOTU0ZTMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImMwNmQ2MTQ4YzAzNWQ4YzMxNDE5N2ZlYTIwNTJmMjZjZWQyNDIzYzMxZjFiNjZlODFkNWI3ZWI1OTZkZTk1OWQifQ"
         }
       ]
@@ -57,7 +57,7 @@
       "statement": "Web push subscriptions are stored in pushsubscriptions and upserted or deleted by the user and browser endpoint pair, with the repository constructed outside the Repos aggregate.",
       "evidence": [
         {
-          "resource": "repo://internal/handler/notifications.go#L35-L73",
+          "resource": "repo://internal/handler/notifications.go#L33-L71",
           "version": "repo-lines-v1:sha256:daca41e024db40d1c29178a65ca8cee5c2650758c89f276300dd14d18a872d41:eyJzZWxlY3RlZExpbmVDb3VudCI6MzksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImRhOGQ0ZWY4NTRhYTRiMzU4MTk4MzQyYzhmZDIzOGU0Y2E1Y2U0Y2Q5NGQwNGUyMTA3NjFlNGQ3ZjA4N2ZiMDgiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjRhODQ1NGIyZTdhOTZlY2NiZjgwZGI0Yjc3MjA2YmZjZDliMzJkMzc3NTVlYWY1YzgxMzQ3MzM1YWYzYzNlOTIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImY3MDQ4YmY3NjliOTM5NGU3MTMzNjBlYThjNWU2YjdkMTAyNjc1MjYzNjI5ZjU3NTI0ZDk1ZTIzNDI0YWRjOGEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImEzMDAzOGNjNWFhMDAwY2I3OWQyMGVjZjEyOTE5ZGZjZmEwMjJlNjQ1ODViNDgxN2JkMjVhZDIyYjhkY2Q4OGUifQ"
         },
         {
@@ -71,11 +71,11 @@
       "statement": "Web push sending is not implemented: every domain's sendPushToUser helper is a no-op placeholder, so stored subscriptions never receive messages, and the VAPID public key is exposed only when both VAPID keys are configured.",
       "evidence": [
         {
-          "resource": "repo://internal/handler/episodes.go#L1509-L1516",
+          "resource": "repo://internal/handler/episodes.go#L1508-L1515",
           "version": "repo-lines-v1:sha256:d6f998871da02331b65e043f320f155f45506fc7ae6a5bdb4dc744cad25ddb94:eyJzZWxlY3RlZExpbmVDb3VudCI6OCwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiZmNjYTNjYjdlMDI1YzI4MTViNGNhOTkwODdiYmE3ODgzZDA0NGE3ZGE2ZTc3ZDkwYzY2OGNmNTVlMmFkZGQxOCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMjNlN2M0Mzk5NDU2NzQ2NWMzOGUzZTM0YjdjMDFmNzI1M2Y5ZGIxMTIxNjc3OTJiNjU5ZWMxZWEzYjAyNjA1OCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiN2U0NDM4NWE5YTE3YWY2NmUyMmYzYWMwZTBkZWI4ZWQzYmMxZjgzYzU5MWU5YmM2MWQ2M2E1ZGY1ZDg0NDE5ZCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiYTBkZjk5NjcwMmRjZjQ5Nzg4MTQxOGUxYTgzNmMyNzljYzJjOGE2MGUxN2UwYWMxZjI4ODNmYWRiZDkyY2YwNSJ9"
         },
         {
-          "resource": "repo://internal/handler/notifications.go#L447-L453",
+          "resource": "repo://internal/handler/notifications.go#L445-L451",
           "version": "repo-lines-v1:sha256:58fb02b9a386503f029f18c5395c63deb4ab68fe83e569090f32b9eede80a885:eyJzZWxlY3RlZExpbmVDb3VudCI6NywiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiNGExYmVmMDJiNDZiODQ1OGM3MzJkMGI3YmQyOGE4MGVjMTg5ODlkNDJhZGIwYTg3MTIyOGVhNjQxYjJmNmE3YyIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiY2Q3OGY2M2NmM2Q3NzYzOGIyZWVjNTU1NTQ1OTRiOTQ4NTNhMThlZDU4OWI4ZWZhNjdlZTVmZDg0MzZhZmI5ZiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiYTM0MmVlODAyMjc1NWVmOGMyNDkxNWQ0YTMwNDc4NTJmNGY3M2VlYzllZTE3Yjk4ZGJjNmMxOGNiNjFiYzZiZSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZTNlYTllOGUwYWNhMTMyZDE4NmVlN2NkNmJhZjQ1OGY5NTk4ZTUyNzRkYWRhYTc3YzgxNjVkMTBiYmQ1MDRmZSJ9"
         },
         {
@@ -93,11 +93,11 @@
       "statement": "Users have seven email notification preferences that default to true, are returned by /auth/me, and gate outbound emails without preventing in-app notification creation.",
       "evidence": [
         {
-          "resource": "repo://internal/model/model.go#L75-L89",
+          "resource": "repo://internal/model/model.go#L76-L90",
           "version": "repo-lines-v1:sha256:34018265c8d04fb9bc821347b2a2e27260c590256b517a2b3d2b8eddb1c5ced6:eyJzZWxlY3RlZExpbmVDb3VudCI6MTUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImY4NzkyYzZkMjQxOWYyMDc2Y2I5Y2Q2NWNiODc3MTE4ZjU1MjZmZDVjYjdlOTY5YzQ5ZjgzZDI1NWI5YjA5YzUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjZlYTViMGFkODg1MmE4NDZlNDgzOTZjZTQxMWVhYmZkYWQyODk1ZDBkNWZkYjMwYmVkMWUwNDBjYWUzYjkxOTQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjFkNjdlOTgyZjZiNDM3OTE3NzFlMGZmNWQzYTVkYTI1NWQwYmJhZDE2NTExY2Y3NWYzZWU5ZDdiMDJiMzEyYjcifQ"
         },
         {
-          "resource": "repo://internal/service/auth_service.go#L143-L157",
+          "resource": "repo://internal/service/auth_service.go#L146-L160",
           "version": "repo-lines-v1:sha256:d84511bb9d04ee610b510f04886812d79ae5362f000bc897c537740378d34acd:eyJzZWxlY3RlZExpbmVDb3VudCI6MTUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImMxMmVlMjlhZmU5ODkzYTViYjI0NzA3ZjJlOTY5Y2VkN2ZmNzhmMjhiNDA0MGZmNzRhNGQ0ZDVkODc4NDNkNTAiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjFhMWRmYWJmNTUwZGI1ZDA0MTNkMzVlZDc0ZmY0NDczN2Q4YTNhMGFjM2IxNDgwMDcyMDlmNTQzMWMwMzBhYTQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImM2ZDFhYTQ2MTZmMDY0M2ZjMDI1Y2RkODQ4OGZlNTliZDU5ZTE3YjZlMjg0OTU2NGRjMGE5OTdkZjFkY2I4OGIifQ"
         }
       ]
@@ -107,7 +107,7 @@
       "statement": "Notification listing coerces page and limit with JavaScript-like semantics: page defaults to 1, limit defaults to 20, negative limit becomes 1, zero falls back to the default, and values above 100 are clamped.",
       "evidence": [
         {
-          "resource": "repo://internal/handler/notifications.go#L588-L607",
+          "resource": "repo://internal/handler/notifications.go#L567-L586",
           "version": "repo-lines-v1:sha256:ad787d730816ac46de9beb9e21a3b20aaafc080ce3a2c0a9bea328875dacb35c:eyJzZWxlY3RlZExpbmVDb3VudCI6MjAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImM4MGUwMWNkMGU1MGU3MzdjOGMxZTk5ZjRjZjY4ZDJkYzg3MDkyZDc1OWM4NWVhNWY3OWJhZDk0YTk1NjBmMGEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImJmNWY0MjlhOTVkMTA2N2IxMjlhYmYxMzI5NzE1Yjg2YmIwYWFiM2MyNmRiYjIzNGFjYzIyNGY4YTRiNjhjMWMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImU0ZjM5NGUzYWFmYzM1NDQwNzliZTQzNmZkMzE0YTM5ZWY4NWQwMmM2ZGVlNmI2ZWRlMGZhMWExMWZmOGZjYTUifQ"
         }
       ]
@@ -117,18 +117,28 @@
       "statement": "剧集域生成的追番站内通知与 Push 文案中的集数称呼经 episodeRefText 解析——单集自定义 label 非空时用它，否则「第N集」；label 非空时 metadata 额外携带 episodeLabel。",
       "evidence": [
         {
-          "resource": "repo://internal/handler/episodes.go#L1093-L1115",
+          "resource": "repo://internal/handler/episodes.go#L1092-L1114",
           "version": "repo-lines-v1:sha256:0becba5f6a8e45d656d6384f09bb04acfefd52ac0b54978875e25c11379f46df:eyJzZWxlY3RlZExpbmVDb3VudCI6MjMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY0ZWZjNDk0MThkMjZkY2YxMjliMjJhNmFhMjExMDhjZWVjMzc2NzdhMzJkMDhlOWQ1ZmVlMzVkZGE2NmJiOWQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjUxMzE0NTFkYjBiMWY4ZWUyNDgzNzRjZmI2NTg3Y2Q3ODQ4Mjk2MTA5OTExNzhkY2QwNDBkMzgwZGQ0ZTFlM2UiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjcwM2ZlYTkwY2VlYTdmY2I2Y2QyOTBmNjU1ZDM4ZmVmYThlOWFiZWE3NmI0MGY2M2IyMjNjYThlZWMzYzVlODYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjZmMDAwYmYyOGU4OTlhMDQ2NWU4MzM5YmQzODY3YWIyNDQ4Y2NjNjg3MWIyNGUxMmY5ZmRkNTg0YTYzZTU1YTcifQ"
         },
         {
-          "resource": "repo://internal/handler/episodes.go#L1413-L1462",
+          "resource": "repo://internal/handler/episodes.go#L1412-L1461",
           "version": "repo-lines-v1:sha256:6c564f692d8a5345293e41b85f1bd7756e88068896d9bde8180af7a10d571877:eyJzZWxlY3RlZExpbmVDb3VudCI6NTAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImU2NGQ1NzkwYjBlYTllYjZmOTdjZGQ3ZTk0YTQ5MTAwYjI2ZGE2YjE0MzIxNTcyMjhlZDk5NzAwYzdhZGY5MzAiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImQ3ZTJmNWQxMjFkZjBkNDQyZDYxOTU5ZGVjNzk5YjQzMTg0OWZkY2RiNmJjOGM4ZWUwNzFhNGM3ZDg0YTdjNTkiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImI4OGQxZDE5YzFmZmUyZWUzNDBlZWI5ZGQ5MGRhNzgwZjYwYzIxZTgwZjQ1ZDQ5ZWRiODU5YmRlN2JjZTkxZDAiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjdhNzYwY2E5MzUyNjhhYTExZTZmYmI3ODY4YmU1Nzc2MWUxM2EwZTZiZDZjMmJiZjhhNDNlMTk1ZDBmOWYyMGUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_02498b0bf57642b988d9ddd64e54a28c",
+      "statement": "SSE 流每 IP 连接上限的客户端 IP 改用 gin c.ClientIP() 解析（删除手写 clientIP 方法），标头信任策略由 [server] 配置在引擎级装配；上限数值（每 IP 10、全局 500、每用户 5）不变。",
+      "evidence": [
+        {
+          "resource": "repo://internal/handler/notifications.go#L96-L115",
+          "version": "repo-lines-v1:sha256:f2372d967b08f989ee1bade09421798d954c55d13113c0c956a55c89e419a166:eyJzZWxlY3RlZExpbmVDb3VudCI6MjAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjIwMDQ5NDVjNDc2YjgzYmM0YTE4MzZhZmRkMGRiNzRkNzI1NDI0ODk5YjNiMGMwNWQ0ZGM4ZjEyNTA0NTgwMzIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjYxOWI1OWIzMzg2MjI0MTFhYmEzMmFmYjViNjdmMmEyMWIwOTZhYWRlNDE5ZDJmZDVmM2Y0MWEwNzg4Y2FiNDQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjU2YTY1ZWRmYjdhODgzOGI4N2Y5Mjc5NmUzNTNmNDU3MDg1OGE0M2UzMmYyZjNiNGE5NjA1NWRjMDQ5MzJmNjIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjcyZTc3NTBkNDUxYTBkM2ViZGY3NWZhODJmYzI4NGE2ZmU5ZGZkYzI0ZWY5MDIyYmI1YzIzY2RkMjU0MmI5ZGMifQ"
         }
       ]
     }
   ],
   "verification": {
     "by": "openwiki/0.7.2",
-    "at": "2026-11-04T15:34:40.691Z"
+    "at": "2026-11-11T16:33:08.526Z"
   }
 }

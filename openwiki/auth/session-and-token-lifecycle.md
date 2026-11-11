@@ -1,11 +1,12 @@
 ---
 type: auth-flow
 title: 会话与令牌生命周期
-description: 双令牌模型、JWT claims 与 purpose、cookie 路径、会话存储、refresh 轮换与 30 秒宽限期重用检测、419/409/401 语义、登出吊销以及会话管理端点。
+description: 双令牌模型、JWT claims 与 purpose、cookie 路径、带吊销原因墓碑的会话存储、refresh 轮换与 2 分钟宽限期重用检测、refresh 失败认证事件、419/409/401 语义、登出吊销以及会话管理端点。
 tags: [auth, jwt, refresh, sessions, cookies]
+verified:
+  - by: openwiki/0.7.2
+    at: 2026-11-11T16:33:08.526Z
 sources:
-  - id: openwiki-source-0f6ed11169bd8e6b34b44280
-    resource: repo://cmd/server/main.go
   - id: openwiki-source-d30e65659972429c2c50cf5a
     resource: repo://internal/auth/cookies.go
   - id: openwiki-source-be8c32ef9eb79a8172d00695
@@ -20,10 +21,7 @@ sources:
     resource: repo://internal/service/auth_service.go
   - id: openwiki-source-27784338c57fd749bd43470e
     resource: repo://internal/service/refresh.go
-generated: { by: "opencode", at: "2026-11-03T16:50:44.301Z" }
-verified:
-  - by: openwiki/0.7.2
-    at: 2026-11-04T15:34:40.691Z
+generated: { by: "zcode", at: "2026-11-11T16:33:08.526Z" }
 ---
 
 # 会话与令牌生命周期
@@ -51,7 +49,9 @@ refresh cookie 的窄路径意味着刷新与登出请求必须位于 `/api/auth
 
 ## 会话存储
 
-`usersessions` 文档包含用户 ID、refresh 令牌的 SHA-256 hex 哈希（`refreshTokenHash`）、access 令牌的 SHA-256 hex 哈希（`tokenHash`）、设备信息、IP、`isActive`、`loginAt`、`lastActiveAt` 与 `logoutAt`。只存哈希，不存令牌原文。`auth.HashToken` 是普通 SHA-256 hex 摘要，不能改变，否则既有哈希无法比较。
+`usersessions` 文档包含用户 ID、refresh 令牌的 SHA-256 hex 哈希（`refreshTokenHash`）、access 令牌的 SHA-256 hex 哈希（`tokenHash`）、设备信息、IP、`isActive`、`loginAt`、`lastActiveAt`、`logoutAt` 与 `revokeReason`。只存哈希，不存令牌原文。`auth.HashToken` 是普通 SHA-256 hex 摘要，不能改变，否则既有哈希无法比较。
+
+`revokeReason` 是会话被置为 inactive 的原因墓碑（取值见 `model.Revoke*` 常量），覆盖登出（`logout`）、refresh 轮换（`rotated`，正常不是吊销）、改密（`password_changed`）、密码重置（`password_reset`）、改绑邮箱（`email_changed`）、refresh 重用检测（`refresh_reuse`）、用户自助下线（`user_revoked`/`user_revoked_all`）、管理员强制下线（`admin_revoked`）与超期清理（`expired`）。它只存在于库与日志，不进 API 响应——排障时直接查 `usersessions` 或用 `make diag` 即可知道会话"为什么"被置废。
 
 `Protect` 对带 `jti` 的 access 令牌按 `tokenHash` 反查会话；会话被登出、改密或管理员下线后，access 令牌立即失效。没有 `jti` 的历史令牌跳过该检查，最多再存活一个 access TTL。
 
@@ -72,12 +72,14 @@ refresh cookie 的窄路径意味着刷新与登出请求必须位于 `/api/auth
 1. 缺少令牌 → 401 `auth.noRefreshToken`。
 2. 签名非法 → 401 `auth.invalidToken`；过期 → 401 `auth.refreshTokenExpired`。
 3. purpose 错误 → 401 `auth.invalidToken`。
-4. 通过 `findOneAndUpdate({refreshTokenHash, isActive:true}, {$set:{isActive:false, logoutAt:now}})` 原子占用会话。只有一个并发请求能成功。
+4. 通过 `findOneAndUpdate({refreshTokenHash, isActive:true}, {$set:{isActive:false, logoutAt:now, revokeReason:"rotated"}})` 原子占用会话。只有一个并发请求能成功。
+
+该端点使用独立的 `RefreshSpec` 限流器（60 次/15 分钟），不再与 2FA 桶（5/15min）共享配额——正常轮换流量与 TOTP 试错共桶曾让运营商 NAT 共享出口 IP 的用户被 429 打成登出（ADR-015）。
 
 如果原子占用失败，`handleRefreshMiss` 会查询同一哈希（包括非活跃会话）并区分两种情况：
 
-- 会话在 **30 秒**内被置为无效 → **409** `auth.concurrentRefresh`。这被视为合法并发刷新，例如多个标签页。handler **不会**清除 cookie，也**不会**吊销会话。
-- 否则 → **401** `auth.refreshTokenReuse`。该用户所有活跃会话都会被置为无效，强制重新登录。
+- 会话在 **2 分钟**（`ConcurrentRefreshGrace`）内被置为无效 → **409** `auth.concurrentRefresh`。这被视为合法并发刷新（多标签页、弱网重发），并记录 `refresh_grace` 事件。handler **不会**清除 cookie，也**不会**吊销会话。宽限期从旧值 30 秒放宽，避免移动端后台挂起后迟到的旧 token 被误判为重用而吊销全部会话。
+- 否则 → **401** `auth.refreshTokenReuse`。该用户所有活跃会话都会被置为无效（`revokeReason="refresh_reuse"`），强制重新登录，并记录 `refresh_reuse` 事件。
 
 成功占用后加载用户并轮换：带新 `jti` 的新 access 令牌、带新 `jti` 的新 refresh 令牌、继承设备信息与原登录时间且记录两者哈希的新会话，以及新 cookie。旧会话保持非活跃。
 
@@ -91,11 +93,11 @@ refresh cookie 的窄路径意味着刷新与登出请求必须位于 `/api/auth
 | 409 | 宽限期内并发刷新 | 保留 cookie，不吊销 |
 | 401 | refresh 缺失、非法、过期或重用 | handler 清除 cookie，重用时吊销 |
 
-除 409 外，handler 会为所有 refresh 错误清除鉴权 cookie。
+除 409 外，handler 会为所有 refresh 错误清除鉴权 cookie，并按错误 messageKey 记录 `refresh_invalid` 诊断事件（detail 区分 cookie missing / expired / invalid）——409 与 401 在响应上都是 4xx，但排障含义完全不同。
 
 ## 登出
 
-`POST /api/auth/logout` 受保护，因此带有效 access 令牌。`DeactivateForLogout` 执行双路吊销：
+`POST /api/auth/logout` 受保护，因此带有效 access 令牌。`DeactivateForLogout` 执行双路吊销，两条路径都写入 `revokeReason="logout"`：
 
 1. 哈希 refresh cookie 并按 ID 停用匹配会话；
 2. 哈希 access 令牌并停用任何遗留 `tokenHash` 匹配的会话。
@@ -117,7 +119,7 @@ refresh cookie 的窄路径意味着刷新与登出请求必须位于 `/api/auth
 
 ## 会话清理
 
-`internal/cron` 包含一个任务，把 `lastActiveAt` 超过 30 天的活跃会话标记为无效，每小时运行。`cron.StartSessions` 已由 `cmd/server/main.go` 在开始监听之前启动，因此清理会随进程运行；进程退出时通过 context 取消。cron 包中记录的不活跃窗口同样是 30 天。
+`internal/cron` 包含一个任务，把 `lastActiveAt` 超过 30 天的活跃会话标记为无效（`revokeReason="expired"`），每小时运行。`cron.StartSessions` 已由 `cmd/server/main.go` 在开始监听之前启动，因此清理会随进程运行；进程退出时通过 context 取消。cron 包中记录的不活跃窗口同样是 30 天。
 
 ## 多实例影响
 
