@@ -38,13 +38,17 @@ func NewIcons(repos *repository.Repos, cfg *config.Config, amw *middleware.Auth,
 	return &Icons{Repos: repos, Config: cfg, AuthMW: amw, RL: rl}
 }
 
-// Register 挂载 /api/icons 全部端点。
+// Register 挂载 /api/icons 端点。
+//
+// 图标包上传已停用（主题只保留壁纸）：POST /upload 的注册被注释掉，端点对客户端
+// 表现为不存在，上传目录不会被写入。读取链路（GET /list、GET /all）与线上已有的
+// 图标文件/主题图标映射不受影响。恢复时取消下面那一行注释即可。
 func (h *Icons) Register(g *gin.RouterGroup) {
 	super := h.AuthMW.Protect(middleware.RoleSuperAdmin)
 	reqEmail := h.AuthMW.RequireEmailChanged()
 	g.GET("/list", h.List)
 	g.GET("/all", super, h.AdminAll)
-	g.POST("/upload", super, reqEmail, h.RL(ratelimit.UploadSpec), h.Upload)
+	// g.POST("/upload", super, reqEmail, h.RL(ratelimit.UploadSpec), h.Upload)
 	g.PUT("/:id", super, reqEmail, h.Update)
 	g.DELETE("/:id", super, reqEmail, h.Delete)
 }

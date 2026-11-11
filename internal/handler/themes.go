@@ -45,6 +45,10 @@ func NewThemes(repos *repository.Repos, cfg *config.Config, amw *middleware.Auth
 }
 
 // Register 挂载 /api/themes 全部端点。
+//
+// 主题图标上传已停用（主题只保留壁纸）：POST /upload-icon 的注册被注释掉，
+// 端点对客户端表现为不存在。壁纸上传（/upload-wallpaper）、主题选择与既有
+// 图标主题的读取都不受影响。恢复时取消下面那一行注释即可。
 func (h *Themes) Register(g *gin.RouterGroup) {
 	super := h.AuthMW.Protect(middleware.RoleSuperAdmin)
 	reqEmail := h.AuthMW.RequireEmailChanged()
@@ -56,7 +60,7 @@ func (h *Themes) Register(g *gin.RouterGroup) {
 	g.PUT("/background-prefs", h.AuthMW.Protect(), h.UpdateBackgroundPrefs)
 	g.POST("/", h.AuthMW.Protect(), reqEmail, h.Create)
 	g.POST("/upload-wallpaper", h.AuthMW.Protect(), reqEmail, h.RL(ratelimit.UploadSpec), h.UploadWallpaper)
-	g.POST("/upload-icon", h.AuthMW.Protect(), reqEmail, h.RL(ratelimit.UploadSpec), h.UploadIcon)
+	// g.POST("/upload-icon", h.AuthMW.Protect(), reqEmail, h.RL(ratelimit.UploadSpec), h.UploadIcon)
 	g.PUT("/:id", h.AuthMW.Protect(), reqEmail, h.Update)
 	g.DELETE("/:id", h.AuthMW.Protect(), reqEmail, h.Delete)
 	g.POST("/:id/submit", h.AuthMW.Protect(), reqEmail, h.Submit)
