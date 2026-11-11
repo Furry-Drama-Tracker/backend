@@ -371,7 +371,6 @@ Stats 域带 `middleware.Cache`（TTL 5min、上限 200 条，按完整 URI 缓�
 | PUT | `/themes/background-prefs` | 登录 | `{enabled?,opacity(0-100),blur(0-20),image?}` | 更新背景偏好（原 `/users/background-prefs`） |
 | POST | `/themes/` | 登录 | `{name,description?,wallpaperUrl?,wallpaperThumb?,icons?,accentColor?,isSystem?(仅超管生效)}` | 创建，默认 draft；资源须 `/uploads/` 或 http(s)；图标键须匹配组件键正则、≤64 个；`misc.logo` 不可覆盖（仅注册带尾斜杠形式） |
 | POST | `/themes/upload-wallpaper` | 登录（upload 20/h） | multipart `image`（≤8MB） | `{url}` |
-| POST | `/themes/upload-icon` | 登录（upload 20/h） | multipart `file`（SVG ≤1MB） | `{url}` |
 | PUT | `/themes/:id` | 登录（归属） | 同创建 | 更新 |
 | DELETE | `/themes/:id` | 登录（归属） | — | 删除（仅清理 `theme-wallpaper-` 前缀且未被引用的文件） |
 | POST | `/themes/:id/submit` | 登录（归属） | — | draft → pending 提审 |
@@ -386,7 +385,6 @@ Stats 域带 `middleware.Cache`（TTL 5min、上限 200 条，按完整 URI 缓�
 |---|---|---|---|---|
 | GET | `/icons/list` | 公开 | — | 启用图标 + 组件键→URL 的扁平 `mappings` |
 | GET | `/icons/all` | 超管 | — | 全部 |
-| POST | `/icons/upload` | 超管（upload 20/h） | multipart `files`（多）或 `file`（单）；单次≤50 个，SVG ≤1MB/个 | 单文件失败进 `failed` 数组不整批失败 |
 | PUT | `/icons/:id` | 超管 | 名称/分类/描述/映射/启用（长度与键校验） | 更新 |
 | DELETE | `/icons/:id` | 超管 | — | 删除文档+文件 |
 
@@ -439,8 +437,8 @@ Stats 域带 `middleware.Cache`（TTL 5min、上限 200 条，按完整 URI 缓�
 | POST `/wallpapers/personal` | `image` | 8MB | `wallpaper-` |
 | POST `/wallpapers/system` | `image` | 8MB | `wallpaper-` |
 | POST `/themes/upload-wallpaper` | `image` | 8MB | `theme-wallpaper-` |
-| POST `/themes/upload-icon` | `file` | 1MB（SVG） | `icon-` |
-| POST `/icons/upload` | `files`/`file` | 1MB（SVG）/个，单次≤50 | `icon-` |
+
+已停用上传端点：`/icons/upload`（图标包）与 `/themes/upload-icon`（主题图标）路由未注册（主题只保留壁纸），端点对客户端表现为 404；恢复方式见 `internal/handler/icons.go`、`themes.go` 内注释。
 
 上传错误码：`LIMIT_FILE_SIZE`/`LIMIT_FILE_TYPE`/`BAD_MAGIC`，渲染为 400 固定文案（部分旧 handler 对类型不符刻意 500，属既有契约）。`RemoveFile` 只接受上传目录下单层路径段（拒 `..`/分隔符）。
 

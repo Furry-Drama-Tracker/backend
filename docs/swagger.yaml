@@ -3249,40 +3249,6 @@ paths:
       summary: 获取启用图标与组件映射表
       tags:
       - 图标
-  /icons/upload:
-    post:
-      consumes:
-      - multipart/form-data
-      parameters:
-      - collectionFormat: csv
-        description: SVG 图标（可多选，最多 50 个；也接受单文件字段 file）
-        in: formData
-        items:
-          type: file
-        name: files
-        type: array
-      - description: 分类（默认 general）
-        in: formData
-        name: category
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: created/failed
-          schema:
-            additionalProperties: true
-            type: object
-        "400":
-          description: Bad Request
-          schema:
-            additionalProperties: true
-            type: object
-      security:
-      - bearerAuth: []
-      summary: 批量上传 SVG 图标
-      tags:
-      - 图标
   /notifications/{id}:
     delete:
       parameters:
@@ -4759,35 +4725,6 @@ paths:
       security:
       - bearerAuth: []
       summary: 设置用户背景/图标两槽主题
-      tags:
-      - 主题
-  /themes/upload-icon:
-    post:
-      consumes:
-      - multipart/form-data
-      parameters:
-      - description: SVG 图标（≤1MB）
-        in: formData
-        name: file
-        required: true
-        type: file
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: url
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "400":
-          description: Bad Request
-          schema:
-            additionalProperties: true
-            type: object
-      security:
-      - bearerAuth: []
-      summary: 上传主题图标
       tags:
       - 主题
   /themes/upload-wallpaper:

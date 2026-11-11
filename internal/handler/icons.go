@@ -166,16 +166,8 @@ func (h *Icons) AdminAll(c *gin.Context) {
 // Upload POST /api/icons/upload（superadmin）：批量上传 SVG 图标。
 // multipart 字段 files（多文件）或 file（单文件）；可选表单 category（默认 general）。
 // 响应 {"created": [...], "failed": [{"filename", "error"}]}。
-// @Summary 批量上传 SVG 图标
-// @Tags 图标
-// @Security bearerAuth
-// @Accept multipart/form-data
-// @Produce json
-// @Param files formData []file false "SVG 图标（可多选，最多 50 个；也接受单文件字段 file）"
-// @Param category formData string false "分类（默认 general）"
-// @Success 200 {object} map[string]any "created/failed"
-// @Failure 400 {object} map[string]any
-// @Router /icons/upload [post]
+// （已停用）路由注册已注释，Swagger 注解一并摘除：swag 以行内 `// *@` 规则命中注解，
+// 注释不掉，只能删除。恢复时连同 g.POST("/upload", ...) 一起还原注解（git 历史可查）。
 func (h *Icons) Upload(c *gin.Context) {
 	form, err := c.MultipartForm()
 	if err != nil {

@@ -1243,15 +1243,8 @@ func (h *Themes) UploadWallpaper(c *gin.Context) {
 
 // UploadIcon POST /api/themes/upload-icon（登录用户 + ≤1MB SVG）。
 // 上传主题用图标，返回 {"url": "/uploads/icons/icon-xxx.svg"}。
-// @Summary 上传主题图标
-// @Tags 主题
-// @Security bearerAuth
-// @Accept multipart/form-data
-// @Produce json
-// @Param file formData file true "SVG 图标（≤1MB）"
-// @Success 200 {object} map[string]string "url"
-// @Failure 400 {object} map[string]any
-// @Router /themes/upload-icon [post]
+// （已停用）路由注册已注释，Swagger 注解一并摘除：swag 以行内 `// *@` 规则命中注解，
+// 注释不掉，只能删除。恢复时连同 g.POST("/upload-icon", ...) 一起还原注解（git 历史可查）。
 func (h *Themes) UploadIcon(c *gin.Context) {
 	url, err := upload.SaveSVG(c, "file")
 	if err != nil {
