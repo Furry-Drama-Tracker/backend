@@ -129,6 +129,11 @@ type SecurityConfig struct {
 	LoginLockMinutes int
 	CSRFMaxAgeHours  int
 	RateLimitSkip    bool
+	// IPRegionEnabled 控制 IP → 地域解析（登录/注册/设备确认记录与提醒邮件）。
+	// 默认 false：该能力会外呼第三方 ipapi.co，属数据出境，默认关闭；
+	// 需要时用 [security].ip_region_enabled 或 IP_REGION_ENABLED 显式开启，
+	// 待换成本地离线库后可放开（见 docs/decisions.md ADR-017）。
+	IPRegionEnabled bool
 }
 
 // Load 加载配置：先读 .env（如果存在），再读 ini（path 为空则尝试 DefaultPath，
@@ -316,6 +321,8 @@ func applyINI(cfg *Config, data []byte) error {
 	cfg.Security.LoginMaxAttempts = sec.Key("login_max_attempts").MustInt(5)
 	cfg.Security.LoginLockMinutes = sec.Key("login_lock_minutes").MustInt(30)
 	cfg.Security.CSRFMaxAgeHours = sec.Key("csrf_max_age_h").MustInt(24)
+	// 缺省 false：IP 地域解析默认关闭（数据出境合规，ADR-017）。
+	cfg.Security.IPRegionEnabled = sec.Key("ip_region_enabled").MustBool(false)
 	return nil
 }
 
@@ -369,6 +376,11 @@ func applyEnv(cfg *Config) {
 	setStr(&cfg.Server.ProxyTrustedPlatform, os.Getenv("PROXY_TRUSTED_PLATFORM"))
 	if v := os.Getenv("SKIP_RATE_LIMIT"); v == "1" {
 		cfg.Security.RateLimitSkip = true
+	}
+	if v := os.Getenv("IP_REGION_ENABLED"); v != "" {
+		if b, err := strconv.ParseBool(v); err == nil {
+			cfg.Security.IPRegionEnabled = b
+		}
 	}
 }
 

@@ -3,6 +3,7 @@ package ipregion
 import (
 	"context"
 	"fmt"
+	"reflect"
 	"testing"
 )
 
@@ -48,5 +49,24 @@ func TestUnknownOnFetchError(t *testing.T) {
 	c := NewClient(func(ctx context.Context, ip string) string { return "未知" })
 	if got := c.GetRegion(context.Background(), "1.2.3.4"); got != "未知" {
 		t.Fatalf("expected 未知, got %q", got)
+	}
+}
+
+// TestDisabledNoOutbound 禁用态（默认装配）不得外呼：本地 IP 仍识别，其余一律 "未知"。
+func TestDisabledNoOutbound(t *testing.T) {
+	c := NewDisabled()
+	// 显式断言没有接上任何外呼实现（数据出境合规的硬约束）。
+	if reflect.ValueOf(c.fetch).Pointer() == reflect.ValueOf(fetchFromIPAPI).Pointer() {
+		t.Fatal("NewDisabled 不得装配 ipapi.co 外呼")
+	}
+	for _, ip := range []string{"127.0.0.1", "::1", "::ffff:127.0.0.1"} {
+		if got := c.GetRegion(context.Background(), ip); got != "本地" {
+			t.Fatalf("ip %s 应返回 本地, got %q", ip, got)
+		}
+	}
+	for _, ip := range []string{"8.8.8.8", "2001:4860:4860::8888", "10.0.0.1"} {
+		if got := c.GetRegion(context.Background(), ip); got != "未知" {
+			t.Fatalf("禁用态下 ip %s 应返回 未知, got %q", ip, got)
+		}
 	}
 }

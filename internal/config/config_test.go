@@ -105,3 +105,25 @@ proxy_trusted_platform = True-Client-IP
 		t.Fatalf("PROXY_IP_HEADERS 应覆盖为 %v, got %v", want, cfg.Server.ProxyIPHeaders)
 	}
 }
+
+// TestIPRegionDisabledByDefault 校验 IP 地域解析的数据出境合规开关：
+// 缺省必须关闭；ini / 环境变量可显式开启或关闭（见 ADR-017）。
+func TestIPRegionDisabledByDefault(t *testing.T) {
+	cfg := defaults()
+	if cfg.Security.IPRegionEnabled {
+		t.Fatal("IP 地域解析缺省必须关闭（不外呼 ipapi.co）")
+	}
+
+	if err := applyINI(cfg, []byte("[security]\nip_region_enabled = true\n")); err != nil {
+		t.Fatalf("applyINI: %v", err)
+	}
+	if !cfg.Security.IPRegionEnabled {
+		t.Fatal("ip_region_enabled = true 应开启 IP 地域解析")
+	}
+
+	t.Setenv("IP_REGION_ENABLED", "false")
+	applyEnv(cfg)
+	if cfg.Security.IPRegionEnabled {
+		t.Fatal("IP_REGION_ENABLED=false 应覆盖 ini 为关闭")
+	}
+}

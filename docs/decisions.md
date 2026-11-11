@@ -160,3 +160,21 @@
   - 现场：`journalctl -u <unit> | grep 'event='`（看实时，含 spec/reason/detail）；
   - 事后：`make diag ARGS="-user=someone@example.com -days=7"`（结论直接给"第几秒被谁以什么原因吊销"）；
   - 面：`make diag ARGS="-recent -hours=6"`（按类型统计，判断是否大面积）。
+
+## ADR-017 IP 地域解析默认禁用（数据出境合规）+ 可替换的本地实现预留
+
+- **决策**：
+  1. `internal/ipregion` 新增 `NewDisabled()`：只识别本地 IP（`本地`），其余 IP 一律返回 `未知`，**不发起任何网络外呼**；
+  2. `RegisterRoutes` 默认装配 `NewDisabled()`，仅当 `[security].ip_region_enabled = true`（环境变量 `IP_REGION_ENABLED`，优先级同其它配置）时才装配原来的 ipapi.co 客户端；
+  3. 开关缺省 **false**——不依赖运维改配置，拉到新代码即停止出境；`deploy/furry-drama-be-neo.ini` 显式写出并注明合规原因。
+- **背景**：登录、注册、设备确认、2FA 登录会把客户端 IP 内联发给第三方 `https://ipapi.co/<ip>/json/`（同步、5s 超时）来拼 `LastLoginRegion`。IP 属个人信息，向境外第三方 API 传递构成数据出境，需按合规要求先停用；后续计划换成本地离线库（如 ip2region 一类）查询。
+- **替代方案**：
+  - 直接删掉 `ipregion` 包与外呼代码：最彻底，但未来接本地库要重写四处调用点与字段语义；保留注入点更省事；
+  - service 里传 `nil` 客户端：也能走 `未知` 兜底，但调用点分散在 4 处、`!= nil` 分支长期不被执行，容易在后续改动中被"顺手清理"掉；用显式 `NewDisabled()` 让同一条代码路径保持“活着”；
+  - 默认开启 + 用 ini 关掉：需要每个部署改配置，漏改即继续出境，不合规风险高。
+- **取舍 / 兼容性**：
+  - 响应契约不变：`LastLoginRegion` 落库值变为 `未知`（本就是外呼失败时的兜底值），前端/API 无字段变化；
+  - 新设备登录提醒邮件里的地域一行显示 `未知`，不影响发送与其它内容；
+  - 关闭后不再有 5s 外呼，认证路径少一个外部故障点（缓存未命中时的登录延迟随之消失）；
+  - 少量历史数据仍是真实地域，不做回填（回填反而需要再次出境查询）。
+- **怎么接到本地实现**：把 `register_routes.go` 里 `ipregion.NewDisabled()` 换成 `ipregion.NewClient(本地查询)`（`fetch` 签名 `func(ctx, ip) string`，返回 `country · region · city` 风格的字符串），并为本地查询函数补单测；`NewClient` 的 LRU（1000 条 / 24h TTL）会继续生效，service 侧零改动。

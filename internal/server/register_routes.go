@@ -22,7 +22,13 @@ import (
 func RegisterRoutes(d Deps, api *gin.RouterGroup, opts middleware.RateLimitOpts, rec *authlog.Recorder) {
 	mail := email.NewClient(d.Config, d.Repos.SiteContents)
 	mail.StartCleanup(10 * time.Minute)
-	ipr := ipregion.NewClient(nil)
+	// IP 地域解析默认禁用（外呼 ipapi.co，数据出境合规；见 docs/decisions.md ADR-017）。
+	// 关闭时 LastLoginRegion 保持 service 侧的 "未知" 兜底，不影响登录/注册流程；
+	// 未来接本地离线库时只需替换这里的构造函数（ipregion.NewClient(<本地查询>)）。
+	ipr := ipregion.NewDisabled()
+	if d.Config.Security.IPRegionEnabled {
+		ipr = ipregion.NewClient(nil)
+	}
 	svc := service.NewAuthService(d.Config, d.Repos, d.Signer, mail, ipr)
 	svc.Rec = rec
 	amw := middleware.NewAuth(d.Repos, d.Signer)

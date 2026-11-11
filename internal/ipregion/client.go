@@ -2,6 +2,11 @@
 //   - 本地 IP（127.0.0.1 / ::1 / ::ffff:127.0.0.1）直接返回 "本地"
 //   - 否则外呼 https://ipapi.co/<ip>/json/（5s 超时），拼接 country_name · region · city
 //   - 缓存用 hashicorp/golang-lru（上限 1000 条）+ 24h TTL（过期条目在命中时淘汰）
+//
+// 默认装配走 NewDisabled：IP 地域属数据出境敏感能力，未显式开启
+// （[security].ip_region_enabled / IP_REGION_ENABLED，见 ADR-017）时一律不外呼。
+// 未来接本地离线库时，用 NewClient(<本地查询函数>) 替换 NewDisabled 即可，
+// service 侧无改动。
 package ipregion
 
 import (
@@ -53,6 +58,13 @@ func NewClient(fetch func(ctx context.Context, ip string) string) *Client {
 		cl.fetch = fetchFromIPAPI
 	}
 	return cl
+}
+
+// NewDisabled 构造不做任何网络外呼的客户端（数据出境合规的默认态，见 ADR-017）：
+// 本地 IP 仍返回 "本地"，其余 IP 一律返回 "未知"。
+// 未来换成本地离线库时，把装配处替换为 NewClient(本地查询函数) 即可。
+func NewDisabled() *Client {
+	return NewClient(func(ctx context.Context, ip string) string { return "未知" })
 }
 
 // GetRegion 返回 IP 地域，带 LRU + 24h TTL 缓存。

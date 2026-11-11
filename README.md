@@ -168,7 +168,7 @@ section：`[server] [database] [jwt] [email] [vapid] [security]`。模板见 [`d
 
 ### 环境变量
 
-**同名环境变量优先于 ini 和 .env**（供 systemd 注入密钥、CI 注入 DEV_API_TOKEN 等）。兼容 `.env` 变量名：`JWT_SECRET MONGO_URI ENCRYPTION_KEY ALTCHA_HMAC_KEY FRONTEND_URL SITE_URL ALLOWED_ORIGINS EMAIL_* VAPID_* DEMO_EMAILS DEV_API_TOKEN PORT NODE_ENV SKIP_RATE_LIMIT`。客户端 IP 识别（代理标头信任策略，ADR-013）：`TRUST_PROXY_HEADERS PROXY_IP_HEADERS TRUSTED_PROXIES PROXY_TRUSTED_PLATFORM`。
+**同名环境变量优先于 ini 和 .env**（供 systemd 注入密钥、CI 注入 DEV_API_TOKEN 等）。兼容 `.env` 变量名：`JWT_SECRET MONGO_URI ENCRYPTION_KEY ALTCHA_HMAC_KEY FRONTEND_URL SITE_URL ALLOWED_ORIGINS EMAIL_* VAPID_* DEMO_EMAILS DEV_API_TOKEN PORT NODE_ENV SKIP_RATE_LIMIT`。客户端 IP 识别（代理标头信任策略，ADR-013）：`TRUST_PROXY_HEADERS PROXY_IP_HEADERS TRUSTED_PROXIES PROXY_TRUSTED_PLATFORM`。IP 地域解析默认关闭（数据出境合规，ADR-017）：`IP_REGION_ENABLED`。
 
 启动致命校验：缺 `JWT_SECRET`（或 < 32 字符）/ `MONGO_URI` → 退出 1。示例/历史弱密钥与生产 CORS 占位域名仅输出安全告警，不阻止已有服务启动；升级后应尽快轮换/修正。
 
@@ -193,7 +193,7 @@ internal/
   ratelimit/           Store 接口 + 内存滑动窗口 + 命名限流器
   code/                验证码内存存储（CodeStore 接口）
   email/               go-mail 封装 + 模板 + 目标限流
-  ipregion/            ipapi.co 外呼 + 24h LRU
+  ipregion/           IP 地域解析（默认禁用；开启后 ipapi.co 外呼 + 24h LRU）
   upload/              图片落盘（魔数/大小/类型校验）
   pagination/ errors/ logging/ audit/ migrate/ indexes/ cron/
 docs/                  swagger 产物 + 维护文档

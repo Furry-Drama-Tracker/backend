@@ -61,6 +61,13 @@ func main() {
 	if cfg.Server.InsecureOrigins {
 		log.Printf("[SECURITY WARN] 生产环境 CORS 源仍包含 localhost/127.0.0.1/example.com 或为空，请尽快配置真实站点域名")
 	}
+	// IP 地域解析默认关闭（数据出境合规，见 docs/decisions.md ADR-017）：
+	// 开启后登录/注册/设备确认会把客户端 IP 发给第三方 ipapi.co。
+	if cfg.Security.IPRegionEnabled {
+		log.Printf("[SECURITY WARN] IP 地域解析已开启：认证流程会向 ipapi.co 发送客户端 IP（数据出境），非必要请保持关闭")
+	} else {
+		log.Printf("IP 地域解析已禁用（LastLoginRegion 记为 未知）；待本地离线库就绪后再开启")
+	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()

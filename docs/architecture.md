@@ -38,7 +38,7 @@ middleware (横切)              model (struct 映射)            mongo-driver (
 | `ratelimit` | 命名限流器定义（Spec）+ IP key | `AuthSpec`、`IPKey` |
 | `code` | 验证码内存存储（接口化，可换 Redis） | `NewStore`、`GenerateCode` |
 | `email` | SMTP（go-mail）+ 模板 + 目标限流 + SiteContent 配置 | `NewClient` |
-| `ipregion` | ipapi.co 外呼 + LRU | `NewClient` |
+| `ipregion` | IP 地域解析：默认 `NewDisabled`（不外呼，ADR-017）；开启后 ipapi.co 外呼 + LRU | `NewClient`、`NewDisabled` |
 | `upload` | 图片落盘（魔数校验/大小/类型） | `SaveImage`、`RemoveFile` |
 | `pagination` | 分页参数（page/limit 上限 100） | `Parse` |
 | `errors` | AppError + 全局错误处理 | `New`、`NewKey`、`AbortWithAppError` |
@@ -59,7 +59,7 @@ main.go
     └ 装配全局中间件（顺序见下）
     └ 受限流路由组 /api（挂 globalLimiter）
     └ RegisterRoutes(d, api, opts)
-        └ email.NewClient + ipregion.NewClient + service.NewAuthService
+        └ email.NewClient + ipregion.NewDisabled/NewClient（按 ip_region_enabled）+ service.NewAuthService
         └ middleware.NewAuth(repos, signer)
         └ handler.NewAuth(svc, amw, cfg)
         └ Mount 挂 /auth /user-sessions /2fa /users
