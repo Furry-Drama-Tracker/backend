@@ -19,6 +19,7 @@ type Repos struct {
 	UsedTokens      *UsedTokenRepo
 	Notifications   *NotificationRepo
 	AuditLogs       *AuditLogRepo
+	AuthEvents      *AuthEventRepo
 	ApiUsage        *ApiUsageRepo
 	SiteContents    *SiteContentRepo
 	Settings        *SettingRepo
@@ -54,6 +55,7 @@ func NewRepos(db *mongo.Database, loginMaxAttempts, loginLockMinutes int) *Repos
 		UsedTokens:      NewUsedTokenRepo(db.Collection("usedtokens")),
 		Notifications:   NewNotificationRepo(db.Collection("notifications")),
 		AuditLogs:       NewAuditLogRepo(db.Collection("auditlogs")),
+		AuthEvents:      NewAuthEventRepo(db.Collection("authevents")),
 		ApiUsage:        NewApiUsageRepo(db.Collection("apiusages")),
 		SiteContents:    NewSiteContentRepo(db.Collection("sitecontents")),
 		Settings:        NewSettingRepo(db.Collection("settings")),

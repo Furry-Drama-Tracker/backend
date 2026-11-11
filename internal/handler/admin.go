@@ -150,7 +150,7 @@ func (h *Admin) Logout(c *gin.Context) {
 	}
 	if v, ok := c.Get(middleware.ContextAuthTokenKey); ok {
 		if accessToken, ok := v.(string); ok && accessToken != "" {
-			_ = h.Repos.Sessions.DeactivateByTokenHash(ctx, auth.HashToken(accessToken))
+			_ = h.Repos.Sessions.DeactivateByTokenHash(ctx, auth.HashToken(accessToken), model.RevokeLogout)
 		}
 	}
 	auth.ClearAuthCookies(c, !h.Config.IsDev)

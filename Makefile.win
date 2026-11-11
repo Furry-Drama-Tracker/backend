@@ -1,5 +1,5 @@
 # Windows NMAKE makefile - furry-drama-be-neo backend
-# Usage: nmake /f Makefile.win [all|build|release|run|seed|test|vet|fmt|docs|clean]
+# Usage: nmake /f Makefile.win [all|build|release|run|seed|test|vet|fmt|docs|diag|clean]
 # Cross-compile: nmake /f Makefile.win release GOOS=linux GOARCH=arm64
 # Use GNU make with Makefile on Unix/Linux.
 #
@@ -58,6 +58,11 @@ fmt: FORCE
 # go install github.com/swaggo/swag/cmd/swag@latest)
 docs: FORCE
 	$(SWAG) init -g cmd/server/main.go --output docs
+
+# Auth troubleshooting (read-only): session tombstones + auth event timeline.
+# Usage: nmake /f Makefile.win diag ARGS="-user=someone@example.com -days=7"
+diag: FORCE
+	go run .\cmd\diag $(ARGS)
 
 clean: FORCE
 	if exist "$(BINARY)" del /q "$(BINARY)"

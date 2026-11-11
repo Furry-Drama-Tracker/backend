@@ -139,3 +139,24 @@
   - 60/15min 仍保留 DoS 约束：refresh token 是高熵随机串，不存在被爆破的现实风险，故按可用性优先；
   - 宽限期 2min 远小于 access TTL（15min），不影响"真实重用必须吊销全部会话"的语义；
   - 新增回归测试 TestRefreshBurstNotRateLimited（连续 8 次轮换不得 429），旧配置下第 6 次即失败。
+## ADR-016 认证排障：会话墓碑 + 认证事件（authevents）+ cmd/diag
+
+- **决策**：
+  1. 会话置废时写入 `usersessions.revokeReason`（取值见 `model.Revoke*`：logout / rotated / password_changed / password_reset / email_changed / refresh_reuse / user_revoked / user_revoked_all / admin_revoked / expired）；
+  2. 认证链路的**失败与吊销类**事件写双出口：stderr 结构化日志（`event=<类型>`，journalctl 可直接 grep）＋ `authevents` 集合（`at` 建 30 天 TTL 索引）；
+  3. 429 命中时记录 `event=ratelimited spec=<限流器名>`（原本日志里只有状态码，无法区分是哪个限流器打的）；
+  4. 新增只读排障命令 `cmd/diag`（`make diag ARGS="-user=..."`），按邮箱/`_id` 输出会话时间线与事件，并给出"掉登录"结论。
+- **背景**：用户报"用着用着掉登录"时，日志只有 `method/path/status`，既不知道 429 是哪个限流器、也不知道 401 是因为登出、改密、refresh 重用还是 cookie 根本没发出来；`sessions` 也只有 `isActive/logoutAt`，看不出**为什么**被置废。排查只能靠猜。
+- **替代方案**：
+  - 只写日志不落库：journald 未开持久化或日志轮转后就查不到了（用户通常隔天才报障）；
+  - 只落库不写日志：现场 `tail -f` / `journalctl -f` 看不到实时抖动；
+  - 复用 `auditlogs`：那份记业务操作（谁改了谁），语义不同且查询路径不同，混在一起反而更难查。
+- **取舍 / 兼容性**：
+  - `authevents` 只记失败/吊销（成功登录不记），量级很小；TTL 30 天自动清理，无需人工归档；
+  - 落库是 fire-and-forget（3s 超时 + 失败只记一行 warn），**不影响响应**，Mongo 抖动也不会让登录失败；
+  - API 响应**未新增字段**：`handler.sessionJSON` 是显式字段集，`revokeReason` 只存在于库与日志中（避开客户端契约冻结）；
+  - 新增集合意味着备份/恢复白名单不含它（`handler/backup.go`）——排障数据不入备份，属预期。
+- **怎么用**：
+  - 现场：`journalctl -u <unit> | grep 'event='`（看实时，含 spec/reason/detail）；
+  - 事后：`make diag ARGS="-user=someone@example.com -days=7"`（结论直接给"第几秒被谁以什么原因吊销"）；
+  - 面：`make diag ARGS="-recent -hours=6"`（按类型统计，判断是否大面积）。

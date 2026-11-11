@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"fmt"
+	"log/slog"
 	"strconv"
 	"strings"
 	"time"
@@ -10,6 +11,7 @@ import (
 	ulule "github.com/ulule/limiter/v3"
 	memory "github.com/ulule/limiter/v3/drivers/store/memory"
 
+	"github.com/Furry-Drama-Tracker/backend/internal/model"
 	"github.com/Furry-Drama-Tracker/backend/internal/ratelimit"
 )
 
@@ -19,6 +21,9 @@ type RateLimitOpts struct {
 	IsDev bool
 	// SkipRateLimit 对应 SKIP_RATE_LIMIT=1。
 	SkipRateLimit bool
+	// Log 是可选的日志器：429 命中时输出 `event=ratelimited spec=<名字>`，
+	// 便于在 journalctl 里直接看出是哪个限流器打的（原本只能看到 429 状态码）。
+	Log *slog.Logger
 }
 
 // specLimiter 封装 ulule/limiter（每个命名限流器一个独立 limiter + 内存 store）。
@@ -117,6 +122,18 @@ func RateLimit(spec ratelimit.Spec, opts RateLimitOpts) gin.HandlerFunc {
 				retryAfter = 0
 			}
 			c.Header("Retry-After", strconv.FormatInt(retryAfter, 10))
+			// 关键排障信息：哪个限流器、哪条路径、哪个 IP。
+			// 不加这行时，日志里只有 "status=429"，无法区分是登录、refresh
+			// 还是全局限流命中（排查"掉登录"时踩过这个坑）。
+			if opts.Log != nil {
+				opts.Log.Warn("auth event",
+					"event", model.AuthEventRateLimited,
+					"spec", spec.Name,
+					"path", path,
+					"ip", ip,
+					"retry_after_s", retryAfter,
+				)
+			}
 			c.AbortWithStatusJSON(429, gin.H{"message": spec.Message})
 			return
 		}

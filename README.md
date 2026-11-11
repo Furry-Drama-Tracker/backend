@@ -176,6 +176,7 @@ section：`[server] [database] [jwt] [email] [vapid] [security]`。模板见 [`d
 
 ```
 cmd/server/            入口（--config/--listen、TCP/Unix 监听、优雅关停）
+cmd/diag/              认证排障 CLI（会话墓碑 + authevents 时间线，只读）
 internal/
   config/              ini+env 加载与校验
   server/              Gin 装配（中间件管线顺序）+ 路由注册表
@@ -185,7 +186,8 @@ internal/
   service/             领域逻辑（登录分支流、refresh 轮换+重用检测、设备登录码链、2FA、导出）
   repository/          mongo 仓储（Repos 聚合，ToObjectID 规范化）
   model/               struct 映射（bson 标签与既有集合数据形态一致）
-  auth/                jwt/cookies/bcrypt(cost12)/totp/fieldcrypto(AES-256-CBC)/parseUserAgent
+  auth/                jwt/cookies/bcrypt(cost12)/totp/backupcode/fieldcrypto(AES-256-CBC)/parseUserAgent
+  authlog/             认证诊断事件（结构化 stderr event=... + authevents 落库）
   security/            XSS 清洗（bluemonday）+ 密码强度
   altcha/              Altcha v2 PoW
   ratelimit/           Store 接口 + 内存滑动窗口 + 命名限流器
@@ -208,6 +210,7 @@ deploy/                systemd unit + ini 模板 + run.sh
 - **账号锁定**：5 次失败锁 30 分钟（`loginAttempts`/`lockUntil`）。
 - **字段加密**：AES-256-CBC，`enc:iv:ct`，key=`sha256(ENCRYPTION_KEY 或 JWT_SECRET)`，兼容既有加密数据。
 - **限流**：全局 300/min + 各端点专用（login 5/15min、register 3/h 等）；per-endpoint 只匹配 `/api/<mount>`。
+- **认证排障**：会话置废写 `revokeReason`；失败/吊销类事件写 `authevents`（30 天 TTL）并输出 `event=...` 结构化日志；`make diag ARGS="-user=someone@example.com"` 直接给出会话时间线与"为什么掉登录"的结论（`-recent -hours=6` 看全局面）。
 
 ## 部署
 

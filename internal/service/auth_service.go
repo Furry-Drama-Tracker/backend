@@ -16,6 +16,7 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"github.com/Furry-Drama-Tracker/backend/internal/auth"
+	"github.com/Furry-Drama-Tracker/backend/internal/authlog"
 	"github.com/Furry-Drama-Tracker/backend/internal/code"
 	"github.com/Furry-Drama-Tracker/backend/internal/config"
 	"github.com/Furry-Drama-Tracker/backend/internal/email"
@@ -43,6 +44,9 @@ type AuthService struct {
 
 	EmailVerifyCodes *code.Store
 	DeviceLoginCodes *code.Store
+
+	// Rec 是认证诊断事件记录器（可选，nil 时静默）。
+	Rec *authlog.Recorder
 }
 
 // NewAuthService 构造认证服务并初始化验证码内存存储。

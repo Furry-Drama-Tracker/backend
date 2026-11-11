@@ -169,7 +169,7 @@ func (h *Auth) DeleteUserSession(c *gin.Context) {
 		c.JSON(400, gin.H{"message": "不能下线当前设备，请使用退出登录"})
 		return
 	}
-	if err := h.Svc.Repos.Sessions.DeactivateByID(c.Request.Context(), id); err != nil {
+	if err := h.Svc.Repos.Sessions.DeactivateByID(c.Request.Context(), id, model.RevokeUserRevoked); err != nil {
 		c.JSON(500, gin.H{"message": "Server error"})
 		return
 	}
@@ -258,7 +258,7 @@ func (h *Auth) AdminDeleteSession(c *gin.Context) {
 		c.JSON(404, gin.H{"message": "会话不存在"})
 		return
 	}
-	if err := h.Svc.Repos.Sessions.DeactivateByID(c.Request.Context(), id); err != nil {
+	if err := h.Svc.Repos.Sessions.DeactivateByID(c.Request.Context(), id, model.RevokeAdmin); err != nil {
 		c.JSON(500, gin.H{"message": "Server error"})
 		return
 	}
@@ -278,7 +278,7 @@ func (h *Auth) AdminDeleteUserSessions(c *gin.Context) {
 		c.JSON(400, gin.H{"message": "会话不存在"})
 		return
 	}
-	if err := h.Svc.Repos.Sessions.DeactivateAllByUser(c.Request.Context(), userID); err != nil {
+	if err := h.Svc.Repos.Sessions.DeactivateAllByUser(c.Request.Context(), userID, model.RevokeAdmin); err != nil {
 		c.JSON(500, gin.H{"message": "Server error"})
 		return
 	}

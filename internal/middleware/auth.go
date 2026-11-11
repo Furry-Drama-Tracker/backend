@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"github.com/Furry-Drama-Tracker/backend/internal/auth"
+	"github.com/Furry-Drama-Tracker/backend/internal/authlog"
 	"github.com/Furry-Drama-Tracker/backend/internal/model"
 	"github.com/Furry-Drama-Tracker/backend/internal/repository"
 )
@@ -32,6 +33,8 @@ const (
 type Auth struct {
 	Repos  *repository.Repos
 	Signer *auth.Signer
+	// Rec 是可选的认证事件记录器（nil 时静默，便于测试与最小装配）。
+	Rec *authlog.Recorder
 }
 
 // NewAuth 构造认证容器。
@@ -77,6 +80,29 @@ func (a *Auth) Protect(allowedRoles ...string) gin.HandlerFunc {
 		if claims.JTI != "" {
 			sess, serr := a.Repos.Sessions.FindByTokenHash(c.Request.Context(), auth.HashToken(token))
 			if serr != nil || !sess.IsActive || sess.UserID != user.ID {
+				// 记录"为什么这个会话不工作了"——排障的核心证据。
+				reason, detail := "", ""
+				if serr != nil {
+					detail = "session lookup failed"
+				} else if !sess.IsActive {
+					reason = sess.RevokeReason
+					if reason == "" {
+						detail = "revoked with unknown reason"
+					}
+				} else {
+					detail = "session user mismatch"
+				}
+				uid := user.ID
+				a.Rec.Record(model.AuthEvent{
+					Event:  model.AuthEventSessionRevoked,
+					UserID: &uid,
+					Email:  user.Email,
+					IP:     c.ClientIP(),
+					UA:     c.Request.UserAgent(),
+					Path:   c.Request.URL.Path,
+					Reason: reason,
+					Detail: detail,
+				})
 				c.AbortWithStatusJSON(401, gin.H{"message": "Not authorized, token revoked", "messageKey": "auth.invalidToken"})
 				return
 			}

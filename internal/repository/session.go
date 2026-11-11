@@ -57,7 +57,7 @@ func (r *SessionRepo) FindAndDeactivateRefresh(ctx context.Context, hash string)
 	err := r.coll.FindOneAndUpdate(
 		ctx,
 		bson.M{"refreshTokenHash": hash, "isActive": true},
-		bson.M{"$set": bson.M{"isActive": false, "logoutAt": now}},
+		bson.M{"$set": bson.M{"isActive": false, "logoutAt": now, "revokeReason": model.RevokeRotated}},
 		options.FindOneAndUpdate().SetReturnDocument(options.After),
 	).Decode(s)
 	if errors.Is(err, mongo.ErrNoDocuments) {
@@ -94,6 +94,30 @@ func (r *SessionRepo) FindActiveByUser(ctx context.Context, userID any) ([]model
 	return list, nil
 }
 
+// FindByUserSince 返回用户自 since 之后创建的会话（按 loginAt 倒序）。
+// 专供排障（cmd/diag）：需要连已吊销的会话一起看，才能判断"为什么掉登录"。
+func (r *SessionRepo) FindByUserSince(ctx context.Context, userID any, since time.Time, limit int64) ([]model.UserSession, error) {
+	ctx, cancel := r.newCtx(ctx)
+	defer cancel()
+	if limit <= 0 || limit > 500 {
+		limit = 100
+	}
+	cur, err := r.coll.Find(ctx,
+		bson.M{"userId": ToObjectID(userID), "loginAt": bson.M{"$gte": since}},
+		options.Find().
+			SetSort(bson.D{{Key: "loginAt", Value: -1}}).
+			SetLimit(limit))
+	if err != nil {
+		return nil, err
+	}
+	defer cur.Close(ctx)
+	var list []model.UserSession
+	if err := cur.All(ctx, &list); err != nil {
+		return nil, err
+	}
+	return list, nil
+}
+
 // UpdateLastActiveByRefresh 更新 lastActiveAt（鉴权中间件 fire-and-forget）。
 func (r *SessionRepo) UpdateLastActiveByRefresh(ctx context.Context, userID any, t time.Time) error {
 	ctx, cancel := r.newCtx(ctx)
@@ -115,32 +139,33 @@ func (r *SessionRepo) UpdateLastActiveByTokenHash(ctx context.Context, hash stri
 }
 
 // DeactivateAllByUser 吊销用户全部 active 会话（updateMany 批量置 inactive + logoutAt）。
-func (r *SessionRepo) DeactivateAllByUser(ctx context.Context, userID any) error {
+// reason 写入 revokeReason（取值见 model.Revoke*），供排障区分吊销来源。
+func (r *SessionRepo) DeactivateAllByUser(ctx context.Context, userID any, reason string) error {
 	ctx, cancel := r.newCtx(ctx)
 	defer cancel()
 	_, err := r.coll.UpdateMany(ctx,
 		bson.M{"userId": userID, "isActive": true},
-		bson.M{"$set": bson.M{"isActive": false, "logoutAt": time.Now()}})
+		bson.M{"$set": bson.M{"isActive": false, "logoutAt": time.Now(), "revokeReason": reason}})
 	return err
 }
 
 // DeactivateByTokenHash 按旧 access 哈希置废（登出用）。
-func (r *SessionRepo) DeactivateByTokenHash(ctx context.Context, hash string) error {
+func (r *SessionRepo) DeactivateByTokenHash(ctx context.Context, hash, reason string) error {
 	ctx, cancel := r.newCtx(ctx)
 	defer cancel()
 	_, err := r.coll.UpdateOne(ctx,
 		bson.M{"tokenHash": hash, "isActive": true},
-		bson.M{"$set": bson.M{"isActive": false, "logoutAt": time.Now()}})
+		bson.M{"$set": bson.M{"isActive": false, "logoutAt": time.Now(), "revokeReason": reason}})
 	return err
 }
 
 // DeactivateByID 按 ID 置废（userSessions 管理用，不能下线当前设备由 handler 判断）。
-func (r *SessionRepo) DeactivateByID(ctx context.Context, id any) error {
+func (r *SessionRepo) DeactivateByID(ctx context.Context, id any, reason string) error {
 	ctx, cancel := r.newCtx(ctx)
 	defer cancel()
 	_, err := r.coll.UpdateOne(ctx,
 		bson.M{"_id": ToObjectID(id), "isActive": true},
-		bson.M{"$set": bson.M{"isActive": false, "logoutAt": time.Now()}})
+		bson.M{"$set": bson.M{"isActive": false, "logoutAt": time.Now(), "revokeReason": reason}})
 	return err
 }
 
@@ -245,12 +270,12 @@ func (r *SessionRepo) FindByUser(ctx context.Context, userID any, limit int) ([]
 // MarkInactiveOlderThan 把 lastActiveAt 早于 cutoff 的 active 会话批量置为 inactive+logoutAt。
 // updateMany({isActive:true, lastActiveAt:{$lt:cutoff}})（会话清理定时任务使用）。
 // 返回被修改的文档数。
-func (r *SessionRepo) MarkInactiveOlderThan(ctx context.Context, cutoff time.Time) (int64, error) {
+func (r *SessionRepo) MarkInactiveOlderThan(ctx context.Context, cutoff time.Time, reason string) (int64, error) {
 	ctx, cancel := r.newCtx(ctx)
 	defer cancel()
 	res, err := r.coll.UpdateMany(ctx,
 		bson.M{"isActive": true, "lastActiveAt": bson.M{"$lt": cutoff}},
-		bson.M{"$set": bson.M{"isActive": false, "logoutAt": time.Now()}})
+		bson.M{"$set": bson.M{"isActive": false, "logoutAt": time.Now(), "revokeReason": reason}})
 	if err != nil {
 		return 0, err
 	}

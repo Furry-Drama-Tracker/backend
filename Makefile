@@ -21,7 +21,7 @@ BINARY ?= $(BIN_DIR)/$(NAME)$(if $(filter windows,$(TARGET_GOOS)),.exe)
 # 发布构建的链接参数：-s 去掉符号表，-w 去掉 DWARF 调试信息
 STRIP_LDFLAGS ?= -s -w
 
-.PHONY: all build release run seed test vet fmt docs clean
+.PHONY: all build release run seed test vet fmt docs diag clean
 
 all: build
 
@@ -50,6 +50,12 @@ fmt:
 # 重新生成 Swagger 产物（需要 swag，安装：go install github.com/swaggo/swag/cmd/swag@latest）
 docs:
 	$(SWAG) init -g cmd/server/main.go --output docs
+
+# 认证排障（只读）：按邮箱或 _id 输出会话墓碑 + 认证事件时间线
+# 用法：make diag ARGS="-user=someone@example.com -days=7"
+#       make diag ARGS="-recent -hours=6"
+diag:
+	go run ./cmd/diag $(ARGS)
 
 clean:
 	rm -f $(BINARY)

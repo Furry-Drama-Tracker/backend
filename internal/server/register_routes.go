@@ -6,6 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
+	"github.com/Furry-Drama-Tracker/backend/internal/authlog"
 	"github.com/Furry-Drama-Tracker/backend/internal/email"
 	"github.com/Furry-Drama-Tracker/backend/internal/handler"
 	"github.com/Furry-Drama-Tracker/backend/internal/ipregion"
@@ -17,12 +18,15 @@ import (
 
 // RegisterRoutes 挂载第一段业务路由（认证 + 用户域）到受限流的 /api 路由组下。
 // 每个端点只在 /api 下注册一次；per-endpoint 限流由 middleware.RateLimit 施加。
-func RegisterRoutes(d Deps, api *gin.RouterGroup, opts middleware.RateLimitOpts) {
+// rec 是认证诊断事件记录器（nil 时静默）。
+func RegisterRoutes(d Deps, api *gin.RouterGroup, opts middleware.RateLimitOpts, rec *authlog.Recorder) {
 	mail := email.NewClient(d.Config, d.Repos.SiteContents)
 	mail.StartCleanup(10 * time.Minute)
 	ipr := ipregion.NewClient(nil)
 	svc := service.NewAuthService(d.Config, d.Repos, d.Signer, mail, ipr)
+	svc.Rec = rec
 	amw := middleware.NewAuth(d.Repos, d.Signer)
+	amw.Rec = rec
 	h := handler.NewAuth(svc, amw, d.Config)
 	// 同一 spec 在同一个 App 内复用同一个 limiter，使挂载到多个路由的 spec
 	// （例如 2FA）共享计数器；不同 App/测试实例之间互不影响。

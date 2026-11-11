@@ -121,6 +121,9 @@ type UserSession struct {
 	LoginAt          time.Time          `bson:"loginAt" json:"loginAt"`
 	LastActiveAt     time.Time          `bson:"lastActiveAt" json:"lastActiveAt"`
 	LogoutAt         *time.Time         `bson:"logoutAt" json:"logoutAt"`
+	// RevokeReason 是会话被置为 inactive 的原因（取值见 Revoke* 常量）。
+	// 排障用：用户报"掉登录"时据此判断是用户登出、改密、重用检测还是 cron 过期。
+	RevokeReason string `bson:"revokeReason,omitempty" json:"revokeReason,omitempty"`
 }
 
 // UsedToken 一次性令牌去重表（usedtokens 集合，expiresAt 建 TTL 索引自动删除）。

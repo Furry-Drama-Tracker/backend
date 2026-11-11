@@ -87,6 +87,12 @@ func Ensure(ctx context.Context, db *mongo.Database) error {
 		{coll: "auditlogs", name: "adminId_1", keys: bson.D{{Key: "adminId", Value: 1}}},
 		{coll: "auditlogs", name: "userId_1", keys: bson.D{{Key: "userId", Value: 1}}},
 
+		// authevents 是认证排障事件（会话吊销/refresh 异常/限流），按 userId+时间查，
+		// 并靠 at 的 TTL 索引自动过期（30 天），避免无界增长。
+		{coll: "authevents", name: "userId_1_at_-1", keys: bson.D{{Key: "userId", Value: 1}, {Key: "at", Value: -1}}},
+		{coll: "authevents", name: "email_1_at_-1", keys: bson.D{{Key: "email", Value: 1}, {Key: "at", Value: -1}}},
+		{coll: "authevents", name: "at_1", keys: bson.D{{Key: "at", Value: 1}}, isTTL: true, ttlSeconds: 30 * 24 * 60 * 60},
+
 		{coll: "apiusages", name: "endpoint_1_date_1", keys: bson.D{{Key: "endpoint", Value: 1}, {Key: "date", Value: 1}}, unique: true},
 		{coll: "sitecontents", name: "key_1", keys: bson.D{{Key: "key", Value: 1}}, unique: true},
 		{coll: "folders", name: "userId_1_type_1", keys: bson.D{{Key: "userId", Value: 1}, {Key: "type", Value: 1}}},

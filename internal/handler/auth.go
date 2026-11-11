@@ -9,6 +9,7 @@ import (
 	"github.com/Furry-Drama-Tracker/backend/internal/config"
 	"github.com/Furry-Drama-Tracker/backend/internal/errors"
 	"github.com/Furry-Drama-Tracker/backend/internal/middleware"
+	"github.com/Furry-Drama-Tracker/backend/internal/model"
 	"github.com/Furry-Drama-Tracker/backend/internal/service"
 )
 
@@ -209,6 +210,11 @@ func (h *Auth) Refresh(c *gin.Context) {
 	refreshToken := auth.GetRefreshToken(c)
 	res, err := h.Svc.VerifyRefreshToken(c.Request.Context(), refreshToken)
 	if err != nil {
+		// 记录 refresh 失败原因（cookie 缺失 / 过期 / 非法）——与"并发宽限"
+		// 和"重用检测"在响应上都是 4xx，但排障含义完全不同。
+		if appErr, ok := err.(*errors.AppError); ok {
+			h.recordRefreshInvalid(c, appErr)
+		}
 		if appErr, ok := err.(*errors.AppError); ok && appErr.Status == 409 {
 			// 并发刷新：不清 cookie 不吊销（固定契约，勿改）。
 			errors.AbortWithAppError(c, err, h.Config.IsDev)
@@ -223,6 +229,29 @@ func (h *Auth) Refresh(c *gin.Context) {
 		return
 	}
 	c.JSON(200, h.Svc.SessionUserJSON(res.User))
+}
+
+// recordRefreshInvalid 记录 refresh 的"非重用类"失败（缺 cookie / 过期 / 非法）。
+// 409 并发宽限与 401 重用检测在 service 层记录（那里才知道 userId）。
+func (h *Auth) recordRefreshInvalid(c *gin.Context, e *errors.AppError) {
+	var detail string
+	switch e.MessageKey {
+	case "auth.noRefreshToken":
+		detail = "cookie missing"
+	case "auth.refreshTokenExpired":
+		detail = "expired"
+	case "auth.invalidToken":
+		detail = "invalid"
+	default:
+		return
+	}
+	h.Svc.Rec.Record(model.AuthEvent{
+		Event:  model.AuthEventRefreshInvalid,
+		IP:     c.ClientIP(),
+		UA:     c.Request.UserAgent(),
+		Path:   c.Request.URL.Path,
+		Detail: detail,
+	})
 }
 
 // ---- me ----

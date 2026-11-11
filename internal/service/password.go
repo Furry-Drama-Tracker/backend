@@ -9,6 +9,7 @@ import (
 
 	"github.com/Furry-Drama-Tracker/backend/internal/auth"
 	"github.com/Furry-Drama-Tracker/backend/internal/errors"
+	"github.com/Furry-Drama-Tracker/backend/internal/model"
 )
 
 // ChangePassword PUT /api/auth/change-password（protect）。
@@ -33,7 +34,7 @@ func (s *AuthService) ChangePassword(c *gin.Context, userID interface{}, current
 	if err := s.Repos.Users.UpdatePassword(c.Request.Context(), userID, hash, time.Now()); err != nil {
 		return errors.New(500, "服务器错误")
 	}
-	_ = s.Repos.Sessions.DeactivateAllByUser(c.Request.Context(), userID)
+	_ = s.Repos.Sessions.DeactivateAllByUser(c.Request.Context(), userID, model.RevokePasswordChanged)
 	s.Audit(c.Request.Context(), user, "CHANGE_PASSWORD", "auth", "User change password", s.ClientIP(c))
 	auth.ClearAuthCookies(c, !s.Config.IsDev)
 	return nil
@@ -97,12 +98,12 @@ func (s *AuthService) ResetPassword(ctx context.Context, token, newPassword stri
 	if err := s.Repos.Users.UpdatePassword(ctx, user.ID, hash, time.Now()); err != nil {
 		return errors.New(500, "服务器错误")
 	}
-	_ = s.Repos.Sessions.DeactivateAllByUser(ctx, user.ID)
+	_ = s.Repos.Sessions.DeactivateAllByUser(ctx, user.ID, model.RevokePasswordReset)
 	s.Audit(ctx, user, "PASSWORD_RESET", "auth", "User password reset", "")
 	return nil
 }
 
 // DeactivateAllSessions 吊销用户全部会话（change-email 等场景复用）。
-func (s *AuthService) DeactivateAllSessions(ctx context.Context, userID interface{}) error {
-	return s.Repos.Sessions.DeactivateAllByUser(ctx, userID)
+func (s *AuthService) DeactivateAllSessions(ctx context.Context, userID interface{}, reason string) error {
+	return s.Repos.Sessions.DeactivateAllByUser(ctx, userID, reason)
 }

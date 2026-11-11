@@ -42,6 +42,7 @@ go run ./cmd/server --listen=unix:/run/furry-drama-be-neo.sock   # Unix socket
 
 ```
 cmd/server/           入口（--config/--listen、TCP/Unix 监听、优雅关停）
+cmd/diag/             认证排障 CLI（会话墓碑 + authevents 时间线，只读）
 internal/
   config/             ini+env 加载与校验
   server/             Gin 装配（中间件管线顺序见 app.go 注释）
@@ -51,7 +52,8 @@ internal/
   service/            领域逻辑（登录分支流、refresh 轮换、设备码链、导出）
   repository/         mongo repo（Repos 聚合注入）
   model/              struct 映射（bson 标签与既有集合数据形态一致）
-  auth/               jwt/cookies/bcrypt/totp/fieldcrypto/lockout
+  auth/               jwt/cookies/bcrypt/totp/backupcode/fieldcrypto/lockout
+  authlog/            认证诊断事件记录器（结构化 stderr + authevents 落库）
   security/           XSS 清洗（bluemonday）+ 密码强度
   altcha/             Altcha v2 PoW
   ratelimit/          限流（Store interface，内存滑动窗口）
@@ -89,6 +91,7 @@ deploy/               systemd unit + ini 模板 + run.sh
 6. **单前缀路由**：所有领域端点只挂 `/api/<path>`；v1 镜像已移除，per-endpoint 限流只匹配 `/api/<mount>`；global 作用于全部 `/api/*`
 7. **`_id` 输出 hex 字符串**；`backgroundPrefs` 默认 `{image:'',enabled:false,opacity:30,blur:0}`
 8. 行为怪癖与有意偏离（XSS 处理、固定窗口限流等）集中在 `docs/decisions.md`——**改动任何行为前先读**；`go test ./...` 是行为回归闸门
+9. **会话墓碑**：任何把会话置为 `isActive=false` 的路径都必须写 `revokeReason`（`model.Revoke*`），不得静默置废——`make diag` 与 `authevents` 排障链依赖它；认证失败/吊销事件统一走 `authlog.Recorder`（stderr `event=` + `authevents`）
 
 <!-- OPENWIKI:START -->
 

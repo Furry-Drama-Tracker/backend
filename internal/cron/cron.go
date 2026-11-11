@@ -9,6 +9,7 @@ import (
 	"log/slog"
 	"time"
 
+	"github.com/Furry-Drama-Tracker/backend/internal/model"
 	"github.com/Furry-Drama-Tracker/backend/internal/repository"
 	"github.com/Furry-Drama-Tracker/backend/internal/service"
 )
@@ -89,7 +90,7 @@ func nextDailyDelay(now time.Time, hour int) time.Duration {
 // cleanupExpiredSessions 会话清理任务体。
 func cleanupExpiredSessions(ctx context.Context, repos *repository.Repos) {
 	cutoff := time.Now().Add(-sessionTTL)
-	n, err := repos.Sessions.MarkInactiveOlderThan(ctx, cutoff)
+	n, err := repos.Sessions.MarkInactiveOlderThan(ctx, cutoff, model.RevokeExpired)
 	if err != nil {
 		slog.Error("[Cron] Session cleanup error", "err", err)
 		return

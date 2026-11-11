@@ -49,7 +49,7 @@ func (s *AuthService) ChangeEmail(c *gin.Context, userID interface{}, newEmail, 
 		go s.Mail.SendVerificationCodeEmail(context.Background(), user.Email, verifyCode, "changeEmail")
 	}
 	s.Audit(ctx, user, "CHANGE_EMAIL", "auth", "User change email", s.ClientIP(c))
-	_ = s.Repos.Sessions.DeactivateAllByUser(ctx, user.ID)
+	_ = s.Repos.Sessions.DeactivateAllByUser(ctx, user.ID, model.RevokeEmailChanged)
 	auth.ClearAuthCookies(c, !s.Config.IsDev)
 	return nil
 }
@@ -259,6 +259,6 @@ func (s *AuthService) VerifyEmailChange(ctx context.Context, token string) (stri
 	if err := s.Repos.Users.SetEmailVerifiedAndEmail(ctx, user.ID, newEmail); err != nil {
 		return "", errors.New(500, "服务器错误")
 	}
-	_ = s.Repos.Sessions.DeactivateAllByUser(ctx, user.ID)
+	_ = s.Repos.Sessions.DeactivateAllByUser(ctx, user.ID, model.RevokeEmailChanged)
 	return newEmail, nil
 }

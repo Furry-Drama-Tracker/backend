@@ -67,6 +67,13 @@ func (s *AuthService) handleRefreshMiss(ctx context.Context, hash, claimsID stri
 	if err == nil && existing.LogoutAt != nil {
 		if time.Since(*existing.LogoutAt) < ConcurrentRefreshGrace {
 			// 同一 refresh token 刚被另一请求轮换（并发刷新，非重用攻击）。
+			uid := existing.UserID
+			s.Rec.Record(model.AuthEvent{
+				Event:  model.AuthEventRefreshGrace,
+				UserID: &uid,
+				Reason: model.RevokeRotated,
+				Detail: "old token reused within grace window",
+			})
 			return nil, errors.NewKey(409, "Concurrent refresh", "auth.concurrentRefresh")
 		}
 	}
@@ -77,7 +84,13 @@ func (s *AuthService) handleRefreshMiss(ctx context.Context, hash, claimsID stri
 	}
 	if userIDHex != "" {
 		if oid, err := primitive.ObjectIDFromHex(userIDHex); err == nil {
-			_ = s.Repos.Sessions.DeactivateAllByUser(ctx, oid)
+			_ = s.Repos.Sessions.DeactivateAllByUser(ctx, oid, model.RevokeRefreshReuse)
+			s.Rec.Record(model.AuthEvent{
+				Event:  model.AuthEventRefreshReuse,
+				UserID: &oid,
+				Reason: model.RevokeRefreshReuse,
+				Detail: "all sessions revoked",
+			})
 		}
 	}
 	return nil, errors.NewKey(401, "Refresh token reuse detected", "auth.refreshTokenReuse")
@@ -118,12 +131,12 @@ func (s *AuthService) DeactivateForLogout(c *gin.Context, refreshToken, accessTo
 	if refreshToken != "" {
 		hash := auth.HashToken(refreshToken)
 		if sess, err := s.Repos.Sessions.FindByRefreshTokenHash(c.Request.Context(), hash); err == nil {
-			_ = s.Repos.Sessions.DeactivateByID(c.Request.Context(), sess.ID)
+			_ = s.Repos.Sessions.DeactivateByID(c.Request.Context(), sess.ID, model.RevokeLogout)
 		}
 	}
 	if accessToken != "" {
 		hash := auth.HashToken(accessToken)
-		_ = s.Repos.Sessions.DeactivateByTokenHash(c.Request.Context(), hash)
+		_ = s.Repos.Sessions.DeactivateByTokenHash(c.Request.Context(), hash, model.RevokeLogout)
 	}
 	auth.ClearAuthCookies(c, !s.Config.IsDev)
 }

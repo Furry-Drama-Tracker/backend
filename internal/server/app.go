@@ -16,6 +16,7 @@
 package server
 
 import (
+	"log/slog"
 	"net/http"
 	"os"
 	"path"
@@ -29,6 +30,7 @@ import (
 
 	_ "github.com/Furry-Drama-Tracker/backend/docs" // swag init 生成的 OpenAPI spec（init 注册）
 	"github.com/Furry-Drama-Tracker/backend/internal/auth"
+	"github.com/Furry-Drama-Tracker/backend/internal/authlog"
 	"github.com/Furry-Drama-Tracker/backend/internal/config"
 	"github.com/Furry-Drama-Tracker/backend/internal/errors"
 	"github.com/Furry-Drama-Tracker/backend/internal/handler"
@@ -45,6 +47,8 @@ type Deps struct {
 	DB     *mongo.Database
 	Repos  *repository.Repos
 	Signer *auth.Signer
+	// Log 可选：不传则按 IsDev 新建（测试可注入捕获器）。
+	Log *slog.Logger
 }
 
 // NewApp 按管线顺序装配并返回 Gin 引擎。
@@ -56,7 +60,12 @@ func NewApp(d Deps) *gin.Engine {
 	}
 	r := gin.New()
 	r.Use(gin.Recovery())
-	log := logging.New(d.Config.IsDev)
+	log := d.Log
+	if log == nil {
+		log = logging.New(d.Config.IsDev)
+	}
+	// 认证诊断事件记录器：结构化写 stderr + 异步落 authevents（30 天 TTL）。
+	rec := authlog.New(log, d.Repos.AuthEvents)
 
 	// ---- 客户端 IP 识别（gin c.ClientIP，配置见 [server] trust_proxy_headers 等）----
 	// 信任开关缺省沿用历史行为：生产信任、开发不信任。
@@ -108,6 +117,7 @@ func NewApp(d Deps) *gin.Engine {
 	opts := middleware.RateLimitOpts{
 		IsDev:         d.Config.IsDev,
 		SkipRateLimit: d.Config.Security.RateLimitSkip,
+		Log:           log,
 	}
 	api := r.Group("/api")
 	api.Use(middleware.RateLimit(ratelimit.GlobalSpec, opts))
@@ -119,7 +129,7 @@ func NewApp(d Deps) *gin.Engine {
 	}
 
 	// ---- 业务路由挂载（M2 填充；挂 api 组下以继承 globalLimiter）----
-	RegisterRoutes(d, api, opts)
+	RegisterRoutes(d, api, opts, rec)
 
 	// ---- /uploads 静态服务（图片/SVG 图标，公开可读）----
 	// 不挂 /api 组：避免吃 globalLimiter（300/min）；apitracker 只统计 /api/、CSRF 对 GET

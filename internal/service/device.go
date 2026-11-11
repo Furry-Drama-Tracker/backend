@@ -167,6 +167,14 @@ func (s *AuthService) Login2FA(c *gin.Context, emailAddr, challenge, token strin
 			return nil, errors.New(500, "服务器错误")
 		}
 		if !accepted {
+			// 同一时间步重复提交：可能是重放，也可能是用户重复点击。
+			uid := user.ID
+			s.Rec.Record(model.AuthEvent{
+				Event:  model.AuthEventTwoFAReplay,
+				UserID: &uid,
+				Email:  user.Email,
+				Detail: "totp step already consumed",
+			})
 			return nil, s.rejectTwoFactor(c.Request.Context(), user)
 		}
 		// 下方 Save 为整文档替换，需同步内存值以免把刚写入的标记回滚。

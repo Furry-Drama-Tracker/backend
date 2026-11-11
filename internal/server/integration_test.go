@@ -18,15 +18,24 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 
 	"github.com/Furry-Drama-Tracker/backend/internal/auth"
 	"github.com/Furry-Drama-Tracker/backend/internal/config"
+	"github.com/Furry-Drama-Tracker/backend/internal/model"
 	"github.com/Furry-Drama-Tracker/backend/internal/repository"
 	"github.com/Furry-Drama-Tracker/backend/internal/server"
 )
 
 // testServer 组装测试服务器（真实 mongod）。
 func testServer(t *testing.T) *httptest.Server {
+	t.Helper()
+	ts, _ := testServerWithRepos(t)
+	return ts
+}
+
+// testServerWithRepos 同 testServer，但额外返回仓储（需要直接查库断言的测试用）。
+func testServerWithRepos(t *testing.T) (*httptest.Server, *repository.Repos) {
 	t.Helper()
 	gin.SetMode(gin.TestMode)
 	cfg := &config.Config{}
@@ -53,7 +62,7 @@ func testServer(t *testing.T) *httptest.Server {
 	app := server.NewApp(server.Deps{Config: cfg, DB: db, Repos: repos, Signer: signer})
 	ts := httptest.NewServer(app)
 	t.Cleanup(ts.Close)
-	return ts
+	return ts, repos
 }
 
 // client 是带 cookie jar + CSRF 自动回填的测试客户端。
@@ -377,6 +386,128 @@ func TestRefreshBurstNotRateLimited(t *testing.T) {
 		if resp.StatusCode != 200 {
 			t.Fatalf("refresh #%d must not be rate limited: %d body=%v", i+1, resp.StatusCode, out)
 		}
+	}
+}
+
+// TestSessionRevokeReasonAndEvent 验证"会话墓碑 + 认证事件"这条排障链：
+// 会话被吊销后写入 revokeReason，下一次带旧 access token 的请求触发
+// session_revoked 事件（含原因），两者都能被事后查到。
+func TestSessionRevokeReasonAndEvent(t *testing.T) {
+	ts, repos := testServerWithRepos(t)
+	c := newClient(t, ts.URL)
+	email := "it_revoke_" + fmt.Sprintf("%d", time.Now().UnixNano()%1e7) + "@test.com"
+	c.register(email)
+
+	var login map[string]any
+	if resp := c.json("POST", "/api/auth/login", map[string]any{"email": email, "password": "pass1234"}, &login); resp.StatusCode != 200 {
+		t.Fatalf("login: %d body=%v", resp.StatusCode, login)
+	}
+	uidHex, _ := login["_id"].(string)
+	uid, err := primitive.ObjectIDFromHex(uidHex)
+	if err != nil {
+		t.Fatalf("bad user id %q: %v", uidHex, err)
+	}
+
+	// 轮换一次：旧会话留下 rotated 墓碑，新会话成为唯一的 active。
+	var rotated map[string]any
+	if resp := c.json("POST", "/api/auth/refresh", nil, &rotated); resp.StatusCode != 200 {
+		t.Fatalf("refresh: %d body=%v", resp.StatusCode, rotated)
+	}
+	active, err := repos.Sessions.FindActiveByUser(t.Context(), uid)
+	if err != nil {
+		t.Fatalf("find active sessions: %v", err)
+	}
+	if len(active) != 1 {
+		t.Fatalf("want exactly 1 active session after rotation, got %d", len(active))
+	}
+	sessID := active[0].ID
+
+	// 直接吊销该会话（模拟管理员强制下线），随后带旧 access 的请求应 401。
+	if err := repos.Sessions.DeactivateByID(t.Context(), sessID, model.RevokeAdmin); err != nil {
+		t.Fatalf("deactivate: %v", err)
+	}
+	var me map[string]any
+	if resp := c.json("GET", "/api/auth/me", nil, &me); resp.StatusCode != 401 {
+		t.Fatalf("/me after revoke should be 401, got %d body=%v", resp.StatusCode, me)
+	}
+
+	// 墓碑：会话本身记下了吊销原因。
+	revoked, err := repos.Sessions.FindByID(t.Context(), sessID)
+	if err != nil {
+		t.Fatalf("reload session: %v", err)
+	}
+	if revoked.RevokeReason != model.RevokeAdmin {
+		t.Fatalf("revokeReason = %q, want %q", revoked.RevokeReason, model.RevokeAdmin)
+	}
+
+	// 事件：异步落库，轮询等待（最多 3s）。
+	var got *model.AuthEvent
+	deadline := time.Now().Add(3 * time.Second)
+	for time.Now().Before(deadline) {
+		events, err := repos.AuthEvents.FindByUserID(t.Context(), uid, time.Now().Add(-time.Hour), 50)
+		if err != nil {
+			t.Fatalf("find events: %v", err)
+		}
+		for i := range events {
+			if events[i].Event == model.AuthEventSessionRevoked {
+				got = &events[i]
+				break
+			}
+		}
+		if got != nil {
+			break
+		}
+		time.Sleep(50 * time.Millisecond)
+	}
+	if got == nil {
+		t.Fatal("session_revoked 事件未落库")
+	}
+	if got.Reason != model.RevokeAdmin {
+		t.Fatalf("event reason = %q, want %q", got.Reason, model.RevokeAdmin)
+	}
+	if got.Email != email {
+		t.Fatalf("event email = %q, want %q", got.Email, email)
+	}
+	if got.Path == "" || got.IP == "" {
+		t.Fatalf("event 缺少 path/ip: %+v", got)
+	}
+}
+
+// TestRefreshInvalidEventRecorded 没有 refresh cookie 的请求应记录 refresh_invalid
+// （区分"客户端没带 cookie"与"token 过期/重用"——掉登录排障的关键分叉）。
+func TestRefreshInvalidEventRecorded(t *testing.T) {
+	ts, repos := testServerWithRepos(t)
+	c := newClient(t, ts.URL) // 全新 jar：没有任何登录 cookie
+
+	var out map[string]any
+	resp := c.json("POST", "/api/auth/refresh", nil, &out)
+	if resp.StatusCode != 401 {
+		t.Fatalf("refresh without cookie: %d body=%v", resp.StatusCode, out)
+	}
+
+	var got *model.AuthEvent
+	deadline := time.Now().Add(3 * time.Second)
+	for time.Now().Before(deadline) {
+		events, err := repos.AuthEvents.Recent(t.Context(), time.Now().Add(-time.Hour), 50)
+		if err != nil {
+			t.Fatalf("find events: %v", err)
+		}
+		for i := range events {
+			if events[i].Event == model.AuthEventRefreshInvalid {
+				got = &events[i]
+				break
+			}
+		}
+		if got != nil {
+			break
+		}
+		time.Sleep(50 * time.Millisecond)
+	}
+	if got == nil {
+		t.Fatal("refresh_invalid 事件未落库")
+	}
+	if got.Detail != "cookie missing" {
+		t.Fatalf("event detail = %q, want %q", got.Detail, "cookie missing")
 	}
 }
 
