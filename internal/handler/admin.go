@@ -145,7 +145,12 @@ func (h *Admin) Logout(c *gin.Context) {
 	ctx := c.Request.Context()
 	if refreshToken := auth.GetRefreshToken(c); refreshToken != "" {
 		if _, err := h.Repos.Sessions.FindAndDeactivateRefresh(ctx, auth.HashToken(refreshToken)); err != nil {
-			// 无匹配 session 不影响登出（无匹配时静默）。
+			// 无匹配的 active 会话：可能是无此令牌，也可能是已消费（被先行轮换）。
+			// 查一次区分：已消费 = 令牌重用信号 → 吊销该用户全部 active 会话，
+			// 防止先行轮换的窃贼会话在受害者登出后继续存活。
+			if sess, ferr := h.Repos.Sessions.FindByRefreshTokenHash(ctx, auth.HashToken(refreshToken)); ferr == nil && !sess.IsActive {
+				_ = h.Repos.Sessions.DeactivateAllByUser(ctx, sess.UserID, model.RevokeRefreshReuse)
+			}
 		}
 	}
 	if v, ok := c.Get(middleware.ContextAuthTokenKey); ok {

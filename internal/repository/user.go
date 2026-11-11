@@ -173,34 +173,41 @@ func IsLocked(u *model.User) bool {
 }
 
 // IncLoginAttempts 增加登录失败次数；达到阈值后锁定 lockMinutes 分钟。
-// 若当前已锁定则重置为 1 次并清除 lockUntil（防御分支）。
+// 全程使用带状态守卫的原子更新，并发下不会重置/清除兄弟请求刚设置的锁：
+//  1. 锁已过期 → 重置计数并清除（仅在过期后重启计数，对齐 Express 原版语义）；
+//  2. 未锁定 → $inc 原子递增（替代读后 $set，避免并发丢计数）；
+//  3. 递增后达到阈值 → 上锁（守卫"未锁定"，并发重复上锁幂等且不覆盖已有活动锁）。
+// 活动中的锁在 2/3 两步过滤器中均不匹配，保持锁定直到过期。
 func (r *UserRepo) IncLoginAttempts(ctx context.Context, id any) error {
 	ctx, cancel := r.newCtx(ctx)
 	defer cancel()
 
-	// 先读当前锁定状态
-	var lock struct {
-		LockUntil     int64 `bson:"lockUntil"`
-		LoginAttempts int   `bson:"loginAttempts"`
-	}
-	err := r.coll.FindOne(ctx, bson.M{"_id": ToObjectID(id)},
-		options.FindOne().SetProjection(bson.M{"lockUntil": 1, "loginAttempts": 1})).Decode(&lock)
-	if err != nil {
-		return normalizeErr(err)
-	}
 	now := time.Now()
-	if lock.LockUntil > 0 && lock.LockUntil > now.UnixMilli() {
-		// 已锁定：重置并清除锁
-		_, err = r.coll.UpdateOne(ctx, bson.M{"_id": ToObjectID(id)},
-			bson.M{"$set": bson.M{"loginAttempts": 1}, "$unset": bson.M{"lockUntil": ""}})
+	// "未锁定"守卫：字段缺失 / 0 / 已过期均匹配，活动锁不匹配
+	//（$not 对缺失字段的 $gt 取反为 true）。
+	notLocked := bson.M{"$not": bson.M{"$gt": now.UnixMilli()}}
+
+	// 1) 过期锁：重启计数（lockUntil > 0 且 <= now）。
+	if _, err := r.coll.UpdateOne(ctx,
+		bson.M{"_id": ToObjectID(id), "lockUntil": bson.M{"$gt": int64(0), "$lte": now.UnixMilli()}},
+		bson.M{"$set": bson.M{"loginAttempts": 0}, "$unset": bson.M{"lockUntil": ""}}); err != nil {
 		return err
 	}
-	next := lock.LoginAttempts + 1
-	update := bson.M{"$set": bson.M{"loginAttempts": next}}
-	if next >= r.maxAttempts {
-		update["$set"].(bson.M)["lockUntil"] = now.Add(time.Duration(r.lockMinutes) * time.Minute).UnixMilli()
+
+	// 2) 原子递增：仅未锁定的文档匹配（过滤器即状态守卫）。
+	res, err := r.coll.UpdateOne(ctx,
+		bson.M{"_id": ToObjectID(id), "lockUntil": notLocked},
+		bson.M{"$inc": bson.M{"loginAttempts": 1}})
+	if err != nil {
+		return err
 	}
-	_, err = r.coll.UpdateOne(ctx, bson.M{"_id": ToObjectID(id)}, update)
+
+	// 3) 递增后达到阈值 → 上锁（同样带未锁定守卫）。
+	if res.ModifiedCount > 0 {
+		_, err = r.coll.UpdateOne(ctx,
+			bson.M{"_id": ToObjectID(id), "loginAttempts": bson.M{"$gte": r.maxAttempts}, "lockUntil": notLocked},
+			bson.M{"$set": bson.M{"lockUntil": now.Add(time.Duration(r.lockMinutes) * time.Minute).UnixMilli()}})
+	}
 	return err
 }
 

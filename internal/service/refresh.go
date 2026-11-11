@@ -131,7 +131,20 @@ func (s *AuthService) DeactivateForLogout(c *gin.Context, refreshToken, accessTo
 	if refreshToken != "" {
 		hash := auth.HashToken(refreshToken)
 		if sess, err := s.Repos.Sessions.FindByRefreshTokenHash(c.Request.Context(), hash); err == nil {
-			_ = s.Repos.Sessions.DeactivateByID(c.Request.Context(), sess.ID, model.RevokeLogout)
+			if !sess.IsActive {
+				// 登出携带已消费（已轮换/已吊销）的 refresh token = 令牌重用信号：
+				// 该令牌已被他人先行轮换。按 handleRefreshMiss 的同款语义吊销该用户
+				// 全部 active 会话，防止先行轮换的窃贼会话在受害者登出后继续存活。
+				_ = s.Repos.Sessions.DeactivateAllByUser(c.Request.Context(), sess.UserID, model.RevokeRefreshReuse)
+				s.Rec.Record(model.AuthEvent{
+					Event:  model.AuthEventRefreshReuse,
+					UserID: &sess.UserID,
+					Reason: model.RevokeRefreshReuse,
+					Detail: "spent refresh token presented at logout; all sessions revoked",
+				})
+			} else {
+				_ = s.Repos.Sessions.DeactivateByID(c.Request.Context(), sess.ID, model.RevokeLogout)
+			}
 		}
 	}
 	if accessToken != "" {
