@@ -34,7 +34,7 @@ go run ./cmd/server --listen=unix:/run/furry-drama-be-neo.sock   # Unix socket
 
 - **`.env` 文件**：启动时自动读取当前目录的 `.env`（如果存在），仅为未在真实环境中设置的变量注入值。兼容 dotenv 格式（`KEY=VALUE`、`#` 注释、`export` 前缀、引号包裹）。
 - **ini 配置文件**：默认按 OS 读取（Linux: `/etc/furry-drama-tracker/backend.ini`，macOS: `/Library/Application Support/furry-drama-tracker/backend.ini`，Windows: `C:\ProgramData\furry-drama-tracker\backend.ini`），`--config=` 覆盖。section：`[server] [database] [jwt] [email] [vapid] [security]`。
-- **环境变量**：同名环境变量优先于 ini 和 `.env`（供 systemd 注入密钥、CI 注入 DEV_API_TOKEN 等）。兼容 `.env` 变量名：`JWT_SECRET MONGO_URI ENCRYPTION_KEY ALTCHA_HMAC_KEY FRONTEND_URL SITE_URL ALLOWED_ORIGINS EMAIL_* VAPID_* DEMO_EMAILS DEV_API_TOKEN PORT NODE_ENV SKIP_RATE_LIMIT`。客户端 IP 识别（代理标头信任策略，ADR-013）：`TRUST_PROXY_HEADERS PROXY_IP_HEADERS TRUSTED_PROXIES PROXY_TRUSTED_PLATFORM`。IP 地域解析默认关闭（数据出境合规，ADR-017）：`IP_REGION_ENABLED`（=ini `[security].ip_region_enabled`）仅在显式开启时外呼 ipapi.co。
+- **环境变量**：同名环境变量优先于 ini 和 `.env`（供 systemd 注入密钥、CI 注入 DEV_API_TOKEN 等）。兼容 `.env` 变量名：`JWT_SECRET MONGO_URI ENCRYPTION_KEY ALTCHA_HMAC_KEY FRONTEND_URL SITE_URL ALLOWED_ORIGINS EMAIL_* VAPID_* DEMO_EMAILS DEV_API_TOKEN PORT NODE_ENV SKIP_RATE_LIMIT`。客户端 IP 识别（代理标头信任策略，ADR-013）：`TRUST_PROXY_HEADERS PROXY_IP_HEADERS TRUSTED_PROXIES PROXY_TRUSTED_PLATFORM`。IP 地域解析默认关闭（数据出境合规，ADR-017/ADR-018）：`IP_REGION_ENABLED`（=ini `[security].ip_region_enabled`）仅在显式开启时启用；数据源由 `IP_REGION_PROVIDER`（`aliyun` 默认=阿里云云市场纯真 API / `czdb`=纯真离线库，另一源配置齐全时自动兜底）选择，凭证 `IP_REGION_APPCODE`、离线库 `IP_REGION_CZDB_PATH_V4`/`IP_REGION_CZDB_PATH_V6`/`IP_REGION_CZDB_KEY`。
 
 启动致命校验：缺 `JWT_SECRET`/`MONGO_URI` 或 secret < 32 字符 → 退出 1。示例/历史弱密钥、生产 CORS 占位域名仅告警不阻止启动，便于已有服务平滑升级；应尽快轮换/修正。
 
@@ -59,7 +59,7 @@ internal/
   ratelimit/          限流（Store interface，内存滑动窗口）
   code/               验证码内存存储（CodeStore interface）
   email/              SMTP 客户端 + 模板
-  ipregion/           IP 地域解析（默认禁用不外呼，ADR-017；开启后 ipapi.co 外呼 + LRU）
+  ipregion/           IP 地域解析（默认禁用不外呼，ADR-017；开启后 aliyun 云市场纯真 API / czdb 离线库可切换+兜底，ADR-018，LRU）
   upload/             图片落盘（魔数/大小/类型校验）
   pagination/ errors/ logging/ audit/ migrate/ indexes/ cron/
 docs/                 swaggo 产物 + 维护文档
@@ -68,7 +68,7 @@ deploy/               systemd unit + ini 模板 + run.sh
 
 ## 接口契约（固定，勿改签名——并行 subagent 依赖）
 
-- `config.Load(path string) (*config.Config, error)`；字段 `Cfg.IsDev`、`Cfg.Server.AllowOrigins`、`Cfg.Server.TrustProxyHeaders/ProxyIPHeaders/TrustedProxies/ProxyTrustedPlatform`（代理标头信任策略，缺省沿用 !IsDev）、`Cfg.Security.LoginMaxAttempts/LoginLockMinutes/CSRFMaxAgeHours`、`Cfg.JWT.Secret/EncryptionKey/AltchaHMACKey/DevAPIToken/DemoEmails/AccessTTL/RefreshTTL`
+- `config.Load(path string) (*config.Config, error)`；字段 `Cfg.IsDev`、`Cfg.Server.AllowOrigins`、`Cfg.Server.TrustProxyHeaders/ProxyIPHeaders/TrustedProxies/ProxyTrustedPlatform`（代理标头信任策略，缺省沿用 !IsDev）、`Cfg.Security.LoginMaxAttempts/LoginLockMinutes/CSRFMaxAgeHours/IPRegionEnabled/IPRegionProvider/IPRegionAppCode/IPRegionCzdbPathV4/IPRegionCzdbPathV6/IPRegionCzdbKey`、`Cfg.JWT.Secret/EncryptionKey/AltchaHMACKey/DevAPIToken/DemoEmails/AccessTTL/RefreshTTL`
 - `repository.Connect(ctx, uri, name string, pool int) (*mongo.Database, error)`
 - `repository.NewRepos(db, loginMaxAttempts, loginLockMinutes int) *repository.Repos`
 - `auth.NewSigner(secret string) *auth.Signer`；`(*Signer).Sign/Verify`

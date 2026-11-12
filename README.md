@@ -193,7 +193,7 @@ internal/
   ratelimit/           Store 接口 + 内存滑动窗口 + 命名限流器
   code/                验证码内存存储（CodeStore 接口）
   email/               go-mail 封装 + 模板 + 目标限流
-  ipregion/           IP 地域解析（默认禁用；开启后 ipapi.co 外呼 + 24h LRU）
+  ipregion/           IP 地域解析（默认禁用；开启后 aliyun 云市场纯真 API / czdb 离线库可切换+兜底 + 24h LRU）
   upload/              图片落盘（魔数/大小/类型校验）
   pagination/ errors/ logging/ audit/ migrate/ indexes/ cron/
 docs/                  swagger 产物 + 维护文档

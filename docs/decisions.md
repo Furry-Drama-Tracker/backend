@@ -178,3 +178,23 @@
   - 关闭后不再有 5s 外呼，认证路径少一个外部故障点（缓存未命中时的登录延迟随之消失）；
   - 少量历史数据仍是真实地域，不做回填（回填反而需要再次出境查询）。
 - **怎么接到本地实现**：把 `register_routes.go` 里 `ipregion.NewDisabled()` 换成 `ipregion.NewClient(本地查询)`（`fetch` 签名 `func(ctx, ip) string`，返回 `country · region · city` 风格的字符串），并为本地查询函数补单测；`NewClient` 的 LRU（1000 条 / 24h TTL）会继续生效，service 侧零改动。
+
+## ADR-018 IP 地域数据源切换纯真：云市场 API + czdb 离线库（可切换/兜底）
+
+- **决策**：
+  1. 外呼数据源由 ipapi.co 换成**阿里云云市场纯真 IP 地域 API**（cmapi00053387，`GET https://cz88geo.market.alicloudapi.com/search/ip/geo?ip=<ip>`，鉴权 `Authorization: APPCODE <code>`，境内服务）；AppCode 走 `[security].ip_region_appcode` / `IP_REGION_APPCODE`；
+  2. 新增**纯真离线库 czdb** 数据源（`github.com/tagphi/czdb-search-golang`，MEMORY 模式，构造期预热避免懒加载竞态后即释放文件句柄），`[security].ip_region_czdb_path_v4` + `ip_region_czdb_path_v6` 分别指定 IPv4/IPv6 的 .czdb 库文件路径，密钥 `ip_region_czdb_key` 两库共用；本地查询**无网络外呼**，查询按 IP 协议路由到对应库；
+  3. `[security].ip_region_provider`（`IP_REGION_PROVIDER`，缺省 `aliyun`）选择首选数据源；**另一数据源配置齐全时自动兜底**——首选返回 `未知`（外呼失败/IP 未命中）时改走它，封装在 `ipregion.NewConfiguredClient`；
+  4. 输出统一为 `country · province · city · districts` 风格。实测官方 czdb 输出为 `国家–省–市[–区]<TAB>归属描述`（– 为 en-dash U+2013，列选择为 0 时 lib 直接返回 otherData）：取首个 tab 段按 – 拆段、丢弃归属描述；兼容 geo mapping 列形态（tab 分隔列取前 4 列非空）。阿里云 API 取 data 四字段，缺失的区县会返回字面 `未知`，与空值一并跳过。
+- **背景**：ADR-017 停用的 ipapi.co 是无 SLA 的免费境外服务；需求回归后选定纯真系数据源——云市场 API 精度高（区县级）但按量计费且依赖外呼，czdb 离线库免费无外呼但需人工下载/更新库文件。两者互补，故做成可切换 + 兜底而非二选一。
+- **替代方案**：
+  - 只接云市场 API：外呼失败/欠费即全量 `未知`，无兜底；
+  - 只接 czdb：v4/v6 双库、需定期更新，忘记维护则长期陈旧；
+  - 保持 ipapi.co：境外服务，数据出境合规问题依旧。
+- **取舍 / 兼容性**：
+  - `ip_region_enabled` 语义与缺省值不变（ADR-017 仍成立）：默认关闭，开启才外呼/查库；开启但未配置任何数据源时保持禁用态并告警；
+  - `LastLoginRegion` 格式仍是 `·` 拼接字符串，service/handler/API 契约零变化；区县级比旧 ipapi.co 多一列区县；
+  - czdb 仅配一个协议的库时，另一协议 IP 记 `未知`（可由 aliyun 兜底）；
+  - czdb 搜索器生命周期与进程一致（MEMORY 模式全量入内存，v4+v6 约几十 MB），不做热更新——更新库文件后重启服务生效；
+  - 单行形态的启发式（首段含 `–` 或 tab 段 <3）用于区分实测形态与假想的 geo mapping 列形态，若未来换用列形态库版本需以真实样本复核 `formatCzdb`。
+- **怎么配**：ini `[security]` 段（模板见 `deploy/furry-drama-be-neo.ini`）或同名大写环境变量；AppCode 在云市场控制台获取（https://market.aliyun.com/detail/cmapi00053387），czdb 密钥随库文件由纯真官方下发。真实数据源冒烟：`internal/ipregion/local_smoke_test.go`（环境变量门控，默认跳过）。

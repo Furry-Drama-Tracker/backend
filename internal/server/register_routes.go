@@ -2,6 +2,7 @@ package server
 
 import (
 	"fmt"
+	"log"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -22,12 +23,28 @@ import (
 func RegisterRoutes(d Deps, api *gin.RouterGroup, opts middleware.RateLimitOpts, rec *authlog.Recorder) {
 	mail := email.NewClient(d.Config, d.Repos.SiteContents)
 	mail.StartCleanup(10 * time.Minute)
-	// IP 地域解析默认禁用（外呼 ipapi.co，数据出境合规；见 docs/decisions.md ADR-017）。
-	// 关闭时 LastLoginRegion 保持 service 侧的 "未知" 兜底，不影响登录/注册流程；
-	// 未来接本地离线库时只需替换这里的构造函数（ipregion.NewClient(<本地查询>)）。
+	// IP 地域解析默认禁用（见 docs/decisions.md ADR-017）。
+	// 开启后按 [security].ip_region_provider 装配首选数据源
+	// （aliyun=阿里云云市场纯真 API / czdb=纯真离线库，v4/v6 双库路径），
+	// 另一数据源配置齐全时兜底（ADR-018）。
+	// 关闭或无任何可用数据源时 LastLoginRegion 记 "未知"，不影响认证流程。
 	ipr := ipregion.NewDisabled()
 	if d.Config.Security.IPRegionEnabled {
-		ipr = ipregion.NewClient(nil)
+		c, err := ipregion.NewConfiguredClient(
+			d.Config.Security.IPRegionProvider,
+			d.Config.Security.IPRegionAppCode,
+			d.Config.Security.IPRegionCzdbPathV4,
+			d.Config.Security.IPRegionCzdbPathV6,
+			d.Config.Security.IPRegionCzdbKey,
+		)
+		if err != nil {
+			log.Printf("[WARN] IP 地域解析 czdb 离线库加载失败（其它数据源继续可用）: %v", err)
+		}
+		if c != nil {
+			ipr = c
+		} else {
+			log.Printf("[WARN] IP 地域解析已开启但未配置任何数据源（AppCode/离线库路径），地域将记为 未知")
+		}
 	}
 	svc := service.NewAuthService(d.Config, d.Repos, d.Signer, mail, ipr)
 	svc.Rec = rec

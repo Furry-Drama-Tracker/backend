@@ -61,12 +61,20 @@ func main() {
 	if cfg.Server.InsecureOrigins {
 		log.Printf("[SECURITY WARN] 生产环境 CORS 源仍包含 localhost/127.0.0.1/example.com 或为空，请尽快配置真实站点域名")
 	}
-	// IP 地域解析默认关闭（数据出境合规，见 docs/decisions.md ADR-017）：
-	// 开启后登录/注册/设备确认会把客户端 IP 发给第三方 ipapi.co。
+	// IP 地域解析默认关闭（见 docs/decisions.md ADR-017）：
+	// 开启后登录/注册/设备确认会把客户端 IP 发给所选数据源
+	// （aliyun=阿里云云市场纯真 API / czdb=纯真离线库，见 ADR-018）。
 	if cfg.Security.IPRegionEnabled {
-		log.Printf("[SECURITY WARN] IP 地域解析已开启：认证流程会向 ipapi.co 发送客户端 IP（数据出境），非必要请保持关闭")
+		if cfg.Security.IPRegionProvider == "czdb" {
+			log.Printf("[SECURITY WARN] IP 地域解析已开启（首选 czdb 离线库）：查询走本地库，库未命中/失败时按配置兜底")
+		} else {
+			log.Printf("[SECURITY WARN] IP 地域解析已开启（首选阿里云云市场纯真 API）：认证流程会把客户端 IP 发送至该 API，非必要请保持关闭")
+		}
+		if cfg.Security.IPRegionProvider != "czdb" && cfg.Security.IPRegionAppCode == "" {
+			log.Printf("[SECURITY WARN] IP 地域解析未配置 AppCode（[security].ip_region_appcode 或 IP_REGION_APPCODE），aliyun 数据源不可用")
+		}
 	} else {
-		log.Printf("IP 地域解析已禁用（LastLoginRegion 记为 未知）；待本地离线库就绪后再开启")
+		log.Printf("IP 地域解析已禁用（LastLoginRegion 记为 未知）")
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)

@@ -111,7 +111,7 @@ proxy_trusted_platform = True-Client-IP
 func TestIPRegionDisabledByDefault(t *testing.T) {
 	cfg := defaults()
 	if cfg.Security.IPRegionEnabled {
-		t.Fatal("IP 地域解析缺省必须关闭（不外呼 ipapi.co）")
+		t.Fatal("IP 地域解析缺省必须关闭（不外呼第三方）")
 	}
 
 	if err := applyINI(cfg, []byte("[security]\nip_region_enabled = true\n")); err != nil {
@@ -125,5 +125,42 @@ func TestIPRegionDisabledByDefault(t *testing.T) {
 	applyEnv(cfg)
 	if cfg.Security.IPRegionEnabled {
 		t.Fatal("IP_REGION_ENABLED=false 应覆盖 ini 为关闭")
+	}
+}
+
+// TestIPRegionSources 校验数据源配置（ADR-018）：provider 缺省 aliyun；
+// ini 可设置 provider/AppCode/czdb 路径与密钥；env 同名变量优先于 ini。
+func TestIPRegionSources(t *testing.T) {
+	cfg := defaults()
+	if cfg.Security.IPRegionProvider != "aliyun" {
+		t.Fatalf("provider 缺省应为 aliyun, got %q", cfg.Security.IPRegionProvider)
+	}
+
+	if err := applyINI(cfg, []byte("[security]\n"+
+		"ip_region_provider = czdb\n"+
+		"ip_region_appcode = app-ini\n"+
+		"ip_region_czdb_path_v4 = /data/geo_v4.czdb\n"+
+		"ip_region_czdb_path_v6 = /data/geo_v6.czdb\n"+
+		"ip_region_czdb_key = key-ini\n")); err != nil {
+		t.Fatalf("applyINI: %v", err)
+	}
+	s := cfg.Security
+	if s.IPRegionProvider != "czdb" || s.IPRegionAppCode != "app-ini" ||
+		s.IPRegionCzdbPathV4 != "/data/geo_v4.czdb" || s.IPRegionCzdbPathV6 != "/data/geo_v6.czdb" ||
+		s.IPRegionCzdbKey != "key-ini" {
+		t.Fatalf("ini 数据源配置未生效: %+v", s)
+	}
+
+	t.Setenv("IP_REGION_PROVIDER", "aliyun")
+	t.Setenv("IP_REGION_APPCODE", "app-env")
+	t.Setenv("IP_REGION_CZDB_PATH_V4", "/data/v4.zip")
+	t.Setenv("IP_REGION_CZDB_PATH_V6", "/data/v6.zip")
+	t.Setenv("IP_REGION_CZDB_KEY", "key-env")
+	applyEnv(cfg)
+	s = cfg.Security
+	if s.IPRegionProvider != "aliyun" || s.IPRegionAppCode != "app-env" ||
+		s.IPRegionCzdbPathV4 != "/data/v4.zip" || s.IPRegionCzdbPathV6 != "/data/v6.zip" ||
+		s.IPRegionCzdbKey != "key-env" {
+		t.Fatalf("env 应覆盖 ini: %+v", s)
 	}
 }

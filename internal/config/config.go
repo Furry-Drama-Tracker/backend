@@ -130,10 +130,22 @@ type SecurityConfig struct {
 	CSRFMaxAgeHours  int
 	RateLimitSkip    bool
 	// IPRegionEnabled 控制 IP → 地域解析（登录/注册/设备确认记录与提醒邮件）。
-	// 默认 false：该能力会外呼第三方 ipapi.co，属数据出境，默认关闭；
+	// 默认 false：该能力会外呼第三方位置服务，默认关闭；
 	// 需要时用 [security].ip_region_enabled 或 IP_REGION_ENABLED 显式开启，
-	// 待换成本地离线库后可放开（见 docs/decisions.md ADR-017）。
+	// 待换成本地离线库后可放开（见 docs/decisions.md ADR-017/ADR-018）。
 	IPRegionEnabled bool
+	// IPRegionProvider 是首选数据源：aliyun（默认，阿里云云市场纯真 API）或
+	// czdb（纯真离线库）。另一数据源配置齐全时自动兜底（见 ADR-018）。
+	IPRegionProvider string
+	// IPRegionAppCode 是阿里云云市场纯真 IP 地域 API（cmapi00053387）的鉴权凭证。
+	// ini [security].ip_region_appcode 或环境变量 IP_REGION_APPCODE。
+	IPRegionAppCode string
+	// IPRegionCzdbPathV4 / IPRegionCzdbPathV6 分别是纯真离线库（czdb）的
+	// IPv4/IPv6 库文件路径（.czdb），IPRegionCzdbKey 是配套解密密钥
+	// （两库共用，随库由纯真官方提供）。
+	IPRegionCzdbPathV4 string
+	IPRegionCzdbPathV6 string
+	IPRegionCzdbKey    string
 }
 
 // Load 加载配置：先读 .env（如果存在），再读 ini（path 为空则尝试 DefaultPath，
@@ -241,6 +253,7 @@ func defaults() *Config {
 			LoginMaxAttempts: 5,
 			LoginLockMinutes: 30,
 			CSRFMaxAgeHours:  24,
+			IPRegionProvider: "aliyun",
 		},
 	}
 }
@@ -323,6 +336,14 @@ func applyINI(cfg *Config, data []byte) error {
 	cfg.Security.CSRFMaxAgeHours = sec.Key("csrf_max_age_h").MustInt(24)
 	// 缺省 false：IP 地域解析默认关闭（数据出境合规，ADR-017）。
 	cfg.Security.IPRegionEnabled = sec.Key("ip_region_enabled").MustBool(false)
+	provider := strings.ToLower(strings.TrimSpace(sec.Key("ip_region_provider").String()))
+	if provider != "" {
+		cfg.Security.IPRegionProvider = provider
+	}
+	cfg.Security.IPRegionAppCode = strings.TrimSpace(sec.Key("ip_region_appcode").String())
+	cfg.Security.IPRegionCzdbPathV4 = strings.TrimSpace(sec.Key("ip_region_czdb_path_v4").String())
+	cfg.Security.IPRegionCzdbPathV6 = strings.TrimSpace(sec.Key("ip_region_czdb_path_v6").String())
+	cfg.Security.IPRegionCzdbKey = strings.TrimSpace(sec.Key("ip_region_czdb_key").String())
 	return nil
 }
 
@@ -382,6 +403,13 @@ func applyEnv(cfg *Config) {
 			cfg.Security.IPRegionEnabled = b
 		}
 	}
+	if v := os.Getenv("IP_REGION_PROVIDER"); v != "" {
+		cfg.Security.IPRegionProvider = strings.ToLower(strings.TrimSpace(v))
+	}
+	setStr(&cfg.Security.IPRegionAppCode, os.Getenv("IP_REGION_APPCODE"))
+	setStr(&cfg.Security.IPRegionCzdbPathV4, os.Getenv("IP_REGION_CZDB_PATH_V4"))
+	setStr(&cfg.Security.IPRegionCzdbPathV6, os.Getenv("IP_REGION_CZDB_PATH_V6"))
+	setStr(&cfg.Security.IPRegionCzdbKey, os.Getenv("IP_REGION_CZDB_KEY"))
 }
 
 // validate 执行启动致命校验。
