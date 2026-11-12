@@ -76,8 +76,7 @@ func (s *AuthService) Login(c *gin.Context, in LoginInput) (*LoginResult, error)
 
 	// 邮箱未验证：发验证码（除非 skipVerification 或 dev-token 绕过）。
 	if !user.IsEmailVerified && !s.SkipVerification(user) && !s.devTokenActive(in.DevToken) {
-		verifyCode := code.GenerateCode()
-		s.EmailVerifyCodes.Set(verifyCode, code.Entry{
+		verifyCode := s.EmailVerifyCodes.Mint(code.Entry{
 			UserID:    user.ID.Hex(),
 			Email:     user.Email,
 			ExpiresAt: time.Now().Add(CodeTTL),
@@ -90,18 +89,27 @@ func (s *AuthService) Login(c *gin.Context, in LoginInput) (*LoginResult, error)
 	}
 
 	// skipVerification 且未验证 → 自动置 verified（对齐 L345-348）。
+	// 定点 $set：此处 user 来自 FindByEmailWithAuth（不含 2FA 密文），整文档替换
+	// 会把 twoFactorSecret/twoFactorBackupCodes 清成零值。
 	if s.SkipVerification(user) && !user.IsEmailVerified {
 		user.IsEmailVerified = true
-		_ = s.Repos.Users.Save(ctx, user)
+		_ = s.Repos.Users.UpdateVerified(ctx, user.ID)
 	}
 
-	// 新设备检测：无同 UA active session 且已有 session 数 > 0。
+	// 新设备检测：以服务端签发的设备令牌（fdt-device cookie ↔ 会话 deviceTokenHash）
+	// 判定已知设备。User-Agent 客户端完全可控、可枚举重放（CWE-290），仅作展示，
+	// 不再作为信任依据；旧会话无 deviceTokenHash → 不匹配（fail-closed），
+	// 下次登录走一次设备验证码后写入。
 	knownSessions, _ := s.Repos.Sessions.FindActiveByUser(ctx, user.ID)
+	deviceToken := auth.GetDeviceToken(c)
 	isKnownDevice := false
-	for _, sess := range knownSessions {
-		if sess.DeviceInfo.UserAgent == in.Ua {
-			isKnownDevice = true
-			break
+	if deviceToken != "" {
+		tokenHash := auth.HashToken(deviceToken)
+		for _, sess := range knownSessions {
+			if sess.DeviceTokenHash != "" && sess.DeviceTokenHash == tokenHash {
+				isKnownDevice = true
+				break
+			}
 		}
 	}
 	// 任何未识别设备都要求邮箱验证码（不再以“已有 session”为前置条件）。
@@ -111,8 +119,7 @@ func (s *AuthService) Login(c *gin.Context, in LoginInput) (*LoginResult, error)
 		_, mailReady = s.Mail.GetConfig(ctx)
 	}
 	if !isKnownDevice && !s.SkipVerification(user) && !s.devTokenActive(in.DevToken) && mailReady {
-		loginCode := code.GenerateCode()
-		s.DeviceLoginCodes.Set(loginCode, code.Entry{
+		loginCode := s.DeviceLoginCodes.Mint(code.Entry{
 			UserID:    user.ID.Hex(),
 			ExpiresAt: time.Now().Add(CodeTTL),
 			Need2FA:   user.TwoFactorEnabled,
@@ -163,7 +170,9 @@ func (s *AuthService) Login(c *gin.Context, in LoginInput) (*LoginResult, error)
 	user.LastLoginAt = &now
 	user.LastLoginIP = in.IP
 	user.LastLoginRegion = region
-	_ = s.Repos.Users.Save(ctx, user)
+	// 登录态字段定点更新（勿整文档替换）：并发密码轮换落库后，
+	// 本请求早前加载的旧结构若整体回写会把新哈希回滚（复活旧密码）。
+	_ = s.Repos.Users.UpdateDeviceInfoAndLogin(ctx, user.ID, di, now, in.IP, region)
 
 	if err := s.IssueSession(c, user, di, in.IP, "LOGIN"); err != nil {
 		return nil, errors.New(500, "服务器错误")

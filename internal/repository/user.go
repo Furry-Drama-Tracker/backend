@@ -158,6 +158,16 @@ func (r *UserRepo) SetEmailVerifiedAndEmail(ctx context.Context, id any, email s
 	return err
 }
 
+// SetEmailPendingVerification 更新绑定邮箱并置为未验证（change-email 用）。
+// 定点 $set：超管改邮箱绝不能整文档替换——FindByIDWithAuth 投影不含 2FA 密文，
+// Save 会把 twoFactorSecret/twoFactorBackupCodes 清成零值，造成 2FA 账号永久无法登录。
+func (r *UserRepo) SetEmailPendingVerification(ctx context.Context, id any, email string) error {
+	ctx, cancel := r.newCtx(ctx)
+	defer cancel()
+	_, err := r.coll.UpdateOne(ctx, bson.M{"_id": ToObjectID(id)}, bson.M{"$set": bson.M{"email": email, "isEmailVerified": false}})
+	return err
+}
+
 // UpdatePassword 更新密码哈希与 passwordChangedAt。
 func (r *UserRepo) UpdatePassword(ctx context.Context, id any, hash string, changedAt time.Time) error {
 	ctx, cancel := r.newCtx(ctx)
@@ -225,6 +235,19 @@ func (r *UserRepo) DeleteByID(ctx context.Context, id any) error {
 	ctx, cancel := r.newCtx(ctx)
 	defer cancel()
 	_, err := r.coll.DeleteOne(ctx, bson.M{"_id": ToObjectID(id)})
+	return err
+}
+
+// SetDeletionRequestedAt 设置或清除注销申请时间（$set 定点更新，不触碰其余字段）。
+// 注销申请/取消只应修改这一个字段；禁止对投影加载的 user 做整文档替换（Save），
+// 否则 password/twoFactorSecret 等被 publicProjection 排除的字段会被零值覆盖，
+// 导致账号凭据被静默销毁（密码/2FA 全部失效，宽限期内无法再取消注销）。
+// t 为 nil 时写入 BSON null（清除申请，与 *time.Time 零值解码语义一致）。
+func (r *UserRepo) SetDeletionRequestedAt(ctx context.Context, id any, t *time.Time) error {
+	ctx, cancel := r.newCtx(ctx)
+	defer cancel()
+	_, err := r.coll.UpdateOne(ctx, bson.M{"_id": ToObjectID(id)},
+		bson.M{"$set": bson.M{"deletionRequestedAt": t}})
 	return err
 }
 
@@ -446,6 +469,16 @@ func (r *UserRepo) EnableTwoFactor(ctx context.Context, id any) error {
 	ctx, cancel := r.newCtx(ctx)
 	defer cancel()
 	_, err := r.coll.UpdateOne(ctx, bson.M{"_id": ToObjectID(id)}, bson.M{"$set": bson.M{"twoFactorEnabled": true}})
+	return err
+}
+
+// UpdateTwoFactorBackupCodes 仅更新 2FA 备份码列表（login-2fa 备份码消费写回用）。
+// 定点 $set：避免整文档替换把并发的密码轮换/锁定计数等修改回滚。
+func (r *UserRepo) UpdateTwoFactorBackupCodes(ctx context.Context, id any, backupCodes []string) error {
+	ctx, cancel := r.newCtx(ctx)
+	defer cancel()
+	_, err := r.coll.UpdateOne(ctx, bson.M{"_id": ToObjectID(id)},
+		bson.M{"$set": bson.M{"twoFactorBackupCodes": backupCodes}})
 	return err
 }
 

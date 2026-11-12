@@ -102,6 +102,20 @@ func (h *Auth) Disable2FA(c *gin.Context) {
 	}
 	keyHex := h.twoFactorKeyHex()
 	secret := auth.DecryptField(u.TwoFactorSecret, keyHex)
+	// 配置完整性兜底（ADR-019）：密钥与备份码均已丢失（如历史版本对投影加载的
+	// user 做整文档 Save 把 twoFactorSecret 清空）时，2FA 已不存在任何可验证
+	// 凭据——继续要求验证码会把账户永久锁死（登录侧 Login2FA 对空 secret 同样
+	// 不尝试校验）。此时允许持有效会话的账户所有者直接关闭 2FA 重新设置；
+	// 正常账户（secret 或备份码非空）行为不变，仍必须通过 TOTP/备份码校验。
+	if secret == "" && len(u.TwoFactorBackupCodes) == 0 {
+		if err := h.Svc.Repos.Users.DisableTwoFactor(c.Request.Context(), user.ID); err != nil {
+			c.JSON(500, gin.H{"message": "服务器错误"})
+			return
+		}
+		h.Svc.Audit(c.Request.Context(), u, "2FA_DISABLED", "auth", "User disabled 2FA (no verifiable credential stored)", h.clientIP(c))
+		c.JSON(200, gin.H{"message": "2FA disabled successfully"})
+		return
+	}
 	// 备份码命中即视为消费（命中旧格式时一并升级为哈希）；随后 DisableTwoFactor
 	// 会清空全部备份码，故无需另行写回。
 	_, backupHit := auth.ConsumeBackupCode(u.TwoFactorBackupCodes, req.Token, keyHex)

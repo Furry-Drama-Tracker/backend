@@ -198,3 +198,26 @@
   - czdb 搜索器生命周期与进程一致（MEMORY 模式全量入内存，v4+v6 约几十 MB），不做热更新——更新库文件后重启服务生效；
   - 单行形态的启发式（首段含 `–` 或 tab 段 <3）用于区分实测形态与假想的 geo mapping 列形态，若未来换用列形态库版本需以真实样本复核 `formatCzdb`。
 - **怎么配**：ini `[security]` 段（模板见 `deploy/furry-drama-be-neo.ini`）或同名大写环境变量；AppCode 在云市场控制台获取（https://market.aliyun.com/detail/cmapi00053387），czdb 密钥随库文件由纯真官方下发。真实数据源冒烟：`internal/ipregion/local_smoke_test.go`（环境变量门控，默认跳过）。
+
+## ADR-019 认证链路安全加固：注销定点写 / 设备令牌 / 原子限流键 / 码位防覆盖
+
+- **决策**（六项均为纯服务端改动；安全审计 BUG-R2 系列的修复落地）：
+  1. **注销申请只定点写一个字段**：`request-deletion` / `cancel-deletion` 改用 `UserRepo.SetDeletionRequestedAt`（`$set deletionRequestedAt`），不再对中间件投影加载的 user 做整文档 `Save`。`publicProjection` 不含 `password/twoFactorSecret/twoFactorBackupCodes/loginAttempts/lockUntil`，整文档替换会把它们覆写成零值——一次"申请注销"就会静默销毁凭据（2FA 账号永久锁死、宽限期内无法再取消，7 天后即被物理清除）；
+  2. **"已知设备"改由设备令牌判定**：新签发 `fdt-device` cookie（httpOnly、secure=prod、sameSite=lax、365d、256 位随机值），会话文档存其 sha256 哈希（`usersessions.deviceTokenHash`）；login 的已知设备判定只比对 `cookie ↔ deviceTokenHash`，**不再比对 User-Agent**（客户端完全可控、可枚举重放，CWE-290：泄露密码者重放 UA 字符串即可绕过邮件验证屏障拿到完整会话）。refresh 轮换延续旧会话的哈希；
+  3. **凭证/邮件类限流 key 绑定目标邮箱**：`auth / twoFactor / passwordReset / emailVerify` 四个 spec 的计数 key 在请求体带 `email` 时改为 `spec:邮箱`（无邮箱体的挂载回退 IP key）。来源 IP 可经伪造代理标头轮换（CWE-348），纯 IP key 在轮换下退化为无限流；绑定邮箱后对同一账号的猜测无论换多少来源 IP 都共享同一计数桶；
+  4. **验证码 Mint 防跨用户覆盖**：`code.Store` 新增 `SetFresh`/`Mint`，全部签发点（login/register/change-email/resend/verify-device）改用 `Mint`——6 位码是全用户共享的 900k 命名空间，旧 `Set` 静默覆盖同码条目会把攻击者已知的 code 解析到别的账号（设备码链可据此接管）；mint 保证不覆盖任何未过期条目。尝试计数等原地写回仍走 `Set`；
+  5. **登录态字段定点更新**：login / confirm-device-login / login-2fa 的登录成功簿记改走 `UpdateDeviceInfoAndLogin`（既有但此前零调用的四字段 `$set`）+ `UpdateVerified` / `UpdateTwoFactorBackupCodes`（新增），消灭整文档替换回滚并发密码轮换的竞态（旧哈希复活、吊销前签发的会话存活）；超管 `change-email` 同步改为 `SetEmailPendingVerification`（定点），不再清空 2FA 密文；
+  6. **2FA 无凭据恢复通道显式化**：`/2fa/disable` 在存储的 secret 与备份码均为空（配置完整性损坏，如历史版本曾覆写）时，允许持有效会话的所有者直接关闭 2FA 重新启用（审计事件注明 "no verifiable credential stored"）；正常账户行为不变。此前该状态只能靠 pquerna hotp 对空密钥的 HMAC 恰好校验通过的"意外后门"恢复。
+- **背景**：OpenVuln 审计（快照 3058134）确认上述缺陷均可端到端利用：注销流程凭据清零（BUG-R2-C1-A1-H1）、UA 重放绕过设备验证（A3-H3）、设备码喷洒不可见（A3-H1）、IP 轮换击穿限流族（C2-A3-H2）、验证码跨用户覆盖（A3-H2/C1）、登录簿记竞态复活旧密码（A1-H4）、2FA 账号不可恢复（A1-H2）。其中锁定计数原子化（C2-A3-H3）已在 cfad7fc 单独修复，本批不含。
+- **替代方案**：
+  - 设备码/邮箱验证码改高熵令牌或按账号绑定提交标识：更彻底，但需前端契约改动，未采纳（后端单独可落地优先）；
+  - confirm-device-login 前置 altcha：同样需要前端配合，未采纳；本批先落 miss 留痕（`device_code_miss` 认证事件，stderr + authevents，按 IP 节流落库），喷洒在排障链路可见，根治留待前端契约演进；
+  - 注销申请改软删除字段快照：超出必要范围，`$set` 单字段已消除全部覆写面。
+- **取舍 / 兼容性**：
+  - **新增 cookie `fdt-device`**：浏览器自动携带，前端零改动；旧会话无 `deviceTokenHash` → 首次登录按新设备处理（走一次邮箱验证码后写入），fail-closed 属预期一次性摩擦；
+  - 清 cookie / 换浏览器 → 重新走一次设备验证码（新令牌）；"记住设备"语义不变；
+  - 邮箱绑定限流使"对同一账号"的 429 与来源无关：NAT 共享出口的多用户各自账号互不影响（比旧 IP key 更友好）；攻击者可在 15min 窗口内对任意账号打满 5 次——与账号锁定（5 次/30min）同量级，属预期；
+  - `reset-password` / `change-password` / 2fa 管理 / `confirm-device-login` 等无邮箱体端点仍按 IP key（行为不变）；
+  - Mint 在连续 100 次冲突（概率≈0）时回退 `Set` 保证可用性；
+  - `SetDeletionRequestedAt(nil)` 写 BSON null，与 `*time.Time` 零值解码及 `FindDeletionRequestedBefore`（`$ne: nil`）语义一致；
+  - 注销申请/取消失败现在如实返回 500（旧实现吞错返回 200 但未落库）。

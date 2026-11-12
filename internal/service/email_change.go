@@ -34,12 +34,15 @@ func (s *AuthService) ChangeEmail(c *gin.Context, userID interface{}, newEmail, 
 	if exists, err := s.Repos.Users.ExistsByEmail(ctx, newEmail); err == nil && exists {
 		return errors.New(400, "该邮箱已被其他账号使用")
 	}
-	// 置新邮箱为未验证，发验证码。
+	// 置新邮箱为未验证（定点 $set，勿整文档替换）：user 来自 FindByIDWithAuth，
+	// 投影不含 2FA 密文，Save 会把 twoFactorSecret/twoFactorBackupCodes 清成零值，
+	// twoFactorEnabled 仍为 true → 登录卡死在永远无法通过的 2FA 挑战上（超管锁死）。
+	if err := s.Repos.Users.SetEmailPendingVerification(ctx, user.ID, newEmail); err != nil {
+		return errors.New(500, "服务器错误")
+	}
 	user.Email = newEmail
 	user.IsEmailVerified = false
-	_ = s.Repos.Users.Save(ctx, user)
-	verifyCode := code.GenerateCode()
-	s.EmailVerifyCodes.Set(verifyCode, code.Entry{
+	verifyCode := s.EmailVerifyCodes.Mint(code.Entry{
 		UserID:    user.ID.Hex(),
 		Email:     user.Email,
 		ExpiresAt: time.Now().Add(CodeTTL),
@@ -127,8 +130,7 @@ func (s *AuthService) ResendVerification(ctx context.Context, user *model.User) 
 	if user.IsEmailVerified {
 		return "邮箱已验证", nil
 	}
-	verifyCode := code.GenerateCode()
-	s.EmailVerifyCodes.Set(verifyCode, code.Entry{
+	verifyCode := s.EmailVerifyCodes.Mint(code.Entry{
 		UserID:    user.ID.Hex(),
 		Email:     user.Email,
 		ExpiresAt: time.Now().Add(CodeTTL),
@@ -157,8 +159,7 @@ func (s *AuthService) ResendVerificationByEmail(ctx context.Context, emailAddr, 
 	if err != nil || user.IsEmailVerified {
 		return unified, nil
 	}
-	verifyCode := code.GenerateCode()
-	s.EmailVerifyCodes.Set(verifyCode, code.Entry{
+	verifyCode := s.EmailVerifyCodes.Mint(code.Entry{
 		UserID:    user.ID.Hex(),
 		Email:     user.Email,
 		ExpiresAt: time.Now().Add(CodeTTL),

@@ -116,11 +116,16 @@ type UserSession struct {
 	TokenHash        string             `bson:"tokenHash,omitempty" json:"tokenHash,omitempty"`
 	RefreshTokenHash string             `bson:"refreshTokenHash,omitempty" json:"refreshTokenHash,omitempty"`
 	DeviceInfo       DeviceInfo         `bson:"deviceInfo" json:"deviceInfo"`
-	IP               string             `bson:"ip" json:"ip"`
-	IsActive         bool               `bson:"isActive" json:"isActive"`
-	LoginAt          time.Time          `bson:"loginAt" json:"loginAt"`
-	LastActiveAt     time.Time          `bson:"lastActiveAt" json:"lastActiveAt"`
-	LogoutAt         *time.Time         `bson:"logoutAt" json:"logoutAt"`
+	// DeviceTokenHash 是设备令牌（fdt-device cookie）的 sha256 哈希：
+	// "已知设备"识别的唯一信任依据；User-Agent 客户端完全可控、可枚举重放，
+	// 仅作展示字段。旧会话无此字段 → 不匹配（fail-closed），
+	// 下次登录走一次设备验证码后写入。
+	DeviceTokenHash string     `bson:"deviceTokenHash,omitempty" json:"-"`
+	IP              string     `bson:"ip" json:"ip"`
+	IsActive        bool       `bson:"isActive" json:"isActive"`
+	LoginAt         time.Time  `bson:"loginAt" json:"loginAt"`
+	LastActiveAt    time.Time  `bson:"lastActiveAt" json:"lastActiveAt"`
+	LogoutAt        *time.Time `bson:"logoutAt" json:"logoutAt"`
 	// RevokeReason 是会话被置为 inactive 的原因（取值见 Revoke* 常量）。
 	// 排障用：用户报"掉登录"时据此判断是用户登出、改密、重用检测还是 cron 过期。
 	RevokeReason string `bson:"revokeReason,omitempty" json:"revokeReason,omitempty"`

@@ -15,8 +15,14 @@ const (
 	CookieRefreshToken = "refreshToken"
 	CookieLegacyToken  = "token"
 	CookieCSRF         = "XSRF-TOKEN"
+	// CookieDeviceToken 是设备令牌 cookie："已知设备"识别的唯一信任依据
+	//（会话文档存其 sha256 哈希）。User-Agent 客户端可控、可枚举重放（CWE-290），
+	// 仅作展示；本 cookie httpOnly + 256 位随机值，不参与 CSRF 双提交。
+	CookieDeviceToken = "fdt-device"
 	// CSRFMaxAgeHours 是 CSRF cookie 有效期（默认 24h）。
 	CSRFMaxAgeHours = 24
+	// DeviceTokenMaxAge 是设备令牌 cookie 有效期（365d：与设备长期绑定）。
+	DeviceTokenMaxAge = 365 * 24 * time.Hour
 )
 
 // access/refresh 有效期（固定契约：access 15m，refresh 7d，勿改）。
@@ -120,6 +126,22 @@ func GetAccessToken(c *gin.Context) string {
 // GetRefreshToken 读取 refreshToken cookie。
 func GetRefreshToken(c *gin.Context) string {
 	if v, err := c.Cookie(CookieRefreshToken); err == nil && v != "" {
+		return v
+	}
+	return ""
+}
+
+// SetDeviceCookie 设置设备令牌 cookie：httpOnly、secure=prod、sameSite=lax、
+// 365d、path=/。设备令牌用于"已知设备"识别（会话文档存其 sha256 哈希）；
+// User-Agent 仅作展示，不再参与判定（客户端完全可控、可枚举重放，CWE-290）。
+// 浏览器随 cookie 自动携带；后端沿用请求携带的令牌即可识别设备。
+func SetDeviceCookie(c *gin.Context, token string, isProd bool) {
+	rawSetCookie(c, CookieDeviceToken, token, DeviceTokenMaxAge, "/", true, isProd, http.SameSiteLaxMode)
+}
+
+// GetDeviceToken 读取请求携带的设备令牌 cookie。
+func GetDeviceToken(c *gin.Context) string {
+	if v, err := c.Cookie(CookieDeviceToken); err == nil && v != "" {
 		return v
 	}
 	return ""

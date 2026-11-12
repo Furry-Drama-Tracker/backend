@@ -31,6 +31,10 @@ const (
 	AuthEventRefreshInvalid = "refresh_invalid" // refresh 缺失/过期/非法（401）
 	AuthEventTwoFAReplay    = "twofa_replay"    // TOTP 同一时间步被重复提交
 	AuthEventRateLimited    = "ratelimited"     // 限流命中（429）
+	// AuthEventDeviceCodeMiss 设备登录码提交未命中（confirm-device-login 400）。
+	// miss 此前零痕迹：per-entry 尝试上限只数命中，喷洒式枚举完全不可见；
+	// 留痕后（按 IP 节流落库）可在 authevents/日志中发现批量猜测。
+	AuthEventDeviceCodeMiss = "device_code_miss"
 )
 
 // AuthEvent 是认证链路上的低概率诊断事件（authevents 集合，at 建 TTL 索引自动过期）。

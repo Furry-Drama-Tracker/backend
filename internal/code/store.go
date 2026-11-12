@@ -82,6 +82,38 @@ func (s *Store) Set(code string, e Entry) {
 	s.mu.Unlock()
 }
 
+// SetFresh 存入全新验证码条目：该 code 已存在未过期条目时拒绝（返回 false），
+// 保证任一时刻一个 code 只属于一个用户，杜绝跨用户静默覆盖
+// （6 位码是 900k 的共享命名空间，A 用户签发时若覆盖了 B 用户的同码条目，
+// B 已知的 code 就会被解析到 A 的账号——设备登录码链可被据此接管）。
+// 尝试计数等原地写回（同一 entry）仍用 Set。
+func (s *Store) SetFresh(code string, e Entry) bool {
+	if e.ExpiresAt.IsZero() {
+		e.ExpiresAt = time.Now().Add(s.ttl)
+	}
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if cur, ok := s.items[code]; ok && time.Now().Before(cur.ExpiresAt) {
+		return false
+	}
+	s.items[code] = e
+	return true
+}
+
+// Mint 生成并存入一个与现有未过期条目不冲突的验证码并返回之。
+// 900k 键空间下冲突概率可忽略；连续冲突视为异常，最后退回 Set 保证可用。
+func (s *Store) Mint(e Entry) string {
+	for i := 0; i < 100; i++ {
+		c := GenerateCode()
+		if s.SetFresh(c, e) {
+			return c
+		}
+	}
+	c := GenerateCode()
+	s.Set(c, e)
+	return c
+}
+
 // Get 取出条目（过期判定由调用方负责，Get 不主动判过期——固定契约，勿改）。
 func (s *Store) Get(code string) (Entry, bool) {
 	s.mu.Lock()

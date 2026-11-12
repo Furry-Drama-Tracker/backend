@@ -112,11 +112,14 @@ func (s *AuthService) RotateRefresh(c *gin.Context, user *model.User, old *model
 		UserID:           user.ID,
 		TokenHash:        auth.HashToken(accessToken),
 		RefreshTokenHash: auth.HashToken(refreshToken),
-		DeviceInfo:       old.DeviceInfo,
-		IP:               old.IP,
-		IsActive:         true,
-		LoginAt:          old.LoginAt,
-		LastActiveAt:     now,
+		// 设备令牌哈希随旧会话延续：轮换不换设备，浏览器仍持同一 fdt-device
+		// cookie，下次登录据此继续判定为已知设备。
+		DeviceTokenHash: old.DeviceTokenHash,
+		DeviceInfo:      old.DeviceInfo,
+		IP:              old.IP,
+		IsActive:        true,
+		LoginAt:         old.LoginAt,
+		LastActiveAt:    now,
 	}
 	if err := s.Repos.Sessions.Create(c.Request.Context(), newSession); err != nil {
 		return err

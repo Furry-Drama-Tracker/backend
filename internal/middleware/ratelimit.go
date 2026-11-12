@@ -98,9 +98,21 @@ func RateLimit(spec ratelimit.Spec, opts RateLimitOpts) gin.HandlerFunc {
 		// 来源校验由 server/app.go 按 [server] 配置装配）。
 		ip := c.ClientIP()
 		key := spec.Name + ":" + ratelimit.IPKey(ip)
-		if spec.Name == ratelimit.RequestEmailChangeName {
+		switch spec.Name {
+		case ratelimit.RequestEmailChangeName:
 			// 同时按来源 IP 与目标邮箱限流，避免攻击者用不同邮箱刷验证邮件。
 			key = spec.Name + ":" + ratelimit.IPKey(ip) + ":" + strings.ToLower(newEmailFromBody(c))
+		case ratelimit.AuthName, ratelimit.TwoFactorName, ratelimit.PasswordResetName,
+			ratelimit.EmailVerifyName:
+			// 凭证/邮件类限流：key 绑定目标邮箱（请求体 email 小写）。
+			// 来源 IP 可经伪造代理标头轮换（CWE-348），key 中保留 IP 分量会让
+			// 这些 spec 在 IP 轮换下退化为无限流——按邮箱绑定后，对同一账号的
+			// 猜测/邮件请求无论换多少来源 IP 都共享同一计数桶。
+			// 请求体无 email 的挂载（reset-password / change-password / 2fa/* /
+			// confirm-device-login 等无邮箱体端点）回退到原 IP key（与旧行为一致）。
+			if email := emailFromBody(c); email != "" {
+				key = spec.Name + ":" + email
+			}
 		}
 
 		ctx, err := sl.lim.Get(c.Request.Context(), key)
@@ -151,4 +163,17 @@ func newEmailFromBody(c *gin.Context) string {
 		return v
 	}
 	return "unknown"
+}
+
+// emailFromBody 读取请求体中 email 字段（小写、去空白；缺省返回空串）。
+// 供凭证/邮件类限流把 key 绑定到目标账号，避免伪造代理标头轮换 IP 绕过。
+func emailFromBody(c *gin.Context) string {
+	body := GetBody(c)
+	if body == nil {
+		return ""
+	}
+	if v, ok := body["email"].(string); ok {
+		return strings.ToLower(strings.TrimSpace(v))
+	}
+	return ""
 }

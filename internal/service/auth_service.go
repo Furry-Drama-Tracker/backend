@@ -177,10 +177,18 @@ func (s *AuthService) IssueSession(c *gin.Context, u *model.User, deviceInfo mod
 	if err != nil {
 		return err
 	}
+	// 设备令牌：优先复用请求携带的 fdt-device cookie；缺失（首次登录/清 cookie/
+	// 换设备）则新签发。哈希随会话落库，cookie 下发浏览器（只认哈希，不认明文）。
+	// "已知设备"判定只认此哈希（login.go），User-Agent 不再作为信任依据。
+	deviceToken := auth.GetDeviceToken(c)
+	if deviceToken == "" {
+		deviceToken = auth.RandomHex(32)
+	}
 	session := &model.UserSession{
 		UserID:           u.ID,
 		TokenHash:        auth.HashToken(accessToken),
 		RefreshTokenHash: auth.HashToken(refreshToken),
+		DeviceTokenHash:  auth.HashToken(deviceToken),
 		DeviceInfo:       deviceInfo,
 		IP:               ip,
 		IsActive:         true,
@@ -191,6 +199,7 @@ func (s *AuthService) IssueSession(c *gin.Context, u *model.User, deviceInfo mod
 		return err
 	}
 	auth.SetAuthCookies(c, accessToken, refreshToken, !s.Config.IsDev)
+	auth.SetDeviceCookie(c, deviceToken, !s.Config.IsDev)
 	// 审计（失败静默）。
 	go s.Audit(c.Request.Context(), u, action, "auth", "User "+strings.ToLower(action)+" success", ip)
 	return nil

@@ -33,8 +33,14 @@ func (s *AuthService) RequestDeletion(ctx context.Context, user *model.User, pas
 	}
 	_ = s.Repos.Users.ResetLoginAttempts(ctx, user.ID)
 	now := time.Now()
+	// 只定点写 deletionRequestedAt（勿整文档替换）：user 是中间件经 publicProjection
+	// 加载的投影结构，Save 会把 password/twoFactorSecret/twoFactorBackupCodes/
+	// loginAttempts/lockUntil 覆写成零值——凭据被静默销毁，2FA 用户再也无法登录
+	// （也无法在宽限期内取消注销，宽限到期即被物理清除）。
+	if err := s.Repos.Users.SetDeletionRequestedAt(ctx, user.ID, &now); err != nil {
+		return nil, errors.New(500, "服务器错误")
+	}
 	user.DeletionRequestedAt = &now
-	_ = s.Repos.Users.Save(ctx, user)
 	s.Audit(ctx, user, "ACCOUNT_DELETION_REQUESTED", "auth", "User requested account deletion", "")
 	return &DeletionResult{RequestedAt: now, DeleteAt: now.Add(DeletionGraceDays * 24 * time.Hour)}, nil
 }
@@ -45,8 +51,11 @@ func (s *AuthService) CancelDeletion(ctx context.Context, user *model.User) erro
 	if user.DeletionRequestedAt == nil {
 		return errors.New(400, "没有注销申请")
 	}
+	// 同 RequestDeletion：只定点清除 deletionRequestedAt，不整文档替换。
+	if err := s.Repos.Users.SetDeletionRequestedAt(ctx, user.ID, nil); err != nil {
+		return errors.New(500, "服务器错误")
+	}
 	user.DeletionRequestedAt = nil
-	_ = s.Repos.Users.Save(ctx, user)
 	s.Audit(ctx, user, "ACCOUNT_DELETION_CANCELLED", "auth", "User cancelled account deletion", "")
 	return nil
 }

@@ -114,8 +114,9 @@ func (s *AuthService) Register(ctx context.Context, in RegisterInput) (*Register
 	}
 
 	// 生成 6 位验证码并发送（10 分钟有效），对齐 L227-234。
-	verifyCode := code.GenerateCode()
-	s.EmailVerifyCodes.Set(verifyCode, code.Entry{
+	// Mint 保证不覆盖既有未过期条目（6 位码为全用户共享命名空间，静默覆盖
+	// 会把攻击者已知的 code 解析到别的账号，见 ADR-019）。
+	verifyCode := s.EmailVerifyCodes.Mint(code.Entry{
 		UserID:    user.ID.Hex(),
 		Email:     user.Email,
 		ExpiresAt: time.Now().Add(CodeTTL),

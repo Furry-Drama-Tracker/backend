@@ -46,8 +46,7 @@ func (s *AuthService) VerifyDevice(ctx context.Context, token string) (*DeviceVe
 	}
 	_ = s.Repos.UsedTokens.MarkUsed(ctx, tokenHash, "device-verify", 30*time.Minute)
 
-	loginCode := code.GenerateCode()
-	s.DeviceLoginCodes.Set(loginCode, code.Entry{
+	loginCode := s.DeviceLoginCodes.Mint(code.Entry{
 		UserID:    user.ID.Hex(),
 		ExpiresAt: time.Now().Add(CodeTTL),
 		Need2FA:   user.TwoFactorEnabled,
@@ -67,6 +66,16 @@ func (s *AuthService) ConfirmDeviceLogin(c *gin.Context, loginCode string) (*Log
 		if ok {
 			s.DeviceLoginCodes.Delete(loginCode)
 		}
+		// miss 记账（ADR-019）：guess/喷洒不命中时此前零状态零痕迹，尝试上限
+		// 只数命中、防不住枚举；把 miss 留痕到 authevents（按 IP 节流落库），
+		// 使喷洒式猜测在排障链路可见。
+		s.Rec.Record(model.AuthEvent{
+			Event:  model.AuthEventDeviceCodeMiss,
+			IP:     s.ClientIP(c),
+			UA:     c.Request.UserAgent(),
+			Path:   c.Request.URL.Path,
+			Detail: "login code miss",
+		})
 		return nil, errors.New(400, "验证码无效或已过期，请重新验证")
 	}
 	entry.Attempts++
@@ -109,7 +118,9 @@ func (s *AuthService) ConfirmDeviceLogin(c *gin.Context, loginCode string) (*Log
 		region = s.IPRegion.GetRegion(c.Request.Context(), ip)
 	}
 	user.LastLoginRegion = region
-	_ = s.Repos.Users.Save(c.Request.Context(), user)
+	// 登录态字段定点更新（勿整文档替换）：本请求早前加载的旧结构若整体回写，
+	// 会回滚并发落库的密码轮换（复活旧凭据）。
+	_ = s.Repos.Users.UpdateDeviceInfoAndLogin(c.Request.Context(), user.ID, di, now, ip, region)
 
 	if err := s.IssueSession(c, user, di, ip, "LOGIN"); err != nil {
 		return nil, errors.New(500, "服务器错误")
@@ -177,7 +188,7 @@ func (s *AuthService) Login2FA(c *gin.Context, emailAddr, challenge, token strin
 			})
 			return nil, s.rejectTwoFactor(c.Request.Context(), user)
 		}
-		// 下方 Save 为整文档替换，需同步内存值以免把刚写入的标记回滚。
+		// 同步内存值（MarkTOTPStepUsed 已原子落库；登录态字段改走定点更新）。
 		user.TwoFactorLastStep = totpStep
 	}
 	_ = s.Repos.Users.ResetLoginAttempts(c.Request.Context(), user.ID)
@@ -200,7 +211,13 @@ func (s *AuthService) Login2FA(c *gin.Context, emailAddr, challenge, token strin
 		region = s.IPRegion.GetRegion(c.Request.Context(), ip)
 	}
 	user.LastLoginRegion = region
-	_ = s.Repos.Users.Save(c.Request.Context(), user)
+	// 登录态字段定点更新（勿整文档替换）：user 虽由 FindByEmailWith2FA 全字段加载，
+	// 但整体回写仍会把请求加载后并发落库的密码轮换/锁定计数回滚（复活旧凭据）。
+	// 备份码消费单独定点落库（其内存同步已在上方完成）。
+	_ = s.Repos.Users.UpdateDeviceInfoAndLogin(c.Request.Context(), user.ID, di, now, ip, region)
+	if backupHit {
+		_ = s.Repos.Users.UpdateTwoFactorBackupCodes(c.Request.Context(), user.ID, remaining)
+	}
 
 	if err := s.IssueSession(c, user, di, ip, "LOGIN_2FA"); err != nil {
 		return nil, errors.New(500, "服务器错误")
