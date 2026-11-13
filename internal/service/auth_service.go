@@ -157,7 +157,9 @@ func (s *AuthService) ForceEmailChange(u *model.User) bool {
 }
 
 // SessionUserJSON 组装登录/refresh 响应的用户对象（字段集为固定契约，勿增删）。
-// 本期扩展：新增 uid（数字用户锚）与 force2FASetup（管理员未开 2FA 的强制设置标记）。
+// 本期扩展：新增 uid（数字用户锚）、force2FASetup（管理员未开 2FA 的强制设置标记）
+// 与 twoFactorEnabled（前端 2FA 状态展示的权威来源——此前缺失导致
+// account-security/two-factor 页面刷新后无法检测状态）。
 func (s *AuthService) SessionUserJSON(u *model.User) gin.H {
 	return gin.H{
 		"_id":                u.ID.Hex(),
@@ -167,6 +169,7 @@ func (s *AuthService) SessionUserJSON(u *model.User) gin.H {
 		"email":              u.Email,
 		"isEmailVerified":    u.IsEmailVerified,
 		"role":               u.Role,
+		"twoFactorEnabled":   u.TwoFactorEnabled,
 		"forceEmailChange":   s.ForceEmailChange(u),
 		"force2FASetup":      requiresTwoFactorSetup(u),
 		"backgroundPrefs":    u.BackgroundPrefs,
@@ -175,7 +178,7 @@ func (s *AuthService) SessionUserJSON(u *model.User) gin.H {
 }
 
 // MeJSON 组装 /me 响应（字段集为固定契约，勿增删）。
-// 本期扩展：新增 uid 与 force2FASetup。
+// 本期扩展：新增 uid、force2FASetup 与 twoFactorEnabled（同上）。
 func (s *AuthService) MeJSON(u *model.User) gin.H {
 	return gin.H{
 		"_id":                    u.ID.Hex(),
@@ -187,6 +190,7 @@ func (s *AuthService) MeJSON(u *model.User) gin.H {
 		"role":                   u.Role,
 		"avatar":                 u.Avatar,
 		"emailNotificationPrefs": u.EmailNotificationPrefs,
+		"twoFactorEnabled":       u.TwoFactorEnabled,
 		"force2FASetup":          requiresTwoFactorSetup(u),
 		"backgroundPrefs":        u.BackgroundPrefs,
 		"personalWallpapers":     nonNilWallpapers(u.PersonalWallpapers),

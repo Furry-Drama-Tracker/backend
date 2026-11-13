@@ -52,6 +52,17 @@ func GenerateBackupCodes() []string {
 	return codes
 }
 
+// SecretBase32 把内部 base64 格式的 secret 转为 otpauth:// 规范要求的
+// RFC 4648 Base32（无填充大写）——Google/Microsoft Authenticator 等工具的
+// 二维码 secret 参数与"手动输入密钥"都只认这个格式。
+func SecretBase32(secretBase64 string) (string, error) {
+	secretBytes, err := base64.StdEncoding.DecodeString(secretBase64)
+	if err != nil {
+		return "", err
+	}
+	return base32.StdEncoding.WithPadding(base32.NoPadding).EncodeToString(secretBytes), nil
+}
+
 // VerifyTOTP 校验 6 位 TOTP 验证码，使用当前时间（30s 步长，窗口 ±1）。
 func VerifyTOTP(secret, token string) bool {
 	return verifyTOTPAt(secret, token, time.Now())

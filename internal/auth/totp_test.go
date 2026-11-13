@@ -1,10 +1,13 @@
 package auth
 
 import (
+	"bytes"
 	"crypto/hmac"
 	"crypto/sha1"
+	"encoding/base32"
 	"encoding/base64"
 	"fmt"
+	"strings"
 	"testing"
 	"time"
 )
@@ -205,4 +208,28 @@ func computeTOTPNodeFormula(secret string, at time.Time) string {
 		(int(hash[offset+2]) << 8) |
 		int(hash[offset+3])
 	return fmt.Sprintf("%06d", code%1000000)
+}
+
+// TestSecretBase32Roundtrip SecretBase32 转换不得改变字节（否则 2FA 工具算出的码
+// 与服务端校验链路不一致），且必须是无填充大写 base32（otpauth 规范）。
+func TestSecretBase32Roundtrip(t *testing.T) {
+	secret := GenerateSecret()
+	b32, err := SecretBase32(secret)
+	if err != nil {
+		t.Fatalf("SecretBase32: %v", err)
+	}
+	if b32 == "" {
+		t.Fatal("empty base32")
+	}
+	if strings.ContainsAny(b32, "=abcdefghijklmnopqrstuvwxyz") {
+		t.Fatalf("must be unpadded uppercase base32: %q", b32)
+	}
+	rawFromB64, _ := base64.StdEncoding.DecodeString(secret)
+	rawFromB32, err := base32.StdEncoding.WithPadding(base32.NoPadding).DecodeString(b32)
+	if err != nil {
+		t.Fatalf("decode b32: %v", err)
+	}
+	if !bytes.Equal(rawFromB64, rawFromB32) {
+		t.Fatal("base32 roundtrip must preserve bytes")
+	}
 }

@@ -50,8 +50,20 @@ func (h *Auth) Enable2FA(c *gin.Context) {
 		return
 	}
 	h.Svc.Audit(c.Request.Context(), u, "2FA_SETUP_INITIATED", "auth", "User initiated 2FA setup", h.clientIP(c))
-	otpauthURL := "otpauth://totp/FurryDrama:" + url.QueryEscape(u.AccountID) + "?secret=" + url.QueryEscape(secret) + "&issuer=FurryDrama"
-	c.JSON(200, gin.H{"secret": secret, "backupCodes": backup, "otpauthUrl": otpauthURL})
+	// otpauth 的 secret 参数按 otpauth:// 规范必须是 RFC 4648 Base32（无填充大写）；
+	// 内部存储格式是标准 base64（既有格式勿改），此处转换供 2FA 工具识别二维码与手动密钥。
+	secretBase32, derr := auth.SecretBase32(secret)
+	if derr != nil {
+		c.JSON(500, gin.H{"message": "服务器错误"})
+		return
+	}
+	otpauthURL := "otpauth://totp/" + url.PathEscape("FurryDrama:"+u.AccountID) + "?secret=" + secretBase32 + "&issuer=FurryDrama"
+	c.JSON(200, gin.H{
+		"secret":       secret,       // 内部 base64 格式（既有响应字段，保持兼容）
+		"secretBase32": secretBase32, // 2FA 工具识别的格式（二维码/手动输入）
+		"backupCodes":  backup,
+		"otpauthUrl":   otpauthURL,
+	})
 }
 
 // VerifyEnable2FA POST /api/2fa/verify-enable（protect）：TOTP 校验后启用 2FA。
