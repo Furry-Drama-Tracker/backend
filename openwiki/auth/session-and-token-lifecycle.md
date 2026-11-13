@@ -3,9 +3,6 @@ type: auth-flow
 title: 会话与令牌生命周期
 description: 双令牌模型、JWT claims 与 purpose、cookie 路径、带吊销原因墓碑的会话存储、refresh 轮换与 2 分钟宽限期重用检测、refresh 失败认证事件、419/409/401 语义、登出吊销以及会话管理端点。
 tags: [auth, jwt, refresh, sessions, cookies]
-verified:
-  - by: openwiki/0.7.2
-    at: 2026-11-11T16:33:08.526Z
 sources:
   - id: openwiki-source-d30e65659972429c2c50cf5a
     resource: repo://internal/auth/cookies.go
@@ -15,13 +12,20 @@ sources:
     resource: repo://internal/cron/cron.go
   - id: openwiki-source-314bd77139a7d3c62ed804bf
     resource: repo://internal/handler/auth.go
+  - id: openwiki-source-3f2beed769b653e945288445
+    resource: repo://internal/model/authaudit.go
+  - id: openwiki-source-c04b809e997b6644e3320acf
+    resource: repo://internal/model/model.go
   - id: openwiki-source-b5df54b08f2ac1045e8ab7c9
     resource: repo://internal/repository/session.go
   - id: openwiki-source-f7acf9d278285ec2e6b81113
     resource: repo://internal/service/auth_service.go
   - id: openwiki-source-27784338c57fd749bd43470e
     resource: repo://internal/service/refresh.go
-generated: { by: "zcode", at: "2026-11-11T16:33:08.526Z" }
+generated: { by: "zcode", at: "2026-11-13T18:41:36.261Z" }
+verified:
+  - by: openwiki/0.7.2
+    at: 2026-11-13T18:41:36.261Z
 ---
 
 # 会话与令牌生命周期
@@ -32,7 +36,7 @@ generated: { by: "zcode", at: "2026-11-11T16:33:08.526Z" }
 
 - **Access 令牌**：HS256，默认 15 分钟，purpose `access`，claim `id` 为用户 hex ID，以及由 24 个随机字节生成的 `jti`。
 - **Refresh 令牌**：HS256，默认 7 天，purpose `refresh`，claim `id`，以及由 24 个随机字节生成的 `jti`。
-- **特殊 purpose 令牌**：`2fa-challenge`（5 分钟）、`device-verify`、`reset-password`、`email-change`（1 小时）与 `sse-ticket`（30 秒）。它们使用同一签名器，但 `Protect` 会因其 purpose 不是 `access` 而拒绝。
+- **特殊 purpose 令牌**：`2fa-challenge`（5 分钟）、`reset-password`、`email-change`（1 小时）与 `sse-ticket`（30 秒）。它们使用同一签名器，但 `Protect` 会因其 purpose 不是 `access` 而拒绝。（历史 `device-verify` purpose 随设备验证码链移除而停用。）
 
 Claims 包含 `id`、可选 `purpose`、`jti`、`newEmail`、`type`、`deviceLoginCode`，以及标准 `iat`/`exp`（秒）。`Verify` 强制 HS256，过期映射为 `ErrTokenExpired`，其他失败映射为 `ErrInvalidToken`。
 
@@ -44,12 +48,13 @@ Claims 包含 `id`、可选 `purpose`、`jti`、`newEmail`、`type`、`deviceLog
 |---|---|---|---|---|---|
 | `accessToken` | `/` | 15 分钟 | 是 | Lax | 仅生产 |
 | `refreshToken` | `/api/auth` | 7 天 | 是 | Lax | 仅生产 |
+| `fdt-device` | `/` | 365 天 | 是 | Lax | 仅生产 |
 
-refresh cookie 的窄路径意味着刷新与登出请求必须位于 `/api/auth` 下。清除鉴权 cookie 会为两个路径以及遗留 `token` cookie 写入过期 cookie。
+refresh cookie 的窄路径意味着刷新与登出请求必须位于 `/api/auth` 下。`fdt-device` 设备令牌 cookie 是"已知设备"识别的唯一依据：浏览器自动携带，会话文档存其 sha256 哈希；User-Agent 客户端完全可控、可枚举重放（CWE-290），仅作展示字段。清除鉴权 cookie 会为两个鉴权路径以及遗留 `token` cookie 写入过期 cookie。
 
 ## 会话存储
 
-`usersessions` 文档包含用户 ID、refresh 令牌的 SHA-256 hex 哈希（`refreshTokenHash`）、access 令牌的 SHA-256 hex 哈希（`tokenHash`）、设备信息、IP、`isActive`、`loginAt`、`lastActiveAt`、`logoutAt` 与 `revokeReason`。只存哈希，不存令牌原文。`auth.HashToken` 是普通 SHA-256 hex 摘要，不能改变，否则既有哈希无法比较。
+`usersessions` 文档包含用户 ID、refresh 令牌的 SHA-256 hex 哈希（`refreshTokenHash`）、access 令牌的 SHA-256 hex 哈希（`tokenHash`）、设备令牌的 SHA-256 hex 哈希（`deviceTokenHash`，已知设备识别依据）、设备信息、IP、`isActive`、`loginAt`、`lastActiveAt`、`logoutAt` 与 `revokeReason`。只存哈希，不存令牌原文。`auth.HashToken` 是普通 SHA-256 hex 摘要，不能改变，否则既有哈希无法比较。
 
 `revokeReason` 是会话被置为 inactive 的原因墓碑（取值见 `model.Revoke*` 常量），覆盖登出（`logout`）、refresh 轮换（`rotated`，正常不是吊销）、改密（`password_changed`）、密码重置（`password_reset`）、改绑邮箱（`email_changed`）、refresh 重用检测（`refresh_reuse`）、用户自助下线（`user_revoked`/`user_revoked_all`）、管理员强制下线（`admin_revoked`）与超期清理（`expired`）。它只存在于库与日志，不进 API 响应——排障时直接查 `usersessions` 或用 `make diag` 即可知道会话"为什么"被置废。
 
@@ -61,8 +66,8 @@ refresh cookie 的窄路径意味着刷新与登出请求必须位于 `/api/auth
 
 1. 签发带新 `jti` 的 access 令牌；
 2. 签发带新 `jti` 的 refresh 令牌；
-3. 插入包含 access 哈希、refresh 哈希、设备信息、IP 与时间戳的会话；
-4. 设置 cookie；
+3. 生成 256 位随机设备令牌，插入包含 access 哈希、refresh 哈希、设备令牌哈希、设备信息、IP 与时间戳的会话；
+4. 设置鉴权 cookie 与 `fdt-device` 设备 cookie；
 5. 异步写审计记录。
 
 ## 轮换与重用检测
@@ -97,12 +102,11 @@ refresh cookie 的窄路径意味着刷新与登出请求必须位于 `/api/auth
 
 ## 登出
 
-`POST /api/auth/logout` 受保护，因此带有效 access 令牌。`DeactivateForLogout` 执行双路吊销，两条路径都写入 `revokeReason="logout"`：
+`POST /api/auth/logout` 受保护，因此带有效 access 令牌。`DeactivateForLogout` 的行为：
 
-1. 哈希 refresh cookie 并按 ID 停用匹配会话；
-2. 哈希 access 令牌并停用任何遗留 `tokenHash` 匹配的会话。
-
-两条路径都执行，因为历史会话可能以 access 令牌哈希为键。随后清除 cookie。没有匹配时静默。
+1. 哈希 refresh cookie 并查找匹配会话：**会话已是 inactive = 令牌重用信号**（该令牌已被他人先行轮换/吊销）——按重用语义吊销该用户全部活跃会话（`revokeReason="refresh_reuse"`）并记录 `refresh_reuse` 认证事件，防止先行轮换的窃贼会话在受害者登出后继续存活；会话仍活跃则按 ID 停用（`revokeReason="logout"`）。
+2. 哈希 access 令牌并停用任何遗留 `tokenHash` 匹配的会话（`revokeReason="logout"`）。
+3. 清除鉴权 cookie。没有匹配时静默。
 
 ## 会话管理
 

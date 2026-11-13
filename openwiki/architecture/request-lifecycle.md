@@ -3,9 +3,6 @@ type: architecture
 title: 请求生命周期与中间件管线
 description: 固定的 Gin 中间件顺序、引擎级客户端 IP 识别装配、请求体解析与清洗、CSRF 校验、限流挂载语义与 429 诊断日志、单前缀路由、静态上传，以及错误实际如何到达客户端。
 tags: [http, middleware, gin, rate-limiting, csrf, routing]
-verified:
-  - by: openwiki/0.7.2
-    at: 2026-11-11T16:33:08.526Z
 sources:
   - id: openwiki-source-8cc3b2cd34ec48fbcbb82fd1
     resource: repo://internal/middleware/apitracker.go
@@ -19,13 +16,18 @@ sources:
     resource: repo://internal/middleware/ratelimit.go
   - id: openwiki-source-40b293d8b99aed27fbe9db06
     resource: repo://internal/middleware/security.go
+  - id: openwiki-source-6e8f4534cd26274b5794f0ca
+    resource: repo://internal/ratelimit/limiter.go
   - id: openwiki-source-a8ba835229d442d09305d33e
     resource: repo://internal/security/xss.go
   - id: openwiki-source-7106c8455bb73d12832c8523
     resource: repo://internal/server/app.go
   - id: openwiki-source-ebbcecfb3e8c07ba5e940ccd
     resource: repo://internal/server/register_routes.go
-generated: { by: "zcode", at: "2026-11-11T16:33:08.526Z" }
+generated: { by: "zcode", at: "2026-11-13T18:41:36.261Z" }
+verified:
+  - by: openwiki/0.7.2
+    at: 2026-11-13T18:41:36.261Z
 ---
 
 # 请求生命周期与中间件管线
@@ -135,10 +137,12 @@ gin.Recovery
 
 两个后果容易被忽略：
 
-1. 每次 `RateLimit` 调用都会创建带独立内存计数的新限流器。但 `RegisterRoutes` 用 `spec.Name|window|max` 做键缓存限流器，因此同一 spec 的所有路由共享同一计数器与预算。例如 2FA spec 挂在六个路由上（`/auth/login-2fa`、`/2fa/verify-enable`、`/2fa/disable`、`/2fa/verify`、`/auth/verify-device`、`/auth/confirm-device-login`），它们共用同一个 5 次/15 分钟桶；`/auth/refresh` 不在此列，它使用独立的 `RefreshSpec`（60 次/15 分钟）。
+1. 每次 `RateLimit` 调用都会创建带独立内存计数的新限流器。但 `RegisterRoutes` 用 `spec.Name|window|max` 做键缓存限流器，因此同一 spec 的所有路由共享同一计数器与预算。例如 TwoFactorSpec 的 Mounts 清单为 5 条路由（`/auth/login-2fa`、`/auth/2fa/email-otp/send`、`/2fa/verify-enable`、`/2fa/disable`、`/2fa/verify`），它们共用同一个 5 次/15 分钟桶；`/2fa/enable` 虽然也调用了同一 spec 工厂，但不在 Mounts 清单内，端点匹配不命中、不计入该桶（既有挂载语义）；`/auth/refresh` 不在此列，它使用独立的 `RefreshSpec`（60 次/15 分钟）。Passkey 仪式有独立的 `PasskeySpec`（10 次/15 分钟，覆盖 `/passkeys/register/*` 与 `/auth/passkey/*`）。
 2. 动态路由如 `/episodes/:id/view` 无法用挂载匹配表达，因此其配置的限流器永远不会触发。
 
-限流器使用 `ulule/limiter` 与内存存储，因此计数是固定窗口且进程本地的。响应包含 draft-6 `RateLimit-*` 头，429 时包含 `Retry-After`。`requestEmailChange` 限流器同时按来源 IP 与目标邮箱小写值限流，避免用不同邮箱刷验证邮件。
+限流器使用 `ulule/limiter` 与内存存储，因此计数是固定窗口且进程本地的。响应包含 draft-6 `RateLimit-*` 头，429 时包含 `Retry-After`。
+
+限流键在凭证/邮件类 spec 上绑定目标账号（ADR-019）：`auth`、`twoFactor`、`passwordReset`、`emailVerify` 四个 spec 在请求体带 `email` 时改用 `spec:邮箱`（小写）计数——来源 IP 可经伪造代理标头轮换（CWE-348），保留 IP 分量会让这些 spec 在 IP 轮换下退化为无限流；绑定邮箱后，对同一账号的猜测无论换多少来源 IP 都共享同一计数桶。请求体无 `email` 的挂载（`reset-password`、`change-password`、`2fa/*` 等无邮箱体端点）回退到原 `spec:IP` 键，与旧行为一致。`requestEmailChange` 仍同时按来源 IP 与目标新邮箱小写值限流，避免用不同邮箱刷验证邮件。Passkey 仪式请求体不含 email，天然走 IP 键（仪式本身有 ceremony 会话一次性约束）。
 
 429 命中时，中间件还会通过 `RateLimitOpts.Log` 输出一条认证诊断事件：`event=ratelimited`，带限流器名（spec 名写入 reason）、路径、IP 与 retry_after 秒数——在此之前日志里只有一个 429 状态码，无法区分是登录、refresh 还是全局限流命中。
 

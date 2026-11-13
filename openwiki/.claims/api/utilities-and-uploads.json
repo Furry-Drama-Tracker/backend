@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "pageVersion": "sha256:80ff3a5c646fe6afe7633687d168515490ef88079475b243ab0701d6e01fc1d3",
+  "pageVersion": "sha256:b84fb0d9c7a9ec3af3539475d146d54d10b05102dca5f9cd4163cb1a7c227194",
   "claims": [
     {
       "id": "claim_5dbfb384331346708453099adf64485f",
@@ -151,10 +151,56 @@
           "version": "repo-lines-v1:sha256:c603765137df8cb48b31ab308b84ebafd6e3749121608adfe1908ab9508ca404:eyJzZWxlY3RlZExpbmVDb3VudCI6MjYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY3Y2RhODJkYTYwNjIzOGUwNWU2MjM5OTU2OWM1ZWUwMzk5MzQxOTY0OGFlNWQ0M2EyYmY4Y2Q2MzQ3ZjgyNjMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjU5MWYwYzMyYWIzNWY2N2JkN2YyMGQwNGY2OGFlZDk5YzMzZDBlNzg2Y2Q4NjI5ZmM0MzAyMjRkM2I4ZmE1MmQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjhiN2MzYWZhMzZkMWUwMjY2ZmMzNDYwNWM5MmQxMWJlNTk0Y2Y2ODViNmIzZTkxYmZhYjA5YzRlN2M2YzllYTAiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImY5ODlmMzk2NThjZjc0MTAyOTE1NGQ3ZGU0MjU3MWIzODM2NWM0NjNlNmY1ZTllNTZhNGNmNDJiZTg5ZDk3NzEifQ"
         }
       ]
+    },
+    {
+      "id": "claim_8e1c592164394b8fa5c44628d6f8490d",
+      "statement": "PUT /api/users/login-name（protect，PasswordResetSpec 限流）按固定顺序改名：密码再认证（重新带哈希加载后 bcrypt 校验）→ 与当前名折叠比较 → ValidateLoginName 规则（3–32 字符、^[A-Za-z_][A-Za-z0-9_-]{2,31}$、内置黑名单子串匹配可与 username_blacklist 合并、保留名精确匹配）→ 折叠小写占用/保留期检查（豁免自己）→ 改名冷却（login_name_cooldown_days 默认 7 天，响应携带剩余天数）→ 两步定点写：旧名折叠小写写入保留期后 UpdateLoginName 更新 accountId/accountIdLower/loginNameChangedAt，并写 LOGIN_NAME_CHANGED 审计事件。",
+      "evidence": [
+        {
+          "resource": "repo://internal/handler/users.go#L85-L117",
+          "version": "repo-lines-v1:sha256:e374e866a9e7b1db7a92b835809716d349930f3c9c0434b5191262dcc00a5e00:eyJzZWxlY3RlZExpbmVDb3VudCI6MzMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijg1ZjVhNmFjZTRhNTE1NDU1MjcyY2EwNzM4YzllMzUxOTBjMmNjZTY1NmNmNWEzNDgzOTdiZDI5OTRkM2NhMGUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjM2NzQ1YTA5YjlmZDg3NDIyMWNlM2QwOGI4Y2RlNzA3NmRhOGFlNTBhNzU1YTQyNmY4MTBiZWNjODdkZDJkYzIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjkzYzhjODdlNTc4NGY3YmM2ZDRhNTJkNTQ5YTdkZjQ3MGY5MmExNGNiYTdkNzkxNWI5ZWFjZWM5M2Y2NjUxNzEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImVkNTczMTcyZjk3Mjg1ZWU2MjllNzkyMzliMTBiZTNjNWE4NzQ4NzNmZGQzOTU2Y2RhNzBjZTlhOTVjMDkwNmEifQ"
+        },
+        {
+          "resource": "repo://internal/service/loginname.go#L155-L225",
+          "version": "repo-lines-v1:sha256:28af23927f8a29f6fb782fab783ff51ca8c8f44d2a263889790695d39e16e144:eyJzZWxlY3RlZExpbmVDb3VudCI6NzEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImE4MWM2MjA0ZDNmZTZjMDgwZDZlZjBmZWVjZjdjNjNkMTEwZjcxMjMzYjYwNDM0MTliYWJkNmQ0NGY5OTBlZjYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImQ3N2VmNGE4Y2YyYTIxODVmYzMyNTMyY2I2YmVhMjMyMTM2YmYyNzNjZDg0ODczNzU0YTExNTA2ZTk5MjJlNjciLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_ae128e5a569d4902b2b3627b472613c1",
+      "statement": "改名后旧名进入 loginnamereservations 保留期（login_name_reserve_days 默认 90 天，存折叠小写防止大小写变体绕过；集合带 loginName_1 唯一索引与 reservedUntil_1 TTL 索引），期间他人不可注册或改名占用；GET /api/users/check-login-name 复用同一套校验与占用/保留期检查返回 {available, reason}。",
+      "evidence": [
+        {
+          "resource": "repo://internal/indexes/indexes.go#L73-L74",
+          "version": "repo-lines-v1:sha256:3b7b69f701b2790b02234a72bf88bd7d4c4e07662280963915cd149d19042936:eyJzZWxlY3RlZExpbmVDb3VudCI6MiwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiNDcxNzBjMjJjODUxN2M4OTdlZGNjNTMzZTcyNjgwNjFkODJkMDlmMTZmOGNjNTU5ZTMyYmQ0YzI2ZDc1NTQ5MiIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiZTMwMmUxNGRiODIzMmE4ZWJiODc5OTg5NDA1OTMzOWFjNzQyYmIzMWExOWJjYjgxZGI3ZWJjZmVmOWEzNzZjYiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNjU4ODk4MmVjNzA3YzBjYjc5NjNmYTUzMzY3Nzk2ZWJhMTA0YjI5ZWVkNGVhNWQ2NWQxNGE5ZTljMTIwOTFjYyIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiYWRmZTUwYTRhMWFkNDc4NGM5OTVlNDYzZTM0YjNiMWM2MmVlNGZkODI0NGUyZjY5ZDJmM2NhZmM4YjgwNmI5OSJ9"
+        },
+        {
+          "resource": "repo://internal/repository/loginname_reservation.go#L33-L71",
+          "version": "repo-lines-v1:sha256:d655fc120964cd948bcaeaf79ba3e25941442f53c30670b15c984df0e196ddac:eyJzZWxlY3RlZExpbmVDb3VudCI6MzksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImY3N2FiN2ZmMWQwN2M3YTNjODZlOTdkZmNjNDNmOTVkNjBkYzY5ZGZhNWZmMWNiOGU0NzRlOWI4MjRiZGRiZGMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImE0NjUzZjc3Zjg5OTk1MjE3ZDhiN2FjZjI0YTA3MmNhZDM4ZjNhMGJlZjJjMWUwNDhhNDY0NzBkNTc1ZWQ5ZjkiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        },
+        {
+          "resource": "repo://internal/service/loginname.go#L207-L225",
+          "version": "repo-lines-v1:sha256:bda69aa5f21da6a3cb0af045eb4e7e7ff2913d0d6b7fddd7d25c886492e1fe40:eyJzZWxlY3RlZExpbmVDb3VudCI6MTksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjVlM2NjZDU3OTU1YzY3NDNmNTM0MjIzZjVhYjkyMWIxN2RiNWE0NWM0NzA0Y2VkMTAwYmEyN2YzOTdiNDdkYzgiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjkzNzg3YjUwNzU4ZTU3MGE2MTQ3OWI4OTUxNmZmMjE3NDQ2MGQwM2U0YjFjNjMyZDc5YmU2NjkwOTc1ODk2OTAiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_8e5cf13e3dba4d648526ffed0d9cfaaf",
+      "statement": "图标包上传端点（POST /api/icons/upload 与 POST /api/themes/upload-icon）保持停用（路由注册被注释），且 Swagger 注解已一并摘除——swag 以行内 `// *@` 规则命中注解，注释不掉只能删除；恢复时需连同路由注册与注解一起还原。",
+      "evidence": [
+        {
+          "resource": "repo://internal/handler/icons.go#L166-L176",
+          "version": "repo-lines-v1:sha256:a4062e334f0ca1adf0b632dea141a6f22378c66dc0b8868602983cad69ab1cfb:eyJzZWxlY3RlZExpbmVDb3VudCI6MTEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImMzNTUzMDI5MTU4Nzg3OTYzNzk2NjhkNzM2MjZjMzk1ODA1ZTdlNmFhMjYwMzkyMzk5NWMxMzRlY2FhZGEzYjEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY3Y2RhODJkYTYwNjIzOGUwNWU2MjM5OTU2OWM1ZWUwMzk5MzQxOTY0OGFlNWQ0M2EyYmY4Y2Q2MzQ3ZjgyNjMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjQ5MThjZDYxNGM5OGZjZGM2MGEwZTY4MjdiZjg4MDQ4MDU5ODRhNjAzMTAzOWI2MDIwMDgwOGM2Y2MzNzAzM2IiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjJmNTgwZTBjOTAzNWExODk4YjMyZjExMTkzY2FiODcyYzA3MGY1ZGZjZmJjMTY4NTE0MmZmZTk1YTFmOTAyMDgifQ"
+        },
+        {
+          "resource": "repo://internal/handler/themes.go#L1243-L1253",
+          "version": "repo-lines-v1:sha256:6b7c18a1846dc0b8e2495bead057a1f83e33ea1c183b5e001c88696cc3b8eebb:eyJzZWxlY3RlZExpbmVDb3VudCI6MTEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjUxMzE0NTFkYjBiMWY4ZWUyNDgzNzRjZmI2NTg3Y2Q3ODQ4Mjk2MTA5OTExNzhkY2QwNDBkMzgwZGQ0ZTFlM2UiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjA3OWY3ZGIzZjY1YTI5ZjdlMzQ0N2E5YTBjOWY4MTE3Y2RlYTJiMjQ0YjQ4ZWRmNzI0MGQ0NzUwMzZhYTJjOTQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjQ4NTQ4ZjBmNTFiOTgzMDVlZDU0ZTM1NTcwOGIyNmY2MmUxMDk1MDE5MGE3MzRhNzJmMDhlZDRmYTVjMDUxNWYifQ"
+        }
+      ]
     }
   ],
   "verification": {
     "by": "openwiki/0.7.2",
-    "at": "2026-11-11T16:33:08.526Z"
+    "at": "2026-11-13T18:41:36.261Z"
   }
 }

@@ -1,36 +1,48 @@
 ---
 type: api-domain
-title: 上传、RSS、翻译、备份与分页
-description: 共享图片与 SVG 上传校验与落盘安全（O_EXCL、剥离执行位）、静态上传服务、RSS 订阅、翻译提供方回退、整库备份导出/导入限制，以及通用分页契约。
-tags: [api, uploads, rss, translation, backup, pagination]
-verified:
-  - by: openwiki/0.7.2
-    at: 2026-11-11T16:33:08.526Z
+title: 工具与上传 API
+description: 共享图片与 SVG 上传校验与落盘安全（O_EXCL、剥离执行位）、用户名（登录名）改名与预检、静态上传服务、RSS 订阅、翻译提供方回退、整库备份导出/导入限制，以及通用分页契约。
+tags: [api, uploads, rss, translation, backup, pagination, login-name]
 sources:
   - id: openwiki-source-1649edbcafe0eab861fed46a
     resource: repo://internal/handler/backup.go
   - id: openwiki-source-f89e324c07065d291ea97e16
     resource: repo://internal/handler/episodes.go
+  - id: openwiki-source-72eac37f3c5cb254f4c498e7
+    resource: repo://internal/handler/icons.go
   - id: openwiki-source-12bf4f6da3684593b4c87988
     resource: repo://internal/handler/rss.go
+  - id: openwiki-source-eb2a947fd0238814b1b0335d
+    resource: repo://internal/handler/themes.go
   - id: openwiki-source-3a7c36409770ce04e5cdeef4
     resource: repo://internal/handler/translate.go
+  - id: openwiki-source-98ac6fe2e30d23a1386f80db
+    resource: repo://internal/handler/users.go
+  - id: openwiki-source-90472325131c7abb6569a18c
+    resource: repo://internal/indexes/indexes.go
   - id: openwiki-source-dbaf2c53f5cefea8a8bb2ff3
     resource: repo://internal/middleware/bodyparse.go
   - id: openwiki-source-4b411986ff37b5fb340aff2a
     resource: repo://internal/pagination/paginate.go
+  - id: openwiki-source-41a2783aa92ed53b4752ea41
+    resource: repo://internal/repository/loginname_reservation.go
   - id: openwiki-source-7106c8455bb73d12832c8523
     resource: repo://internal/server/app.go
+  - id: openwiki-source-77e540df76c24affc46048e3
+    resource: repo://internal/service/loginname.go
   - id: openwiki-source-da80fdae2220fc6ad9a470b7
     resource: repo://internal/upload/svg.go
   - id: openwiki-source-62a9837f2b45c92ae81ca775
     resource: repo://internal/upload/upload.go
-generated: { by: "zcode", at: "2026-11-11T16:33:08.526Z" }
+generated: { by: "zcode", at: "2026-11-13T18:41:36.261Z" }
+verified:
+  - by: openwiki/0.7.2
+    at: 2026-11-13T18:41:36.261Z
 ---
 
 # 上传、RSS、翻译、备份与分页
 
-本页覆盖其他功能依赖的服务型领域：二进制存储、订阅生成、机器翻译、数据可移植性，以及大多数列表端点共用的分页辅助。
+本页覆盖其他功能依赖的服务型领域：二进制存储、用户名改名、订阅生成、机器翻译、数据可移植性，以及大多数列表端点共用的分页辅助。
 
 ## 图片上传
 
@@ -82,7 +94,22 @@ SVG 上传走独立路径，因为它是文本且带脚本风险：
 
 文件写入 `IconsDir`（默认 `./uploads/icons`，可由配置覆盖），文件名为 `icon-<32 位 hex>.svg`，返回 URL 为 `/uploads/icons/<文件名>`。与图片落盘相同，`SaveSVGHeader` 同样使用 `O_EXCL` 打开并在写入后剥离执行位，失败即删除文件。静态上传路由只服务上传目录下的文件，因此自定义图标目录若在外部，需要自行挂载静态服务。
 
-注意：图标包上传端点（`POST /api/icons/upload` 与 `POST /api/themes/upload-icon`）当前已停用（路由注册被注释），SVG 保存路径仅为恢复上传时使用，详见 CMS 页面。
+注意：图标包上传端点（`POST /api/icons/upload` 与 `POST /api/themes/upload-icon`）当前已停用（路由注册被注释），SVG 保存路径仅为恢复上传时使用，详见 CMS 页面。Swagger 注解也已一并摘除——swag 以行内 `// *@` 规则命中注解，注释不掉只能删除；恢复时需连同路由注册与注解一起还原。
+
+## 用户名（登录名）改名
+
+`PUT /api/users/login-name`（protect，PasswordResetSpec 限流）允许已登录用户修改用户名（即 `accountId` 字段），请求体 `{newLoginName, currentPassword}`，流程顺序固定：
+
+1. **密码再认证**——中间件公开投影不含 password 哈希，服务重新带哈希加载后用 bcrypt 校验当前密码；
+2. 与当前名相同（含折叠比较）返回 400；
+3. **新名规则**（`ValidateLoginName`）：3–32 字符，正则 `^[A-Za-z_][A-Za-z0-9_-]{2,31}$`（首字符字母或下划线）；显式拒绝 `.`/`..`；内置黑名单子串匹配（admin/root/system/api 等，可与 `[security].username_blacklist` 词表合并）；保留名精确匹配（me/self/login/settings 等）；
+4. **占用检查**按折叠小写比较：`accountIdLower` 唯一索引 + `loginnamereservations` 保留期（保留期豁免自己——大小写微调不被自己的旧名挡住）；
+5. **改名冷却**：距上次改名不足 `[security].login_name_cooldown_days`（默认 7 天）时返回 400 与剩余天数（响应 `cooldownDays` 携带）；
+6. **落库为两步定点写**：先把旧名的折叠小写写入 `loginnamereservations`（`login_name_reserve_days` 默认 90 天，期间他人不可注册或改名占用；集合带 `loginName_1` 唯一索引与 `reservedUntil_1` TTL 索引），再 `UpdateLoginName` 更新 `accountId`/`accountIdLower`/`loginNameChangedAt`；成功后写 `LOGIN_NAME_CHANGED` 审计事件，响应 `{message, accountId, cooldownDays}`。
+
+大小写策略为 GitHub 式：存储保留原样，登录、唯一性与保留期一律按折叠小写判定，因此 `Admin` 与 `admin` 不可并存、登录不区分大小写。存量账号不做校验（grandfather，含旧规则遗留字符），规则只在注册与改名时生效。
+
+`GET /api/users/check-login-name?name=`（protect）是改名前预检，返回 `{available, reason}`，复用同一套校验与占用/保留期检查。
 
 ## RSS
 
@@ -139,6 +166,7 @@ HTTP 请求体限制对 `/api/backup/import` 单独放宽到 50 MB，且只对 J
 ## 相关阅读
 
 - [请求生命周期与中间件管线](../architecture/request-lifecycle.md)——请求体大小限制与静态路由位置。
+- [账号安全能力](../auth/account-security.md)——密码再认证与 2FA 策略。
 - [内容目录 API](content-catalog.md)——上传调用点。
 - [CMS 与站点内容 API](cms-and-site-content.md)——图标/主题图标上传端点的停用状态。
 - [部署与运行时](../operations/deployment-and-runtime.md)——上传与图标目录配置。

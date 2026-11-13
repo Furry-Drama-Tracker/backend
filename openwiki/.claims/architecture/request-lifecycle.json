@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "pageVersion": "sha256:cc61ad0bef1be5d60286ec1083c8acf82ef46a083ba081a30c2c3da2f105286a",
+  "pageVersion": "sha256:78c78d2ec09cb2a6b8582a587cf8fe53f4fcc1911ba9fd5ff024905343c9f5c8",
   "claims": [
     {
       "id": "claim_ad8616456be14998a10dc7de860bbbf0",
@@ -65,12 +65,12 @@
       "statement": "Each RateLimit call constructs a new limiter and in-memory store, but RegisterRoutes caches one limiter per spec name, window, and max, so routes sharing a spec share counters.",
       "evidence": [
         {
-          "resource": "repo://internal/middleware/ratelimit.go#L47-L142",
-          "version": "repo-lines-v1:sha256:86ced4ce07bc48db528c955ad719e8c7d1fe32422aaec923f05616d47b376742:eyJzZWxlY3RlZExpbmVDb3VudCI6OTYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjA1NWVkNTg1NmQ1ZjgzNGRjM2ZlZWU3MGMxYWRhZTBlZWFlZjk1YmViNzEwMDVjMmFhZWRhY2NlOTliOWFiZWIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjIxZDI5ZTg2MmVlNzI3ZTkwOWJkNjE0NzYwYWFmNTRlNjljMWUzYzUxNjQ3ZmI1ODIzNjBmNjdjNDk2ODBkYjgiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImYyNDhmM2JiNDI4ODc2YjRiMWY2YjVmOTllOWIwNTdkMWRhYjMxZDFkZjdiZDViNTYwZjMzNjBmM2Q1ZWQ0YWIifQ"
+          "resource": "repo://internal/middleware/ratelimit.go#L47-L154",
+          "version": "repo-lines-v1:sha256:65e67fc8fb21294815fb972e6eb0737983b399e4dbf571daa2b2afdc870470a2:eyJzZWxlY3RlZExpbmVDb3VudCI6MTA4LCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiIwNTVlZDU4NTZkNWY4MzRkYzNmZWVlNzBjMWFkYWUwZWVhZWY5NWJlYjcxMDA1YzJhYWVkYWNjZTk5YjlhYmViIiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiI0MTJjYTM0NWNjZjc1YmY5YzA4MDZiY2U2OTViZThkZTgwOGI3OTk4NDI1MWE3YTU0ZDIwMmNmNjEwMWRkNDUxIiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiIyMWQyOWU4NjJlZTcyN2U5MDliZDYxNDc2MGFhZjU0ZTY5YzFlM2M1MTY0N2ZiNTgyMzYwZjY3YzQ5NjgwZGI4IiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MywiZm9sbG93aW5nQ29udGV4dEhhc2giOiJmMjQ4ZjNiYjQyODg3NmI0YjFmNmI1Zjk5ZTliMDU3ZDFkYWIzMWQxZGY3YmQ1YjU2MGYzMzYwZjNkNWVkNGFiIn0"
         },
         {
-          "resource": "repo://internal/server/register_routes.go#L38-L48",
-          "version": "repo-lines-v1:sha256:34891b81ac97fb630271fddff3253f908b2c7b5c32fa396ad0f3b804f6d8eb04:eyJzZWxlY3RlZExpbmVDb3VudCI6MTEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxZDM5M2JmYmNmOTZiMTlkYzlkN2NkYjYwZGQ1Y2RmNjY4YWIyMzMyZTU4YmE2MjNiZTFmOWE1YTI3ZDQ3MWUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY3Y2RhODJkYTYwNjIzOGUwNWU2MjM5OTU2OWM1ZWUwMzk5MzQxOTY0OGFlNWQ0M2EyYmY4Y2Q2MzQ3ZjgyNjMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImNiMmViOWE3YThjZWI3ZDMwZDVkM2NiOTJkODIxZTVhMDBmMzgzNjFhNTQ1YWMxNzE1ZDMxZDVkMzc4MjZkMGMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImM5ZmViOTI5MjJlMmY2OTJlOGNlMmIwM2EyMzU1NjdiYmQyODgxZTYyZmFmNjBkYjg0Yzg0OTIxYjczYjJlNjYifQ"
+          "resource": "repo://internal/server/register_routes.go#L50-L57",
+          "version": "repo-lines-v1:sha256:b40f834b6da69976e037ef76e2d486fd0a0192acd9f2d7c79b078d773e35e59d:eyJzZWxlY3RlZExpbmVDb3VudCI6OCwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiMzUxNjM5MmFjMjlkMzJmOTFhNjA4ZDUzZjk1OGFjM2I3MGYyYzBlNDg2NjM2YzdjZGUzZWE2ODA5MGI1N2YwNCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMGJkM2M0N2E5YTFhMTdiYjJlOGM4YjBjMmEzNjFkZjJjNmQyMDI0ZmExZTdiZDNlODM5MzVkOWRkYWNjOWViZiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiMmM2MjNjOGRhMmVkNTc5MTI0OGU1ZTU0MjBkN2Y2MTJlNjQzZjhlODE3ZWUxNDFlNzA4NDI5M2UwYzNhMGY5OCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiNDU4ZGNmZmU4YzkzYjc2ZjlmNzI5MzQwMDgxNzcwNzA2MzBmOTMzM2Y1OGExZjgxZTE3YWI3YmEwZGM3YTllZCJ9"
         }
       ]
     },
@@ -125,10 +125,34 @@
           "version": "repo-lines-v1:sha256:8057ae0ab77285bd27e6611cdbbe12671aa7fe47c21bf69d2e707015bc50fd71:eyJzZWxlY3RlZExpbmVDb3VudCI6MzksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAyMGIyYTE0OTY1NzQxNWI3YmRhMWY3NmIxODE2NjZhMWEyMjMzYjFkNmJlYzMzMjJlOGZjMjE4ZDYwZmZlZGQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY5Y2JkMzZmYmU4OWM1ZWUyZDRiOGNjYTdkOTg0MTE1ZGFjZDgwNTJmOWEyMjljMDdjMWUwNjgwMmFiZWZmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjUzZTBjODRlYjY0ODlkNzgxMTJjMzQ3M2FiODhjMWZhODkxYzhlNzY0NDYwMjc0Zjk5ODc1YmRiNzM4MzJkMzMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImYzNzVhYjYzYjY3NzliNWQ4MTg4YzU2MjJlNTBjZmJkNTRjODk1YWZhYjYyNGJmMTAyNGQ4OTk3OTE1MmQ0ZWMifQ"
         }
       ]
+    },
+    {
+      "id": "claim_6699f7baecf04f6693d0d10976052fdb",
+      "statement": "凭证/邮件类限流（auth/twoFactor/passwordReset/emailVerify 四个 spec）在请求体带 email 时改用 spec:邮箱（小写）计数，无邮箱体的挂载回退原 spec:IP 键；来源 IP 可经伪造代理标头轮换（CWE-348），按邮箱绑定后对同一账号的猜测无论换多少来源 IP 都共享同一计数桶。requestEmailChange 仍同时按 IP 与目标新邮箱限流。",
+      "evidence": [
+        {
+          "resource": "repo://internal/middleware/ratelimit.go#L168-L179",
+          "version": "repo-lines-v1:sha256:6bddff4bb4eec08b105c4793b77ca735e85f4a7e5b408eb4af07f652e48acbd2:eyJzZWxlY3RlZExpbmVDb3VudCI6MTIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImFjNGQxNzJmZmE4ZmRlZTMwNTczYThjMmMwNmIyYjI3Zjc2OWY3M2NhMWYzOThmOGZmMDFkYjk4YzViMjNkMjMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjY5MzAyOTc1YTFlNDJmMmEwZjE5ODA1NmUyMDBjODhmZjhkY2Y5MGQ2NjYyZWQ1OWY5Yzc3YzQxY2RlNzFlMzciLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        },
+        {
+          "resource": "repo://internal/middleware/ratelimit.go#L97-L116",
+          "version": "repo-lines-v1:sha256:c3bd121f55d43bb9531b974b65126c3cffbbed5916b6a645779459057f661802:eyJzZWxlY3RlZExpbmVDb3VudCI6MjAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY1OTI4NmRmNmIxOTk3MmEwMzA4MjZjZDEzMDk4MWEzM2Y0MGYxMGVjYTQxM2EwNmRmOGYyMTU5NzNlMDk4YzMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY0ZWZjNDk0MThkMjZkY2YxMjliMjJhNmFhMjExMDhjZWVjMzc2NzdhMzJkMDhlOWQ1ZmVlMzVkZGE2NmJiOWQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImYwMWIyOGYwNTRiMmUwZTE0YjA4Y2E5YzExNjE5NzFiMGViMzZiYWQ3OTE2ZjgxZmFmNjgyZWNiZWU5YjU2OTIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjRlOTBhYTg0YTlmNDI0NjkxZmE4OGI3NTEyOGNjMGI1MWQ2ODliYTFmMzRlN2I2MzJlYmNlMjdkMGQ1NGY1YjgifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_09504f75aeb247ff971b2ec51d9e74e3",
+      "statement": "Passkey 仪式有独立的 PasskeySpec（10 次/15 分钟，覆盖 /passkeys/register/* 与 /auth/passkey/* 四条路由）；仪式请求体不含 email，天然走 IP 键，仪式本身有 ceremony 会话一次性约束。",
+      "evidence": [
+        {
+          "resource": "repo://internal/ratelimit/limiter.go#L98-L106",
+          "version": "repo-lines-v1:sha256:003f74644291dd06086665d7d538fe149f70e443ee0adab4bf1c2ee0cd4fb65d:eyJzZWxlY3RlZExpbmVDb3VudCI6OSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiOTgxYzAyYjlkZDQyYmViMGMyMWRlOTNiMTFiNjZlODUzZTQwNTg4YWY2ZmFkYjY0MmM1ZjQ0OTkyZDdkM2IyMCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNzA0MzA1ODRiODVmYTBkN2MzODA3YmMxMGM1ODY2MjUwZGE0N2ZmNjZmNmFlN2ZmOTRjZmFmNWMxZTUzYTk3ZiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiM2ZiNTFlY2YyODM2Yjk0NjY5ODY1MmJmOTQ0NmRjMTBjODE5ZjAwZWZmMGQwMDQ0MmJiMzNmMjY1MWRkOTEwZCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiMjFjZDMzY2NhMGJlNTZmZmVlM2ZkYjNlMTE0ZTE5ZDVmY2Q0NTJlNzliNTg4MGZjMmI5MTUxYjcwOGZhMTQzNCJ9"
+        }
+      ]
     }
   ],
   "verification": {
     "by": "openwiki/0.7.2",
-    "at": "2026-11-11T16:33:08.526Z"
+    "at": "2026-11-13T18:41:36.261Z"
   }
 }

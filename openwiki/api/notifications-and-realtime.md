@@ -3,9 +3,6 @@ type: api-domain
 title: 通知与实时推送
 description: 通知文档与端点、SSE 流的票据认证与连接上限、邮件通知偏好，以及已存储但不会发送的 Web Push 订阅。
 tags: [api, notifications, sse, push, email]
-verified:
-  - by: openwiki/0.7.2
-    at: 2026-11-11T16:33:08.526Z
 sources:
   - id: openwiki-source-314bd77139a7d3c62ed804bf
     resource: repo://internal/handler/auth.go
@@ -23,7 +20,10 @@ sources:
     resource: repo://internal/repository/push_subscription.go
   - id: openwiki-source-f7acf9d278285ec2e6b81113
     resource: repo://internal/service/auth_service.go
-generated: { by: "zcode", at: "2026-11-11T16:33:08.526Z" }
+generated: { by: "zcode", at: "2026-11-13T18:41:36.261Z" }
+verified:
+  - by: openwiki/0.7.2
+    at: 2026-11-13T18:41:36.261Z
 ---
 
 # 通知与实时推送
@@ -94,7 +94,7 @@ handler 写入 SSE 头（`text/event-stream`、`no-cache`、`keep-alive`、`X-Ac
 
 这些偏好不会阻止通知创建，只门控对应的邮件发送；邮件由生产领域异步发送，且仅在邮箱已验证时发送。例如剧集更新邮件检查 `episodeUpdate`，反馈回复检查 `feedbackReply`，审核结果检查 `reviewResult`。
 
-偏好通过 `PUT /api/auth/email-notification-prefs` 管理，并出现在 `/auth/me` 响应中。
+偏好通过 `PUT /api/auth/email-notification-prefs` 管理，并出现在 `/auth/me` 响应中。`/auth/me` 与登录/refresh 响应的用户对象是固定字段契约（`勿增删`）：登录/refresh 用 `SessionUserJSON`，`/auth/me` 用 `MeJSON`（额外带 `avatar` 与偏好对象）；两者当前都包含 `_id`、`uid`（数字用户锚）、`accountId`、`username`、`email`、`role`、`twoFactorEnabled`（前端 2FA 状态展示的权威来源）、`force2FASetup`（admin/superadmin 未开 2FA 时的强制设置标记）与 `forceEmailChange`（超管未改默认邮箱标记）。
 
 ## Web Push
 

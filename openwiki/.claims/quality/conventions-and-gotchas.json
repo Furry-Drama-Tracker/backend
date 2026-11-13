@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "pageVersion": "sha256:16839a1542ef94c430cecd0468169448806b563c580f98650b9b9a94516a02a7",
+  "pageVersion": "sha256:9efb027d00d32b2a62f6b72d44d6bff72f3f1fd5ba5c6824127b7e371decbdff",
   "claims": [
     {
       "id": "claim_deb47bdd79be4295a6916727d8f6bc09",
@@ -27,12 +27,12 @@
       "statement": "端点限流器仍只匹配 /api/<mount> 与子路径、固定窗口计数，并由 RegisterRoutes 按 spec 名/窗口/上限缓存限流器（共享 spec 共享计数器）；限流键统一使用引擎级 c.ClientIP()，429 时输出 ratelimited 认证事件。",
       "evidence": [
         {
-          "resource": "repo://internal/middleware/ratelimit.go#L47-L142",
-          "version": "repo-lines-v1:sha256:86ced4ce07bc48db528c955ad719e8c7d1fe32422aaec923f05616d47b376742:eyJzZWxlY3RlZExpbmVDb3VudCI6OTYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjA1NWVkNTg1NmQ1ZjgzNGRjM2ZlZWU3MGMxYWRhZTBlZWFlZjk1YmViNzEwMDVjMmFhZWRhY2NlOTliOWFiZWIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjIxZDI5ZTg2MmVlNzI3ZTkwOWJkNjE0NzYwYWFmNTRlNjljMWUzYzUxNjQ3ZmI1ODIzNjBmNjdjNDk2ODBkYjgiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImYyNDhmM2JiNDI4ODc2YjRiMWY2YjVmOTllOWIwNTdkMWRhYjMxZDFkZjdiZDViNTYwZjMzNjBmM2Q1ZWQ0YWIifQ"
+          "resource": "repo://internal/middleware/ratelimit.go#L47-L154",
+          "version": "repo-lines-v1:sha256:65e67fc8fb21294815fb972e6eb0737983b399e4dbf571daa2b2afdc870470a2:eyJzZWxlY3RlZExpbmVDb3VudCI6MTA4LCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiIwNTVlZDU4NTZkNWY4MzRkYzNmZWVlNzBjMWFkYWUwZWVhZWY5NWJlYjcxMDA1YzJhYWVkYWNjZTk5YjlhYmViIiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiI0MTJjYTM0NWNjZjc1YmY5YzA4MDZiY2U2OTViZThkZTgwOGI3OTk4NDI1MWE3YTU0ZDIwMmNmNjEwMWRkNDUxIiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiIyMWQyOWU4NjJlZTcyN2U5MDliZDYxNDc2MGFhZjU0ZTY5YzFlM2M1MTY0N2ZiNTgyMzYwZjY3YzQ5NjgwZGI4IiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MywiZm9sbG93aW5nQ29udGV4dEhhc2giOiJmMjQ4ZjNiYjQyODg3NmI0YjFmNmI1Zjk5ZTliMDU3ZDFkYWIzMWQxZGY3YmQ1YjU2MGYzMzYwZjNkNWVkNGFiIn0"
         },
         {
-          "resource": "repo://internal/server/register_routes.go#L36-L52",
-          "version": "repo-lines-v1:sha256:cabb07f3a74dec9dc33c5f77d3e315f89bb8d2eb08b374623895557f3d865c81:eyJzZWxlY3RlZExpbmVDb3VudCI6MTcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjMyM2FhMTQzOWE1ZGJiNzczNzQ2NDdjNjJmMjdhZTYyYTY0YzJiZjJhMTdlYzIyZGIxMDdjNmZhMTUxZWEzZTEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY2MzBmMjg3NDU1YzVhMmQ1NzgwN2UzNTRhNjEyNGZkNzI4YjNhMmY4N2RjMjM0YzMxMzJlNmYyM2UyNjczMDEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijk0NmVmOTAyN2U5YzdiOTRhODJhNmYwMjM4YWIyMGFjNTExZmY1YTgzN2RlYWJkOGQ4OTQxNDcwODgzMTdhYjkiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6Ijg1NTRiZDA5NDU3M2YwNmZhMmQ2MGQ5MDQ0ODVjNGRmZDFjNzAxODFmMzlkMmYwMTBhMTc1ZDExYjIyNDBiYmIifQ"
+          "resource": "repo://internal/server/register_routes.go#L36-L57",
+          "version": "repo-lines-v1:sha256:479f6cc13e773e093fc1424abf101891147768eaea55ada15b1460056bdf4c24:eyJzZWxlY3RlZExpbmVDb3VudCI6MjIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjhlMDljZjc3MWNlNzkxZjNiYjRhYTY0ZGE2ZDI1YmY3ZDNjZDFjNjllZWRhYThjMTdlNTZkYzJjYTEwMTQ3ZjMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjBiZDNjNDdhOWExYTE3YmIyZThjOGIwYzJhMzYxZGYyYzZkMjAyNGZhMWU3YmQzZTgzOTM1ZDlkZGFjYzllYmYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImM3ZWEyNDNhM2UzNTExZDQwZmI4YTRjM2RkOWE1ZmQ4ZjI3NjY3YWFkNWVmMjUwZDgwZDIwNTUzN2E3YTJiYjUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjQ1OGRjZmZlOGM5M2I3NmY5ZjcyOTM0MDA4MTc3MDcwNjMwZjkzMzNmNThhMWY4MWUxN2FiN2JhMGRjN2E5ZWQifQ"
         }
       ]
     },
@@ -41,22 +41,22 @@
       "statement": "requestEmailChange 限流器的键仍是来源 IP + 小写目标邮箱（而非仅 IP），防止用不同邮箱刷验证邮件；IP 现取自 c.ClientIP()。",
       "evidence": [
         {
-          "resource": "repo://internal/middleware/ratelimit.go#L99-L105",
-          "version": "repo-lines-v1:sha256:56ceaf279c53f2ab8afcf9b4220ff192a3d675cfb79e419b312e251b40cdf508:eyJzZWxlY3RlZExpbmVDb3VudCI6NywiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiNmI0ZTUzODFiMDBlNGU2NWNkMWQ3OGFiNjBjZmVmNmE3ZjhkMTlmYzc5ZGM0YTNmMmFlYjVlZDM4YTVkOGU1YyIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMDFiYTQ3MTljODBiNmZlOTExYjA5MWE3YzA1MTI0YjY0ZWVlY2U5NjRlMDljMDU4ZWY4Zjk4MDVkYWNhNTQ2YiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNmY1ODcyZTQ0ODY4ZDFmYzk0ODI3YTZiMTVlMGY4ODE3Njg5YWYzOGIyODI0Y2YwM2VmZDQwZWU0Y2Y3Mjk3YyIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZjhhZGU3ZmQ5MTE5NzM5NDJjNjY2NDcyMjkwODcxOWQxYzQzMWIyZjk2MTA4MWFhZjM2OWUyYjkwZDcyNGM0MSJ9"
+          "resource": "repo://internal/middleware/ratelimit.go#L101-L104",
+          "version": "repo-lines-v1:sha256:6dde05d93a0ddb11c44f1b7d631ef6b76d16c68d2613b47167d527a0126f4a62:eyJzZWxlY3RlZExpbmVDb3VudCI6NCwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiOTAxMGQwODRmZTgzMTMwOGNjZTlmYjY4YThhODVlMWQ2OWMwNmM2YmEzOGMwNDY3NmIzMzA5NmE3YzM2ZmEyOCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNzU3ZjI3ZmU2MmFiY2QxMmIzMzM1ZDg3NDJiZTUzZmMyMTdiNjZmMTAyYTY0ZGM3Y2VkZjNhNDIyNTlkNWZmYSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiYTNkNGM0ODhkOTlhOGU1ZGFjOWI1OTQ2YzdhYjgzMTE0YTEwMzRmYTY5N2E5ZGYyMjM0NjIyYWNkNjZiNTYwMyIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiOWFmMmI1NWZjYzY4OTEyNDkxMmQxYTc0YTIxNWVjMGI2ODllZDc2NmE5MTI4OWM1NGJlYWU1MmNhY2NlODU4NyJ9"
         },
         {
-          "resource": "repo://internal/ratelimit/limiter.go#L88-L102",
-          "version": "repo-lines-v1:sha256:34cbd3b1fe9d7273cb12f857e73bacbf71cde3fce4fd217743a4045dab24156e:eyJzZWxlY3RlZExpbmVDb3VudCI6MTUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImM3M2VhMjUzNDdjYzdmNjBlZGU4NjlhZjgzOGM3MjVlNDNiOGVjZDg5NWQwYTg5NzVhODg4N2I0MDc5MzJjZmUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImE1NmM5OTYyNTY4ZjQ5ZTc0MmQ3ZjE3ZjIzZGI3MTgwZjgwNjg2YWFjOWNlNGVmMzg5NjhlM2EwMDU5ZDUyMTAiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijg3MWIxMDY1ZTk3ODcwNTY1ZmExMmFhOTg3MWEwNTI2ODM5ZGEwMzQzMmViN2ExNGM0Y2QwNWY4ODhiNTA3MjgiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjJhMWRhNTM0N2EyZTFiMmM0NzVmYzE4NmJlZDMzNjVmZmFkYzE5M2E1NzQ1YzIwYWM3MjNhYzZjOTMxZWExNDEifQ"
+          "resource": "repo://internal/ratelimit/limiter.go#L128-L135",
+          "version": "repo-lines-v1:sha256:b6401ec256881b2021d1b7d1f6f803e2a2dd598645f4fd114b970b3883141e38:eyJzZWxlY3RlZExpbmVDb3VudCI6OCwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiZjgxMjAxYmIwY2M0OWUzZTVkZWI5MTJhMmNkOWY1NmFhYjU0OTY4OTI4MmExYjVlNTdmZThkMjNhMjRiYTNkZiIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNmY4NTRmMDUwMzcyYTFmZTQ2MWZhMDE5MTQ5OGJhZDQ5ZDdlYzEwNGMxNTk4Y2I4ZWEwYWI0NDVmY2E2YzRjZiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiMWY4MTgxYmY4NTEwODEwNjg2NDNmZWQ2ZjM3NThlMmRjNThjMTY0ZGZjOGQ0NTlmNzEyM2RiN2RiMzcwODkyNSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZTkzMDgzZDkwNjViOGRlMWQyMmM2ODA2MTdkOTViOTlmZDdmNGVmZTc2ODlhMTcwMWZlYmEyOTE0ZWRjMzhlNiJ9"
         }
       ]
     },
     {
       "id": "claim_3659554e27ba4b15bea8a5fdb8869ca2",
-      "statement": "XSS 清洗仍剥除不允许的标签而保留文本（不转义标记），与 bluemonday 替换决策一致；该决策在 docs/decisions.md 中的位置随新增 ADR-013..017 后移。",
+      "statement": "XSS 清洗仍剥除不允许的标签而保留文本（不转义标记），与 bluemonday 替换决策一致；该决策在 docs/decisions.md 中的位置随新增 ADR-013..019 后移。",
       "evidence": [
         {
           "resource": "repo://docs/decisions.md",
-          "version": "repo-file-v1:sha256:a844efc24d2d9c595466f0df1969589689df5a422084fb2905925cda8b7a1e98"
+          "version": "repo-file-v1:sha256:1edcb306fee6ca5b53a70ac711c62d4d5d31e5f1c9caf29a83a578aff327bdd0"
         },
         {
           "resource": "repo://internal/security/xss.go#L32-L70",
@@ -101,10 +101,52 @@
           "version": "repo-lines-v1:sha256:ae3e940214500a4760f082232d38ae176d2a8d56d008bf342766aa873df0da0b:eyJzZWxlY3RlZExpbmVDb3VudCI6OCwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiYjU5N2Q5Yjc3MmMxNDgyMTI5ZTYxYjRkYmYzM2FkNDhiNzkxYjY3MDNjYWJmNjJlMDI1ODJhMDM3MGJlNGQ3NyIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNDEyY2EzNDVjY2Y3NWJmOWMwODA2YmNlNjk1YmU4ZGU4MDhiNzk5ODQyNTFhN2E1NGQyMDJjZjYxMDFkZDQ1MSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNDQ1NjU1ODJiZmU4YzEzOTczNThjODg5OTkyN2M3NmJlNzkyYTBjODNkN2MwNDI4ZWJmOWQyZjY3YWUzZmVkZiIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiOGE5ZDc1NWEyYWMzODkxNjAwMGYyOGI2YWFiZTU3NTA0OGEyYzEzYWQ2MDBhZjkzNWE5ODM1NjQ3Y2FmZGRmZCJ9"
         }
       ]
+    },
+    {
+      "id": "claim_2b7ae78afcd54134b2b96b2b46f5d5d4",
+      "statement": "otpauth secret 展示格式是 RFC 4648 Base32（无填充大写，auth.SecretBase32 从内部 base64 转换），内部存储保持标准 base64 既有格式勿改；/2fa/enable 同时返回 secret 与 secretBase32 两个字段。",
+      "evidence": [
+        {
+          "resource": "repo://internal/auth/totp.go#L55-L65",
+          "version": "repo-lines-v1:sha256:259a7af21a6db2c342add781682ec01812012133088d9f226373e6cd1f66095c:eyJzZWxlY3RlZExpbmVDb3VudCI6MTEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjhlYzhhNTJmMjUwMTlkYjcxN2M0YTc3Njc1MzFmZTk5ZDg0Yjk3YWRkOTY1ZjU5ZTQ3NjQ2OGEyMzgzNDM4NDEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjE1OTdiMzMzMzYzMDU3Y2JmZGU1NWVjMTkzMzRkOTdhYjVmNTRjNWI5ZjZkNjIwN2QyNGZhNzk1NDBkOGQ1NTEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjBjOGRiNWNlMDI0MWNhMDZjMjAzNTFjOTcxNDVlMzIxNGI3MWFhYjFiMDljN2I1N2M3NmI3MjM4ZmIyODA1ZTUifQ"
+        },
+        {
+          "resource": "repo://internal/handler/twofactor.go#L50-L68",
+          "version": "repo-lines-v1:sha256:fdc03c7a40bf2884ddcd38b4770174e5b4c89859eb30221e6a12f16082174508:eyJzZWxlY3RlZExpbmVDb3VudCI6MTksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImM2NmEzNDI0MWRmZDdkZTIyMzg2NTY3ZDE1ZWUxN2RlZWIyZmY5NGY0YjExMzQwMWVhNzY1MzJkMmEwZDk1N2QiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjVhZWZhYWVmOTViOWQ3MTA5MWVkZTIyNjUyZWVhMmU2NjBhNGNkMGM0ZTE2ODIyMWNkYmFmODI0ZTRjYTkzOWIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjYwNDAzZWY4MmYxNjZjMDNjYWU4YWY1NDcyOWQ1MjgwZmRkMjE0ZjNjOWU3OGI5ZjllNWM1YTFhYWMxZmY0NzQifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_3b67c147327d4fb597bed1d9d966cb8d",
+      "statement": "code.Store 新增 SetFresh/Mint：SetFresh 在同码已有未过期条目时拒绝，Mint 循环生成直到无冲突（连续 100 次冲突回退 Set 保可用性），全部签发点（login/register/change-email/resend）改用 Mint——防止六位码全用户共享命名空间下的跨用户静默覆盖（ADR-019）。",
+      "evidence": [
+        {
+          "resource": "repo://internal/code/store.go#L85-L116",
+          "version": "repo-lines-v1:sha256:c00a1fcd973adce59298c907497d9343e69b80c8afeb9ed5c0e5de0d438555b0:eyJzZWxlY3RlZExpbmVDb3VudCI6MzIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjlkMmRiMzYyMGI3NTMzNjBlNWNkY2U2NGJiNmNjMGZkOGExM2NmNTliMWQ4Njg4MWU2YWE2YTFlNGNkOGY4N2UiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImE3MTBhZmU0ZWUxNDNlM2M5NDhmMTA4NGQ1YWIyMzE4YmUzYTVjNGZkY2VkODZmMjQxMjkyMWM1OTRjYjlmM2YiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjRkNWI2NzU2Njc2NzQ2NmMwMDhkODA4OGEyNDIwODE3NmY3MzAxMTQxZjkxNWJjMDQ0MzViODNkNDBlNzZmZTMifQ"
+        },
+        {
+          "resource": "repo://internal/service/register.go#L132-L143",
+          "version": "repo-lines-v1:sha256:aed4cced93911b11d18ee24cf1b6a0b150a802df7fbd3f891976fc4e88af24ab:eyJzZWxlY3RlZExpbmVDb3VudCI6MTIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijk4MzczNWM3NjdjN2M3YmQ1YjQ3YjIwZDA4MjUyODE5YzA5ODg2OTVhNGQ1MGNlNWFiNDZiODcyZmE0NTU4OWYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY3Y2RhODJkYTYwNjIzOGUwNWU2MjM5OTU2OWM1ZWUwMzk5MzQxOTY0OGFlNWQ0M2EyYmY4Y2Q2MzQ3ZjgyNjMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjA1N2M1M2Q3YTVlMzQ2YTgwYzhlYmU0NjUwNzM2MmYwOGNjZDhmMWQyMzgxNzM0NWQyNjJmNmM2NWU3OGQzOWMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6Ijk3Nzc0NTk0M2Q1NGU2YmY5OWZhOTU1ZDgwOGQ2Y2Y5YWFjMmYxNzcxYzNhYTU3MGIzMGQ0ZjhkYzA0YmM5OGQifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_56cfcad128b144e5b08f69ea44977136",
+      "statement": "模块路径已迁移至 github.com/Furry-Drama-Tracker/backend（go.mod 与全部导入路径），用户系统重构新增依赖 go-webauthn/webauthn 与 tagphi/czdb-search-golang。",
+      "evidence": [
+        {
+          "resource": "repo://go.mod",
+          "version": "repo-file-v1:sha256:f8c9558fb40ba49ce805c3950d65db12e1872552f60422abfca007d279697147"
+        },
+        {
+          "resource": "repo://internal/service/passkey.go#L1-L23",
+          "version": "repo-lines-v1:sha256:6f5bf91eaa7a32ef9c53c3dbe7760eb52e67ba902af07cf2142e92797b56b403:eyJzZWxlY3RlZExpbmVDb3VudCI6MjMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjkxYzM3NGVkNjExOTUzN2UwMWFjNzliNDU2MTkyMzljZmY3ZDUzYjNhNGZhODI4ZjgyZmYxZDRmOTNmYTA0ZjIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImZhZmJhMDUyN2MzOTUzYzRiNmUwZTViNTczOWJhODM2MTJmODA1M2JjZGM5NDY2NzMwMTkzY2QxZDU5MGI0MDgiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjE5YjMxOWNlZmRmYWY5NzFjYWY4YTg1NDQzNTA5YTgyODIwNDM0MDhlOThlOGI5ZWQ3YjA0OTQyMTc0MmZiZTgifQ"
+        }
+      ]
     }
   ],
   "verification": {
     "by": "openwiki/0.7.2",
-    "at": "2026-11-11T16:33:08.526Z"
+    "at": "2026-11-13T18:41:36.261Z"
   }
 }

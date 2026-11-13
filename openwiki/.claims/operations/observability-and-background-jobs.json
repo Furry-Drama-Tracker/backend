@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "pageVersion": "sha256:241c48b89d86666963e83f690e2c8a1b853a3d50fc73efb03ca3023624e63e56",
+  "pageVersion": "sha256:93380b0f6e8394a3dcab95e03dc044f4fce36f359c708dff9dafe4c61087fa81",
   "claims": [
     {
       "id": "claim_906974628b5a4b4091aae42fe2e0023d",
@@ -97,7 +97,7 @@
       "statement": "The API usage flush loop, email target-rate cleanup, verification-code cleanup loops, and translation batch worker start during middleware or handler construction, while cron, indexes, and migrations now also run at startup from the entrypoint.",
       "evidence": [
         {
-          "resource": "repo://cmd/server/main.go#L84-L100",
+          "resource": "repo://cmd/server/main.go#L92-L108",
           "version": "repo-lines-v1:sha256:c605d92d79de641f977621792cb9263807a1d74481bff841f6b828cea74b451a:eyJzZWxlY3RlZExpbmVDb3VudCI6MTcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImYzODkyZWFlMzEzYjk1ZWNmNDc2YTc5YzAyZWU5NGRmYWNmNjA0OTliZGI3NmFlM2FlNThkNDJhY2U0MzY5OWYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjY0MDUzYzM0MjRkNDFlODZiNGJmNDRmZmI1MzA1ZTA0MjBlOGJmMTFkNzgyZTBkOWVjN2U1NjExYzE1ZmI4YTciLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImIyZTJjZTFjOWQyYjgzOTRhNTkzY2E0YjI4ODA4MDBhMzVlN2Q0Yjg0MDcyMmI4MDFhM2I1NTZkMTNhMDZhZjIifQ"
         },
         {
@@ -113,14 +113,46 @@
           "version": "repo-lines-v1:sha256:64e72938a4d1934488f59cad124b82ff4f5148640cb5665f46a5dd0f855873ad:eyJzZWxlY3RlZExpbmVDb3VudCI6MTAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjljMzNiNTJlOTU4YWJiMDBjOGVhY2FkYzdhMTZlODE1YmZlMGViMTEzMjU2Mjk1MWMzODhiNjQ2YmE4ZGM0Y2IiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImJmMDYwOWU2YjM2MGZjYzljODA3OWE3YmU4YmFhODBjZDY3ZjI2ZDAwNmE5NDJmYjc4NzNlNmE0MDQzMTA5NWQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjM0NWY5ZGI4NmZlODJmZjkzM2RkZGQ0NWE1MjZmYzVjN2E3ZTAzMjNkNGZhOWVhY2NjMDAwNjJiOGEyYmE5ZDciLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImM5MjFhOGZkOTM3Mjg3N2Q4ZTY2NDgzZWMxNjJiMjNjNTRjMGM0ZTA1YzJmMjg0YzdjYjA2ZmJlNDQxZjJiZGMifQ"
         },
         {
-          "resource": "repo://internal/server/register_routes.go#L23-L24",
+          "resource": "repo://internal/server/register_routes.go#L24-L25",
           "version": "repo-lines-v1:sha256:5c2507d31a2117bf5bd01c747e3574ab6f146771ed155bd78180ba42eb9c40f1:eyJzZWxlY3RlZExpbmVDb3VudCI6MiwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiOWUzYjBjNzg0YTVmNDBjYjk3ZGZmYmM5ZjhjNDk3MTI0OGEwY2FjNTQxN2ZiODRlODdlYmU2ZTJkNTA2YTE1ZCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMzViMTdkNzg1OWQ5OGFiZGE0ZmFhZDhkMWM0MWIyZjA2ZWU0YTA1NTZiYzI2ZDM1ODRiNzk3N2I5NWZmYzk0NSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiYjQ4Y2YyNjZlZDFkZWI4YmUyNTk5NGRiZWE4ZGM0YWYzZjhjNWRjZDNjMTdmOGQ4OTBkYjZlOTI2MDVhYzhjMyIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiNThiYzBiNTM2OWJiYmMxOGE2ZDg4N2M2MjU2ZDc5NmQzYTE2ZjdmY2NkZDBiZDk5ZjYxZWY4NDkxY2VkMzYxMyJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_d42b013ab29b4368a18eeedde37ab9ef",
+      "statement": "authlog 诊断事件仍覆盖六类失败/吊销事件（session_revoked、refresh_grace、refresh_reuse、refresh_invalid、twofa_replay、ratelimited）；refresh_reuse 在登出携带已消费 refresh 令牌时也会触发；device_code_miss 是历史事件类型（设备验证码链已移除，不再产生新事件），仅存在于历史数据中。",
+      "evidence": [
+        {
+          "resource": "repo://internal/model/authaudit.go#L28-L36",
+          "version": "repo-lines-v1:sha256:2f0dcb67f60300c5e6860634a49aabf2896b07df0bc0eafb42fc7955bdf35f85:eyJzZWxlY3RlZExpbmVDb3VudCI6OSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiYmExZjQ4YTNmYzBkYTlkN2VhOGU1ZTJhM2NhMGRiYmQ5ODgxNDMxMWZlYTI1ZTljNjI4NTJhNTUyMDhlMDVjNyIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNjliZDkzY2E1N2ZmNTgwOTE5Y2ZmMDg2Y2Q0MWVlNzU5YzY3Y2U0NWE3YTM5NzhkNjI2OWNjOGQxNWY5NWZiYiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiMjgyMTYzMWY1Y2MzNjZmZDI0YjVkNTc0NDIxODc4NjE3YzBiMzkzZDkwN2Y3OTAyYmZjMTJjZjIxNWFhMTE3OCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiOGZmZjMyODg0NGM3M2U3YTZhNTcwMTY3Y2RmOGUxNDNjOWIyNGMxZWE4YmVlYjU5ZjMxNjc2YzY3NGEwOWNjNSJ9"
+        },
+        {
+          "resource": "repo://internal/service/refresh.go#L133-L158",
+          "version": "repo-lines-v1:sha256:bdf729476a77408e905503fcce2ccf55f338869cc7259ea4bd4d28fbbd967a23:eyJzZWxlY3RlZExpbmVDb3VudCI6MjYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijk4Mjc3MThmOTYxNDMzNmNlZGI2NGU5ZjU5MjQ2ZDk1NDJhMjg3NDZiYjBiMzJjN2FkNzczMjI2ZjA0ZmJkMWQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImE4YWU3ZGIyMTI4OTk4ZmE5NGVmN2QzNjdkMGUyMWZlY2U5ZWVjNjQ2YTk0OTM0ZmM2MTEyY2U5Y2VjM2JlN2QiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_bb728d7e358b40aebab531251e1c22ff",
+      "statement": "审计写入路径新增 LOGIN_PASSKEY（Passkey 登录签发）、LOGIN_NAME_CHANGED（用户名改名）与 ROLE_DOWNGRADE_2FA_OFF（角色降级自动关闭 2FA，仅当目标开启了 2FA）；其余日常管理变更仍不写审计，审计日志仍是认证与数据导入轨迹而非完整管理轨迹。",
+      "evidence": [
+        {
+          "resource": "repo://internal/handler/admin.go#L607-L623",
+          "version": "repo-lines-v1:sha256:def518092ab2167481274fe6e99a07518a09e96094ed0d669c38bd08fc9f16c8:eyJzZWxlY3RlZExpbmVDb3VudCI6MTcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImVkNDAxNWYyZmQ2NGI4ZWI1NDkyYmJlYjIwM2ZiNWFlNjRiYzUxY2VmZTAzYjJiNjAyNTUzZTM3Y2VkMzkwYTMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImZlMjA0ZmM5YzgzMmNmMWQ4YWY4M2I0NDJhZDg1YWE4NWI4NGNiNzEzZjAzZmMzMjE5NmRiYjBjMjFhZjVjMGQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjkxOTg5ZTgzMzE2NWMwZGU0NWI2Y2Q1ZDljNWZkMDI1YjYzNzcwZDJlNGI0Mjc4MTI4YzU2Mzc3NTM0ZmM1MDciLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImI0MmM1ZmQwN2EwZDgyYTA0ZWRkNjE0MzAwYzZmYjg0Y2U0MDhkM2RlZWM3OTUxNjhiYzBhZWI4ZjhiMDg1ZGEifQ"
+        },
+        {
+          "resource": "repo://internal/service/loginname.go#L222-L225",
+          "version": "repo-lines-v1:sha256:8cb97190852670f94480f70fe0034288994aba6d41e5989629e71d7a071bb08e:eyJzZWxlY3RlZExpbmVDb3VudCI6NCwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiNTFmNjhmZjNlNGI5MDYyZTQyOTdhYzE3NDNlZDFkNTA4ODNlZjk1ZWFkZTQ5M2E1NTViM2M4ODY3ZWRlZTI4ZiIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNDEyY2EzNDVjY2Y3NWJmOWMwODA2YmNlNjk1YmU4ZGU4MDhiNzk5ODQyNTFhN2E1NGQyMDJjZjYxMDFkZDQ1MSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNjU2MjUxNGFlMWIyZjY3ZTYzNmUxMTMxMjU2MGNmMThiZjY2ZTUwODI3NWQ0MDhkZDMxZGY0MzVkM2VmZjg5OSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjAsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZTNiMGM0NDI5OGZjMWMxNDlhZmJmNGM4OTk2ZmI5MjQyN2FlNDFlNDY0OWI5MzRjYTQ5NTk5MWI3ODUyYjg1NSJ9"
+        },
+        {
+          "resource": "repo://internal/service/passkey.go#L326-L341",
+          "version": "repo-lines-v1:sha256:c9c12b0f6bf6c4bfa2d0b1ae2d22687e34bed5886b5937d3f6fb2eb1a13502aa:eyJzZWxlY3RlZExpbmVDb3VudCI6MTYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjA3ZjkxOWM4MzIwYWE1OWZhZGUyZmM0ZjFhYjg1NDk4MDdlYmMxMzcyMjAxMmIxMjJlOWI1MTZmMTIzNmUxNTIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImE4NmEyYWI1MjQ1YWMzYTcwYmNmMjFlZDIxODdmNDcwNzE5MTg4OTVjYzg1MGM4N2Y4OWI4MGNkNDM0ZGNiZjciLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjQxODZmNWU5ZTQ5MjYwZDVmN2I2ZWNhY2I4OTM1YTJlZjhiOTMwNzYyYmFmN2RjNzMyYmViOGFlMmQ4Mjc1ZTMifQ"
         }
       ]
     }
   ],
   "verification": {
     "by": "openwiki/0.7.2",
-    "at": "2026-11-11T16:33:08.526Z"
+    "at": "2026-11-13T18:41:36.261Z"
   }
 }

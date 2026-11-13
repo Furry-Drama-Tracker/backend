@@ -3,9 +3,6 @@ type: architecture
 title: 持久化与数据模型
 description: neo-server 如何在不使用 ODM 的情况下使用官方 MongoDB 驱动、集合与 BSON 模型如何组织（含会话吊销原因与认证事件）、ID 与错误约定，以及启动时接线的索引与迁移如何容错执行。
 tags: [mongodb, persistence, repositories, models, indexes, migrations]
-verified:
-  - by: openwiki/0.7.2
-    at: 2026-11-11T16:33:08.526Z
 sources:
   - id: openwiki-source-f89e324c07065d291ea97e16
     resource: repo://internal/handler/episodes.go
@@ -17,6 +14,8 @@ sources:
     resource: repo://internal/model/episode.go
   - id: openwiki-source-c04b809e997b6644e3320acf
     resource: repo://internal/model/model.go
+  - id: openwiki-source-c89848be5c14b54ac7f4a1c4
+    resource: repo://internal/repository/counter.go
   - id: openwiki-source-d398759a1a3f0969ca03110a
     resource: repo://internal/repository/db.go
   - id: openwiki-source-bd4263ae6284e6c27650b1e8
@@ -27,7 +26,10 @@ sources:
     resource: repo://internal/repository/repos.go
   - id: openwiki-source-f9cd993b1da0967b3ad454b7
     resource: repo://internal/repository/user.go
-generated: { by: "zcode", at: "2026-11-11T16:33:08.526Z" }
+generated: { by: "zcode", at: "2026-11-13T18:41:36.261Z" }
+verified:
+  - by: openwiki/0.7.2
+    at: 2026-11-13T18:41:36.261Z
 ---
 
 # 持久化与数据模型
@@ -52,6 +54,10 @@ neo-server 通过官方 Go 驱动（`go.mongodb.org/mongo-driver` v1）访问 Mo
 | Repository 字段 | 集合 |
 |---|---|
 | `Users` | `users` |
+| `Counters` | `counters`（序列号发号器，`_id: "uid"`） |
+| `LoginNameRes` | `loginnamereservations`（改名后旧名保留期） |
+| `ExternalIdents` | `externalidentities`（外部身份绑定，QQ 预留） |
+| `Passkeys` | `passkeys`（WebAuthn 凭据） |
 | `Sessions` | `usersessions` |
 | `UsedTokens` | `usedtokens` |
 | `Notifications` | `notifications` |
@@ -91,13 +97,17 @@ neo-server 通过官方 Go 驱动（`go.mongodb.org/mongo-driver` v1）访问 Mo
 - `singleepisodes` 的 `episodeLabel` 是显示用集数序号（自由字符串）：存量文档缺省为空串，读取时由响应层经 `episodeRefText` 回退为「第N集」，因此该字段无需数据迁移。
 - 部分文档携带只读不写的遗留字段，例如 `themeId` 与 `themeApplyIcons`/`themeApplyWallpaper`，读取时会迁移到双槽主题模型。
 
-认证链路新增三个存储契约：
+认证链路新增四个存储契约：
 
+- `users.uid` 是不可变的数字用户锚（`counters` 集合 `_id: "uid"` 经 `CounterRepo.NextUID` 原子 `$inc` 发号；首个用户/seed 账号显式为 0，仅表示注册顺序，无角色语义）；`users.accountIdLower` 是用户名的折叠小写（GitHub 式大小写策略：存储保留原样，登录/唯一性按折叠判定，`accountIdLower_1` 唯一稀疏索引）；`users.loginNameChangedAt` 记录最近改名时间，改名冷却检查使用。
+- `usersessions.deviceTokenHash` 是设备令牌（`fdt-device` cookie）的 sha256 哈希，是「已知设备」识别的唯一信任依据；User-Agent 客户端完全可控，仅作展示字段。旧会话无此字段时不匹配（fail-closed），下次登录走一次设备验证码后写入。
 - `usersessions.revokeReason`（`model.Revoke*` 常量）是会话被置为 inactive 的原因墓碑：`logout`（登出）、`rotated`（refresh 轮换，正常）、`password_changed`、`password_reset`、`email_changed`、`refresh_reuse`（重用检测命中）、`user_revoked`/`user_revoked_all`（用户自助下线）、`admin_revoked`（管理员强制下线）与 `expired`（30 天无活跃被 cron 清理）。它只存在于库与日志，不进 API 响应。
 - `users.twoFactorLastStep` 记录最近被接受的 TOTP 时间步（Unix 秒 / 30），`UserRepo.MarkTOTPStepUsed` 以原子条件更新实现一次性消费，用于拒绝同一时间步重放。
 - `UserRepo.Create` 在 `createdAt` 为零值时补当前时间（UTC、毫秒对齐），显式赋值不受影响；这修复了 `/api/auth/register` 把 `ISODate("0001-01-01")` 落库的问题。
 
-模型文件按领域分组（`model.go` 放用户、会话、通知、审计、API 统计；另有 `episode.go`、`series.go`、`folder.go`、`theme.go` 等）。没有从标签推导 schema 的迁移框架。
+`internal/model/authfactors.go` 定义 Passkey（WebAuthn）与外部身份两组文档：`Passkey`（`passkeys` 集合，credentialId 为 base64url 唯一键、COSE 公钥、签名计数器、备份状态、传输方式；WebID 即 UID 的大端 8 字节编码，绑定在用户侧）与 `ExternalIdentity`（`externalidentities` 集合，`(provider, openid)` 唯一，provider 目前仅预留 `"qq"`，上线前该集合不会有数据）。
+
+模型文件按领域分组（`model.go` 放用户、会话、通知、审计、API 统计；`authfactors.go` 放 Passkey 与外部身份；另有 `episode.go`、`series.go`、`folder.go`、`theme.go` 等）。没有从标签推导 schema 的迁移框架；数据形态演进由 `internal/migrate` 的标记式启动迁移承担。
 
 ## ID 规范化
 
@@ -117,7 +127,10 @@ repository 使用共享的 10 秒 `contextTimeout`，每个操作创建子上下
 
 `internal/indexes` 包含幂等的 `Ensure(ctx, db)`，会创建以下索引：
 
-- `users`：唯一 `email`、唯一 `accountId`；
+- `users`：唯一 `email`、唯一 `accountId`、唯一稀疏 `accountIdLower`（折叠唯一性）、唯一稀疏 `uid`；
+- `loginnamereservations`：唯一 `loginName`、`reservedUntil` TTL（0 秒，到期自动释放保留名）；
+- `externalidentities`：唯一 `provider+openid`、`userId`；
+- `passkeys`：唯一 `credentialId`、`userId`；
 - `usersessions`：`userId+isActive`、`isActive+lastActiveAt`、唯一稀疏 `refreshTokenHash`、唯一稀疏 `tokenHash`；
 - `usedtokens`：唯一 `tokenHash`、`expiresAt` TTL；
 - `histories`：`lastWatched` TTL（365 天）、`userId+lastWatched`；
@@ -140,13 +153,15 @@ repository 使用共享的 10 秒 `contextTimeout`，每个操作创建子上下
 
 ## 迁移
 
-`internal/migrate` 实现三个幂等、带标记的迁移，标记存储在 `settings` 集合：
+`internal/migrate` 实现五项幂等、带标记的迁移，标记存储在 `settings` 集合：
 
 1. `accountId_migration_v1`——为缺失 `accountId` 的用户回填：把用户名中非单词字符替换为 `_`、转小写，冲突时追加 `_N`。
 2. `role_migration_v1`——把遗留 `adminAccess: true` 用户转为 `role: "admin"`，并移除所有用户的 `adminAccess` 字段。
 3. `creatorProfile_migration_v1`——删除旧 `adminId_1` 索引，把 `adminId` 重命名为 `creatorId`，并为缺少主页的 creator、admin、superadmin 用户创建初始主页。
+4. `uid_backfill_v1`——为缺 `uid` 的用户按 `createdAt` 升序派发连续 UID（已有 uid 的不动），结束后把 `counters.uid` 计数器推进到已发最大号，保证后续注册发号不冲突。
+5. `loginname_lower_backfill_v1`——为存量用户回填 `accountIdLower`（存储保留原样大小写）；仅当两个只差大小写的变体折叠后冲突时，按 `_id` 序给后出现的变体追加 `_N` 后缀改名。
 
-每个迁移先检查 `settings.GetFlag`，成功后写入 `{done: true}`。`migrate.Run` 在首个错误处停止。它在 `main` 中先于索引创建、先于开始监听执行；失败只打印 `[WARN]` 并继续启动，因此遗留数据转换失败时需要人工处理后重启。
+每个迁移先检查 `settings.GetFlag`，成功后写入 `{done: true}`。`migrate.Run` 在首个错误处停止。它在 `main` 中先于索引创建、先于开始监听执行——这个顺序对 `uid_backfill_v1` 是硬约束（uid 唯一稀疏索引在回填完成后才建立）；失败只打印 `[WARN]` 并继续启动，因此遗留数据转换失败时需要人工处理后重启。
 
 ## 运维影响
 

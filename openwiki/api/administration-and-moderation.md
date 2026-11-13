@@ -5,8 +5,10 @@ description: 后台管理、剧集审核与回收站、举报、统计、分类�
 tags: [api, admin, moderation, review, audit, statistics]
 verified:
   - by: openwiki/0.7.2
-    at: 2026-11-04T15:34:40.691Z
+    at: 2026-11-13T18:41:36.261Z
 sources:
+  - id: openwiki-source-85047375915a57a29b05d0cd
+    resource: repo://cmd/useradmin/main.go
   - id: openwiki-source-44e96c77b4637e4ff46c5518
     resource: repo://internal/handler/admin.go
   - id: openwiki-source-039537f045c759e7b68c50fa
@@ -25,7 +27,7 @@ sources:
     resource: repo://internal/handler/stats.go
   - id: openwiki-source-54e2988cad872a1deb6494f6
     resource: repo://internal/repository/episode_trash.go
-generated: { by: "zcode", at: "2026-11-04T15:34:40.691Z" }
+generated: { by: "zcode", at: "2026-11-13T18:41:36.261Z" }
 ---
 
 # 管理与审核 API
@@ -66,8 +68,12 @@ generated: { by: "zcode", at: "2026-11-04T15:34:40.691Z" }
 - `RegisterAccount` 只接受 `admin` 和 `creator` 角色，使用共享密码强度规则，推导或校验唯一 `accountId`，将用户创建为邮箱已验证；创作者账号会尝试创建 `CreatorProfile`（失败静默），并发送“账号已创建”邮件。
 - `DeleteAccount` 拒绝删除自己、拒绝删除最后一个 `superadmin`，且只接受管理或创作者账号。删除委托 `service.PurgeUserData` 做 best-effort 级联清理（单个集合失败不阻断），比 `DeleteUser` 宽松。
 - `DeleteUser` 执行完整级联：追番、历史、通知、收藏、收藏夹、反馈、会话、推送订阅与举报（举报同时按遗留字段 `reporter` 与 `reporterId` 清理），删除该用户的评分，然后对每个受影响的剧集重算平均分与评分人数；随后继续清理收藏夹收藏项、主题与创作者主页。任一步失败即返回 500。
-- `UpdateRole` 接受 `user`、`creator`、`admin`、`superadmin`；拒绝修改自己、拒绝降级最后一个 `superadmin`，并在账号变为 `creator` 时创建 `CreatorProfile`。
+- `UpdateRole` 接受 `user`、`creator`、`admin`、`superadmin`；拒绝修改自己、拒绝降级最后一个 `superadmin`，并在账号变为 `creator` 时创建 `CreatorProfile`。角色化 2FA 策略在此落地：把开启 2FA 的账号降级为 `user` 时，自动关闭其 2FA（旧凭据一并清除）、以 `RevokeAdmin` 原因吊销全部会话，并写入 `ROLE_DOWNGRADE_2FA_OFF` 审计记录——普通用户不允许持有 2FA，降级必须保持策略一致。
 - `ToggleAdminAccess` 在普通 `user` 与 `admin` 之间切换，但拒绝操作 `superadmin` 或 `creator` 账号。
+
+### 带外维护 CLI：useradmin
+
+`cmd/useradmin` 是与 API 并行的维护通道，供能直接访问 MongoDB 的运维环境救砖（配置与 server 相同：`MONGO_URI`/`JWT_SECRET` 来自 env/`.env`/ini）。支持 `list`、`show <uid|accountId|email|_id>`、`set-role`、`reset-password`、`clear-2fa`、`unlock`、`rename`（`--force` 越过黑名单与冷却，不能越过占用检查）、`set-email`（`--verify` 直接标记已验证）、`verify-email`、`revoke-sessions`；破坏性命令需交互确认，`--yes` 跳过。与 API 的职责分工：管理员/超管的 2FA 被 API 层禁止自行关闭，丢失验证器被锁在强制设置流程外时只能用 `clear-2fa` 恢复——CLI 清除 2FA 凭据并吊销全部会话，账号下次登录重新走强制设置流程；后台 API 的 `UpdateRole` 则在降级时把目标账号的 2FA 一并清掉。
 
 `PendingCounts` 汇总后台待办：待审核剧集、举报、反馈、友链和主题。
 
@@ -142,7 +148,7 @@ HTTP 层只暴露列表、版本日志、恢复与彻底删除，四者均为管
 
 `/audit-logs` 仅超管可访问，返回按 `action`、`admin`（操作者名）和 `user`（被操作用户名）过滤的审计文档，过滤使用转义后的不区分大小写正则。响应键严格为 `logs`、`total`、`page`、`totalPages`，没有 `limit` 键。
 
-审计记录只在登录会话签发成功和备份导入时写入。日常管理变更（改角色、删除账号、审核决定）目前不会产生审计条目，因此该日志不是完整的管理操作轨迹。
+审计记录只在登录会话签发成功、备份导入以及角色降级自动关闭 2FA（`ROLE_DOWNGRADE_2FA_OFF`，见上文 `UpdateRole`）时写入。其余日常管理变更（改角色、删除账号、审核决定）不产生审计条目，因此该日志仍不是完整的管理操作轨迹。
 
 ## 相关阅读
 

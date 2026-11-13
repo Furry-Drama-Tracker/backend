@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "pageVersion": "sha256:4bd1f9926ccef9cb38bae4a4b7e67cc12ce4e1a168536f6c3c2d46c80553a781",
+  "pageVersion": "sha256:4a7a8f976f366e6d1b4f88d21a176106b61236fe436578197344929c27350d83",
   "claims": [
     {
       "id": "claim_56a4f99a099548d1b930f956550caa7e",
@@ -18,11 +18,11 @@
     },
     {
       "id": "claim_fbe42990f60e43d2afc25fc6fea2252c",
-      "statement": "端到端集成测试用 server.NewApp 对 127.0.0.1:27017 的真实 MongoDB 装配完整应用，并在清理时删除测试数据库。",
+      "statement": "端到端集成测试用 server.NewApp 对 127.0.0.1:27017 的真实 MongoDB 装配完整应用，并在清理时删除测试数据库；夹具 testServerWithRepos 现同时返回 *repository.Repos 供直接查库断言，并把改名冷却/保留期配置为生产默认值。",
       "evidence": [
         {
-          "resource": "repo://internal/server/integration_test.go#L28-L70",
-          "version": "repo-lines-v1:sha256:662db4b91957b7c4b541636189af75b3b8c2ceed2297a3c38890b5c2d8f5a6b2:eyJzZWxlY3RlZExpbmVDb3VudCI6NDMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImZhZmJhMDUyN2MzOTUzYzRiNmUwZTViNTczOWJhODM2MTJmODA1M2JjZGM5NDY2NzMwMTkzY2QxZDU5MGI0MDgiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjhlM2Y3YjUwOTRjM2NiMzZmODA2NmQ1MmJkODJjYjE2MjUzZjVjZDUxOWU5MWI5NGE2MGJjNWQ1NWNjMGNjYzUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjEwZjc4MDBmNTQwZDRmMTFmZGIwMWY3MzQ3ZTg1NzhhYzJlNmI4NTkwMTNmOWYxNzNkOGYxMjkxNzQ4MmM1MjIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjUyNjI0NWZkODY3OGUwN2VlN2U4MzUxZTNjYmQxNmQyNjNlNWQ5NTIxM2EwNTZlY2I1ZmFhN2M1MWNlYTVmM2QifQ"
+          "resource": "repo://internal/server/integration_test.go#L29-L74",
+          "version": "repo-lines-v1:sha256:2c2e10db2417eb4d256dbffe99d6ba9a5dcb58b1eb67e3c17d3bc38c3a230d57:eyJzZWxlY3RlZExpbmVDb3VudCI6NDYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImZhZmJhMDUyN2MzOTUzYzRiNmUwZTViNTczOWJhODM2MTJmODA1M2JjZGM5NDY2NzMwMTkzY2QxZDU5MGI0MDgiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjhlM2Y3YjUwOTRjM2NiMzZmODA2NmQ1MmJkODJjYjE2MjUzZjVjZDUxOWU5MWI5NGE2MGJjNWQ1NWNjMGNjYzUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjEwZjc4MDBmNTQwZDRmMTFmZGIwMWY3MzQ3ZTg1NzhhYzJlNmI4NTkwMTNmOWYxNzNkOGYxMjkxNzQ4MmM1MjIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjUyNjI0NWZkODY3OGUwN2VlN2U4MzUxZTNjYmQxNmQyNjNlNWQ5NTIxM2EwNTZlY2I1ZmFhN2M1MWNlYTVmM2QifQ"
         }
       ]
     },
@@ -41,7 +41,7 @@
       "statement": "测试数据库命名共存两种策略：固定名 neo_integration_test（测试前后删除）与较新套件的唯一名（如 neo_series_test_<UnixNano>）；仓储级 user_test.go 另由 FDT_TEST_MONGO_URI 门控（未设置跳过）。",
       "evidence": [
         {
-          "resource": "repo://internal/server/integration_test.go#L28-L50",
+          "resource": "repo://internal/server/integration_test.go#L29-L51",
           "version": "repo-lines-v1:sha256:ccef5198b850a4ec46f7cb8a42910cc10c5e020c1450b11013557eb493e20f06:eyJzZWxlY3RlZExpbmVDb3VudCI6MjMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImZhZmJhMDUyN2MzOTUzYzRiNmUwZTViNTczOWJhODM2MTJmODA1M2JjZGM5NDY2NzMwMTkzY2QxZDU5MGI0MDgiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImU3N2FhZTA3NDQ5Nzk5YTE3ZTcwY2Q0MzhlYzY5MGI5NTQ3MTAxNWE5ZmFjY2VjN2FmZjE2NTI4MTZlNTBiYzkiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjEwZjc4MDBmNTQwZDRmMTFmZGIwMWY3MzQ3ZTg1NzhhYzJlNmI4NTkwMTNmOWYxNzNkOGYxMjkxNzQ4MmM1MjIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImY1NDE5NDNmYmYxZWMzMDNiZjY5ODQyNjEzZTA2NmE1OGMwOWVjNmUzYWExNDE0YWZiYzViYzg4MDUyOTU0OTcifQ"
         },
         {
@@ -55,7 +55,7 @@
       "statement": "Test HTTP clients use a cookie jar, fetch a CSRF token first, and attach the matching header to non-GET requests.",
       "evidence": [
         {
-          "resource": "repo://internal/server/integration_test.go#L75-L120",
+          "resource": "repo://internal/server/integration_test.go#L79-L124",
           "version": "repo-lines-v1:sha256:abbf9dc28626d84e31bd2a9e5e8d77bceb12f511e153380eca2b619b8a86b456:eyJzZWxlY3RlZExpbmVDb3VudCI6NDYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijc0MDYwYmM2OWRkNWQ3ZGNjMDBmOTk5NzgyMThlZjcyMjMxODUwODZlYTAwOGUxODM1MWUxOWMwOTVmZmU0N2UiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijc2ODFmMTNhZWRjODYyZmEzN2Q2Yzk3ZDZmOWI0N2MwOWFkYjQwMTE0MWIwOGVjY2FhZmZiNGUzOGZjMjkyODciLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImE5ZmY5ZmUxM2MzNWJkMjkzOGM5MTVkMWVlYWUyYWEyZjZhN2UxOTViNGFjOWY0ZWNjMTI3NTQzNDRlYjZjYjQifQ"
         }
       ]
@@ -93,14 +93,46 @@
       "statement": "episodes_test.go 的 TestEpisodesSingleEpisodeLabel 覆盖 episodeLabel 的写入（trim 空白）、episodeLabelCustom 回填原始值、更新与清空后回退「第N集」。",
       "evidence": [
         {
-          "resource": "repo://internal/handler/episodes_test.go#L425-L505",
+          "resource": "repo://internal/handler/episodes_test.go#L426-L506",
           "version": "repo-lines-v1:sha256:a900f6de3495eb204d26ae12bfe07eedfa66e35149889d50378324c56d52ab0b:eyJzZWxlY3RlZExpbmVDb3VudCI6ODEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjJiZjYwMDg0YmE2ZjQyYzdjYmRhZTljMDU4MWE1ZGYwNDg4NzliNDZhMWNmNGZjM2NlODdmZTBkODg5ZmZhNTkiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjA0OTFhODBiY2Q2NjM1YTZhODZiMjg4NDFiNTQ1ZWRiMDg4MGEwMjIzZTQ1MTMzYjdkOTc1ZDY0NTU0ODM5NzMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImYyOTY0MDc5YzNjNWM4MTUyMGVmMzNhMmI5ZDJlMTVhMWI4NGQ3MjgwZGI4NTkwZGNkNjU3NDdlM2UwMTJhNDAiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImY5MjQ3ODU5NDk2YzMxNjQ1MGUwYWRhNjk2Zjg5YWQ5ODA3NzgwZTViODkyN2M1YzMyZjE2YWRhNGEzMmUyYjIifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_6e5efc9dd7ff4c48bc5ea4392520f899",
+      "statement": "用户系统重构与安全加固新增两个端到端回归文件：auth_security_regression_test.go（注销定点写保留凭据、新设备不拦截、邮箱绑定限流键、2FA 无凭据恢复、邮箱 OTP 第二因素）与 loginname_passkey_test.go（UID 发号与折叠登录、改名冷却/保留期流程、force2FASetup 门禁、大小写折叠登录）；migrate_test 补充 loginname_lower_backfill 用例。",
+      "evidence": [
+        {
+          "resource": "repo://internal/migrate/migrate_test.go#L264-L308",
+          "version": "repo-lines-v1:sha256:e68419ad21b28a6e361e51c2b28dad00aa1208e8401d82a4061b842a58fa5fab:eyJzZWxlY3RlZExpbmVDb3VudCI6NDUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImRiYWJkYzBhNTMxMjZlMDQ1OWM1YWVkZjIzYWJhMDk3M2I5OGJmZjNkODk2OTczOTk1MDE5OWVjZGIzZGRmMWMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjcwMmU0NTE3NjJjNzQ2ZWU3ZjhiMDU0ODNiM2NmYzZiMDBhZmM3YTE5MzY0ZWFmMmI4OTc5NmUyYmM3ZmY2N2UiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        },
+        {
+          "resource": "repo://internal/server/auth_security_regression_test.go#L109-L374",
+          "version": "repo-lines-v1:sha256:9e9cc1f2ad43891bf3570c42595c68efff7c2542079b6f3a09a12aad4db9c005:eyJzZWxlY3RlZExpbmVDb3VudCI6MjY2LCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiIzMTA3OGY1YzE4NjZmNGE1N2FiNjU2ZDU1YzAyM2ViOGQ1ZmE1ZDFkMDRiZTNiNzAyYjgyMzgwOWM5YmE0YWY0IiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiI0MTJjYTM0NWNjZjc1YmY5YzA4MDZiY2U2OTViZThkZTgwOGI3OTk4NDI1MWE3YTU0ZDIwMmNmNjEwMWRkNDUxIiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiI2MDc1MGZhN2RmYTMxYjlhNGM3MDllMDc0ODM1YTg2MzMwZDljMzA2Mzc1M2RlZjNlYzIzMTUzMmVjYmY1N2NlIiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MCwiZm9sbG93aW5nQ29udGV4dEhhc2giOiJlM2IwYzQ0Mjk4ZmMxYzE0OWFmYmY0Yzg5OTZmYjkyNDI3YWU0MWU0NjQ5YjkzNGNhNDk1OTkxYjc4NTJiODU1In0"
+        },
+        {
+          "resource": "repo://internal/server/loginname_passkey_test.go#L12-L188",
+          "version": "repo-lines-v1:sha256:6c8fc12f7f47998f578419fea9b22c2b3c228925c32a147e7d526d8ccb095d3a:eyJzZWxlY3RlZExpbmVDb3VudCI6MTc3LCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiJkNGRlNTM2NWFlYTU2ZTA1OTNhMzQzMmNkYzAwNGI3NWNjNTU2YTVlOWZkM2Q4Njk2Mzc0ODRlOGIzMDYzNzM3IiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiI0MTJjYTM0NWNjZjc1YmY5YzA4MDZiY2U2OTViZThkZTgwOGI3OTk4NDI1MWE3YTU0ZDIwMmNmNjEwMWRkNDUxIiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiIwYWY3ZjkzZGY0MmVjMWExOTY5MjhlNzE3ZDE0ODBlMGJjNDhjYTQ0YTIyYjMyNmE1MDM1YjcyNDYzOGNkNDFlIiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MCwiZm9sbG93aW5nQ29udGV4dEhhc2giOiJlM2IwYzQ0Mjk4ZmMxYzE0OWFmYmY0Yzg5OTZmYjkyNDI3YWU0MWU0NjQ5YjkzNGNhNDk1OTkxYjc4NTJiODU1In0"
+        }
+      ]
+    },
+    {
+      "id": "claim_9279abb7fa3f4b3798036bbf4b00b909",
+      "statement": "ipregion 单元测试覆盖 ADR-018 双数据源：aliyun fetch 用 httptest 注入地址（成功/失败/非 200）、czdb 输出格式化两种形态与库路径错误、WithFallback 与 NewConfiguredClient 装配；真实数据源冒烟 local_smoke_test.go 由环境变量门控默认跳过，不需要网络。",
+      "evidence": [
+        {
+          "resource": "repo://internal/ipregion/client_test.go#L79-L288",
+          "version": "repo-lines-v1:sha256:7baf93531d33621fb55d4c995ba4f87184e1114a7d4aada7456d11bf290a2506:eyJzZWxlY3RlZExpbmVDb3VudCI6MjEwLCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiIzYjU0NTdiZTRiNTIwMTQ0MjgyYmM4NzdhODQzNDFhODU4NTQ4MzM5NjFiMTgyYmMyODViOGJkNWUxZGM1Zjk3IiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiI5OGNmZDhiNDI1NDAyMzQxZDcwMjk4YTk4YjNlMWI2YzY3YTg5NzhiZTg4YmRlYTI0Mjg0NWM5NzdkZmE2ZGRjIiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiJiNWNiNGQwYWFmZTZhM2MwZWI4YzUxZTNmYzhjNjYwMDgzMzM0YTFiODBlNDc4NzNhNTc4ZjY3YThjOTNmOWRjIiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MywiZm9sbG93aW5nQ29udGV4dEhhc2giOiIwMjNjMjIzZWIxYzU0ZGU2NjBiNmRjMzBmMjdhMWQ3YjcwZTA2N2NkMzgyYzMzNzhmMzMxM2VhNzA2ZWY1MWU2In0"
+        },
+        {
+          "resource": "repo://internal/ipregion/local_smoke_test.go#L25-L76",
+          "version": "repo-lines-v1:sha256:dc6f648d6cb6a319a20926839f4defbbb1cda8a95e29154e2b7b5d765222c82e:eyJzZWxlY3RlZExpbmVDb3VudCI6NTIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjgyZTJjNWQ2ODc1MjljYTkyMTQ5YjM2ZDJkZWViOTI1ZGJmODExNmFlN2QzZDRhNWRlOTZkZjcwMTJkMWEyM2UiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjMzZTljYzQ5MGMxMDE3OTYwOGZiMGI1MmViMjZkMDM2NGRiYjM3Zjg0YzMxYjQ1MDhmMzZlNjg3Zjk4YjhiZWQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
         }
       ]
     }
   ],
   "verification": {
     "by": "openwiki/0.7.2",
-    "at": "2026-11-11T16:33:08.526Z"
+    "at": "2026-11-13T18:41:36.261Z"
   }
 }

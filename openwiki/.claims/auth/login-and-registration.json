@@ -1,38 +1,38 @@
 {
   "schemaVersion": 1,
-  "pageVersion": "sha256:e09077d5b51a5ddbc1aeb655288b33aa98462f047f30e40b1e01bf8de2733c5e",
+  "pageVersion": "sha256:e24f72c9071eeb1be0d585bc6e3c696e6293b54537c3b3c3e53e067dc084bfa5",
   "claims": [
     {
       "id": "claim_663a630ac6fb40d4ad42080b26bcfb33",
       "statement": "Altcha challenges use SHA-256, cost 10000, 32-byte keys, prefix 00, and a five-minute expiry, and the verification accepts the configured x-dev-token as a development bypass.",
       "evidence": [
         {
-          "resource": "repo://internal/service/auth_service.go#L66-L116",
+          "resource": "repo://internal/service/auth_service.go#L95-L145",
           "version": "repo-lines-v1:sha256:01b29438050bcccc48dbf84d907b7b273889e57c406acb3d8cfe6e27a7ebb494:eyJzZWxlY3RlZExpbmVDb3VudCI6NTEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjU0ZGY4OTljZTRjNDczNjZkOWI5ZjcwM2ZkMjI4YzZlZjg2ZGRiMjQ0ZjA0MzMxMzJlNzdjY2NiMThiMWY5MGQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijk4YWJmMTY1NzBkM2JlZjE4NzhkNzAwMWZhZWUxOWFjYzM4MmUwYTUyOGVjYmQ3ZDQ5Y2YwZTkyYjAzMmNmYTgiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijc2NGNlYjcxOTJhMmRjNjI2OTBmMGEzODdhYTAxMjk5ZmZiYmNjZDBlODhlNGQyMzJkYTk0MDQwZWNhYmM4MTEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjFlNTk2MmRhY2RkM2U0ODUxMDkzYmUyZjA0Yjg5NGYxZDQ4MTMxMDdkY2M0MGZjNWYwYjE1YmQ0ZjRhOWVhMWYifQ"
         }
       ]
     },
     {
       "id": "claim_c2df94af66e24ba88ef88d2896606610",
-      "statement": "Registration lowercases and trims the email, then validates Altcha, email format, account ID length and characters, username length, password strength, demo-email protection, email uniqueness, and account ID uniqueness in that order, returning 400 on the first failure.",
+      "statement": "Registration lowercases and trims the email, then validates Altcha, email format, login-name rules (3–32 chars, charset, blacklist substring, reserved names), nickname length, password strength, demo-email protection, email uniqueness (emailTaken flag), folded account-ID uniqueness, and reservation-period check in that order, returning 400 on the first failure; success mints a verification code and assigns a UID from counters.",
       "evidence": [
         {
-          "resource": "repo://internal/service/register.go#L37-L131",
-          "version": "repo-lines-v1:sha256:0701ec962ebe1f9910303d7446aae3e20bd0dfcbc5cf41621dcb494ed9d56271:eyJzZWxlY3RlZExpbmVDb3VudCI6OTUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImYwZGI5NGYwMGUxYmUwYWMwZDQ1NzY0YTU1NWY5ZWU1YzZhNWExMWQ5MDJkMjI4NDY4MmE3M2E0ZGVlODhmMmMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjYyZTc1ZTk0ZTViZjFhYmQ3MzM2N2I5OWVkYWM2Y2RhOTQ2YzI5ZjhiYWNkNDI1YTE0NGEyNmJmYWJiMDEzNzciLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImFkOTc5ZGExZmY3ODg0ZTJmMzJhODU1Y2VjNjZkZDUxNzhlYmNjMDdjODA5NmYyYzdhYTFlYWM2MWYyMmJhYjQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjNjY2UxZTAwOWQ1YWU5YjI5YmVlNDI2ODA1OGMwYTQ2OTc0NmNjMzBhNDg1ZGVmMDgyNjJkYWNkZjAxNGM2N2IifQ"
+          "resource": "repo://internal/service/register.go#L37-L146",
+          "version": "repo-lines-v1:sha256:5964bf392202b89efeb07b9e8ccba4a9116fc852731b0436eeb2314fe92ee363:eyJzZWxlY3RlZExpbmVDb3VudCI6MTEwLCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiJmMGRiOTRmMDBlMWJlMGFjMGQ0NTc2NGE1NTVmOWVlNWM2YTVhMTFkOTAyZDIyODQ2ODJhNzNhNGRlZTg4ZjJjIiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiI0MTJjYTM0NWNjZjc1YmY5YzA4MDZiY2U2OTViZThkZTgwOGI3OTk4NDI1MWE3YTU0ZDIwMmNmNjEwMWRkNDUxIiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiJhZDk3OWRhMWZmNzg4NGUyZjMyYTg1NWNlYzY2ZGQ1MTc4ZWJjYzA3YzgwOTZmMmM3YWExZWFjNjFmMjJiYWI0IiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MywiZm9sbG93aW5nQ29udGV4dEhhc2giOiJiZmE2NmVhNDZhZmNjNWNiMTg4MzY5ODQzOGUyOWVhZmQ2NDU2YTBhYWZjNzUwNTRjMTQ0OGU3Y2NkMzBhZDFkIn0"
         }
       ]
     },
     {
       "id": "claim_1ba163f395ed4f8cad91e9f95b4ec505",
-      "statement": "Login branches execute in the order Altcha, lookup, lockout, deletion grace, password, email verification, new-device verification, 2FA, success; a missing account returns the same generic credential error as a wrong password, new-device verification applies to any unrecognized device but only when SMTP is configured, and the handler maps results to 200 for success or 2FA and 403 for verification or device verification.",
+      "statement": "Login branches execute in the order Altcha, folded identifier lookup (username via accountIdLower or email), lockout, deletion grace, password, email verification, 2FA challenge (with twoFactorMethods), success; a missing account returns the same generic credential error as a wrong password, the new-device verification chain has been removed (new devices only get a post-login notification email), and the handler maps success and 2FA to 200 and verification to 403.",
       "evidence": [
         {
-          "resource": "repo://internal/handler/auth.go#L138-L189",
-          "version": "repo-lines-v1:sha256:3691541e804c06d020182be3a308165ab581ff92b9ab6556ee573cbddbbd09ed:eyJzZWxlY3RlZExpbmVDb3VudCI6NTIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImE5ZGE5ODZjYzkzNjIyZmJmMGMzODc3N2U1NGVkY2IwMzRkOWVkMjVhNzY4MWZhNmZkY2RkYmIwOTY4ZDFiOWYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImIyZWY1ZDRkOWNkZGJkNjdmMTFlMDA5MWY1YmQ3Njc0MWI5ZWQzNGI3NTE2NmFiMzk3MTI2N2ZkZjAxNTEyNWMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjIzN2YyMGMxNTc4MzM1Y2EyMGE1ZjAwMDlhYjJiZjE4MTkxNzNiZjQ2YjgwM2RmMzFmNjFlMTVhZmRkYWJhYTQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjVmMTVkNjEyYzgxM2I4YzcyOWZhOTcyOWE2MzAxMjM4MmRhNjBkMTg3MTg3YzdhMDg1ZmM3NTU5ZmU1ZDA4MDgifQ"
+          "resource": "repo://internal/handler/auth.go#L136-L172",
+          "version": "repo-lines-v1:sha256:18dd8357038ae73f90c722453edfc3e0566024308727d48f848705dbb342e212:eyJzZWxlY3RlZExpbmVDb3VudCI6MzcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImE5ZGE5ODZjYzkzNjIyZmJmMGMzODc3N2U1NGVkY2IwMzRkOWVkMjVhNzY4MWZhNmZkY2RkYmIwOTY4ZDFiOWYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImM3NTAwNTgwYTBhNDM4YzYzZTYyMzc3ZWVjZjhiNWZlNzkwYjYyNzExMmYwYWIzOGQ2NDVmNTIxOGNjYTM1NDMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImM4NDMzNTkyNDllYWY0N2ZlZDU4ODdmMmE0NGJkYmFjN2RlMjkyY2Y1NDM5YWU0ZDBkNWFhNmQ1ZjJiZTk2NzQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjUxOGJkYWNhYjA5N2Q2YjRhNzEyNThkODlkNzQ3NjcwMDQyZmY5ODk1NGU0ODZmMGFkZjA3ODVlMTVkZDhhOTYifQ"
         },
         {
-          "resource": "repo://internal/service/login.go#L44-L177",
-          "version": "repo-lines-v1:sha256:7933203ecc5b2cdd0952e52c5219abdeafce6720126242698465782172ff5af8:eyJzZWxlY3RlZExpbmVDb3VudCI6MTM0LCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiJkZTIzYmFiMTJmMGMwNDBmNTZmYTljYTJkZDAwN2I3Mzk3ZWU1NzcwYWQ4YTRiMDIyYTdjN2ViMGY3ZWIwNTQ2IiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiIwMWJhNDcxOWM4MGI2ZmU5MTFiMDkxYTdjMDUxMjRiNjRlZWVjZTk2NGUwOWMwNThlZjhmOTgwNWRhY2E1NDZiIiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiJiNzg3M2NiNjJhMzVjOTk2ZWFlMTM4ODZiOGY4NTJjNWEyOTM1YjM2ZTE5NGQ2OTc0ZjNkZDY1NzM2MGJlMDkwIiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MywiZm9sbG93aW5nQ29udGV4dEhhc2giOiI3NzM5MGVhNjdhZTc4NDQ0YTkwNzJiMWNkNmFlYTk2NzZlZDY1MjQwYjY0MjU5ZTVhMmFlNzgzYWZkZjk3MTg5In0"
+          "resource": "repo://internal/service/login.go#L45-L147",
+          "version": "repo-lines-v1:sha256:c7ff5dab7a0e666774637378bee5ddb8774e510151e0fc420b296066d91ea34f:eyJzZWxlY3RlZExpbmVDb3VudCI6MTAzLCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiI1NGNjM2E0NGMzYmRlOGIzNzBkNmI0ZDIxMWMwNjhhZTllN2JjZTVlMGYyODk4ZTQ2ODYxMmIxOThkNTExMDhlIiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiI0MTJjYTM0NWNjZjc1YmY5YzA4MDZiY2U2OTViZThkZTgwOGI3OTk4NDI1MWE3YTU0ZDIwMmNmNjEwMWRkNDUxIiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiI5N2RiMzc5YmFjM2MzYjdlNzhjZDY2ZjE0ZWE1YzFkNWU2ZGRhMzM2NzZmN2MxZmI0ODEwZDQ1YWUxNjRmZDY0IiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MywiZm9sbG93aW5nQ29udGV4dEhhc2giOiIwOGFjMDNmYTQwYmY5ZGNhYjBlMWNkZTcwODIxYzllMzI0ODVlMmIyNmEyZTA3MTFlMTY3ODU0ODMzMWU2MTQ3In0"
         }
       ]
     },
@@ -41,12 +41,12 @@
       "statement": "账号锁定使用 loginAttempts 与 lockUntil（默认 5 次/30 分钟），普通登录锁定返回通用凭据错误，改密码输错当前密码同样递增 loginAttempts——语义不变；改密成功后以 password_changed 原因吊销全部会话。",
       "evidence": [
         {
-          "resource": "repo://internal/repository/user.go#L166-L210",
-          "version": "repo-lines-v1:sha256:91e995206ed9a412cf5707f4e3f9bb45331e694e1c36fd75a39eaf7b9892b707:eyJzZWxlY3RlZExpbmVDb3VudCI6NDUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImNhNDU5NTE5MDVlMDVhMGJkMzhkMzc5NzY3OTkxYjBhZWY3Yzc2NWI1MGE1ZTFmYzcwYzllYmRmZTU2YzkyNDEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImJiMWIyYjFiMDlmZDI3OTljMmExNTdmZTMzMDM1MGIxNjVkMzFiMzg4NWM2ODM5MTIyNWIzNmY2MWIyN2E4YmQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjQzNmQ4N2YzZjc5YjA5ZGU5NWNjOTBhYTBjNmQ2YjkyN2M3Y2FmMzk4ODcxNTFkNTExNTM0OTUwMGZhNjEyNTQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjA4ZWZjYjExMDEyZWU0YjVhOTkwMzIyZGU5OWRjOWY5ODRiZmQ4OGMyMWJiYjA2OTY0NmI1Mjc4M2MwMzViOWQifQ"
+          "resource": "repo://internal/repository/user.go#L262-L285",
+          "version": "repo-lines-v1:sha256:6707a16680b1f34908e96fe5d50ad79326819853743d9a830b19e26e64423d04:eyJzZWxlY3RlZExpbmVDb3VudCI6MjQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijk5NzUzODhlNTY0ZGIwNjMzNjdmZGE5N2JkZTliYTgzMWI2NTM1MGViMzNjM2QxMTE2ZGZhYzkyMWE3YzM1ODEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjRmMTc2NGU3YjBkZmMxMDYzNTg0N2RiOWFmMWM5MzA2OTMyOTdkODZhNmYzZmY0ZWJkNjJjNDQ5ZTg3MTMyZWEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjEyMTAyZGY1NTMzOTcyYzEwMzVjM2IzMDc0MzFmMzk2NTk5NjFmNmNlYTVkMzc5NzNkMDcyZWJmNGFhYjU1MGQifQ"
         },
         {
-          "resource": "repo://internal/service/login.go#L57-L75",
-          "version": "repo-lines-v1:sha256:39c8614e86ca0dd5116c703f90392780b4cb5b6f51b500e8f683554951f17826:eyJzZWxlY3RlZExpbmVDb3VudCI6MTksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjU3ZGViMTUyOTNkNTc5NzIzYzE0NmEyMTgyNWE0ZjcwNTQyZTZjYjJjNzcwMWE3YTJiZDBhY2NlYjVmYTYyOTEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY4ZTI0YzkxNDE4NmIzNjgwYjI1MWIwZmFkZWUwMjg2MzU4Y2UyZGRhYzhkNDQ2NTQ1YThhZTFlOTk2MTI0MzYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImZiZWE0NWRiZDBhM2JkNjY4MmViYWEwODdiYjc0Y2Y5NjhjODI1YjM3YWM1MjI1OWZiZDM2NjAxMzY4ZTc1MmEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjRkYjFiNWVjZDhhMGJlNzUwYTY4ZTNiOWY5YmU1MDBjYmUwYzFkMWZmMTgzZmE1NjZjYjhhNjZmNGU2MzU5YTcifQ"
+          "resource": "repo://internal/service/login.go#L64-L82",
+          "version": "repo-lines-v1:sha256:39c8614e86ca0dd5116c703f90392780b4cb5b6f51b500e8f683554951f17826:eyJzZWxlY3RlZExpbmVDb3VudCI6MTksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjU3ZGViMTUyOTNkNTc5NzIzYzE0NmEyMTgyNWE0ZjcwNTQyZTZjYjJjNzcwMWE3YTJiZDBhY2NlYjVmYTYyOTEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY4ZTI0YzkxNDE4NmIzNjgwYjI1MWIwZmFkZWUwMjg2MzU4Y2UyZGRhYzhkNDQ2NTQ1YThhZTFlOTk2MTI0MzYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjgwODllOGU2Y2M4YmJjYzMxMzdmMWZiZjg4N2FkOWE1OGI2N2E2ODMxODViMTNlYWUwMTk2OWQ4YzVlMWJkZDgiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjRkYjFiNWVjZDhhMGJlNzUwYTY4ZTNiOWY5YmU1MDBjYmUwYzFkMWZmMTgzZmE1NjZjYjhhNjZmNGU2MzU5YTcifQ"
         },
         {
           "resource": "repo://internal/service/password.go#L17-L43",
@@ -56,55 +56,73 @@
     },
     {
       "id": "claim_3293e394995445f0a5788201de695066",
-      "statement": "New-device verification emails a one-time device-verify token, and confirming it creates a six-digit device login code with at most five attempts that either completes login or returns a 2FA challenge carrying the device code.",
+      "statement": "New-device handling no longer blocks login: the verify-device/confirm-device-login email code chain and both routes were removed entirely; unknown devices now only receive a post-login notification email, and known-device detection is done by comparing the fdt-device cookie hash against active sessions' deviceTokenHash (User-Agent is display-only).",
       "evidence": [
         {
-          "resource": "repo://internal/service/device.go#L25-L60",
-          "version": "repo-lines-v1:sha256:c6f41aefd72d65f74bff23710439f34731d632ba8ed906a971e085974ad04527:eyJzZWxlY3RlZExpbmVDb3VudCI6MzYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjE2ODgwZjYzYzk0MWI3ZDQ0OTI2NDk4ZTZlMGU2YjYwYjcwYWYzMDE0MzU2ODFkNmRiNWQ5NmVjNGM4NWNmZjUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImIwZGFhNjgzZTFiOWZlZmNhMDJiYWI5ZjJlM2EyNzRiMzBiZDY2MDZjYWUwN2VjMzRlMmE5ZWM4OGQ4NWNhNmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjcyYmY5NmY0ZjVlYTg3M2Y4Mzk0NmRlOTk4NDk1MWVkZGI3ZjhjNWVkMzk5MjRhMDAzNThlNGEyYmY3OTY1MmYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImU3OTIxZmVhNjQzNTY5MGVmOGRkYmRiNjY0ZDUxOGZjZTI4MDkyOWQyYzQxNTQxNmRkOTEwNTgzNGMxZmE3YmMifQ"
+          "resource": "repo://internal/server/register_routes.go#L73-L78",
+          "version": "repo-lines-v1:sha256:05525f5cd1cb0937706c248ff98be616f4a8ad388c944c4fb9ada1f92386d1d5:eyJzZWxlY3RlZExpbmVDb3VudCI6NiwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiMGQ2MDNlNjQwMzRiODI2OTQ2OTJjZjc4OWY1MjU2YWQxMDBkNzA3NTBmZWJiNjJiZmM5YWViZWNmODM1ZjY5NiIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNTI5YWEwZmUzOTQ3ZjJlZmI4NmVmYTVlYjkwMGZjNjkzYjIzZThmMDRlOTk5NDkxMDg4NDMwNWY5ZWZkMTA4NCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiODU1NGJkMDk0NTczZjA2ZmEyZDYwZDkwNDQ4NWM0ZGZkMWM3MDE4MWYzOWQyZjAxMGExNzVkMTFiMjI0MGJiYiIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiNTYzMzAwMzhjZDEwY2RjYjI2NzI2YThkZWEwNzdmNDAwZGRlYTY2MTFiMmEyYTRhZWIwMWI2NmRmM2Y5NzA3NyJ9"
         },
         {
-          "resource": "repo://internal/service/device.go#L61-L123",
-          "version": "repo-lines-v1:sha256:95dbb8ed26e3ea4a82f7daca8a2339a443c634128f8ca2f15e73be7d38b41a3a:eyJzZWxlY3RlZExpbmVDb3VudCI6NjMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjI3YmFjODhhYjM0NGI1OTUwOGFkMTZiYjkxMzEwMzgzNjU4NWEwMTk0ZGQxN2IzYzRjODIzMjY2MDhjMjhhMGYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjRkNGVhY2FmNGUyMzA2ZWVkMTg2YTY1OTQyY2M3ZTgxN2M1ODVjODI5ZDExN2EzOTY3ZTgwMDU4NTEzYWYwZWYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjVkZGVkYjJmODRiYjliYjU0ZTg3NDlkZjcxNmU4OWE5MTFhYzEwMzgwMzUzOGZjNjZmMGVjZmFiZDI4NjRkNTciLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjI2NDgyNTAzMjJjMDIyZmIxZmFmYTUyM2M2MzUzYTRlYWU1ZDkzMmVjNGFiYjZhNjc5MTg3YWZmMTJkZjU4YTAifQ"
+          "resource": "repo://internal/service/login.go#L141-L168",
+          "version": "repo-lines-v1:sha256:336d2632bfe22ed98fd05a4df1e3f9a8d1fd40bc51df08a6e41f42e15f1dbbb8:eyJzZWxlY3RlZExpbmVDb3VudCI6MjgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImNhNGE3ZDEwYjA2ZDBjY2NmZDk1Yzk4NzQ1NDM3OGFkYzYxN2E1YmRiNDE3YTlhMjE4MzI2YjY5YzBkOTA1NjQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImU0ZWM3YWZhNjc2ZGU1MzZkNjc1NTYxMjkwYzRkZGQ2NjBhNWExN2VhOWUyMzAxY2NmNDkzMGFhNDUxNTk1Y2UiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjU3MmRiMDEzMjliODJhY2VlZDkwMTRhZGEzNjUyNzYwMDNkNzA2MDRkNWViNWNlYWE5ZDczNGY5YjEwYWJmNGEifQ"
         }
       ]
     },
     {
       "id": "claim_8adfc89ccb214869a2073fd0bf1f3ea5",
-      "statement": "2FA 登录挑战是五分钟、purpose 为 2fa-challenge 的令牌；验证接受 TOTP（VerifyTOTPStep 命中的时间步经 users.twoFactorLastStep 原子标记一次性消费，同一步重复提交记 twofa_replay 事件）或备用码（ConsumeBackupCode 消费，剩余数组就地升级为哈希）；邮箱查找前转小写。",
+      "statement": "2FA 登录挑战是五分钟、purpose 为 2fa-challenge 的令牌；method 决定第二因素：emailOtp（一次性消费独立 EmailOTPCodes，限五次尝试）或默认 totp/备份码（VerifyTOTPStep 命中的时间步经 users.twoFactorLastStep 原子标记一次性消费，同一步重复提交记 twofa_replay 事件；ConsumeBackupCode 消费并就地升级为哈希）；登录态字段定点更新，任一方法失败递增锁定计数。",
       "evidence": [
         {
-          "resource": "repo://internal/repository/user.go#L406-L440",
-          "version": "repo-lines-v1:sha256:ab123f33e7bf41365fea5acd4a571b7a88cd9f7d6fa52f0be44819405e6d4bd7:eyJzZWxlY3RlZExpbmVDb3VudCI6MzUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImRmOGU4ZDU4ODc1ZDI5NzE1YzZhMTc2YmNkNmU4ZjBiZWJlNjk2Nzc1NDRhZjdiYjlhMDFjYjk4NmI5NmNkNmQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImJiMWIyYjFiMDlmZDI3OTljMmExNTdmZTMzMDM1MGIxNjVkMzFiMzg4NWM2ODM5MTIyNWIzNmY2MWIyN2E4YmQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjA2M2Y4MTdiN2JjZGEyNWRhMjkwZjM4MTQ4MTRiOTc1NmQ5OGM5ZDNhOGQ4MmM5MDgwYzk5MjM2NjIwMTcxYTQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjBiMzJhNTZhNTNkYTY0NzE5NTZjZjhmZjk2MGVmZGI5YjVhMGM4YzJlMjgyMmM5OTFmNzA2OTI5ZWRhNmEzOTYifQ"
+          "resource": "repo://internal/repository/user.go#L523-L546",
+          "version": "repo-lines-v1:sha256:7114be1ace69f9dc12eea2dbf01073095cdd372c02c1a45e92fd0765dfa31afd:eyJzZWxlY3RlZExpbmVDb3VudCI6MjQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjFjOTY5Y2YzNjhiYzM3OTI5MTczZGMyMGY5YmI0NmY4N2RiYmM4YmVjN2Y5YmVhOWIzNmY0MGI2MGJlMDYxNGMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjdmY2VmZTEwZmQxZmIxOTdhYjFmNGRiMzA4N2QxODA1MzRiODkyYThhMDg5YjRhNTIzOTFlODJjZmQ4ZGYzNTMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImQ5MjJlMzA1NDZmNzA0MjI1ZmJiMGNmYWY4ZDY5ZTVhMjY4ODRiYzYyZDczZDRmYjNmYjBkZjdjZDg5MjkwMTkiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjNhYmZhNmE0NjhlZjU4NWQ3M2JmOWVmODEwZTVmNDZiZGNjZGIzM2Q2ZjQ2MWU4MjNlN2M1MTU3NDkwYTA4OTMifQ"
         },
         {
-          "resource": "repo://internal/service/device.go#L124-L200",
-          "version": "repo-lines-v1:sha256:21b5d95e558d540401c7c9bb582194027bba74ca7027342b9e0dd8aced1645a6:eyJzZWxlY3RlZExpbmVDb3VudCI6NzcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImNiN2Y5NDJmZjE2ZjJkMjAyNGY5OTQ3MjhlNWNmNTcwNjQ1ODJkNjZiZTI4MzcyYjI5NjNkZDRmMDQ3MjBkNjciLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjIxZTVmZDk0MzU0MzhkNjYwM2RkMGViNWU4MDI2YmJkZmQ5NTJlYzVmYWZjMjYwMjBjOTRmNWU2ZjA3MDA3MWMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjlmNGEwNDQ4YWRjZDA4OWNhMTYzMTEyMDhjZGM3ZTczZGM0M2IxOTZkYmZmZjgyODIyNDdjNGQ2NzFiYzNlZmUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjE5MGRkOWQ0NDcwNWQzOTM5MDM1NDRkNDVmYjdmNTQ3ZWU1MmQ0Yjk1YzdlMmU2NTU3NTY5ODM3ZjM4NjViY2IifQ"
+          "resource": "repo://internal/service/device.go#L19-L127",
+          "version": "repo-lines-v1:sha256:df388358fd255787f883af08e0c13d56aa1d8c24f4f951647073419f0113eafd:eyJzZWxlY3RlZExpbmVDb3VudCI6MTA5LCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiI0NDc2NTY5ODEzZjQ3OGI4NzliNzY5N2Y1YzcyYzMzZDFiYmRhNzBmZDBkMDlhMGViYmY0NmM3ZTUzMWQxMGJjIiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiIwMWJhNDcxOWM4MGI2ZmU5MTFiMDkxYTdjMDUxMjRiNjRlZWVjZTk2NGUwOWMwNThlZjhmOTgwNWRhY2E1NDZiIiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiI1NGQwZmI1NDRmODVkNGE4ZjZkZTAxYjBmYzEwODBhZjZhZmM5YzhkNjlhNjE2NTFkMDNmOTkyMTFlMzk4ZGRlIiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MywiZm9sbG93aW5nQ29udGV4dEhhc2giOiJlYzIyZWY5MGRlNDE5ODA3MWQ1NzZkZTliODI1ZDA2YWM1MDg3YjQxNmVhNGMwYjRlZTQzMzg2NDYzNzcwY2Y3In0"
         }
       ]
     },
     {
       "id": "claim_800bd7c0a11a456baeaee5504c450734",
-      "statement": "Verification codes are stored in an in-process map with a ten-minute TTL, per-entry attempt tracking, and a 60-second cleanup loop, making the flow single-instance.",
+      "statement": "Verification codes are stored in an in-process map with a ten-minute TTL, per-entry attempt tracking, and a 60-second cleanup loop, making the flow single-instance; issuance goes through SetFresh/Mint so a new code never overwrites an unexpired entry with the same code (fallback to Set after 100 collisions), and the auth service holds two independent stores (EmailVerifyCodes and EmailOTPCodes).",
       "evidence": [
         {
-          "resource": "repo://internal/code/store.go#L15-L108",
-          "version": "repo-lines-v1:sha256:3c839d4eb99ba7f66890cde5c0d923abc43f13be8ea4cb49ecf22450a3ee3ac7:eyJzZWxlY3RlZExpbmVDb3VudCI6OTQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ3NzhhNTE5MWE4NTgwMjVkMzlhNDk0N2VkNjQ5M2MxODAwOTcwNWNhNzc4ZDE2MGE0NzI5YzBiMDViYjljMzAiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjYwN2MzMTkyZGE5MDVmZmJhZDEwNTZjMmZkMDI5ZDMzNDhkZGRjNzgwMDk1M2EyNDBlYjgyMjE2NjZiNzc3ZDYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+          "resource": "repo://internal/code/store.go#L76-L116",
+          "version": "repo-lines-v1:sha256:ecbeac34ed64ed84842d48863f0a75167e47a6180a5b066ac5f20f625a0db897:eyJzZWxlY3RlZExpbmVDb3VudCI6NDEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImVkOTNlYzc4NWVhZTVmM2U4NjZhNjgyZDE1NzhiYjdmYjUwNzJmMjU1MjIwODExNjFlN2Q2MGIwYmZlNzk0MjgiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjE4NjQ1ODIxYzJhMDFmNGRmMzMzY2ZlNDUzZTkzNjAyMjBlM2Y2MWVjNTYxZjE1OGMyZDJjOTcyYjAzZTc2NmIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjRkNWI2NzU2Njc2NzQ2NmMwMDhkODA4OGEyNDIwODE3NmY3MzAxMTQxZjkxNWJjMDQ0MzViODNkNDBlNzZmZTMifQ"
+        },
+        {
+          "resource": "repo://internal/service/auth_service.go#L46-L50",
+          "version": "repo-lines-v1:sha256:abe45c5ad61063349ecc0b1d1ee71953f6be18c5660b1fd6a6416b2c91ea9471:eyJzZWxlY3RlZExpbmVDb3VudCI6NSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiMDFiYTQ3MTljODBiNmZlOTExYjA5MWE3YzA1MTI0YjY0ZWVlY2U5NjRlMDljMDU4ZWY4Zjk4MDVkYWNhNTQ2YiIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiYjQzYzUxYTAyZjg5YzZiYTA1ZjEwNjUzODFiZWQyOGUyMjcyZjY0M2NhNDNlZWJlN2NmMWJlZmEzODE5NTFhNSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiODQyNzg3ODE2NzJlYmVhNWQ3OWRjMGIxMDRkMWViZmQ2MWE4ZDc5N2U5MDlhMTU1N2JhYTA0NmQwMjY1YjUxYSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiYmUwNDU0ZmYxNWJkNzZiNDA2YWY0NDU1YjMwZThlYWQ2Y2FjZDJkM2QxMTE3NDgxYTQ1OTRhMzczYzI5NjE2NSJ9"
         }
       ]
     },
     {
       "id": "claim_a76f81c2baae4c37a10355b2be112385",
-      "statement": "Successful login converges on IssueSession, which signs a 15-minute access token and a 7-day refresh token with random jti claims, stores the SHA-256 hashes of both tokens in a usersessions document, sets cookies, and audits asynchronously.",
+      "statement": "Successful login converges on IssueSession, which signs a 15-minute access token and a 7-day refresh token with random jti claims, stores the SHA-256 hashes of both tokens plus the device token hash in a usersessions document, sets the auth cookies and the fdt-device cookie, and audits asynchronously.",
       "evidence": [
         {
-          "resource": "repo://internal/service/auth_service.go#L169-L199",
-          "version": "repo-lines-v1:sha256:e3fc02112097fe443218f703ada1f586c4d32c625d6306937a551e34e5c788d2:eyJzZWxlY3RlZExpbmVDb3VudCI6MzEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImEzZTU1ODE3ZDM0NzNkMTQwNjI5NDJiM2M5ZTg1NDc5NGM0MGMzYmNjNGU2NzlhOGZkMzU1ZTQ1ZTg4YTE0MWEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjIwNjY4YjNkZTZhYmJhZmVhNzk0OGRiMWZiYWZlYmU4YmFmOGE3ZjE1MWQ4MWI0NmRiNjRkZjE4ZTU2OGVlZTAiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjVmOGI4MWVjMDVmMmFiNGIxNTU0MDIzY2EzN2I1MGRhZjBiNzMxM2EyNDc4MWYwMmU1ZjExMzljYjlmMmE1MmEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjRhYmQyZjM3ZjUyMzFiZDk1YzI1ZDVhNjZhZjdlNzQ4ZWY1ZDE4OGNjZGVhMDAwZTBlODgwZDY0ZDZkMmI4YTAifQ"
+          "resource": "repo://internal/service/auth_service.go#L215-L237",
+          "version": "repo-lines-v1:sha256:774eb9ec542c54f888f91d5ef1ea3d03df4a160ebc19e69f3a006b965d000d1d:eyJzZWxlY3RlZExpbmVDb3VudCI6MjMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjIxN2M1NDhkMzczNTRlNDA1YWI1ZGU0ZmE0MWFlZDhlNTUyY2FhNTc3NTZlZDM4YWI2ZWQ1ZGJjZGViNDFiYmYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjEwYTRlOTkzYWY2NDMwOTI2ZWZkNzE2MzAyNTE4NmNkYTZmYTQ2YzZjNTkzNTYzYzQ1MDIyOGU4YjFhOTEyZDIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImJhNzUxOGM2NjkzMDQwNmY2NTQ1NjFiZDFhNjg5OWMyYTViMjJjMThkYWZhNGI1NzUzZDY1YWYzZjEzZDRkOGUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImFlYjU4YmZlY2EyMTI0NjNkOGZjZDYzNDUwNTg0MmIwNjhlZDA2NDdlMWYxNzY4MTY4Zjk2ZTE3NDJhYzA3MTcifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_87618736fee743ceab0a06b17ff47a63",
+      "statement": "登录标识符支持用户名与邮箱：含 @ 按邮箱查找，否则按 accountIdLower 折叠小写查找（FindByLoginIdentifierWithAuth/With2FA），登录前统一小写化并回退兼容旧 email 字段——Admin 与 admin 视为同一账号。",
+      "evidence": [
+        {
+          "resource": "repo://internal/repository/user.go#L88-L98",
+          "version": "repo-lines-v1:sha256:47664979d72ee4f607f0af5e295b8a7cc38322634256186f2ddfffa63a032347:eyJzZWxlY3RlZExpbmVDb3VudCI6MTEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImI1Njk2ZWZkYjE4OTVlYWJmM2QyYzgzNmU1YzI0MjgxNDczN2YxMjBlNGIwYjMzY2JkZjVkNGIzNjlmYWFjYWQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjljMzZiMWI3OGQyODFjNGQ4ZDk2MGNiMzFlYmYwMzAwYmUyNGZmMTEwZDkyYmNiM2NlNzkzZmFlODI1MWMyMmUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImU0NjE1NTBmYjQxNWNiODIzZmZhOWMyMTdhNTMyNTRhOTYyNWM4ZjNjZGY2Zjk2NjkzMzgxYmIyNTcxZWJiYmEifQ"
+        },
+        {
+          "resource": "repo://internal/service/login.go#L47-L63",
+          "version": "repo-lines-v1:sha256:ee3e9893984e5e947d85966886b6eef63cdc3241bae1f7f60698e19770c7b0f7:eyJzZWxlY3RlZExpbmVDb3VudCI6MTcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImRlMjNiYWIxMmYwYzA0MGY1NmZhOWNhMmRkMDA3YjczOTdlZTU3NzBhZDhhNGIwMjJhN2M3ZWIwZjdlYjA1NDYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY3Y2RhODJkYTYwNjIzOGUwNWU2MjM5OTU2OWM1ZWUwMzk5MzQxOTY0OGFlNWQ0M2EyYmY4Y2Q2MzQ3ZjgyNjMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImI3ODczY2I2MmEzNWM5OTZlYWUxMzg4NmI4Zjg1MmM1YTI5MzViMzZlMTk0ZDY5NzRmM2RkNjU3MzYwYmUwOTAiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImU4NDFhNjI0NTc4Njg3NGE3YzkyYjYyNzM1ZGE5NTZlZjA2NGNjZDcxZDM4YWRlZjAyYWU2MWQ5Y2U2ZTgwZTUifQ"
         }
       ]
     }
   ],
   "verification": {
     "by": "openwiki/0.7.2",
-    "at": "2026-11-11T16:33:08.526Z"
+    "at": "2026-11-13T18:41:36.261Z"
   }
 }

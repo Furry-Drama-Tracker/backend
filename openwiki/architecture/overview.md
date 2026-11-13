@@ -3,9 +3,6 @@ type: architecture
 title: 架构总览
 description: neo-server 的分层包结构、从 main 开始的显式依赖注入链、各 internal 包的职责（含 authlog 认证诊断与 cmd/diag 排障），以及文档所述分层比理想情况更松散的地方。
 tags: [architecture, layers, dependency-injection, packages, gin]
-verified:
-  - by: openwiki/0.7.2
-    at: 2026-11-11T16:33:08.526Z
 sources:
   - id: openwiki-source-0f6ed11169bd8e6b34b44280
     resource: repo://cmd/server/main.go
@@ -29,7 +26,10 @@ sources:
     resource: repo://internal/service/auth_service.go
   - id: openwiki-source-62a9837f2b45c92ae81ca775
     resource: repo://internal/upload/upload.go
-generated: { by: "zcode", at: "2026-11-11T16:33:08.526Z" }
+generated: { by: "zcode", at: "2026-11-13T18:41:36.261Z" }
+verified:
+  - by: openwiki/0.7.2
+    at: 2026-11-13T18:41:36.261Z
 ---
 
 # 架构总览
@@ -67,11 +67,11 @@ middleware  handler  <-- HTTP 关注点
 
 1. 解析 `--config` 与 `--listen`。
 2. `config.Load`——缺少、过短或不合规的密钥会致命退出；示例/历史弱密钥与占位生产 CORS 源只打印 `[SECURITY WARN]`。
-3. `repository.Connect`——用 15 秒上下文连接并 ping MongoDB。
-4. `repository.NewRepos`——针对命名集合构造全部 repository。
-5. `auth.NewSigner`——用配置的 secret 构造 JWT 签名器。
-6. 运行启动迁移与索引创建；失败只打印 `[WARN]` 并继续，避免已有数据导致服务无法启动。
-7. 打印 IP 地域解析开关状态：误开（`ip_region_enabled=true`，会向 ipapi.co 出境客户端 IP）时打 `[SECURITY WARN]`。
+3. 打印 IP 地域解析开关状态：开启时打 `[SECURITY WARN]` 并注明首选数据源（aliyun 会把客户端 IP 发送至该 API；czdb 查询走本地库），首选为 aliyun 且未配置 AppCode 时追加不可用告警；关闭时提示 `LastLoginRegion` 记为「未知」。
+4. `repository.Connect`——用 15 秒上下文连接并 ping MongoDB。
+5. `repository.NewRepos`——针对命名集合构造全部 repository。
+6. `auth.NewSigner`——用配置的 secret 构造 JWT 签名器。
+7. 运行启动迁移（`migrate.Run`，五项幂等迁移）与索引创建；失败只打印 `[WARN]` 并继续，避免已有数据导致服务无法启动。
 8. 启动后台清理任务（会话、已读通知、到期注销账号）。
 9. 配置上传与图标目录，并创建两个目录。
 10. `server.NewApp(server.Deps{...})`——装配中间件与路由，并构造 `authlog.Recorder`（认证诊断事件双出口）注入鉴权链。
@@ -96,8 +96,8 @@ type Deps struct {
 随后 `RegisterRoutes(d, api, opts, rec)` 只构造一次请求期协作者（`rec` 是共享的 `authlog.Recorder`）：
 
 - `email.NewClient`（SMTP、模板、收件人限流）；
-- `ipregion.NewDisabled()`（IP 地域查询的默认装配：不外呼，仅显式开启 `Security.IPRegionEnabled` 时换成 ipapi.co 客户端）；
-- `service.NewAuthService`（持有 repository、签名器、邮件、IP 地域、配置以及两个内存验证码存储），并把 `rec` 注入 `svc.Rec`；
+- `ipregion` 客户端：默认 `NewDisabled()` 不外呼；显式开启 `Security.IPRegionEnabled` 时用 `NewConfiguredClient` 按 `[security].ip_region_provider` 装配首选数据源（aliyun 云市场 API / czdb 离线库，另一数据源配置齐全时兜底），czdb 加载失败或无任何数据源时告警并回退禁用态；
+- `service.NewAuthService`（持有 repository、签名器、邮件、IP 地域、配置、两个内存验证码存储——注册/登录验证码与 2FA 邮件 OTP 各一个、Passkey/WebAuthn 引擎与仪式会话存储、QQ 预留 provider），并把 `rec` 注入 `svc.Rec`；
 - `middleware.NewAuth`（JWT 校验与角色检查），同样注入 `amw.Rec`；
 - 每个挂载路由组一个 handler 容器，接收 repository、配置、认证中间件与限流器工厂。
 
@@ -114,21 +114,21 @@ type Deps struct {
 | `router` | 通过 `Mount` 把领域路由挂载到 `/api/<path>` 单前缀（无 v1 镜像、无弃用头） |
 | `middleware` | recovery、gzip、安全头、CORS、超时、日志、请求体解析、清洗、CSRF、鉴权、限流、API 统计、缓存 |
 | `handler` | HTTP 解析与响应组装；40 多个按领域分组的文件 |
-| `service` | 认证/账号领域逻辑：登录分支、refresh 轮换、设备链、2FA、邮箱变更、导出 |
+| `service` | 认证/账号领域逻辑：登录分支、refresh 轮换、设备链、2FA、邮箱变更、导出、用户名（登录名）改名与保留期、Passkey/WebAuthn 仪式 |
 | `repository` | MongoDB 访问，按集合区域一文件，`Repos` 聚合，ObjectID 辅助 |
 | `model` | 带 BSON 标签的文档结构与面向 JSON 的子文档 |
-| `auth` | JWT 签名、cookie、bcrypt、TOTP（含一次性时间步）、备份码哈希、字段加密、User-Agent 解析 |
+| `auth` | JWT 签名、cookie、bcrypt、TOTP（含一次性时间步）、备份码哈希、字段加密、User-Agent 解析、Base32 换算 |
 | `authlog` | 认证诊断事件记录器：stderr 结构化日志（`event=...`）+ `authevents` 异步落库（30 天 TTL） |
 | `security` | bluemonday XSS 清洗与密码强度 |
 | `errors` | `AppError`、上传错误、全局错误渲染 |
 | `ratelimit` | 命名限流器 spec 与挂载元数据 |
 | `code` | 带 TTL 与尝试上限的内存验证码存储 |
 | `email` | go-mail 客户端、模板、收件人限流、stderr 日志 |
-| `ipregion` | IP → 地域查询（默认 `NewDisabled` 不外呼；显式开启时用 ipapi.co），LRU 上限与 24 小时 TTL |
+| `ipregion` | IP → 地域查询（默认 `NewDisabled` 不外呼；显式开启时按 provider 装配 aliyun 云市场 API 或 czdb 离线库并互相兜底），LRU 上限与 24 小时 TTL |
 | `upload` | 图片与 SVG 存储、校验、删除（O_EXCL 落盘 + 剥离执行位） |
 | `pagination` | 共享 `page`/`limit` 解析与结果形状 |
 | `logging` | debug 或 info 级别的 slog 文本日志 |
-| `migrate` | 幂等启动数据迁移（启动时调用，失败告警继续） |
+| `migrate` | 五项幂等启动数据迁移（accountId 回填、角色迁移、创作者主页迁移、UID 派发、用户名折叠回填；settings 集合标记控制，启动时调用，失败告警继续） |
 | `indexes` | 幂等索引创建（启动时调用，单个冲突不阻断其余） |
 | `cron` | 会话、已读通知与到期注销账号清理任务 |
 

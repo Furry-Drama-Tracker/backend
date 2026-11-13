@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "pageVersion": "sha256:3af555d62608a07dcd60715d65fe78e9c17cdf26916a761df0d52f7519578196",
+  "pageVersion": "sha256:7b7849bfe6a751717f16343348b023544f765960c7f5d88c6e8af7e6cca358a1",
   "claims": [
     {
       "id": "claim_813d5398a03447928aea6cd62fb23b94",
@@ -14,15 +14,15 @@
     },
     {
       "id": "claim_0ee72f7aa24749ddbeb5a6b2592bd84a",
-      "statement": "Repos 仍是指向小写复数集合的扁平聚合（users、usersessions、episodes、singleepisodes、systemwallpapers 等，现新增 AuthEvents → authevents），推送订阅与回收站 repository 仍在聚合外构造。",
+      "statement": "Repos 仍是指向小写复数集合的扁平聚合（users、counters、loginnamereservations、externalidentities、passkeys、usersessions、episodes、singleepisodes、systemwallpapers 等），推送订阅与回收站 repository 仍在聚合外构造；用户系统重构新增 Counters/LoginNameRes/ExternalIdents/Passkeys 四个仓储。",
       "evidence": [
         {
           "resource": "repo://internal/repository/push_subscription.go#L21-L29",
           "version": "repo-lines-v1:sha256:c417b1dfdc377100c0dd9ef9e42c6305e34d5f383df8ce41a87837ae9e1914bb:eyJzZWxlY3RlZExpbmVDb3VudCI6OSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiMzIzYTY1MjgzMWJmODVmNjNiMjE5NmQ3MDFjZmE4MTY1YzBjODhlMDBmZmVjZGJhZjMxNDQ1MzFkN2Q3OWUyMiIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMjQyMDNhOGYyYzQwYjZjYTQxNjI1YWZkMTdkN2YwZGRkMGM5NzE2MDgyZDk1YzI1N2RhODNiNDA3YmM0ZmExOSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiMzczM2M2ZjliNDRjZDk4NDYwZDdlN2E3MDExZTkwY2ViNmU3ODU1ZWY4MjRlODE1ZTA5Zjg3NDIzNjIwYmMwZSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiOGI5ZThhMGEwMzNhMjdmZGVlZTM4NGY5Zjg0ZDNkMTNjNzdhN2RlZjE0ODNkOWM4YzQ1NzJlNWRhY2I3N2MzZCJ9"
         },
         {
-          "resource": "repo://internal/repository/repos.go#L16-L90",
-          "version": "repo-lines-v1:sha256:29f105eb513a6b75d306547067574d9d00369a17556420686ba5b2565ad0e0b9:eyJzZWxlY3RlZExpbmVDb3VudCI6NzUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjI1NGNlZTFiMTdkMjgyMjAwMTMzOGRiN2Y2OThiMzdhNTFiMTE3Y2JjZTU1MzkzOGUyMmM2MWMxYjRjMGJiYTEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjIyMTJhODUzMGVkMTY1ZGMwODdlZTM4YzBjZjQ4NzUzMjQ5YmFiZWM3ZThmNzc5MWU3YWQzZTE3ZTNhMTRiOWYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImViMjQyZjk2MzhkYTlmYjU4YTI5NGU4NjgyNDJkOGIwZmVmNWI4YmQwMGFkOTY4MDVkNWM1MGZlMjFlMDQ1YjAiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjoxLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImM4YzVmY2RlYTkwZjA5NjU3YTQzOGNhOTRkMWNjMWU5Yzk0OTNmMGQ1MGJkYmRhN2M2YTM1ZThlYjU1OTg3MmMifQ"
+          "resource": "repo://internal/repository/repos.go#L16-L96",
+          "version": "repo-lines-v1:sha256:9fcffce4a0d0156407f09fa53dd560e5c6979a00325aee7546bea80aba09de6a:eyJzZWxlY3RlZExpbmVDb3VudCI6ODEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjI1NGNlZTFiMTdkMjgyMjAwMTMzOGRiN2Y2OThiMzdhNTFiMTE3Y2JjZTU1MzkzOGUyMmM2MWMxYjRjMGJiYTEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImViMjQyZjk2MzhkYTlmYjU4YTI5NGU4NjgyNDJkOGIwZmVmNWI4YmQwMGFkOTY4MDVkNWM1MGZlMjFlMDQ1YjAiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImVhMmU2ZDQxODhhM2MxMmE4MTNhYzJkMmRmYzMxN2M2NTY1MzM3MjQ5ZjYxNWZmMzQ3OGY4MmZjYjVkOWFiMGEifQ"
         }
       ]
     },
@@ -31,12 +31,12 @@
       "statement": "Models map documents with bson tags and JSON tags, hide password and 2FA and lockout fields from JSON, model the __v version key, and normalize legacy defaults through explicit constructors.",
       "evidence": [
         {
-          "resource": "repo://internal/model/model.go#L20-L61",
-          "version": "repo-lines-v1:sha256:15fa2c4df6ef65a94432ed892388fc5a64e8773782ba1e6dfe3ecb6c3c75cfe8:eyJzZWxlY3RlZExpbmVDb3VudCI6NDIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjdjYmVkOTkwMDUyMzU4MDBmMzRjNGYzNzIyNDlhYWUzYmI1MDM3Y2QxZTFjYjU0MDZkMmQwNjA3N2Q4NDJkM2MiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImFlYjU3ZjBjZDA3MDMxZTBlY2M3MTljOGJiYmY2NzkzY2UwMmQ5YTdkYjY4ZDY0MjhkOWUwY2UwMGM5OThiMWMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjcxMmNkNTBiMWYwNGRlYTIwNjAwZTcyOGM4YmZiNjYxZTM4N2U2ZTE3ZTgyYTcwYjlhZjFhN2IxODk1ZDdkYzMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjBkNDU1ZWU4ZmE1ZjJhZDIyYjEyYjQ4ZGQxNWZkMDI5ODJmMzE4Y2E0YzRjMzI4YjM3ODVjMjhiZTk1M2MyOTQifQ"
+          "resource": "repo://internal/model/model.go#L19-L63",
+          "version": "repo-lines-v1:sha256:e064c8b63fa1c8706d1fba02300d48576194c76d36321ee586b22ce5c9d74811:eyJzZWxlY3RlZExpbmVDb3VudCI6NDUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijk5ZjZlYWRjMmIyYzFmNjJlNzE5YTU3ZTk4OTBlMmE1OGQwYjgyMTQ3OTBhMTdmMWNiYzhiMjQ5ZjY1YzFhZTgiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImIyZjAwNjg2OWRkMjBjYjQ0MGYyZjIzMjlmNTViMDliOTUyNzU5ZWZhODc5ZmZmZTJiN2M5M2I4OTA0YzNhYjMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImM0YjVmNjdlMDhjZDA3MGZhYmUzODYyMGIxNWE0MTAwNzAzOWYzZGQyZmFlMDgxOTJhYzFkODRlN2VlNmVmOWMifQ"
         },
         {
           "resource": "repo://internal/model/model.go#L76-L108",
-          "version": "repo-lines-v1:sha256:f2b823792940a2bd035d777f8c3e09dae2cd023a5be6a65cf81b1859f16fa890:eyJzZWxlY3RlZExpbmVDb3VudCI6MzMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImY4NzkyYzZkMjQxOWYyMDc2Y2I5Y2Q2NWNiODc3MTE4ZjU1MjZmZDVjYjdlOTY5YzQ5ZjgzZDI1NWI5YjA5YzUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjcwMmM4OWZlN2I0YmQ0ZWE1YzVmZWE1NjkwNWVlYTY3ODhjZWZhMzE1NTM4NDRjMjVlYzdmNTY4NWY5ZmU2ZGIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjZlYTViMGFkODg1MmE4NDZlNDgzOTZjZTQxMWVhYmZkYWQyODk1ZDBkNWZkYjMwYmVkMWUwNDBjYWUzYjkxOTQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjNiY2M5ZjVkYjdjMTBjYzdjMjMwOTdmNWZjOWQ1ZmJjMDM1ZWYxNGNmM2M1Y2E4OGIyNmY5YzQyNTVmYTlhODAifQ"
+          "version": "repo-lines-v1:sha256:e9866a9bbce525727a661e41c055ee9ab5c812b8c503b2bbddac72fc13a62c86:eyJzZWxlY3RlZExpbmVDb3VudCI6MzMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjNlYWZmN2NhYTYzNGE3ODE4MWRjOTZkZmZlYWRhN2Y4MzM0MGEyNWM3ZTVhZDYyMWZhZWI4YjViNTA0NzEwZjEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjU3OTUyYzk1NzExZmI1M2ExNjBhOGRkOWQ1OTdhNzM1ODg2YWI0ZTkxNzUzYmY4ZjcwZTA5NTZmMDIwODNiZDEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjAzNDAyNDZiMjBhY2QxOTI3MWM4MjNiZGIyNzhmZDRkNTAzZTRlOTA5OTNlNDQxMDIwNWE4NTFmN2EwY2IxMjkifQ"
         }
       ]
     },
@@ -55,36 +55,36 @@
       "statement": "Repositories expose ErrNotFound and duplicate-key sentinels plus a lockout predicate, and each operation derives a 10-second timeout context.",
       "evidence": [
         {
-          "resource": "repo://internal/repository/user.go#L17-L51",
+          "resource": "repo://internal/repository/user.go#L19-L53",
           "version": "repo-lines-v1:sha256:2a43f9f858b452ee8854cdad9e1131551af7836cd0f22cc3fb9e64ab943638f3:eyJzZWxlY3RlZExpbmVDb3VudCI6MzUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjBlMmRiZTQxOWE5MmZhNDg0MzY4YjEwYjdiMmM3ZTllMGI1OTcyODA4MDJkOTdhMDNlN2ExZTQ0NDMzMjVhMGEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ0Y2U0YjU4M2IxMWNmMjYwOWZiYTFiMGUxNTBjYWQ3NDgyMzE0ZTIxNjg1OGZhYzcyZTkyZTE0ZjhjNjYxNzgiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijg0MWZiYzg5MmE3YzZlNDhhZjRjNzkwNDk0ZDc5MzY4M2UwMGZiMjgzOWVlMWE5YWI3ODJmNDA1OGNlOTc1ZTIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImJmODBjYTlhZWEzN2I4YTBjZDM3NmI5YzI2MWU0YTk1MDI5Y2JhNjA3MzU4YTc1NmRiNmNmNDVlNTk1NjUyMDUifQ"
         }
       ]
     },
     {
       "id": "claim_3150083fe0c643febce1165e6ed3d549",
-      "statement": "indexes 包为 users、sessions、tokens、histories、notifications、ratings、follows、favorites、auditlogs、authevents（userId+at、email+at、at TTL 30 天）、apiusages、sitecontents、folders、episodes、series、themes 与 reports 定义唯一/TTL 索引，按名称幂等创建且单个失败不阻断其余。",
+      "statement": "indexes 包为 users（email/accountId/accountIdLower/uid 唯一，后两者稀疏）、loginnamereservations（loginName 唯一 + reservedUntil TTL）、externalidentities（provider+openid 唯一）、passkeys（credentialId 唯一）、sessions、tokens、histories、notifications、ratings、follows、favorites、auditlogs、authevents（userId+at、email+at、at TTL 30 天）、apiusages、sitecontents、folders、episodes、series、themes 与 reports 定义唯一/TTL 索引，按名称幂等创建且单个失败不阻断其余。",
       "evidence": [
         {
-          "resource": "repo://internal/indexes/indexes.go#L45-L135",
-          "version": "repo-lines-v1:sha256:d8c0c24347dadfb1bde06abc9710c015784222a6c9f0b62bacdb54e4cf66f300:eyJzZWxlY3RlZExpbmVDb3VudCI6OTEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjU0Nzg5MGI4NDM2OTQ5Y2E1ZjY4NGM5NTllODA5N2Y4ZDYyMDU3MTVmN2RiNzY5M2MyNGQyOWY3ZjQ2NWI4MmQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjE4Mjg2Njk3ODQzNjQ4YjAwZWM1ZTczNTliYmMzZjZlM2UxZWRhMzg2NWNlYTJmZDViMzI2OWE3OTA1YTMxOTkiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijc1MWU1ZTk3NjY0MzliNDExZTY5MGQ1Njc5NWI3Mjc0ZjRlYTQ2MzNiMmE2YmJiMzBhMTdiYzAzNzU3YjYwMmYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjBmM2E0OTMyOTI1MGRlNjAzNzA0MDIxZTUyZjljNGI3YTk3ODBkYjg2ZjM1NDRlMGI3NjA1NDRlZTVjOGE4ZTcifQ"
+          "resource": "repo://internal/indexes/indexes.go#L45-L141",
+          "version": "repo-lines-v1:sha256:fbf6cffa5a762de911f3783918d43dead73a30f1eeb4dac7c379dd6e1898ed82:eyJzZWxlY3RlZExpbmVDb3VudCI6OTcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjU0Nzg5MGI4NDM2OTQ5Y2E1ZjY4NGM5NTllODA5N2Y4ZDYyMDU3MTVmN2RiNzY5M2MyNGQyOWY3ZjQ2NWI4MmQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY3Y2RhODJkYTYwNjIzOGUwNWU2MjM5OTU2OWM1ZWUwMzk5MzQxOTY0OGFlNWQ0M2EyYmY4Y2Q2MzQ3ZjgyNjMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijc1MWU1ZTk3NjY0MzliNDExZTY5MGQ1Njc5NWI3Mjc0ZjRlYTQ2MzNiMmE2YmJiMzBhMTdiYzAzNzU3YjYwMmYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImU4MWJiY2Y5N2RlNjZjZmU1MDViNDI5ZDY4NDUzNjc4Zjc1Y2VlZTQyMzBmZDQxNTc4NjdhM2NjOWY2OWM5YWUifQ"
         }
       ]
     },
     {
       "id": "claim_42beadfc09f94ad6a320b6c5b0b87193",
-      "statement": "The migrate package implements three marker-gated migrations for accountId backfill, adminAccess to role conversion, and creatorProfile adminId to creatorId plus profile creation, stopping at the first error.",
+      "statement": "The migrate package implements five marker-gated migrations — accountId backfill, adminAccess-to-role conversion, creatorProfile adminId-to-creatorId plus profile creation, uid backfill (createdAt order, counter advanced to max), and accountIdLower backfill with case-collision rename — stopping at the first error and running before index creation.",
       "evidence": [
         {
-          "resource": "repo://internal/migrate/migrate.go#L102-L213",
-          "version": "repo-lines-v1:sha256:53fde754b2736ae1b3b0343aa6e750c1b3559b0514c1ddbfbd03938641f2e29b:eyJzZWxlY3RlZExpbmVDb3VudCI6MTEyLCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiI2OTkzOGUwNTFjMTc4YTc2NGE4NzNkYjQ3NGMzNTg1ZGZkMTBmZDc5ZjU1MWIyM2E2OGQ1Mjg4NTFlYjc5OGI5IiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiI1OTFhMjE4OWUwNDUzMGNjMjI3ODVhZDY4NDU2ZDcxNzM1YzJjN2FlODUxMzhkODk3YmRjNjc3YWNjZmEzN2U0IiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiJjYzJiZmMwZTdkOThmNjBiMzU4YzNiYTEwZjE4MzY5NmVkZmYyNzFkYjFhNGFiOTcwZjk4OGMwZDg4MjNhNzZlIiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MywiZm9sbG93aW5nQ29udGV4dEhhc2giOiIyYjcwYzcxMTUzOGRlNjk5N2I1MWI3ZTRkZGVmYzU1MzJhYTEwZWIzYTYzMTQ0ZGNlZDIxZGU1MzBiYzkwNTUzIn0"
+          "resource": "repo://internal/migrate/migrate.go#L200-L370",
+          "version": "repo-lines-v1:sha256:14aa06907bd02c70aebb2c197f0f3076446c7b0c2c28929388c2f5ae88c7cbd8:eyJzZWxlY3RlZExpbmVDb3VudCI6MTcxLCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiI4NGJkOWNiYjQ5MTc0Njg0NmViZWEyYjUwNGUzNTk5MjI4MzkxZWMyNmZmMGNiYzIwYjMyNjkwMTAxYmI3NjI2IiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiI0MTJjYTM0NWNjZjc1YmY5YzA4MDZiY2U2OTViZThkZTgwOGI3OTk4NDI1MWE3YTU0ZDIwMmNmNjEwMWRkNDUxIiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiI5MDQ3ZWFmNmY3MzMyMjcyNTMzZjI3NWJhYjJjOWFiODVkNzk0MmQyNTE4NTllNjRiNmUyNWEyZTlmZjBkMTNmIiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MCwiZm9sbG93aW5nQ29udGV4dEhhc2giOiJlM2IwYzQ0Mjk4ZmMxYzE0OWFmYmY0Yzg5OTZmYjkyNDI3YWU0MWU0NjQ5YjkzNGNhNDk1OTkxYjc4NTJiODU1In0"
         },
         {
-          "resource": "repo://internal/migrate/migrate.go#L26-L58",
-          "version": "repo-lines-v1:sha256:f7c1c23621b00261c81bdb0deabf88c6a4dd8addf31bfae899152184f43c0cc9:eyJzZWxlY3RlZExpbmVDb3VudCI6MzMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImQwZDk4NmIwZGY3ZTljNDdhYTc4MmIwNjYwOTQ2OWJjOGVlY2E0NzYxMmI4MzhjZjgyOWRkYTRiY2RkZDMzMjkiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImQ4YWM5ZjQ4YjY1MTRjNTM5Y2U5NjU1YjQ3NDYyYmQzYmU4YzhlMGM4Nzk1NTdhMDQ4MjAwYmZlMzE3MDVmNjYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjUyZmNlMTFjNGJmYzlmYmI5ZGFkMzVjNmE0MzdlMmNjNDQ0NTQ0NmJiZGU3YzhhYTI0MzFlNzQ1ZWJmNGViMzYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjA3N2E0ZmIyMGRjMWYxYzRlNTI4Zjk3ZWU4ZTQzNjc4YTFiNmY2YWUyNWQ2ZGI4ZmVhOGYxNDEyMWUyNDA0YjUifQ"
+          "resource": "repo://internal/migrate/migrate.go#L26-L64",
+          "version": "repo-lines-v1:sha256:d74d129a389dd9c27abb6f5c3216bc7b93ec2ace38736a2f215e73e8499b4b58:eyJzZWxlY3RlZExpbmVDb3VudCI6MzksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImYwZDRhMTc5OGZhZDFjMjA3ZjRhMTdjNjk0ZDFiZTU5YzkwMzYzMjYzMzhkMWQyYjJiNTdiNDE0Y2QxYjA2ZWEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjFiMDE3N2JjMjQxYTA5OGNlOTBjN2NjMDcxNGFjZWZlOTllNjhlMjE1NmRkMDE5NjViZGFhZDUxZDZlNjEzYTAifQ"
         },
         {
-          "resource": "repo://internal/migrate/migrate.go#L59-L101",
-          "version": "repo-lines-v1:sha256:0a904fd056a747c50e2f93adf70059de76c1a23aa27b7404d8d198090ceb0885:eyJzZWxlY3RlZExpbmVDb3VudCI6NDMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjZkZDViNzA1ZWMwMGYzNTMzZDc1MGFkZTM1YTA0OGNmYzUyZjI0NDQ2YjcyM2ZiYjNmOTFjZjZhNmUzYTRkNWYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjYxZGVjZTdiZmZkMmQ5OGFhNTc4MjE2N2U3NGQ5N2I2YjhmNjQwNWNiMjgyYTA1ZjMyMGE0ZDhlZmJiOWJjODMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjM4NWVjNDg4MGRkZTNhN2IzZGIwN2VlNDUwZDQxMTM2OGFiNDFjN2UwZWQyMjk0OWQwNmRmNzY3NjEyNjhmODEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjM1ZjAxZTk0ZDAyNmIwYmI3ZmFhNmZlYTIzOGMyNjdiODY3M2VmZDU5ZTUwMzM3OTNlY2E3YWQ2ZDI2NzY5MzcifQ"
+          "resource": "repo://internal/migrate/migrate.go#L66-L198",
+          "version": "repo-lines-v1:sha256:31995949a7b9786bc6b930e764d825aa4a56de14c1ef346cb41f77a66682b388:eyJzZWxlY3RlZExpbmVDb3VudCI6MTMzLCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiI3ODExOTBhMWM3M2QzNzkwOTdlOTI5ZTcwMWY5OWEyM2QxMWRjOTQyMjVlZDU0ZjI3N2QzZjk2NTAwZDE1ZjcwIiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiI0MTJjYTM0NWNjZjc1YmY5YzA4MDZiY2U2OTViZThkZTgwOGI3OTk4NDI1MWE3YTU0ZDIwMmNmNjEwMWRkNDUxIiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiIxNjMxYjZlMmNhMDdkOGJhZjBlYjQ0ZTc0OWRiZjQ5MGIzOTJlM2E1MzRlZjYxMDIyNzcxMTQ2Y2RmOWFmMWEyIiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MywiZm9sbG93aW5nQ29udGV4dEhhc2giOiJmZjA4ODRkZmRlMzg2YWIyMzMzZTIyOGQ0YzRjNzA0MDYwZTc1OWJjZTdmOTUxMjI5OGQ4ZWY2YTRhZjQ3ZWJlIn0"
         }
       ]
     },
@@ -101,10 +101,20 @@
           "version": "repo-lines-v1:sha256:a4e7c42b3e1a8572bcf2e485d20c1e0d658d5b831d3680b988c5051ba6d0daf4:eyJzZWxlY3RlZExpbmVDb3VudCI6OSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiM2JhNWI2OTcyZGQ1MzQ5ZjU1ZjViODA2ZmFmN2EzZjcxZThjYmQ5NmNlM2E5MjA2MGFiNWNlMjllMGQ0ZmNhNSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiYzVkM2IwNGE5YzUwY2FlNGI3YzhjMzg5MDY3MWVjZGU4OTA0Njc2OGFjZmMxMTk1YTFkZmE5OTZlZjVjYWZlMyIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiMjQ0Mjc1MzU4Yzc4YzI2YzgxY2U2YTQ0MzE5YmU5YjZiYmFmNDU4ODMwMDE3MWExYzcxZmRmZDcyMmFjNDE5NyIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiMjA1NzZhYjdkZjI3ZWNjNTYyYTdjY2U3MGE5MWQ4ZGMzNzg5ZTJmNzE0MmRmOWI0N2RlMDA1NGU2MTc5ZWNjMSJ9"
         }
       ]
+    },
+    {
+      "id": "claim_ff8b7465865d44aca93acd2cbcfe8449",
+      "statement": "counters 集合（_id: \"uid\"）通过 CounterRepo.NextUID 的 FindOneAndUpdate $inc 原子发号用户 UID（首个用户/seed 账号显式为 0，首次调用返回 1）；SetUIDCounter 把计数器至少推进到回填后的最大号且只增不减，保证迁移与后续注册发号不冲突。",
+      "evidence": [
+        {
+          "resource": "repo://internal/repository/counter.go#L20-L49",
+          "version": "repo-lines-v1:sha256:7003d8e9a0af9294a6ae3e0d3c0318ac69cb7e710d765f24dd131299cafa17f8:eyJzZWxlY3RlZExpbmVDb3VudCI6MzAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY3Y2RhODJkYTYwNjIzOGUwNWU2MjM5OTU2OWM1ZWUwMzk5MzQxOTY0OGFlNWQ0M2EyYmY4Y2Q2MzQ3ZjgyNjMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjcyNGM5MGMxZWZmNzE3MjdiODZhODAwYTJkYmYxMDkxNzY5MzZmNWNjYWJjMzY4NWJkYmZkYmNiNjk0ZDE1ZWYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjJlYTU0YWRlYTAwMDg0Y2I4MzViZjg2YzEyZDViNTE5MzE0MTAyZWQxMmYzMzE4MjgzOGRkZDA4NmVlNmMxMjEifQ"
+        }
+      ]
     }
   ],
   "verification": {
     "by": "openwiki/0.7.2",
-    "at": "2026-11-11T16:33:08.526Z"
+    "at": "2026-11-13T18:41:36.261Z"
   }
 }

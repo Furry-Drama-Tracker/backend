@@ -3,27 +3,35 @@ type: operations
 title: 部署与运行时
 description: 构建目标与 CI 滚动发布、认证排障命令 make diag、准确启动顺序、TCP 与 Unix socket 监听、服务器超时、优雅关停、目录初始化、systemd unit 与 ini 模板，以及多实例后果。
 tags: [deployment, runtime, systemd, startup, shutdown, ci]
-verified:
-  - by: openwiki/0.7.2
-    at: 2026-11-11T16:33:08.526Z
 sources:
   - id: openwiki-source-4d1d392666be6dfdd7a91a2e
     resource: repo://.github/workflows/release.yml
   - id: openwiki-source-0f6ed11169bd8e6b34b44280
     resource: repo://cmd/server/main.go
+  - id: openwiki-source-85047375915a57a29b05d0cd
+    resource: repo://cmd/useradmin/main.go
   - id: openwiki-source-6e11d7a3d9cd222e5ed01aed
     resource: repo://deploy/furry-drama-be-neo.ini
   - id: openwiki-source-965e9675b33e3892958fab10
     resource: repo://deploy/furry-drama-be-neo.service
   - id: openwiki-source-523bc741245510a618f572a9
     resource: repo://deploy/run.sh
+  - id: openwiki-source-f9cd993b1da0967b3ad454b7
+    resource: repo://internal/repository/user.go
+  - id: openwiki-source-f7acf9d278285ec2e6b81113
+    resource: repo://internal/service/auth_service.go
+  - id: openwiki-source-540faaa12781d81a1f3eb2aa
+    resource: repo://internal/service/passkey.go
   - id: openwiki-source-da80fdae2220fc6ad9a470b7
     resource: repo://internal/upload/svg.go
   - id: openwiki-source-012f2c78e3b1446dfc35803f
     resource: repo://Makefile
   - id: openwiki-source-1ffe96277832af9ddb17aa8f
     resource: repo://winres/winres.json
-generated: { by: "zcode", at: "2026-11-11T16:33:08.526Z" }
+generated: { by: "zcode", at: "2026-11-13T18:41:36.261Z" }
+verified:
+  - by: openwiki/0.7.2
+    at: 2026-11-13T18:41:36.261Z
 ---
 
 # 部署与运行时
@@ -47,7 +55,7 @@ Makefile 提供标准目标：
 | `make diag` | 认证排障（只读）：`go run ./cmd/diag $(ARGS)`，如 `make diag ARGS="-user=<邮箱或ObjectID> -days=7"` 或 `make diag ARGS="-recent -hours=6"` |
 | `make clean` | 删除二进制 |
 
-`GOOS`/`GOARCH` 通过环境变量传给 `go`，因此 `make release GOOS=linux GOARCH=arm64` 可直接交叉编译，输出名按目标平台决定是否带 `.exe`。`Makefile.win` 为 NMAKE 镜像这些目标（含 `release`、`seed` 与 `diag`）。模块要求 Go 1.26 与可访问的 MongoDB。
+`GOOS`/`GOARCH` 通过环境变量传给 `go`，因此 `make release GOOS=linux GOARCH=arm64` 可直接交叉编译，输出名按目标平台决定是否带 `.exe`。`Makefile.win` 为 NMAKE 镜像这些目标（含 `release`、`seed` 与 `diag`）。模块要求 Go 1.26 与可访问的 MongoDB。另有第四个入口 `cmd/useradmin`（无 make 目标）：`go run ./cmd/useradmin <命令>`，见下文「useradmin 维护 CLI」。
 
 Windows 可执行文件内嵌应用图标与版本元数据：`FDT-Icon.ico` 经 go-winres 由 `winres/winres.json` 编译为 `cmd/server/rsrc_windows_{amd64,386,arm64}.syso`，任意 Windows 目标的 `go build` 自动链接（非 Windows 目标按文件名后缀忽略）。资源含 RT_GROUP_ICON（应用图标）与 RT_VERSION（双语产品名"兽剧通后端服务"/英文、AGPL-3.0 版权、仓库地址；版本号 0.0.0.0 占位）。更换图标后重跑 `go run github.com/tc-hib/go-winres@latest make --in winres/winres.json --out cmd/server/rsrc --arch amd64,386,arm64`。
 
@@ -64,7 +72,7 @@ Windows 可执行文件内嵌应用图标与版本元数据：`FDT-Icon.ico` 经
 `cmd/server/main.go` 按顺序执行：
 
 1. 解析 `--config` 与 `--listen`。
-2. `config.Load`——缺少或过短的 `JWT_SECRET`、过短的 `ENCRYPTION_KEY`，或缺少 `MONGO_URI`，以状态码 1 退出；弱密钥与占位 CORS 源只打印 `[SECURITY WARN]`；随后打印 IP 地域解析开关状态（误开时打 `[SECURITY WARN]` 提示数据出境）。
+2. `config.Load`——缺少或过短的 `JWT_SECRET`、过短的 `ENCRYPTION_KEY`，或缺少 `MONGO_URI`，以状态码 1 退出；弱密钥与占位 CORS 源只打印 `[SECURITY WARN]`；随后打印 IP 地域解析开关状态（开启时按首选数据源打 `[SECURITY WARN]`：aliyun 提示会把客户端 IP 发送至该 API，czdb 提示查询走本地库；首选为 aliyun 且未配 AppCode 时追加不可用告警；关闭时提示记「未知」）。
 3. `repository.Connect`，15 秒上下文——连接或 ping 失败即退出。
 4. 构造 `Repos` 与 JWT 签名器。
 5. 运行 `migrate.Run` 与 `indexes.Ensure`（60 秒上下文）；失败只打印 `[WARN]` 并继续启动。
@@ -128,7 +136,7 @@ Windows 可执行文件内嵌应用图标与版本元数据：`FDT-Icon.ico` 经
 
 ## ini 模板
 
-`deploy/furry-drama-be-neo.ini` 记录了每个段与面向生产的默认值。使用前：
+`deploy/furry-drama-be-neo.ini` 记录了每个段与面向生产的默认值，共八段：`server`（含代理标头四键注释块）、`database`、`jwt`、`email`、`vapid`、`webauthn`（Passkey：`rp_id`/`rp_name`/`origins`，留空自动推导）、`oauth`（QQ 预留）与 `security`（登录锁定、用户名策略三键、`ip_region_enabled = false` 及 ADR-018 双数据源键：`ip_region_provider`/`ip_region_appcode`/`ip_region_czdb_path_v4`/`ip_region_czdb_path_v6`/`ip_region_czdb_key`）。使用前：
 
 1. 复制到 OS 默认路径，或让 `--config` 指向它；
 2. 把 `[jwt].secret` 设为至少 32 个随机字符；
@@ -136,8 +144,9 @@ Windows 可执行文件内嵌应用图标与版本元数据：`FDT-Icon.ico` 经
 4. 把 `uploads_dir` 设为持久可写路径；
 5. 如需邮件，配置 `[email]`；
 6. 把 `allow_origins` 设为真实前端源；按反代拓扑核对 `[server]` 代理标头四键（`trust_proxy_headers`、`proxy_ip_headers`、`trusted_proxies`、`proxy_trusted_platform`，ESA → 本机反代拓扑建议 `trusted_proxies = 127.0.0.1, ::1`）；
-7. 保持 `[security].ip_region_enabled = false`（数据出境合规，ADR-017）；
-8. 可选地显式设置 `encryption_key` 与 `altcha_hmac_key`。
+7. 保持 `[security].ip_region_enabled = false`（数据出境合规，ADR-017/ADR-018）；开启才需配置 provider 与对应数据源凭据；
+8. Passkey 默认从 `frontend_url`/`site_url` 推导 RP；站点走裸域名下子域部署时按需显式设置 `[webauthn].rp_id`；
+9. 可选地显式设置 `encryption_key` 与 `altcha_hmac_key`。
 
 该文件包含密钥，建议 `chmod 600`。
 
@@ -145,11 +154,30 @@ Windows 可执行文件内嵌应用图标与版本元数据：`FDT-Icon.ico` 经
 
 `deploy/run.sh` 是无 systemd 主机上的最小备选。尽管注释提到 nohup，它当前在前台 `exec` 二进制，并期望外部守护进程将其转入后台。二进制缺失时快速失败，使用 `CONFIG` 与可选的 listen 参数。
 
+## useradmin 维护 CLI
+
+`cmd/useradmin` 是与 API 并行的带外用户维护通道（"救砖"用），配置与 server 相同（`MONGO_URI`/`JWT_SECRET` 来自 env/`.env`/ini）。典型场景：管理员丢失 2FA 设备被锁在强制设置流程外（`clear-2fa`）、重置密码邮件链路故障（`reset-password`）、密码连错触发锁定（`unlock`）、恢复/移交管理员权限（`set-role`）。
+
+| 命令 | 动作 |
+|---|---|
+| `list [关键字]` / `show <uid\|accountId\|email\|_id>` | 查询用户（show 支持 UID 数字锚） |
+| `set-role <id> <role>` | 改角色 |
+| `reset-password <id> [--generate\|--stdin]` | 重置密码 |
+| `clear-2fa <id>` | 清除 2FA 并吊销全部会话（账号重新进入强制设置流程） |
+| `unlock <id>` | 清除锁定计数 |
+| `rename <id> <newName> [--force]` | 改用户名；`--force` 越过黑名单与冷却（不能越过占用检查），旧名照常写入保留期 |
+| `set-email <id> <email> [--verify]` | 改邮箱，`--verify` 直接标记已验证 |
+| `verify-email <id>` | 标记邮箱已验证 |
+| `revoke-sessions <id>` | 吊销全部会话 |
+
+破坏性操作需交互确认，`--yes` 跳过（脚本/CI 用）。`FindByUID` 按 UID 数字锚查找是为该 CLI 新增的 repository 方法。与后台 API 的分工：管理员/超管的 2FA 不能经 API 自行关闭，只能用这里的 `clear-2fa` 恢复。
+
 ## 多实例影响
 
 在负载均衡后运行多个实例会改变行为，因为多个存储是进程本地的：
 
-- 验证码与设备登录码；
+- 验证码（注册/登录验证码与 2FA 邮件 OTP 两个独立 store）；
+- Passkey/WebAuthn 仪式会话（5 分钟 TTL 的进程内 ceremonyStore）；
 - 限流计数；
 - SSE 连接上限与驱逐；
 - 剧集缓存；

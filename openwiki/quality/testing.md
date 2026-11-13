@@ -3,9 +3,6 @@ type: quality
 title: 测试策略
 description: Go 单元与集成测试套件、MongoDB 依赖、两种应用夹具模式、带 CSRF 与 cookie 的 HTTP 辅助工具、认证排障链路的新覆盖，以及仍存在的缺口。
 tags: [testing, go-test, integration, mongodb, regression]
-verified:
-  - by: openwiki/0.7.2
-    at: 2026-11-11T16:33:08.526Z
 sources:
   - id: openwiki-source-193053215eb2d471ac4f675e
     resource: repo://docs/contributing.md
@@ -13,24 +10,35 @@ sources:
     resource: repo://internal/handler/episodes_test.go
   - id: openwiki-source-e6c7522152e60d391a17f718
     resource: repo://internal/indexes/indexes_test.go
+  - id: openwiki-source-8c6f0713dcc0fe3d8c1f685f
+    resource: repo://internal/ipregion/client_test.go
+  - id: openwiki-source-53c1ec7850e6cfa263e4f451
+    resource: repo://internal/ipregion/local_smoke_test.go
   - id: openwiki-source-c7ecdff94f5112a400a92cb2
     resource: repo://internal/middleware/csrf_test.go
   - id: openwiki-source-a5ee09c1401361b766b6b860
     resource: repo://internal/middleware/middleware_test.go
   - id: openwiki-source-fce8bcc8408620f767d87b7a
     resource: repo://internal/migrate/migrate_test.go
+  - id: openwiki-source-68427c90d83d93d90b330034
+    resource: repo://internal/server/auth_security_regression_test.go
   - id: openwiki-source-a8fb1ba11cf3dbe31498bcae
     resource: repo://internal/server/integration_test.go
+  - id: openwiki-source-8682e2d422d5e5bad0113559
+    resource: repo://internal/server/loginname_passkey_test.go
   - id: openwiki-source-6070436ccd2d188f29f21465
     resource: repo://internal/server/series_test.go
   - id: openwiki-source-012f2c78e3b1446dfc35803f
     resource: repo://Makefile
-generated: { by: "zcode", at: "2026-11-11T16:33:08.526Z" }
+generated: { by: "zcode", at: "2026-11-13T18:41:36.261Z" }
+verified:
+  - by: openwiki/0.7.2
+    at: 2026-11-13T18:41:36.261Z
 ---
 
 # 测试策略
 
-仓库没有专门测试运行器或框架，只使用标准 `go test`。37 个 `_test.go` 文件中共有约 202 个测试函数。大多数行为要么通过小型 Gin 路由的聚焦单元测试验证，要么通过基于真实 MongoDB 装配真实应用的 HTTP 集成测试验证。
+仓库没有专门测试运行器或框架，只使用标准 `go test`。41 个 `_test.go` 文件中共有约 228 个测试函数。大多数行为要么通过小型 Gin 路由的聚焦单元测试验证，要么通过基于真实 MongoDB 装配真实应用的 HTTP 集成测试验证。
 
 ## 前置条件与命令
 
@@ -51,11 +59,11 @@ CI 只构建不测试：`.github/workflows/release.yml` 在每次推送时做 8 
 以下包测试纯逻辑或可注入逻辑，不需要 MongoDB：
 
 - `internal/middleware`：安全头、CORS、请求体解析、CSRF、限流（含代理标头信任策略与受信代理来源用例 `TestRateLimitClientIPHeaders`/`TestRateLimitClientIPTrustedProxies`）、API 统计、超时与日志辅助，使用 `httptest`。
-- `internal/auth`：bcrypt 哈希与比较、字段加密往返与兼容性、TOTP 向量与一次性时间步（`VerifyTOTPStep`）、备份码哈希格式与旧 AES/明文数据就地升级（`backupcode_test.go`）。
-- `internal/code`：验证码 TTL、尝试次数与清理。
+- `internal/auth`：bcrypt 哈希与比较、字段加密往返与兼容性、TOTP 向量与一次性时间步（`VerifyTOTPStep`）、SecretBase32 转换（`totp_test.go`）、备份码哈希格式与旧 AES/明文数据就地升级（`backupcode_test.go`）。
+- `internal/code`：验证码 TTL、尝试次数、清理与 `Mint`/`SetFresh` 防覆盖行为（`code_test.go`）。
 - `internal/cron`：调度对齐辅助函数。
 - `internal/email`：目标限流、未配置 SMTP 行为与注入发送点。
-- `internal/ipregion`：本地 IP 处理与注入 fetch 的缓存行为。
+- `internal/ipregion`：本地 IP 处理与注入 fetch 的缓存行为，ADR-018 新增——aliyun fetch 用 httptest 注入地址覆盖成功/失败/非 200（`TestAliyunFetchSuccess`/`TestAliyunFetchFailures`/`TestAliyunClientWiring`）、czdb 输出格式化两种形态与库路径错误（`TestFormatCzdb`/`TestCzdbClientInvalidPath`）、`WithFallback` 与 `NewConfiguredClient` 装配（`TestWithFallback`/`TestNewConfiguredClientWiring`）；另有环境变量门控的真实数据源冒烟 `local_smoke_test.go`（默认跳过）。
 - `internal/security`：XSS 清洗与密码校验。
 - `internal/ratelimit`：spec 与 IP key 行为。
 - `internal/router`：锁定 `Mount` 只在 `/api` 下注册，`/api/v1` 返回 404 且不带 `Deprecation` 头。
@@ -76,6 +84,13 @@ CI 只构建不测试：`.github/workflows/release.yml` 在每次推送时做 8 
 - 夹具在测试前后删除专用数据库，清空全局剧集缓存，设置临时上传目录，并只安装该领域需要的中间件（recovery、请求体解析、清洗、CSRF）。
 
 `internal/server` 包含端到端测试，用完整生产装配调用 `server.NewApp`，因此真实中间件链与单前缀 `/api` 路由表都会被覆盖。覆盖包括注册/登录/me/refresh、错误密码、2FA 登录、refresh 重用、通知与 SSE、历史与评分、举报/审核/统计、CMS 域、系列、RSS、翻译校验与备份导出/导入。认证排障链路新增的用例：`TestTwoFactorEnableTwiceRejected`（已启用时 enable 返回 400）、TOTP 同一时间步重放被拒、备份码消费后失效、refresh 连续 8 次轮换不触发 429（`RefreshSpec` 独立配额）、`TestSessionRevokeReasonAndEvent`（吊销原因与 session_revoked 事件）、`TestRefreshInvalidEventRecorded`（refresh_invalid 事件）。
+
+用户系统重构与安全加固（快照 3058134 之后）新增两个集成测试文件与一个迁移用例：
+
+- `internal/server/auth_security_regression_test.go`（ADR-019 回归闸门）：`TestDeletionRequestCancelPreservesCredentials`（注销申请/取消后 2FA 凭据与锁定字段不被覆写——定点写回归）、`TestNewDeviceLoginNoGate`（新设备登录不再被设备验证码拦截）、`TestEmailBoundLoginRateLimit`（凭证限流键绑定目标邮箱）、`TestDisable2FAWithoutStoredCredentials`（无凭据恢复通道）、`TestEmailOTPSecondFactor`（邮箱 OTP 第二因素发送与消费）。
+- `internal/server/loginname_passkey_test.go`：`TestUsernameLoginAndUID`（UID 发号与折叠登录）、`TestLoginNameChangeFlow`（改名：密码再认证/冷却/保留期）、`TestForce2FASetupGate`（管理员未开 2FA 的 force2FASetup 门禁）、`TestUsernameCaseInsensitiveLogin`（大小写折叠登录）。
+- `internal/migrate/migrate_test.go` 补充 `TestMigrateLoginNameLowerBackfill`（折叠回填与大小写冲突改名）。
+- 集成夹具 `testServerWithRepos` 现同时返回 `*repository.Repos`（供直接查库断言），并把改名冷却/保留期配置为生产默认值。
 
 ## 夹具模式
 

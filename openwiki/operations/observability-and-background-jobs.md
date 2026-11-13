@@ -3,9 +3,6 @@ type: operations
 title: 可观测性与后台任务
 description: 写入 stdout 的结构化日志、认证诊断事件双出口（stderr + authevents）、请求与慢请求日志、API 调用统计聚合、审计日志来源、启动时接线的清理定时任务，以及迁移与索引的容错执行。
 tags: [operations, logging, metrics, audit, cron, jobs]
-verified:
-  - by: openwiki/0.7.2
-    at: 2026-11-11T16:33:08.526Z
 sources:
   - id: openwiki-source-0f6ed11169bd8e6b34b44280
     resource: repo://cmd/server/main.go
@@ -15,6 +12,8 @@ sources:
     resource: repo://internal/cron/cron.go
   - id: openwiki-source-b10e065a15408ca747b6184f
     resource: repo://internal/email/client.go
+  - id: openwiki-source-44e96c77b4637e4ff46c5518
+    resource: repo://internal/handler/admin.go
   - id: openwiki-source-1649edbcafe0eab861fed46a
     resource: repo://internal/handler/backup.go
   - id: openwiki-source-3a7c36409770ce04e5cdeef4
@@ -25,13 +24,24 @@ sources:
     resource: repo://internal/middleware/apitracker.go
   - id: openwiki-source-ec085cff2976e238109f19cf
     resource: repo://internal/middleware/requestlogger.go
+  - id: openwiki-source-3f2beed769b653e945288445
+    resource: repo://internal/model/authaudit.go
   - id: openwiki-source-8121abc37fb11ac1dc1948a2
     resource: repo://internal/repository/misc_repos.go
   - id: openwiki-source-ebbcecfb3e8c07ba5e940ccd
     resource: repo://internal/server/register_routes.go
+  - id: openwiki-source-77e540df76c24affc46048e3
+    resource: repo://internal/service/loginname.go
+  - id: openwiki-source-540faaa12781d81a1f3eb2aa
+    resource: repo://internal/service/passkey.go
   - id: openwiki-source-ca7fc5574740b07d87bb29b5
     resource: repo://internal/service/password.go
-generated: { by: "zcode", at: "2026-11-11T16:33:08.526Z" }
+  - id: openwiki-source-27784338c57fd749bd43470e
+    resource: repo://internal/service/refresh.go
+generated: { by: "zcode", at: "2026-11-13T18:41:36.261Z" }
+verified:
+  - by: openwiki/0.7.2
+    at: 2026-11-13T18:41:36.261Z
 ---
 
 # 可观测性与后台任务
@@ -45,7 +55,7 @@ generated: { by: "zcode", at: "2026-11-11T16:33:08.526Z" }
 - **结构化日志写 stderr**：`event=session_revoked reason=refresh_reuse ...`，现场可直接 `journalctl -u <unit> | grep 'event='` 过滤；
 - **`authevents` 集合异步落库**（30 天 TTL）：日志轮转/重启后仍可回溯，由 `cmd/diag` 汇总为时间线。
 
-只记录**失败与吊销**类事件（正常登录成功不记，量级很小），覆盖六类：`session_revoked`（带吊销原因）、`refresh_grace`（409 宽限）、`refresh_reuse`（401 吊销全部）、`refresh_invalid`（缺 cookie/过期/非法）、`twofa_replay`（TOTP 同一时间步重放）与 `ratelimited`（429，reason 为限流器名——此前日志里只有一个 429 状态码，无法区分登录、refresh 还是全局限流命中）。
+只记录**失败与吊销**类事件（正常登录成功不记，量级很小），覆盖六类：`session_revoked`（带吊销原因）、`refresh_grace`（409 宽限）、`refresh_reuse`（401 吊销全部；登出携带已消费 refresh 令牌也会触发）、`refresh_invalid`（缺 cookie/过期/非法）、`twofa_replay`（TOTP 同一时间步重放）与 `ratelimited`（429，reason 为限流器名——此前日志里只有一个 429 状态码，无法区分登录、refresh 还是全局限流命中）。`device_code_miss` 是历史事件类型（设备验证码链已随 2026-11 用户系统重构移除，不再产生新事件），仅存在于重构前的历史数据中。
 
 落库是 fire-and-forget：独立 3 秒超时上下文（与请求解耦，响应返回后仍写完），失败只记一行 warn；按 `event + 来源（userId/email/ip）` 30 秒节流，避免被吊销令牌卡住的客户端一次页面刷新就把集合写爆。`Record` 的 nil receiver 安全，log/repo 任一为 nil 时只走另一出口。
 
@@ -89,13 +99,15 @@ Gin 在开发环境使用 debug 模式，生产环境使用 release 模式。因
 
 写入审计条目的路径包括：
 
-- 认证会话签发（`LOGIN`、`LOGIN_2FA` 等）；
+- 认证会话签发（`LOGIN`、`LOGIN_2FA`、`LOGIN_PASSKEY` 等）；
 - 密码修改与密码重置；
-- 2FA 设置、启用与关闭；
+- 2FA 设置、启用与关闭（含无凭据恢复通道的关闭，注明 "no verifiable credential stored"）；
 - 邮箱变更与账号注销申请/取消；
+- 用户名改名（`LOGIN_NAME_CHANGED`）；
+- 角色降级自动关闭 2FA（`ROLE_DOWNGRADE_2FA_OFF`，仅当目标账号开启了 2FA）；
 - 备份导入（`数据恢复`）。
 
-审计写入是尽力而为的，部分路径异步。值得注意的是，日常管理变更——创建或删除账号、角色变更、创作者主页通过、公告、审核决定——目前**不会**写审计条目。因此审计日志是认证与数据导入轨迹，不是完整的管理轨迹。
+审计写入是尽力而为的，部分路径异步。值得注意的是，其余日常管理变更——创建或删除账号、普通角色变更、创作者主页通过、公告、审核决定——仍**不会**写审计条目。因此审计日志是认证与数据导入轨迹，不是完整的管理轨迹。
 
 ## 定时任务
 

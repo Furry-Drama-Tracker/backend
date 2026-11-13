@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "pageVersion": "sha256:8cbcc4dd0644bff0c81ef4abcbb76dc90884fc957239742fc21f3bddce4b32d0",
+  "pageVersion": "sha256:47e07cf0daa005ef21fe9757827f785837a68a5daffc0bdecb3fcdc7905ad940",
   "claims": [
     {
       "id": "claim_83f01cf1f83a4206bbef06f8510e0e9b",
@@ -21,12 +21,16 @@
       "statement": "Protect 仍兼容空 purpose 令牌（视为 access），成功时把用户与原始令牌写入 Gin 上下文并异步更新会话活跃时间；middleware.Auth 新增可选 Rec 字段（authlog.Recorder，nil 时静默）。",
       "evidence": [
         {
-          "resource": "repo://internal/middleware/auth.go#L108-L120",
-          "version": "repo-lines-v1:sha256:d532d973e4621c4a2dd3d2c6caaaec55806ec10116c7ab6cc04d4d02579ed252:eyJzZWxlY3RlZExpbmVDb3VudCI6MTMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImU2ODA2ZjE1NWM1YWMxYWUyNzIyY2EwNmYyYWM5Y2FkY2I4ODFiOTEyM2NiNjI0YTNjMTA0NzViNDQ0OWRjMmUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijg4OTkwYjk3MDgwMWUwM2UzNjJjZjI2OGYxOGZlZDBkZTc0M2Q5YmExOTJkMDA3ZDBmYjIwMWNkMDY0MTQxODAiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImZkMzYxZjU3NzdkN2YxNDM5YjRhMDZiM2E2MDljNzRhYWM2NGIyOGIzZTdjNTc3MGYwZDkwY2NiZTBhOGJjNjciLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImYyOTY0MDc5YzNjNWM4MTUyMGVmMzNhMmI5ZDJlMTVhMWI4NGQ3MjgwZGI4NTkwZGNkNjU3NDdlM2UwMTJhNDAifQ"
+          "resource": "repo://internal/middleware/auth.go#L126-L132",
+          "version": "repo-lines-v1:sha256:b3b201896f8d105c21213be2459a583169eab42ace862969586d744b527dbc90:eyJzZWxlY3RlZExpbmVDb3VudCI6NywiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiODU2NTYzMGNhN2RlYzQ0NDMwNDcwNjIxNjMyNTE5NzUzYmE0NDNiYjhhYTA2Zjc4NjQyNGNiZjc0ZTVjMzkyMyIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiODg5OTBiOTcwODAxZTAzZTM2MmNmMjY4ZjE4ZmVkMGRlNzQzZDliYTE5MmQwMDdkMGZiMjAxY2QwNjQxNDE4MCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZGI4OWViMmNiNWE0NWQ0YTRkZTkyY2Q2NmRmMTIzMzRiZGQxOTljMjkwYTRkOWNmOTIwZjIzMjQ2OTlkNjBiZiIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZjI5NjQwNzljM2M1YzgxNTIwZWYzM2EyYjlkMmUxNWExYjg0ZDcyODBkYjg1OTBkY2Q2NTc0N2UzZTAxMmE0MCJ9"
         },
         {
-          "resource": "repo://internal/middleware/auth.go#L33-L40",
-          "version": "repo-lines-v1:sha256:df631032fbbcf4ae2f70469a79a1cfb5965f5accb50dbaeffe3ceeed51d7bc91:eyJzZWxlY3RlZExpbmVDb3VudCI6OCwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiYjdhYWVhMjYzOGMyZWU3OWQzYjBmNjg4ZDFkMmQyMTUxZDRhNjhmZmY3MmI0YmU3ZjRiMmQyZTBjZDU4YTUzZSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiZWIzNDc3MTdiZmQ4YTExMmQ3YmY4MzZkZTQ3OGEyYTcyZWI4MGFjMjk4MzI5MGI5ZDQ4Yjg3NjE1ZGUwNTQ2YSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiOTBkZGFhZTNiNThjOGY1YjBlNzExZTY1ODA1ZWJiM2I4ZDY1ZTc3NGI1YWM4ZGVkZGUwMGU5Mjk2OGU4YmQzZSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiY2NlOTc5YjRiMTVhNmZmNWQ5NjNhMjhiZWMwZTAyNmQ0NzZjM2M5MjBjNTVjZjU1YzdlNTUwZmMzMWVmZTQ4ZSJ9"
+          "resource": "repo://internal/middleware/auth.go#L41-L49",
+          "version": "repo-lines-v1:sha256:69e7ffe6a7de38e1e8c749e07b55cfdca6ea72cbe00be49d9676efe71d96ccb3:eyJzZWxlY3RlZExpbmVDb3VudCI6OSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiMDlkODdmNDQzNGU3OTEwMWJmOTQ2NDExNTZmN2VlZWQ3YzhjZGQ5MDk5ZTE0YzEyNWQ1OTVmYTM5MGQyNzYzMSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNzA4Y2QzNTFlNzMzYzEzNTVmZGExYmY2MDg5N2NlN2MxM2UwNjM1YTg5NmNmMWY2ZWM1OTFiNjM3MWYxY2VhNyIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiMWIyOGI0NDRkYjRiZWI5MGQxMDlhYzBmMjQ3Mjg5Yjg5ZDQ5OTI0ODI1NmQ3ZDQyMjgyY2U5ZGJmMmRjNDEwZSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiNWM2YzY3NWQwMjRiNTlkZTg4NDNlNThlNzEzMjI0MGQyZGE2NzI1YjRlMzRiZTYwZjMyYzMzMjIyMTQ3ZDQyNSJ9"
+        },
+        {
+          "resource": "repo://internal/middleware/auth.go#L77-L82",
+          "version": "repo-lines-v1:sha256:f5fe12de45514fb40dfd7df38eccc41f50795031f2e68ddd14778faa3a875ed5:eyJzZWxlY3RlZExpbmVDb3VudCI6NiwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiZjBhNGFmMjJmM2E1NWM5YWIwOTAwODA1YTY1MzVkNTYzZDllZDY0ZWQzZTJkYzVlZjRmYWQ4MTMzMTlhY2RiOCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiY2Q2NGZlMDZlNGZmY2FiNGI3ZGRmODRmNGQwODYxZGEyYjAxMzZlZDM0YWRjMjFmYmFiNmFlZTk5MTA1ODM2ZSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZjA4YjRlNDk3MzFjOGJiOTQyODIwMzY5YjQ4NDhmODZkYzEyNDFmMjAyNDRhMDA4Mzg0YWMwODFjMjg3NjZkMyIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiYzYzZGVmYzlmYTU2YTk5ZmFhMTI0MDQwZmQ4ZjJhMmEyMjVlNWE5YTdlNjQ4MGVjNDgwOGIxNzU5ZTY5NjJiMiJ9"
         }
       ]
     },
@@ -35,8 +39,8 @@
       "statement": "RequireEmailChanged blocks non-GET requests from a superadmin whose email is admin@furry09.com, except paths containing change-email, logout, or verify, returning 403 with forceEmailChange.",
       "evidence": [
         {
-          "resource": "repo://internal/middleware/auth.go#L126-L142",
-          "version": "repo-lines-v1:sha256:d27ceeecf54be5c15d802c40ea750ee7d94cdf5269700591565924dac81adeaf:eyJzZWxlY3RlZExpbmVDb3VudCI6MTcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjU5MWFkYjdiZjQ4MTBjNDAxMWUxN2M3YmE2MWYzODU1YzgwZTRlY2RhZmQxODJjYmI3MTJkMjM5Yzc0M2RhZjgiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjI2NmQ5MjRjZThiNTRiZDZiNzViZmM2YjBjMjEyNzg3MjFmMWYxNzAwZjhmYmJkOGM0YWQ5YTUwZjQ2NTMyZDkiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjlhMzJkZDdiNDQ4OWU5MzBhNTVjNmUwNGIyZjBkMzgyMDE2ZDgxMDA3MzU2YmM4OTE0NzY3MDYwMzJlOWMyMGQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjlmMmQ0MzJjN2NlZWNiZWI1OWVjNjhlYzk0NjNmMjIzZDc1NGVmM2VjZDNjMDRjNzNmMDk2NmUyY2EwNjUzZjQifQ"
+          "resource": "repo://internal/middleware/auth.go#L138-L152",
+          "version": "repo-lines-v1:sha256:7b3754f5d858ef35da88943726d1efd9aed55f6cb6de15507f6e4beab6232e5f:eyJzZWxlY3RlZExpbmVDb3VudCI6MTUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjU5MWFkYjdiZjQ4MTBjNDAxMWUxN2M3YmE2MWYzODU1YzgwZTRlY2RhZmQxODJjYmI3MTJkMjM5Yzc0M2RhZjgiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjlhMzJkZDdiNDQ4OWU5MzBhNTVjNmUwNGIyZjBkMzgyMDE2ZDgxMDA3MzU2YmM4OTE0NzY3MDYwMzJlOWMyMGQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjI2MzIxOTg3YmQ3MzU0YmEyZWQyZDkzMjViMDYxOGMxYjQ4MmU2YTI4NzRkM2Q0ZmRjMTA0ZDlkNWZhMDYyZDYifQ"
         }
       ]
     },
@@ -55,7 +59,7 @@
       "statement": "Access tokens are read from the Authorization Bearer header, then the accessToken cookie, then the legacy token cookie, and refresh tokens are read only from the refreshToken cookie.",
       "evidence": [
         {
-          "resource": "repo://internal/auth/cookies.go#L107-L126",
+          "resource": "repo://internal/auth/cookies.go#L113-L132",
           "version": "repo-lines-v1:sha256:01bd354bf0d0fd212556dafd0c26c4440272cee635a0568e1d773689a432366d:eyJzZWxlY3RlZExpbmVDb3VudCI6MjAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImE2NWUxOWMwNmJlMjNkZDliYzNiODE1MzVmMmUzMDdmZmUwM2M0ZTJiYjA0YTI5OTBhOTU1OWY2YWFhMmRiNTQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjVlOTU2YjZmNjhhNzM1MGU2ZTRmYmY0ZjI1MmNlNDg3ODNhMmE5Y2I4NTk2MWFmMTQ0YzQ4ZDlkODYzMTU1OGYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
         }
       ]
@@ -65,7 +69,7 @@
       "statement": "The CSRF cookie is non-HttpOnly, SameSite Strict, path root, and defaults to 24 hours, while non-GET requests require the X-XSRF-TOKEN header to equal the cookie.",
       "evidence": [
         {
-          "resource": "repo://internal/auth/cookies.go#L51-L80",
+          "resource": "repo://internal/auth/cookies.go#L57-L86",
           "version": "repo-lines-v1:sha256:6d3d88014456a043e8f53bdce1543460c2ea024f3e1c38deb2023dfae5d75323:eyJzZWxlY3RlZExpbmVDb3VudCI6MzAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjdmMjA4N2U2YWMwNjY3ZjU4ZTk0MzAyZmU0OGU4NzEzY2QyODg5ZTYzYmVkZTMwODY5OGY5Njc4MTc2NWQ0MTQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ0MGUwZGJjMDVmY2NmMWZjMTc0Yjk0YjEwYzk1ZWFmZWIwZjE4NGY5N2E4MjUwMTA1YTJkNGZiNzk0M2JjNDgiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImNmMzc0Nzg0NjFhYzQxNjQ4MDU2N2I2NGI2ZTIyZThmOGRhM2ZlMjg3NmFiOGE0YmNjYmIwMjk3NWM1MGQ5MTAiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImYwZmE0Y2I5ZjJlNTcxOTg2ZjViNmE0ZTZjMmNlODQ4YzhlMGNkNGJjZTU4Zjg2OGM3MzJkOTEyMzg3MjdlNTUifQ"
         },
         {
@@ -89,7 +93,7 @@
       "statement": "The SSE stream authenticates separately with a 30-second sse-ticket JWT verified by purpose in the notifications handler rather than through Protect.",
       "evidence": [
         {
-          "resource": "repo://internal/handler/auth.go#L271-L287",
+          "resource": "repo://internal/handler/auth.go#L268-L284",
           "version": "repo-lines-v1:sha256:e93237180d3d07fcac360dcff9463a660471150e71482af06e8e993d5f2dbaea:eyJzZWxlY3RlZExpbmVDb3VudCI6MTcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjYyMjc1Zjc4NmNhM2VjZWI3NTQxY2U0MDEwNTEzNDUwYTU4ZmQ4MzdjOWNlMDc0MTUxZDNkNjNmODc5NDMxNDEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjAzYWU0ZTRhZDE2YjQwYjNkOWY3NzRhYTRlZDdkN2IzODdkYmI1NDc2NzlkZDliZWVlZjBiNThiYzY1N2Q4ZjUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
         },
         {
@@ -103,14 +107,46 @@
       "statement": "Auth cookies are HttpOnly, SameSite Lax, secure only in production, with access at path root for 15 minutes and refresh at /api/auth for 7 days.",
       "evidence": [
         {
-          "resource": "repo://internal/auth/cookies.go#L80-L93",
+          "resource": "repo://internal/auth/cookies.go#L86-L99",
           "version": "repo-lines-v1:sha256:b2d6ddf8937263f815c0d68a6a843c6bbebb39ecd7a363b94b7d3cd1a4bbcfbe:eyJzZWxlY3RlZExpbmVDb3VudCI6MTQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ0MGUwZGJjMDVmY2NmMWZjMTc0Yjk0YjEwYzk1ZWFmZWIwZjE4NGY5N2E4MjUwMTA1YTJkNGZiNzk0M2JjNDgiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijk3MWUwZjA4NDY2OTI2MmE5ZDZiZTlhMjNhODU2NDg2ZTA2ZDBmODNlZDNlMmY2NmI2YjVhMDVhNmRhMzdjNmEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjlhNmY1MjExYmE5N2VhNTdhZWJkM2Q5ODJmZGM5YTgzODBiODFjYmZjNDAxNTQyNDNjNGU4NGNmMDJhNWYzOTcifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_887360681d9d486f8057acd52d9d06ce",
+      "statement": "Protect 在角色检查后执行 force2FASetup 策略门禁：admin/superadmin 且未开启 2FA 时，非 GET 写操作被拦截（放行 GET 与含 2fa/logout/verify 的路径），返回 403 与 {\"force2FASetup\": true}，把账号锁定在 2FA 设置流程中——这是服务端对「管理员强制 2FA」的执行点。",
+      "evidence": [
+        {
+          "resource": "repo://internal/middleware/auth.go#L114-L125",
+          "version": "repo-lines-v1:sha256:338a20f787dc31fce8b2b1b2cc1336f07a4a2684a5f3c53ae03ca73c969ec90e:eyJzZWxlY3RlZExpbmVDb3VudCI6MTIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjMwZjhlYTA1NzQyZTVlNzg4MWJkZmYxMjFiMDkzODY2ZmUwODVhYjhiMDEyM2QxM2JlNGE4ZDQzMjc5MjAzNTgiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY0ZWZjNDk0MThkMjZkY2YxMjliMjJhNmFhMjExMDhjZWVjMzc2NzdhMzJkMDhlOWQ1ZmVlMzVkZGE2NmJiOWQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImMxZTc0ZjQyZDlmOGZiMjQ5YjBkZDBhYmZhZjZlMTc2OWEzNjM4NTc4Y2FhNDM1ZTE4NGIyMjNmZDgxYjRkOTMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjMwMWY1OGVlOTc5Njg1Y2NlZWEzN2M2NGY1MTk5NTExZDUyYTY3ZmFjMDUwZDFiMGY1NWEyNjU4YWQ5MWYwMjgifQ"
+        },
+        {
+          "resource": "repo://internal/middleware/auth.go#L154-L168",
+          "version": "repo-lines-v1:sha256:85cf7d9eea5a3c589c9ff37e6cba504afa324d2666f481a82ce17ac343a859a3:eyJzZWxlY3RlZExpbmVDb3VudCI6MTUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImZkZThlNDY0ZGZkMDY5YmY0OWIwMzExZGRiODE1ODI0ODVmMDFiMWQ4YzUwZjQ3NDBkNzljMjhkMTI3YzI4NDMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImYyOTY0MDc5YzNjNWM4MTUyMGVmMzNhMmI5ZDJlMTVhMWI4NGQ3MjgwZGI4NTkwZGNkNjU3NDdlM2UwMTJhNDAiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUxMzM0MDMzYTE5YmY2YWUyYjViM2QxMTliMDAzOWI1ZjkyZDIzOTE4NWU2YTg5ZTA3NzkyMzg5NmVjY2M5MWMifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_2e21dff9573e4d68843a5f931bf45d6a",
+      "statement": "角色化 2FA 策略在鉴权层三点落地：user 角色禁开 2FA（enable/verify-enable 403）、admin/superadmin 强制开启且不可自行关闭（disable 403，解锁走 useradmin CLI clear-2fa）、creator 可选；降级联动在后台 UpdateRole（自动关闭 2FA 并吊销全部会话）。",
+      "evidence": [
+        {
+          "resource": "repo://internal/handler/admin.go#L607-L623",
+          "version": "repo-lines-v1:sha256:def518092ab2167481274fe6e99a07518a09e96094ed0d669c38bd08fc9f16c8:eyJzZWxlY3RlZExpbmVDb3VudCI6MTcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImVkNDAxNWYyZmQ2NGI4ZWI1NDkyYmJlYjIwM2ZiNWFlNjRiYzUxY2VmZTAzYjJiNjAyNTUzZTM3Y2VkMzkwYTMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImZlMjA0ZmM5YzgzMmNmMWQ4YWY4M2I0NDJhZDg1YWE4NWI4NGNiNzEzZjAzZmMzMjE5NmRiYjBjMjFhZjVjMGQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjkxOTg5ZTgzMzE2NWMwZGU0NWI2Y2Q1ZDljNWZkMDI1YjYzNzcwZDJlNGI0Mjc4MTI4YzU2Mzc3NTM0ZmM1MDciLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImI0MmM1ZmQwN2EwZDgyYTA0ZWRkNjE0MzAwYzZmYjg0Y2U0MDhkM2RlZWM3OTUxNjhiYzBhZWI4ZjhiMDg1ZGEifQ"
+        },
+        {
+          "resource": "repo://internal/handler/twofactor.go#L116-L128",
+          "version": "repo-lines-v1:sha256:133f2858cf6a44675fa2a85fffb604cca0d50c128415a110fac649cc2f4af7bf:eyJzZWxlY3RlZExpbmVDb3VudCI6MTMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY3Y2RhODJkYTYwNjIzOGUwNWU2MjM5OTU2OWM1ZWUwMzk5MzQxOTY0OGFlNWQ0M2EyYmY4Y2Q2MzQ3ZjgyNjMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImM2NmEzNDI0MWRmZDdkZTIyMzg2NTY3ZDE1ZWUxN2RlZWIyZmY5NGY0YjExMzQwMWVhNzY1MzJkMmEwZDk1N2QiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImE5OGZkZTIwMmQ2ZTg1MjZlNWQyNzdkOTdlYTFjMmFlYzQxZTA3ZjMxZGMyYzNlZWIzNjdmZTkwYjI3MWRmMWIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjhlOTEyNTQ0NTAxMmJlMjZmNzExZWQ1NzJkMWY4MDFkZjAzZGVjZGNmOTFlODRkNDdkMGViMGRiNjY2MTJiZTkifQ"
+        },
+        {
+          "resource": "repo://internal/handler/twofactor.go#L26-L45",
+          "version": "repo-lines-v1:sha256:5afb16268e5bfd8345fadc439b3b52278eb4b91ffe0069880334acfbc9b7d942:eyJzZWxlY3RlZExpbmVDb3VudCI6MjAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjMyZDJkYzFiNDUxMjdmNjhmMTRkODM1NDRkMzYzMWU1ZjYxMjczZjk4M2YwOTBmYjdjN2I4ZGZmNjY5MzJkM2YiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjM1MjNiNmUzZjk5MDIyZGVhOGM2NzJkMDJiOTI4Y2M3MGNlYmFjNmNjYmVjNDY4YmU1ZGZlYzM3ZTdjYmMwMjIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijc5M2M5YzQxMDM1NjRhYWE1OWFjZTliNGRkMDE4ZTcxMTExZDI1NDNkYmRiNTQ2NTZmYmJkYWJmZTYzZjNmYmYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUwMzg1OWU1YTMyYWZkZTdiODAzOTcyMDJkNmNhNGE4N2ViZTA1ZTYxYWU4MTdmODUxNWU3ZGU1NDE4MjMwZmYifQ"
         }
       ]
     }
   ],
   "verification": {
     "by": "openwiki/0.7.2",
-    "at": "2026-11-11T16:33:08.526Z"
+    "at": "2026-11-13T18:41:36.261Z"
   }
 }

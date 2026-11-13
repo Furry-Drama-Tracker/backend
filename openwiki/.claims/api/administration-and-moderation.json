@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "pageVersion": "sha256:b95452680450306416036bb3f95c830f2538bbb992bafa036593f4f3e72d6d62",
+  "pageVersion": "sha256:ae0368689e52c45753aed70ebb06400ee6a4ccadd73702118822160dfa33a795",
   "claims": [
     {
       "id": "claim_ecba2947abd34fa08ccd26f57887e786",
@@ -17,7 +17,7 @@
       "statement": "Deleting a user from the admin console cascades across follows, histories, notifications, favorites, folders, feedbacks, sessions, push subscriptions, legacy and modern report fields, and ratings, then rebuilds rating aggregates for affected episodes and additionally clears saved folders, themes, and creator profiles.",
       "evidence": [
         {
-          "resource": "repo://internal/handler/admin.go#L430-L547",
+          "resource": "repo://internal/handler/admin.go#L435-L552",
           "version": "repo-lines-v1:sha256:ccf7ae20885b0f15b5345291585d7f9d705ee880386972500fe75e7ca9e7bee8:eyJzZWxlY3RlZExpbmVDb3VudCI6MTE4LCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiJjMDU0NDA1YjBjYjBmZmY5YjJlMmEwOTJhOWFhNzFmN2VhMDUyMmUwOTRjYmU2Mjc2MDVmMGFhNzNmMWY0NjA5IiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiIwYWNjNDY1YjUwNzliMDhlZDAxMzczMTU5MWJjNzU4NzBhNzk4YWEzMDkyYjE4ZjlhZWVhY2VkYjE1NThmNzhiIiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiIwMjhmMzc1NDg4MGM1YjliZDg0NDE3NmZhMTI1ODY4YjY1OGU0MDZkZGIxNjEwZGE0MzVhNmU5M2YyMTlkZjQ1IiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MywiZm9sbG93aW5nQ29udGV4dEhhc2giOiI5ZjJiMzliNWE4ZTYyN2Q4NWYzNzY4OWYxYjhiYjVlMjAzZjM5N2QyMmU3NWEyYmYwZTJkZjcxZDQxMWRkODFhIn0"
         }
       ]
@@ -137,7 +137,7 @@
       "statement": "更新日历（Stats.Calendar）三个分支的响应在 episodeNumber 之外都带 episodeLabel 字段，取值为 episodeRefText(episodeNumber, episodeLabel)——单集自定义显示序号非空时用它，否则回退为「第N集」。",
       "evidence": [
         {
-          "resource": "repo://internal/handler/episodes.go#L1886-L1893",
+          "resource": "repo://internal/handler/episodes.go#L1866-L1873",
           "version": "repo-lines-v1:sha256:ae3e940214500a4760f082232d38ae176d2a8d56d008bf342766aa873df0da0b:eyJzZWxlY3RlZExpbmVDb3VudCI6OCwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiYjU5N2Q5Yjc3MmMxNDgyMTI5ZTYxYjRkYmYzM2FkNDhiNzkxYjY3MDNjYWJmNjJlMDI1ODJhMDM3MGJlNGQ3NyIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNDEyY2EzNDVjY2Y3NWJmOWMwODA2YmNlNjk1YmU4ZGU4MDhiNzk5ODQyNTFhN2E1NGQyMDJjZjYxMDFkZDQ1MSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNDQ1NjU1ODJiZmU4YzEzOTczNThjODg5OTkyN2M3NmJlNzkyYTBjODNkN2MwNDI4ZWJmOWQyZjY3YWUzZmVkZiIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiOGE5ZDc1NWEyYWMzODkxNjAwMGYyOGI2YWFiZTU3NTA0OGEyYzEzYWQ2MDBhZjkzNWE5ODM1NjQ3Y2FmZGRmZCJ9"
         },
         {
@@ -145,10 +145,34 @@
           "version": "repo-lines-v1:sha256:8219ee8831624bb72593dbc2daaa25b446e1f35d97aab077e645917e4b9a73b9:eyJzZWxlY3RlZExpbmVDb3VudCI6NjYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImI5NWNlMTY0NTdkNDc1ZDdjY2M2YWQ1MWQyZmFlN2MxNDE1NzY1YjMwM2I0OGYxYzcxZGM3NWFkMzBjOTg1NTYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImU3ZTFjN2VhM2M3MDYyNDk5ZTcyMzQ1N2UzZTA2MzAyMmEzM2MwOWEwMDhlZGU3OGRhMmU4NTBhMGIwOWRjMjciLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijg4ZTJhNjA5NTgyZmFjYmU5ZTlkMTU5OGRmZTVjNjViOTEwNGQ1NzI5NzUxYjRlYzRjNzkzOThjNGI2MzI2ZDUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjY2NTY3Njk1MWE1ZTU0ZDc5NTg5MjdkODAwODlhODNkMGI1Mzg0MGEyZGNjZjhkYjRkYWI4YTE2ZjgzNWVjZDIifQ"
         }
       ]
+    },
+    {
+      "id": "claim_d9f187f7d93d4eca8384ce37a879d447",
+      "statement": "UpdateRole 把开启 2FA 的账号降级为 user 时，会自动关闭其 2FA（DisableTwoFactor 清除旧凭据）、以 RevokeAdmin 原因吊销该用户全部会话，并写入 ROLE_DOWNGRADE_2FA_OFF 审计记录——普通用户不允许持有 2FA，降级时强制保持策略一致。",
+      "evidence": [
+        {
+          "resource": "repo://internal/handler/admin.go#L607-L623",
+          "version": "repo-lines-v1:sha256:def518092ab2167481274fe6e99a07518a09e96094ed0d669c38bd08fc9f16c8:eyJzZWxlY3RlZExpbmVDb3VudCI6MTcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImVkNDAxNWYyZmQ2NGI4ZWI1NDkyYmJlYjIwM2ZiNWFlNjRiYzUxY2VmZTAzYjJiNjAyNTUzZTM3Y2VkMzkwYTMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImZlMjA0ZmM5YzgzMmNmMWQ4YWY4M2I0NDJhZDg1YWE4NWI4NGNiNzEzZjAzZmMzMjE5NmRiYjBjMjFhZjVjMGQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjkxOTg5ZTgzMzE2NWMwZGU0NWI2Y2Q1ZDljNWZkMDI1YjYzNzcwZDJlNGI0Mjc4MTI4YzU2Mzc3NTM0ZmM1MDciLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImI0MmM1ZmQwN2EwZDgyYTA0ZWRkNjE0MzAwYzZmYjg0Y2U0MDhkM2RlZWM3OTUxNjhiYzBhZWI4ZjhiMDg1ZGEifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_9cc92d93bcf744169b2498855ac9808a",
+      "statement": "cmd/useradmin 是与 API 并行的带外维护 CLI（配置与 server 相同），提供 list/show/set-role/reset-password/clear-2fa/unlock/rename/set-email/verify-email/revoke-sessions 十个命令，破坏性命令需 --yes 确认；管理员/超管的 2FA 不能经 API 自行关闭，丢失验证器时只能用 clear-2fa 恢复——CLI 清除 2FA 并吊销全部会话，账号重新进入强制设置流程。",
+      "evidence": [
+        {
+          "resource": "repo://cmd/useradmin/main.go#L1-L33",
+          "version": "repo-lines-v1:sha256:9b67653e6a1c9ed71a22057de4e025862fb6a9a4ccad6d3ce0a7d5786c924b85:eyJzZWxlY3RlZExpbmVDb3VudCI6MzMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY2YzUxNDliOWUwNTU5N2EwYjFkYTZiOTUxMjBmNzI4NzljYTE2MzU5ZjUxNmEyYWMxOTY0OGI2NmY0ZWQ1ZWEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImVmM2Q0YjdhYjBlMWFlMzc1MjFkYmNiYzBlOGM2ZGFiYzhhMGIwZGM1NzcyOTZkNzg3ZDgwODI0MDAwZTQ4MjMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImYzZWZiOGRmZjA5ZDBlZGRiZDAxNzNiNWFiMjk1MTQwOTRhMTAxYjMyMTE1ZmFjMDZmOTRmYTM4YzQ4OTE5NzIifQ"
+        },
+        {
+          "resource": "repo://cmd/useradmin/main.go#L74-L111",
+          "version": "repo-lines-v1:sha256:e2dabaeaa2810538651a99a7db244a12ad23d56bcb53f2d35af443d44cf696fb:eyJzZWxlY3RlZExpbmVDb3VudCI6MzgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImNiNGM3MjEyMzllMmY2MWQ0Mjc0ZTNhNDU4YjEyY2EyOGE1ZGI3ZmVlMGNhMWQ2ZmYyNDJhMWIzMzM0M2M0ZGMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY3Y2RhODJkYTYwNjIzOGUwNWU2MjM5OTU2OWM1ZWUwMzk5MzQxOTY0OGFlNWQ0M2EyYmY4Y2Q2MzQ3ZjgyNjMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjZjOGQ1YmViZThhMDdlNDkwZThhOGU3ODA2MDY0YmMwM2M1MzViM2NjZWQ4MjNiYzdmNTNmNzZjYTllYWU2OTIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImZmMDAxNzY1ODI5MTVlZTdlMTY2NTRmN2IxZTQ0MzkwMGVlMGRmMjFhOWE3ZGQxMWEyYjU2ZGM5YzRlMWI1MDQifQ"
+        }
+      ]
     }
   ],
   "verification": {
     "by": "openwiki/0.7.2",
-    "at": "2026-11-04T15:34:40.691Z"
+    "at": "2026-11-13T18:41:36.261Z"
   }
 }

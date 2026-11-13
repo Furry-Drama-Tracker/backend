@@ -3,16 +3,17 @@ type: security
 title: 鉴权中间件与角色
 description: Protect 中间件的准确失败结果与会话吊销诊断事件、角色常量与角色路由、默认超管邮箱的 RequireEmailChanged、可选鉴权、CSRF 双提交 cookie，以及 SSE 票据校验。
 tags: [auth, authorization, roles, middleware, csrf, cookies]
-verified:
-  - by: openwiki/0.7.2
-    at: 2026-11-11T16:33:08.526Z
 sources:
   - id: openwiki-source-d30e65659972429c2c50cf5a
     resource: repo://internal/auth/cookies.go
+  - id: openwiki-source-44e96c77b4637e4ff46c5518
+    resource: repo://internal/handler/admin.go
   - id: openwiki-source-314bd77139a7d3c62ed804bf
     resource: repo://internal/handler/auth.go
   - id: openwiki-source-7e5389f01ee56b40448faee1
     resource: repo://internal/handler/notifications.go
+  - id: openwiki-source-dd013bc1bb1449fcd2111f58
+    resource: repo://internal/handler/twofactor.go
   - id: openwiki-source-a759557a449edc99daccb392
     resource: repo://internal/middleware/auth.go
   - id: openwiki-source-a847b7dda9c7ea38cfd0250b
@@ -21,7 +22,10 @@ sources:
     resource: repo://internal/middleware/optional_auth.go
   - id: openwiki-source-7106c8455bb73d12832c8523
     resource: repo://internal/server/app.go
-generated: { by: "zcode", at: "2026-11-11T16:33:08.526Z" }
+generated: { by: "zcode", at: "2026-11-13T18:41:36.261Z" }
+verified:
+  - by: openwiki/0.7.2
+    at: 2026-11-13T18:41:36.261Z
 ---
 
 # 鉴权中间件与角色
@@ -59,6 +63,8 @@ generated: { by: "zcode", at: "2026-11-11T16:33:08.526Z" }
 
 会话检查失败时，`Protect` 还会通过 `Rec` 记录一条 `session_revoked` 认证诊断事件：`reason` 取会话文档的 `revokeReason`（记录它为何被吊销），`detail` 区分"session lookup failed"（查询失败）与"session user mismatch"（会话不属于该用户），并带 IP、UA 与路径——这是"用户莫名掉登录"排障的核心证据。响应本身不变，仍是 401 `auth.invalidToken`。
 
+角色检查之后还有一道 **force2FASetup 策略门禁**：admin/superadmin 角色且未开启 2FA 时，非 GET 写操作被拦截（放行 GET、含 `2fa`/`logout`/`verify` 的路径），返回 403 与 `{"force2FASetup": true}`，把账号锁定在 2FA 设置流程中。这是服务端对「管理员强制 2FA」的执行点（前端仅呈现阻断页），白名单模式与 `RequireEmailChanged` 一致。
+
 419 不是标准 HTTP 状态，但它是前端调用 `/api/auth/refresh` 的信号。
 
 ## 角色
@@ -71,6 +77,8 @@ generated: { by: "zcode", at: "2026-11-11T16:33:08.526Z" }
 - 仅 superadmin：`Protect("superadmin")`（后台管理、审计日志、备份、系统壁纸、自动任务、站点内容）。
 
 部分领域在创作者可进入的守卫之上再叠加内联校验。审核与剧集回收站路由使用 `Protect(creator, admin, superadmin)` 加 `adminOnlyReview`，后者在角色不是 admin 或 superadmin 时返回 403。即使中间件列表看起来更宽，实际访问仍是仅管理员。
+
+角色化 2FA 策略在鉴权层体现为三点（开/关的入口门控在 `/api/2fa` handler）：`user` 角色禁开 2FA（enable/verify-enable 返回 403）；admin/superadmin 强制开启且不可自行关闭（disable 返回 403，解锁走 `cmd/useradmin clear-2fa`）；`creator` 可选。降级联动在后台 `UpdateRole`：把开启 2FA 的账号降级为 `user` 时自动关闭 2FA 并吊销全部会话。
 
 ## RequireEmailChanged
 
@@ -119,7 +127,7 @@ SSE 通知流不使用 `Protect`，因为 EventSource 不能设置 `Authorizatio
 
 ## 排障语境
 
-- 419（access 过期）触发前端调用 `/api/auth/refresh`；refresh 独立使用 `RefreshSpec`（60/15min），不再与 2FA 桶（5/15min，挂六处路由）共享配额。
+- 419（access 过期）触发前端调用 `/api/auth/refresh`；refresh 独立使用 `RefreshSpec`（60/15min），不再与 2FA 桶（5/15min，Mounts 五条路由）共享配额。
 - 429（限流命中）时中间件输出 `event=ratelimited` 诊断日志，带限流器名（spec 名）、路径、IP 与 Retry-After——排障时可直接在 journalctl 中按 `event=ratelimited reason=<spec>` 过滤，不再只有一个 429 状态码。
 
 ## 相关阅读

@@ -1,17 +1,17 @@
 {
   "schemaVersion": 1,
-  "pageVersion": "sha256:2d3fbb5d0b5acd166601a9f93984f7f5524c7c6ed7e32c24f8da477327184ccb",
+  "pageVersion": "sha256:5a07284d201ebc84ec53f93c40b4a156f941431e60bcfc655b042840f878721d",
   "claims": [
     {
       "id": "claim_9d5c0f9d432440f1b13cc0b99d629064",
       "statement": "Altcha challenges use SHA-256 with cost 10000, key length 32, prefix 00, and a five-minute expiry, and verification accepts a matching x-dev-token as a bypass before decoding the payload.",
       "evidence": [
         {
-          "resource": "repo://internal/service/auth_service.go#L77-L100",
+          "resource": "repo://internal/service/auth_service.go#L106-L129",
           "version": "repo-lines-v1:sha256:b7e60d1b56198b5e272a2a788c3274c60dae3d86774219dad8b5bbb7575a2407:eyJzZWxlY3RlZExpbmVDb3VudCI6MjQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjZhMGVhM2MwNDIwYmExOGVkNTUwNmQzY2U2YTZkMmYyYzA3NDY5OGU5ZTIxYTQ1ZTNmYmE2OTk2NDFjOGQ3YTYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjAxZjZjNTFjOWNiY2VkMGYwMzY0MWI1ZjkyYjcxMWIzM2YyZTFmZTg3YWQ0Y2I5MmU2OWFmMzgxMmM1NTRlZTkiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImU4ZDQ4ZTNmNGJiOWQwZDU0MGU5YWZkNDRiNjIxMzQ5OWI4N2VkNzVjMTVmZjA3OTg2ZDNkZTI1NmU5NWQwZDgifQ"
         },
         {
-          "resource": "repo://internal/service/auth_service.go#L101-L116",
+          "resource": "repo://internal/service/auth_service.go#L130-L145",
           "version": "repo-lines-v1:sha256:9960c9877508b8b74257bb36bc17f8f3e469b930c616455f248f8698ef8e7b15:eyJzZWxlY3RlZExpbmVDb3VudCI6MTYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY3NThjMGRmZmM2ODJlYjFlZmI3MTExMzBlMWY0MjFjZGY1YTkxNGVlOGIzYzc5NjZiNmI2NWU1NGNhYjRiYjgiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijk4YWJmMTY1NzBkM2JlZjE4NzhkNzAwMWZhZWUxOWFjYzM4MmUwYTUyOGVjYmQ3ZDQ5Y2YwZTkyYjAzMmNmYTgiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjlmYjlmMjA4OGJlYmJkZDQyOTFmMjE4NzFkMzI2NjY2OGU4ODhhYjQxM2RjOWVlZjkzNmM4NzMxY2EwZmQ3MDMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjFlNTk2MmRhY2RkM2U0ODUxMDkzYmUyZjA0Yjg5NGYxZDQ4MTMxMDdkY2M0MGZjNWYwYjE1YmQ0ZjRhOWVhMWYifQ"
         }
       ]
@@ -21,22 +21,22 @@
       "statement": "The Altcha HMAC secret is ALTCHA_HMAC_KEY when set, otherwise the hex SHA-256 of altcha- concatenated with JWT_SECRET.",
       "evidence": [
         {
-          "resource": "repo://internal/service/auth_service.go#L66-L73",
+          "resource": "repo://internal/service/auth_service.go#L95-L102",
           "version": "repo-lines-v1:sha256:f5844a082f2d6671489d97d39fc42b2b20aa5b27c4798580c7848ba4da0121f5:eyJzZWxlY3RlZExpbmVDb3VudCI6OCwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiNTRkZjg5OWNlNGM0NzM2NmQ5YjlmNzAzZmQyMjhjNmVmODZkZGIyNDRmMDQzMzEzMmU3N2NjY2IxOGIxZjkwZCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNDEyY2EzNDVjY2Y3NWJmOWMwODA2YmNlNjk1YmU4ZGU4MDhiNzk5ODQyNTFhN2E1NGQyMDJjZjYxMDFkZDQ1MSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNzY0Y2ViNzE5MmEyZGM2MjY5MGYwYTM4N2FhMDEyOTlmZmJiY2NkMGU4OGU0ZDIzMmRhOTQwNDBlY2FiYzgxMSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiMDFmNmM1MWM5Y2JjZWQwZjAzNjQxYjVmOTJiNzExYjMzZjJlMWZlODdhZDRjYjkyZTY5YWYzODEyYzU1NGVlOSJ9"
         }
       ]
     },
     {
       "id": "claim_e1504456983643de8d1b623087ed37fa",
-      "statement": "IP region lookup returns a local marker for loopback addresses and otherwise calls ipapi.co for country, region, and city with a five-second timeout, joining non-empty parts with a separator.",
+      "statement": "IP region lookup returns a local marker for loopback addresses and otherwise queries the configured data source with a five-second timeout: the aliyun cloud-market CZ88 API (Authorization: APPCODE) returns country/province/city/districts joined with a separator, and the czdb offline library queries locally with no outbound calls.",
       "evidence": [
         {
-          "resource": "repo://internal/ipregion/client.go#L69-L86",
-          "version": "repo-lines-v1:sha256:5fe8bb7a328a877aa722682bd5030a80b15f225a96c2f5a90d07d9d10db97147:eyJzZWxlY3RlZExpbmVDb3VudCI6MTgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjBhZGI5MWMxYzE3Zjc4ZmEwMTg0Y2NjOTE2MDJkMmYxZGExODE1ZWU2ZmMyZWMzN2I1ZjU5MzYyOWVkMGU4ODQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjAzZGQ3MmIxYjQwZWI2ZWVkZThkNDQ0NjNkYWI2ZGRlYzRjZDA5OTFkMDZhNTAxNzA0NDNhZjZkYzg0YjAyMzUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImE5YTY0ZGVjNGE0ODc2MjFlYTMxMGI4ZWNkMjI4N2IzOGQ4YjNmMTQyYzU1ZmQ1NDU3NzY4Y2QzZTljM2RlODYifQ"
+          "resource": "repo://internal/ipregion/client.go#L254-L268",
+          "version": "repo-lines-v1:sha256:031f6a93e5c3d18fb9fd4b577afca9a58d4394892f1e179f1389277654cd7ba6:eyJzZWxlY3RlZExpbmVDb3VudCI6MTUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImQ5MjY2MzYxNTVkMmMzM2VhZTQ5ZDYyYTU4NTdjMDljZjhiZDExZGRkMGEyNmNkY2JjOTNlNWY2ODk2MjVmYjkiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImZhMjZhN2RiZGJhYjYwMjE3OTJkNWQ3MmNmMTE5Y2UwOGJhMjNkYzYyZjJkYWExZWEyMzM2YWQwYmM1ZTRlODgiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjdmODY1ZGM0MmI3MTFhZWVjNzc0NzkzN2EyZDA0ZDQ0MzQyMjgxMjBhYjQ5Yzk4M2RlZmZmMTZkMTM3ZjA1OTYifQ"
         },
         {
-          "resource": "repo://internal/ipregion/client.go#L87-L119",
-          "version": "repo-lines-v1:sha256:a9ba651b07eaf91267ab071cc1584f7b6246a61d975170b463c15765624e933f:eyJzZWxlY3RlZExpbmVDb3VudCI6MzMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ2OTJmNDc3MDNkMWUxYTk4MTVjYzE1M2U0NGZlMjQ0NGQwZjg0NzY5NDRiNGQ2YjZmNDYwMWEwYzE2NTdjMDAiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjBkZTdlYmNlZWNmYTRkZDY3NGNiNDRhMTM1NzJhMDY4ODY3YjFhZjVhNzc4YTJlMWI0MzIzZDhiNDRlY2Y2Y2YiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+          "resource": "repo://internal/ipregion/client.go#L273-L321",
+          "version": "repo-lines-v1:sha256:0367f8b1b7596c9600ea1e3cf5b53e9a0b30db45d9f818dfb83115941b5c0852:eyJzZWxlY3RlZExpbmVDb3VudCI6NDksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImQzNzE1MTlkZDcwYzMyZmExN2FiZDAzZjRlZjgwOWNkODg0ZGQ0MmUzNzdiMTUzNGNjNWRjMDdiNzQ2N2M2NjMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjhiMmU2ZWIwYmZkNTI2MzVhM2E0MDE4ZjQ4OGI3ZDRjNzVhN2RhOGE3M2M2ZmRkNDM1MmJlZDc1MzliOTZhOTIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
         }
       ]
     },
@@ -45,26 +45,38 @@
       "statement": "IP 地域结果仍以 hashicorp/golang-lru 缓存（上限 1000 条、TTL 24 小时，过期条目在读取时移除并重新请求），但该缓存仅在显式开启（ip_region_enabled/IP_REGION_ENABLED）时生效；默认装配 NewDisabled() 本地 IP 返回「本地」、其余「未知」且不发任何网络请求。",
       "evidence": [
         {
-          "resource": "repo://internal/ipregion/client.go#L17-L24",
-          "version": "repo-lines-v1:sha256:8c4bb4f4863ef05d086bb0d19b54a7b0a0c360343a98b58acdec9d84cdb903aa:eyJzZWxlY3RlZExpbmVDb3VudCI6OCwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiZGNlODdiNjgxOGEyODg0ZTgzZDMxYzczOTgwZjQ4MjQ2OTk4NzFiZDBkMWIwYjJjZDliN2MzZjViMTViMTE2ZCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMDFiYTQ3MTljODBiNmZlOTExYjA5MWE3YzA1MTI0YjY0ZWVlY2U5NjRlMDljMDU4ZWY4Zjk4MDVkYWNhNTQ2YiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZTc3OTg4MjRhMjEyZjJjOWY0ZjI2ODhhZWIyNjg0OTljNTNlMzE1ODJiYWVmOTc1YTZhYTcxOGVjZTc4OGMxZCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiNmE0YmM1ZDBhODYwODdiNDQyYWVlNTEzOGNiZGU3NzkxNWQ3YWZiMzA5YWY2Mjk4YjZlYTE5ZGY1N2JmNzkwMiJ9"
+          "resource": "repo://internal/ipregion/client.go#L254-L268",
+          "version": "repo-lines-v1:sha256:031f6a93e5c3d18fb9fd4b577afca9a58d4394892f1e179f1389277654cd7ba6:eyJzZWxlY3RlZExpbmVDb3VudCI6MTUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImQ5MjY2MzYxNTVkMmMzM2VhZTQ5ZDYyYTU4NTdjMDljZjhiZDExZGRkMGEyNmNkY2JjOTNlNWY2ODk2MjVmYjkiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImZhMjZhN2RiZGJhYjYwMjE3OTJkNWQ3MmNmMTE5Y2UwOGJhMjNkYzYyZjJkYWExZWEyMzM2YWQwYmM1ZTRlODgiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjdmODY1ZGM0MmI3MTFhZWVjNzc0NzkzN2EyZDA0ZDQ0MzQyMjgxMjBhYjQ5Yzk4M2RlZmZmMTZkMTM3ZjA1OTYifQ"
         },
         {
-          "resource": "repo://internal/ipregion/client.go#L70-L95",
-          "version": "repo-lines-v1:sha256:5d328cab7e70867fb9f362f4008cd21c50b50c70a3e5febdd3bb6a79f7dc8b61:eyJzZWxlY3RlZExpbmVDb3VudCI6MjYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImQ5MjY2MzYxNTVkMmMzM2VhZTQ5ZDYyYTU4NTdjMDljZjhiZDExZGRkMGEyNmNkY2JjOTNlNWY2ODk2MjVmYjkiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjE0YTQ4OWJkNTY1NjA3MzA5NDFkMTBjYWZlYmQwYjM2ZWJhNjA2OThmMWNhZWRlODAyZjIyMWRhM2ExNDA2MjYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjgxODBmNDQzNDE0MzU5NjI5MTRiMGIwMDBjMmY5N2Q4ODg0NmRiODhmNjA4Yzc1YmU1NTg0MDE3NGVkNWI3MDMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjBlMjM3MTA5YzZkZmE4ZjlkZGE0ZGYxZDU5MWI2MDg4OTFkM2I4MDU3M2MwMGVlNzk4MDI2YWMwZWQ3Y2YyNGUifQ"
+          "resource": "repo://internal/ipregion/client.go#L30-L34",
+          "version": "repo-lines-v1:sha256:71f2240d94157c3909efa2d65c1ea18a172c56227ef1977d47f232bf655117bc:eyJzZWxlY3RlZExpbmVDb3VudCI6NSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiYWZmYjBmN2IyZmYwZGRlM2NjMGZiYjQ4ZjA0NDhiNTcxOWI2ZmEzYzEzOTYyNWQwN2JmNmFhN2VlNzg2YTBlZSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiM2NmMzkzOGNlZTE4NDk1OGRmNjlmNzUyYjc2MmFjMDRkMGMxOWQ5MDQ0MGU0MjUzMGIwMjliNTY1MGVlZTYyMSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiMTI4ZmQ4YjJjNWRmYmViMjc4ZjYyOWQ2NDlhYTFmNjlmZmVhYTk4ZjNkODEzNjdjZTVlNWY2ZjljNjNhYmZjMiIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiMjYxNGQxNTNjMmVjMGZkZTRhMWJmZDk1NjlhNTZjNDIyMmViMDE3MDIyNjVjYzRmMjhmYzFiYWZjZGQyM2YxYSJ9"
+        },
+        {
+          "resource": "repo://internal/ipregion/client.go#L59-L73",
+          "version": "repo-lines-v1:sha256:3736a596931db45942cc1184306d7cf9dd1b683864012eee06191d8d52f1bb6e:eyJzZWxlY3RlZExpbmVDb3VudCI6MTUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjlhZWExNTJiYzgwMDdiMDI1Yjk5YTRmZThkNjUzYTFlMTc0MzMzOTUxMWI2YWI4NTg1NGEyY2E3NjUzYjEyNDEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjQ5MTkzNzJjNzg0OTM4MzkyN2VlMWMyODY5YjJlMDJmMmE4NzNhN2E2YWNkOWZiYzViYTUwMjllOGNiZjFlMDciLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjcyYmZjOWRiOTRjYWI0ZmY3ZmZiYjM2NjVjZjFmYmYzZWQ4ZWY0YThlM2ZhMzgzYTY0Y2UyYzJjMGU0ZjM0ZDAifQ"
+        },
+        {
+          "resource": "repo://internal/ipregion/client.go#L82-L86",
+          "version": "repo-lines-v1:sha256:823c1e8a4f037c0166561e3b4029b46c559c05caf064358d5fe58c09f3ad4901:eyJzZWxlY3RlZExpbmVDb3VudCI6NSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiYTZmMzJkMzA2MDQ1NWM5YWJkZDM3ZTEyN2UzMmI3ZTYwNjRmMWUwN2Y5MGY2YThmODE5ZGU0NmJlZjQ0YzRiNiIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNDEyY2EzNDVjY2Y3NWJmOWMwODA2YmNlNjk1YmU4ZGU4MDhiNzk5ODQyNTFhN2E1NGQyMDJjZjYxMDFkZDQ1MSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiM2QzNjI1MWE2OWUwNjk4ZTQ5OTZhNjc5NDM0ZGVkZDkxYTVhOThiZDA2MDZiZGE1OGRjNzRkYWNhZWViNjNjYiIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiNTFiMmE4ZDdjMmE3ODdiM2U3NjMwMTk0YWZiYjU1ZGEzZjU1ZDlmZDdhMWFiMjkxN2RkNjUyMGJiMDM3MDc5MCJ9"
         }
       ]
     },
     {
       "id": "claim_e60f5bb4dd7e4192b0c59d71852dce57",
-      "statement": "IP region lookup failures fall back to an unknown marker, and the lookup is synchronous during login and registration before the user is saved.",
+      "statement": "IP region lookup failures fall back to an unknown marker (aliyun failure falls through to the czdb fallback via WithFallback), and the lookup is synchronous during login and registration before the user is saved.",
       "evidence": [
         {
-          "resource": "repo://internal/ipregion/client.go#L87-L119",
-          "version": "repo-lines-v1:sha256:a9ba651b07eaf91267ab071cc1584f7b6246a61d975170b463c15765624e933f:eyJzZWxlY3RlZExpbmVDb3VudCI6MzMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ2OTJmNDc3MDNkMWUxYTk4MTVjYzE1M2U0NGZlMjQ0NGQwZjg0NzY5NDRiNGQ2YjZmNDYwMWEwYzE2NTdjMDAiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjBkZTdlYmNlZWNmYTRkZDY3NGNiNDRhMTM1NzJhMDY4ODY3YjFhZjVhNzc4YTJlMWI0MzIzZDhiNDRlY2Y2Y2YiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+          "resource": "repo://internal/ipregion/client.go#L161-L176",
+          "version": "repo-lines-v1:sha256:c89c1189b1d3f45339ca2c8e0680452d5f6f4f457330339d252a58064bd78de3:eyJzZWxlY3RlZExpbmVDb3VudCI6MTYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjZlZjYxN2E1ZjgxNWNhYjRhZmM0NmFhYWVkYmEzMjNiZjY5MjcwMGYwZGRkYTg2ZDZjMmU2M2U4ZTI4NWY1YTgiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjgzODQ3ZjE5N2QyMTYxMDY2NzllNGIzYjRmNmE5NzgwM2ViMzQ2ZTdmOGU2ZmZmNWU4OWU4YTQ4NDhjODk4YjUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjQwZWVjZTQwOGY1NmQyYThiMjc4ZGFmZWRmNjUzMDg5M2QwNjA1NDNlZWU3MTgyN2IzNzM2OGJkYmI3ZjYxMGUifQ"
         },
         {
-          "resource": "repo://internal/service/login.go#L160-L177",
-          "version": "repo-lines-v1:sha256:5cba1e6e0253b71d03180afb8bb44e3756b7e6960065cccda3115c56f0c2170b:eyJzZWxlY3RlZExpbmVDb3VudCI6MTgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY3Y2RhODJkYTYwNjIzOGUwNWU2MjM5OTU2OWM1ZWUwMzk5MzQxOTY0OGFlNWQ0M2EyYmY4Y2Q2MzQ3ZjgyNjMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjM5NTU2ZTA2ODc3MDJjMTkwZmYwM2ExZjNhYWM0NWRlMmVkODUxMGYwZGQxMWRmZjAyNWNjYjQ1NTU1MzlmMTYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6Ijc3MzkwZWE2N2FlNzg0NDRhOTA3MmIxY2Q2YWVhOTY3NmVkNjUyNDBiNjQyNTllNWEyYWU3ODNhZmRmOTcxODkifQ"
+          "resource": "repo://internal/service/login.go#L124-L128",
+          "version": "repo-lines-v1:sha256:f10dd78dc198da32695f1ef0fa1a03f9613051009e9d1e7a388f923aa5071b89:eyJzZWxlY3RlZExpbmVDb3VudCI6NSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiMDdmOTE5YzgzMjBhYTU5ZmFkZTJmYzRmMWFiODU0OTgwN2ViYzEzNzIyMDEyYjEyMmU5YjUxNmYxMjM2ZTE1MiIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNjdjZGE4MmRhNjA2MjM4ZTA1ZTYyMzk5NTY5YzVlZTAzOTkzNDE5NjQ4YWU1ZDQzYTJiZjhjZDYzNDdmODI2MyIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiMTcxZGRjNGRlMGE5OTc3MDdmNTJiNzE4ZTEwZDIzYmYzZmE0ZDMyZWNhZjI1YWUxMjhhMjRiOGY0YWMxZWY0NCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiNTFkYTRiY2U1ZTA5NmFjMTFmMThiNzIyMTI0ZTdmMzkxNGM4N2M5ZDNjNDQwMWUzZDkzYmQ4OGM1YTlkMjRjZCJ9"
+        },
+        {
+          "resource": "repo://internal/service/register.go#L102-L105",
+          "version": "repo-lines-v1:sha256:a8170200f3fab27e3b68864778fb8c10030c58225a169694cd8957f6b064d759:eyJzZWxlY3RlZExpbmVDb3VudCI6NCwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiNzUyN2MzYzZiYWQ4ZmVjZDBiNmYxODBhMzVhNWM5NTAwZjIyNGVmNmE0YjU2ZjIyMDY3YzM0NzEyNjNmZjMwMSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNjdjZGE4MmRhNjA2MjM4ZTA1ZTYyMzk5NTY5YzVlZTAzOTkzNDE5NjQ4YWU1ZDQzYTJiZjhjZDYzNDdmODI2MyIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiOGMyYzgwYjMxOGZjOTI2MTFkOGZhMjE4NzM0ODMzZWNlZjAwZjdmZjJkMmFmYjcwM2I5NmUxYjdkMTMxNTY4OCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiNTgwNzkwNjU5YWZmYzVmNzI1ZDc5YTJlMWMzNjRiMzhhODNjYTlhZTU5ZGQyNTY5MDA4NGQwY2Y0NjA0ZDNjOCJ9"
         }
       ]
     },
@@ -73,7 +85,7 @@
       "statement": "VAPID public key, private key, and subject are configurable through ini or environment variables, and the public key endpoint returns the key only when both public and private keys are configured, otherwise null.",
       "evidence": [
         {
-          "resource": "repo://internal/config/config.go#L119-L124",
+          "resource": "repo://internal/config/config.go#L139-L144",
           "version": "repo-lines-v1:sha256:40430e9d62dbbd0dd5944884e3b8dcbfe649edfdac18fd0fbc3fc69bf9f41d26:eyJzZWxlY3RlZExpbmVDb3VudCI6NiwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiODA5NjI3ZGZmZmRiM2UwYzMyMTFlZjVhMGE0YjM3MzQwMmQ1YTNhOTBhNDA5MzZkZjFjZDVhZWFmNzFhN2YzMSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNDEyY2EzNDVjY2Y3NWJmOWMwODA2YmNlNjk1YmU4ZGU4MDhiNzk5ODQyNTFhN2E1NGQyMDJjZjYxMDFkZDQ1MSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNTM0OTdmMmM4MDBmMWU5ZGE3ODljZDhkYTEwNWYxOWY3ZTZkZWJmZDcwMWRjYzE3NTUzNTYzNDY5NGU4NjQ2OCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiNmRmNDU4NjA0YzI2Nzk1ODliMGMzNTVjZTVmNmU0ZGM2Y2FmYjgwYWY1MTZmNjQ0MDJmMzkzZGQzY2U1OWM5MCJ9"
         },
         {
@@ -91,10 +103,52 @@
           "version": "repo-lines-v1:sha256:a9de898e15135c9aef0324fcac86c6daed0405cdd06a72dc60a4eb6bd35ac9c7:eyJzZWxlY3RlZExpbmVDb3VudCI6MTAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImNkMGYxMzJjZWRhMmUxODlhY2EyMTg2MWEwYzFkZDIxNDNkZGFhNmVjOTUxNTdmZWE1M2FkYWYwMDk2NWUyZjgiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
         }
       ]
+    },
+    {
+      "id": "claim_6b2abf1cbac7410896865f0dbff67c1f",
+      "statement": "ADR-018 双数据源装配：NewConfiguredClient 按 ip_region_provider（aliyun 默认/czdb）选首选，另一数据源配置齐全时自动兜底（首选返回「未知」时改走它，WithFallback 封装）；无任何可用数据源时返回 nil，调用方保持 NewDisabled 并告警。czdb MEMORY 模式构造期预热全量入内存后释放文件句柄，仅配一个协议的库时另一协议记「未知」。",
+      "evidence": [
+        {
+          "resource": "repo://internal/ipregion/client.go#L161-L197",
+          "version": "repo-lines-v1:sha256:9abd60892708445ff57449fef95abc23c66fb3cdf7425aa97fdd37dde001e164:eyJzZWxlY3RlZExpbmVDb3VudCI6MzcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjZlZjYxN2E1ZjgxNWNhYjRhZmM0NmFhYWVkYmEzMjNiZjY5MjcwMGYwZGRkYTg2ZDZjMmU2M2U4ZTI4NWY1YTgiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjgzODQ3ZjE5N2QyMTYxMDY2NzllNGIzYjRmNmE5NzgwM2ViMzQ2ZTdmOGU2ZmZmNWU4OWU4YTQ4NDhjODk4YjUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImMzYjFmZTI4YWRhZTg2NzJiNjhkZGVlYjFkZjhlNzE5MDA3MTlhMWExZTBjNTU3MTgyM2NhYTBmMTE1OThiNWIifQ"
+        },
+        {
+          "resource": "repo://internal/ipregion/client.go#L97-L159",
+          "version": "repo-lines-v1:sha256:7b971397998378df68fe0fd5a230337d1e664e9624502278185c160bcc76353b:eyJzZWxlY3RlZExpbmVDb3VudCI6NjMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImRhNjI1ODA1MTM0NDY0NTQ1ZjQ3M2ZkZTUzYjk5ZDQxYjZhNzFlZTFjYTM2ZGMzZGM2OWMwOWYzMzA0NzEwNDUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijc0OTZkZWNmOTBiZGQ4Y2Q0M2QxNTM4NzA5YzAyYTJjNDM4NjI0N2RhN2MyYTEwMWRlZGRkMjdkOTQxZTk2MjkiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjZiNDgxOTMxYzQxZTc4NmYwMWM1MWFjNjVhZDRlNzE1YzYyZmE2MWNiMmVmNGRiYWYyZTFmZTdkMDljNTdiNGQifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_430a7422db964757af437b0c0b5a27c5",
+      "statement": "czdb 官方库实测输出为「国家–省–市[–区]<TAB>归属描述」（– 为 en-dash）：formatCzdb 取首段按 – 拆段、丢弃归属描述，同时兼容 tab 分隔列形态（取前 4 列非空）；区分启发式为首段含 – 或 tab 段不足 3 列按单行形态处理。",
+      "evidence": [
+        {
+          "resource": "repo://internal/ipregion/client.go#L199-L252",
+          "version": "repo-lines-v1:sha256:2db0851aaf564f32849856839319434d319bc4282f01e35da99c13743b913466:eyJzZWxlY3RlZExpbmVDb3VudCI6NTQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImNiYjNmNTdiOTkwMmMzZGJiNWRlMTcwMzJhNWM5NzZlZTEzMDIxNTQ4ZWVlZTJlNjQ1MDRhZmFjMGE5MzlmZjciLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImYyOTY0MDc5YzNjNWM4MTUyMGVmMzNhMmI5ZDJlMTVhMWI4NGQ3MjgwZGI4NTkwZGNkNjU3NDdlM2UwMTJhNDAiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImFlMzUxNmE0N2IwNGZlMDlkZWFmNTcxZjkxMWZiMzBkZWI1ZTFjMzk1OTk5OWU3MWQ3ZDEzODQzMDA4ZmY1MDgifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_0bc6c4d2db014e269e7694e770013108",
+      "statement": "QQ 互联 OAuth 是预留路由 /api/auth/qq/*（status/start/callback）：凭据未配置时 provider disabled，已配置时实现仍返回 501「QQ 登录尚未开放」待接入 SDK；status 端点返回 {enabled}；externalidentities 集合已建 (provider, openid) 唯一索引（provider 预留 qq），注册路径已为无邮箱外部身份预留分支。",
+      "evidence": [
+        {
+          "resource": "repo://internal/handler/oauth.go#L16-L53",
+          "version": "repo-lines-v1:sha256:6f7148b6d530b27a9da151f027594d22b16066f748a6b2ab3d9ef840d4d68d29:eyJzZWxlY3RlZExpbmVDb3VudCI6MzgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjcwN2I3OGM0YmM1YTk5MTA0MGEzYTc4ZjM2YmVmM2IxNmE2YmRmMDliZjQ1MTMxYzQzOWM2YTBhNjIzODg0N2QiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImEwZjEzZTNlMTg0Y2FiYTY0NThjMzAyZjA5MTdhNGE3OWE4MjI4ZDBkMTQ5ZTU5OGY2YmRmOTgxZDUzMjM3NzciLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        },
+        {
+          "resource": "repo://internal/model/authfactors.go#L9-L21",
+          "version": "repo-lines-v1:sha256:4532654d16fe130a6f0c7bc7d91a0c0fa94a9862a921100cd131856466e24c65:eyJzZWxlY3RlZExpbmVDb3VudCI6MTMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImQ5YzI0NTdkMmJhYTE4NjU4ZWNhMjQwMjUwNGQ3YTgxZTg3MGY1MDEzNmRlZGRhNmIxODgxYTY0Yzg3ZDU0NDMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjcxMmNkNTBiMWYwNGRlYTIwNjAwZTcyOGM4YmZiNjYxZTM4N2U2ZTE3ZTgyYTcwYjlhZjFhN2IxODk1ZDdkYzMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjQ5NGQwNWU0YmViMjJlNjM4YTIyMzgwYjJhMTZmNzIyNWFlYmM2MzYzOWVjM2M0NGZmZTZjOWY5MmY3ZTExYjEifQ"
+        },
+        {
+          "resource": "repo://internal/service/oauth.go#L20-L40",
+          "version": "repo-lines-v1:sha256:9cd5feb1685b6c9aa61d315cafb64905e585c0c593db82b6fd84f0ca2d2ccc65:eyJzZWxlY3RlZExpbmVDb3VudCI6MjEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjE4ODc5OWYzY2Q5NzBhMTE4YTNlNWZiY2RlYThkMjFjZDA2NGRiZmY1NTRhMWIxNjExMTNiMTM2ZGUzZDhhMGEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjkwZDFiN2E0N2MxYjMyNTQwMjNlOWEzNTMzODRlNmNhZDNhNTE3NzE0YTYwMTRiMTAyNWE3NDM0ODc3MzgzZmQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImYzOWQ2YmE5MTgzMGJmZWZiOGY0ZWFhMzBmMjcyZmMxOThmNjgzNWE5NjMyNDAwODkwZTMxZGIwN2ZhODg2MzMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjUyOGE2N2FjYzNhODI0NTM3YzhhNTUzZjg0ZGQ1ZjNhNzllNWQ3ZjA0M2E3MjRiNjU5MDhlNjAwODFlN2VlMDkifQ"
+        }
+      ]
     }
   ],
   "verification": {
     "by": "openwiki/0.7.2",
-    "at": "2026-11-11T16:33:08.526Z"
+    "at": "2026-11-13T18:41:36.261Z"
   }
 }
