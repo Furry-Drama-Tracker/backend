@@ -82,11 +82,16 @@ func (e *adminTestEnv) insertUser(t *testing.T, accountID, username, email, role
 		t.Fatalf("hash password: %v", err)
 	}
 	id := primitive.NewObjectID()
-	_, err = e.db.Collection("users").InsertOne(context.Background(), bson.M{
+	doc := bson.M{
 		"_id": id, "accountId": accountID, "username": username, "email": email,
 		"password": hash, "role": role, "isEmailVerified": true, "avatar": "",
 		"createdAt": time.Now(), "updatedAt": time.Now(),
-	})
+	}
+	// 角色化 2FA：admin/superadmin 必须已开启 2FA，否则写操作被 force2FASetup 拦截。
+	if role == "admin" || role == "superadmin" {
+		doc["twoFactorEnabled"] = true
+	}
+	_, err = e.db.Collection("users").InsertOne(context.Background(), doc)
 	if err != nil {
 		t.Fatalf("insert user: %v", err)
 	}

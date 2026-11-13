@@ -31,9 +31,8 @@ const (
 	AuthEventRefreshInvalid = "refresh_invalid" // refresh 缺失/过期/非法（401）
 	AuthEventTwoFAReplay    = "twofa_replay"    // TOTP 同一时间步被重复提交
 	AuthEventRateLimited    = "ratelimited"     // 限流命中（429）
-	// AuthEventDeviceCodeMiss 设备登录码提交未命中（confirm-device-login 400）。
-	// miss 此前零痕迹：per-entry 尝试上限只数命中，喷洒式枚举完全不可见；
-	// 留痕后（按 IP 节流落库）可在 authevents/日志中发现批量猜测。
+	// AuthEventDeviceCodeMiss 设备登录码提交未命中（历史事件类型：设备验证码链
+	// 已被"新设备通知邮件"替代，常量保留供读取存量 authevents 数据）。
 	AuthEventDeviceCodeMiss = "device_code_miss"
 )
 

@@ -75,6 +75,7 @@ func (e *cmsTestEnv) createSuperAdmin(t *testing.T) string {
 		Email:                  fmt.Sprintf("sa%d@test.com", time.Now().UnixNano()),
 		Password:               "x",
 		Role:                   "superadmin",
+		TwoFactorEnabled:       true, // 角色化 2FA：超管必须已开启（否则写操作被 force2FASetup 拦截）
 		EmailNotificationPrefs: model.DefaultEmailNotificationPrefs(),
 		CreatedAt:              time.Now(),
 	}

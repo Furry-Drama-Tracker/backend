@@ -38,6 +38,24 @@ const (
 	defaultOrigins = "http://localhost:3000,http://localhost:3001,http://localhost:3002,http://localhost:5000"
 )
 
+// WebAuthnConfig Passkey（WebAuthn）配置。
+type WebAuthnConfig struct {
+	// RPID 是 WebAuthn Relying Party ID（通常是站点域名，如 "furry09.com"）。
+	// 为空时从 FRONTEND_URL/SITE_URL 的 host 推导。
+	RPID string
+	// RPName 是注册时展示给用户的站点名（空时用 email FromName 或域名）。
+	RPName string
+	// Origins 是允许的 WebAuthn 仪式来源（完整 origin，如 https://xxx）。
+	// 为空时从 FRONTEND_URL/SITE_URL 推导；开发环境自动追加 localhost:3000-3002。
+	Origins []string
+}
+
+// OAuthConfig 外部身份提供方配置（QQ 互联预留；上线前仅占位）。
+type OAuthConfig struct {
+	QQAppID  string
+	QQAppKey string
+}
+
 // Config 是全部运行配置。
 type Config struct {
 	Server   ServerConfig
@@ -46,6 +64,8 @@ type Config struct {
 	Email    EmailConfig
 	VAPID    VAPIDConfig
 	Security SecurityConfig
+	WebAuthn WebAuthnConfig
+	OAuth    OAuthConfig
 	// IsDev 等价于 NODE_ENV !== 'production'，控制 cookie secure、错误栈、CORS 等。
 	IsDev bool
 }
@@ -129,6 +149,13 @@ type SecurityConfig struct {
 	LoginLockMinutes int
 	CSRFMaxAgeHours  int
 	RateLimitSkip    bool
+	// UsernameBlacklist 是用户名黑名单补充词表（逗号分隔，[security].username_blacklist
+	// 或 USERNAME_BLACKLIST）。与内置词表合并后做子串匹配。
+	UsernameBlacklist string
+	// LoginNameCooldownDays 是改名冷却天数（默认 7）。
+	LoginNameCooldownDays int
+	// LoginNameReserveDays 是旧名保留天数（默认 90，期间他人不可注册该名）。
+	LoginNameReserveDays int
 	// IPRegionEnabled 控制 IP → 地域解析（登录/注册/设备确认记录与提醒邮件）。
 	// 默认 false：该能力会外呼第三方位置服务，默认关闭；
 	// 需要时用 [security].ip_region_enabled 或 IP_REGION_ENABLED 显式开启，
@@ -190,7 +217,39 @@ func Load(path string) (*Config, error) {
 		}
 	}
 
-	// 5) 致命校验
+	// 5) WebAuthn 兜底：RPID/Origins 未配置时从站点地址 host 推导；
+	//    开发环境自动允许 localhost:3000-3002（对齐 CORS 默认源）。
+	if cfg.WebAuthn.RPID == "" {
+		if u := originHost(cfg.Server.FrontendURL); u != "" {
+			cfg.WebAuthn.RPID = u
+		} else if u := originHost(cfg.Server.SiteURL); u != "" {
+			cfg.WebAuthn.RPID = u
+		}
+	}
+	if len(cfg.WebAuthn.Origins) == 0 {
+		for _, u := range []string{cfg.Server.FrontendURL, cfg.Server.SiteURL} {
+			u = strings.TrimRight(strings.TrimSpace(u), "/")
+			if u != "" {
+				cfg.WebAuthn.Origins = append(cfg.WebAuthn.Origins, u)
+			}
+		}
+	}
+	if cfg.IsDev {
+		for _, o := range []string{"http://localhost:3000", "http://localhost:3001", "http://localhost:3002"} {
+			if !containsStr(cfg.WebAuthn.Origins, o) {
+				cfg.WebAuthn.Origins = append(cfg.WebAuthn.Origins, o)
+			}
+		}
+	}
+	if cfg.WebAuthn.RPName == "" {
+		if cfg.Email.FromName != "" {
+			cfg.WebAuthn.RPName = cfg.Email.FromName
+		} else {
+			cfg.WebAuthn.RPName = cfg.WebAuthn.RPID
+		}
+	}
+
+	// 6) 致命校验
 	if err := cfg.validate(); err != nil {
 		return nil, err
 	}
@@ -250,10 +309,12 @@ func defaults() *Config {
 		},
 		Email: EmailConfig{Port: 465},
 		Security: SecurityConfig{
-			LoginMaxAttempts: 5,
-			LoginLockMinutes: 30,
-			CSRFMaxAgeHours:  24,
-			IPRegionProvider: "aliyun",
+			LoginMaxAttempts:      5,
+			LoginLockMinutes:      30,
+			CSRFMaxAgeHours:       24,
+			IPRegionProvider:      "aliyun",
+			LoginNameCooldownDays: 7,
+			LoginNameReserveDays:  90,
 		},
 	}
 }
@@ -330,10 +391,30 @@ func applyINI(cfg *Config, data []byte) error {
 	cfg.VAPID.PrivateKey = vapid.Key("private_key").String()
 	cfg.VAPID.Subject = vapid.Key("subject").String()
 
+	wa := f.Section("webauthn")
+	cfg.WebAuthn.RPID = wa.Key("rp_id").String()
+	cfg.WebAuthn.RPName = wa.Key("rp_name").String()
+	if v := wa.Key("origins").String(); v != "" {
+		cfg.WebAuthn.Origins = splitTrim(v)
+	}
+
+	oa := f.Section("oauth")
+	cfg.OAuth.QQAppID = oa.Key("qq_app_id").String()
+	cfg.OAuth.QQAppKey = oa.Key("qq_app_key").String()
+
 	sec := f.Section("security")
 	cfg.Security.LoginMaxAttempts = sec.Key("login_max_attempts").MustInt(5)
 	cfg.Security.LoginLockMinutes = sec.Key("login_lock_minutes").MustInt(30)
 	cfg.Security.CSRFMaxAgeHours = sec.Key("csrf_max_age_h").MustInt(24)
+	if v := sec.Key("username_blacklist").String(); v != "" {
+		cfg.Security.UsernameBlacklist = v
+	}
+	if v := sec.Key("login_name_cooldown_days").MustInt(0); v > 0 {
+		cfg.Security.LoginNameCooldownDays = v
+	}
+	if v := sec.Key("login_name_reserve_days").MustInt(0); v > 0 {
+		cfg.Security.LoginNameReserveDays = v
+	}
 	// 缺省 false：IP 地域解析默认关闭（数据出境合规，ADR-017）。
 	cfg.Security.IPRegionEnabled = sec.Key("ip_region_enabled").MustBool(false)
 	provider := strings.ToLower(strings.TrimSpace(sec.Key("ip_region_provider").String()))
@@ -410,6 +491,24 @@ func applyEnv(cfg *Config) {
 	setStr(&cfg.Security.IPRegionCzdbPathV4, os.Getenv("IP_REGION_CZDB_PATH_V4"))
 	setStr(&cfg.Security.IPRegionCzdbPathV6, os.Getenv("IP_REGION_CZDB_PATH_V6"))
 	setStr(&cfg.Security.IPRegionCzdbKey, os.Getenv("IP_REGION_CZDB_KEY"))
+	setStr(&cfg.Security.UsernameBlacklist, os.Getenv("USERNAME_BLACKLIST"))
+	if v := os.Getenv("LOGIN_NAME_COOLDOWN_DAYS"); v != "" {
+		if d, err := strconv.Atoi(v); err == nil && d > 0 {
+			cfg.Security.LoginNameCooldownDays = d
+		}
+	}
+	if v := os.Getenv("LOGIN_NAME_RESERVE_DAYS"); v != "" {
+		if d, err := strconv.Atoi(v); err == nil && d > 0 {
+			cfg.Security.LoginNameReserveDays = d
+		}
+	}
+	setStr(&cfg.WebAuthn.RPID, os.Getenv("WEBAUTHN_RP_ID"))
+	setStr(&cfg.WebAuthn.RPName, os.Getenv("WEBAUTHN_RP_NAME"))
+	if v := os.Getenv("WEBAUTHN_ORIGINS"); v != "" {
+		cfg.WebAuthn.Origins = splitTrim(v)
+	}
+	setStr(&cfg.OAuth.QQAppID, os.Getenv("QQ_APPID"))
+	setStr(&cfg.OAuth.QQAppKey, os.Getenv("QQ_APPKEY"))
 }
 
 // validate 执行启动致命校验。
@@ -489,4 +588,36 @@ func splitTrim(s string) []string {
 		}
 	}
 	return out
+}
+
+// originHost 提取 URL 的 host（去掉 scheme/端口默认语义，仅用于 WebAuthn RPID 推导）。
+func originHost(u string) string {
+	u = strings.TrimSpace(u)
+	if u == "" {
+		return ""
+	}
+	// 简单解析：去掉 scheme 后取到第一个 / 为止。
+	if i := strings.Index(u, "://"); i >= 0 {
+		u = u[i+3:]
+	}
+	if i := strings.IndexAny(u, "/?#"); i >= 0 {
+		u = u[:i]
+	}
+	// 去掉端口（RPID 是纯域名，不含端口）。
+	if i := strings.LastIndex(u, ":"); i >= 0 && !strings.Contains(u, "]") {
+		u = u[:i]
+	} else if i := strings.LastIndex(u, "]:"); i >= 0 {
+		u = u[:i+1]
+	}
+	return strings.ToLower(strings.Trim(u, "[]"))
+}
+
+// containsStr 判断列表是否包含某字符串。
+func containsStr(list []string, v string) bool {
+	for _, x := range list {
+		if x == v {
+			return true
+		}
+	}
+	return false
 }

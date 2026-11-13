@@ -111,6 +111,18 @@ func (a *Auth) Protect(allowedRoles ...string) gin.HandlerFunc {
 			c.AbortWithStatusJSON(403, gin.H{"message": "Not authorized", "messageKey": "auth.forbidden"})
 			return
 		}
+		// 角色化 2FA：管理员/超管必须开启两步验证（policy gate）。
+		// 未开启时拦截其非 GET 写操作，把账号锁定在 2FA 设置流程中
+		// （放行 /api/2fa/* 开启流程与 logout）。响应带 force2FASetup 供前端呈现阻断页。
+		if requiresTwoFactor(user) && !user.TwoFactorEnabled {
+			if a.blockedBy2FASetup(c.Request.Method, c.Request.URL.Path) {
+				c.AbortWithStatusJSON(403, gin.H{
+					"message":       "管理员账号必须开启两步验证后才能继续操作",
+					"force2FASetup": true,
+				})
+				return
+			}
+		}
 		c.Set(ContextUserKey, user)
 		c.Set(ContextAuthTokenKey, token)
 		// fire-and-forget 更新 lastActiveAt（失败静默，固定行为）。
@@ -137,6 +149,22 @@ func (a *Auth) RequireEmailChanged() gin.HandlerFunc {
 		}
 		c.Next()
 	}
+}
+
+// requiresTwoFactor 判断该角色是否强制开启 2FA（admin/superadmin 强制，
+// creator 可选，user 禁开——开/关的入口门控在 /api/2fa handler）。
+func requiresTwoFactor(u *model.User) bool {
+	return u.Role == RoleAdmin || u.Role == RoleSuperAdmin
+}
+
+// blockedBy2FASetup 判断请求是否应被 force2FASetup 门禁拦截：
+// 放行 GET、/api/2fa/*（开启流程）、logout 与含 "verify" 的路径；
+// 其余非 GET 写操作全部拦截（与 RequireEmailChanged 的白名单模式一致）。
+func (a *Auth) blockedBy2FASetup(method, path string) bool {
+	if method == "GET" || containsFold(path, "2fa") || containsFold(path, "logout") || containsFold(path, "verify") {
+		return false
+	}
+	return true
 }
 
 // GetUser 从 gin.Context 取当前登录用户。

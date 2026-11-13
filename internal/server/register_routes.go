@@ -73,9 +73,8 @@ func RegisterRoutes(d Deps, api *gin.RouterGroup, opts middleware.RateLimitOpts,
 		g.POST("/refresh", rl(ratelimit.RefreshSpec), h.Refresh)
 		g.GET("/me", amw.Protect(), h.Me)
 		g.GET("/sse-ticket", amw.Protect(), h.SSETicket)
-		g.POST("/verify-device", rl(ratelimit.TwoFactorSpec), h.VerifyDevice)
-		g.POST("/confirm-device-login", rl(ratelimit.TwoFactorSpec), h.ConfirmDeviceLogin)
 		g.POST("/login-2fa", rl(ratelimit.TwoFactorSpec), h.Login2FA)
+		g.POST("/2fa/email-otp/send", rl(ratelimit.TwoFactorSpec), h.Send2FAEmailOTP)
 		g.PUT("/change-password", rl(ratelimit.PasswordResetSpec), amw.Protect(), h.ChangePassword)
 		g.POST("/forgot-password", rl(ratelimit.PasswordResetSpec), h.ForgotPassword)
 		g.POST("/reset-password", rl(ratelimit.PasswordResetSpec), h.ResetPassword)
@@ -111,9 +110,30 @@ func RegisterRoutes(d Deps, api *gin.RouterGroup, opts middleware.RateLimitOpts,
 		g.POST("/verify", amw.Protect(), rl(ratelimit.TwoFactorSpec), h.Verify2FA)
 	})
 
+	// ---- Passkey（WebAuthn）----
+	router.Mount(api, "/passkeys", func(g *gin.RouterGroup) {
+		g.POST("/register/options", amw.Protect(), rl(ratelimit.PasskeySpec), h.PasskeyRegisterOptions)
+		g.POST("/register/verify", amw.Protect(), rl(ratelimit.PasskeySpec), h.PasskeyRegisterVerify)
+		g.GET("", amw.Protect(), h.ListPasskeys)
+		g.DELETE("/:id", amw.Protect(), h.DeletePasskey)
+	})
+	router.Mount(api, "/auth/passkey", func(g *gin.RouterGroup) {
+		g.POST("/options", rl(ratelimit.PasskeySpec), h.PasskeyLoginOptions)
+		g.POST("/verify", rl(ratelimit.PasskeySpec), h.PasskeyLoginVerify)
+	})
+
+	// ---- OAuth（QQ 预留：未配置凭据时一律 501）----
+	router.Mount(api, "/auth/qq", func(g *gin.RouterGroup) {
+		g.GET("/status", h.QQOAuthStatus)
+		g.GET("/start", h.QQOAuthStart)
+		g.POST("/callback", h.QQOAuthCallback)
+	})
+
 	router.Mount(api, "/users", func(g *gin.RouterGroup) {
 		g.POST("/avatar", amw.Protect(), rl(ratelimit.UploadSpec), h.Avatar)
 		g.PUT("/profile", amw.Protect(), h.Profile)
+		g.PUT("/login-name", amw.Protect(), rl(ratelimit.PasswordResetSpec), h.LoginName)
+		g.GET("/check-login-name", amw.Protect(), h.CheckLoginName)
 		g.GET("/export-my-data", amw.Protect(), rl(ratelimit.ExportSpec), h.ExportMyData)
 	})
 

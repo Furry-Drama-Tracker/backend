@@ -40,6 +40,10 @@ func PurgeUserData(ctx context.Context, repos *repository.Repos, userID any) err
 	_ = repos.SavedFolders.DeleteByUser(ctx, userID)
 	_ = repos.CreatorProfiles.DeleteByCreator(ctx, userID)
 	_ = repos.Users.AdminDeletePushSubscriptionsByUser(ctx, userID)
+	// 认证因素清理：Passkey 凭据与外部身份绑定随账号一并删除
+	// （loginnamereservations 的旧名保留记录按设计保留到期自动释放）。
+	_ = repos.Passkeys.DeleteByUser(ctx, userID)
+	_ = repos.ExternalIdents.DeleteByUser(ctx, userID)
 	if oid != primitive.NilObjectID {
 		_ = repos.Themes.DeleteByOwner(ctx, oid)
 	}

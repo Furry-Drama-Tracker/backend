@@ -252,10 +252,15 @@ func TestStatsRealtimeAndOverview(t *testing.T) {
 // ---- 测试辅助 ----
 
 // promoteUser 直接把用户角色提升为 admin/superadmin（审核/举报/统计管理端点需要）。
+// 角色化 2FA：admin/superadmin 同步置 twoFactorEnabled，否则写操作被 force2FASetup 门禁拦截。
 func promoteUser(t *testing.T, db *mongo.Database, userID primitive.ObjectID, role string) {
 	t.Helper()
+	set := bson.M{"role": role}
+	if role == "admin" || role == "superadmin" {
+		set["twoFactorEnabled"] = true
+	}
 	_, err := db.Collection("users").UpdateOne(context.Background(),
-		bson.M{"_id": userID}, bson.M{"$set": bson.M{"role": role}})
+		bson.M{"_id": userID}, bson.M{"$set": set})
 	if err != nil {
 		t.Fatalf("promote user: %v", err)
 	}

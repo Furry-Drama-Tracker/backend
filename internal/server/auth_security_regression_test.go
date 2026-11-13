@@ -5,7 +5,6 @@ package server_test
 
 import (
 	"bytes"
-	"context"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
@@ -17,7 +16,6 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 
 	"github.com/Furry-Drama-Tracker/backend/internal/auth"
@@ -120,6 +118,8 @@ func TestDeletionRequestCancelPreservesCredentials(t *testing.T) {
 	}
 	uid := login["_id"].(string)
 
+	// 角色化 2FA：创作者及以上才可开启。
+	promoteRole(t, repos, userIDByEmail(t, repos, email), "creator")
 	secret, _ := enable2FA(t, c)
 
 	// 申请注销（密码正确）。
@@ -176,12 +176,12 @@ func TestDeletionRequestCancelPreservesCredentials(t *testing.T) {
 	}
 }
 
-// TestDeviceTokenKnownDeviceGate 已知设备判定只认设备令牌（fdt-device cookie）。
-// 回归点：旧实现按 User-Agent 精确匹配——重放 UA 字符串即可绕过邮件验证屏障。
-// 此处新客户端与既有会话使用完全相同的默认 UA（Go-http-client/1.1），
-// 若 UA 判定回潮，末步将拿到 200 而非 403 needDeviceVerify。
-func TestDeviceTokenKnownDeviceGate(t *testing.T) {
-	ts, repos := testServerWithMailRepos(t)
+// TestNewDeviceLoginNoGate 新设备登录不再强制验证码（策略变更：事前拦截 → 事后通知）。
+// 回归点：旧实现任何未识别设备都要求邮箱验证码（needDeviceVerify 403）；
+// 现行为：未识别设备直接发会话 + 异步通知邮件（fdt-device cookie 仍作为
+// 已知设备判定与通知触发的依据）。
+func TestNewDeviceLoginNoGate(t *testing.T) {
+	ts, repos := testServerWithRepos(t)
 	c := newClient(t, ts.URL)
 	email := "itdev_" + fmt.Sprintf("%d", time.Now().UnixNano()%1e7) + "@test.com"
 
@@ -192,12 +192,12 @@ func TestDeviceTokenKnownDeviceGate(t *testing.T) {
 	}
 	uid := me["_id"].(string)
 
-	// 设备验证码链只对已验证邮箱生效。
+	// 免 dev-token 的登录只对已验证邮箱放行（补验证，与旧用例一致）。
 	if err := repos.Users.UpdateVerified(t.Context(), uid); err != nil {
 		t.Fatalf("verify email: %v", err)
 	}
 
-	// 登录会话必须携带设备令牌哈希。
+	// 登录会话必须携带设备令牌哈希（已知设备判定的信任依据不变）。
 	oid, perr := primitive.ObjectIDFromHex(uid)
 	if perr != nil {
 		t.Fatalf("bad uid: %v", perr)
@@ -213,17 +213,20 @@ func TestDeviceTokenKnownDeviceGate(t *testing.T) {
 		t.Fatal("UA stays as display field")
 	}
 
-	// 同一设备（cookie jar 持有 fdt-device）免 dev-token 登录 → 已知设备，直接发会话。
+	// 同一设备（cookie jar 持有 fdt-device）登录 → 直接发会话。
 	var known map[string]any
 	if resp := postJSONNoDev(c, "/api/auth/login", map[string]any{"email": email, "password": "pass1234", "altcha": solveCaptcha(t, c)}, &known); resp.StatusCode != 200 || known["_id"] == "" {
-		t.Fatalf("same-device login must skip device verification: %d body=%v", resp.StatusCode, known)
+		t.Fatalf("same-device login must succeed: %d body=%v", resp.StatusCode, known)
 	}
 
-	// 新客户端：无设备令牌，但 UA 完全相同 → 必须走设备验证（403 needDeviceVerify）。
+	// 新客户端（无设备令牌、UA 完全相同）：不再有 needDeviceVerify 拦截，直接登录成功。
 	fresh := newClient(t, ts.URL)
 	var unknown map[string]any
-	if resp := postJSONNoDev(fresh, "/api/auth/login", map[string]any{"email": email, "password": "pass1234", "altcha": solveCaptcha(t, fresh)}, &unknown); resp.StatusCode != 403 || unknown["needDeviceVerify"] != true {
-		t.Fatalf("UA replay must NOT bypass device gate: %d body=%v", resp.StatusCode, unknown)
+	if resp := postJSONNoDev(fresh, "/api/auth/login", map[string]any{"email": email, "password": "pass1234", "altcha": solveCaptcha(t, fresh)}, &unknown); resp.StatusCode != 200 || unknown["_id"] == "" {
+		t.Fatalf("new-device login must succeed without device gate: %d body=%v", resp.StatusCode, unknown)
+	}
+	if unknown["needDeviceVerify"] != nil {
+		t.Fatalf("needDeviceVerify must no longer appear: %v", unknown)
 	}
 }
 
@@ -299,38 +302,73 @@ func TestDisable2FAWithoutStoredCredentials(t *testing.T) {
 	}
 }
 
-// TestDeviceCodeMissRecorded confirm-device-login 的 miss 必须留痕。
-// 回归点：旧实现 miss 零状态零痕迹，喷洒式枚举完全不可见（尝试上限只数命中）。
-func TestDeviceCodeMissRecorded(t *testing.T) {
-	ts := testServer(t)
+// TestEmailOTPSecondFactor 邮件 OTP 作为第二因素：登录挑战返回方法列表、
+// 发码接口凭挑战令牌工作、错误码按 2FA 失败处理。
+// 回归点：设备验证码链已移除，邮件 OTP 现挂在 2FA 挑战链上。
+func TestEmailOTPSecondFactor(t *testing.T) {
+	ts, repos := testServerWithRepos(t)
 	c := newClient(t, ts.URL)
+	email := "itotp_" + fmt.Sprintf("%d", time.Now().UnixNano()%1e7) + "@test.com"
+	c.registerAndLogin(email)
+	promoteRole(t, repos, userIDByEmail(t, repos, email), "creator")
+	secret, _ := enable2FA(t, c)
 
-	var out map[string]any
-	if resp := c.json("POST", "/api/auth/confirm-device-login", map[string]any{"loginCode": "654321"}, &out); resp.StatusCode != 400 {
-		t.Fatalf("bogus code must 400: %d body=%v", resp.StatusCode, out)
+	// emailOtp 仅对已验证邮箱开放（dev-token 注册跳过了验证门槛，此处补验证）。
+	if err := repos.Users.UpdateVerified(t.Context(), userIDByEmail(t, repos, email)); err != nil {
+		t.Fatalf("verify email: %v", err)
 	}
 
-	// 事件异步落库（Recorder 3s 超时 + 30s 节流），轮询等待。
-	db, err := repository.Connect(t.Context(), "mongodb://127.0.0.1:27017/neo_integration_test", "", 10)
-	if err != nil {
-		t.Fatalf("connect db: %v", err)
+	// 登录 → need2FA，且 twoFactorMethods 含 totp 与 emailOtp（邮箱已验证）。
+	var login map[string]any
+	if resp := c.json("POST", "/api/auth/login", map[string]any{"email": email, "password": "pass1234"}, &login); resp.StatusCode != 200 || login["need2FA"] != true {
+		t.Fatalf("login: %d body=%v", resp.StatusCode, login)
 	}
-	events := db.Collection("authevents")
-	ctx, cancel := context.WithTimeout(t.Context(), 6*time.Second)
-	defer cancel()
-	found := false
-	for {
-		n, qerr := events.CountDocuments(ctx, bson.M{"event": "device_code_miss"})
-		if qerr == nil && n > 0 {
-			found = true
-			break
-		}
-		if ctx.Err() != nil {
-			break
-		}
-		time.Sleep(250 * time.Millisecond)
+	challenge, _ := login["twoFactorChallenge"].(string)
+	if challenge == "" {
+		t.Fatalf("missing challenge: %v", login)
 	}
-	if !found {
-		t.Fatal("device_code_miss event must be persisted to authevents")
+	methods, _ := login["twoFactorMethods"].([]any)
+	var hasTOTP, hasEmail bool
+	for _, m := range methods {
+		if s, ok := m.(string); ok {
+			if s == "totp" {
+				hasTOTP = true
+			}
+			if s == "emailOtp" {
+				hasEmail = true
+			}
+		}
+	}
+	if !hasTOTP || !hasEmail {
+		t.Fatalf("twoFactorMethods must include totp+emailOtp: %v", methods)
+	}
+
+	// 发码：挑战缺失 → 400；挑战非法 → 400。
+	var sent map[string]any
+	if resp := c.json("POST", "/api/auth/2fa/email-otp/send", map[string]any{}, &sent); resp.StatusCode != 400 {
+		t.Fatalf("send without challenge must 400: %d body=%v", resp.StatusCode, sent)
+	}
+	if resp := c.json("POST", "/api/auth/2fa/email-otp/send", map[string]any{"twoFactorChallenge": challenge}, &sent); resp.StatusCode != 200 {
+		t.Fatalf("send with valid challenge must 200 (SMTP 未配置时码仍入内存存储): %d body=%v", resp.StatusCode, sent)
+	}
+	if sent["email"] != email {
+		t.Fatalf("send response must carry email: %v", sent)
+	}
+
+	// 错误码经 login-2fa（method=emailOtp）→ 400。
+	var wrong map[string]any
+	resp := c.json("POST", "/api/auth/login-2fa", map[string]any{
+		"email": email, "twoFactorChallenge": challenge, "method": "emailOtp", "twoFactorToken": "000000",
+	}, &wrong)
+	if resp.StatusCode != 400 {
+		t.Fatalf("wrong emailOtp must 400: %d body=%v", resp.StatusCode, wrong)
+	}
+
+	// 正常 TOTP 路径仍可用（回归保护）。
+	var done map[string]any
+	if resp := c.json("POST", "/api/auth/login-2fa", map[string]any{
+		"email": email, "twoFactorToken": totpCode(secret, time.Now()), "twoFactorChallenge": challenge,
+	}, &done); resp.StatusCode != 200 || done["_id"] == nil {
+		t.Fatalf("totp path after emailOtp rejection: %d body=%v", resp.StatusCode, done)
 	}
 }

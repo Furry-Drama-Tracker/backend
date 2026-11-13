@@ -604,6 +604,22 @@ func (h *Admin) UpdateRole(c *gin.Context) {
 	if role == "creator" && target.Role != "creator" {
 		_ = h.ensureCreatorProfile(ctx, oid, updated.Username)
 	}
+	// 角色化 2FA：降级为普通用户时自动关闭 2FA 并吊销全部会话
+	// （普通用户不允许持有 2FA；旧凭据随降级一并清除，保持策略一致）。
+	if role == "user" && updated.TwoFactorEnabled {
+		if err := h.Repos.Users.DisableTwoFactor(ctx, oid); err == nil {
+			_ = h.Repos.Sessions.DeactivateAllByUser(ctx, oid, model.RevokeAdmin)
+			adminID := user.ID
+			_ = h.Repos.AuditLogs.Create(ctx, &model.AuditLog{
+				UserID:   &adminID,
+				UserName: user.Username,
+				Action:   "ROLE_DOWNGRADE_2FA_OFF",
+				Target:   "auth",
+				Details:  "User " + updated.Username + " downgraded to user; 2FA disabled and sessions revoked",
+				IP:       c.ClientIP(),
+			})
+		}
+	}
 	c.JSON(200, adminUserJSON(updated))
 }
 

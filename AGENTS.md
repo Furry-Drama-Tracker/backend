@@ -42,6 +42,8 @@ go run ./cmd/server --listen=unix:/run/furry-drama-be-neo.sock   # Unix socket
 
 ```
 cmd/server/           入口（--config/--listen、TCP/Unix 监听、优雅关停）
+cmd/seed-admin/       初始超管创建 CLI（全库无用户时 UID=0；否则走计数器取号）
+cmd/useradmin/        用户维护 CLI（救砖：重置密码/清2FA/解锁/改角色/改名/吊销会话）
 cmd/diag/             认证排障 CLI（会话墓碑 + authevents 时间线，只读）
 internal/
   config/             ini+env 加载与校验
@@ -49,7 +51,7 @@ internal/
   middleware/         CORS/CSRF/security/ratelimit/apitracker/requestlogger/bodyparse/...
   router/             领域路由单前缀挂载（Mount）+ 路由注册表
   handler/            薄 HTTP 层（auth/{session,device,password,email,account}、usersession、twofactor、users、csrf、health）
-  service/            领域逻辑（登录分支流、refresh 轮换、设备码链、导出）
+  service/            领域逻辑（登录分支流、refresh 轮换、2FA 多因素（TOTP/邮件OTP/Passkey）、用户名改名、导出）
   repository/         mongo repo（Repos 聚合注入）
   model/              struct 映射（bson 标签与既有集合数据形态一致）
   auth/               jwt/cookies/bcrypt/totp/backupcode/fieldcrypto/lockout
@@ -86,12 +88,20 @@ deploy/               systemd unit + ini 模板 + run.sh
 1. **双 token**：access 15m / refresh 7d，HS256；`refreshToken` cookie path=`/api/auth`；419=access 过期（`auth.accessTokenExpired`）
 2. **refresh 轮换 + 重用**：原子 findOneAndUpdate 取用作废；未抢到且 logoutAt 在 **2min** 并发宽限内 → **409**（`auth.concurrentRefresh`，不清 cookie 不吊销）；否则吊销全部 → 401（`auth.refreshTokenReuse`）
 3. **CSRF 三态** 403
-4. **登录分支顺序**：altcha→锁定→删除宽限→密码→邮箱(403 needVerification)→设备(403 needDeviceVerify)→2FA(200 need2FA)→成功；状态码不能乱
+4. **登录分支顺序**：altcha→锁定→删除宽限→密码→邮箱(403 needVerification)→2FA(200 need2FA)→成功；状态码不能乱。（2026-11 起新设备不再强制验证码——改为事后通知邮件；needDeviceVerify/verify-device/confirm-device-login 全链路已移除）
+5. **标识与认证（2026-11 重构）**：
+   - `users.uid`：不可变数字锚（首个用户/seed=0，仅注册顺序、无角色语义；`counters` 集合原子发号；登录标识=用户名(accountId)或邮箱）
+   - accountId=可改登录用户名（POSIX portable filename 字符集收紧版，**允许大小写**）：3-32 位字母/数字/`_`/`-`+黑名单子串+保留名；**GitHub 式大小写策略**——存储保留原样，登录/唯一性/保留期一律按折叠小写 `users.accountIdLower`（唯一索引）判定；改名 `PUT /users/login-name`（密码再认证，冷却 7d，旧名折叠形式写 `loginnamereservations` 保留 90d TTL，豁免自己——大小写微调合法）；注册/`check-accountId` 均查保留期；迁移 `loginname_lower_backfill_v1` 回填存量 lower（变体撞名给后出现者加 _N）
+   - 角色化 2FA：user 禁开（/2fa/enable 403）/creator 可选/admin+superadmin 强制（`middleware.Protect` 内置 force2FASetup 门禁：未开启时拦截非 GET，放行 2fa/logout/verify；`SessionUserJSON`/`MeJSON` 带 `force2FASetup`）；admin 的 /2fa/disable 403（自救走 `cmd/useradmin clear-2fa`）；降级为 user 自动关 2FA+吊销会话
+   - 2FA 挑战响应带 `twoFactorMethods`（totp/emailOtp；emailOtp 仅已验证邮箱）；`login-2fa` 带 `method` 字段；发码 `POST /auth/2fa/email-otp/send`（凭 challenge JWT）
+   - Passkey（go-webauthn）：`/api/passkeys/*`（管理+注册）与 `/api/auth/passkey/*`（登录）；user handle=UID 大端 8 字节；**Passkey 单因素登录直接通过，跳过 2FA 挑战**；仪式会话存内存（单实例语义）
+   - QQ 预留：`externalidentities` 集合 + `OAuthProvider` 接口；`/api/auth/qq/*` 未配置凭据时一律 501
 5. **AES-256-CBC**：key=`sha256(ENCRYPTION_KEY 或 JWT_SECRET)`（二选一非拼接），格式 `enc:iv:ct`，兼容既有加密数据
 6. **单前缀路由**：所有领域端点只挂 `/api/<path>`；v1 镜像已移除，per-endpoint 限流只匹配 `/api/<mount>`；global 作用于全部 `/api/*`
 7. **`_id` 输出 hex 字符串**；`backgroundPrefs` 默认 `{image:'',enabled:false,opacity:30,blur:0}`
 8. 行为怪癖与有意偏离（XSS 处理、固定窗口限流等）集中在 `docs/decisions.md`——**改动任何行为前先读**；`go test ./...` 是行为回归闸门
 9. **会话墓碑**：任何把会话置为 `isActive=false` 的路径都必须写 `revokeReason`（`model.Revoke*`），不得静默置废——`make diag` 与 `authevents` 排障链依赖它；认证失败/吊销事件统一走 `authlog.Recorder`（stderr `event=` + `authevents`）
+10. **维护 CLI**：`go run ./cmd/useradmin <list|show|set-role|reset-password|clear-2fa|unlock|rename|set-email|verify-email|revoke-sessions>`（直连 Mongo，破坏性操作需确认，`--yes` 跳过）——管理员锁死/丢 2FA 的唯一自救通道
 
 <!-- OPENWIKI:START -->
 

@@ -3,6 +3,8 @@ package repository
 import (
 	"context"
 	"errors"
+	"regexp"
+	"strings"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -57,6 +59,13 @@ var publicProjection = bson.M{
 	"lockUntil":            0,
 }
 
+// CountAll 统计用户总数（seed-admin 判断全库是否为空用）。
+func (r *UserRepo) CountAll(ctx context.Context) (int64, error) {
+	ctx, cancel := r.newCtx(ctx)
+	defer cancel()
+	return r.coll.CountDocuments(ctx, bson.M{})
+}
+
 // FindByEmail 按邮箱查找（不含敏感字段）。
 func (r *UserRepo) FindByEmail(ctx context.Context, email string) (*model.User, error) {
 	ctx, cancel := r.newCtx(ctx)
@@ -72,11 +81,69 @@ func (r *UserRepo) FindByEmailWithAuth(ctx context.Context, email string) (*mode
 	return r.findOne(ctx, bson.M{"email": email}, bson.M{"twoFactorSecret": 0, "twoFactorBackupCodes": 0})
 }
 
+// FindByAccountIDWithAuth 按 accountId 查找，附带密码哈希与锁定字段（用户名登录用）。
+func (r *UserRepo) FindByAccountIDWithAuth(ctx context.Context, accountID string) (*model.User, error) {
+	ctx, cancel := r.newCtx(ctx)
+	defer cancel()
+	return r.findOne(ctx, bson.M{"accountIdLower": strings.ToLower(accountID)}, bson.M{"twoFactorSecret": 0, "twoFactorBackupCodes": 0})
+}
+
+// FindByLoginIdentifierWithAuth 按"登录标识"查找：含 @ 按邮箱（保持既有唯一语义），
+// 否则按 accountId（用户名登录）。附带密码哈希与锁定字段。
+func (r *UserRepo) FindByLoginIdentifierWithAuth(ctx context.Context, identifier string) (*model.User, error) {
+	if strings.Contains(identifier, "@") {
+		return r.FindByEmailWithAuth(ctx, identifier)
+	}
+	return r.FindByAccountIDWithAuth(ctx, identifier)
+}
+
+// FindByLoginIdentifier 按"登录标识"查找（含 @ 按邮箱，否则按 accountId），
+// 公开投影（Passkey 登录 options 构造用）。
+func (r *UserRepo) FindByLoginIdentifier(ctx context.Context, identifier string) (*model.User, error) {
+	if strings.Contains(identifier, "@") {
+		return r.FindByEmail(ctx, identifier)
+	}
+	return r.FindByAccountID(ctx, identifier)
+}
+
+// FindByUID 按 UID 查找（维护 CLI 用）。
+func (r *UserRepo) FindByUID(ctx context.Context, uid int64) (*model.User, error) {
+	ctx, cancel := r.newCtx(ctx)
+	defer cancel()
+	return r.findOne(ctx, bson.M{"uid": uid}, bson.M{})
+}
+
+// UpdateLoginName 定点更新 accountId 与改名时间（改名语义，不整文档替换——
+// 避免回滚并发落库的密码轮换/2FA 等字段）。
+func (r *UserRepo) UpdateLoginName(ctx context.Context, id any, loginName string, changedAt time.Time) error {
+	ctx, cancel := r.newCtx(ctx)
+	defer cancel()
+	_, err := r.coll.UpdateOne(ctx, bson.M{"_id": ToObjectID(id)},
+		bson.M{"$set": bson.M{"accountId": loginName, "accountIdLower": strings.ToLower(loginName), "loginNameChangedAt": changedAt}})
+	return err
+}
+
 // FindByEmailWith2FA 按邮箱查找，附带 2FA 敏感字段与锁定字段（login-2fa 用）。
 func (r *UserRepo) FindByEmailWith2FA(ctx context.Context, email string) (*model.User, error) {
 	ctx, cancel := r.newCtx(ctx)
 	defer cancel()
 	return r.findOne(ctx, bson.M{"email": email}, bson.M{})
+}
+
+// FindByAccountIDWith2FA 按 accountId 查找，附带 2FA 敏感字段（用户名登录 2FA 用）。
+func (r *UserRepo) FindByAccountIDWith2FA(ctx context.Context, accountID string) (*model.User, error) {
+	ctx, cancel := r.newCtx(ctx)
+	defer cancel()
+	return r.findOne(ctx, bson.M{"accountIdLower": strings.ToLower(accountID)}, bson.M{})
+}
+
+// FindByLoginIdentifierWith2FA 按"登录标识"查找（含 @ 按邮箱，否则按 accountId），
+// 返回全部字段（login-2fa 用）。
+func (r *UserRepo) FindByLoginIdentifierWith2FA(ctx context.Context, identifier string) (*model.User, error) {
+	if strings.Contains(identifier, "@") {
+		return r.FindByEmailWith2FA(ctx, identifier)
+	}
+	return r.FindByAccountIDWith2FA(ctx, identifier)
 }
 
 // FindByID 按 ID 查找（不含敏感字段）。
@@ -90,7 +157,7 @@ func (r *UserRepo) FindByID(ctx context.Context, id any) (*model.User, error) {
 func (r *UserRepo) FindByAccountID(ctx context.Context, accountID string) (*model.User, error) {
 	ctx, cancel := r.newCtx(ctx)
 	defer cancel()
-	return r.findOne(ctx, bson.M{"accountId": accountID}, publicProjection)
+	return r.findOne(ctx, bson.M{"accountIdLower": strings.ToLower(accountID)}, publicProjection)
 }
 
 // ExistsByEmail 判断邮箱是否已被占用。
@@ -104,7 +171,7 @@ func (r *UserRepo) ExistsByEmail(ctx context.Context, email string) (bool, error
 func (r *UserRepo) ExistsByAccountID(ctx context.Context, accountID string) (bool, error) {
 	ctx, cancel := r.newCtx(ctx)
 	defer cancel()
-	return r.exists(ctx, bson.M{"accountId": accountID})
+	return r.exists(ctx, bson.M{"accountIdLower": strings.ToLower(accountID)})
 }
 
 // Create 插入用户；唯一键冲突返回 IsDuplicateKey(err)。
@@ -117,6 +184,10 @@ func (r *UserRepo) Create(ctx context.Context, u *model.User) error {
 	defer cancel()
 	if u.CreatedAt.IsZero() {
 		u.CreatedAt = time.Now().UTC().Truncate(time.Millisecond)
+	}
+	// 折叠小写兜底：唯一索引是 sparse 的，漏写 accountIdLower 会让大小写唯一性失效。
+	if u.AccountID != "" && u.AccountIDLower == "" {
+		u.AccountIDLower = strings.ToLower(u.AccountID)
 	}
 	res, err := r.coll.InsertOne(ctx, u)
 	if mongo.IsDuplicateKeyError(err) {
@@ -252,7 +323,7 @@ func (r *UserRepo) SetDeletionRequestedAt(ctx context.Context, id any, t *time.T
 }
 
 // FindByIDWithAuth 按 ID 查找，附带密码哈希与账号锁定字段，排除 2FA 密文。
-// （change-password / verify-device / confirm-device-login / reset-password 使用点）。
+// （change-password / reset-password 使用点）。
 func (r *UserRepo) FindByIDWithAuth(ctx context.Context, id any) (*model.User, error) {
 	ctx, cancel := r.newCtx(ctx)
 	defer cancel()
@@ -268,7 +339,7 @@ func (r *UserRepo) FindByIDWithAllSecrets(ctx context.Context, id any) (*model.U
 }
 
 // UpdateDeviceInfoAndLogin 更新登录后的设备信息与最近登录字段。
-// login 成功 / confirm-device-login / login-2fa 使用（四字段定点 $set）。
+// login 成功 / login-2fa 使用（四字段定点 $set）。
 func (r *UserRepo) UpdateDeviceInfoAndLogin(ctx context.Context, id any, deviceInfo model.DeviceInfo, lastLoginAt time.Time, lastLoginIP, lastLoginRegion string) error {
 	ctx, cancel := r.newCtx(ctx)
 	defer cancel()
@@ -509,21 +580,33 @@ func (r *UserRepo) FindMissingAccountID(ctx context.Context) ([]model.User, erro
 	return list, nil
 }
 
-// UpdateAccountID 仅更新 accountId 字段（$set，保留其余字段）。
+// UpdateAccountID 仅更新 accountId 与折叠小写字段（$set，保留其余字段）。
 // 回填迁移语义：只更新被修改的路径（整文档覆盖保存有丢失文档中未知旧字段的风险），
 // 与既有迁移行为一致，勿改为整文档替换。
 func (r *UserRepo) UpdateAccountID(ctx context.Context, id any, accountID string) error {
 	ctx, cancel := r.newCtx(ctx)
 	defer cancel()
-	_, err := r.coll.UpdateOne(ctx, bson.M{"_id": ToObjectID(id)}, bson.M{"$set": bson.M{"accountId": accountID}})
+	_, err := r.coll.UpdateOne(ctx, bson.M{"_id": ToObjectID(id)}, bson.M{"$set": bson.M{
+		"accountId":      accountID,
+		"accountIdLower": strings.ToLower(accountID),
+	}})
 	return err
 }
 
-// AccountIDExistsExcluding 判断 accountId 是否被除 excludeID 之外的用户占用（回填迁移碰撞检测用）。
+// AccountIDExistsExcluding 判断 accountId 是否被除 excludeID 之外的用户占用
+// （迁移碰撞检测 / CLI 用；折叠小写语义）。
+// 兼容两种文档形态：已回填 accountIdLower 的走精确匹配（走索引）；
+// 尚未回填的旧文档退化为大小写不敏感锚定正则（仅迁移窗口期出现，量级有限）。
 func (r *UserRepo) AccountIDExistsExcluding(ctx context.Context, accountID string, excludeID any) (bool, error) {
 	ctx, cancel := r.newCtx(ctx)
 	defer cancel()
-	return r.exists(ctx, bson.M{"accountId": accountID, "_id": bson.M{"$ne": excludeID}})
+	fold := strings.ToLower(accountID)
+	filter := bson.M{"_id": bson.M{"$ne": excludeID}, "$or": bson.A{
+		bson.M{"accountIdLower": fold},
+		bson.M{"accountIdLower": bson.M{"$exists": false},
+			"accountId": primitive.Regex{Pattern: "^" + regexp.QuoteMeta(fold) + "$", Options: "i"}},
+	}}
+	return r.exists(ctx, filter)
 }
 
 // FindDeletionRequestedBefore 返回注销申请时间早于 cutoff 的用户（只需 _id）。

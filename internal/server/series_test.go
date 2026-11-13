@@ -71,7 +71,11 @@ func newSeriesUser(t *testing.T, base string, db *mongo.Database, role string) (
 		t.Fatalf("parse login _id: %v", err)
 	}
 	if role != "" && role != "user" {
-		if _, err := db.Collection("users").UpdateOne(t.Context(), bson.M{"_id": uid}, bson.M{"$set": bson.M{"role": role}}); err != nil {
+		set := bson.M{"role": role}
+		if role == "admin" || role == "superadmin" {
+			set["twoFactorEnabled"] = true
+		}
+		if _, err := db.Collection("users").UpdateOne(t.Context(), bson.M{"_id": uid}, bson.M{"$set": set}); err != nil {
 			t.Fatalf("promote role %s: %v", role, err)
 		}
 	}

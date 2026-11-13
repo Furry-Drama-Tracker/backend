@@ -16,6 +16,7 @@ func (h *Auth) twoFactorKeyHex() string {
 
 // Enable2FA POST /api/2fa/enable（protect）：生成 TOTP secret + 备份码并加密存储。
 // 已启用时直接拒绝——否则一次带有效会话的请求就能把 2FA 静默关掉（twoFactorEnabled=false）。
+// 角色门控：普通用户禁开（2FA 是创作者及以上才开放的能力）；创作者可选。
 // @Summary 开启 2FA（生成密钥）
 // @Tags 2FA
 // @Security bearerAuth
@@ -24,6 +25,10 @@ func (h *Auth) twoFactorKeyHex() string {
 // @Router /2fa/enable [post]
 func (h *Auth) Enable2FA(c *gin.Context) {
 	user, _ := middleware.GetUser(c)
+	if user.Role == middleware.RoleUser {
+		c.JSON(403, gin.H{"message": "普通用户不可开启两步验证"})
+		return
+	}
 	u, err := h.Svc.Repos.Users.FindByIDWithAllSecrets(c.Request.Context(), user.ID)
 	if err != nil {
 		c.JSON(500, gin.H{"message": "服务器错误"})
@@ -63,6 +68,10 @@ func (h *Auth) VerifyEnable2FA(c *gin.Context) {
 	}
 	_ = c.ShouldBindJSON(&req)
 	user, _ := middleware.GetUser(c)
+	if user.Role == middleware.RoleUser {
+		c.JSON(403, gin.H{"message": "普通用户不可开启两步验证"})
+		return
+	}
 	u, err := h.Svc.Repos.Users.FindByIDWithAllSecrets(c.Request.Context(), user.ID)
 	if err != nil || u.TwoFactorSecret == "" {
 		c.JSON(400, gin.H{"message": "2FA not set up"})
@@ -95,6 +104,12 @@ func (h *Auth) Disable2FA(c *gin.Context) {
 	}
 	_ = c.ShouldBindJSON(&req)
 	user, _ := middleware.GetUser(c)
+	// 管理员/超管强制开启 2FA：不允许自行关闭（解锁走 useradmin CLI 的 clear-2fa，
+	// CLI 会吊销全部会话并要求重新走强制设置流程）。
+	if user.Role == middleware.RoleAdmin || user.Role == middleware.RoleSuperAdmin {
+		c.JSON(403, gin.H{"message": "管理员账号强制开启两步验证，不可自行关闭"})
+		return
+	}
 	u, err := h.Svc.Repos.Users.FindByIDWithAllSecrets(c.Request.Context(), user.ID)
 	if err != nil || !u.TwoFactorEnabled {
 		c.JSON(400, gin.H{"message": "2FA not enabled"})

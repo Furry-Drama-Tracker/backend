@@ -154,6 +154,7 @@ func insertUser(t *testing.T, repos *repository.Repos, id string, role string) p
 		Email:                  id[:8] + "@test.com",
 		Role:                   role,
 		IsEmailVerified:        true,
+		TwoFactorEnabled:       role == "admin" || role == "superadmin", // 角色化 2FA
 		EmailNotificationPrefs: model.DefaultEmailNotificationPrefs(),
 	}
 	if err := repos.Users.Create(t.Context(), u); err != nil {

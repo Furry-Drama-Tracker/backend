@@ -15,6 +15,10 @@ import (
 // Repos 聚合全部仓储。
 type Repos struct {
 	Users           *UserRepo
+	Counters        *CounterRepo
+	LoginNameRes    *LoginNameReservationRepo
+	ExternalIdents  *ExternalIdentityRepo
+	Passkeys        *PasskeyRepo
 	Sessions        *SessionRepo
 	UsedTokens      *UsedTokenRepo
 	Notifications   *NotificationRepo
@@ -51,6 +55,10 @@ type Repos struct {
 func NewRepos(db *mongo.Database, loginMaxAttempts, loginLockMinutes int) *Repos {
 	return &Repos{
 		Users:           NewUserRepo(db.Collection("users"), loginMaxAttempts, loginLockMinutes),
+		Counters:        NewCounterRepo(db.Collection("counters")),
+		LoginNameRes:    NewLoginNameReservationRepo(db.Collection("loginnamereservations")),
+		ExternalIdents:  NewExternalIdentityRepo(db.Collection("externalidentities")),
+		Passkeys:        NewPasskeyRepo(db.Collection("passkeys")),
 		Sessions:        NewSessionRepo(db.Collection("usersessions")),
 		UsedTokens:      NewUsedTokenRepo(db.Collection("usedtokens")),
 		Notifications:   NewNotificationRepo(db.Collection("notifications")),

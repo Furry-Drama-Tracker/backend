@@ -2,6 +2,7 @@ package server_test
 
 import (
 	"bytes"
+	"context"
 	"crypto/hmac"
 	"crypto/sha1"
 	"encoding/base64"
@@ -50,6 +51,9 @@ func testServerWithRepos(t *testing.T) (*httptest.Server, *repository.Repos) {
 	cfg.JWT.RefreshTTL = 7 * 24 * time.Hour
 	cfg.Security.LoginMaxAttempts = 5
 	cfg.Security.LoginLockMinutes = 30
+	// 改名策略与生产默认一致（产品语义测试）。
+	cfg.Security.LoginNameCooldownDays = 7
+	cfg.Security.LoginNameReserveDays = 90
 	cfg.Server.AllowOrigins = []string{"http://localhost:3000"}
 
 	db, err := repository.Connect(t.Context(), "mongodb://127.0.0.1:27017/neo_integration_test", "", 10)
@@ -161,6 +165,44 @@ func totpCode(secret string, t time.Time) string {
 	return fmt.Sprintf("%06d", code)
 }
 
+// promoteRole 直接把用户角色改为指定角色（测试辅助）。
+// 角色化 2FA：提升为 admin/superadmin 时同步置 twoFactorEnabled，
+// 否则后续写操作会被 force2FASetup 门禁拦截。
+func promoteRole(t *testing.T, repos *repository.Repos, uid primitive.ObjectID, role string) {
+	t.Helper()
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	if _, err := repos.Users.AdminFindByIDAndSetRole(ctx, uid.Hex(), role); err != nil {
+		t.Fatalf("promote role %s: %v", role, err)
+	}
+	if role == "admin" || role == "superadmin" {
+		if err := repos.Users.EnableTwoFactor(ctx, uid); err != nil {
+			t.Fatalf("set twoFactorEnabled: %v", err)
+		}
+	}
+}
+
+// promoteRoleOnly 只改角色不碰 2FA（测试 force2FASetup 门禁用——被提升的 admin
+// 保持未开启 2FA 状态）。
+func promoteRoleOnly(t *testing.T, repos *repository.Repos, uid primitive.ObjectID, role string) {
+	t.Helper()
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	if _, err := repos.Users.AdminFindByIDAndSetRole(ctx, uid.Hex(), role); err != nil {
+		t.Fatalf("promote role %s: %v", role, err)
+	}
+}
+
+// userIDByEmail 按邮箱查用户 _id（测试辅助）。
+func userIDByEmail(t *testing.T, repos *repository.Repos, email string) primitive.ObjectID {
+	t.Helper()
+	u, err := repos.Users.FindByEmail(context.Background(), email)
+	if err != nil {
+		t.Fatalf("find user %s: %v", email, err)
+	}
+	return u.ID
+}
+
 // TestRegisterLoginMeRefresh 注册→登录→me→refresh 主流程。
 func TestRegisterLoginMeRefresh(t *testing.T) {
 	ts := testServer(t)
@@ -203,10 +245,12 @@ func TestLoginWrongPassword(t *testing.T) {
 
 // TestTwoFactorLoginFlow enable → verify-enable → 登录走 2FA → login-2fa。
 func TestTwoFactorLoginFlow(t *testing.T) {
-	ts := testServer(t)
+	ts, repos := testServerWithRepos(t)
 	c := newClient(t, ts.URL)
 	email := "it2fa_" + fmt.Sprintf("%d", time.Now().UnixNano()%1e7) + "@test.com"
 	c.registerAndLogin(email)
+	// 角色化 2FA：普通用户禁开，创作者及以上才可开启。
+	promoteRole(t, repos, userIDByEmail(t, repos, email), "creator")
 
 	var setup map[string]any
 	resp := c.json("POST", "/api/2fa/enable", nil, &setup)
@@ -278,10 +322,11 @@ func enable2FA(t *testing.T, c *client) (string, []string) {
 // TestTwoFactorEnableTwiceRejected 已启用 2FA 后再次调用 /2fa/enable 必须被拒绝，
 // 否则一次带有效会话的请求就能把 2FA 静默关闭（twoFactorEnabled=false）。
 func TestTwoFactorEnableTwiceRejected(t *testing.T) {
-	ts := testServer(t)
+	ts, repos := testServerWithRepos(t)
 	c := newClient(t, ts.URL)
 	email := "it2fa_re_" + fmt.Sprintf("%d", time.Now().UnixNano()%1e7) + "@test.com"
 	c.registerAndLogin(email)
+	promoteRole(t, repos, userIDByEmail(t, repos, email), "creator")
 
 	enable2FA(t, c)
 
@@ -302,10 +347,11 @@ func TestTwoFactorEnableTwiceRejected(t *testing.T) {
 
 // TestTwoFactorTOTPReplayRejected 同一时间步的 TOTP 码只能被接受一次。
 func TestTwoFactorTOTPReplayRejected(t *testing.T) {
-	ts := testServer(t)
+	ts, repos := testServerWithRepos(t)
 	c := newClient(t, ts.URL)
 	email := "it2fa_rp_" + fmt.Sprintf("%d", time.Now().UnixNano()%1e7) + "@test.com"
 	c.registerAndLogin(email)
+	promoteRole(t, repos, userIDByEmail(t, repos, email), "creator")
 	secret, _ := enable2FA(t, c)
 
 	// 第一次登录：拿到挑战并用当前步长的码通过。
@@ -337,10 +383,11 @@ func TestTwoFactorTOTPReplayRejected(t *testing.T) {
 
 // TestTwoFactorBackupCodeConsumed 备份码登录一次后即失效（哈希存储 + 一次性消费）。
 func TestTwoFactorBackupCodeConsumed(t *testing.T) {
-	ts := testServer(t)
+	ts, repos := testServerWithRepos(t)
 	c := newClient(t, ts.URL)
 	email := "it2fa_bc_" + fmt.Sprintf("%d", time.Now().UnixNano()%1e7) + "@test.com"
 	c.registerAndLogin(email)
+	promoteRole(t, repos, userIDByEmail(t, repos, email), "creator")
 	_, codes := enable2FA(t, c)
 	backup := codes[0]
 

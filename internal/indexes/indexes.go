@@ -62,6 +62,24 @@ func Ensure(ctx context.Context, db *mongo.Database) error {
 	specs := []indexSpec{
 		{coll: "users", name: "email_1", keys: bson.D{{Key: "email", Value: 1}}, unique: true},
 		{coll: "users", name: "accountId_1", keys: bson.D{{Key: "accountId", Value: 1}}, unique: true},
+		// 用户名折叠小写唯一（GitHub 式大小写策略：登录/唯一性按折叠判定；
+		// sparse 容忍迁移前的缺失字段，loginname_lower_backfill_v1 会全部回填）。
+		{coll: "users", name: "accountIdLower_1", keys: bson.D{{Key: "accountIdLower", Value: 1}}, unique: true, sparse: true},
+		// uid 唯一索引（sparse：允许迁移期间/外部写入的缺 uid 文档；正式发号路径
+		// 全部带 uid）。uid_backfill_v1 迁移先于索引建立（启动顺序：migrate → indexes）。
+		{coll: "users", name: "uid_1", keys: bson.D{{Key: "uid", Value: 1}}, unique: true, sparse: true},
+
+		// 用户名（accountId）改名后的旧名保留：loginName 唯一，reservedUntil TTL 自动释放。
+		{coll: "loginnamereservations", name: "loginName_1", keys: bson.D{{Key: "loginName", Value: 1}}, unique: true},
+		{coll: "loginnamereservations", name: "reservedUntil_1", keys: bson.D{{Key: "reservedUntil", Value: 1}}, isTTL: true, ttlSeconds: 0},
+
+		// 外部身份绑定（QQ 预留）：(provider, openid) 唯一。
+		{coll: "externalidentities", name: "provider_1_openid_1", keys: bson.D{{Key: "provider", Value: 1}, {Key: "openid", Value: 1}}, unique: true},
+		{coll: "externalidentities", name: "userId_1", keys: bson.D{{Key: "userId", Value: 1}}},
+
+		// WebAuthn 凭据：credentialId 唯一，userId 查询。
+		{coll: "passkeys", name: "credentialId_1", keys: bson.D{{Key: "credentialId", Value: 1}}, unique: true},
+		{coll: "passkeys", name: "userId_1", keys: bson.D{{Key: "userId", Value: 1}}},
 
 		{coll: "usersessions", name: "userId_1_isActive_1", keys: bson.D{{Key: "userId", Value: 1}, {Key: "isActive", Value: 1}}},
 		{coll: "usersessions", name: "isActive_1_lastActiveAt_-1", keys: bson.D{{Key: "isActive", Value: 1}, {Key: "lastActiveAt", Value: -1}}},

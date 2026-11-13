@@ -9,10 +9,12 @@ package migrate
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log/slog"
 	"regexp"
 	"strings"
+	"time"
 
 	"github.com/Furry-Drama-Tracker/backend/internal/model"
 	"github.com/Furry-Drama-Tracker/backend/internal/repository"
@@ -27,6 +29,8 @@ const (
 	keyAccountIDMigration      = "accountId_migration_v1"
 	keyRoleMigration           = "role_migration_v1"
 	keyCreatorProfileMigration = "creatorProfile_migration_v1"
+	keyUIDBackfillMigration    = "uid_backfill_v1"
+	keyLoginNameLowerMigration = "loginname_lower_backfill_v1"
 )
 
 // nonWordRegex 对应 JS 的 /[^\w]/g（\w = [A-Za-z0-9_]）。
@@ -50,7 +54,147 @@ func Run(ctx context.Context, db *mongo.Database, repos *repository.Repos) error
 	if err := migrateCreatorProfile(ctx, db, repos); err != nil {
 		return fmt.Errorf("migrate creatorProfile: %w", err)
 	}
+	if err := migrateUIDBackfill(ctx, db, repos); err != nil {
+		return fmt.Errorf("migrate uid backfill: %w", err)
+	}
+	if err := migrateLoginNameLowerBackfill(ctx, db, repos); err != nil {
+		return fmt.Errorf("migrate loginname lower backfill: %w", err)
+	}
 	return nil
+}
+
+// migrateLoginNameLowerBackfill 为存量用户回填 accountIdLower（折叠小写）。
+// 背景：大小写策略为 GitHub 式——存储保留原样，登录/唯一性按折叠判定
+// （accountIdLower_1 唯一索引）。存量 accountId 含大写时保留原样不改写；
+// 仅当两个只差大小写的变体（"Alice" 与 "alice"）折叠后冲突时，按 _id 序
+// 给后出现的变体追加 _N 后缀改名（先出现者保留原样）。
+func migrateLoginNameLowerBackfill(ctx context.Context, db *mongo.Database, repos *repository.Repos) error {
+	done, err := repos.Settings.GetFlag(ctx, keyLoginNameLowerMigration)
+	if err != nil {
+		return err
+	}
+	if done {
+		return nil
+	}
+
+	type nameUser struct {
+		ID        primitive.ObjectID `bson:"_id"`
+		AccountID string             `bson:"accountId"`
+	}
+	var users []nameUser
+	cur, err := db.Collection("users").Find(ctx, bson.M{"accountId": bson.M{"$exists": true}},
+		options.Find().SetSort(bson.D{{Key: "_id", Value: 1}}).
+			SetProjection(bson.M{"_id": 1, "accountId": 1}))
+	if err != nil {
+		return err
+	}
+	if err := cur.All(ctx, &users); err != nil {
+		cur.Close(ctx)
+		return err
+	}
+	cur.Close(ctx)
+
+	seenLower := make(map[string]bool, len(users))
+	renamed, backfilled := 0, 0
+	for _, u := range users {
+		lower := strings.ToLower(u.AccountID)
+		if !seenLower[lower] {
+			// 无冲突：只回填折叠字段，accountId 原样保留。
+			seenLower[lower] = true
+			if _, err := db.Collection("users").UpdateOne(ctx, bson.M{"_id": u.ID},
+				bson.M{"$set": bson.M{"accountIdLower": lower}}); err != nil {
+				return err
+			}
+			backfilled++
+			continue
+		}
+		// 折叠冲突（大小写变体）：给后出现者追加 _N 改名（保留先出现者原样）。
+		newName := ""
+		for i := 1; ; i++ {
+			candidate := fmt.Sprintf("%s_%d", lower, i)
+			exists, gerr := repos.Users.AccountIDExistsExcluding(ctx, candidate, u.ID)
+			if gerr != nil {
+				return gerr
+			}
+			if !exists {
+				newName = candidate
+				break
+			}
+		}
+		if err := repos.Users.UpdateAccountID(ctx, u.ID, newName); err != nil {
+			return err
+		}
+		seenLower[strings.ToLower(newName)] = true
+		renamed++
+	}
+	if renamed > 0 || backfilled > 0 {
+		slog.Info("已为存量用户回填用户名折叠字段", "backfilled", backfilled, "renamedConflicts", renamed)
+	}
+	return repos.Settings.SetFlag(ctx, keyLoginNameLowerMigration, bson.M{"done": true})
+}
+
+// uidBackfillUser 是 uid 回填所需的用户投影。
+type uidBackfillUser struct {
+	ID        primitive.ObjectID `bson:"_id"`
+	UID       int64              `bson:"uid"`
+	CreatedAt time.Time          `bson:"createdAt"`
+}
+
+// migrateUIDBackfill 为缺 uid 的用户按 createdAt 升序派发连续 UID（0..N）。
+// 首个用户自然得 0（仅表示注册顺序，无角色语义）；已有 uid 的用户不动。
+// 结束后把 counters.uid 计数器推进到已发最大号，保证后续注册发号不冲突。
+func migrateUIDBackfill(ctx context.Context, db *mongo.Database, repos *repository.Repos) error {
+	done, err := repos.Settings.GetFlag(ctx, keyUIDBackfillMigration)
+	if err != nil {
+		return err
+	}
+	if done {
+		return nil
+	}
+
+	users := db.Collection("users")
+	var pending []uidBackfillUser
+	cur, err := users.Find(ctx,
+		bson.M{"uid": bson.M{"$exists": false}},
+		options.Find().SetSort(bson.D{{Key: "createdAt", Value: 1}, {Key: "_id", Value: 1}}).
+			SetProjection(bson.M{"_id": 1, "uid": 1, "createdAt": 1}))
+	if err != nil {
+		return err
+	}
+	if err := cur.All(ctx, &pending); err != nil {
+		cur.Close(ctx)
+		return err
+	}
+	cur.Close(ctx)
+
+	if len(pending) > 0 {
+		// 起点取全库已存在 uid 的最大值（-1 使无 uid 时从 0 开始）。
+		maxDoc := users.FindOne(ctx, bson.M{"uid": bson.M{"$exists": true}},
+			options.FindOne().SetSort(bson.M{"uid": -1}).SetProjection(bson.M{"uid": 1}))
+		var top struct {
+			UID int64 `bson:"uid"`
+		}
+		maxUID := int64(-1)
+		if err := maxDoc.Decode(&top); err == nil {
+			maxUID = top.UID
+		} else if !errors.Is(err, mongo.ErrNoDocuments) {
+			return err
+		}
+
+		next := maxUID + 1
+		for _, u := range pending {
+			if _, err := users.UpdateOne(ctx, bson.M{"_id": u.ID, "uid": bson.M{"$exists": false}},
+				bson.M{"$set": bson.M{"uid": next}}); err != nil {
+				return err
+			}
+			next++
+		}
+		if err := repos.Counters.SetUIDCounter(ctx, next-1); err != nil {
+			return err
+		}
+		slog.Info("已为存量用户派发 UID", "count", len(pending), "max", next-1)
+	}
+	return repos.Settings.SetFlag(ctx, keyUIDBackfillMigration, bson.M{"done": true})
 }
 
 // migrateAccountID 回填缺 accountId 的用户。

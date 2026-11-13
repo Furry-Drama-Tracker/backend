@@ -55,10 +55,11 @@ func (h *Auth) Captcha(c *gin.Context) {
 // ---- check-accountId ----
 
 // CheckAccountID GET /api/auth/check-accountId?accountId=：返回账号ID是否可用。
+// 响应附带 reason（不可用时的原因文案，前端直接展示）。
 // @Summary 检查账号ID是否可用
 // @Tags 认证
 // @Param accountId query string true "账号ID"
-// @Success 200 {object} map[string]bool "available"
+// @Success 200 {object} map[string]any "available/reason"
 // @Router /auth/check-accountId [get]
 func (h *Auth) CheckAccountID(c *gin.Context) {
 	accountID := c.Query("accountId")
@@ -66,12 +67,8 @@ func (h *Auth) CheckAccountID(c *gin.Context) {
 		c.JSON(400, gin.H{"message": "accountId is required"})
 		return
 	}
-	exists, err := h.Svc.Repos.Users.ExistsByAccountID(c.Request.Context(), accountID)
-	if err != nil {
-		c.JSON(500, gin.H{"message": "服务器错误"})
-		return
-	}
-	c.JSON(200, gin.H{"available": !exists})
+	available, reason := h.Svc.CheckLoginNameAvailable(c.Request.Context(), accountID)
+	c.JSON(200, gin.H{"available": available, "reason": reason})
 }
 
 // ---- register ----
@@ -119,6 +116,7 @@ func (h *Auth) Register(c *gin.Context) {
 // ---- login ----
 
 type loginRequest struct {
+	Identifier string                  `json:"identifier"`
 	Email      string                  `json:"email"`
 	Password   string                  `json:"password"`
 	DeviceInfo *auth.DeviceInfoPayload `json:"deviceInfo"`
@@ -130,15 +128,16 @@ type loginRequest struct {
 // @Tags 认证
 // @Accept json
 // @Produce json
-// @Param body body loginRequest true "登录信息"
+// @Param body body loginRequest true "登录信息（identifier=用户名或邮箱）"
 // @Success 200 {object} map[string]any "用户对象或 need2FA"
 // @Failure 400 {object} map[string]any
-// @Failure 403 {object} map[string]any "needVerification/needDeviceVerify"
+// @Failure 403 {object} map[string]any "needVerification"
 // @Router /auth/login [post]
 func (h *Auth) Login(c *gin.Context) {
 	var req loginRequest
 	_ = c.ShouldBindJSON(&req)
 	res, err := h.Svc.Login(c, service.LoginInput{
+		Identifier: req.Identifier,
 		Email:      req.Email,
 		Password:   req.Password,
 		DeviceInfo: req.DeviceInfo,
@@ -161,18 +160,16 @@ func (h *Auth) Login(c *gin.Context) {
 			"needVerification": true,
 			"email":            res.Email,
 		})
-	case res.NeedDeviceVerify:
-		c.JSON(403, gin.H{
-			"message":          "检测到新设备登录，验证码已发送至您的邮箱",
-			"needDeviceVerify": true,
-			"email":            res.Email,
-			"deviceInfo":       res.DeviceVerifyInfo,
-		})
 	case res.Need2FA:
+		methods := res.TwoFactorMethods
+		if methods == nil {
+			methods = []string{}
+		}
 		c.JSON(200, gin.H{
 			"need2FA":            true,
 			"email":              res.Email,
 			"twoFactorChallenge": res.TwoFactorChallenge,
+			"twoFactorMethods":   methods,
 		})
 	default:
 		c.JSON(500, gin.H{"message": "服务器错误"})

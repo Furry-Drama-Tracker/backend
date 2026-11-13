@@ -258,3 +258,51 @@ func TestGenerateAccountID(t *testing.T) {
 		}
 	}
 }
+
+// TestMigrateLoginNameLowerBackfill 回填折叠小写字段（GitHub 式大小写策略）：
+// 原样大小写保留、accountIdLower 回填、大小写变体冲突给后出现者加 _N、幂等。
+func TestMigrateLoginNameLowerBackfill(t *testing.T) {
+	db, cleanup := testDB(t)
+	defer cleanup()
+	ctx := context.Background()
+	users := db.Collection("users")
+
+	oidAlice := primitive.NewObjectID()
+	oidBob := primitive.NewObjectID()
+	mustInsert(t, users, bson.M{"_id": oidAlice, "username": "Alice", "email": "a@example.com", "accountId": "Alice"})
+	mustInsert(t, users, bson.M{"_id": oidBob, "username": "ALICE2", "email": "b@example.com", "accountId": "ALICE"})
+	mustInsert(t, users, bson.M{"_id": primitive.NewObjectID(), "username": "Lower", "email": "c@example.com", "accountId": "lowerok"})
+
+	repos := repository.NewRepos(db, 5, 30)
+	if err := migrateLoginNameLowerBackfill(ctx, db, repos); err != nil {
+		t.Fatalf("migrateLoginNameLowerBackfill: %v", err)
+	}
+
+	var got struct {
+		AccountID      string `bson:"accountId"`
+		AccountIDLower string `bson:"accountIdLower"`
+	}
+	// 先出现的 Alice：accountId 原样保留，lower 回填 alice。
+	if err := users.FindOne(ctx, bson.M{"_id": oidAlice}).Decode(&got); err != nil || got.AccountID != "Alice" || got.AccountIDLower != "alice" {
+		t.Fatalf("Alice must keep case + get lower: %+v err=%v", got, err)
+	}
+	// 后出现的 ALICE（折叠冲突）：改名 alice_1。
+	if err := users.FindOne(ctx, bson.M{"_id": oidBob}).Decode(&got); err != nil || got.AccountID != "alice_1" || got.AccountIDLower != "alice_1" {
+		t.Fatalf("ALICE variant must be renamed alice_1: %+v err=%v", got, err)
+	}
+	// 无冲突者原样保留。
+	if err := users.FindOne(ctx, bson.M{"_id": primitive.NewObjectID()}).Err(); err == nil {
+		t.Fatal("unexpected user matched by empty id")
+	}
+	if err := users.FindOne(ctx, bson.M{"accountId": "lowerok"}).Err(); err != nil {
+		t.Fatalf("lowerok must remain: %v", err)
+	}
+
+	// 幂等：二次执行不再改动。
+	if err := migrateLoginNameLowerBackfill(ctx, db, repos); err != nil {
+		t.Fatalf("second run: %v", err)
+	}
+	if err := users.FindOne(ctx, bson.M{"_id": oidAlice}).Decode(&got); err != nil || got.AccountID != "Alice" {
+		t.Fatalf("second run must not change names: %+v", got)
+	}
+}

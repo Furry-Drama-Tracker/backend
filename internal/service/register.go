@@ -35,6 +35,7 @@ type RegisterResult struct {
 // Register 注册流程（校验顺序为固定契约，勿重排）。
 // 返回错误时是 *errors.AppError（handler 用 AbortWithAppError 渲染）。
 func (s *AuthService) Register(ctx context.Context, in RegisterInput) (*RegisterResult, error) {
+	// 用户名保留原样大小写（GitHub 式）；唯一性/登录按折叠小写（accountIdLower）判定。
 	accountID := strings.TrimSpace(in.AccountID)
 	username := strings.TrimSpace(in.Username)
 	email := strings.ToLower(strings.TrimSpace(in.Email))
@@ -42,16 +43,17 @@ func (s *AuthService) Register(ctx context.Context, in RegisterInput) (*Register
 	if !s.VerifyAltcha(in.Altcha, in.DevToken) {
 		return nil, errors.New(400, "验证码错误或已过期")
 	}
+	// 注册凭据要求：用户名 + 密码 + （邮箱 或 外部身份）至少其一。
+	// QQ 登录上线后，OAuth 注册路径（externalidentities 有绑定、无邮箱）在此分支放行
+	// email 为空；本期 QQ 未开放，邮箱仍为必填。
 	if !EmailRegex.MatchString(email) {
 		return nil, errors.New(400, "邮箱格式不正确")
 	}
-	if len(accountID) < 3 || len(accountID) > 20 {
-		return nil, errors.New(400, "账号ID长度需在3-20个字符之间")
+	// 用户名（accountId 字段）新规则：小写 POSIX 风格 + 黑名单子串 + 保留名。
+	if msg := ValidateLoginName(accountID, s.Config.Security.UsernameBlacklist); msg != "" {
+		return nil, errors.New(400, msg)
 	}
-	if !AccountIDRegex.MatchString(accountID) {
-		return nil, errors.New(400, "账号ID只能包含字母、数字和下划线")
-	}
-	if len(username) < 1 || len(username) > 20 {
+	if len([]rune(username)) < 1 || len([]rune(username)) > 20 {
 		return nil, errors.New(400, "昵称长度需在1-20个字符之间")
 	}
 	if msg := ValidatePassword(in.Password); msg != "" {
@@ -78,8 +80,20 @@ func (s *AuthService) Register(ctx context.Context, in RegisterInput) (*Register
 	} else if exists {
 		return nil, errors.New(400, "该账号ID已被占用")
 	}
+	// 旧用户名保留期检查（改名释放的旧名在 reservedUntil 内不可注册，防冒充；
+	// 按折叠小写匹配，注册者无自身豁免）。
+	if reserved, err := s.Repos.LoginNameRes.ExistsActive(ctx, strings.ToLower(accountID), time.Now(), nil); err != nil {
+		return nil, errors.New(500, "服务器错误")
+	} else if reserved {
+		return nil, errors.New(400, "该用户名正在保留期，暂时不可注册")
+	}
 
 	hash, err := auth.Hash(in.Password)
+	if err != nil {
+		return nil, errors.New(500, "服务器错误")
+	}
+	// UID 发号：注册顺序号（首个用户/seed=0；普通注册从计数器取号）。
+	uid, err := s.Repos.Counters.NextUID(ctx)
 	if err != nil {
 		return nil, errors.New(500, "服务器错误")
 	}
@@ -90,7 +104,9 @@ func (s *AuthService) Register(ctx context.Context, in RegisterInput) (*Register
 		region = s.IPRegion.GetRegion(ctx, in.IP)
 	}
 	user := &model.User{
+		UID:                    uid,
 		AccountID:              accountID,
+		AccountIDLower:         strings.ToLower(accountID),
 		Username:               username,
 		Email:                  email,
 		Password:               hash,

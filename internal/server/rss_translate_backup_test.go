@@ -78,7 +78,9 @@ func rtbNewRoleUser(t *testing.T, repos *repository.Repos, signer *auth.Signer, 
 		Email:           fmt.Sprintf("%s_%d@test.com", prefix, n),
 		Role:            role,
 		IsEmailVerified: true,
-		CreatedAt:       time.Now(),
+		// 角色化 2FA：admin/superadmin 必须开启 2FA（否则写操作被 force2FASetup 拦截）。
+		TwoFactorEnabled: role == "admin" || role == "superadmin",
+		CreatedAt:        time.Now(),
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()

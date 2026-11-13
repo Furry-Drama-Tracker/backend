@@ -17,7 +17,10 @@ import (
 )
 
 // LoginInput 是登录请求解析结果。
+// Identifier 是登录标识：用户名（accountId）或邮箱（含 @ 即按邮箱查找）。
+// Email 字段保留兼容（前端旧版本仍发 email）。
 type LoginInput struct {
+	Identifier string
 	Email      string
 	Password   string
 	DeviceInfo *auth.DeviceInfoPayload
@@ -32,26 +35,30 @@ type LoginInput struct {
 type LoginResult struct {
 	Email              string
 	NeedVerification   bool
-	NeedDeviceVerify   bool
-	DeviceVerifyInfo   gin.H
 	Need2FA            bool
 	TwoFactorChallenge string
-	User               *model.User
+	// TwoFactorMethods 是登录响应中告知前端可用的第二因素（totp/emailOtp）。
+	TwoFactorMethods []string
+	User             *model.User
 }
 
 // Login 登录分支流程。分支顺序是固定契约，必须严格保持，勿重排。
 // 需要 *gin.Context（登录成功时设置 access/refresh cookie）。
 func (s *AuthService) Login(c *gin.Context, in LoginInput) (*LoginResult, error) {
 	ctx := c.Request.Context()
-	emailAddr := strings.ToLower(strings.TrimSpace(in.Email))
+	identifier := strings.ToLower(strings.TrimSpace(in.Identifier))
+	if identifier == "" {
+		// 兼容旧客户端：回退到 email 字段。
+		identifier = strings.ToLower(strings.TrimSpace(in.Email))
+	}
 
 	if !s.VerifyAltcha(in.Altcha, in.DevToken) {
 		return nil, errors.New(400, "验证码错误或已过期")
 	}
 
-	user, err := s.Repos.Users.FindByEmailWithAuth(ctx, emailAddr)
+	user, err := s.Repos.Users.FindByLoginIdentifierWithAuth(ctx, identifier)
 	if err != nil {
-		// 不区分“邮箱不存在”和“密码错误”，降低账号枚举面。
+		// 不区分"账号不存在"和"密码错误"，降低账号枚举面。
 		return nil, errors.New(400, "用户名或密码错误")
 	}
 	if repository.IsLocked(user) {
@@ -89,64 +96,11 @@ func (s *AuthService) Login(c *gin.Context, in LoginInput) (*LoginResult, error)
 	}
 
 	// skipVerification 且未验证 → 自动置 verified（对齐 L345-348）。
-	// 定点 $set：此处 user 来自 FindByEmailWithAuth（不含 2FA 密文），整文档替换
+	// 定点 $set：此处 user 来自 FindByLoginIdentifierWithAuth（不含 2FA 密文），整文档替换
 	// 会把 twoFactorSecret/twoFactorBackupCodes 清成零值。
 	if s.SkipVerification(user) && !user.IsEmailVerified {
 		user.IsEmailVerified = true
 		_ = s.Repos.Users.UpdateVerified(ctx, user.ID)
-	}
-
-	// 新设备检测：以服务端签发的设备令牌（fdt-device cookie ↔ 会话 deviceTokenHash）
-	// 判定已知设备。User-Agent 客户端完全可控、可枚举重放（CWE-290），仅作展示，
-	// 不再作为信任依据；旧会话无 deviceTokenHash → 不匹配（fail-closed），
-	// 下次登录走一次设备验证码后写入。
-	knownSessions, _ := s.Repos.Sessions.FindActiveByUser(ctx, user.ID)
-	deviceToken := auth.GetDeviceToken(c)
-	isKnownDevice := false
-	if deviceToken != "" {
-		tokenHash := auth.HashToken(deviceToken)
-		for _, sess := range knownSessions {
-			if sess.DeviceTokenHash != "" && sess.DeviceTokenHash == tokenHash {
-				isKnownDevice = true
-				break
-			}
-		}
-	}
-	// 任何未识别设备都要求邮箱验证码（不再以“已有 session”为前置条件）。
-	// 邮件服务未配置时无法发送验证码，退化为仅密码登录，避免整站无法登录。
-	mailReady := false
-	if s.Mail != nil {
-		_, mailReady = s.Mail.GetConfig(ctx)
-	}
-	if !isKnownDevice && !s.SkipVerification(user) && !s.devTokenActive(in.DevToken) && mailReady {
-		loginCode := s.DeviceLoginCodes.Mint(code.Entry{
-			UserID:    user.ID.Hex(),
-			ExpiresAt: time.Now().Add(CodeTTL),
-			Need2FA:   user.TwoFactorEnabled,
-			Attempts:  0,
-		})
-		parsed := auth.ParseUserAgent(in.Ua)
-		if s.Mail != nil {
-			go s.Mail.SendNewDeviceLoginEmail(context.Background(), user.Email, email.DeviceInfo{
-				Browser:        parsed.Browser,
-				BrowserVersion: parsed.BrowserVersion,
-				OS:             parsed.OS,
-				OSVersion:      parsed.OSVersion,
-				DeviceType:     parsed.DeviceType,
-			}, in.IP, "", loginCode, time.Now())
-		}
-		return &LoginResult{
-			Email:            user.Email,
-			NeedDeviceVerify: true,
-			DeviceVerifyInfo: gin.H{
-				"browser":        parsed.Browser,
-				"browserVersion": parsed.BrowserVersion,
-				"os":             parsed.OS,
-				"osVersion":      parsed.OSVersion,
-				"deviceType":     parsed.DeviceType,
-				"ip":             in.IP,
-			},
-		}, nil
 	}
 
 	// 2FA 已开启 → 返回 2FA 挑战（JWT 5m purpose=2fa-challenge），对齐 L408-419。
@@ -155,33 +109,72 @@ func (s *AuthService) Login(c *gin.Context, in LoginInput) (*LoginResult, error)
 		if err != nil {
 			return nil, errors.New(500, "服务器错误")
 		}
-		return &LoginResult{Email: user.Email, Need2FA: true, TwoFactorChallenge: challenge}, nil
+		return &LoginResult{
+			Email:              user.Email,
+			Need2FA:            true,
+			TwoFactorChallenge: challenge,
+			TwoFactorMethods:   s.availableTwoFactorMethods(user),
+		}, nil
 	}
 
 	// 登录成功：更新设备信息 + 签发会话 + 审计 + 新设备提醒。
-	parsed := auth.ParseUserAgent(in.Ua)
-	di := auth.BuildDeviceInfo(in.DeviceInfo, parsed, in.Ua, in.AcceptLang)
+	ua := c.Request.UserAgent()
+	parsed := auth.ParseUserAgent(ua)
+	di := auth.BuildDeviceInfo(in.DeviceInfo, parsed, ua, in.AcceptLang)
+	ip := s.ClientIP(c)
 	region := "未知"
 	if s.IPRegion != nil {
-		region = s.IPRegion.GetRegion(ctx, in.IP)
+		region = s.IPRegion.GetRegion(ctx, ip)
 	}
 	now := time.Now()
 	user.DeviceInfo = di
 	user.LastLoginAt = &now
-	user.LastLoginIP = in.IP
+	user.LastLoginIP = ip
 	user.LastLoginRegion = region
 	// 登录态字段定点更新（勿整文档替换）：并发密码轮换落库后，
 	// 本请求早前加载的旧结构若整体回写会把新哈希回滚（复活旧密码）。
-	_ = s.Repos.Users.UpdateDeviceInfoAndLogin(ctx, user.ID, di, now, in.IP, region)
+	_ = s.Repos.Users.UpdateDeviceInfoAndLogin(ctx, user.ID, di, now, ip, region)
 
-	if err := s.IssueSession(c, user, di, in.IP, "LOGIN"); err != nil {
+	if err := s.IssueSession(c, user, di, ip, "LOGIN"); err != nil {
 		return nil, errors.New(500, "服务器错误")
 	}
-	// 新设备登录提醒邮件（已注册 session 前提下，跳过设备验证时也发送），对齐 L446-453。
-	if s.Mail != nil {
-		go s.sendNewDeviceNotification(user, parsed, in.IP, region)
+	// 未识别设备 → 发通知邮件（受 emailNotificationPrefs.newDeviceLogin 控制）。
+	// 已识别设备不再重复提醒。通知是"事后提醒"，不再拦截登录。
+	if s.Mail != nil && !s.isKnownDevice(ctx, c, user.ID) {
+		go s.sendNewDeviceNotification(user, parsed, ip, region)
 	}
 	return &LoginResult{User: user}, nil
+}
+
+// isKnownDevice 以服务端签发的设备令牌（fdt-device cookie ↔ 会话 deviceTokenHash）
+// 判定已知设备。User-Agent 客户端完全可控、可枚举重放（CWE-290），仅作展示，
+// 不再作为信任依据。旧会话无 deviceTokenHash → 不匹配（fail-closed）。
+func (s *AuthService) isKnownDevice(ctx context.Context, c *gin.Context, userID interface{}) bool {
+	deviceToken := auth.GetDeviceToken(c)
+	if deviceToken == "" {
+		return false
+	}
+	tokenHash := auth.HashToken(deviceToken)
+	knownSessions, err := s.Repos.Sessions.FindActiveByUser(ctx, userID)
+	if err != nil {
+		return false
+	}
+	for _, sess := range knownSessions {
+		if sess.DeviceTokenHash != "" && sess.DeviceTokenHash == tokenHash {
+			return true
+		}
+	}
+	return false
+}
+
+// availableTwoFactorMethods 返回用户可用的第二因素方法列表。
+// totp 恒有（TOTP 密钥在 2FA 开启时必已注册）；emailOtp 仅邮箱已验证时可用。
+func (s *AuthService) availableTwoFactorMethods(u *model.User) []string {
+	methods := []string{"totp"}
+	if u.IsEmailVerified && u.Email != "" {
+		methods = append(methods, "emailOtp")
+	}
+	return methods
 }
 
 func (s *AuthService) devTokenActive(devToken string) bool {

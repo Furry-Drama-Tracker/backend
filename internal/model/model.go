@@ -19,12 +19,21 @@ import (
 
 // User 对应用户文档（users 集合）。
 type User struct {
-	ID                     primitive.ObjectID     `bson:"_id,omitempty" json:"_id"`
-	AccountID              string                 `bson:"accountId" json:"accountId"`
-	Username               string                 `bson:"username" json:"username"`
-	Email                  string                 `bson:"email" json:"email"`
-	Password               string                 `bson:"password" json:"-"`
-	Avatar                 string                 `bson:"avatar" json:"avatar"`
+	ID primitive.ObjectID `bson:"_id,omitempty" json:"_id"`
+	// UID 是不可变的数字用户锚（首个用户/seed 账号 = 0，仅表示注册顺序，无角色语义）。
+	// 权限判定只看 Role；uid 由 counters 集合原子发号，注册后永不变更。
+	UID int64 `bson:"uid" json:"uid"`
+	AccountID string `bson:"accountId" json:"accountId"`
+	// AccountIDLower 是 accountId 的折叠小写（GitHub 式大小写策略）：登录查找、
+	// 唯一性判定一律走它（accountIdLower_1 唯一索引）；存储保留原样大小写。
+	AccountIDLower        string             `bson:"accountIdLower" json:"-"`
+	Username               string             `bson:"username" json:"username"`
+	Email                  string             `bson:"email" json:"email"`
+	Password               string             `bson:"password" json:"-"`
+	Avatar                 string             `bson:"avatar" json:"avatar"`
+	// LoginNameChangedAt 是最近一次用户名（accountId）改名时间（nil=从未改过），
+	// 改名冷却检查使用。
+	LoginNameChangedAt     *time.Time         `bson:"loginNameChangedAt,omitempty" json:"loginNameChangedAt,omitempty"`
 	DeviceInfo             DeviceInfo             `bson:"deviceInfo" json:"deviceInfo"`
 	LastLoginAt            *time.Time             `bson:"lastLoginAt" json:"lastLoginAt"`
 	LastLoginIP            string                 `bson:"lastLoginIp" json:"lastLoginIp"`

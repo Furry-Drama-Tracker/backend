@@ -8,12 +8,14 @@ import (
 	"encoding/base64"
 	"encoding/hex"
 	"encoding/json"
+	"log/slog"
 	"regexp"
 	"strings"
 	"time"
 
 	altchalib "github.com/altcha-org/altcha-lib-go/v2"
 	"github.com/gin-gonic/gin"
+	webauthnlib "github.com/go-webauthn/webauthn/webauthn"
 
 	"github.com/Furry-Drama-Tracker/backend/internal/auth"
 	"github.com/Furry-Drama-Tracker/backend/internal/authlog"
@@ -43,7 +45,16 @@ type AuthService struct {
 	Config   *config.Config
 
 	EmailVerifyCodes *code.Store
-	DeviceLoginCodes *code.Store
+	// EmailOTPCodes 是 2FA 邮件 OTP 第二因素验证码存储（独立于注册/登录验证码，
+	// 避免同码跨流程误消费）。
+	EmailOTPCodes *code.Store
+
+	// Passkey（WebAuthn）：引擎实例（构造失败为 nil → 路由 503）与仪式会话存储。
+	passkeyWA        *webauthnlib.WebAuthn
+	passkeyCeremonies *ceremonyStore
+
+	// QQ 是外部身份 provider（预留；未配置凭据时为 disabled 占位实现）。
+	QQ OAuthProvider
 
 	// Rec 是认证诊断事件记录器（可选，nil 时静默）。
 	Rec *authlog.Recorder
@@ -51,14 +62,32 @@ type AuthService struct {
 
 // NewAuthService 构造认证服务并初始化验证码内存存储。
 func NewAuthService(cfg *config.Config, repos *repository.Repos, signer *auth.Signer, mail *email.Client, ipr *ipregion.Client) *AuthService {
+	// WebAuthn 引擎：配置缺失/非法时仅告警不致命（Passkey 路由会回 503，
+	// 其余认证方式不受影响）。RPID/Origins 由 config.Load 兜底推导，此处一般不会失败。
+	wa, waErr := webauthnlib.New(&webauthnlib.Config{
+		RPID:          cfg.WebAuthn.RPID,
+		RPDisplayName: cfg.WebAuthn.RPName,
+		RPOrigins:     cfg.WebAuthn.Origins,
+	})
+	if waErr != nil {
+		slog.Warn("WebAuthn 引擎初始化失败，Passkey 功能将不可用", "err", waErr)
+		wa = nil
+	}
+	if wa != nil && (cfg.WebAuthn.RPID == "" || len(cfg.WebAuthn.Origins) == 0) {
+		slog.Warn("WebAuthn 配置不完整（rp_id/origins 为空），Passkey 功能将不可用")
+		wa = nil
+	}
 	return &AuthService{
-		Repos:            repos,
-		Signer:           signer,
-		Mail:             mail,
-		IPRegion:         ipr,
-		Config:           cfg,
-		EmailVerifyCodes: code.NewStore(CodeTTL),
-		DeviceLoginCodes: code.NewStore(CodeTTL),
+		Repos:             repos,
+		Signer:            signer,
+		Mail:              mail,
+		IPRegion:          ipr,
+		Config:            cfg,
+		EmailVerifyCodes:  code.NewStore(CodeTTL),
+		EmailOTPCodes:     code.NewStore(CodeTTL),
+		passkeyWA:         wa,
+		passkeyCeremonies: newCeremonyStore(),
+		QQ:                NewQQProvider(cfg.OAuth.QQAppID, cfg.OAuth.QQAppKey),
 	}
 }
 
@@ -128,24 +157,29 @@ func (s *AuthService) ForceEmailChange(u *model.User) bool {
 }
 
 // SessionUserJSON 组装登录/refresh 响应的用户对象（字段集为固定契约，勿增删）。
+// 本期扩展：新增 uid（数字用户锚）与 force2FASetup（管理员未开 2FA 的强制设置标记）。
 func (s *AuthService) SessionUserJSON(u *model.User) gin.H {
 	return gin.H{
 		"_id":                u.ID.Hex(),
+		"uid":                u.UID,
 		"accountId":          u.AccountID,
 		"username":           u.Username,
 		"email":              u.Email,
 		"isEmailVerified":    u.IsEmailVerified,
 		"role":               u.Role,
 		"forceEmailChange":   s.ForceEmailChange(u),
+		"force2FASetup":      requiresTwoFactorSetup(u),
 		"backgroundPrefs":    u.BackgroundPrefs,
 		"personalWallpapers": nonNilWallpapers(u.PersonalWallpapers),
 	}
 }
 
 // MeJSON 组装 /me 响应（字段集为固定契约，勿增删）。
+// 本期扩展：新增 uid 与 force2FASetup。
 func (s *AuthService) MeJSON(u *model.User) gin.H {
 	return gin.H{
 		"_id":                    u.ID.Hex(),
+		"uid":                    u.UID,
 		"accountId":              u.AccountID,
 		"username":               u.Username,
 		"email":                  u.Email,
@@ -153,9 +187,16 @@ func (s *AuthService) MeJSON(u *model.User) gin.H {
 		"role":                   u.Role,
 		"avatar":                 u.Avatar,
 		"emailNotificationPrefs": u.EmailNotificationPrefs,
+		"force2FASetup":          requiresTwoFactorSetup(u),
 		"backgroundPrefs":        u.BackgroundPrefs,
 		"personalWallpapers":     nonNilWallpapers(u.PersonalWallpapers),
 	}
+}
+
+// requiresTwoFactorSetup 判断是否应向响应附加 force2FASetup 标记
+// （admin/superadmin 角色且 2FA 未开启）。
+func requiresTwoFactorSetup(u *model.User) bool {
+	return (u.Role == "admin" || u.Role == "superadmin") && !u.TwoFactorEnabled
 }
 
 // nonNilWallpapers 把 nil 墙纸数组归一化为空数组（输出恒为数组，固定契约）。

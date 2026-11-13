@@ -9,6 +9,7 @@ import (
 
 	"github.com/Furry-Drama-Tracker/backend/internal/errors"
 	"github.com/Furry-Drama-Tracker/backend/internal/middleware"
+	"github.com/Furry-Drama-Tracker/backend/internal/service"
 	"github.com/Furry-Drama-Tracker/backend/internal/upload"
 )
 
@@ -79,6 +80,54 @@ func (h *Auth) Profile(c *gin.Context) {
 		"role":            u.Role,
 		"avatar":          u.Avatar,
 	})
+}
+
+// LoginName PUT /api/users/login-name（protect）：用户名改名（密码再认证 +
+// 校验 + 冷却）。成功后旧名进入保留期（默认 90 天，期间他人不可注册）。
+// @Summary 修改登录用户名
+// @Tags 用户
+// @Security bearerAuth
+// @Accept json
+// @Param body body object true "newLoginName/currentPassword"
+// @Success 200 {object} map[string]any "accountId/cooldownDays"
+// @Router /users/login-name [put]
+func (h *Auth) LoginName(c *gin.Context) {
+	var req struct {
+		NewLoginName    string `json:"newLoginName"`
+		CurrentPassword string `json:"currentPassword"`
+	}
+	_ = c.ShouldBindJSON(&req)
+	user, _ := middleware.GetUser(c)
+	newName, cooldownDays, err := h.Svc.ChangeLoginName(c.Request.Context(), user, service.ChangeLoginNameInput{
+		NewLoginName:    req.NewLoginName,
+		CurrentPassword: req.CurrentPassword,
+	})
+	if err != nil {
+		errors.AbortWithAppError(c, err, h.Config.IsDev)
+		return
+	}
+	c.JSON(200, gin.H{
+		"message":      "用户名修改成功",
+		"accountId":    newName,
+		"cooldownDays": cooldownDays,
+	})
+}
+
+// CheckLoginName GET /api/users/check-login-name?name=（protect）：改名前预检。
+// @Summary 检查用户名是否可用
+// @Tags 用户
+// @Security bearerAuth
+// @Param name query string true "用户名"
+// @Success 200 {object} map[string]any "available/reason"
+// @Router /users/check-login-name [get]
+func (h *Auth) CheckLoginName(c *gin.Context) {
+	name := c.Query("name")
+	if name == "" {
+		c.JSON(400, gin.H{"message": "name is required"})
+		return
+	}
+	available, reason := h.Svc.CheckLoginNameAvailable(c.Request.Context(), name)
+	c.JSON(200, gin.H{"available": available, "reason": reason})
 }
 
 // ExportMyData GET /api/users/export-my-data（protect + exportLimiter 3/h）。

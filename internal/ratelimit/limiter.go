@@ -83,19 +83,27 @@ var (
 		Window: time.Hour, Max: 3,
 		Message: "操作过于频繁，请稍后再试",
 	}
-	// TwoFactorSpec 2FA 限流器 5/15min（挂 login-2fa/verify-enable/disable/verify/
-	// verify-device/confirm-device-login 六处）。
+	// TwoFactorSpec 2FA 限流器 5/15min（挂 login-2fa/verify-enable/disable/verify
+	// 与邮件 OTP 发码四处）。
 	// 注意：/auth/refresh 不在此列——正常轮换流量与暴力破解额度共桶会让
 	// 移动网络（运营商 NAT 共享出口 IP）用户被误伤成 429，见 RefreshSpec。
 	TwoFactorSpec = Spec{
 		Name: TwoFactorName,
 		Mounts: []string{"/auth/login-2fa", "/2fa/verify-enable", "/2fa/disable",
-			"/2fa/verify", "/auth/verify-device", "/auth/confirm-device-login"},
+			"/2fa/verify", "/auth/2fa/email-otp/send"},
 		Window: 15 * time.Minute, Max: 5,
 		Message: "操作过于频繁，请15分钟后再试",
 	}
-	// RefreshSpec 令牌轮换限流器 60/15min（挂 /api/auth/refresh）。
-	// 背景：access 15 分钟一换 → 单用户约 4 次/小时；共享出口 IP 下多个用户
+	// PasskeySpec Passkey（WebAuthn）仪式限流器 10/15min（IP 键：注册/登录仪式
+	// 请求体不含 email，天然走 IP 键；仪式本身有 ceremony 会话一次性约束）。
+	PasskeySpec = Spec{
+		Name: "passkey",
+		Mounts: []string{"/passkeys/register/options", "/passkeys/register/verify",
+			"/auth/passkey/options", "/auth/passkey/verify"},
+		Window:  15 * time.Minute, Max: 10,
+		Message: "操作过于频繁，请15分钟后再试",
+	}
+	// RefreshSpec 令牌轮换限流器 60/15min（挂 /api/auth/refresh）。	// 背景：access 15 分钟一换 → 单用户约 4 次/小时；共享出口 IP 下多个用户
 	// 叠加很容易超过原 2FA 桶的 5/15min，客户端会把 429 当成登出。
 	// 取值 60/15min（4 次/分钟）既能容纳 NAT 共享与多标签页并发，又保留 DoS 约束；
 	// refresh token 是高熵随机串，不存在被爆破的现实风险，故按可用性优先。

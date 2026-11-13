@@ -58,6 +58,26 @@ func main() {
 	} else if exists {
 		log.Fatalf("账号ID已被占用: %s", accountID)
 	}
+	// 新用户名校验（黑名单/保留名）。存量账号不校验，但 seed 创建的是新账号。
+	if msg := service.ValidateLoginName(accountID, os.Getenv("USERNAME_BLACKLIST")); msg != "" {
+		log.Fatalf("账号ID不合规: %s", msg)
+	}
+
+	// UID 分配：仅全库无用户时（首次建站）显式取 0（首个用户 = 0，仅注册顺序，
+	// 无角色语义）；库中已有用户则走计数器取下一个号，不会抢 0。
+	totalUsers, err := repos.Users.CountAll(ctx)
+	if err != nil {
+		log.Fatalf("统计用户数失败: %v", err)
+	}
+	uid := int64(0)
+	if totalUsers > 0 {
+		uid, err = repos.Counters.NextUID(ctx)
+		if err != nil {
+			log.Fatalf("发号失败: %v", err)
+		}
+	} else if err := repos.Counters.SetUIDCounter(ctx, 0); err != nil {
+		log.Fatalf("初始化发号器失败: %v", err)
+	}
 
 	hash, err := auth.Hash(password)
 	if err != nil {
@@ -66,6 +86,7 @@ func main() {
 	now := time.Now()
 	user := &model.User{
 		ID:                     primitive.NewObjectID(),
+		UID:                    uid,
 		AccountID:              accountID,
 		Username:               "admin",
 		Email:                  email,
@@ -81,5 +102,5 @@ func main() {
 	if err := repos.Users.Create(ctx, user); err != nil {
 		log.Fatalf("创建超级管理员失败: %v", err)
 	}
-	log.Printf("超级管理员创建成功: %s (%s)", accountID, email)
+	log.Printf("超级管理员创建成功: %s (uid=%d) %s", accountID, uid, email)
 }
