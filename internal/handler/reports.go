@@ -50,7 +50,7 @@ func (h *Reports) Register(g *gin.RouterGroup) {
 // @Accept json
 // @Param body body object true "targetType/targetId/reason/description"
 // @Success 201 {object} map[string]any "举报记录"
-// @Failure 400 {object} map[string]string "Invalid target type / Invalid reason / 描述不能超过2000个字符 / Already reported"
+// @Failure 400 {object} errors.ErrorBody "Invalid target type / Invalid reason / 描述不能超过2000个字符 / Already reported"
 // @Router /reports [post]
 func (h *Reports) Create(c *gin.Context) {
 	user, _ := middleware.GetUser(c)
@@ -176,8 +176,8 @@ func (h *Reports) List(c *gin.Context) {
 // @Param id path string true "举报 ID"
 // @Param body body object true "status/resolveNote"
 // @Success 200 {object} map[string]any "处理后的举报记录"
-// @Failure 400 {object} map[string]string "Invalid status"
-// @Failure 404 {object} map[string]string "Report not found"
+// @Failure 400 {object} errors.ErrorBody "Invalid status"
+// @Failure 404 {object} errors.ErrorBody "Report not found"
 // @Router /reports/resolve/{id} [put]
 func (h *Reports) Resolve(c *gin.Context) {
 	user, _ := middleware.GetUser(c)

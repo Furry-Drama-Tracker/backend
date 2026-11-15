@@ -24,7 +24,7 @@ func (h *Auth) QQOAuthStatus(c *gin.Context) {
 // @Summary 开始 QQ 授权（预留）
 // @Tags 认证
 // @Success 200 {object} map[string]string "authUrl"
-// @Failure 501 {object} map[string]string
+// @Failure 501 {object} errors.ErrorBody
 // @Router /auth/qq/start [get]
 func (h *Auth) QQOAuthStart(c *gin.Context) {
 	if !h.Svc.QQ.Enabled() {
@@ -43,7 +43,7 @@ func (h *Auth) QQOAuthStart(c *gin.Context) {
 // @Summary QQ 授权回调（预留）
 // @Tags 认证
 // @Accept json
-// @Failure 501 {object} map[string]string
+// @Failure 501 {object} errors.ErrorBody
 // @Router /auth/qq/callback [post]
 func (h *Auth) QQOAuthCallback(c *gin.Context) {
 	if !h.Svc.QQ.Enabled() {

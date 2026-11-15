@@ -99,7 +99,8 @@ deploy/               systemd unit + ini 模板 + run.sh
 - **message 恒为纯文案**：编号只经 `error`/`ref` JSON 字段传递，后端不拼进 message；出错编号展示与复制由前端从字段拼装（`frontend/src/utils/errorMeta.js`，格式 `USR0007-000123456`）。生产 5xx message 掩码「服务器内部错误」。
 - **日志**：5xx 渲染时额外打一行 ERROR（stdout slog）：`code`/`ref`/`path`/`site`（错误构造点 file:line，`runtime.Caller` 自动抓取）/`cause`；panic 恢复走 `SYS0500`（JSON 500 + stack 入日志）。排障：拿用户报的码 grep 源码定位站点，拿 ref grep 日志定位请求。
 - **构造器选型**：handler 直写用 `Abort500C/AbortErrC/AbortCoded`；middleware 固定契约响应用 `codedBody(c, status, code, gin.H{...})`；service 层用 `NewC/NewKeyC/NewExtraC/WrapC`。
-- **边缘预留（ESA）**：`ESA0001` 已预留给 ESA 边缘地区限制响应（非本仓库生成，注册表 kind=edge）：`{"message":"此服务在您所在地区不可用。","error":"ESA0001","ref":0,"status":451}`。**ref 恒为 0** 标记边缘响应——无服务端请求日志，按 ref grep 不到属预期。
+- **边缘预留（ESA）**：ESA 边缘错误响应固定信封（Schema `docs/esa-error.schema.json`，错误 ID 注册表 `docs/esa-errors.csv`——新 ID 取 CSV 内下一序号）：`{"message":"...","error":"ESAXXXX","ref":0,"esa_request_id":"<UUID>","esa_rule":<数字>,"status":451}`。`ref 恒为 0` 标记边缘响应——无服务端请求日志，按 ref grep 不到属预期；排障用 `esa_request_id`（ESA 控制台查边缘日志）与 `esa_rule`（命中的规则）。已登记：`ESA0001` 地区限制（451）。
+- **Swagger**：`@Failure` 注解统一引用 `errors.ErrorBody` 信封模型（108 处），主描述在 `cmd/server/main.go`；改动后 `make docs`（swag init）再生成 `docs/docs.go`。
 - **机器注册表**：`docs/errors.json`（741+ 条目，含 code/kind/status/message/file/line）+ `docs/errors.schema.json`；生成器 `python3 docs/gen_errors_json.py`——新增错误码后重跑，输出字节稳定可提交；未提交修改（WIP）的文件按 HEAD 内容扫描，注册表只反映已提交契约。
 - 例外不加码：`/api/health` 503（独立信封）、oauth 501（业务性未开放）、`UploadError` 400 信封。
 

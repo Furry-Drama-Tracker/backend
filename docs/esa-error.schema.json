@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fdt.xiedada.net/schemas/esa-error.schema.json",
+  "title": "ESA 边缘错误响应信封",
+  "description": "阿里云 ESA 边缘拦截（地区限制等）返回的错误响应体。错误 ID 注册表见 docs/esa-errors.csv。ref 恒为 0：边缘响应无后端 RequestRef，无服务端请求日志；排障走 esa_request_id（ESA 控制台可查）与 esa_rule（命中的拦截规则）。",
+  "type": "object",
+  "required": ["message", "error", "ref", "esa_request_id", "esa_rule", "status"],
+  "additionalProperties": false,
+  "properties": {
+    "message": {
+      "type": "string",
+      "minLength": 1,
+      "description": "用户可读文案（纯文案，编号不内嵌；展示拼装由前端负责）"
+    },
+    "error": {
+      "type": "string",
+      "pattern": "^ESA\\d{4}$",
+      "description": "ESA 错误码 ESAXXXX；注册表见 docs/esa-errors.csv，新 ID 取 CSV 内下一序号"
+    },
+    "ref": {
+      "type": "integer",
+      "const": 0,
+      "description": "恒为 0——边缘响应标记（无服务端请求日志可查）"
+    },
+    "esa_request_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "ESA 侧请求 ID（UUID），ESA 控制台按此查询边缘日志"
+    },
+    "esa_rule": {
+      "type": "integer",
+      "description": "命中的拦截规则 ID（纯数字，ESA 控制台规则列表对应）"
+    },
+    "status": {
+      "type": "integer",
+      "minimum": 400,
+      "maximum": 599,
+      "description": "HTTP 状态码整数（地区限制为 451 Unavailable For Legal Reasons）"
+    }
+  }
+}

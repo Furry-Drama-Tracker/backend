@@ -263,8 +263,7 @@ const docTemplate = `{
                     "404": {
                         "description": "创作者主页不存在",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/errors.ErrorBody"
                         }
                     }
                 }
@@ -311,8 +310,7 @@ const docTemplate = `{
                     "404": {
                         "description": "创作者主页不存在",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/errors.ErrorBody"
                         }
                     }
                 }
@@ -349,8 +347,7 @@ const docTemplate = `{
                     "404": {
                         "description": "创作者主页不存在",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/errors.ErrorBody"
                         }
                     }
                 }
@@ -399,8 +396,7 @@ const docTemplate = `{
                     "404": {
                         "description": "创作者主页不存在",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/errors.ErrorBody"
                         }
                     }
                 }
@@ -549,8 +545,7 @@ const docTemplate = `{
                     "400": {
                         "description": "校验失败",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/errors.ErrorBody"
                         }
                     }
                 }
@@ -599,15 +594,13 @@ const docTemplate = `{
                     "400": {
                         "description": "无效的角色/不能修改自己/最后一个超管",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/errors.ErrorBody"
                         }
                     },
                     "404": {
                         "description": "账户不存在",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/errors.ErrorBody"
                         }
                     }
                 }
@@ -656,15 +649,13 @@ const docTemplate = `{
                     "400": {
                         "description": "参数错误/不能修改超管或创作者权限",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/errors.ErrorBody"
                         }
                     },
                     "404": {
                         "description": "用户不存在",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/errors.ErrorBody"
                         }
                     }
                 }
@@ -745,15 +736,13 @@ const docTemplate = `{
                     "400": {
                         "description": "不能删除自己/最后一个超管",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/errors.ErrorBody"
                         }
                     },
                     "404": {
                         "description": "用户不存在",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/errors.ErrorBody"
                         }
                     }
                 }
@@ -819,15 +808,13 @@ const docTemplate = `{
                     "400": {
                         "description": "请输入密码/密码错误",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/errors.ErrorBody"
                         }
                     },
                     "404": {
                         "description": "未找到",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/errors.ErrorBody"
                         }
                     }
                 }
@@ -866,15 +853,13 @@ const docTemplate = `{
                     "400": {
                         "description": "不能删除自己/最后一个超管/非管理账户",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/errors.ErrorBody"
                         }
                     },
                     "404": {
                         "description": "账户不存在",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/errors.ErrorBody"
                         }
                     }
                 }
@@ -939,10 +924,7 @@ const docTemplate = `{
                     "400": {
                         "description": "标题和内容不能为空",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/errors.ErrorBody"
                         }
                     }
                 }
@@ -1002,10 +984,7 @@ const docTemplate = `{
                     "404": {
                         "description": "Announcement not found",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/errors.ErrorBody"
                         }
                     }
                 }
@@ -1052,10 +1031,7 @@ const docTemplate = `{
                     "404": {
                         "description": "Announcement not found",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/errors.ErrorBody"
                         }
                     }
                 }
@@ -1092,10 +1068,7 @@ const docTemplate = `{
                     "404": {
                         "description": "Announcement not found",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/errors.ErrorBody"
                         }
                     }
                 }
@@ -1132,19 +1105,13 @@ const docTemplate = `{
                     "400": {
                         "description": "该公告未启用邮件推送",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/errors.ErrorBody"
                         }
                     },
                     "404": {
                         "description": "Announcement not found",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/errors.ErrorBody"
                         }
                     }
                 }
@@ -1181,19 +1148,13 @@ const docTemplate = `{
                     "400": {
                         "description": "该公告未启用通知推送",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/errors.ErrorBody"
                         }
                     },
                     "404": {
                         "description": "Announcement not found",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/errors.ErrorBody"
                         }
                     }
                 }
@@ -1245,6 +1206,37 @@ const docTemplate = `{
                 "responses": {
                     "200": {
                         "description": "logs/total/page/totalPages",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/2fa/email-otp/send": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "认证"
+                ],
+                "summary": "发送 2FA 邮箱验证码",
+                "parameters": [
+                    {
+                        "description": "twoFactorChallenge",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "email",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
@@ -1394,43 +1386,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "available",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "boolean"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/auth/confirm-device-login": {
-            "post": {
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "认证"
-                ],
-                "summary": "确认设备登录",
-                "parameters": [
-                    {
-                        "description": "6 位登录码",
-                        "name": "body",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "type": "object"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "用户对象或 need2FA",
+                        "description": "available/reason",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
@@ -1553,7 +1509,7 @@ const docTemplate = `{
                 "summary": "用户登录",
                 "parameters": [
                     {
-                        "description": "登录信息",
+                        "description": "登录信息（identifier=用户名或邮箱）",
                         "name": "body",
                         "in": "body",
                         "required": true,
@@ -1573,15 +1529,13 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/errors.ErrorBody"
                         }
                     },
                     "403": {
-                        "description": "needVerification/needDeviceVerify",
+                        "description": "needVerification",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/errors.ErrorBody"
                         }
                     }
                 }
@@ -1601,7 +1555,7 @@ const docTemplate = `{
                 "summary": "2FA 登录",
                 "parameters": [
                     {
-                        "description": "email/twoFactorToken/twoFactorChallenge",
+                        "description": "identifier/twoFactorToken/twoFactorChallenge/method",
                         "name": "body",
                         "in": "body",
                         "required": true,
@@ -1670,6 +1624,118 @@ const docTemplate = `{
                 }
             }
         },
+        "/auth/passkey/options": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "认证"
+                ],
+                "summary": "开始 Passkey 登录",
+                "responses": {
+                    "200": {
+                        "description": "publicKey options + ceremonyKey",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/passkey/verify": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "认证"
+                ],
+                "summary": "完成 Passkey 登录",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "仪式会话键",
+                        "name": "ceremonyKey",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "用户对象",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/qq/callback": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "认证"
+                ],
+                "summary": "QQ 授权回调（预留）",
+                "responses": {
+                    "501": {
+                        "description": "Not Implemented",
+                        "schema": {
+                            "$ref": "#/definitions/errors.ErrorBody"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/qq/start": {
+            "get": {
+                "tags": [
+                    "认证"
+                ],
+                "summary": "开始 QQ 授权（预留）",
+                "responses": {
+                    "200": {
+                        "description": "authUrl",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "501": {
+                        "description": "Not Implemented",
+                        "schema": {
+                            "$ref": "#/definitions/errors.ErrorBody"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/qq/status": {
+            "get": {
+                "tags": [
+                    "认证"
+                ],
+                "summary": "QQ 登录可用状态",
+                "responses": {
+                    "200": {
+                        "description": "enabled",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "boolean"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/auth/refresh": {
             "post": {
                 "tags": [
@@ -1687,15 +1753,13 @@ const docTemplate = `{
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/errors.ErrorBody"
                         }
                     },
                     "409": {
                         "description": "并发刷新",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/errors.ErrorBody"
                         }
                     }
                 }
@@ -1735,8 +1799,7 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/errors.ErrorBody"
                         }
                     }
                 }
@@ -1920,40 +1983,6 @@ const docTemplate = `{
                             "additionalProperties": {
                                 "type": "string"
                             }
-                        }
-                    }
-                }
-            }
-        },
-        "/auth/verify-device": {
-            "post": {
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "认证"
-                ],
-                "summary": "设备验证：邮箱链接换取登录码",
-                "parameters": [
-                    {
-                        "description": "device-verify JWT",
-                        "name": "body",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "type": "object"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "verified/loginCode",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
                         }
                     }
                 }
@@ -2438,10 +2467,7 @@ const docTemplate = `{
                     "404": {
                         "description": "Profile not found",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/errors.ErrorBody"
                         }
                     }
                 }
@@ -2529,10 +2555,7 @@ const docTemplate = `{
                     "404": {
                         "description": "Profile not found",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/errors.ErrorBody"
                         }
                     }
                 }
@@ -2701,10 +2724,7 @@ const docTemplate = `{
                     "404": {
                         "description": "Episode not found",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/errors.ErrorBody"
                         }
                     }
                 }
@@ -2741,10 +2761,7 @@ const docTemplate = `{
                     "404": {
                         "description": "Episode not found",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/errors.ErrorBody"
                         }
                     }
                 }
@@ -3598,10 +3615,7 @@ const docTemplate = `{
                     "400": {
                         "description": "无效的反馈类型/内容不能为空/内容不能超过2000字",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/errors.ErrorBody"
                         }
                     }
                 }
@@ -3686,19 +3700,13 @@ const docTemplate = `{
                     "400": {
                         "description": "无效的状态值",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/errors.ErrorBody"
                         }
                     },
                     "404": {
                         "description": "Not found",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/errors.ErrorBody"
                         }
                     }
                 }
@@ -3770,10 +3778,7 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/errors.ErrorBody"
                         }
                     }
                 }
@@ -3867,10 +3872,7 @@ const docTemplate = `{
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/errors.ErrorBody"
                         }
                     }
                 }
@@ -3918,19 +3920,13 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/errors.ErrorBody"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/errors.ErrorBody"
                         }
                     }
                 }
@@ -3967,10 +3963,7 @@ const docTemplate = `{
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/errors.ErrorBody"
                         }
                     }
                 }
@@ -4019,10 +4012,7 @@ const docTemplate = `{
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/errors.ErrorBody"
                         }
                     }
                 }
@@ -4068,10 +4058,7 @@ const docTemplate = `{
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/errors.ErrorBody"
                         }
                     }
                 }
@@ -4110,10 +4097,7 @@ const docTemplate = `{
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/errors.ErrorBody"
                         }
                     }
                 }
@@ -4150,10 +4134,7 @@ const docTemplate = `{
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/errors.ErrorBody"
                         }
                     }
                 }
@@ -4368,10 +4349,7 @@ const docTemplate = `{
                     "400": {
                         "description": "参数校验失败",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/errors.ErrorBody"
                         }
                     }
                 }
@@ -4440,10 +4418,7 @@ const docTemplate = `{
                     "400": {
                         "description": "参数校验失败",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/errors.ErrorBody"
                         }
                     }
                 }
@@ -4517,19 +4492,13 @@ const docTemplate = `{
                     "400": {
                         "description": "参数校验失败",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/errors.ErrorBody"
                         }
                     },
                     "404": {
                         "description": "友链不存在",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/errors.ErrorBody"
                         }
                     }
                 }
@@ -4566,10 +4535,7 @@ const docTemplate = `{
                     "404": {
                         "description": "友链不存在",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/errors.ErrorBody"
                         }
                     }
                 }
@@ -4597,10 +4563,7 @@ const docTemplate = `{
                     "503": {
                         "description": "status/timestamp/db",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/errors.ErrorBody"
                         }
                     }
                 }
@@ -4773,15 +4736,13 @@ const docTemplate = `{
                     "400": {
                         "description": "Invalid episode number",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/errors.ErrorBody"
                         }
                     },
                     "404": {
                         "description": "Episode not found",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/errors.ErrorBody"
                         }
                     }
                 }
@@ -4851,8 +4812,7 @@ const docTemplate = `{
                     "403": {
                         "description": "Forbidden",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/errors.ErrorBody"
                         }
                     }
                 }
@@ -4924,15 +4884,13 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/errors.ErrorBody"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/errors.ErrorBody"
                         }
                     }
                 }
@@ -4972,8 +4930,7 @@ const docTemplate = `{
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/errors.ErrorBody"
                         }
                     }
                 }
@@ -5337,6 +5294,143 @@ const docTemplate = `{
                 }
             }
         },
+        "/passkeys": {
+            "get": {
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "tags": [
+                    "Passkey"
+                ],
+                "summary": "列出我的 Passkey",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "additionalProperties": true
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/passkeys/register/options": {
+            "post": {
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "tags": [
+                    "Passkey"
+                ],
+                "summary": "开始注册 Passkey",
+                "parameters": [
+                    {
+                        "description": "当前密码",
+                        "name": "currentPassword",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "publicKey options + ceremonyKey",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/passkeys/register/verify": {
+            "post": {
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "tags": [
+                    "Passkey"
+                ],
+                "summary": "完成 Passkey 注册",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "仪式会话键",
+                        "name": "ceremonyKey",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "设备名",
+                        "name": "name",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/passkeys/{id}": {
+            "delete": {
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "tags": [
+                    "Passkey"
+                ],
+                "summary": "删除 Passkey",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "凭据 ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "currentPassword",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/ratings": {
             "post": {
                 "security": [
@@ -5376,22 +5470,19 @@ const docTemplate = `{
                     "400": {
                         "description": "Invalid rating data",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/errors.ErrorBody"
                         }
                     },
                     "403": {
                         "description": "该剧集暂不可评分",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/errors.ErrorBody"
                         }
                     },
                     "404": {
                         "description": "Episode not found",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/errors.ErrorBody"
                         }
                     }
                 }
@@ -5465,8 +5556,7 @@ const docTemplate = `{
                     "404": {
                         "description": "Rating not found",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/errors.ErrorBody"
                         }
                     }
                 }
@@ -5508,10 +5598,7 @@ const docTemplate = `{
                     "400": {
                         "description": "Invalid target type / Invalid reason / 描述不能超过2000个字符 / Already reported",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/errors.ErrorBody"
                         }
                     }
                 }
@@ -5602,19 +5689,13 @@ const docTemplate = `{
                     "400": {
                         "description": "Invalid status",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/errors.ErrorBody"
                         }
                     },
                     "404": {
                         "description": "Report not found",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/errors.ErrorBody"
                         }
                     }
                 }
@@ -5696,10 +5777,7 @@ const docTemplate = `{
                     "404": {
                         "description": "Episode not found",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/errors.ErrorBody"
                         }
                     }
                 }
@@ -5745,10 +5823,7 @@ const docTemplate = `{
                     "404": {
                         "description": "Editor not found / Episode not found",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/errors.ErrorBody"
                         }
                     }
                 }
@@ -5830,10 +5905,7 @@ const docTemplate = `{
                     "404": {
                         "description": "Episode not found",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/errors.ErrorBody"
                         }
                     }
                 }
@@ -5879,10 +5951,7 @@ const docTemplate = `{
                     "404": {
                         "description": "Episode not found",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/errors.ErrorBody"
                         }
                     }
                 }
@@ -5991,19 +6060,13 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/errors.ErrorBody"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/errors.ErrorBody"
                         }
                     }
                 }
@@ -6042,10 +6105,7 @@ const docTemplate = `{
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/errors.ErrorBody"
                         }
                     }
                 }
@@ -6115,10 +6175,7 @@ const docTemplate = `{
                     "400": {
                         "description": "名称必填",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/errors.ErrorBody"
                         }
                     }
                 }
@@ -6149,10 +6206,7 @@ const docTemplate = `{
                     "404": {
                         "description": "Not found",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/errors.ErrorBody"
                         }
                     }
                 }
@@ -6198,19 +6252,13 @@ const docTemplate = `{
                     "403": {
                         "description": "无权修改此系列",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/errors.ErrorBody"
                         }
                     },
                     "404": {
                         "description": "Not found",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/errors.ErrorBody"
                         }
                     }
                 }
@@ -6327,10 +6375,7 @@ const docTemplate = `{
                     "400": {
                         "description": "配置缺失或发送失败",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/errors.ErrorBody"
                         }
                     }
                 }
@@ -6398,10 +6443,7 @@ const docTemplate = `{
                     "404": {
                         "description": "Content not found",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/errors.ErrorBody"
                         }
                     }
                 }
@@ -6677,10 +6719,7 @@ const docTemplate = `{
                     "404": {
                         "description": "Episode not found",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/errors.ErrorBody"
                         }
                     }
                 }
@@ -6725,8 +6764,7 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/errors.ErrorBody"
                         }
                     }
                 }
@@ -6780,8 +6818,7 @@ const docTemplate = `{
                     "403": {
                         "description": "Forbidden",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/errors.ErrorBody"
                         }
                     }
                 }
@@ -6826,8 +6863,7 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/errors.ErrorBody"
                         }
                     }
                 }
@@ -6884,8 +6920,7 @@ const docTemplate = `{
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/errors.ErrorBody"
                         }
                     }
                 }
@@ -6916,8 +6951,7 @@ const docTemplate = `{
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/errors.ErrorBody"
                         }
                     }
                 }
@@ -6962,22 +6996,19 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/errors.ErrorBody"
                         }
                     },
                     "403": {
                         "description": "无权使用该主题",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/errors.ErrorBody"
                         }
                     },
                     "404": {
                         "description": "主题不存在",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/errors.ErrorBody"
                         }
                     }
                 }
@@ -7022,8 +7053,7 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/errors.ErrorBody"
                         }
                     }
                 }
@@ -7075,22 +7105,19 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/errors.ErrorBody"
                         }
                     },
                     "403": {
                         "description": "Forbidden",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/errors.ErrorBody"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/errors.ErrorBody"
                         }
                     }
                 }
@@ -7130,15 +7157,13 @@ const docTemplate = `{
                     "403": {
                         "description": "Forbidden",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/errors.ErrorBody"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/errors.ErrorBody"
                         }
                     }
                 }
@@ -7190,15 +7215,13 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/errors.ErrorBody"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/errors.ErrorBody"
                         }
                     }
                 }
@@ -7249,15 +7272,13 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/errors.ErrorBody"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/errors.ErrorBody"
                         }
                     }
                 }
@@ -7309,15 +7330,13 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/errors.ErrorBody"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/errors.ErrorBody"
                         }
                     }
                 }
@@ -7357,22 +7376,19 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/errors.ErrorBody"
                         }
                     },
                     "403": {
                         "description": "Forbidden",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/errors.ErrorBody"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/errors.ErrorBody"
                         }
                     }
                 }
@@ -7409,19 +7425,13 @@ const docTemplate = `{
                     "400": {
                         "description": "Missing key or targetLang / Unsupported language",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/errors.ErrorBody"
                         }
                     },
                     "504": {
                         "description": "Translation request timeout",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/errors.ErrorBody"
                         }
                     }
                 }
@@ -7458,19 +7468,13 @@ const docTemplate = `{
                     "400": {
                         "description": "Missing texts or targetLang / Unsupported language",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/errors.ErrorBody"
                         }
                     },
                     "504": {
                         "description": "Translation request timeout",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/errors.ErrorBody"
                         }
                     }
                 }
@@ -7795,6 +7799,37 @@ const docTemplate = `{
                 }
             }
         },
+        "/users/check-login-name": {
+            "get": {
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "tags": [
+                    "用户"
+                ],
+                "summary": "检查用户名是否可用",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "用户名",
+                        "name": "name",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "available/reason",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
         "/users/export-my-data": {
             "get": {
                 "security": [
@@ -7819,6 +7854,42 @@ const docTemplate = `{
                         "description": "文件下载",
                         "schema": {
                             "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/users/login-name": {
+            "put": {
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "用户"
+                ],
+                "summary": "修改登录用户名",
+                "parameters": [
+                    {
+                        "description": "newLoginName/currentPassword",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "accountId/cooldownDays",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
                         }
                     }
                 }
@@ -8263,10 +8334,7 @@ const docTemplate = `{
                     "404": {
                         "description": "壁纸不存在",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/errors.ErrorBody"
                         }
                     }
                 }
@@ -8303,10 +8371,7 @@ const docTemplate = `{
                     "404": {
                         "description": "壁纸不存在",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/errors.ErrorBody"
                         }
                     }
                 }
@@ -8349,6 +8414,27 @@ const docTemplate = `{
                 }
             }
         },
+        "errors.ErrorBody": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string",
+                    "example": "USR0007"
+                },
+                "message": {
+                    "type": "string",
+                    "example": "该邮箱已注册"
+                },
+                "ref": {
+                    "type": "integer",
+                    "example": 123456789
+                },
+                "status": {
+                    "type": "integer",
+                    "example": 400
+                }
+            }
+        },
         "handler.loginRequest": {
             "type": "object",
             "properties": {
@@ -8359,6 +8445,9 @@ const docTemplate = `{
                     "$ref": "#/definitions/auth.DeviceInfoPayload"
                 },
                 "email": {
+                    "type": "string"
+                },
+                "identifier": {
                     "type": "string"
                 },
                 "password": {
@@ -8542,7 +8631,7 @@ var SwaggerInfo = &swag.Spec{
 	BasePath:         "/api",
 	Schemes:          []string{},
 	Title:            "兽剧聚合平台 API",
-	Description:      "兽剧内容聚合平台后端服务 API 文档（neo-server）",
+	Description:      "兽剧内容聚合平台后端服务 API 文档（neo-server）\n所有 4xx/5xx 响应体为统一错误信封（模型 ErrorBody）：{\"message\",\"error\",\"ref\",\"status\"}。\nerror=错误码 XXXYYYY（模块前缀+序号，注册表 backend/docs/errors.json）；ref=0-999999999 随机参考号（响应头 X-Ref-ID 同值；边缘 ESA 响应恒为 0）；status=HTTP 状态码整数。\nmessage 恒为纯文案，生产 5xx 掩码「服务器内部错误」；出错编号展示格式 CODE-000123456，由前端拼装。",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",

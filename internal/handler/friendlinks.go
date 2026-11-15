@@ -81,7 +81,7 @@ func (h *FriendLinks) List(c *gin.Context) {
 // @Accept json
 // @Param body body object true "name/url 必填；logo/description/altcha"
 // @Success 200 {object} map[string]string "申请已提交，等待管理员审核"
-// @Failure 400 {object} map[string]string "参数校验失败"
+// @Failure 400 {object} errors.ErrorBody "参数校验失败"
 // @Router /friend-links/apply [post]
 func (h *FriendLinks) Apply(c *gin.Context) {
 	body := cmsReadBody(c)
@@ -198,7 +198,7 @@ func (h *FriendLinks) All(c *gin.Context) {
 // @Accept json
 // @Param body body object true "name/url 必填；其余字段可选"
 // @Success 200 {object} map[string]any "友链对象"
-// @Failure 400 {object} map[string]string "参数校验失败"
+// @Failure 400 {object} errors.ErrorBody "参数校验失败"
 // @Router /friend-links [post]
 func (h *FriendLinks) Create(c *gin.Context) {
 	body := cmsReadBody(c)
@@ -249,8 +249,8 @@ func (h *FriendLinks) Create(c *gin.Context) {
 // @Param id path string true "友链 ID"
 // @Param body body object true "可更新字段 + status"
 // @Success 200 {object} map[string]any "友链对象"
-// @Failure 400 {object} map[string]string "参数校验失败"
-// @Failure 404 {object} map[string]string "友链不存在"
+// @Failure 400 {object} errors.ErrorBody "参数校验失败"
+// @Failure 404 {object} errors.ErrorBody "友链不存在"
 // @Router /friend-links/{id} [put]
 func (h *FriendLinks) Update(c *gin.Context) {
 	oid, err := primitive.ObjectIDFromHex(c.Param("id"))
@@ -330,7 +330,7 @@ func (h *FriendLinks) Update(c *gin.Context) {
 // @Security bearerAuth
 // @Param id path string true "友链 ID"
 // @Success 200 {object} map[string]string "删除成功"
-// @Failure 404 {object} map[string]string "友链不存在"
+// @Failure 404 {object} errors.ErrorBody "友链不存在"
 // @Router /friend-links/{id} [delete]
 func (h *FriendLinks) Delete(c *gin.Context) {
 	oid, err := primitive.ObjectIDFromHex(c.Param("id"))

@@ -248,8 +248,8 @@ func (h *Histories) historyEpisodeMap(c *gin.Context, rows []repository.HistoryR
 // @Produce json
 // @Param body body object true "episodeId/episodeNumber"
 // @Success 200 {object} map[string]any "历史记录"
-// @Failure 400 {object} map[string]any "Invalid episode number"
-// @Failure 404 {object} map[string]any "Episode not found"
+// @Failure 400 {object} errors.ErrorBody "Invalid episode number"
+// @Failure 404 {object} errors.ErrorBody "Episode not found"
 // @Router /histories/record [post]
 func (h *Histories) Record(c *gin.Context) {
 	body := middleware.GetBody(c)
@@ -491,9 +491,9 @@ func (h *Histories) DeleteOne(c *gin.Context) {
 // @Produce json
 // @Param body body object true "episodeId/score"
 // @Success 200 {object} map[string]any "score/averageRating/ratingCount"
-// @Failure 400 {object} map[string]any "Invalid rating data"
-// @Failure 403 {object} map[string]any "该剧集暂不可评分"
-// @Failure 404 {object} map[string]any "Episode not found"
+// @Failure 400 {object} errors.ErrorBody "Invalid rating data"
+// @Failure 403 {object} errors.ErrorBody "该剧集暂不可评分"
+// @Failure 404 {object} errors.ErrorBody "Episode not found"
 // @Router /ratings [post]
 func (h *Ratings) Submit(c *gin.Context) {
 	body := middleware.GetBody(c)
@@ -558,7 +558,7 @@ func (h *Ratings) Submit(c *gin.Context) {
 // @Produce json
 // @Param episodeId path string true "剧集 ID"
 // @Success 200 {object} map[string]any "message/averageRating/ratingCount"
-// @Failure 404 {object} map[string]any "Rating not found"
+// @Failure 404 {object} errors.ErrorBody "Rating not found"
 // @Router /ratings/{episodeId} [delete]
 func (h *Ratings) Remove(c *gin.Context) {
 	user, _ := middleware.GetUser(c)

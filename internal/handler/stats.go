@@ -762,7 +762,7 @@ func (h *Stats) Personalized(c *gin.Context) {
 // @Tags 统计
 // @Param episodeId path string true "剧集 ID"
 // @Success 200 {array} map[string]any "相关剧集（含 __v）"
-// @Failure 404 {object} map[string]string "Episode not found"
+// @Failure 404 {object} errors.ErrorBody "Episode not found"
 // @Router /stats/recommendations/{episodeId} [get]
 func (h *Stats) RelatedRecommendations(c *gin.Context) {
 	if h.cached(c) {

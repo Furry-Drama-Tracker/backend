@@ -1,0 +1,2 @@
+code,message,status,ref,note
+ESA0001,此服务在您所在地区不可用。,451,0,地区限制拦截（默认规则）；响应另含 esa_request_id(UUID) 与 esa_rule(数字)

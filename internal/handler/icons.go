@@ -149,7 +149,7 @@ func (h *Icons) List(c *gin.Context) {
 // @Security bearerAuth
 // @Produce json
 // @Success 200 {array} map[string]any "图标数组（含禁用）"
-// @Failure 403 {object} map[string]any
+// @Failure 403 {object} errors.ErrorBody
 // @Router /icons/all [get]
 func (h *Icons) AdminAll(c *gin.Context) {
 	list, err := h.Repos.Icons.FindAll(c.Request.Context())
@@ -229,8 +229,8 @@ func (h *Icons) Upload(c *gin.Context) {
 // @Param id path string true "图标 ID"
 // @Param body body object true "name/category/description/enabled/mappings（可选）"
 // @Success 200 {object} map[string]any "图标对象"
-// @Failure 400 {object} map[string]any
-// @Failure 404 {object} map[string]any
+// @Failure 400 {object} errors.ErrorBody
+// @Failure 404 {object} errors.ErrorBody
 // @Router /icons/{id} [put]
 func (h *Icons) Update(c *gin.Context) {
 	oid, err := primitive.ObjectIDFromHex(c.Param("id"))
@@ -298,7 +298,7 @@ func (h *Icons) Update(c *gin.Context) {
 // @Produce json
 // @Param id path string true "图标 ID"
 // @Success 200 {object} map[string]string "message"
-// @Failure 404 {object} map[string]any
+// @Failure 404 {object} errors.ErrorBody
 // @Router /icons/{id} [delete]
 func (h *Icons) Delete(c *gin.Context) {
 	oid, err := primitive.ObjectIDFromHex(c.Param("id"))

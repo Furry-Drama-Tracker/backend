@@ -32,7 +32,7 @@ func CSRF(cfg *config.Config) gin.HandlerFunc {
 // @Tags 系统
 // @Produce json
 // @Success 200 {object} map[string]string "status/timestamp/db"
-// @Failure 503 {object} map[string]string "status/timestamp/db"
+// @Failure 503 {object} errors.ErrorBody "status/timestamp/db"
 // @Router /health [get]
 func Health(db *mongo.Database) gin.HandlerFunc {
 	return func(c *gin.Context) {

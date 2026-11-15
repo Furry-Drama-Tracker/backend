@@ -67,7 +67,7 @@ func (h *Feedback) Register(g *gin.RouterGroup) {
 // @Accept json
 // @Param body body object true "type/content"
 // @Success 200 {object} map[string]string "message"
-// @Failure 400 {object} map[string]string "无效的反馈类型/内容不能为空/内容不能超过2000字"
+// @Failure 400 {object} errors.ErrorBody "无效的反馈类型/内容不能为空/内容不能超过2000字"
 // @Router /feedback [post]
 func (h *Feedback) Create(c *gin.Context) {
 	var body map[string]any
@@ -199,8 +199,8 @@ func (h *Feedback) List(c *gin.Context) {
 // @Param id path string true "反馈 ID"
 // @Param body body object true "status/reply"
 // @Success 200 {object} map[string]any "反馈文档"
-// @Failure 400 {object} map[string]string "无效的状态值"
-// @Failure 404 {object} map[string]string "Not found"
+// @Failure 400 {object} errors.ErrorBody "无效的状态值"
+// @Failure 404 {object} errors.ErrorBody "Not found"
 // @Router /feedback/{id} [put]
 func (h *Feedback) Reply(c *gin.Context) {
 	var body map[string]any

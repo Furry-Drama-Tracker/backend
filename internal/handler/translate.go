@@ -238,8 +238,8 @@ func (h *Translate) Register(g *gin.RouterGroup) {
 // @Accept json
 // @Param body body object true "{key, targetLang}"
 // @Success 200 {object} map[string]any "translation（机器翻译失败为 null）"
-// @Failure 400 {object} map[string]string "Missing key or targetLang / Unsupported language"
-// @Failure 504 {object} map[string]string "Translation request timeout"
+// @Failure 400 {object} errors.ErrorBody "Missing key or targetLang / Unsupported language"
+// @Failure 504 {object} errors.ErrorBody "Translation request timeout"
 // @Router /translate [post]
 func (h *Translate) Translate(c *gin.Context) {
 	body := readBodyMap(c)
@@ -292,8 +292,8 @@ func (h *Translate) Translate(c *gin.Context) {
 // @Accept json
 // @Param body body object true "{texts[], targetLang}"
 // @Success 200 {object} map[string]any "translations"
-// @Failure 400 {object} map[string]string "Missing texts or targetLang / Unsupported language"
-// @Failure 504 {object} map[string]string "Translation request timeout"
+// @Failure 400 {object} errors.ErrorBody "Missing texts or targetLang / Unsupported language"
+// @Failure 504 {object} errors.ErrorBody "Translation request timeout"
 // @Router /translate/batch [post]
 func (h *Translate) Batch(c *gin.Context) {
 	body := readBodyMap(c)

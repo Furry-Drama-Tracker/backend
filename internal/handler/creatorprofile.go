@@ -140,7 +140,7 @@ func (h *CreatorProfiles) UpdateMyProfile(c *gin.Context) {
 // @Tags 创作者主页
 // @Param id path string true "创作者主页 ID"
 // @Success 200 {object} map[string]any "profile + episodes"
-// @Failure 404 {object} map[string]string "Profile not found"
+// @Failure 404 {object} errors.ErrorBody "Profile not found"
 // @Router /creator-profile/public/{id} [get]
 func (h *CreatorProfiles) PublicProfile(c *gin.Context) {
 	oid, err := primitive.ObjectIDFromHex(c.Param("id"))
@@ -173,7 +173,7 @@ func (h *CreatorProfiles) PublicProfile(c *gin.Context) {
 // @Tags 创作者主页
 // @Param creatorId path string true "创作者用户 ID"
 // @Success 200 {object} map[string]any "profile + episodes"
-// @Failure 404 {object} map[string]string "Profile not found"
+// @Failure 404 {object} errors.ErrorBody "Profile not found"
 // @Router /creator-profile/by-creator/{creatorId} [get]
 func (h *CreatorProfiles) ByCreator(c *gin.Context) {
 	creatorID, err := primitive.ObjectIDFromHex(c.Param("creatorId"))

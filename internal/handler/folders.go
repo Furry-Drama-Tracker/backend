@@ -159,7 +159,7 @@ func (h *Folders) ListFolders(c *gin.Context) {
 // @Accept json
 // @Param body body object true "name/type"
 // @Success 200 {object} model.Folder
-// @Failure 400 {object} map[string]string
+// @Failure 400 {object} errors.ErrorBody
 // @Router /folders [post]
 func (h *Folders) CreateFolder(c *gin.Context) {
 	user, _ := middleware.GetUser(c)
@@ -235,8 +235,8 @@ func (h *Folders) ReorderFolders(c *gin.Context) {
 // @Param id path string true "收藏夹 ID"
 // @Param body body object true "name/description（可选）"
 // @Success 200 {object} model.Folder
-// @Failure 400 {object} map[string]string
-// @Failure 404 {object} map[string]string
+// @Failure 400 {object} errors.ErrorBody
+// @Failure 404 {object} errors.ErrorBody
 // @Router /folders/{id} [put]
 func (h *Folders) UpdateFolder(c *gin.Context) {
 	user, _ := middleware.GetUser(c)
@@ -286,7 +286,7 @@ func (h *Folders) UpdateFolder(c *gin.Context) {
 // @Security bearerAuth
 // @Param id path string true "收藏夹 ID"
 // @Success 200 {object} map[string]string "message"
-// @Failure 404 {object} map[string]string
+// @Failure 404 {object} errors.ErrorBody
 // @Router /folders/{id} [delete]
 func (h *Folders) DeleteFolder(c *gin.Context) {
 	user, _ := middleware.GetUser(c)
@@ -328,7 +328,7 @@ func (h *Folders) DeleteFolder(c *gin.Context) {
 // @Param id path string true "收藏夹 ID"
 // @Param body body object true "episodeId"
 // @Success 200 {object} map[string]any
-// @Failure 404 {object} map[string]string
+// @Failure 404 {object} errors.ErrorBody
 // @Router /folders/{id}/items [post]
 func (h *Folders) AddFolderItem(c *gin.Context) {
 	user, _ := middleware.GetUser(c)
@@ -397,7 +397,7 @@ func (h *Folders) AddFolderItem(c *gin.Context) {
 // @Param id path string true "收藏夹 ID"
 // @Param episodeId path string true "剧集 ID"
 // @Success 200 {object} map[string]string "message"
-// @Failure 404 {object} map[string]string
+// @Failure 404 {object} errors.ErrorBody
 // @Router /folders/{id}/items/{episodeId} [delete]
 func (h *Folders) RemoveFolderItem(c *gin.Context) {
 	user, _ := middleware.GetUser(c)
@@ -477,7 +477,7 @@ func (h *Folders) ShareUnclassified(c *gin.Context) {
 // @Security bearerAuth
 // @Param id path string true "收藏夹 ID"
 // @Success 200 {object} map[string]string "shareToken"
-// @Failure 404 {object} map[string]string
+// @Failure 404 {object} errors.ErrorBody
 // @Router /folders/{id}/share [post]
 func (h *Folders) ShareFolder(c *gin.Context) {
 	user, _ := middleware.GetUser(c)
@@ -511,7 +511,7 @@ func (h *Folders) ShareFolder(c *gin.Context) {
 // @Security bearerAuth
 // @Param id path string true "收藏夹 ID"
 // @Success 200 {object} map[string]string "message"
-// @Failure 404 {object} map[string]string
+// @Failure 404 {object} errors.ErrorBody
 // @Router /folders/{id}/share [delete]
 func (h *Folders) RevokeShare(c *gin.Context) {
 	user, _ := middleware.GetUser(c)
@@ -542,7 +542,7 @@ func (h *Folders) RevokeShare(c *gin.Context) {
 // @Tags 收藏夹
 // @Param shareToken path string true "分享令牌"
 // @Success 200 {object} map[string]any "name/description/type/count/episodes/createdAt/creatorId/creatorName"
-// @Failure 404 {object} map[string]string
+// @Failure 404 {object} errors.ErrorBody
 // @Router /folders/shared/{shareToken} [get]
 func (h *Folders) SharedFolder(c *gin.Context) {
 	folder, err := h.Repos.Folders.FindByShareToken(c.Request.Context(), c.Param("shareToken"))
@@ -667,8 +667,8 @@ func (h *SavedFolders) ListSavedFolders(c *gin.Context) {
 // @Accept json
 // @Param body body object true "shareToken/creatorName"
 // @Success 200 {object} model.SavedFolder
-// @Failure 400 {object} map[string]string
-// @Failure 404 {object} map[string]string
+// @Failure 400 {object} errors.ErrorBody
+// @Failure 404 {object} errors.ErrorBody
 // @Router /saved-folders [post]
 func (h *SavedFolders) CreateSavedFolder(c *gin.Context) {
 	user, _ := middleware.GetUser(c)
@@ -739,7 +739,7 @@ func (h *SavedFolders) CreateSavedFolder(c *gin.Context) {
 // @Security bearerAuth
 // @Param id path string true "收藏项 ID"
 // @Success 200 {object} map[string]string "message"
-// @Failure 404 {object} map[string]string
+// @Failure 404 {object} errors.ErrorBody
 // @Router /saved-folders/{id} [delete]
 func (h *SavedFolders) DeleteSavedFolder(c *gin.Context) {
 	user, _ := middleware.GetUser(c)

@@ -39,6 +39,15 @@ const refMax = 1_000_000_000
 // fallbackCode 是未编码 4xx/5xx 的兜底错误码。
 const fallbackCode = "SYS0001"
 
+// ErrorBody 是 4xx/5xx 统一错误信封的 Swagger 契约模型（渲染实现见 abortAppError，
+// 契约详见 backend/AGENTS.md「错误码与参考号」）。@Failure 注解统一引用本模型。
+type ErrorBody struct {
+	Message string `json:"message" example:"该邮箱已注册"`
+	Error   string `json:"error" example:"USR0007"`
+	Ref     int64  `json:"ref" example:"123456789"`
+	Status  int    `json:"status" example:"400"`
+}
+
 // 包级日志器：server.NewApp 启动时注入一次；未注入回退 slog.Default()。
 var logger *slog.Logger
 

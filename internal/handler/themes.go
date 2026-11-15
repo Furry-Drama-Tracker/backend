@@ -257,7 +257,7 @@ func (h *Themes) List(c *gin.Context) {
 // @Security bearerAuth
 // @Produce json
 // @Success 200 {array} map[string]any "个人主题数组"
-// @Failure 401 {object} map[string]any
+// @Failure 401 {object} errors.ErrorBody
 // @Router /themes/my [get]
 func (h *Themes) MyList(c *gin.Context) {
 	user, _ := middleware.GetUser(c)
@@ -321,7 +321,7 @@ func (h *Themes) resolveThemeSlot(ctx context.Context, c *gin.Context, user *mod
 // @Security bearerAuth
 // @Produce json
 // @Success 200 {object} map[string]any "wallpaperTheme/iconsTheme/wallpaperIsDefault/iconsIsDefault"
-// @Failure 401 {object} map[string]any
+// @Failure 401 {object} errors.ErrorBody
 // @Router /themes/my/selection [get]
 func (h *Themes) MySelection(c *gin.Context) {
 	user, _ := middleware.GetUser(c)
@@ -414,9 +414,9 @@ func bodyBool(body map[string]any, key string, def bool) bool {
 // @Produce json
 // @Param body body object true "wallpaperThemeId/iconsThemeId（空串清空；兼容 themeId/applyIcons/applyWallpaper）"
 // @Success 200 {object} map[string]any "wallpaperTheme/iconsTheme/backgroundPrefs/accentColor"
-// @Failure 400 {object} map[string]any
-// @Failure 403 {object} map[string]any "无权使用该主题"
-// @Failure 404 {object} map[string]any "主题不存在"
+// @Failure 400 {object} errors.ErrorBody
+// @Failure 403 {object} errors.ErrorBody "无权使用该主题"
+// @Failure 404 {object} errors.ErrorBody "主题不存在"
 // @Router /themes/selection [put]
 func (h *Themes) SetSelection(c *gin.Context) {
 	body := cmsReadBody(c)
@@ -593,7 +593,7 @@ func (h *Themes) findValidatedTheme(c *gin.Context, raw string, forWallpaper boo
 // @Produce json
 // @Param body body object true "opacity(0-100)/blur(0-40)/enabled 至少其一"
 // @Success 200 {object} map[string]any "backgroundPrefs"
-// @Failure 400 {object} map[string]any
+// @Failure 400 {object} errors.ErrorBody
 // @Router /themes/background-prefs [put]
 func (h *Themes) UpdateBackgroundPrefs(c *gin.Context) {
 	body := cmsReadBody(c)
@@ -645,7 +645,7 @@ func (h *Themes) UpdateBackgroundPrefs(c *gin.Context) {
 // @Produce json
 // @Param body body object true "name/description/wallpaperUrl/wallpaperThumb/icons/accentColor/isSystem"
 // @Success 200 {object} map[string]any "主题对象"
-// @Failure 400 {object} map[string]any
+// @Failure 400 {object} errors.ErrorBody
 // @Router /themes [post]
 func (h *Themes) Create(c *gin.Context) {
 	body := cmsReadBody(c)
@@ -732,9 +732,9 @@ func canEditTheme(c *gin.Context, t *model.Theme) bool {
 // @Param id path string true "主题 ID"
 // @Param body body object true "name/description/wallpaperUrl/wallpaperThumb/icons/accentColor（可选）"
 // @Success 200 {object} map[string]any "主题对象"
-// @Failure 400 {object} map[string]any
-// @Failure 403 {object} map[string]any
-// @Failure 404 {object} map[string]any
+// @Failure 400 {object} errors.ErrorBody
+// @Failure 403 {object} errors.ErrorBody
+// @Failure 404 {object} errors.ErrorBody
 // @Router /themes/{id} [put]
 func (h *Themes) Update(c *gin.Context) {
 	oid, err := primitive.ObjectIDFromHex(c.Param("id"))
@@ -837,8 +837,8 @@ func (h *Themes) Update(c *gin.Context) {
 // @Produce json
 // @Param id path string true "主题 ID"
 // @Success 200 {object} map[string]string "message"
-// @Failure 403 {object} map[string]any
-// @Failure 404 {object} map[string]any
+// @Failure 403 {object} errors.ErrorBody
+// @Failure 404 {object} errors.ErrorBody
 // @Router /themes/{id} [delete]
 func (h *Themes) Delete(c *gin.Context) {
 	oid, err := primitive.ObjectIDFromHex(c.Param("id"))
@@ -913,9 +913,9 @@ func (h *Themes) removeUnreferencedThemeFiles(ctx context.Context, t *model.Them
 // @Produce json
 // @Param id path string true "主题 ID"
 // @Success 200 {object} map[string]any "主题对象"
-// @Failure 400 {object} map[string]any
-// @Failure 403 {object} map[string]any
-// @Failure 404 {object} map[string]any
+// @Failure 400 {object} errors.ErrorBody
+// @Failure 403 {object} errors.ErrorBody
+// @Failure 404 {object} errors.ErrorBody
 // @Router /themes/{id}/submit [post]
 func (h *Themes) Submit(c *gin.Context) {
 	oid, err := primitive.ObjectIDFromHex(c.Param("id"))
@@ -963,7 +963,7 @@ func (h *Themes) Submit(c *gin.Context) {
 // @Security bearerAuth
 // @Produce json
 // @Success 200 {array} map[string]any "主题数组（含个人/待审核）"
-// @Failure 403 {object} map[string]any
+// @Failure 403 {object} errors.ErrorBody
 // @Router /themes/all [get]
 func (h *Themes) AdminAll(c *gin.Context) {
 	list, err := h.Repos.Themes.FindAllAdmin(c.Request.Context())
@@ -989,8 +989,8 @@ func (h *Themes) AdminAll(c *gin.Context) {
 // @Param id path string true "主题 ID"
 // @Param body body object true "action(approve|reject)/note"
 // @Success 200 {object} map[string]any "主题对象"
-// @Failure 400 {object} map[string]any
-// @Failure 404 {object} map[string]any
+// @Failure 400 {object} errors.ErrorBody
+// @Failure 404 {object} errors.ErrorBody
 // @Router /themes/{id}/review [post]
 func (h *Themes) Review(c *gin.Context) {
 	oid, err := primitive.ObjectIDFromHex(c.Param("id"))
@@ -1074,8 +1074,8 @@ func (h *Themes) notifyThemeReviewResult(t *model.Theme, action, note string) {
 // @Param id path string true "主题 ID"
 // @Param body body object false "default（缺省 true；false 取消默认）"
 // @Success 200 {object} map[string]any "主题对象"
-// @Failure 400 {object} map[string]any
-// @Failure 404 {object} map[string]any
+// @Failure 400 {object} errors.ErrorBody
+// @Failure 404 {object} errors.ErrorBody
 // @Router /themes/{id}/default [post]
 func (h *Themes) SetDefault(c *gin.Context) {
 	oid, err := primitive.ObjectIDFromHex(c.Param("id"))
@@ -1141,8 +1141,8 @@ func (h *Themes) SetDefault(c *gin.Context) {
 // @Param id path string true "主题 ID"
 // @Param body body object true "isSystem/enabled/isDefault（可选）"
 // @Success 200 {object} map[string]any "主题对象"
-// @Failure 400 {object} map[string]any
-// @Failure 404 {object} map[string]any
+// @Failure 400 {object} errors.ErrorBody
+// @Failure 404 {object} errors.ErrorBody
 // @Router /themes/{id}/admin [put]
 func (h *Themes) AdminUpdate(c *gin.Context) {
 	oid, err := primitive.ObjectIDFromHex(c.Param("id"))
@@ -1233,7 +1233,7 @@ func (h *Themes) AdminUpdate(c *gin.Context) {
 // @Produce json
 // @Param image formData file true "图片（≤8MB）"
 // @Success 200 {object} map[string]string "url"
-// @Failure 400 {object} map[string]any
+// @Failure 400 {object} errors.ErrorBody
 // @Router /themes/upload-wallpaper [post]
 func (h *Themes) UploadWallpaper(c *gin.Context) {
 	url, err := upload.SaveImage(c, "image", "theme-wallpaper", 8<<20)

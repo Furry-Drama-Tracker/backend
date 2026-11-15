@@ -166,7 +166,7 @@ func (h *Review) All(c *gin.Context) {
 // @Param id path string true "剧集 ID"
 // @Param body body object true "note"
 // @Success 200 {object} map[string]any "剧集对象"
-// @Failure 404 {object} map[string]string "Episode not found"
+// @Failure 404 {object} errors.ErrorBody "Episode not found"
 // @Router /review/approve/{id} [put]
 func (h *Review) Approve(c *gin.Context) {
 	admin, _ := middleware.GetUser(c)
@@ -242,7 +242,7 @@ func (h *Review) Approve(c *gin.Context) {
 // @Param id path string true "剧集 ID"
 // @Param body body object true "note"
 // @Success 200 {object} map[string]any "剧集对象"
-// @Failure 404 {object} map[string]string "Episode not found"
+// @Failure 404 {object} errors.ErrorBody "Episode not found"
 // @Router /review/reject/{id} [put]
 func (h *Review) Reject(c *gin.Context) {
 	admin, _ := middleware.GetUser(c)
@@ -314,7 +314,7 @@ func (h *Review) Reject(c *gin.Context) {
 // @Param episodeId path string true "剧集 ID"
 // @Param body body object true "editorId"
 // @Success 200 {object} map[string]any "剧集对象（createdBy/allowedEditors 已关联展开）"
-// @Failure 404 {object} map[string]string "Editor not found / Episode not found"
+// @Failure 404 {object} errors.ErrorBody "Editor not found / Episode not found"
 // @Router /review/assign-editor/{episodeId} [put]
 func (h *Review) AssignEditor(c *gin.Context) {
 	episodeIdStr := c.Param("episodeId")
@@ -378,7 +378,7 @@ func (h *Review) AssignEditor(c *gin.Context) {
 // @Param episodeId path string true "剧集 ID"
 // @Param body body object true "editorId"
 // @Success 200 {object} map[string]any "剧集对象（createdBy/allowedEditors 已关联展开）"
-// @Failure 404 {object} map[string]string "Episode not found"
+// @Failure 404 {object} errors.ErrorBody "Episode not found"
 // @Router /review/remove-editor/{episodeId} [put]
 func (h *Review) RemoveEditor(c *gin.Context) {
 	episodeIdStr := c.Param("episodeId")

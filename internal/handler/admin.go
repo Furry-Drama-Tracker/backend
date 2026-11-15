@@ -209,7 +209,7 @@ func (h *Admin) List(c *gin.Context) {
 // @Accept json
 // @Param body body object true "username/email/password/role/accountId"
 // @Success 200 {object} map[string]any "用户对象 + message"
-// @Failure 400 {object} map[string]any "校验失败"
+// @Failure 400 {object} errors.ErrorBody "校验失败"
 // @Router /admin/register [post]
 func (h *Admin) RegisterAccount(c *gin.Context) {
 	var body map[string]any
@@ -331,8 +331,8 @@ func (h *Admin) RegisterAccount(c *gin.Context) {
 // @Security bearerAuth
 // @Param id path string true "账户 ID"
 // @Success 200 {object} map[string]string "message"
-// @Failure 400 {object} map[string]any "不能删除自己/最后一个超管/非管理账户"
-// @Failure 404 {object} map[string]any "账户不存在"
+// @Failure 400 {object} errors.ErrorBody "不能删除自己/最后一个超管/非管理账户"
+// @Failure 404 {object} errors.ErrorBody "账户不存在"
 // @Router /admin/{id} [delete]
 func (h *Admin) DeleteAccount(c *gin.Context) {
 	idStr := c.Param("id")
@@ -430,8 +430,8 @@ func (h *Admin) ListUsers(c *gin.Context) {
 // @Security bearerAuth
 // @Param id path string true "用户 ID"
 // @Success 200 {object} map[string]string "message"
-// @Failure 400 {object} map[string]any "不能删除自己/最后一个超管"
-// @Failure 404 {object} map[string]any "用户不存在"
+// @Failure 400 {object} errors.ErrorBody "不能删除自己/最后一个超管"
+// @Failure 404 {object} errors.ErrorBody "用户不存在"
 // @Router /admin/users/{id} [delete]
 func (h *Admin) DeleteUser(c *gin.Context) {
 	idStr := c.Param("id")
@@ -548,8 +548,8 @@ func (h *Admin) DeleteUser(c *gin.Context) {
 // @Param id path string true "账户 ID"
 // @Param body body object true "role"
 // @Success 200 {object} map[string]any "用户对象"
-// @Failure 400 {object} map[string]any "无效的角色/不能修改自己/最后一个超管"
-// @Failure 404 {object} map[string]any "账户不存在"
+// @Failure 400 {object} errors.ErrorBody "无效的角色/不能修改自己/最后一个超管"
+// @Failure 404 {object} errors.ErrorBody "账户不存在"
 // @Router /admin/role/{id} [put]
 func (h *Admin) UpdateRole(c *gin.Context) {
 	var body map[string]any
@@ -686,7 +686,7 @@ func (h *Admin) ListCreatorProfiles(c *gin.Context) {
 // @Security bearerAuth
 // @Param id path string true "主页 ID"
 // @Success 200 {object} map[string]any
-// @Failure 404 {object} map[string]any "创作者主页不存在"
+// @Failure 404 {object} errors.ErrorBody "创作者主页不存在"
 // @Router /admin/creator-profiles/{id} [get]
 func (h *Admin) GetCreatorProfile(c *gin.Context) {
 	oid, err := primitive.ObjectIDFromHex(c.Param("id"))
@@ -721,7 +721,7 @@ func (h *Admin) GetCreatorProfile(c *gin.Context) {
 // @Param id path string true "主页 ID"
 // @Param body body object true "displayName/avatar/bio/socialLinks/qqGroupLink"
 // @Success 200 {object} map[string]any
-// @Failure 404 {object} map[string]any "创作者主页不存在"
+// @Failure 404 {object} errors.ErrorBody "创作者主页不存在"
 // @Router /admin/creator-profiles/{id} [put]
 func (h *Admin) UpdateCreatorProfile(c *gin.Context) {
 	oid, err := primitive.ObjectIDFromHex(c.Param("id"))
@@ -772,7 +772,7 @@ func (h *Admin) UpdateCreatorProfile(c *gin.Context) {
 // @Security bearerAuth
 // @Param id path string true "主页 ID"
 // @Success 200 {object} map[string]any
-// @Failure 404 {object} map[string]any "创作者主页不存在"
+// @Failure 404 {object} errors.ErrorBody "创作者主页不存在"
 // @Router /admin/creator-profiles/{id}/approve [put]
 func (h *Admin) ApproveCreatorProfile(c *gin.Context) {
 	oid, err := primitive.ObjectIDFromHex(c.Param("id"))
@@ -818,7 +818,7 @@ func (h *Admin) ApproveCreatorProfile(c *gin.Context) {
 // @Param id path string true "主页 ID"
 // @Param body body object true "note"
 // @Success 200 {object} map[string]any
-// @Failure 404 {object} map[string]any "创作者主页不存在"
+// @Failure 404 {object} errors.ErrorBody "创作者主页不存在"
 // @Router /admin/creator-profiles/{id}/reject [put]
 func (h *Admin) RejectCreatorProfile(c *gin.Context) {
 	oid, err := primitive.ObjectIDFromHex(c.Param("id"))
@@ -859,8 +859,8 @@ func (h *Admin) RejectCreatorProfile(c *gin.Context) {
 // @Accept json
 // @Param body body object true "password"
 // @Success 200 {object} map[string]bool "verified"
-// @Failure 400 {object} map[string]any "请输入密码/密码错误"
-// @Failure 404 {object} map[string]any "未找到"
+// @Failure 400 {object} errors.ErrorBody "请输入密码/密码错误"
+// @Failure 404 {object} errors.ErrorBody "未找到"
 // @Router /admin/verify-password [post]
 func (h *Admin) VerifyPassword(c *gin.Context) {
 	var body map[string]any
@@ -898,8 +898,8 @@ func (h *Admin) VerifyPassword(c *gin.Context) {
 // @Param id path string true "用户 ID"
 // @Param body body object true "adminAccess"
 // @Success 200 {object} map[string]any "message/adminAccess/role"
-// @Failure 400 {object} map[string]any "参数错误/不能修改超管或创作者权限"
-// @Failure 404 {object} map[string]any "用户不存在"
+// @Failure 400 {object} errors.ErrorBody "参数错误/不能修改超管或创作者权限"
+// @Failure 404 {object} errors.ErrorBody "用户不存在"
 // @Router /admin/user-admin-access/{id} [put]
 func (h *Admin) ToggleAdminAccess(c *gin.Context) {
 	var body map[string]any

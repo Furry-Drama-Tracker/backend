@@ -213,7 +213,7 @@ func (h *EpisodeTrash) Versions(c *gin.Context) {
 // @Security bearerAuth
 // @Param id path string true "剧集 ID"
 // @Success 200 {object} map[string]any "剧集对象"
-// @Failure 404 {object} map[string]string "Episode not found"
+// @Failure 404 {object} errors.ErrorBody "Episode not found"
 // @Router /episode-trash/{id}/restore [put]
 func (h *EpisodeTrash) Restore(c *gin.Context) {
 	oid, err := primitive.ObjectIDFromHex(c.Param("id"))
@@ -241,7 +241,7 @@ func (h *EpisodeTrash) Restore(c *gin.Context) {
 // @Security bearerAuth
 // @Param id path string true "剧集 ID"
 // @Success 200 {object} map[string]string "message"
-// @Failure 404 {object} map[string]string "Episode not found"
+// @Failure 404 {object} errors.ErrorBody "Episode not found"
 // @Router /episode-trash/{id} [delete]
 func (h *EpisodeTrash) Purge(c *gin.Context) {
 	oid, err := primitive.ObjectIDFromHex(c.Param("id"))

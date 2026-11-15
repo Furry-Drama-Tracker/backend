@@ -201,7 +201,7 @@ func (h *SiteContents) PWAManifest(c *gin.Context) {
 // @Tags 站点内容
 // @Param key path string true "内容键（privacy/terms/about/settings/email）"
 // @Success 200 {object} map[string]any "站点内容文档"
-// @Failure 404 {object} map[string]string "Content not found"
+// @Failure 404 {object} errors.ErrorBody "Content not found"
 // @Router /site-content/{key} [get]
 func (h *SiteContents) GetByKey(c *gin.Context) {
 	key := c.Param("key")
@@ -338,7 +338,7 @@ func (h *SiteContents) List(c *gin.Context) {
 // @Accept json
 // @Param body body object true "host/port/user/pass/fromName/to"
 // @Success 200 {object} map[string]string "测试邮件发送成功，请检查收件箱"
-// @Failure 400 {object} map[string]string "配置缺失或发送失败"
+// @Failure 400 {object} errors.ErrorBody "配置缺失或发送失败"
 // @Router /site-content/test-email [post]
 func (h *SiteContents) TestEmail(c *gin.Context) {
 	var body map[string]any

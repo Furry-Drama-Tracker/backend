@@ -89,7 +89,7 @@ type registerRequest struct {
 // @Produce json
 // @Param body body registerRequest true "注册信息"
 // @Success 200 {object} map[string]any "message/email/needVerification"
-// @Failure 400 {object} map[string]any
+// @Failure 400 {object} errors.ErrorBody
 // @Router /auth/register [post]
 func (h *Auth) Register(c *gin.Context) {
 	var req registerRequest
@@ -130,8 +130,8 @@ type loginRequest struct {
 // @Produce json
 // @Param body body loginRequest true "登录信息（identifier=用户名或邮箱）"
 // @Success 200 {object} map[string]any "用户对象或 need2FA"
-// @Failure 400 {object} map[string]any
-// @Failure 403 {object} map[string]any "needVerification"
+// @Failure 400 {object} errors.ErrorBody
+// @Failure 403 {object} errors.ErrorBody "needVerification"
 // @Router /auth/login [post]
 func (h *Auth) Login(c *gin.Context) {
 	var req loginRequest
@@ -198,8 +198,8 @@ func (h *Auth) Logout(c *gin.Context) {
 // @Summary 刷新令牌
 // @Tags 认证
 // @Success 200 {object} map[string]any "用户对象"
-// @Failure 401 {object} map[string]any
-// @Failure 409 {object} map[string]any "并发刷新"
+// @Failure 401 {object} errors.ErrorBody
+// @Failure 409 {object} errors.ErrorBody "并发刷新"
 // @Router /auth/refresh [post]
 func (h *Auth) Refresh(c *gin.Context) {
 	refreshToken := auth.GetRefreshToken(c)

@@ -91,6 +91,8 @@ def line_of(text, idx):
 
 # 边缘/外部系统预留的错误码（非本仓库生成，源码扫描扫不到，手工登记）。
 # ref 恒为 0 = 边缘响应标记（无 RequestRef，无服务端请求日志可查）。
+# 完整响应信封（含 esa_request_id/esa_rule）见 docs/esa-error.schema.json，
+# ESA 错误 ID 注册表见 docs/esa-errors.csv。
 RESERVED = [
     {
         "code": "ESA0001", "kind": "edge", "status": 451,

@@ -229,7 +229,7 @@ func (h *Series) List(c *gin.Context) {
 // @Tags 系列
 // @Param id path string true "系列 ID"
 // @Success 200 {object} model.Series
-// @Failure 404 {object} map[string]string "Not found"
+// @Failure 404 {object} errors.ErrorBody "Not found"
 // @Router /series/{id} [get]
 func (h *Series) Detail(c *gin.Context) {
 	id, err := primitive.ObjectIDFromHex(c.Param("id"))
@@ -262,7 +262,7 @@ func (h *Series) Detail(c *gin.Context) {
 // @Accept json
 // @Param body body object true "name/description/episodes"
 // @Success 201 {object} model.Series
-// @Failure 400 {object} map[string]string "名称必填"
+// @Failure 400 {object} errors.ErrorBody "名称必填"
 // @Router /series [post]
 func (h *Series) Create(c *gin.Context) {
 	var req struct {
@@ -307,8 +307,8 @@ func (h *Series) Create(c *gin.Context) {
 // @Param id path string true "系列 ID"
 // @Param body body object true "name/description/episodes"
 // @Success 200 {object} model.Series
-// @Failure 403 {object} map[string]string "无权修改此系列"
-// @Failure 404 {object} map[string]string "Not found"
+// @Failure 403 {object} errors.ErrorBody "无权修改此系列"
+// @Failure 404 {object} errors.ErrorBody "Not found"
 // @Router /series/{id} [put]
 func (h *Series) Update(c *gin.Context) {
 	user, _ := middleware.GetUser(c)

@@ -11,6 +11,9 @@
 // @title 兽剧聚合平台 API
 // @version 1.0.0
 // @description 兽剧内容聚合平台后端服务 API 文档（neo-server）
+// @description 所有 4xx/5xx 响应体为统一错误信封（模型 ErrorBody）：{"message","error","ref","status"}。
+// @description error=错误码 XXXYYYY（模块前缀+序号，注册表 backend/docs/errors.json）；ref=0-999999999 随机参考号（响应头 X-Ref-ID 同值；边缘 ESA 响应恒为 0）；status=HTTP 状态码整数。
+// @description message 恒为纯文案，生产 5xx 掩码「服务器内部错误」；出错编号展示格式 CODE-000123456，由前端拼装。
 // @host localhost:5000
 // @BasePath /api
 // @securityDefinitions.apikey bearerAuth

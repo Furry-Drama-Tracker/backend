@@ -23,6 +23,21 @@ definitions:
       screenWidth:
         type: integer
     type: object
+  errors.ErrorBody:
+    properties:
+      error:
+        example: USR0007
+        type: string
+      message:
+        example: 该邮箱已注册
+        type: string
+      ref:
+        example: 123456789
+        type: integer
+      status:
+        example: 400
+        type: integer
+    type: object
   handler.loginRequest:
     properties:
       altcha:
@@ -30,6 +45,8 @@ definitions:
       deviceInfo:
         $ref: '#/definitions/auth.DeviceInfoPayload'
       email:
+        type: string
+      identifier:
         type: string
       password:
         type: string
@@ -141,7 +158,11 @@ definitions:
 host: localhost:5000
 info:
   contact: {}
-  description: 兽剧内容聚合平台后端服务 API 文档（neo-server）
+  description: |-
+    兽剧内容聚合平台后端服务 API 文档（neo-server）
+    所有 4xx/5xx 响应体为统一错误信封（模型 ErrorBody）：{"message","error","ref","status"}。
+    error=错误码 XXXYYYY（模块前缀+序号，注册表 backend/docs/errors.json）；ref=0-999999999 随机参考号（响应头 X-Ref-ID 同值；边缘 ESA 响应恒为 0）；status=HTTP 状态码整数。
+    message 恒为纯文案，生产 5xx 掩码「服务器内部错误」；出错编号展示格式 CODE-000123456，由前端拼装。
   title: 兽剧聚合平台 API
   version: 1.0.0
 paths:
@@ -280,13 +301,11 @@ paths:
         "400":
           description: 不能删除自己/最后一个超管/非管理账户
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/errors.ErrorBody'
         "404":
           description: 账户不存在
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/errors.ErrorBody'
       security:
       - bearerAuth: []
       summary: 删除管理/创作者账户
@@ -324,8 +343,7 @@ paths:
         "404":
           description: 创作者主页不存在
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/errors.ErrorBody'
       security:
       - bearerAuth: []
       summary: 创作者主页详情
@@ -355,8 +373,7 @@ paths:
         "404":
           description: 创作者主页不存在
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/errors.ErrorBody'
       security:
       - bearerAuth: []
       summary: 编辑创作者主页
@@ -379,8 +396,7 @@ paths:
         "404":
           description: 创作者主页不存在
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/errors.ErrorBody'
       security:
       - bearerAuth: []
       summary: 通过创作者主页修改
@@ -411,8 +427,7 @@ paths:
         "404":
           description: 创作者主页不存在
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/errors.ErrorBody'
       security:
       - bearerAuth: []
       summary: 拒绝创作者主页修改
@@ -502,8 +517,7 @@ paths:
         "400":
           description: 校验失败
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/errors.ErrorBody'
       security:
       - bearerAuth: []
       summary: 创建管理/创作者账户
@@ -534,13 +548,11 @@ paths:
         "400":
           description: 无效的角色/不能修改自己/最后一个超管
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/errors.ErrorBody'
         "404":
           description: 账户不存在
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/errors.ErrorBody'
       security:
       - bearerAuth: []
       summary: 修改账户角色
@@ -571,13 +583,11 @@ paths:
         "400":
           description: 参数错误/不能修改超管或创作者权限
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/errors.ErrorBody'
         "404":
           description: 用户不存在
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/errors.ErrorBody'
       security:
       - bearerAuth: []
       summary: 切换用户管理权限
@@ -627,13 +637,11 @@ paths:
         "400":
           description: 不能删除自己/最后一个超管
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/errors.ErrorBody'
         "404":
           description: 用户不存在
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/errors.ErrorBody'
       security:
       - bearerAuth: []
       summary: 删除用户（级联清理）
@@ -673,13 +681,11 @@ paths:
         "400":
           description: 请输入密码/密码错误
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/errors.ErrorBody'
         "404":
           description: 未找到
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/errors.ErrorBody'
       security:
       - bearerAuth: []
       summary: 校验管理员密码
@@ -719,9 +725,7 @@ paths:
         "400":
           description: 标题和内容不能为空
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/errors.ErrorBody'
       security:
       - bearerAuth: []
       summary: 创建公告
@@ -745,9 +749,7 @@ paths:
         "404":
           description: Announcement not found
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/errors.ErrorBody'
       security:
       - bearerAuth: []
       summary: 删除公告
@@ -769,9 +771,7 @@ paths:
         "404":
           description: Announcement not found
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/errors.ErrorBody'
       summary: 获取公告详情
       tags:
       - 公告
@@ -799,9 +799,7 @@ paths:
         "404":
           description: Announcement not found
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/errors.ErrorBody'
       security:
       - bearerAuth: []
       summary: 更新公告
@@ -824,15 +822,11 @@ paths:
         "400":
           description: 该公告未启用邮件推送
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/errors.ErrorBody'
         "404":
           description: Announcement not found
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/errors.ErrorBody'
       security:
       - bearerAuth: []
       summary: 手动触发公告邮件推送
@@ -855,15 +849,11 @@ paths:
         "400":
           description: 该公告未启用通知推送
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/errors.ErrorBody'
         "404":
           description: Announcement not found
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/errors.ErrorBody'
       security:
       - bearerAuth: []
       summary: 手动触发公告通知推送
@@ -921,6 +911,26 @@ paths:
       summary: 审计日志列表
       tags:
       - 审计日志
+  /auth/2fa/email-otp/send:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: twoFactorChallenge
+        in: body
+        name: body
+        required: true
+        schema:
+          type: object
+      responses:
+        "200":
+          description: email
+          schema:
+            additionalProperties: true
+            type: object
+      summary: 发送 2FA 邮箱验证码
+      tags:
+      - 认证
   /auth/cancel-deletion:
     post:
       responses:
@@ -1007,34 +1017,11 @@ paths:
         type: string
       responses:
         "200":
-          description: available
-          schema:
-            additionalProperties:
-              type: boolean
-            type: object
-      summary: 检查账号ID是否可用
-      tags:
-      - 认证
-  /auth/confirm-device-login:
-    post:
-      consumes:
-      - application/json
-      parameters:
-      - description: 6 位登录码
-        in: body
-        name: body
-        required: true
-        schema:
-          type: object
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: 用户对象或 need2FA
+          description: available/reason
           schema:
             additionalProperties: true
             type: object
-      summary: 确认设备登录
+      summary: 检查账号ID是否可用
       tags:
       - 认证
   /auth/deletion-status:
@@ -1104,7 +1091,7 @@ paths:
       consumes:
       - application/json
       parameters:
-      - description: 登录信息
+      - description: 登录信息（identifier=用户名或邮箱）
         in: body
         name: body
         required: true
@@ -1121,13 +1108,11 @@ paths:
         "400":
           description: Bad Request
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/errors.ErrorBody'
         "403":
-          description: needVerification/needDeviceVerify
+          description: needVerification
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/errors.ErrorBody'
       summary: 用户登录
       tags:
       - 认证
@@ -1136,7 +1121,7 @@ paths:
       consumes:
       - application/json
       parameters:
-      - description: email/twoFactorToken/twoFactorChallenge
+      - description: identifier/twoFactorToken/twoFactorChallenge/method
         in: body
         name: body
         required: true
@@ -1182,6 +1167,78 @@ paths:
       summary: 获取当前用户
       tags:
       - 认证
+  /auth/passkey/options:
+    post:
+      consumes:
+      - application/json
+      responses:
+        "200":
+          description: publicKey options + ceremonyKey
+          schema:
+            additionalProperties: true
+            type: object
+      summary: 开始 Passkey 登录
+      tags:
+      - 认证
+  /auth/passkey/verify:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 仪式会话键
+        in: query
+        name: ceremonyKey
+        required: true
+        type: string
+      responses:
+        "200":
+          description: 用户对象
+          schema:
+            additionalProperties: true
+            type: object
+      summary: 完成 Passkey 登录
+      tags:
+      - 认证
+  /auth/qq/callback:
+    post:
+      consumes:
+      - application/json
+      responses:
+        "501":
+          description: Not Implemented
+          schema:
+            $ref: '#/definitions/errors.ErrorBody'
+      summary: QQ 授权回调（预留）
+      tags:
+      - 认证
+  /auth/qq/start:
+    get:
+      responses:
+        "200":
+          description: authUrl
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "501":
+          description: Not Implemented
+          schema:
+            $ref: '#/definitions/errors.ErrorBody'
+      summary: 开始 QQ 授权（预留）
+      tags:
+      - 认证
+  /auth/qq/status:
+    get:
+      responses:
+        "200":
+          description: enabled
+          schema:
+            additionalProperties:
+              type: boolean
+            type: object
+      summary: QQ 登录可用状态
+      tags:
+      - 认证
   /auth/refresh:
     post:
       responses:
@@ -1193,13 +1250,11 @@ paths:
         "401":
           description: Unauthorized
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/errors.ErrorBody'
         "409":
           description: 并发刷新
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/errors.ErrorBody'
       summary: 刷新令牌
       tags:
       - 认证
@@ -1225,8 +1280,7 @@ paths:
         "400":
           description: Bad Request
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/errors.ErrorBody'
       summary: 用户注册
       tags:
       - 认证
@@ -1340,28 +1394,6 @@ paths:
       security:
       - bearerAuth: []
       summary: 获取 SSE 票据
-      tags:
-      - 认证
-  /auth/verify-device:
-    post:
-      consumes:
-      - application/json
-      parameters:
-      - description: device-verify JWT
-        in: body
-        name: body
-        required: true
-        schema:
-          type: object
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: verified/loginCode
-          schema:
-            additionalProperties: true
-            type: object
-      summary: 设备验证：邮箱链接换取登录码
       tags:
       - 认证
   /auth/verify-email:
@@ -1662,9 +1694,7 @@ paths:
         "404":
           description: Profile not found
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/errors.ErrorBody'
       summary: 按创作者用户 ID 查询公开主页
       tags:
       - 创作者主页
@@ -1719,9 +1749,7 @@ paths:
         "404":
           description: Profile not found
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/errors.ErrorBody'
       summary: 公开创作者主页
       tags:
       - 创作者主页
@@ -1823,9 +1851,7 @@ paths:
         "404":
           description: Episode not found
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/errors.ErrorBody'
       security:
       - bearerAuth: []
       summary: 彻底删除回收站剧集（清理全部关联数据，释放服务器资源）
@@ -1848,9 +1874,7 @@ paths:
         "404":
           description: Episode not found
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/errors.ErrorBody'
       security:
       - bearerAuth: []
       summary: 从回收站恢复剧集（移回正式集合，可再次编辑/重新提交审核）
@@ -2384,9 +2408,7 @@ paths:
         "400":
           description: 无效的反馈类型/内容不能为空/内容不能超过2000字
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/errors.ErrorBody'
       security:
       - bearerAuth: []
       summary: 提交反馈
@@ -2417,15 +2439,11 @@ paths:
         "400":
           description: 无效的状态值
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/errors.ErrorBody'
         "404":
           description: Not found
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/errors.ErrorBody'
       security:
       - bearerAuth: []
       summary: 处理/回复反馈
@@ -2491,9 +2509,7 @@ paths:
         "400":
           description: Bad Request
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/errors.ErrorBody'
       security:
       - bearerAuth: []
       summary: 新建收藏夹
@@ -2517,9 +2533,7 @@ paths:
         "404":
           description: Not Found
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/errors.ErrorBody'
       security:
       - bearerAuth: []
       summary: 删除收藏夹
@@ -2548,15 +2562,11 @@ paths:
         "400":
           description: Bad Request
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/errors.ErrorBody'
         "404":
           description: Not Found
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/errors.ErrorBody'
       security:
       - bearerAuth: []
       summary: 重命名/修改描述
@@ -2587,9 +2597,7 @@ paths:
         "404":
           description: Not Found
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/errors.ErrorBody'
       security:
       - bearerAuth: []
       summary: 添加条目到收藏夹
@@ -2618,9 +2626,7 @@ paths:
         "404":
           description: Not Found
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/errors.ErrorBody'
       security:
       - bearerAuth: []
       summary: 从收藏夹移除条目
@@ -2644,9 +2650,7 @@ paths:
         "404":
           description: Not Found
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/errors.ErrorBody'
       security:
       - bearerAuth: []
       summary: 取消分享收藏夹
@@ -2669,9 +2673,7 @@ paths:
         "404":
           description: Not Found
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/errors.ErrorBody'
       security:
       - bearerAuth: []
       summary: 分享收藏夹
@@ -2731,9 +2733,7 @@ paths:
         "404":
           description: Not Found
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/errors.ErrorBody'
       summary: 公开访问分享收藏夹
       tags:
       - 收藏夹
@@ -2864,9 +2864,7 @@ paths:
         "400":
           description: 参数校验失败
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/errors.ErrorBody'
       security:
       - bearerAuth: []
       summary: 直接创建友链
@@ -2890,9 +2888,7 @@ paths:
         "404":
           description: 友链不存在
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/errors.ErrorBody'
       security:
       - bearerAuth: []
       summary: 删除友链
@@ -2922,15 +2918,11 @@ paths:
         "400":
           description: 参数校验失败
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/errors.ErrorBody'
         "404":
           description: 友链不存在
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/errors.ErrorBody'
       security:
       - bearerAuth: []
       summary: 更新友链
@@ -2972,9 +2964,7 @@ paths:
         "400":
           description: 参数校验失败
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/errors.ErrorBody'
       security:
       - bearerAuth: []
       summary: 申请友情链接
@@ -3009,9 +2999,7 @@ paths:
         "503":
           description: status/timestamp/db
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/errors.ErrorBody'
       summary: 健康检查
       tags:
       - 系统
@@ -3137,13 +3125,11 @@ paths:
         "400":
           description: Invalid episode number
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/errors.ErrorBody'
         "404":
           description: Episode not found
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/errors.ErrorBody'
       security:
       - bearerAuth: []
       summary: 记录观看历史
@@ -3169,8 +3155,7 @@ paths:
         "404":
           description: Not Found
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/errors.ErrorBody'
       security:
       - bearerAuth: []
       summary: 删除图标
@@ -3202,13 +3187,11 @@ paths:
         "400":
           description: Bad Request
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/errors.ErrorBody'
         "404":
           description: Not Found
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/errors.ErrorBody'
       security:
       - bearerAuth: []
       summary: 更新图标
@@ -3229,8 +3212,7 @@ paths:
         "403":
           description: Forbidden
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/errors.ErrorBody'
       security:
       - bearerAuth: []
       summary: 全部图标（管理端）
@@ -3466,6 +3448,90 @@ paths:
       summary: VAPID 公钥
       tags:
       - 通知
+  /passkeys:
+    get:
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              additionalProperties: true
+              type: object
+            type: array
+      security:
+      - bearerAuth: []
+      summary: 列出我的 Passkey
+      tags:
+      - Passkey
+  /passkeys/{id}:
+    delete:
+      parameters:
+      - description: 凭据 ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: currentPassword
+        in: body
+        name: body
+        required: true
+        schema:
+          type: object
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - bearerAuth: []
+      summary: 删除 Passkey
+      tags:
+      - Passkey
+  /passkeys/register/options:
+    post:
+      parameters:
+      - description: 当前密码
+        in: body
+        name: currentPassword
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: publicKey options + ceremonyKey
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - bearerAuth: []
+      summary: 开始注册 Passkey
+      tags:
+      - Passkey
+  /passkeys/register/verify:
+    post:
+      parameters:
+      - description: 仪式会话键
+        in: query
+        name: ceremonyKey
+        required: true
+        type: string
+      - description: 设备名
+        in: query
+        name: name
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - bearerAuth: []
+      summary: 完成 Passkey 注册
+      tags:
+      - Passkey
   /ratings:
     post:
       consumes:
@@ -3488,18 +3554,15 @@ paths:
         "400":
           description: Invalid rating data
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/errors.ErrorBody'
         "403":
           description: 该剧集暂不可评分
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/errors.ErrorBody'
         "404":
           description: Episode not found
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/errors.ErrorBody'
       security:
       - bearerAuth: []
       summary: 提交评分
@@ -3524,8 +3587,7 @@ paths:
         "404":
           description: Rating not found
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/errors.ErrorBody'
       security:
       - bearerAuth: []
       summary: 删除评分
@@ -3573,9 +3635,7 @@ paths:
           description: Invalid target type / Invalid reason / 描述不能超过2000个字符 / Already
             reported
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/errors.ErrorBody'
       security:
       - bearerAuth: []
       summary: 提交举报
@@ -3632,15 +3692,11 @@ paths:
         "400":
           description: Invalid status
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/errors.ErrorBody'
         "404":
           description: Report not found
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/errors.ErrorBody'
       security:
       - bearerAuth: []
       summary: 处理举报（已采纳/未采纳，通知举报者）
@@ -3691,9 +3747,7 @@ paths:
         "404":
           description: Episode not found
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/errors.ErrorBody'
       security:
       - bearerAuth: []
       summary: 审核通过剧集（含应用待审核修改）
@@ -3722,9 +3776,7 @@ paths:
         "404":
           description: Editor not found / Episode not found
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/errors.ErrorBody'
       security:
       - bearerAuth: []
       summary: 分配剧集编辑者
@@ -3775,9 +3827,7 @@ paths:
         "404":
           description: Episode not found
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/errors.ErrorBody'
       security:
       - bearerAuth: []
       summary: 审核拒绝剧集（含清除待审核修改）
@@ -3806,9 +3856,7 @@ paths:
         "404":
           description: Episode not found
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/errors.ErrorBody'
       security:
       - bearerAuth: []
       summary: 移除剧集编辑者
@@ -3874,15 +3922,11 @@ paths:
         "400":
           description: Bad Request
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/errors.ErrorBody'
         "404":
           description: Not Found
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/errors.ErrorBody'
       security:
       - bearerAuth: []
       summary: 收藏他人收藏夹
@@ -3906,9 +3950,7 @@ paths:
         "404":
           description: Not Found
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/errors.ErrorBody'
       security:
       - bearerAuth: []
       summary: 取消收藏他人收藏夹
@@ -3952,9 +3994,7 @@ paths:
         "400":
           description: 名称必填
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/errors.ErrorBody'
       security:
       - bearerAuth: []
       summary: 创建新系列（需要创作者/管理员权限）
@@ -3995,9 +4035,7 @@ paths:
         "404":
           description: Not found
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/errors.ErrorBody'
       summary: 根据ID获取系列详情
       tags:
       - 系列
@@ -4024,15 +4062,11 @@ paths:
         "403":
           description: 无权修改此系列
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/errors.ErrorBody'
         "404":
           description: Not found
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/errors.ErrorBody'
       security:
       - bearerAuth: []
       summary: 更新系列信息（需要创作者/管理员权限）
@@ -4070,9 +4104,7 @@ paths:
         "404":
           description: Content not found
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/errors.ErrorBody'
       summary: 获取站点内容
       tags:
       - 站点内容
@@ -4134,9 +4166,7 @@ paths:
         "400":
           description: 配置缺失或发送失败
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/errors.ErrorBody'
       security:
       - bearerAuth: []
       summary: 发送测试邮件
@@ -4275,9 +4305,7 @@ paths:
         "404":
           description: Episode not found
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/errors.ErrorBody'
       summary: 相关剧集推荐（标签/分类/浏览量混合打分）
       tags:
       - 统计
@@ -4333,8 +4361,7 @@ paths:
         "400":
           description: Bad Request
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/errors.ErrorBody'
       security:
       - bearerAuth: []
       summary: 创建主题
@@ -4360,13 +4387,11 @@ paths:
         "403":
           description: Forbidden
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/errors.ErrorBody'
         "404":
           description: Not Found
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/errors.ErrorBody'
       security:
       - bearerAuth: []
       summary: 删除主题
@@ -4398,18 +4423,15 @@ paths:
         "400":
           description: Bad Request
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/errors.ErrorBody'
         "403":
           description: Forbidden
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/errors.ErrorBody'
         "404":
           description: Not Found
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/errors.ErrorBody'
       security:
       - bearerAuth: []
       summary: 更新主题
@@ -4442,13 +4464,11 @@ paths:
         "400":
           description: Bad Request
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/errors.ErrorBody'
         "404":
           description: Not Found
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/errors.ErrorBody'
       security:
       - bearerAuth: []
       summary: 管理主题类型与状态
@@ -4480,13 +4500,11 @@ paths:
         "400":
           description: Bad Request
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/errors.ErrorBody'
         "404":
           description: Not Found
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/errors.ErrorBody'
       security:
       - bearerAuth: []
       summary: 设置/取消站点默认主题
@@ -4519,13 +4537,11 @@ paths:
         "400":
           description: Bad Request
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/errors.ErrorBody'
         "404":
           description: Not Found
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/errors.ErrorBody'
       security:
       - bearerAuth: []
       summary: 审核个人主题
@@ -4550,18 +4566,15 @@ paths:
         "400":
           description: Bad Request
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/errors.ErrorBody'
         "403":
           description: Forbidden
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/errors.ErrorBody'
         "404":
           description: Not Found
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/errors.ErrorBody'
       security:
       - bearerAuth: []
       summary: 提交个人主题审核
@@ -4595,8 +4608,7 @@ paths:
         "403":
           description: Forbidden
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/errors.ErrorBody'
       security:
       - bearerAuth: []
       summary: 全部主题（管理端）
@@ -4624,8 +4636,7 @@ paths:
         "400":
           description: Bad Request
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/errors.ErrorBody'
       security:
       - bearerAuth: []
       summary: 更新背景显示偏好
@@ -4661,8 +4672,7 @@ paths:
         "401":
           description: Unauthorized
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/errors.ErrorBody'
       security:
       - bearerAuth: []
       summary: 获取我的个人主题
@@ -4681,8 +4691,7 @@ paths:
         "401":
           description: Unauthorized
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/errors.ErrorBody'
       security:
       - bearerAuth: []
       summary: 获取当前用户生效主题
@@ -4710,18 +4719,15 @@ paths:
         "400":
           description: Bad Request
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/errors.ErrorBody'
         "403":
           description: 无权使用该主题
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/errors.ErrorBody'
         "404":
           description: 主题不存在
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/errors.ErrorBody'
       security:
       - bearerAuth: []
       summary: 设置用户背景/图标两槽主题
@@ -4749,8 +4755,7 @@ paths:
         "400":
           description: Bad Request
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/errors.ErrorBody'
       security:
       - bearerAuth: []
       summary: 上传主题壁纸
@@ -4776,15 +4781,11 @@ paths:
         "400":
           description: Missing key or targetLang / Unsupported language
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/errors.ErrorBody'
         "504":
           description: Translation request timeout
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/errors.ErrorBody'
       summary: 翻译文本（硬编码表 + 机器翻译）
       tags:
       - 翻译
@@ -4808,15 +4809,11 @@ paths:
         "400":
           description: Missing texts or targetLang / Unsupported language
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/errors.ErrorBody'
         "504":
           description: Translation request timeout
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/errors.ErrorBody'
       summary: 批量翻译文本
       tags:
       - 翻译
@@ -5013,6 +5010,25 @@ paths:
       summary: 上传头像
       tags:
       - 用户
+  /users/check-login-name:
+    get:
+      parameters:
+      - description: 用户名
+        in: query
+        name: name
+        required: true
+        type: string
+      responses:
+        "200":
+          description: available/reason
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - bearerAuth: []
+      summary: 检查用户名是否可用
+      tags:
+      - 用户
   /users/export-my-data:
     get:
       parameters:
@@ -5028,6 +5044,28 @@ paths:
       security:
       - bearerAuth: []
       summary: 导出个人数据
+      tags:
+      - 用户
+  /users/login-name:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: newLoginName/currentPassword
+        in: body
+        name: body
+        required: true
+        schema:
+          type: object
+      responses:
+        "200":
+          description: accountId/cooldownDays
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - bearerAuth: []
+      summary: 修改登录用户名
       tags:
       - 用户
   /users/profile:
@@ -5281,9 +5319,7 @@ paths:
         "404":
           description: 壁纸不存在
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/errors.ErrorBody'
       security:
       - bearerAuth: []
       summary: 删除系统壁纸
@@ -5313,9 +5349,7 @@ paths:
         "404":
           description: 壁纸不存在
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/errors.ErrorBody'
       security:
       - bearerAuth: []
       summary: 更新系统壁纸

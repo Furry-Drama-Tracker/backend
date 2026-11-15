@@ -131,7 +131,7 @@ func (h *Wallpapers) SystemUpload(c *gin.Context) {
 // @Param id path string true "壁纸 ID"
 // @Param body body object true "name/enabled/sortOrder"
 // @Success 200 {object} map[string]any "壁纸对象"
-// @Failure 404 {object} map[string]string "壁纸不存在"
+// @Failure 404 {object} errors.ErrorBody "壁纸不存在"
 // @Router /wallpapers/system/{id} [put]
 func (h *Wallpapers) SystemUpdate(c *gin.Context) {
 	oid, err := primitive.ObjectIDFromHex(c.Param("id"))
@@ -168,7 +168,7 @@ func (h *Wallpapers) SystemUpdate(c *gin.Context) {
 // @Security bearerAuth
 // @Param id path string true "壁纸 ID"
 // @Success 200 {object} map[string]string "已删除"
-// @Failure 404 {object} map[string]string "壁纸不存在"
+// @Failure 404 {object} errors.ErrorBody "壁纸不存在"
 // @Router /wallpapers/system/{id} [delete]
 func (h *Wallpapers) SystemDelete(c *gin.Context) {
 	oid, err := primitive.ObjectIDFromHex(c.Param("id"))

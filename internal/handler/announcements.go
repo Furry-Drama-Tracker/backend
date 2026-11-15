@@ -87,7 +87,7 @@ func (h *Announcements) Active(c *gin.Context) {
 // @Tags 公告
 // @Param id path string true "公告 ID"
 // @Success 200 {object} map[string]any "公告对象"
-// @Failure 404 {object} map[string]string "Announcement not found"
+// @Failure 404 {object} errors.ErrorBody "Announcement not found"
 // @Router /announcements/{id} [get]
 func (h *Announcements) PublicDetail(c *gin.Context) {
 	a, ok := h.findAnnouncement(c)
@@ -125,7 +125,7 @@ func (h *Announcements) AdminList(c *gin.Context) {
 // @Accept json
 // @Param body body object true "title/content 必填；其余字段可选"
 // @Success 200 {object} map[string]any "公告对象"
-// @Failure 400 {object} map[string]string "标题和内容不能为空"
+// @Failure 400 {object} errors.ErrorBody "标题和内容不能为空"
 // @Router /announcements [post]
 func (h *Announcements) Create(c *gin.Context) {
 	body := cmsReadBody(c)
@@ -187,7 +187,7 @@ func (h *Announcements) Create(c *gin.Context) {
 // @Param id path string true "公告 ID"
 // @Param body body object true "可更新字段"
 // @Success 200 {object} map[string]any "公告对象"
-// @Failure 404 {object} map[string]string "Announcement not found"
+// @Failure 404 {object} errors.ErrorBody "Announcement not found"
 // @Router /announcements/{id} [put]
 func (h *Announcements) Update(c *gin.Context) {
 	oid, err := primitive.ObjectIDFromHex(c.Param("id"))
@@ -279,7 +279,7 @@ func (h *Announcements) Update(c *gin.Context) {
 // @Security bearerAuth
 // @Param id path string true "公告 ID"
 // @Success 200 {object} map[string]string "已删除"
-// @Failure 404 {object} map[string]string "Announcement not found"
+// @Failure 404 {object} errors.ErrorBody "Announcement not found"
 // @Router /announcements/{id} [delete]
 func (h *Announcements) Delete(c *gin.Context) {
 	oid, err := primitive.ObjectIDFromHex(c.Param("id"))
@@ -308,8 +308,8 @@ func (h *Announcements) Delete(c *gin.Context) {
 // @Security bearerAuth
 // @Param id path string true "公告 ID"
 // @Success 200 {object} map[string]any "message/sent"
-// @Failure 400 {object} map[string]string "该公告未启用邮件推送"
-// @Failure 404 {object} map[string]string "Announcement not found"
+// @Failure 400 {object} errors.ErrorBody "该公告未启用邮件推送"
+// @Failure 404 {object} errors.ErrorBody "Announcement not found"
 // @Router /announcements/{id}/send-email [post]
 func (h *Announcements) SendEmail(c *gin.Context) {
 	oid, err := primitive.ObjectIDFromHex(c.Param("id"))
@@ -353,8 +353,8 @@ func (h *Announcements) SendEmail(c *gin.Context) {
 // @Security bearerAuth
 // @Param id path string true "公告 ID"
 // @Success 200 {object} map[string]any "message/count"
-// @Failure 400 {object} map[string]string "该公告未启用通知推送"
-// @Failure 404 {object} map[string]string "Announcement not found"
+// @Failure 400 {object} errors.ErrorBody "该公告未启用通知推送"
+// @Failure 404 {object} errors.ErrorBody "Announcement not found"
 // @Router /announcements/{id}/send-notification [post]
 func (h *Announcements) SendNotification(c *gin.Context) {
 	oid, err := primitive.ObjectIDFromHex(c.Param("id"))
