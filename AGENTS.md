@@ -90,14 +90,14 @@ deploy/               systemd unit + ini 模板 + run.sh
 所有 4xx/5xx 响应体统一附带三个信号（200 与 health 503 / oauth 501 / 上传 400 信封除外）：
 
 ```json
-{"message": "该邮箱已注册 [USR0007·123456789]", "error": "USR0007", "ref": 123456789}
+{"message": "该邮箱已注册", "error": "USR0007", "ref": 123456789}
 ```
 
 - **error**：`XXXYYYY`——X=3 字母模块前缀，Y=文件（或模块共享文件组）内顺序号。码即注册表：`grep -rn "USR0007" backend/` 直达唯一调用点。**新站点取号 = 同前缀仓库内当前最大序号 +1**（4 位数字，前缀不得复用于不同模块）。
-- **ref**：每请求一个 0-999999999 随十进制整数（`crypto/rand`，`middleware.RequestRef` 生成）；响应头 `X-Ref-ID` 同值；`RequestLogger`/5xx 日志行都带 `ref`。前端契约：JSON 整数补零 9 位后按三位一段空格分组展示（`123456789` → `123 456 789`）。
-- **message 内嵌**：生产环境 4xx/5xx message 末尾由渲染器统一追加 ` [CODE·ref]`（非技术用户直接复制报告）；开发/测试环境 message 保持原文（字段仍附带）。5xx 生产另有统一掩码「服务器内部错误」。
+- **ref**：每请求一个 0-999999999 随十进制整数（`crypto/rand`，`middleware.RequestRef` 生成）；响应头 `X-Ref-ID` 同值；`RequestLogger`/5xx 日志行都带 `ref`。
+- **message 恒为纯文案**：编号只经 `error`/`ref` JSON 字段传递，后端不拼进 message；出错编号展示与复制由前端从字段拼装（`frontend/src/utils/errorMeta.js`，格式 `USR0007-000123456`）。生产 5xx message 掩码「服务器内部错误」。
 - **日志**：5xx 渲染时额外打一行 ERROR（stdout slog）：`code`/`ref`/`path`/`site`（错误构造点 file:line，`runtime.Caller` 自动抓取）/`cause`；panic 恢复走 `SYS0500`（JSON 500 + stack 入日志）。排障：拿用户报的码 grep 源码定位站点，拿 ref grep 日志定位请求。
-- **构造器选型**：handler 直写用 `Abort500C/AbortErrC/AbortCoded`；middleware 固定契约响应用 `codedBody(c, code, gin.H{...})`（message 不内嵌后缀）；service 层用 `NewC/NewKeyC/NewExtraC/WrapC`。
+- **构造器选型**：handler 直写用 `Abort500C/AbortErrC/AbortCoded`；middleware 固定契约响应用 `codedBody(c, code, gin.H{...})`；service 层用 `NewC/NewKeyC/NewExtraC/WrapC`。
 - **机器注册表**：`docs/errors.json`（741+ 条目，含 code/kind/status/message/file/line）+ `docs/errors.schema.json`；生成器 `python3 docs/gen_errors_json.py`——新增错误码后重跑，输出字节稳定可提交。
 - 例外不加码：`/api/health` 503（独立信封）、oauth 501（业务性未开放）、`UploadError` 400 信封。
 

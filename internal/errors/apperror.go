@@ -7,9 +7,8 @@
 //   - 开发环境响应体附带 stack
 //   - 4xx/5xx 响应体统一附带 error（错误码 XXXYYYY，模块前缀+文件内顺序号，
 //     契约见 backend/AGENTS.md「错误码与参考号」）与 ref（0-999999999 随机参考号，
-//     JSON 整数；前端按三位一段空格分组展示）。
-//     生产环境 message 末尾追加 " [CODE·ref]"，非技术用户可直接复制报告；
-//     开发环境 message 保持原文。
+//     JSON 整数）。message 恒为纯文案，不内嵌编号；展示与复制由前端从字段拼装
+//     （frontend/src/utils/errorMeta.js）。
 //   - 5xx 渲染时额外打一行 ERROR 日志（code/ref/cause/site/path），
 //     site 为错误构造点 file:line（runtime.Caller 自动抓取）。
 package errors
@@ -244,7 +243,7 @@ func abortAppError(c *gin.Context, ae *AppError, isDev bool) {
 		}
 		body[k] = v
 	}
-	// 4xx/5xx 统一附带错误码与参考号；生产 message 末尾内嵌，供非技术用户直接复制报告。
+	// 4xx/5xx 统一附带错误码与参考号（JSON 字段）；message 恒为纯文案，不内嵌编号。
 	if status >= 400 {
 		code := ae.Code
 		if code == "" {
@@ -253,9 +252,6 @@ func abortAppError(c *gin.Context, ae *AppError, isDev bool) {
 		ref := refFromContext(c)
 		body["error"] = code
 		body["ref"] = ref
-		if !isDev {
-			body["message"] = fmt.Sprintf("%s [%s·%d]", msg, code, ref)
-		}
 		if status >= 500 {
 			log5xx(c, ae, code, ref)
 		}

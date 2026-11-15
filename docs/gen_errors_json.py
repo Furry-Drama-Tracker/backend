@@ -220,7 +220,7 @@ def main():
         "$schema": "./errors.schema.json",
         "version": 1,
         "refSpec": {"type": "integer", "range": [0, 999999999],
-                    "display": "前端补零到 9 位后按三位一段空格分组，如 123 456 789"},
+                    "display": "出错编号 = error 码 + '-' + 补零 9 位整数，如 USR0007-000123456；展示与复制由前端拼装（frontend/src/utils/errorMeta.js）"},
         "codes": sorted(dedup, key=lambda e: e["code"]),
     }
     target = Path(__file__).resolve().parent / "errors.json"

@@ -54,27 +54,25 @@ func TestAbortAppErrorRefIsInteger(t *testing.T) {
 	}
 }
 
-// TestAbortAppErrorProdEmbedsCodeRef 生产环境 message 末尾内嵌 [CODE·ref]；
-// 开发环境 message 保持原文（字段仍附带）。
-func TestAbortAppErrorProdEmbedsCodeRef(t *testing.T) {
+// TestAbortAppErrorProdPlainMessage 生产环境 message 恒为纯文案（无编号后缀），
+// 编号只经 error/ref JSON 字段传递；开发环境行为一致。
+func TestAbortAppErrorProdPlainMessage(t *testing.T) {
 	ae := &AppError{Message: "该邮箱已注册", Status: 400, Code: "USR0007"}
 	_, body := render(t, false, ae)
-	want := "该邮箱已注册 [USR0007·"
-	msg, _ := body["message"].(string)
-	if len(msg) < len(want) || msg[:len(want)] != want {
-		t.Fatalf("prod message = %q, want 前缀 %q", msg, want)
+	if body["message"] != "该邮箱已注册" {
+		t.Fatalf("prod message = %v, 不应内嵌编号", body["message"])
 	}
 	if body["error"] != "USR0007" {
 		t.Fatalf("prod error = %v", body["error"])
 	}
 	_, body = render(t, true, ae)
 	if body["message"] != "该邮箱已注册" {
-		t.Fatalf("dev message = %v, 不应内嵌", body["message"])
+		t.Fatalf("dev message = %v", body["message"])
 	}
 }
 
 // TestAbortAppErrorFallbackCode 未编码错误回退 SYS0001；
-// 生产 5xx message 隐藏内部文案。
+// 生产 5xx message 隐藏内部文案（纯文案，无后缀）。
 func TestAbortAppErrorFallbackCode(t *testing.T) {
 	_, body := render(t, true, &AppError{Message: "inner", Status: 500})
 	if body["error"] != fallbackCode {
@@ -84,7 +82,7 @@ func TestAbortAppErrorFallbackCode(t *testing.T) {
 		t.Fatalf("dev 5xx message = %v", body["message"])
 	}
 	_, body = render(t, false, &AppError{Message: "inner", Status: 500})
-	if body["message"] != "服务器内部错误 [SYS0001·" && msgOf(body)[:len("服务器内部错误 [SYS0001·")] != "服务器内部错误 [SYS0001·" {
+	if body["message"] != "服务器内部错误" {
 		t.Fatalf("prod 5xx message = %v", body["message"])
 	}
 }
@@ -126,9 +124,4 @@ func TestNewRefIDRange(t *testing.T) {
 			t.Fatalf("ref out of range: %d", n)
 		}
 	}
-}
-
-func msgOf(body map[string]any) string {
-	s, _ := body["message"].(string)
-	return s
 }
