@@ -42,9 +42,9 @@
           "enum": [
             "Abort500C", "AbortErrC", "AbortCoded", "AbortKeyed",
             "NewC", "NewKeyC", "NewExtraC", "WrapC",
-            "codedBody", "fallback", "panic"
+            "codedBody", "fallback", "panic", "edge"
           ],
-          "description": "调用形态：Abort*/codedBody 为 handler/中间件直写点；New*/WrapC 为 service/handler 构造后经渲染器输出；fallback=渲染器兜底；panic=panic 恢复"
+          "description": "调用形态：Abort*/codedBody 为 handler/中间件直写点；New*/WrapC 为 service/handler 构造后经渲染器输出；fallback=渲染器兜底；panic=panic 恢复；edge=边缘/外部系统预留（非本仓库生成，ref 恒为 0）"
         },
         "status": {
           "type": ["integer", "null"],
@@ -60,8 +60,8 @@
           "type": "string",
           "description": "可选：前端 i18n 键（仅 NewKeyC/AbortKeyed 条目存在）"
         },
-        "file": { "type": "string", "description": "调用点文件（相对 backend/）" },
-        "line": { "type": "integer", "minimum": 1, "description": "调用点行号（生成时快照，重构后以 grep code 为准）" },
+        "file": { "type": "string", "description": "调用点文件（相对 backend/）；edge 预留条目为来源说明文本" },
+        "line": { "type": ["integer", "null"], "minimum": 1, "description": "调用点行号（生成时快照，重构后以 grep code 为准）；edge 预留条目为 null" },
         "_note": { "type": "string", "description": "可选备注（仅 fallback/panic 条目）" }
       }
     }

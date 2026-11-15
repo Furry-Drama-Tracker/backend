@@ -130,7 +130,7 @@ func (h *Versions) Get(c *gin.Context) {
 		return
 	}
 	if !h.canReadVersions(c, episodeID) {
-		errors.AbortCoded(c, 404, "VER0011", "Episode not found", h.Config.IsDev)
+		errors.AbortCoded(c, 404, "VER0012", "Episode not found", h.Config.IsDev)
 		return
 	}
 	versionNum, ok := versionsParseInt(c.Param("version"))
@@ -171,7 +171,7 @@ func (h *Versions) Diff(c *gin.Context) {
 		return
 	}
 	if !h.canReadVersions(c, episodeID) {
-		errors.AbortCoded(c, 404, "VER0011", "Episode not found", h.Config.IsDev)
+		errors.AbortCoded(c, 404, "VER0013", "Episode not found", h.Config.IsDev)
 		return
 	}
 	v1Num, v1OK := versionsParseInt(c.Param("v1"))

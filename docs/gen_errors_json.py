@@ -10,6 +10,7 @@ panic 恢复 SYS0500。新增错误码后重跑本脚本即可刷新注册表（
 可安全提交）。"""
 import json
 import re
+import subprocess
 import sys
 from pathlib import Path
 
@@ -17,6 +18,14 @@ ROOT = Path(__file__).resolve().parent.parent
 SCAN_DIRS = ["internal/handler", "internal/service", "internal/middleware", "internal/server", "internal/errors"]
 CTORS = {"NewC", "NewKeyC", "NewExtraC", "WrapC", "Abort500C", "AbortErrC", "AbortCoded", "AbortKeyed"}
 CODE_RE = re.compile(r'"([A-Z]{3}\d{4})"')
+HTTP_CONST = {
+    "http.StatusBadRequest": 400, "http.StatusUnauthorized": 401,
+    "http.StatusForbidden": 403, "http.StatusNotFound": 404,
+    "http.StatusMethodNotAllowed": 405, "http.StatusConflict": 409,
+    "http.StatusRequestEntityTooLarge": 413, "http.StatusUnsupportedMediaType": 415,
+    "http.StatusUnprocessableEntity": 422, "http.StatusTooManyRequests": 429,
+    "http.StatusInternalServerError": 500, "http.StatusGatewayTimeout": 504,
+}
 
 
 def find_close(s, i):
@@ -80,9 +89,36 @@ def line_of(text, idx):
     return text.count("\n", 0, idx) + 1
 
 
+# 边缘/外部系统预留的错误码（非本仓库生成，源码扫描扫不到，手工登记）。
+# ref 恒为 0 = 边缘响应标记（无 RequestRef，无服务端请求日志可查）。
+RESERVED = [
+    {
+        "code": "ESA0001", "kind": "edge", "status": 451,
+        "message": "此服务在您所在地区不可用。",
+        "file": "（ESA 边缘配置，非本仓库）", "line": None,
+        "_note": "ESA 地区限制拦截；ref 恒为 0",
+    },
+]
+
+
+def read_source(path):
+    """读取待扫描源码：未提交修改（WIP，含并行会话）的文件按 HEAD 内容扫描——
+    注册表只反映已提交契约，WIP 的临时重复码不得阻塞或混入注册表。"""
+    rel = path.relative_to(ROOT).as_posix()
+    st = subprocess.run(["git", "status", "--porcelain", "--", rel],
+                        capture_output=True, text=True, cwd=ROOT)
+    if st.returncode == 0 and st.stdout.strip():
+        show = subprocess.run(["git", "show", f"HEAD:{rel}"],
+                              capture_output=True, text=True, cwd=ROOT)
+        if show.returncode == 0:
+            print(f"  [HEAD] {rel}（工作树有未提交修改，按已提交内容扫描）", file=sys.stderr)
+            return show.stdout
+    return path.read_text()
+
+
 def scan_file(path):
-    """返回该文件的 entries。跳过注释行与函数定义行。"""
-    text = path.read_text()
+    """返回该文件的 entries。跳过注释行与函数定义行；WIP 文件按 HEAD 内容扫描。"""
+    text = read_source(path)
 
     def in_comment_or_def(idx):
         ls = text.rfind("\n", 0, idx) + 1
@@ -156,12 +192,13 @@ def scan_file(path):
             continue
         args = split_args(text[open_idx + 1:close])
         ln = line_of(text, i + m.start())
-        cm = CODE_RE.search(args[1]) if len(args) > 1 else None
-        st = None
-        head = text[max(0, i + m.start() - 200):i + m.start()]
-        sm = re.search(r"AbortWithStatusJSON\((\d+)", head)
-        if sm:
-            st = int(sm.group(1))
+        # codedBody(c, status, code, gin.H{...})；status 为数字或 http.StatusXxx
+        cm = CODE_RE.search(args[2]) if len(args) > 2 else None
+        try:
+            st_raw = args[1]
+            st = int(st_raw) if st_raw.isdigit() else HTTP_CONST.get(st_raw)
+        except (ValueError, IndexError):
+            st = None
         msg = "<dynamic>"
         mb = re.search(r'"message":\s*("(?:[^"\\]|\\.)*")', text[open_idx + 1:close])
         if mb:
@@ -185,6 +222,7 @@ def main():
             if p.name.endswith("_test.go"):
                 continue
             entries.extend(scan_file(p))
+    entries.extend(RESERVED)
     # 渲染器兜底与 panic 恢复（不在构造器清单里）
     ae_text = (ROOT / "internal/errors/apperror.go").read_text()
     ae_line = next(i + 1 for i, l in enumerate(ae_text.split("\n")) if 'fallbackCode = "SYS0001"' in l)
