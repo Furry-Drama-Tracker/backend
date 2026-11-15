@@ -7,7 +7,7 @@
       0,
       999999999
     ],
-    "display": "前端补零到 9 位后按三位一段空格分组，如 123 456 789"
+    "display": "出错编号 = error 码 + '-' + 补零 9 位整数，如 USR0007-000123456；展示与复制由前端拼装（frontend/src/utils/errorMeta.js）"
   },
   "codes": [
     {
@@ -888,7 +888,7 @@
       "status": 500,
       "message": "服务器错误",
       "file": "internal/handler/auth.go",
-      "line": 223
+      "line": 229
     },
     {
       "code": "AUT0005",
@@ -896,7 +896,7 @@
       "status": 500,
       "message": "服务器错误",
       "file": "internal/handler/auth.go",
-      "line": 278
+      "line": 284
     },
     {
       "code": "AUT0006",
@@ -1457,7 +1457,7 @@
       "message": "No refresh token",
       "messageKey": "auth.noRefreshToken",
       "file": "internal/service/refresh.go",
-      "line": 34
+      "line": 38
     },
     {
       "code": "AUT0076",
@@ -1466,7 +1466,7 @@
       "message": "Refresh token expired",
       "messageKey": "auth.refreshTokenExpired",
       "file": "internal/service/refresh.go",
-      "line": 39
+      "line": 43
     },
     {
       "code": "AUT0077",
@@ -1475,7 +1475,7 @@
       "message": "Invalid refresh token",
       "messageKey": "auth.invalidToken",
       "file": "internal/service/refresh.go",
-      "line": 41
+      "line": 45
     },
     {
       "code": "AUT0078",
@@ -1484,7 +1484,7 @@
       "message": "Invalid token type",
       "messageKey": "auth.invalidToken",
       "file": "internal/service/refresh.go",
-      "line": 44
+      "line": 48
     },
     {
       "code": "AUT0079",
@@ -1492,7 +1492,7 @@
       "status": 500,
       "message": "服务器错误",
       "file": "internal/service/refresh.go",
-      "line": 54
+      "line": 58
     },
     {
       "code": "AUT0080",
@@ -1501,7 +1501,7 @@
       "message": "User not found",
       "messageKey": "auth.userNotFound",
       "file": "internal/service/refresh.go",
-      "line": 59
+      "line": 63
     },
     {
       "code": "AUT0081",
@@ -1510,7 +1510,7 @@
       "message": "Concurrent refresh",
       "messageKey": "auth.concurrentRefresh",
       "file": "internal/service/refresh.go",
-      "line": 77
+      "line": 81
     },
     {
       "code": "AUT0082",
@@ -1519,7 +1519,7 @@
       "message": "Refresh token reuse detected",
       "messageKey": "auth.refreshTokenReuse",
       "file": "internal/service/refresh.go",
-      "line": 96
+      "line": 100
     },
     {
       "code": "AUT0083",
@@ -1676,7 +1676,7 @@
     {
       "code": "AUT0102",
       "kind": "codedBody",
-      "status": 419,
+      "status": 401,
       "message": "Not authorized, token failed",
       "file": "internal/middleware/auth.go",
       "line": 64
@@ -1736,6 +1736,15 @@
       "message": "管理员账号必须开启两步验证后才能继续操作",
       "file": "internal/middleware/auth.go",
       "line": 119
+    },
+    {
+      "code": "AUT0110",
+      "kind": "NewKeyC",
+      "status": 401,
+      "message": "Refresh token expired",
+      "messageKey": "auth.refreshTokenExpired",
+      "file": "internal/service/refresh.go",
+      "line": 139
     },
     {
       "code": "BAK0001",
@@ -1804,7 +1813,7 @@
     {
       "code": "BDP0001",
       "kind": "codedBody",
-      "status": null,
+      "status": 400,
       "message": "读取请求体失败: ",
       "file": "internal/middleware/bodyparse.go",
       "line": 85
@@ -1812,7 +1821,7 @@
     {
       "code": "BDP0002",
       "kind": "codedBody",
-      "status": null,
+      "status": 413,
       "message": "request entity too large",
       "file": "internal/middleware/bodyparse.go",
       "line": 89
@@ -1820,7 +1829,7 @@
     {
       "code": "BDP0003",
       "kind": "codedBody",
-      "status": null,
+      "status": 400,
       "message": "<dynamic>",
       "file": "internal/middleware/bodyparse.go",
       "line": 107
@@ -1828,7 +1837,7 @@
     {
       "code": "BDP0004",
       "kind": "codedBody",
-      "status": null,
+      "status": 400,
       "message": "<dynamic>",
       "file": "internal/middleware/bodyparse.go",
       "line": 117
@@ -1860,7 +1869,7 @@
     {
       "code": "COR0001",
       "kind": "codedBody",
-      "status": null,
+      "status": 403,
       "message": "CORS policy denied",
       "file": "internal/middleware/cors.go",
       "line": 28
@@ -2463,7 +2472,16 @@
       "status": 500,
       "message": "Server error",
       "file": "internal/handler/episodes.go",
-      "line": 1780
+      "line": 1791
+    },
+    {
+      "code": "ESA0001",
+      "kind": "edge",
+      "status": 451,
+      "message": "此服务在您所在地区不可用。",
+      "file": "（ESA 边缘配置，非本仓库）",
+      "line": null,
+      "_note": "ESA 地区限制拦截；ref 恒为 0"
     },
     {
       "code": "FBK0001",
@@ -5689,7 +5707,7 @@
       "status": 404,
       "message": "Version not found",
       "file": "internal/handler/versions.go",
-      "line": 130
+      "line": 138
     },
     {
       "code": "VER0002",
@@ -5697,7 +5715,7 @@
       "status": 404,
       "message": "Version not found",
       "file": "internal/handler/versions.go",
-      "line": 136
+      "line": 144
     },
     {
       "code": "VER0003",
@@ -5705,7 +5723,7 @@
       "status": 404,
       "message": "Version not found",
       "file": "internal/handler/versions.go",
-      "line": 169
+      "line": 181
     },
     {
       "code": "VER0004",
@@ -5713,7 +5731,7 @@
       "status": 404,
       "message": "Version not found",
       "file": "internal/handler/versions.go",
-      "line": 176
+      "line": 188
     },
     {
       "code": "VER0005",
@@ -5721,7 +5739,7 @@
       "status": 404,
       "message": "Version not found",
       "file": "internal/handler/versions.go",
-      "line": 185
+      "line": 197
     },
     {
       "code": "VER0006",
@@ -5729,7 +5747,7 @@
       "status": 404,
       "message": "Version not found",
       "file": "internal/handler/versions.go",
-      "line": 212
+      "line": 224
     },
     {
       "code": "VER0007",
@@ -5737,7 +5755,7 @@
       "status": 404,
       "message": "Version not found",
       "file": "internal/handler/versions.go",
-      "line": 219
+      "line": 231
     },
     {
       "code": "VER0008",
@@ -5745,7 +5763,7 @@
       "status": 404,
       "message": "Episode not found",
       "file": "internal/handler/versions.go",
-      "line": 228
+      "line": 240
     },
     {
       "code": "VER0009",
@@ -5753,7 +5771,7 @@
       "status": 404,
       "message": "Episode not found",
       "file": "internal/handler/versions.go",
-      "line": 301
+      "line": 313
     },
     {
       "code": "VER0010",
@@ -5761,7 +5779,31 @@
       "status": 403,
       "message": "No permission to rollback this episode",
       "file": "internal/handler/versions.go",
-      "line": 245
+      "line": 257
+    },
+    {
+      "code": "VER0011",
+      "kind": "AbortCoded",
+      "status": 404,
+      "message": "Episode not found",
+      "file": "internal/handler/versions.go",
+      "line": 76
+    },
+    {
+      "code": "VER0012",
+      "kind": "AbortCoded",
+      "status": 404,
+      "message": "Episode not found",
+      "file": "internal/handler/versions.go",
+      "line": 133
+    },
+    {
+      "code": "VER0013",
+      "kind": "AbortCoded",
+      "status": 404,
+      "message": "Episode not found",
+      "file": "internal/handler/versions.go",
+      "line": 174
     },
     {
       "code": "WAL0001",
