@@ -146,9 +146,13 @@ func (s *AuthService) Register(ctx context.Context, in RegisterInput) (*Register
 }
 
 // ValidatePassword 校验密码规则，返回错误文案或空串（文案为固定契约，勿本地化/勿改）。
+// 上限 72 字节对齐 bcrypt 硬限制（auth.Hash 超限会直接报错，不再静默截断）。
 func ValidatePassword(p string) string {
 	if len([]rune(p)) < 8 {
 		return "密码长度至少8位"
+	}
+	if len(p) > 72 {
+		return "密码长度不能超过72个字节（汉字/表情符号占多个字节）"
 	}
 	hasLetter := false
 	hasDigit := false

@@ -94,10 +94,14 @@ func SanitizeValue(v any) any {
 }
 
 // ValidatePassword 校验密码强度，返回错误文案；合法则返回空串。
-// 规则固定（长度按 UTF-16 码元 ≥8、含字母、含数字），文案为固定契约勿改。
+// 规则固定（长度按 UTF-16 码元 ≥8 且 ≤72 字节、含字母、含数字），文案为固定契约勿改。
+// 72 字节上限对齐 bcrypt 硬限制，与 service.ValidatePassword 保持一致。
 func ValidatePassword(password string) string {
 	if password == "" || utf16Length(password) < 8 {
 		return "密码长度至少8位"
+	}
+	if len(password) > 72 {
+		return "密码长度不能超过72个字节（汉字/表情符号占多个字节）"
 	}
 	hasLetter, hasDigit := false, false
 	for _, r := range password {

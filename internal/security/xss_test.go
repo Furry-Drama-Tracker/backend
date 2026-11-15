@@ -1,6 +1,9 @@
 package security
 
-import "testing"
+import (
+	"strings"
+	"testing"
+)
 
 // TestSanitizeStripsScript script 标签（含内容）被剥除——防 XSS 的核心。
 func TestSanitizeStripsScript(t *testing.T) {
@@ -109,7 +112,7 @@ func TestSanitizeValueArray(t *testing.T) {
 	}
 }
 
-// TestValidatePassword 密码规则：≥8 位 + 字母 + 数字。
+// TestValidatePassword 密码规则：≥8 位 + ≤72 字节（bcrypt 上限）+ 字母 + 数字。
 func TestValidatePassword(t *testing.T) {
 	cases := []struct {
 		in   string
@@ -120,6 +123,12 @@ func TestValidatePassword(t *testing.T) {
 		{"abcdefgh", "密码必须包含至少一个数字"},
 		{"", "密码长度至少8位"},
 		{"pass1234", ""},
+		// 72 字节硬上限（bcrypt），按字节而非码元计。
+		{strings.Repeat("a1", 36), ""},
+		{strings.Repeat("a1", 37), "密码长度不能超过72个字节（汉字/表情符号占多个字节）"},
+		// 多字节字符：24 个汉字恰好 72 字节（但无字母数字），25 个汉字 75 字节超限。
+		{strings.Repeat("字", 24), "密码必须包含至少一个字母"},
+		{strings.Repeat("字", 25), "密码长度不能超过72个字节（汉字/表情符号占多个字节）"},
 	}
 	for _, c := range cases {
 		if got := ValidatePassword(c.in); got != c.want {
