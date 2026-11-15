@@ -39,7 +39,7 @@ func (h *Auth) Login2FA(c *gin.Context) {
 		c.JSON(200, h.Svc.SessionUserJSON(res.User))
 		return
 	}
-	c.JSON(500, gin.H{"message": "服务器错误"})
+	errors.Abort500C(c, "DEV0001", "服务器错误", err, h.Config.IsDev)
 }
 
 // Send2FAEmailOTP POST /api/auth/2fa/email-otp/send：凭 2FA 挑战令牌发送邮箱

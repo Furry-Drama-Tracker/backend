@@ -33,7 +33,7 @@ func (h *Auth) Avatar(c *gin.Context) {
 		_ = removeUploadedFile(user.Avatar)
 	}
 	if err := h.Svc.Repos.Users.UpdateAvatar(c.Request.Context(), user.ID, url); err != nil {
-		c.JSON(500, gin.H{"message": "头像上传失败"})
+		errors.Abort500C(c, "USR0001", "头像上传失败", err, h.Config.IsDev)
 		return
 	}
 	c.JSON(200, gin.H{"url": url})
@@ -54,21 +54,21 @@ func (h *Auth) Profile(c *gin.Context) {
 	_ = c.ShouldBindJSON(&req)
 	username := strings.TrimSpace(req.Username)
 	if len([]rune(username)) > 20 {
-		c.JSON(400, gin.H{"message": "昵称长度不能超过20个字符"})
+		errors.AbortCoded(c, 400, "USR0002", "昵称长度不能超过20个字符", h.Config.IsDev)
 		return
 	}
 	if username == "" {
-		c.JSON(400, gin.H{"message": "没有需要更新的数据"})
+		errors.AbortCoded(c, 400, "USR0003", "没有需要更新的数据", h.Config.IsDev)
 		return
 	}
 	user, _ := middleware.GetUser(c)
 	if err := h.Svc.Repos.Users.UpdateUsername(c.Request.Context(), user.ID, username); err != nil {
-		c.JSON(500, gin.H{"message": "服务器错误"})
+		errors.Abort500C(c, "USR0004", "服务器错误", err, h.Config.IsDev)
 		return
 	}
 	u, err := h.Svc.Repos.Users.FindByID(c.Request.Context(), user.ID)
 	if err != nil {
-		c.JSON(500, gin.H{"message": "服务器错误"})
+		errors.Abort500C(c, "USR0005", "服务器错误", err, h.Config.IsDev)
 		return
 	}
 	c.JSON(200, gin.H{
@@ -123,7 +123,7 @@ func (h *Auth) LoginName(c *gin.Context) {
 func (h *Auth) CheckLoginName(c *gin.Context) {
 	name := c.Query("name")
 	if name == "" {
-		c.JSON(400, gin.H{"message": "name is required"})
+		errors.AbortCoded(c, 400, "USR0006", "name is required", h.Config.IsDev)
 		return
 	}
 	available, reason := h.Svc.CheckLoginNameAvailable(c.Request.Context(), name)
@@ -141,7 +141,7 @@ func (h *Auth) ExportMyData(c *gin.Context) {
 	user, _ := middleware.GetUser(c)
 	data, err := h.Svc.BuildExportData(c.Request.Context(), user)
 	if err != nil {
-		c.JSON(500, gin.H{"message": "导出失败"})
+		errors.Abort500C(c, "USR0007", "导出失败", err, h.Config.IsDev)
 		return
 	}
 	dateStr := time.Now().Format("2006-01-02")
@@ -162,23 +162,23 @@ func (h *Auth) ExportMyData(c *gin.Context) {
 // abortUploadError 渲染上传错误（错误文案是固定契约，勿改）。
 func (h *Auth) abortUploadError(c *gin.Context, err error, maxMB int) {
 	if err == upload.ErrNoFile {
-		c.JSON(400, gin.H{"message": "请选择要上传的图片"})
+		errors.AbortCoded(c, 400, "USR0008", "请选择要上传的图片", h.Config.IsDev)
 		return
 	}
 	if ue, ok := err.(*errors.UploadError); ok {
 		switch ue.Code {
 		case "LIMIT_FILE_SIZE":
-			c.JSON(400, gin.H{"message": fmt.Sprintf("文件大小不能超过%dMB", maxMB)})
+			errors.AbortCoded(c, 400, "USR0009", fmt.Sprintf("文件大小不能超过%dMB", maxMB), h.Config.IsDev)
 		case "LIMIT_FILE_TYPE":
-			c.JSON(400, gin.H{"message": "仅支持图片文件 (jpg, jpeg, png, gif, webp)"})
+			errors.AbortCoded(c, 400, "USR0010", "仅支持图片文件 (jpg, jpeg, png, gif, webp)", h.Config.IsDev)
 		case "BAD_MAGIC":
-			c.JSON(400, gin.H{"message": "文件内容与类型不匹配，仅支持图片文件"})
+			errors.AbortCoded(c, 400, "USR0011", "文件内容与类型不匹配，仅支持图片文件", h.Config.IsDev)
 		default:
-			c.JSON(400, gin.H{"message": "文件上传错误: " + ue.Message})
+			errors.AbortCoded(c, 400, "USR0012", "文件上传错误: "+ue.Message, h.Config.IsDev)
 		}
 		return
 	}
-	c.JSON(500, gin.H{"message": "服务器错误"})
+	errors.Abort500C(c, "USR0013", "服务器错误", err, h.Config.IsDev)
 }
 
 // removeUploadedFile 删除已上传文件（忽略错误）。只允许删除头像前缀文件，

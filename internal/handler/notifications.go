@@ -13,6 +13,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 
 	"github.com/Furry-Drama-Tracker/backend/internal/config"
+	"github.com/Furry-Drama-Tracker/backend/internal/errors"
 	"github.com/Furry-Drama-Tracker/backend/internal/middleware"
 	"github.com/Furry-Drama-Tracker/backend/internal/model"
 	"github.com/Furry-Drama-Tracker/backend/internal/ratelimit"
@@ -100,7 +101,7 @@ func (h *Notifications) Stream(c *gin.Context) {
 	}
 	userOID, err := primitive.ObjectIDFromHex(userID)
 	if err != nil {
-		c.JSON(401, gin.H{"message": "认证信息无效"})
+		errors.AbortCoded(c, 401, "NTF0001", "认证信息无效", h.Config.IsDev)
 		return
 	}
 
@@ -250,27 +251,27 @@ func (h *Notifications) SubscribeReminder(c *gin.Context) {
 	}
 	_ = c.ShouldBindJSON(&req)
 	if req.EpisodeID == "" {
-		c.JSON(400, gin.H{"message": "缺少剧集ID"})
+		errors.AbortCoded(c, 400, "NTF0002", "缺少剧集ID", h.Config.IsDev)
 		return
 	}
 	oid, err := primitive.ObjectIDFromHex(req.EpisodeID)
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	ctx := c.Request.Context()
 	episode, err := h.Repos.Episodes.FindByID(ctx, oid)
 	if err != nil {
 		if repository.IsNotFound(err) {
-			c.JSON(404, gin.H{"message": "剧集不存在"})
+			errors.AbortCoded(c, 404, "NTF0003", "剧集不存在", h.Config.IsDev)
 			return
 		}
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	follow, err := h.Repos.Follows.FollowFindByUserEpisode(ctx, user.ID, oid)
 	if err != nil && !repository.IsNotFound(err) {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	if follow == nil {
@@ -280,7 +281,7 @@ func (h *Notifications) SubscribeReminder(c *gin.Context) {
 			FollowedAtEpisodes: episode.CurrentEpisodes,
 			CreatedAt:          time.Now(),
 		}); err != nil {
-			serverError(c)
+			serverError(c, err, h.Config.IsDev)
 			return
 		}
 	}
@@ -301,12 +302,12 @@ func (h *Notifications) List(c *gin.Context) {
 	ctx := c.Request.Context()
 	total, err := h.Repos.Notifications.CountByUser(ctx, user.ID)
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	list, err := h.Repos.Notifications.FindByUser(ctx, user.ID, page, limit)
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	items := make([]gin.H, 0, len(list))
@@ -336,7 +337,7 @@ func (h *Notifications) UnreadCount(c *gin.Context) {
 	user, _ := middleware.GetUser(c)
 	count, err := h.Repos.Notifications.CountUnread(c.Request.Context(), user.ID)
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	c.JSON(200, gin.H{"count": count})
@@ -351,7 +352,7 @@ func (h *Notifications) UnreadCount(c *gin.Context) {
 func (h *Notifications) ReadAll(c *gin.Context) {
 	user, _ := middleware.GetUser(c)
 	if _, err := h.Repos.Notifications.MarkAllRead(c.Request.Context(), user.ID); err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	c.JSON(200, gin.H{"message": "All marked as read"})
@@ -369,11 +370,11 @@ func (h *Notifications) ReadEpisode(c *gin.Context) {
 	user, _ := middleware.GetUser(c)
 	oid, err := primitive.ObjectIDFromHex(c.Param("episodeId"))
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	if _, err := h.Repos.Notifications.MarkEpisodeRead(c.Request.Context(), user.ID, oid); err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	c.JSON(200, gin.H{"message": "Episode notifications marked as read"})
@@ -390,11 +391,11 @@ func (h *Notifications) Read(c *gin.Context) {
 	user, _ := middleware.GetUser(c)
 	oid, err := primitive.ObjectIDFromHex(c.Param("id"))
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	if err := h.Repos.Notifications.MarkReadByID(c.Request.Context(), oid, user.ID); err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	c.JSON(200, gin.H{"message": "Marked as read"})
@@ -409,7 +410,7 @@ func (h *Notifications) Read(c *gin.Context) {
 func (h *Notifications) ClearRead(c *gin.Context) {
 	user, _ := middleware.GetUser(c)
 	if _, err := h.Repos.Notifications.ClearRead(c.Request.Context(), user.ID); err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	c.JSON(200, gin.H{"message": "Read notifications cleared"})
@@ -426,11 +427,11 @@ func (h *Notifications) Delete(c *gin.Context) {
 	user, _ := middleware.GetUser(c)
 	oid, err := primitive.ObjectIDFromHex(c.Param("id"))
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	if err := h.Repos.Notifications.DeleteByIDForUser(c.Request.Context(), oid, user.ID); err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	c.JSON(200, gin.H{"message": "Notification deleted"})
@@ -467,12 +468,12 @@ func (h *Notifications) PushSubscribe(c *gin.Context) {
 	}
 	_ = c.ShouldBindJSON(&req)
 	if req.Subscription == nil || req.Subscription.Endpoint == "" {
-		c.JSON(400, gin.H{"message": "无效的订阅信息"})
+		errors.AbortCoded(c, 400, "NTF0004", "无效的订阅信息", h.Config.IsDev)
 		return
 	}
 	if err := h.PushSubs.PushSubUpsertByEndpoint(c.Request.Context(), user.ID,
 		req.Subscription.Endpoint, req.Subscription.keys(), c.GetHeader("User-Agent")); err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	c.JSON(200, gin.H{"message": "推送订阅成功"})
@@ -494,11 +495,11 @@ func (h *Notifications) PushUnsubscribe(c *gin.Context) {
 	}
 	_ = c.ShouldBindJSON(&req)
 	if req.Endpoint == "" {
-		c.JSON(400, gin.H{"message": "缺少endpoint"})
+		errors.AbortCoded(c, 400, "NTF0005", "缺少endpoint", h.Config.IsDev)
 		return
 	}
 	if err := h.PushSubs.PushSubDeleteByEndpoint(c.Request.Context(), user.ID, req.Endpoint); err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	c.JSON(200, gin.H{"message": "取消推送订阅成功"})
@@ -525,16 +526,16 @@ func (b *pushSubscriptionBody) keys() model.PushSubscriptionKeys {
 func (h *Notifications) verifySSETicket(c *gin.Context) (string, bool) {
 	ticket := c.Query("ticket")
 	if ticket == "" {
-		c.JSON(401, gin.H{"message": "需要认证"})
+		errors.AbortCoded(c, 401, "NTF0006", "需要认证", h.Config.IsDev)
 		return "", false
 	}
 	claims, err := h.AuthMW.Signer.Verify(ticket)
 	if err != nil {
-		c.JSON(401, gin.H{"message": "认证信息无效"})
+		errors.AbortCoded(c, 401, "NTF0007", "认证信息无效", h.Config.IsDev)
 		return "", false
 	}
 	if claims.Purpose != "sse-ticket" {
-		c.JSON(401, gin.H{"message": "无效的ticket"})
+		errors.AbortCoded(c, 401, "NTF0008", "无效的ticket", h.Config.IsDev)
 		return "", false
 	}
 	return claims.ID, true

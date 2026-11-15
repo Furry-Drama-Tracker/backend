@@ -78,16 +78,16 @@ func (h *Feedback) Create(c *gin.Context) {
 	switch typ {
 	case "", "suggestion", "bug", "complaint", "other":
 	default:
-		c.JSON(400, gin.H{"message": "无效的反馈类型"})
+		errors.AbortCoded(c, 400, "FBK0001", "无效的反馈类型", h.Config.IsDev)
 		return
 	}
 	content := asString(body["content"])
 	if strings.TrimSpace(content) == "" {
-		c.JSON(400, gin.H{"message": "内容不能为空"})
+		errors.AbortCoded(c, 400, "FBK0002", "内容不能为空", h.Config.IsDev)
 		return
 	}
 	if len([]rune(content)) > 2000 {
-		c.JSON(400, gin.H{"message": "内容不能超过2000字"})
+		errors.AbortCoded(c, 400, "FBK0003", "内容不能超过2000字", h.Config.IsDev)
 		return
 	}
 	user, _ := middleware.GetUser(c)
@@ -109,7 +109,7 @@ func (h *Feedback) Create(c *gin.Context) {
 		f.Content = string(runes[:2000])
 	}
 	if err := h.Repos.Feedbacks.FeedbackCreate(c.Request.Context(), f); err != nil {
-		errors.AbortWithAppError(c, errors.New(500, "Server error"), h.Config.IsDev)
+		errors.Abort500C(c, "FBK0004", "Server error", err, h.Config.IsDev)
 		return
 	}
 	c.JSON(200, gin.H{"message": "反馈已提交，感谢您的建议！"})
@@ -130,13 +130,13 @@ func (h *Feedback) My(c *gin.Context) {
 	ctx := c.Request.Context()
 	total, err := h.Repos.Feedbacks.FeedbackCount(ctx, filter)
 	if err != nil {
-		errors.AbortWithAppError(c, errors.New(500, "Server error"), h.Config.IsDev)
+		errors.Abort500C(c, "FBK0005", "Server error", err, h.Config.IsDev)
 		return
 	}
 	list, err := h.Repos.Feedbacks.FeedbackFindPaged(ctx, filter,
 		bson.D{{Key: "createdAt", Value: -1}}, page, limit)
 	if err != nil {
-		errors.AbortWithAppError(c, errors.New(500, "Server error"), h.Config.IsDev)
+		errors.Abort500C(c, "FBK0006", "Server error", err, h.Config.IsDev)
 		return
 	}
 	out := make([]gin.H, 0, len(list))
@@ -170,13 +170,13 @@ func (h *Feedback) List(c *gin.Context) {
 	ctx := c.Request.Context()
 	total, err := h.Repos.Feedbacks.FeedbackCount(ctx, filter)
 	if err != nil {
-		errors.AbortWithAppError(c, errors.New(500, "Server error"), h.Config.IsDev)
+		errors.Abort500C(c, "FBK0007", "Server error", err, h.Config.IsDev)
 		return
 	}
 	list, err := h.Repos.Feedbacks.FeedbackFindPaged(ctx, filter,
 		bson.D{{Key: "createdAt", Value: -1}}, page, limit)
 	if err != nil {
-		errors.AbortWithAppError(c, errors.New(500, "Server error"), h.Config.IsDev)
+		errors.Abort500C(c, "FBK0008", "Server error", err, h.Config.IsDev)
 		return
 	}
 	out := make([]gin.H, 0, len(list))
@@ -211,7 +211,7 @@ func (h *Feedback) Reply(c *gin.Context) {
 	switch statusVal {
 	case "", "pending", "read", "replied":
 	default:
-		c.JSON(400, gin.H{"message": "无效的状态值"})
+		errors.AbortCoded(c, 400, "FBK0009", "无效的状态值", h.Config.IsDev)
 		return
 	}
 	update := bson.M{}
@@ -229,16 +229,16 @@ func (h *Feedback) Reply(c *gin.Context) {
 	oid, err := primitive.ObjectIDFromHex(c.Param("id"))
 	if err != nil {
 		// 固定契约：非法 ID → 500 Server error。
-		errors.AbortWithAppError(c, errors.New(500, "Server error"), h.Config.IsDev)
+		errors.Abort500C(c, "FBK0010", "Server error", err, h.Config.IsDev)
 		return
 	}
 	fb, err := h.Repos.Feedbacks.FeedbackFindOneAndUpdate(c.Request.Context(), oid, bson.M{"$set": update})
 	if repository.IsNotFound(err) {
-		c.JSON(404, gin.H{"message": "Not found"})
+		errors.AbortCoded(c, 404, "FBK0011", "Not found", h.Config.IsDev)
 		return
 	}
 	if err != nil {
-		errors.AbortWithAppError(c, errors.New(500, "Server error"), h.Config.IsDev)
+		errors.Abort500C(c, "FBK0012", "Server error", err, h.Config.IsDev)
 		return
 	}
 	if truthy(replyVal) {
@@ -250,7 +250,7 @@ func (h *Feedback) Reply(c *gin.Context) {
 			Metadata:  primitive.M{"reply": preview},
 			CreatedAt: time.Now().UTC().Truncate(time.Millisecond),
 		}); err != nil {
-			errors.AbortWithAppError(c, errors.New(500, "Server error"), h.Config.IsDev)
+			errors.Abort500C(c, "FBK0013", "Server error", err, h.Config.IsDev)
 			return
 		}
 		reply200 := replyPreview(asString(replyVal), 200)

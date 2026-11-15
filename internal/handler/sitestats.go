@@ -17,6 +17,7 @@ import (
 // 避免首页每次加载都打库。所有查询均为只读。
 type SiteStats struct {
 	Repos *repository.Repos
+	IsDev bool
 
 	mu       sync.Mutex
 	cachedAt time.Time
@@ -29,8 +30,8 @@ const (
 )
 
 // NewSiteStats 构造公开站点统计 handler。
-func NewSiteStats(repos *repository.Repos) *SiteStats {
-	return &SiteStats{Repos: repos}
+func NewSiteStats(repos *repository.Repos, isDev bool) *SiteStats {
+	return &SiteStats{Repos: repos, IsDev: isDev}
 }
 
 // Register 注册路由：GET /api/site-stats
@@ -59,12 +60,12 @@ func (h *SiteStats) Get(c *gin.Context) {
 
 	episodes, err := h.Repos.Episodes.CountDocuments(ctx, bson.M{"reviewStatus": "approved"})
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.IsDev)
 		return
 	}
 	users, err := h.Repos.Users.StatsUserCount(ctx, bson.M{})
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.IsDev)
 		return
 	}
 	online, err := h.Repos.Sessions.CountActiveUsersSince(ctx, time.Now().Add(-siteStatsOnlineWindow))

@@ -195,19 +195,19 @@ func (h *Series) List(c *gin.Context) {
 	ctx := c.Request.Context()
 	total, err := h.Repos.Series.Count(ctx)
 	if err != nil {
-		errors.AbortWithAppError(c, errors.New(500, "Server error"), h.Config.IsDev)
+		errors.Abort500C(c, "SER0001", "Server error", err, h.Config.IsDev)
 		return
 	}
 	seriesList, err := h.Repos.Series.FindPage(ctx, page, limit)
 	if err != nil {
-		errors.AbortWithAppError(c, errors.New(500, "Server error"), h.Config.IsDev)
+		errors.Abort500C(c, "SER0002", "Server error", err, h.Config.IsDev)
 		return
 	}
 	// 关联查询 episodes（输出 title/coverImage/currentEpisodes/totalEpisodes/
 	// status/averageRating 字段）。
 	epMap, err := h.fetchSeriesEpisodes(c, collectSeriesEpisodeIDs(seriesList))
 	if err != nil {
-		errors.AbortWithAppError(c, errors.New(500, "Server error"), h.Config.IsDev)
+		errors.Abort500C(c, "SER0003", "Server error", err, h.Config.IsDev)
 		return
 	}
 	list := make([]seriesResponse, 0, len(seriesList))
@@ -235,21 +235,21 @@ func (h *Series) Detail(c *gin.Context) {
 	id, err := primitive.ObjectIDFromHex(c.Param("id"))
 	if err != nil {
 		// 固定契约：非法 ID → 500 Server error。
-		errors.AbortWithAppError(c, errors.New(500, "Server error"), h.Config.IsDev)
+		errors.Abort500C(c, "SER0004", "Server error", err, h.Config.IsDev)
 		return
 	}
 	s, err := h.Repos.Series.FindByID(c.Request.Context(), id)
 	if repository.IsNotFound(err) {
-		c.JSON(404, gin.H{"message": "Not found"})
+		errors.AbortCoded(c, 404, "SER0005", "Not found", h.Config.IsDev)
 		return
 	}
 	if err != nil {
-		errors.AbortWithAppError(c, errors.New(500, "Server error"), h.Config.IsDev)
+		errors.Abort500C(c, "SER0006", "Server error", err, h.Config.IsDev)
 		return
 	}
 	epMap, err := h.fetchSeriesEpisodes(c, s.Episodes)
 	if err != nil {
-		errors.AbortWithAppError(c, errors.New(500, "Server error"), h.Config.IsDev)
+		errors.Abort500C(c, "SER0007", "Server error", err, h.Config.IsDev)
 		return
 	}
 	c.JSON(200, seriesJSON(s, seriesDetailEpisodesView(epMap, s.Episodes)))
@@ -272,7 +272,7 @@ func (h *Series) Create(c *gin.Context) {
 	}
 	_ = c.ShouldBindJSON(&req)
 	if req.Name == "" {
-		c.JSON(400, gin.H{"message": "名称必填"})
+		errors.AbortCoded(c, 400, "SER0008", "名称必填", h.Config.IsDev)
 		return
 	}
 	user, _ := middleware.GetUser(c)
@@ -281,7 +281,7 @@ func (h *Series) Create(c *gin.Context) {
 		oid, err := primitive.ObjectIDFromHex(s)
 		if err != nil {
 			// 固定契约：episodes 含非法 ID → 500 Server error。
-			errors.AbortWithAppError(c, errors.New(500, "Server error"), h.Config.IsDev)
+			errors.Abort500C(c, "SER0009", "Server error", err, h.Config.IsDev)
 			return
 		}
 		episodes = append(episodes, oid)
@@ -293,7 +293,7 @@ func (h *Series) Create(c *gin.Context) {
 		CreatedBy:   &user.ID,
 	}
 	if err := h.Repos.Series.Create(c.Request.Context(), series); err != nil {
-		errors.AbortWithAppError(c, errors.New(500, "Server error"), h.Config.IsDev)
+		errors.Abort500C(c, "SER0010", "Server error", err, h.Config.IsDev)
 		return
 	}
 	c.JSON(201, seriesJSON(series, seriesEpisodeHexes(series.Episodes)))
@@ -314,22 +314,22 @@ func (h *Series) Update(c *gin.Context) {
 	user, _ := middleware.GetUser(c)
 	id, err := primitive.ObjectIDFromHex(c.Param("id"))
 	if err != nil {
-		errors.AbortWithAppError(c, errors.New(500, "Server error"), h.Config.IsDev)
+		errors.Abort500C(c, "SER0011", "Server error", err, h.Config.IsDev)
 		return
 	}
 	existing, err := h.Repos.Series.FindByID(c.Request.Context(), id)
 	if repository.IsNotFound(err) {
-		c.JSON(404, gin.H{"message": "Not found"})
+		errors.AbortCoded(c, 404, "SER0012", "Not found", h.Config.IsDev)
 		return
 	}
 	if err != nil {
-		errors.AbortWithAppError(c, errors.New(500, "Server error"), h.Config.IsDev)
+		errors.Abort500C(c, "SER0013", "Server error", err, h.Config.IsDev)
 		return
 	}
 	// 归属校验：非 superadmin/admin 且 createdBy 非空且非本人 → 403。
 	if user.Role != middleware.RoleSuperAdmin && user.Role != middleware.RoleAdmin &&
 		existing.CreatedBy != nil && existing.CreatedBy.Hex() != user.ID.Hex() {
-		c.JSON(403, gin.H{"message": "无权修改此系列"})
+		errors.AbortCoded(c, 403, "SER0014", "无权修改此系列", h.Config.IsDev)
 		return
 	}
 	patch := bson.M{"updatedAt": time.Now()}
@@ -340,7 +340,7 @@ func (h *Series) Update(c *gin.Context) {
 		if v, ok2 := bsonStringOrNull(raw); ok2 {
 			patch["name"] = v
 		} else {
-			errors.AbortWithAppError(c, errors.New(500, "Server error"), h.Config.IsDev)
+			errors.Abort500C(c, "SER0015", "Server error", err, h.Config.IsDev)
 			return
 		}
 	}
@@ -348,7 +348,7 @@ func (h *Series) Update(c *gin.Context) {
 		if v, ok2 := bsonStringOrNull(raw); ok2 {
 			patch["description"] = v
 		} else {
-			errors.AbortWithAppError(c, errors.New(500, "Server error"), h.Config.IsDev)
+			errors.Abort500C(c, "SER0016", "Server error", err, h.Config.IsDev)
 			return
 		}
 	}
@@ -356,7 +356,7 @@ func (h *Series) Update(c *gin.Context) {
 		v, ok2 := bsonEpisodesOrNull(raw)
 		if !ok2 {
 			// 固定契约：episodes 含非法 ID 或非数组形态 → 500 Server error。
-			errors.AbortWithAppError(c, errors.New(500, "Server error"), h.Config.IsDev)
+			errors.Abort500C(c, "SER0017", "Server error", err, h.Config.IsDev)
 			return
 		}
 		patch["episodes"] = v
@@ -369,7 +369,7 @@ func (h *Series) Update(c *gin.Context) {
 		return
 	}
 	if err != nil {
-		errors.AbortWithAppError(c, errors.New(500, "Server error"), h.Config.IsDev)
+		errors.Abort500C(c, "SER0018", "Server error", err, h.Config.IsDev)
 		return
 	}
 	var episodesOut any = seriesEpisodeHexes(updated.Episodes)
@@ -390,7 +390,7 @@ func (h *Series) Update(c *gin.Context) {
 func (h *Series) Delete(c *gin.Context) {
 	id, err := primitive.ObjectIDFromHex(c.Param("id"))
 	if err != nil {
-		errors.AbortWithAppError(c, errors.New(500, "Server error"), h.Config.IsDev)
+		errors.Abort500C(c, "SER0019", "Server error", err, h.Config.IsDev)
 		return
 	}
 	existing, err := h.Repos.Series.FindByID(c.Request.Context(), id)
@@ -398,15 +398,15 @@ func (h *Series) Delete(c *gin.Context) {
 		user, _ := middleware.GetUser(c)
 		if user.Role != middleware.RoleSuperAdmin && user.Role != middleware.RoleAdmin &&
 			existing.CreatedBy != nil && existing.CreatedBy.Hex() != user.ID.Hex() {
-			c.JSON(403, gin.H{"message": "无权删除此系列"})
+			errors.AbortCoded(c, 403, "SER0020", "无权删除此系列", h.Config.IsDev)
 			return
 		}
 	} else if !repository.IsNotFound(err) {
-		errors.AbortWithAppError(c, errors.New(500, "Server error"), h.Config.IsDev)
+		errors.Abort500C(c, "SER0021", "Server error", err, h.Config.IsDev)
 		return
 	}
 	if err := h.Repos.Series.DeleteByID(c.Request.Context(), id); err != nil {
-		errors.AbortWithAppError(c, errors.New(500, "Server error"), h.Config.IsDev)
+		errors.Abort500C(c, "SER0022", "Server error", err, h.Config.IsDev)
 		return
 	}
 	c.JSON(200, gin.H{"message": "Deleted"})

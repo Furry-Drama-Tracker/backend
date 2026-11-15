@@ -46,7 +46,7 @@ func (h *Auth) devToken(c *gin.Context) string {
 func (h *Auth) Captcha(c *gin.Context) {
 	ch, err := h.Svc.CreateCaptcha()
 	if err != nil {
-		c.JSON(500, gin.H{"message": "服务器错误"})
+		errors.Abort500C(c, "AUT0001", "服务器错误", err, h.Config.IsDev)
 		return
 	}
 	c.JSON(200, ch)
@@ -64,7 +64,7 @@ func (h *Auth) Captcha(c *gin.Context) {
 func (h *Auth) CheckAccountID(c *gin.Context) {
 	accountID := c.Query("accountId")
 	if accountID == "" {
-		c.JSON(400, gin.H{"message": "accountId is required"})
+		errors.AbortCoded(c, 400, "AUT0002", "accountId is required", h.Config.IsDev)
 		return
 	}
 	available, reason := h.Svc.CheckLoginNameAvailable(c.Request.Context(), accountID)
@@ -155,11 +155,9 @@ func (h *Auth) Login(c *gin.Context) {
 	case res.User != nil:
 		c.JSON(200, h.Svc.SessionUserJSON(res.User))
 	case res.NeedVerification:
-		c.JSON(403, gin.H{
-			"message":          "请先验证邮箱后再登录，验证码已发送至您的邮箱",
-			"needVerification": true,
-			"email":            res.Email,
-		})
+		errors.AbortWithAppError(c, errors.NewExtraC("AUT0108", 403,
+			"请先验证邮箱后再登录，验证码已发送至您的邮箱",
+			map[string]any{"needVerification": true, "email": res.Email}), h.Config.IsDev)
 	case res.Need2FA:
 		methods := res.TwoFactorMethods
 		if methods == nil {
@@ -172,7 +170,7 @@ func (h *Auth) Login(c *gin.Context) {
 			"twoFactorMethods":   methods,
 		})
 	default:
-		c.JSON(500, gin.H{"message": "服务器错误"})
+		errors.Abort500C(c, "AUT0003", "服务器错误", err, h.Config.IsDev)
 	}
 }
 
@@ -222,7 +220,7 @@ func (h *Auth) Refresh(c *gin.Context) {
 		return
 	}
 	if err := h.Svc.RotateRefresh(c, res.User, res.Session); err != nil {
-		c.JSON(500, gin.H{"message": "服务器错误"})
+		errors.Abort500C(c, "AUT0004", "服务器错误", err, h.Config.IsDev)
 		return
 	}
 	c.JSON(200, h.Svc.SessionUserJSON(res.User))
@@ -277,7 +275,7 @@ func (h *Auth) SSETicket(c *gin.Context) {
 	user, _ := middleware.GetUser(c)
 	ticket, err := h.Svc.Signer.Sign(user.ID.Hex(), "sse-ticket", 30*time.Second, nil)
 	if err != nil {
-		c.JSON(500, gin.H{"message": "服务器错误"})
+		errors.Abort500C(c, "AUT0005", "服务器错误", err, h.Config.IsDev)
 		return
 	}
 	c.JSON(200, gin.H{"ticket": ticket})

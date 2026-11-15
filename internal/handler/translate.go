@@ -18,6 +18,7 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"github.com/Furry-Drama-Tracker/backend/internal/config"
+	"github.com/Furry-Drama-Tracker/backend/internal/errors"
 	"github.com/Furry-Drama-Tracker/backend/internal/middleware"
 	"github.com/Furry-Drama-Tracker/backend/internal/ratelimit"
 	"github.com/Furry-Drama-Tracker/backend/internal/repository"
@@ -245,11 +246,11 @@ func (h *Translate) Translate(c *gin.Context) {
 	keyVal, hasKey := body["key"]
 	targetLang := asString(body["targetLang"])
 	if !hasKey || translateJsFalsy(keyVal) || targetLang == "" {
-		c.JSON(400, gin.H{"message": "Missing key or targetLang"})
+		errors.AbortCoded(c, 400, "TRA0001", "Missing key or targetLang", h.Config.IsDev)
 		return
 	}
 	if !supportedTranslateLang(targetLang) {
-		c.JSON(400, gin.H{"message": "Unsupported language"})
+		errors.AbortCoded(c, 400, "TRA0002", "Unsupported language", h.Config.IsDev)
 		return
 	}
 	if targetLang == "zh" {
@@ -279,7 +280,7 @@ func (h *Translate) Translate(c *gin.Context) {
 		}
 		c.JSON(200, gin.H{"translation": v})
 	case <-timer.C:
-		c.JSON(504, gin.H{"message": "Translation request timeout"})
+		errors.AbortErrC(c, 504, "TRA0004", "Translation request timeout", nil, h.Config.IsDev)
 	case <-c.Request.Context().Done():
 		return
 	}
@@ -300,11 +301,11 @@ func (h *Translate) Batch(c *gin.Context) {
 	texts, isArray := textsVal.([]any)
 	targetLang := asString(body["targetLang"])
 	if !hasTexts || !isArray || texts == nil || targetLang == "" {
-		c.JSON(400, gin.H{"message": "Missing texts or targetLang"})
+		errors.AbortCoded(c, 400, "TRA0005", "Missing texts or targetLang", h.Config.IsDev)
 		return
 	}
 	if !supportedTranslateLang(targetLang) {
-		c.JSON(400, gin.H{"message": "Unsupported language"})
+		errors.AbortCoded(c, 400, "TRA0006", "Unsupported language", h.Config.IsDev)
 		return
 	}
 	if targetLang == "zh" {
@@ -346,7 +347,7 @@ func (h *Translate) Batch(c *gin.Context) {
 	select {
 	case h.batchCh <- item:
 	case <-timer.C:
-		c.JSON(504, gin.H{"message": "Translation request timeout"})
+		errors.AbortErrC(c, 504, "TRA0008", "Translation request timeout", nil, h.Config.IsDev)
 		return
 	case <-c.Request.Context().Done():
 		return
@@ -355,7 +356,7 @@ func (h *Translate) Batch(c *gin.Context) {
 	case results := <-item.resultCh:
 		c.JSON(200, gin.H{"translations": results})
 	case <-timer.C:
-		c.JSON(504, gin.H{"message": "Translation request timeout"})
+		errors.AbortErrC(c, 504, "TRA0010", "Translation request timeout", nil, h.Config.IsDev)
 	case <-c.Request.Context().Done():
 		return
 	}

@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"github.com/Furry-Drama-Tracker/backend/internal/config"
+	"github.com/Furry-Drama-Tracker/backend/internal/errors"
 	"github.com/Furry-Drama-Tracker/backend/internal/middleware"
 	"github.com/Furry-Drama-Tracker/backend/internal/model"
 	"github.com/Furry-Drama-Tracker/backend/internal/ratelimit"
@@ -50,7 +51,7 @@ func (h *Categories) Register(g *gin.RouterGroup) {
 func (h *Categories) List(c *gin.Context) {
 	cats, err := h.Repos.Categories.FindAllSorted(c.Request.Context())
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	list := make([]gin.H, 0, len(cats))
@@ -73,16 +74,16 @@ func (h *Categories) Create(c *gin.Context) {
 	name := asString(body["name"])
 	existing, err := h.Repos.Categories.FindByName(c.Request.Context(), name)
 	if err != nil && !repository.IsNotFound(err) {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	if existing != nil {
-		c.JSON(400, gin.H{"message": "该分类已存在"})
+		errors.AbortCoded(c, 400, "CAT0001", "该分类已存在", h.Config.IsDev)
 		return
 	}
 	// name 必填（固定契约）：缺失/为空 → 500 Server error（catch-all）。
 	if name == "" {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	cat := &model.Category{
@@ -92,7 +93,7 @@ func (h *Categories) Create(c *gin.Context) {
 		Order:  toInt(body["order"]),
 	}
 	if err := h.Repos.Categories.Create(c.Request.Context(), cat); err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	c.JSON(200, categoryJSON(cat))
@@ -110,16 +111,16 @@ func (h *Categories) Create(c *gin.Context) {
 func (h *Categories) Update(c *gin.Context) {
 	oid, err := primitive.ObjectIDFromHex(c.Param("id"))
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	cat, err := h.Repos.Categories.FindByID(c.Request.Context(), oid)
 	if err != nil {
 		if repository.IsNotFound(err) {
-			c.JSON(404, gin.H{"message": "分类不存在"})
+			errors.AbortCoded(c, 404, "CAT0002", "分类不存在", h.Config.IsDev)
 			return
 		}
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	body := cmsReadBody(c)
@@ -137,7 +138,7 @@ func (h *Categories) Update(c *gin.Context) {
 		cat.Order = toInt(v)
 	}
 	if err := h.Repos.Categories.Save(c.Request.Context(), cat); err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	c.JSON(200, categoryJSON(cat))
@@ -153,19 +154,19 @@ func (h *Categories) Update(c *gin.Context) {
 func (h *Categories) Delete(c *gin.Context) {
 	oid, err := primitive.ObjectIDFromHex(c.Param("id"))
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	if _, err := h.Repos.Categories.FindByID(c.Request.Context(), oid); err != nil {
 		if repository.IsNotFound(err) {
-			c.JSON(404, gin.H{"message": "分类不存在"})
+			errors.AbortCoded(c, 404, "CAT0003", "分类不存在", h.Config.IsDev)
 			return
 		}
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	if err := h.Repos.Categories.DeleteByID(c.Request.Context(), oid); err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	c.JSON(200, gin.H{"message": "分类已删除"})

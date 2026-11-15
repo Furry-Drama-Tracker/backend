@@ -59,7 +59,7 @@ func (h *Wallpapers) Register(g *gin.RouterGroup) {
 func (h *Wallpapers) SystemList(c *gin.Context) {
 	list, err := h.Repos.Wallpapers.FindEnabled(c.Request.Context())
 	if err != nil {
-		c.JSON(500, gin.H{"message": "获取系统壁纸失败"})
+		apperrors.Abort500C(c, "WAL0001", "获取系统壁纸失败", err, h.Config.IsDev)
 		return
 	}
 	out := make([]gin.H, 0, len(list))
@@ -78,7 +78,7 @@ func (h *Wallpapers) SystemList(c *gin.Context) {
 func (h *Wallpapers) SystemAll(c *gin.Context) {
 	list, err := h.Repos.Wallpapers.FindAll(c.Request.Context())
 	if err != nil {
-		c.JSON(500, gin.H{"message": "获取系统壁纸失败"})
+		apperrors.Abort500C(c, "WAL0002", "获取系统壁纸失败", err, h.Config.IsDev)
 		return
 	}
 	out := make([]gin.H, 0, len(list))
@@ -117,7 +117,7 @@ func (h *Wallpapers) SystemUpload(c *gin.Context) {
 		UploadedBy: &user.ID,
 	}
 	if err := h.Repos.Wallpapers.Create(c.Request.Context(), w); err != nil {
-		c.JSON(500, gin.H{"message": "上传系统壁纸失败"})
+		apperrors.Abort500C(c, "WAL0003", "上传系统壁纸失败", err, h.Config.IsDev)
 		return
 	}
 	c.JSON(200, cmsWallpaperJSON(w))
@@ -136,7 +136,7 @@ func (h *Wallpapers) SystemUpload(c *gin.Context) {
 func (h *Wallpapers) SystemUpdate(c *gin.Context) {
 	oid, err := primitive.ObjectIDFromHex(c.Param("id"))
 	if err != nil {
-		c.JSON(500, gin.H{"message": "更新系统壁纸失败"})
+		apperrors.Abort500C(c, "WAL0004", "更新系统壁纸失败", err, h.Config.IsDev)
 		return
 	}
 	body := cmsReadBody(c)
@@ -153,10 +153,10 @@ func (h *Wallpapers) SystemUpdate(c *gin.Context) {
 	w, err := h.Repos.Wallpapers.FindOneAndUpdate(c.Request.Context(), oid, bson.M{"$set": update})
 	if err != nil {
 		if repository.IsNotFound(err) {
-			c.JSON(404, gin.H{"message": "壁纸不存在"})
+			apperrors.AbortCoded(c, 404, "WAL0005", "壁纸不存在", h.Config.IsDev)
 			return
 		}
-		c.JSON(500, gin.H{"message": "更新系统壁纸失败"})
+		apperrors.Abort500C(c, "WAL0006", "更新系统壁纸失败", err, h.Config.IsDev)
 		return
 	}
 	c.JSON(200, cmsWallpaperJSON(w))
@@ -173,16 +173,16 @@ func (h *Wallpapers) SystemUpdate(c *gin.Context) {
 func (h *Wallpapers) SystemDelete(c *gin.Context) {
 	oid, err := primitive.ObjectIDFromHex(c.Param("id"))
 	if err != nil {
-		c.JSON(500, gin.H{"message": "删除系统壁纸失败"})
+		apperrors.Abort500C(c, "WAL0007", "删除系统壁纸失败", err, h.Config.IsDev)
 		return
 	}
 	w, err := h.Repos.Wallpapers.FindOneAndDelete(c.Request.Context(), oid)
 	if err != nil {
 		if repository.IsNotFound(err) {
-			c.JSON(404, gin.H{"message": "壁纸不存在"})
+			apperrors.AbortCoded(c, 404, "WAL0008", "壁纸不存在", h.Config.IsDev)
 			return
 		}
-		c.JSON(500, gin.H{"message": "删除系统壁纸失败"})
+		apperrors.Abort500C(c, "WAL0009", "删除系统壁纸失败", err, h.Config.IsDev)
 		return
 	}
 	// 删除文件（fire-and-forget，失败不影响响应）。只清理系统壁纸前缀文件。
@@ -202,7 +202,7 @@ func (h *Wallpapers) PersonalList(c *gin.Context) {
 	user, _ := middleware.GetUser(c)
 	u, err := h.Repos.Users.FindByID(c.Request.Context(), user.ID)
 	if err != nil {
-		c.JSON(500, gin.H{"message": "获取个人壁纸失败"})
+		apperrors.Abort500C(c, "WAL0010", "获取个人壁纸失败", err, h.Config.IsDev)
 		return
 	}
 	list := u.PersonalWallpapers
@@ -231,20 +231,20 @@ func (h *Wallpapers) PersonalUpload(c *gin.Context) {
 	user, _ := middleware.GetUser(c)
 	u, err := h.Repos.Users.FindByID(c.Request.Context(), user.ID)
 	if err != nil {
-		c.JSON(500, gin.H{"message": "上传个人壁纸失败"})
+		apperrors.Abort500C(c, "WAL0011", "上传个人壁纸失败", err, h.Config.IsDev)
 		return
 	}
 	// 限制个人壁纸数量。
 	if len(u.PersonalWallpapers) >= 20 {
 		// 删除刚上传的文件（同步删除）。
 		_ = upload.RemoveFile(strings.TrimPrefix(url, "/uploads/"))
-		c.JSON(400, gin.H{"message": "个人壁纸最多 20 张，请先删除旧的"})
+		apperrors.AbortCoded(c, 400, "WAL0012", "个人壁纸最多 20 张，请先删除旧的", h.Config.IsDev)
 		return
 	}
 	now := time.Now().UTC().Truncate(time.Millisecond)
 	if err := h.Repos.Users.WallpapersPushPersonal(c.Request.Context(), user.ID,
 		model.Wallpaper{URL: url, Name: name, AddedAt: now}); err != nil {
-		c.JSON(500, gin.H{"message": "上传个人壁纸失败"})
+		apperrors.Abort500C(c, "WAL0013", "上传个人壁纸失败", err, h.Config.IsDev)
 		return
 	}
 	c.JSON(200, gin.H{"url": url, "name": name, "addedAt": now})
@@ -263,13 +263,13 @@ func (h *Wallpapers) PersonalDelete(c *gin.Context) {
 	url := asString(body["url"])
 	user, _ := middleware.GetUser(c)
 	if url == "" || !strings.HasPrefix(url, "/uploads/wallpaper-") {
-		c.JSON(400, gin.H{"message": "无效的壁纸地址"})
+		apperrors.AbortCoded(c, 400, "WAL0014", "无效的壁纸地址", h.Config.IsDev)
 		return
 	}
 	// 必须先确认该文件确实属于当前用户的个人壁纸库，不能只凭 URL 删除。
 	u, err := h.Repos.Users.FindByID(c.Request.Context(), user.ID)
 	if err != nil {
-		c.JSON(500, gin.H{"message": "删除个人壁纸失败"})
+		apperrors.Abort500C(c, "WAL0015", "删除个人壁纸失败", err, h.Config.IsDev)
 		return
 	}
 	owned := false
@@ -280,11 +280,11 @@ func (h *Wallpapers) PersonalDelete(c *gin.Context) {
 		}
 	}
 	if !owned {
-		c.JSON(404, gin.H{"message": "壁纸不存在"})
+		apperrors.AbortCoded(c, 404, "WAL0016", "壁纸不存在", h.Config.IsDev)
 		return
 	}
 	if err := h.Repos.Users.WallpapersRemovePersonal(c.Request.Context(), user.ID, url); err != nil {
-		c.JSON(500, gin.H{"message": "删除个人壁纸失败"})
+		apperrors.Abort500C(c, "WAL0017", "删除个人壁纸失败", err, h.Config.IsDev)
 		return
 	}
 	// 仅在文件已无任何业务引用时删除，避免误删被主题/系统壁纸复用的文件。
@@ -299,27 +299,27 @@ func (h *Wallpapers) PersonalDelete(c *gin.Context) {
 //   - 魔数不符 → 400 "文件内容与类型不匹配，仅支持图片文件"
 func abortImageUploadError(c *gin.Context, cfg *config.Config, err error, fallback string) {
 	if err == upload.ErrNoFile {
-		c.JSON(400, gin.H{"message": "请选择要上传的图片"})
+		apperrors.AbortCoded(c, 400, "WAL0018", "请选择要上传的图片", cfg.IsDev)
 		return
 	}
 	if ue, ok := err.(*apperrors.UploadError); ok {
 		switch ue.Code {
 		case "LIMIT_FILE_SIZE":
-			c.JSON(400, gin.H{"message": "文件上传错误: File too large"})
+			apperrors.AbortCoded(c, 400, "WAL0019", "文件上传错误: File too large", cfg.IsDev)
 		case "LIMIT_FILE_TYPE":
 			msg := "仅支持图片文件 (jpg, jpeg, png, gif, webp)"
 			if !cfg.IsDev {
 				msg = "服务器内部错误"
 			}
-			c.JSON(500, gin.H{"message": msg})
+			apperrors.Abort500C(c, "WAL0020", msg, err, cfg.IsDev)
 		case "BAD_MAGIC":
-			c.JSON(400, gin.H{"message": "文件内容与类型不匹配，仅支持图片文件"})
+			apperrors.AbortCoded(c, 400, "WAL0021", "文件内容与类型不匹配，仅支持图片文件", cfg.IsDev)
 		default:
-			c.JSON(500, gin.H{"message": fallback})
+			apperrors.Abort500C(c, "WAL0022", fallback, err, cfg.IsDev)
 		}
 		return
 	}
-	c.JSON(500, gin.H{"message": fallback})
+	apperrors.Abort500C(c, "WAL0023", fallback, err, cfg.IsDev)
 }
 
 // abortWallpaperUploadError 是 abortImageUploadError 的壁纸域包装。

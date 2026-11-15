@@ -101,19 +101,19 @@ func (h *SiteContents) Upload(c *gin.Context) {
 	url, err := upload.SaveImage(c, "image", "site", 5<<20)
 	if err != nil {
 		if err == upload.ErrNoFile {
-			c.JSON(400, gin.H{"message": "请选择要上传的图片"})
+			errors.AbortCoded(c, 400, "SIT0001", "请选择要上传的图片", h.Config.IsDev)
 			return
 		}
 		if ue, ok := err.(*errors.UploadError); ok {
 			switch ue.Code {
 			case "LIMIT_FILE_SIZE":
-				c.JSON(400, gin.H{"message": "文件大小不能超过5MB"})
+				errors.AbortCoded(c, 400, "SIT0002", "文件大小不能超过5MB", h.Config.IsDev)
 			case "LIMIT_FILE_TYPE":
-				c.JSON(400, gin.H{"message": "仅支持图片文件 (jpg, jpeg, png, gif, webp)"})
+				errors.AbortCoded(c, 400, "SIT0003", "仅支持图片文件 (jpg, jpeg, png, gif, webp)", h.Config.IsDev)
 			case "BAD_MAGIC":
-				c.JSON(400, gin.H{"message": "文件内容与类型不匹配，仅支持图片文件"})
+				errors.AbortCoded(c, 400, "SIT0004", "文件内容与类型不匹配，仅支持图片文件", h.Config.IsDev)
 			default:
-				c.JSON(400, gin.H{"message": "文件上传错误"})
+				errors.AbortCoded(c, 400, "SIT0005", "文件上传错误", h.Config.IsDev)
 			}
 			return
 		}
@@ -121,7 +121,7 @@ func (h *SiteContents) Upload(c *gin.Context) {
 		if msg == "" {
 			msg = "文件上传失败"
 		}
-		c.JSON(400, gin.H{"message": msg})
+		errors.AbortCoded(c, 400, "SIT0006", msg, h.Config.IsDev)
 		return
 	}
 	c.JSON(200, gin.H{"url": url})
@@ -140,11 +140,11 @@ func (h *SiteContents) PWAManifest(c *gin.Context) {
 	if repository.IsNotFound(err) {
 		content = h.newDefaultContent("settings")
 		if err := h.Repos.SiteContents.SiteContentsCreate(ctx, content); err != nil {
-			serverError(c)
+			serverError(c, err, h.Config.IsDev)
 			return
 		}
 	} else if err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	if content != nil && content.Content != "" {
@@ -216,15 +216,15 @@ func (h *SiteContents) GetByKey(c *gin.Context) {
 		if _, ok := defaultSiteContent[key]; ok {
 			content = h.newDefaultContent(key)
 			if err := h.Repos.SiteContents.SiteContentsCreate(ctx, content); err != nil {
-				serverError(c)
+				serverError(c, err, h.Config.IsDev)
 				return
 			}
 		} else {
-			c.JSON(404, gin.H{"message": "Content not found"})
+			errors.AbortCoded(c, 404, "SIT0007", "Content not found", h.Config.IsDev)
 			return
 		}
 	} else if err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	c.JSON(200, siteContentJSON(content))
@@ -262,7 +262,7 @@ func (h *SiteContents) emailConfigJSON() gin.H {
 func (h *SiteContents) UpdateByKey(c *gin.Context) {
 	key := c.Param("key")
 	if key == "email" {
-		c.JSON(400, gin.H{"message": "邮件服务配置已改为通过环境变量或配置文件设置，请勿在此修改"})
+		errors.AbortCoded(c, 400, "SIT0008", "邮件服务配置已改为通过环境变量或配置文件设置，请勿在此修改", h.Config.IsDev)
 		return
 	}
 	var body map[string]any
@@ -273,7 +273,7 @@ func (h *SiteContents) UpdateByKey(c *gin.Context) {
 	processed := asString(contentVal)
 	if hasContent && (key == "about" || key == "settings") {
 		if !json.Valid([]byte(processed)) {
-			c.JSON(400, gin.H{"message": "该站点内容的 content 必须是合法 JSON"})
+			errors.AbortCoded(c, 400, "SIT0009", "该站点内容的 content 必须是合法 JSON", h.Config.IsDev)
 			return
 		}
 	}
@@ -286,7 +286,7 @@ func (h *SiteContents) UpdateByKey(c *gin.Context) {
 	}
 	updated, err := h.Repos.SiteContents.SiteContentsFindOneAndUpdate(c.Request.Context(), key, bson.M{"$set": update})
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	c.JSON(200, siteContentJSON(updated))
@@ -303,7 +303,7 @@ func (h *SiteContents) List(c *gin.Context) {
 	ctx := c.Request.Context()
 	contents, err := h.Repos.SiteContents.SiteContentsFindAll(ctx)
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	for _, key := range defaultSiteContentKey {
@@ -317,7 +317,7 @@ func (h *SiteContents) List(c *gin.Context) {
 		if !found {
 			created := h.newDefaultContent(key)
 			if err := h.Repos.SiteContents.SiteContentsCreate(ctx, created); err != nil {
-				serverError(c)
+				serverError(c, err, h.Config.IsDev)
 				return
 			}
 			contents = append(contents, *created)
@@ -350,7 +350,7 @@ func (h *SiteContents) TestEmail(c *gin.Context) {
 	pass := asString(body["pass"])
 	to := asString(body["to"])
 	if host == "" || user == "" || pass == "" || to == "" {
-		c.JSON(400, gin.H{"message": "请填写完整的邮件服务配置和收件地址"})
+		errors.AbortCoded(c, 400, "SIT0010", "请填写完整的邮件服务配置和收件地址", h.Config.IsDev)
 		return
 	}
 	port := 465
@@ -359,12 +359,12 @@ func (h *SiteContents) TestEmail(c *gin.Context) {
 	}
 	fromName := orDefaultString(body["fromName"], "")
 	if h.Mail == nil {
-		c.JSON(400, gin.H{"message": "邮件发送失败，请检查邮件服务配置"})
+		errors.AbortCoded(c, 400, "SIT0011", "邮件发送失败，请检查邮件服务配置", h.Config.IsDev)
 		return
 	}
 	if err := h.Mail.SendSiteTestEmail(c.Request.Context(), host, port, user, pass, fromName, to); err != nil {
 		slog.Error("[Email] test-email send failed", "host", host, "port", port, "to", to, "err", err)
-		c.JSON(400, gin.H{"message": "邮件发送失败，请检查邮件服务配置"})
+		errors.AbortCoded(c, 400, "SIT0012", "邮件发送失败，请检查邮件服务配置", h.Config.IsDev)
 		return
 	}
 	c.JSON(200, gin.H{"message": "测试邮件发送成功，请检查收件箱"})

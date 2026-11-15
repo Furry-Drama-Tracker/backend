@@ -9,6 +9,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 
 	"github.com/Furry-Drama-Tracker/backend/internal/config"
+	"github.com/Furry-Drama-Tracker/backend/internal/errors"
 	"github.com/Furry-Drama-Tracker/backend/internal/middleware"
 	"github.com/Furry-Drama-Tracker/backend/internal/model"
 	"github.com/Furry-Drama-Tracker/backend/internal/ratelimit"
@@ -61,31 +62,31 @@ func (h *Reports) Create(c *gin.Context) {
 	}
 	_ = c.ShouldBindJSON(&req)
 	if req.TargetType != "episode" && req.TargetType != "creator" {
-		c.JSON(400, gin.H{"message": "Invalid target type"})
+		errors.AbortCoded(c, 400, "RPT0001", "Invalid target type", h.Config.IsDev)
 		return
 	}
 	if !validReportReason(req.Reason) {
-		c.JSON(400, gin.H{"message": "Invalid reason"})
+		errors.AbortCoded(c, 400, "RPT0002", "Invalid reason", h.Config.IsDev)
 		return
 	}
 	if utf16Len(req.Description) > 2000 {
-		c.JSON(400, gin.H{"message": "描述不能超过2000个字符"})
+		errors.AbortCoded(c, 400, "RPT0003", "描述不能超过2000个字符", h.Config.IsDev)
 		return
 	}
 	// 固定契约：targetId 非法 hex → 500 Server error。
 	targetID, err := primitive.ObjectIDFromHex(req.TargetID)
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	ctx := c.Request.Context()
 	existing, err := h.Repos.Reports.ReportsFindPending(ctx, user.ID, req.TargetType, targetID)
 	if err != nil && !repository.IsNotFound(err) {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	if existing != nil {
-		c.JSON(400, gin.H{"message": "Already reported"})
+		errors.AbortCoded(c, 400, "RPT0004", "Already reported", h.Config.IsDev)
 		return
 	}
 	report := &model.Report{
@@ -98,7 +99,7 @@ func (h *Reports) Create(c *gin.Context) {
 	}
 	doc, err := h.Repos.Reports.ReportsCreate(ctx, report)
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	c.JSON(201, reportsJSON(doc, doc.ReporterID.Hex()))
@@ -134,12 +135,12 @@ func (h *Reports) List(c *gin.Context) {
 	skip := int64((page - 1) * limit)
 	reports, err := h.Repos.Reports.ReportsList(ctx, filter, skip, int64(limit))
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	total, err := h.Repos.Reports.ReportsCount(ctx, filter)
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 
@@ -149,7 +150,7 @@ func (h *Reports) List(c *gin.Context) {
 	}
 	refs, err := h.Repos.Users.ReportsFindReporterRefs(ctx, dedupIDs(ids))
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	list := make([]gin.H, 0, len(reports))
@@ -186,17 +187,17 @@ func (h *Reports) Resolve(c *gin.Context) {
 	}
 	_ = c.ShouldBindJSON(&req)
 	if req.Status != "resolved" && req.Status != "dismissed" {
-		c.JSON(400, gin.H{"message": "Invalid status"})
+		errors.AbortCoded(c, 400, "RPT0005", "Invalid status", h.Config.IsDev)
 		return
 	}
 	ctx := c.Request.Context()
 	doc, err := h.Repos.Reports.ReportsResolve(ctx, c.Param("id"), req.Status, req.ResolveNote, user.ID)
 	if err != nil {
 		if repository.IsNotFound(err) {
-			c.JSON(404, gin.H{"message": "Report not found"})
+			errors.AbortCoded(c, 404, "RPT0006", "Report not found", h.Config.IsDev)
 			return
 		}
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 

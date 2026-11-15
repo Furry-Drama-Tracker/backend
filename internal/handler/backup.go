@@ -5,7 +5,6 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"net/http"
 	"strconv"
 	"time"
 
@@ -16,6 +15,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 
 	"github.com/Furry-Drama-Tracker/backend/internal/config"
+	"github.com/Furry-Drama-Tracker/backend/internal/errors"
 	"github.com/Furry-Drama-Tracker/backend/internal/middleware"
 	"github.com/Furry-Drama-Tracker/backend/internal/model"
 	"github.com/Furry-Drama-Tracker/backend/internal/ratelimit"
@@ -85,7 +85,7 @@ func (h *Backup) Register(g *gin.RouterGroup) {
 func (h *Backup) requireSuperAdmin(c *gin.Context) {
 	user, ok := middleware.GetUser(c)
 	if !ok || user.Role != middleware.RoleSuperAdmin {
-		c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"message": "需要超级管理员权限"})
+		errors.AbortCoded(c, 403, "BAK0001", "需要超级管理员权限", h.Config.IsDev)
 		return
 	}
 	c.Next()
@@ -143,7 +143,7 @@ func (h *Backup) Import(c *gin.Context) {
 	body := readBodyMap(c)
 	dataVal, ok := body["data"]
 	if !ok || dataVal == nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "无效的备份数据"})
+		errors.AbortCoded(c, 400, "BAK0002", "无效的备份数据", h.Config.IsDev)
 		return
 	}
 	var data map[string]any
@@ -157,7 +157,7 @@ func (h *Backup) Import(c *gin.Context) {
 			data[strconv.Itoa(i)] = item
 		}
 	default:
-		c.JSON(http.StatusBadRequest, gin.H{"message": "无效的备份数据"})
+		errors.AbortCoded(c, 400, "BAK0003", "无效的备份数据", h.Config.IsDev)
 		return
 	}
 	overwrite := truthy(body["overwrite"])
@@ -165,11 +165,11 @@ func (h *Backup) Import(c *gin.Context) {
 	// 大小校验（等价 JSON.stringify(data).length > 50MB，UTF-16 长度）。
 	dataJSON, err := json.Marshal(data)
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	if jsUTF16Len(string(dataJSON)) > backupMaxImportBytes {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "备份数据过大，最大支持50MB"})
+		errors.AbortCoded(c, 400, "BAK0004", "备份数据过大，最大支持50MB", h.Config.IsDev)
 		return
 	}
 

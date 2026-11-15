@@ -76,12 +76,30 @@ deploy/               systemd unit + ini 模板 + run.sh
 - `auth.NewSigner(secret string) *auth.Signer`；`(*Signer).Sign/Verify`
 - `auth.HashToken(token) string`（sha256 hex）
 - `auth.SetAuthCookies(c, access, refresh string, isProd bool)`、`auth.ClearAuthCookies(c, isProd bool)`、`auth.SetCSRFCookie(c, isProd bool, maxAgeHours int) string`、`auth.GetAccessToken(c)`、`auth.GetRefreshToken(c)`
-- `errors.New/NewKey/Wrap(status, message[, key, cause])`、`errors.AbortWithAppError(c, err, isDev)`
+- `errors.New/NewKey/NewExtra/Wrap(status, message[, key, cause])`、`errors.AbortWithAppError(c, err, isDev)`（无码旧构造器，保留兼容）
+- `errors.NewC/NewKeyC/NewExtraC/WrapC(code, status, message[, key/cause])`、`errors.Abort500C(c, code, msg, cause, isDev)`、`errors.AbortErrC/AbortCoded/AbortKeyed(...)`、`errors.SetLogger(l)`、`errors.NewRefID()`、`errors.ContextRefID`
+- `middleware.RequestRef(isDev)`（全局链第一个中间件：生成参考号 ref + `X-Ref-ID` 响应头 + isDev 入 context）
 - `pagination.Parse(c) (Query)`、`(*Query).Skip()/TotalPages()`
 - `middleware.CORS(allowOrigins []string)`、`middleware.CSRF()`
 - `router.Mount(parent *gin.RouterGroup, mountPath string, register func(*gin.RouterGroup))`
 - `server.NewApp(server.Deps{Config, DB, Repos, Signer}) *gin.Engine`
 - `handler.CSRF(cfg)`、`handler.Health(db)`
+
+## 错误码与参考号（2026-11 契约，勿破坏）
+
+所有 4xx/5xx 响应体统一附带三个信号（200 与 health 503 / oauth 501 / 上传 400 信封除外）：
+
+```json
+{"message": "该邮箱已注册 [USR0007·123456789]", "error": "USR0007", "ref": 123456789}
+```
+
+- **error**：`XXXYYYY`——X=3 字母模块前缀，Y=文件（或模块共享文件组）内顺序号。码即注册表：`grep -rn "USR0007" backend/` 直达唯一调用点。**新站点取号 = 同前缀仓库内当前最大序号 +1**（4 位数字，前缀不得复用于不同模块）。
+- **ref**：每请求一个 0-999999999 随十进制整数（`crypto/rand`，`middleware.RequestRef` 生成）；响应头 `X-Ref-ID` 同值；`RequestLogger`/5xx 日志行都带 `ref`。前端契约：JSON 整数补零 9 位后按三位一段空格分组展示（`123456789` → `123 456 789`）。
+- **message 内嵌**：生产环境 4xx/5xx message 末尾由渲染器统一追加 ` [CODE·ref]`（非技术用户直接复制报告）；开发/测试环境 message 保持原文（字段仍附带）。5xx 生产另有统一掩码「服务器内部错误」。
+- **日志**：5xx 渲染时额外打一行 ERROR（stdout slog）：`code`/`ref`/`path`/`site`（错误构造点 file:line，`runtime.Caller` 自动抓取）/`cause`；panic 恢复走 `SYS0500`（JSON 500 + stack 入日志）。排障：拿用户报的码 grep 源码定位站点，拿 ref grep 日志定位请求。
+- **构造器选型**：handler 直写用 `Abort500C/AbortErrC/AbortCoded`；middleware 固定契约响应用 `codedBody(c, code, gin.H{...})`（message 不内嵌后缀）；service 层用 `NewC/NewKeyC/NewExtraC/WrapC`。
+- **机器注册表**：`docs/errors.json`（741+ 条目，含 code/kind/status/message/file/line）+ `docs/errors.schema.json`；生成器 `python3 docs/gen_errors_json.py`——新增错误码后重跑，输出字节稳定可提交。
+- 例外不加码：`/api/health` 503（独立信封）、oauth 501（业务性未开放）、`UploadError` 400 信封。
 
 ## 行为一致性铁律
 

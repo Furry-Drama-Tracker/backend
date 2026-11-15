@@ -8,6 +8,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 
 	"github.com/Furry-Drama-Tracker/backend/internal/auth"
+	"github.com/Furry-Drama-Tracker/backend/internal/errors"
 	"github.com/Furry-Drama-Tracker/backend/internal/middleware"
 	"github.com/Furry-Drama-Tracker/backend/internal/model"
 )
@@ -66,7 +67,7 @@ func (h *Auth) CreateUserSession(c *gin.Context) {
 	}
 	sess, err := h.Svc.Repos.Sessions.UpsertByTokenHash(c.Request.Context(), auth.HashToken(tokenStr), user.ID, di, h.clientIP(c), time.Now())
 	if err != nil {
-		c.JSON(500, gin.H{"message": "Server error"})
+		errors.Abort500C(c, "SES0001", "Server error", err, h.Config.IsDev)
 		return
 	}
 	c.JSON(200, gin.H{"sessionId": sess.ID.Hex()})
@@ -86,7 +87,7 @@ func (h *Auth) MyUserSessions(c *gin.Context) {
 	currentHash := auth.HashToken(tokenStr)
 	sessions, err := h.Svc.Repos.Sessions.FindByUser(c.Request.Context(), user.ID, 20)
 	if err != nil {
-		c.JSON(500, gin.H{"message": "Server error"})
+		errors.Abort500C(c, "SES0002", "Server error", err, h.Config.IsDev)
 		return
 	}
 	result := make([]gin.H, 0, len(sessions))
@@ -111,7 +112,7 @@ func (h *Auth) RenameUserSession(c *gin.Context) {
 	_ = c.ShouldBindJSON(&req)
 	name := strings.TrimSpace(req.DeviceName)
 	if name == "" {
-		c.JSON(400, gin.H{"message": "设备名称不能为空"})
+		errors.AbortCoded(c, 400, "SES0003", "设备名称不能为空", h.Config.IsDev)
 		return
 	}
 	if len([]rune(name)) > 50 {
@@ -120,20 +121,20 @@ func (h *Auth) RenameUserSession(c *gin.Context) {
 	user, _ := middleware.GetUser(c)
 	id, err := primitive.ObjectIDFromHex(c.Param("id"))
 	if err != nil {
-		c.JSON(400, gin.H{"message": "会话不存在"})
+		errors.AbortCoded(c, 400, "SES0004", "会话不存在", h.Config.IsDev)
 		return
 	}
 	sess, err := h.Svc.Repos.Sessions.FindByID(c.Request.Context(), id)
 	if err != nil {
-		c.JSON(404, gin.H{"message": "会话不存在"})
+		errors.AbortCoded(c, 404, "SES0005", "会话不存在", h.Config.IsDev)
 		return
 	}
 	if sess.UserID != user.ID {
-		c.JSON(403, gin.H{"message": "权限不足"})
+		errors.AbortCoded(c, 403, "SES0006", "权限不足", h.Config.IsDev)
 		return
 	}
 	if err := h.Svc.Repos.Sessions.UpdateDeviceName(c.Request.Context(), id, user.ID, name); err != nil {
-		c.JSON(500, gin.H{"message": "Server error"})
+		errors.Abort500C(c, "SES0007", "Server error", err, h.Config.IsDev)
 		return
 	}
 	c.JSON(200, gin.H{"message": "设备名称已更新"})
@@ -153,24 +154,24 @@ func (h *Auth) DeleteUserSession(c *gin.Context) {
 	currentHash := auth.HashToken(tokenStr)
 	id, err := primitive.ObjectIDFromHex(c.Param("id"))
 	if err != nil {
-		c.JSON(400, gin.H{"message": "会话不存在"})
+		errors.AbortCoded(c, 400, "SES0008", "会话不存在", h.Config.IsDev)
 		return
 	}
 	sess, err := h.Svc.Repos.Sessions.FindByID(c.Request.Context(), id)
 	if err != nil {
-		c.JSON(404, gin.H{"message": "会话不存在"})
+		errors.AbortCoded(c, 404, "SES0009", "会话不存在", h.Config.IsDev)
 		return
 	}
 	if sess.UserID != user.ID {
-		c.JSON(403, gin.H{"message": "权限不足"})
+		errors.AbortCoded(c, 403, "SES0010", "权限不足", h.Config.IsDev)
 		return
 	}
 	if sess.TokenHash == currentHash {
-		c.JSON(400, gin.H{"message": "不能下线当前设备，请使用退出登录"})
+		errors.AbortCoded(c, 400, "SES0011", "不能下线当前设备，请使用退出登录", h.Config.IsDev)
 		return
 	}
 	if err := h.Svc.Repos.Sessions.DeactivateByID(c.Request.Context(), id, model.RevokeUserRevoked); err != nil {
-		c.JSON(500, gin.H{"message": "Server error"})
+		errors.Abort500C(c, "SES0012", "Server error", err, h.Config.IsDev)
 		return
 	}
 	c.JSON(200, gin.H{"message": "已下线该设备"})
@@ -187,7 +188,7 @@ func (h *Auth) DeleteAllOtherSessions(c *gin.Context) {
 	accessToken, _ := c.Get(middleware.ContextAuthTokenKey)
 	tokenStr, _ := accessToken.(string)
 	if err := h.Svc.Repos.Sessions.DeactivateAllOtherByTokenHash(c.Request.Context(), user.ID, auth.HashToken(tokenStr)); err != nil {
-		c.JSON(500, gin.H{"message": "Server error"})
+		errors.Abort500C(c, "SES0013", "Server error", err, h.Config.IsDev)
 		return
 	}
 	c.JSON(200, gin.H{"message": "已下线其他所有设备"})
@@ -203,7 +204,7 @@ func (h *Auth) Heartbeat(c *gin.Context) {
 	accessToken, _ := c.Get(middleware.ContextAuthTokenKey)
 	tokenStr, _ := accessToken.(string)
 	if err := h.Svc.Repos.Sessions.UpdateLastActiveByTokenHash(c.Request.Context(), auth.HashToken(tokenStr), time.Now()); err != nil {
-		c.JSON(500, gin.H{"message": "Server error"})
+		errors.Abort500C(c, "SES0014", "Server error", err, h.Config.IsDev)
 		return
 	}
 	c.JSON(200, gin.H{"ok": true})
@@ -224,7 +225,7 @@ func (h *Auth) AllUserSessions(c *gin.Context) {
 	currentHash := auth.HashToken(tokenStr)
 	sessions, err := h.Svc.Repos.Sessions.FindAll(c.Request.Context(), 200)
 	if err != nil {
-		c.JSON(500, gin.H{"message": "Server error"})
+		errors.Abort500C(c, "SES0015", "Server error", err, h.Config.IsDev)
 		return
 	}
 	result := make([]gin.H, 0, len(sessions))
@@ -251,15 +252,15 @@ func (h *Auth) AllUserSessions(c *gin.Context) {
 func (h *Auth) AdminDeleteSession(c *gin.Context) {
 	id, err := primitive.ObjectIDFromHex(c.Param("id"))
 	if err != nil {
-		c.JSON(400, gin.H{"message": "会话不存在"})
+		errors.AbortCoded(c, 400, "SES0016", "会话不存在", h.Config.IsDev)
 		return
 	}
 	if _, err := h.Svc.Repos.Sessions.FindByID(c.Request.Context(), id); err != nil {
-		c.JSON(404, gin.H{"message": "会话不存在"})
+		errors.AbortCoded(c, 404, "SES0017", "会话不存在", h.Config.IsDev)
 		return
 	}
 	if err := h.Svc.Repos.Sessions.DeactivateByID(c.Request.Context(), id, model.RevokeAdmin); err != nil {
-		c.JSON(500, gin.H{"message": "Server error"})
+		errors.Abort500C(c, "SES0018", "Server error", err, h.Config.IsDev)
 		return
 	}
 	c.JSON(200, gin.H{"message": "已下线该设备"})
@@ -275,11 +276,11 @@ func (h *Auth) AdminDeleteSession(c *gin.Context) {
 func (h *Auth) AdminDeleteUserSessions(c *gin.Context) {
 	userID, err := primitive.ObjectIDFromHex(c.Param("userId"))
 	if err != nil {
-		c.JSON(400, gin.H{"message": "会话不存在"})
+		errors.AbortCoded(c, 400, "SES0019", "会话不存在", h.Config.IsDev)
 		return
 	}
 	if err := h.Svc.Repos.Sessions.DeactivateAllByUser(c.Request.Context(), userID, model.RevokeAdmin); err != nil {
-		c.JSON(500, gin.H{"message": "Server error"})
+		errors.Abort500C(c, "SES0020", "Server error", err, h.Config.IsDev)
 		return
 	}
 	c.JSON(200, gin.H{"message": "已下线该用户全部会话"})

@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"github.com/Furry-Drama-Tracker/backend/internal/auth"
+	"github.com/Furry-Drama-Tracker/backend/internal/errors"
 	"github.com/Furry-Drama-Tracker/backend/internal/middleware"
 )
 
@@ -26,18 +27,18 @@ func (h *Auth) twoFactorKeyHex() string {
 func (h *Auth) Enable2FA(c *gin.Context) {
 	user, _ := middleware.GetUser(c)
 	if user.Role == middleware.RoleUser {
-		c.JSON(403, gin.H{"message": "普通用户不可开启两步验证"})
+		errors.AbortCoded(c, 403, "TFA0001", "普通用户不可开启两步验证", h.Config.IsDev)
 		return
 	}
 	u, err := h.Svc.Repos.Users.FindByIDWithAllSecrets(c.Request.Context(), user.ID)
 	if err != nil {
-		c.JSON(500, gin.H{"message": "服务器错误"})
+		errors.Abort500C(c, "TFA0002", "服务器错误", err, h.Config.IsDev)
 		return
 	}
 	// 已启用：不允许用 enable 覆盖既有 secret（那等价于无验证关闭 2FA）。
 	// 需要重置请先走 /2fa/disable（要求 TOTP 或备份码）。
 	if u.TwoFactorEnabled {
-		c.JSON(400, gin.H{"message": "2FA already enabled; disable it before re-enrolling"})
+		errors.AbortCoded(c, 400, "TFA0003", "2FA already enabled; disable it before re-enrolling", h.Config.IsDev)
 		return
 	}
 	secret := auth.GenerateSecret()
@@ -46,7 +47,7 @@ func (h *Auth) Enable2FA(c *gin.Context) {
 	// secret 需要可逆（要复算 TOTP），备份码只需单向验证 → 只存哈希。
 	if err := h.Svc.Repos.Users.SetTwoFactorSetup(c.Request.Context(), user.ID,
 		auth.EncryptField(secret, keyHex), auth.HashBackupCodes(backup), false); err != nil {
-		c.JSON(500, gin.H{"message": "服务器错误"})
+		errors.Abort500C(c, "TFA0004", "服务器错误", err, h.Config.IsDev)
 		return
 	}
 	h.Svc.Audit(c.Request.Context(), u, "2FA_SETUP_INITIATED", "auth", "User initiated 2FA setup", h.clientIP(c))
@@ -54,7 +55,7 @@ func (h *Auth) Enable2FA(c *gin.Context) {
 	// 内部存储格式是标准 base64（既有格式勿改），此处转换供 2FA 工具识别二维码与手动密钥。
 	secretBase32, derr := auth.SecretBase32(secret)
 	if derr != nil {
-		c.JSON(500, gin.H{"message": "服务器错误"})
+		errors.Abort500C(c, "TFA0005", "服务器错误", err, h.Config.IsDev)
 		return
 	}
 	otpauthURL := "otpauth://totp/" + url.PathEscape("FurryDrama:"+u.AccountID) + "?secret=" + secretBase32 + "&issuer=FurryDrama"
@@ -81,21 +82,21 @@ func (h *Auth) VerifyEnable2FA(c *gin.Context) {
 	_ = c.ShouldBindJSON(&req)
 	user, _ := middleware.GetUser(c)
 	if user.Role == middleware.RoleUser {
-		c.JSON(403, gin.H{"message": "普通用户不可开启两步验证"})
+		errors.AbortCoded(c, 403, "TFA0006", "普通用户不可开启两步验证", h.Config.IsDev)
 		return
 	}
 	u, err := h.Svc.Repos.Users.FindByIDWithAllSecrets(c.Request.Context(), user.ID)
 	if err != nil || u.TwoFactorSecret == "" {
-		c.JSON(400, gin.H{"message": "2FA not set up"})
+		errors.AbortCoded(c, 400, "TFA0007", "2FA not set up", h.Config.IsDev)
 		return
 	}
 	secret := auth.DecryptField(u.TwoFactorSecret, h.twoFactorKeyHex())
 	if !auth.VerifyTOTP(secret, req.Token) {
-		c.JSON(400, gin.H{"message": "Invalid verification code"})
+		errors.AbortCoded(c, 400, "TFA0008", "Invalid verification code", h.Config.IsDev)
 		return
 	}
 	if err := h.Svc.Repos.Users.EnableTwoFactor(c.Request.Context(), user.ID); err != nil {
-		c.JSON(500, gin.H{"message": "服务器错误"})
+		errors.Abort500C(c, "TFA0009", "服务器错误", err, h.Config.IsDev)
 		return
 	}
 	h.Svc.Audit(c.Request.Context(), u, "2FA_ENABLED", "auth", "User enabled 2FA", h.clientIP(c))
@@ -119,12 +120,12 @@ func (h *Auth) Disable2FA(c *gin.Context) {
 	// 管理员/超管强制开启 2FA：不允许自行关闭（解锁走 useradmin CLI 的 clear-2fa，
 	// CLI 会吊销全部会话并要求重新走强制设置流程）。
 	if user.Role == middleware.RoleAdmin || user.Role == middleware.RoleSuperAdmin {
-		c.JSON(403, gin.H{"message": "管理员账号强制开启两步验证，不可自行关闭"})
+		errors.AbortCoded(c, 403, "TFA0010", "管理员账号强制开启两步验证，不可自行关闭", h.Config.IsDev)
 		return
 	}
 	u, err := h.Svc.Repos.Users.FindByIDWithAllSecrets(c.Request.Context(), user.ID)
 	if err != nil || !u.TwoFactorEnabled {
-		c.JSON(400, gin.H{"message": "2FA not enabled"})
+		errors.AbortCoded(c, 400, "TFA0011", "2FA not enabled", h.Config.IsDev)
 		return
 	}
 	keyHex := h.twoFactorKeyHex()
@@ -136,7 +137,7 @@ func (h *Auth) Disable2FA(c *gin.Context) {
 	// 正常账户（secret 或备份码非空）行为不变，仍必须通过 TOTP/备份码校验。
 	if secret == "" && len(u.TwoFactorBackupCodes) == 0 {
 		if err := h.Svc.Repos.Users.DisableTwoFactor(c.Request.Context(), user.ID); err != nil {
-			c.JSON(500, gin.H{"message": "服务器错误"})
+			errors.Abort500C(c, "TFA0012", "服务器错误", err, h.Config.IsDev)
 			return
 		}
 		h.Svc.Audit(c.Request.Context(), u, "2FA_DISABLED", "auth", "User disabled 2FA (no verifiable credential stored)", h.clientIP(c))
@@ -147,11 +148,11 @@ func (h *Auth) Disable2FA(c *gin.Context) {
 	// 会清空全部备份码，故无需另行写回。
 	_, backupHit := auth.ConsumeBackupCode(u.TwoFactorBackupCodes, req.Token, keyHex)
 	if !auth.VerifyTOTP(secret, req.Token) && !backupHit {
-		c.JSON(400, gin.H{"message": "Invalid verification code"})
+		errors.AbortCoded(c, 400, "TFA0013", "Invalid verification code", h.Config.IsDev)
 		return
 	}
 	if err := h.Svc.Repos.Users.DisableTwoFactor(c.Request.Context(), user.ID); err != nil {
-		c.JSON(500, gin.H{"message": "服务器错误"})
+		errors.Abort500C(c, "TFA0014", "服务器错误", err, h.Config.IsDev)
 		return
 	}
 	h.Svc.Audit(c.Request.Context(), u, "2FA_DISABLED", "auth", "User disabled 2FA", h.clientIP(c))
@@ -174,14 +175,14 @@ func (h *Auth) Verify2FA(c *gin.Context) {
 	user, _ := middleware.GetUser(c)
 	u, err := h.Svc.Repos.Users.FindByIDWithAllSecrets(c.Request.Context(), user.ID)
 	if err != nil || !u.TwoFactorEnabled {
-		c.JSON(400, gin.H{"message": "2FA not enabled for this account"})
+		errors.AbortCoded(c, 400, "TFA0015", "2FA not enabled for this account", h.Config.IsDev)
 		return
 	}
 	keyHex := h.twoFactorKeyHex()
 	secret := auth.DecryptField(u.TwoFactorSecret, keyHex)
 	remaining, backupHit := auth.ConsumeBackupCode(u.TwoFactorBackupCodes, req.Token, keyHex)
 	if !auth.VerifyTOTP(secret, req.Token) && !backupHit {
-		c.JSON(400, gin.H{"message": "Invalid verification code"})
+		errors.AbortCoded(c, 400, "TFA0016", "Invalid verification code", h.Config.IsDev)
 		return
 	}
 	// 备份码命中 → 消费该码（remaining 已是哈希格式，直接落库）。

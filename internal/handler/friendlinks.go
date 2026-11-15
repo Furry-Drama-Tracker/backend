@@ -11,6 +11,7 @@ import (
 
 	"github.com/Furry-Drama-Tracker/backend/internal/config"
 	"github.com/Furry-Drama-Tracker/backend/internal/email"
+	"github.com/Furry-Drama-Tracker/backend/internal/errors"
 	"github.com/Furry-Drama-Tracker/backend/internal/middleware"
 	"github.com/Furry-Drama-Tracker/backend/internal/model"
 	"github.com/Furry-Drama-Tracker/backend/internal/ratelimit"
@@ -63,7 +64,7 @@ func (h *FriendLinks) Register(g *gin.RouterGroup) {
 func (h *FriendLinks) List(c *gin.Context) {
 	list, err := h.Repos.FriendLinks.FindActive(c.Request.Context())
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	out := make([]gin.H, 0, len(list))
@@ -87,21 +88,21 @@ func (h *FriendLinks) Apply(c *gin.Context) {
 	name := asString(body["name"])
 	linkURL := asString(body["url"])
 	if name == "" || linkURL == "" {
-		c.JSON(400, gin.H{"message": "站点名称和链接为必填项"})
+		errors.AbortCoded(c, 400, "FLK0001", "站点名称和链接为必填项", h.Config.IsDev)
 		return
 	}
 	// altcha 验证码（开发环境 x-dev-token 匹配可绕过，由 VerifyAltcha 内部处理）。
 	if h.VerifyAltcha == nil || !h.VerifyAltcha(asString(body["altcha"]), c.GetHeader("x-dev-token")) {
-		c.JSON(400, gin.H{"message": "验证码错误或已过期"})
+		errors.AbortCoded(c, 400, "FLK0002", "验证码错误或已过期", h.Config.IsDev)
 		return
 	}
 	if !cmsIsValidHTTPURL(linkURL) {
-		c.JSON(400, gin.H{"message": "链接格式不合法，仅支持 http/https 协议"})
+		errors.AbortCoded(c, 400, "FLK0003", "链接格式不合法，仅支持 http/https 协议", h.Config.IsDev)
 		return
 	}
 	logo := asString(body["logo"])
 	if logo != "" && !cmsIsValidHTTPURL(logo) {
-		c.JSON(400, gin.H{"message": "Logo URL 格式不合法"})
+		errors.AbortCoded(c, 400, "FLK0004", "Logo URL 格式不合法", h.Config.IsDev)
 		return
 	}
 	var applicantID *primitive.ObjectID
@@ -120,12 +121,12 @@ func (h *FriendLinks) Apply(c *gin.Context) {
 		ApplicantID: applicantID,
 	}
 	if err := h.Repos.FriendLinks.Create(ctx, link); err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	superAdmins, err := h.Repos.Users.FriendLinksFindSuperAdmins(ctx)
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	if len(superAdmins) > 0 {
@@ -139,7 +140,7 @@ func (h *FriendLinks) Apply(c *gin.Context) {
 			})
 		}
 		if err := h.Repos.Notifications.CmsInsertMany(ctx, notifs); err != nil {
-			serverError(c)
+			serverError(c, err, h.Config.IsDev)
 			return
 		}
 		for _, a := range superAdmins {
@@ -161,7 +162,7 @@ func (h *FriendLinks) MyApplications(c *gin.Context) {
 	user, _ := middleware.GetUser(c)
 	list, err := h.Repos.FriendLinks.FindByApplicant(c.Request.Context(), user.ID)
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	out := make([]gin.H, 0, len(list))
@@ -180,7 +181,7 @@ func (h *FriendLinks) MyApplications(c *gin.Context) {
 func (h *FriendLinks) All(c *gin.Context) {
 	list, err := h.Repos.FriendLinks.FindAll(c.Request.Context())
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	out := make([]gin.H, 0, len(list))
@@ -204,16 +205,16 @@ func (h *FriendLinks) Create(c *gin.Context) {
 	name := asString(body["name"])
 	linkURL := asString(body["url"])
 	if name == "" || linkURL == "" {
-		c.JSON(400, gin.H{"message": "名称和链接为必填项"})
+		errors.AbortCoded(c, 400, "FLK0005", "名称和链接为必填项", h.Config.IsDev)
 		return
 	}
 	if !cmsIsValidHTTPURL(linkURL) {
-		c.JSON(400, gin.H{"message": "链接格式不合法，仅支持 http/https 协议"})
+		errors.AbortCoded(c, 400, "FLK0006", "链接格式不合法，仅支持 http/https 协议", h.Config.IsDev)
 		return
 	}
 	logo := asString(body["logo"])
 	if logo != "" && !cmsIsValidHTTPURL(logo) {
-		c.JSON(400, gin.H{"message": "Logo URL 格式不合法"})
+		errors.AbortCoded(c, 400, "FLK0007", "Logo URL 格式不合法", h.Config.IsDev)
 		return
 	}
 	isActive := true
@@ -234,7 +235,7 @@ func (h *FriendLinks) Create(c *gin.Context) {
 		Status:        "approved",
 	}
 	if err := h.Repos.FriendLinks.Create(c.Request.Context(), link); err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	c.JSON(200, cmsFriendLinkJSON(link))
@@ -254,23 +255,23 @@ func (h *FriendLinks) Create(c *gin.Context) {
 func (h *FriendLinks) Update(c *gin.Context) {
 	oid, err := primitive.ObjectIDFromHex(c.Param("id"))
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	body := cmsReadBody(c)
 	linkURL := asString(body["url"])
 	if linkURL != "" && !cmsIsValidHTTPURL(linkURL) {
-		c.JSON(400, gin.H{"message": "链接格式不合法，仅支持 http/https 协议"})
+		errors.AbortCoded(c, 400, "FLK0008", "链接格式不合法，仅支持 http/https 协议", h.Config.IsDev)
 		return
 	}
 	logo := asString(body["logo"])
 	if logo != "" && !cmsIsValidHTTPURL(logo) {
-		c.JSON(400, gin.H{"message": "Logo URL 格式不合法"})
+		errors.AbortCoded(c, 400, "FLK0009", "Logo URL 格式不合法", h.Config.IsDev)
 		return
 	}
 	status := asString(body["status"])
 	if status != "" && status != "pending" && status != "approved" && status != "rejected" {
-		c.JSON(400, gin.H{"message": "无效的状态值"})
+		errors.AbortCoded(c, 400, "FLK0010", "无效的状态值", h.Config.IsDev)
 		return
 	}
 	updateData := bson.M{}
@@ -292,10 +293,10 @@ func (h *FriendLinks) Update(c *gin.Context) {
 	link, err := h.Repos.FriendLinks.FindOneAndUpdate(c.Request.Context(), oid, bson.M{"$set": updateData})
 	if err != nil {
 		if repository.IsNotFound(err) {
-			c.JSON(404, gin.H{"message": "友链不存在"})
+			errors.AbortCoded(c, 404, "FLK0011", "友链不存在", h.Config.IsDev)
 			return
 		}
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	// status 变更且存在申请者：写通知 + 邮件 + 推送。
@@ -313,7 +314,7 @@ func (h *FriendLinks) Update(c *gin.Context) {
 			Message:  fmt.Sprintf("友链「%s」申请%s", link.Name, statusLabel),
 			Metadata: primitive.M{"name": link.Name, "status": statusLabel},
 		}); err != nil {
-			serverError(c)
+			serverError(c, err, h.Config.IsDev)
 			return
 		}
 		h.sendFriendLinkStatusEmail(ctx, *link.ApplicantID, link.Name, statusLabel)
@@ -334,15 +335,15 @@ func (h *FriendLinks) Update(c *gin.Context) {
 func (h *FriendLinks) Delete(c *gin.Context) {
 	oid, err := primitive.ObjectIDFromHex(c.Param("id"))
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	if _, err := h.Repos.FriendLinks.FindOneAndDelete(c.Request.Context(), oid); err != nil {
 		if repository.IsNotFound(err) {
-			c.JSON(404, gin.H{"message": "友链不存在"})
+			errors.AbortCoded(c, 404, "FLK0012", "友链不存在", h.Config.IsDev)
 			return
 		}
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	c.JSON(200, gin.H{"message": "删除成功"})

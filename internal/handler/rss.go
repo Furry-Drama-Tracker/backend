@@ -65,12 +65,12 @@ func (h *RSS) Feed(c *gin.Context) {
 
 	eps, err := h.Repos.Episodes.RSSFindRecent(c.Request.Context(), sevenDaysAgo)
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	singles, err := h.Repos.SingleEpisodes.RSSFindRecent(c.Request.Context(), sevenDaysAgo)
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 
@@ -111,7 +111,7 @@ func (h *RSS) Feed(c *gin.Context) {
 		}
 		titles, err := h.Repos.Episodes.RSSFindEpisodeTitles(c.Request.Context(), ids)
 		if err != nil {
-			serverError(c)
+			serverError(c, err, h.Config.IsDev)
 			return
 		}
 		for i := range singles {
@@ -158,7 +158,7 @@ func (h *RSS) ApiUsage(c *gin.Context) {
 		f, err := strconv.ParseFloat(ds, 64)
 		if err != nil {
 			// days 非法 → new Date(NaN).toISOString() 抛错 → catch → 500。
-			serverError(c)
+			serverError(c, err, h.Config.IsDev)
 			return
 		}
 		days = f
@@ -166,7 +166,7 @@ func (h *RSS) ApiUsage(c *gin.Context) {
 	since := time.Now().Add(-time.Duration(days * 24 * float64(time.Hour))).UTC().Format("2006-01-02")
 	usage, err := h.Repos.ApiUsage.RSSFindSince(c.Request.Context(), since)
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 

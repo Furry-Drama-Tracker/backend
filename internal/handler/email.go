@@ -183,7 +183,7 @@ func (h *Auth) RequestDeletion(c *gin.Context) {
 	_ = c.ShouldBindJSON(&req)
 	user, _ := middleware.GetUser(c)
 	if req.Password == "" {
-		c.JSON(400, gin.H{"message": "请输入密码确认注销"})
+		errors.AbortCoded(c, 400, "EML0001", "请输入密码确认注销", h.Config.IsDev)
 		return
 	}
 	res, err := h.Svc.RequestDeletion(c.Request.Context(), user, req.Password)

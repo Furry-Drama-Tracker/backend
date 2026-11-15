@@ -53,16 +53,16 @@ func (s *AuthService) Login(c *gin.Context, in LoginInput) (*LoginResult, error)
 	}
 
 	if !s.VerifyAltcha(in.Altcha, in.DevToken) {
-		return nil, errors.New(400, "验证码错误或已过期")
+		return nil, errors.NewC("AUT0041", 400, "验证码错误或已过期")
 	}
 
 	user, err := s.Repos.Users.FindByLoginIdentifierWithAuth(ctx, identifier)
 	if err != nil {
 		// 不区分"账号不存在"和"密码错误"，降低账号枚举面。
-		return nil, errors.New(400, "用户名或密码错误")
+		return nil, errors.NewC("AUT0042", 400, "用户名或密码错误")
 	}
 	if repository.IsLocked(user) {
-		return nil, errors.New(400, "用户名或密码错误")
+		return nil, errors.NewC("AUT0043", 400, "用户名或密码错误")
 	}
 
 	// 注销宽限已过 → 物理删除全部关联数据后仍返回统一错误（不泄露）。
@@ -70,14 +70,14 @@ func (s *AuthService) Login(c *gin.Context, in LoginInput) (*LoginResult, error)
 		deleteAt := user.DeletionRequestedAt.Add(DeletionGraceDays * 24 * time.Hour)
 		if time.Now().After(deleteAt) {
 			if err := s.purgeUser(ctx, user.ID); err == nil {
-				return nil, errors.New(400, "用户名或密码错误")
+				return nil, errors.NewC("AUT0044", 400, "用户名或密码错误")
 			}
 		}
 	}
 
 	if !auth.Compare(user.Password, in.Password) {
 		_ = s.Repos.Users.IncLoginAttempts(ctx, user.ID)
-		return nil, errors.New(400, "用户名或密码错误")
+		return nil, errors.NewC("AUT0045", 400, "用户名或密码错误")
 	}
 	_ = s.Repos.Users.ResetLoginAttempts(ctx, user.ID)
 
@@ -107,7 +107,7 @@ func (s *AuthService) Login(c *gin.Context, in LoginInput) (*LoginResult, error)
 	if user.TwoFactorEnabled {
 		challenge, err := s.Signer.Sign(user.ID.Hex(), "2fa-challenge", 5*time.Minute, nil)
 		if err != nil {
-			return nil, errors.New(500, "服务器错误")
+			return nil, errors.NewC("AUT0046", 500, "服务器错误")
 		}
 		return &LoginResult{
 			Email:              user.Email,
@@ -136,7 +136,7 @@ func (s *AuthService) Login(c *gin.Context, in LoginInput) (*LoginResult, error)
 	_ = s.Repos.Users.UpdateDeviceInfoAndLogin(ctx, user.ID, di, now, ip, region)
 
 	if err := s.IssueSession(c, user, di, ip, "LOGIN"); err != nil {
-		return nil, errors.New(500, "服务器错误")
+		return nil, errors.NewC("AUT0047", 500, "服务器错误")
 	}
 	// 未识别设备 → 发通知邮件（受 emailNotificationPrefs.newDeviceLogin 控制）。
 	// 已识别设备不再重复提醒。通知是"事后提醒"，不再拦截登录。

@@ -7,6 +7,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 
+	"github.com/Furry-Drama-Tracker/backend/internal/errors"
 	"github.com/Furry-Drama-Tracker/backend/internal/middleware"
 	"github.com/Furry-Drama-Tracker/backend/internal/model"
 	"github.com/Furry-Drama-Tracker/backend/internal/repository"
@@ -25,21 +26,22 @@ import (
 type EpisodeTrash struct {
 	Repos *repository.Repos
 	AuthM *middleware.Auth
+	IsDev bool
 }
 
 // NewEpisodeTrash 构造回收站 handler 容器。
-func NewEpisodeTrash(repos *repository.Repos, amw *middleware.Auth) *EpisodeTrash {
-	return &EpisodeTrash{Repos: repos, AuthM: amw}
+func NewEpisodeTrash(repos *repository.Repos, amw *middleware.Auth, isDev bool) *EpisodeTrash {
+	return &EpisodeTrash{Repos: repos, AuthM: amw, IsDev: isDev}
 }
 
 // Register 挂载 /api/episode-trash 全部端点（仅 admin/superadmin，creator 403）。
 func (h *EpisodeTrash) Register(g *gin.RouterGroup) {
 	protect := h.AuthM.Protect(middleware.RoleCreator, middleware.RoleAdmin, middleware.RoleSuperAdmin)
 	reqEmail := h.AuthM.RequireEmailChanged()
-	g.GET("", protect, adminOnlyReview, h.List)
-	g.GET("/:id/versions", protect, adminOnlyReview, h.Versions)
-	g.PUT("/:id/restore", protect, adminOnlyReview, reqEmail, h.Restore)
-	g.DELETE("/:id", protect, adminOnlyReview, reqEmail, h.Purge)
+	g.GET("", protect, adminOnlyReview(h.IsDev), h.List)
+	g.GET("/:id/versions", protect, adminOnlyReview(h.IsDev), h.Versions)
+	g.PUT("/:id/restore", protect, adminOnlyReview(h.IsDev), reqEmail, h.Restore)
+	g.DELETE("/:id", protect, adminOnlyReview(h.IsDev), reqEmail, h.Purge)
 }
 
 // trashPage 解析回收站分页参数（page 默认 1；limit 默认 20，上限 100）。
@@ -121,12 +123,12 @@ func (h *EpisodeTrash) List(c *gin.Context) {
 	ctx := c.Request.Context()
 	total, err := h.Repos.EpisodeTrash.Count(ctx, bson.M{})
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.IsDev)
 		return
 	}
 	items, err := h.Repos.EpisodeTrash.FindList(ctx, bson.M{}, int64((page-1)*limit), int64(limit))
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.IsDev)
 		return
 	}
 	// 批量取操作人用户引用。
@@ -157,20 +159,20 @@ func (h *EpisodeTrash) List(c *gin.Context) {
 func (h *EpisodeTrash) Versions(c *gin.Context) {
 	oid, err := primitive.ObjectIDFromHex(c.Param("id"))
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.IsDev)
 		return
 	}
 	if _, err := h.Repos.EpisodeTrash.FindByID(c.Request.Context(), oid); err != nil {
 		if repository.IsNotFound(err) {
-			c.JSON(404, gin.H{"message": "Episode not found"})
+			errors.AbortCoded(c, 404, "TRS0001", "Episode not found", h.IsDev)
 			return
 		}
-		serverError(c)
+		serverError(c, err, h.IsDev)
 		return
 	}
 	versions, err := h.Repos.EpisodeVersions.FindAllByEpisode(c.Request.Context(), oid)
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.IsDev)
 		return
 	}
 	changedByIDs := make([]primitive.ObjectID, 0, len(versions))
@@ -216,16 +218,16 @@ func (h *EpisodeTrash) Versions(c *gin.Context) {
 func (h *EpisodeTrash) Restore(c *gin.Context) {
 	oid, err := primitive.ObjectIDFromHex(c.Param("id"))
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.IsDev)
 		return
 	}
 	episode, err := h.Repos.EpisodeTrash.Restore(c.Request.Context(), oid)
 	if err != nil {
 		if repository.IsNotFound(err) {
-			c.JSON(404, gin.H{"message": "Episode not found"})
+			errors.AbortCoded(c, 404, "TRS0002", "Episode not found", h.IsDev)
 			return
 		}
-		serverError(c)
+		serverError(c, err, h.IsDev)
 		return
 	}
 	middleware.EpisodeCache.Delete("episode_" + oid.Hex())
@@ -244,16 +246,16 @@ func (h *EpisodeTrash) Restore(c *gin.Context) {
 func (h *EpisodeTrash) Purge(c *gin.Context) {
 	oid, err := primitive.ObjectIDFromHex(c.Param("id"))
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.IsDev)
 		return
 	}
 	ok, err := h.Repos.EpisodeTrash.Purge(c.Request.Context(), oid)
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.IsDev)
 		return
 	}
 	if !ok {
-		c.JSON(404, gin.H{"message": "Episode not found"})
+		errors.AbortCoded(c, 404, "TRS0003", "Episode not found", h.IsDev)
 		return
 	}
 	middleware.EpisodeCache.Delete("episode_" + oid.Hex())

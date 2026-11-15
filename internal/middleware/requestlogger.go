@@ -54,6 +54,7 @@ func SlowLogger(log *slog.Logger, isDev bool) gin.HandlerFunc {
 					"path", path,
 					"status", status,
 					"duration_ms", duration.Milliseconds(),
+					"ref", refFromCtx(c),
 				}
 				if duration > devSlowThreshold {
 					attrs = append(attrs, "level", "SLOW")
@@ -66,6 +67,7 @@ func SlowLogger(log *slog.Logger, isDev bool) gin.HandlerFunc {
 				"path", path,
 				"status", status,
 				"duration_ms", duration.Milliseconds(),
+				"ref", refFromCtx(c),
 			)
 		}
 	}
@@ -105,6 +107,7 @@ func RequestLogger(log *slog.Logger) gin.HandlerFunc {
 			"duration_ms", duration.Milliseconds(),
 			"ip", c.ClientIP(),
 			"userId", userIDFromContext(c),
+			"ref", refFromCtx(c),
 		)
 	}
 }

@@ -25,7 +25,7 @@ func CORS(allowOrigins []string) gin.HandlerFunc {
 			return
 		}
 		if !normalized[origin] {
-			c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"message": "CORS policy denied"})
+			c.AbortWithStatusJSON(http.StatusForbidden, codedBody(c, "COR0001", gin.H{"message": "CORS policy denied"}))
 			return
 		}
 		c.Header("Access-Control-Allow-Origin", origin)

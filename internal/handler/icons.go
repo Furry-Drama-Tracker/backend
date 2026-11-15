@@ -11,6 +11,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 
 	"github.com/Furry-Drama-Tracker/backend/internal/config"
+	"github.com/Furry-Drama-Tracker/backend/internal/errors"
 	"github.com/Furry-Drama-Tracker/backend/internal/middleware"
 	"github.com/Furry-Drama-Tracker/backend/internal/model"
 	"github.com/Furry-Drama-Tracker/backend/internal/ratelimit"
@@ -128,7 +129,7 @@ func iconNameFromFilename(filename string) string {
 func (h *Icons) List(c *gin.Context) {
 	list, err := h.Repos.Icons.FindEnabled(c.Request.Context())
 	if err != nil {
-		c.JSON(500, gin.H{"message": "获取图标列表失败"})
+		errors.Abort500C(c, "ICN0001", "获取图标列表失败", err, h.Config.IsDev)
 		return
 	}
 	out := make([]gin.H, 0, len(list))
@@ -153,7 +154,7 @@ func (h *Icons) List(c *gin.Context) {
 func (h *Icons) AdminAll(c *gin.Context) {
 	list, err := h.Repos.Icons.FindAll(c.Request.Context())
 	if err != nil {
-		c.JSON(500, gin.H{"message": "获取图标列表失败"})
+		errors.Abort500C(c, "ICN0002", "获取图标列表失败", err, h.Config.IsDev)
 		return
 	}
 	out := make([]gin.H, 0, len(list))
@@ -171,7 +172,7 @@ func (h *Icons) AdminAll(c *gin.Context) {
 func (h *Icons) Upload(c *gin.Context) {
 	form, err := c.MultipartForm()
 	if err != nil {
-		c.JSON(400, gin.H{"message": "请选择要上传的 SVG 图标"})
+		errors.AbortCoded(c, 400, "ICN0003", "请选择要上传的 SVG 图标", h.Config.IsDev)
 		return
 	}
 	files := form.File["files"]
@@ -179,11 +180,11 @@ func (h *Icons) Upload(c *gin.Context) {
 		files = form.File["file"]
 	}
 	if len(files) == 0 {
-		c.JSON(400, gin.H{"message": "请选择要上传的 SVG 图标"})
+		errors.AbortCoded(c, 400, "ICN0004", "请选择要上传的 SVG 图标", h.Config.IsDev)
 		return
 	}
 	if len(files) > 50 {
-		c.JSON(400, gin.H{"message": "单次最多上传 50 个图标"})
+		errors.AbortCoded(c, 400, "ICN0005", "单次最多上传 50 个图标", h.Config.IsDev)
 		return
 	}
 	category := strings.TrimSpace(c.PostForm("category"))
@@ -191,7 +192,7 @@ func (h *Icons) Upload(c *gin.Context) {
 		category = "general"
 	}
 	if len([]rune(category)) > 30 {
-		c.JSON(400, gin.H{"message": "分类名不能超过 30 个字符"})
+		errors.AbortCoded(c, 400, "ICN0006", "分类名不能超过 30 个字符", h.Config.IsDev)
 		return
 	}
 	user, _ := middleware.GetUser(c)
@@ -234,7 +235,7 @@ func (h *Icons) Upload(c *gin.Context) {
 func (h *Icons) Update(c *gin.Context) {
 	oid, err := primitive.ObjectIDFromHex(c.Param("id"))
 	if err != nil {
-		c.JSON(400, gin.H{"message": "图标 ID 不合法"})
+		errors.AbortCoded(c, 400, "ICN0007", "图标 ID 不合法", h.Config.IsDev)
 		return
 	}
 	body := cmsReadBody(c)
@@ -242,7 +243,7 @@ func (h *Icons) Update(c *gin.Context) {
 	if v, ok := body["name"]; ok {
 		name := strings.TrimSpace(asString(v))
 		if name == "" || len([]rune(name)) > 50 {
-			c.JSON(400, gin.H{"message": "图标名称不能为空且不超过 50 个字符"})
+			errors.AbortCoded(c, 400, "ICN0008", "图标名称不能为空且不超过 50 个字符", h.Config.IsDev)
 			return
 		}
 		set["name"] = name
@@ -253,7 +254,7 @@ func (h *Icons) Update(c *gin.Context) {
 			category = "general"
 		}
 		if len([]rune(category)) > 30 {
-			c.JSON(400, gin.H{"message": "分类名不能超过 30 个字符"})
+			errors.AbortCoded(c, 400, "ICN0009", "分类名不能超过 30 个字符", h.Config.IsDev)
 			return
 		}
 		set["category"] = category
@@ -261,7 +262,7 @@ func (h *Icons) Update(c *gin.Context) {
 	if v, ok := body["description"]; ok {
 		desc := strings.TrimSpace(asString(v))
 		if len([]rune(desc)) > 200 {
-			c.JSON(400, gin.H{"message": "描述不能超过 200 个字符"})
+			errors.AbortCoded(c, 400, "ICN0010", "描述不能超过 200 个字符", h.Config.IsDev)
 			return
 		}
 		set["description"] = desc
@@ -273,7 +274,7 @@ func (h *Icons) Update(c *gin.Context) {
 		rawList, _ := v.([]any)
 		mappings, errMsg := sanitizeMappings(rawList)
 		if errMsg != "" {
-			c.JSON(400, gin.H{"message": errMsg})
+			errors.AbortCoded(c, 400, "ICN0011", errMsg, h.Config.IsDev)
 			return
 		}
 		set["mappings"] = mappings
@@ -281,10 +282,10 @@ func (h *Icons) Update(c *gin.Context) {
 	updated, err := h.Repos.Icons.FindOneAndUpdate(c.Request.Context(), oid, bson.M{"$set": set})
 	if err != nil {
 		if repository.IsNotFound(err) {
-			c.JSON(404, gin.H{"message": "图标不存在"})
+			errors.AbortCoded(c, 404, "ICN0012", "图标不存在", h.Config.IsDev)
 			return
 		}
-		c.JSON(500, gin.H{"message": "更新图标失败"})
+		errors.Abort500C(c, "ICN0013", "更新图标失败", err, h.Config.IsDev)
 		return
 	}
 	c.JSON(200, iconJSON(updated))
@@ -302,16 +303,16 @@ func (h *Icons) Update(c *gin.Context) {
 func (h *Icons) Delete(c *gin.Context) {
 	oid, err := primitive.ObjectIDFromHex(c.Param("id"))
 	if err != nil {
-		c.JSON(400, gin.H{"message": "图标 ID 不合法"})
+		errors.AbortCoded(c, 400, "ICN0014", "图标 ID 不合法", h.Config.IsDev)
 		return
 	}
 	icon, err := h.Repos.Icons.FindOneAndDelete(c.Request.Context(), oid)
 	if err != nil {
 		if repository.IsNotFound(err) {
-			c.JSON(404, gin.H{"message": "图标不存在"})
+			errors.AbortCoded(c, 404, "ICN0015", "图标不存在", h.Config.IsDev)
 			return
 		}
-		c.JSON(500, gin.H{"message": "删除图标失败"})
+		errors.Abort500C(c, "ICN0016", "删除图标失败", err, h.Config.IsDev)
 		return
 	}
 	_ = upload.RemoveIconFile(icon.URL)

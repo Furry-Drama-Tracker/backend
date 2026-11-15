@@ -67,11 +67,11 @@ func (h *CreatorProfiles) MyProfile(c *gin.Context) {
 			SocialLinks: map[string]string{},
 		}
 		if err := h.Repos.CreatorProfiles.Create(ctx, profile); err != nil {
-			errors.AbortWithAppError(c, errors.New(500, "Server error"), h.Config.IsDev)
+			errors.Abort500C(c, "CPD0001", "Server error", err, h.Config.IsDev)
 			return
 		}
 	} else if err != nil {
-		errors.AbortWithAppError(c, errors.New(500, "Server error"), h.Config.IsDev)
+		errors.Abort500C(c, "CPD0002", "Server error", err, h.Config.IsDev)
 		return
 	}
 	c.JSON(200, creatorProfileJSON(profile))
@@ -95,17 +95,17 @@ func (h *CreatorProfiles) UpdateMyProfile(c *gin.Context) {
 	}
 	avatar := strings.TrimSpace(asString(body["avatar"]))
 	if avatar != "" && !isSafeAssetURL(avatar) {
-		c.JSON(400, gin.H{"message": "头像地址必须为 /uploads/ 或 http(s) 地址"})
+		errors.AbortCoded(c, 400, "CPD0003", "头像地址必须为 /uploads/ 或 http(s) 地址", h.Config.IsDev)
 		return
 	}
 	socialLinks, msg := sanitizeSocialLinks(body["socialLinks"])
 	if msg != "" {
-		c.JSON(400, gin.H{"message": msg})
+		errors.AbortCoded(c, 400, "CPD0004", msg, h.Config.IsDev)
 		return
 	}
 	qqGroupLink := strings.TrimSpace(orDefaultString(body["qqGroupLink"], ""))
 	if qqGroupLink != "" && !isHTTPURL(qqGroupLink) {
-		c.JSON(400, gin.H{"message": "QQ群链接必须为 http/https 地址"})
+		errors.AbortCoded(c, 400, "CPD0005", "QQ群链接必须为 http/https 地址", h.Config.IsDev)
 		return
 	}
 	pending := primitive.M{
@@ -119,14 +119,14 @@ func (h *CreatorProfiles) UpdateMyProfile(c *gin.Context) {
 	profile, err := h.Repos.CreatorProfiles.CreatorProfilesUpsertPending(ctx, user.ID,
 		pending, time.Now().UTC().Truncate(time.Millisecond))
 	if err != nil {
-		errors.AbortWithAppError(c, errors.New(500, "Server error"), h.Config.IsDev)
+		errors.Abort500C(c, "CPD0006", "Server error", err, h.Config.IsDev)
 		return
 	}
 	// 若是新创建的文档缺少正式 displayName，先用 pendingChanges 兜底初始化。
 	if profile.DisplayName == "" {
 		profile.DisplayName = orDefaultString(pending["displayName"], "创作者")
 		if err := h.Repos.CreatorProfiles.CreatorProfilesSave(ctx, profile); err != nil {
-			errors.AbortWithAppError(c, errors.New(500, "Server error"), h.Config.IsDev)
+			errors.Abort500C(c, "CPD0007", "Server error", err, h.Config.IsDev)
 			return
 		}
 	}
@@ -146,22 +146,22 @@ func (h *CreatorProfiles) PublicProfile(c *gin.Context) {
 	oid, err := primitive.ObjectIDFromHex(c.Param("id"))
 	if err != nil {
 		// 固定契约：非法 ID → 500 Server error。
-		errors.AbortWithAppError(c, errors.New(500, "Server error"), h.Config.IsDev)
+		errors.Abort500C(c, "CPD0008", "Server error", err, h.Config.IsDev)
 		return
 	}
 	ctx := c.Request.Context()
 	profile, err := h.Repos.CreatorProfiles.CreatorProfilesFindByID(ctx, oid)
 	if repository.IsNotFound(err) {
-		c.JSON(404, gin.H{"message": "Profile not found"})
+		errors.AbortCoded(c, 404, "CPD0009", "Profile not found", h.Config.IsDev)
 		return
 	}
 	if err != nil {
-		errors.AbortWithAppError(c, errors.New(500, "Server error"), h.Config.IsDev)
+		errors.Abort500C(c, "CPD0010", "Server error", err, h.Config.IsDev)
 		return
 	}
 	episodes, err := h.creatorEpisodes(ctx, profile.CreatorID)
 	if err != nil {
-		errors.AbortWithAppError(c, errors.New(500, "Server error"), h.Config.IsDev)
+		errors.Abort500C(c, "CPD0011", "Server error", err, h.Config.IsDev)
 		return
 	}
 	c.JSON(200, gin.H{"profile": publicCreatorProfileJSON(profile), "episodes": episodes})
@@ -179,22 +179,22 @@ func (h *CreatorProfiles) ByCreator(c *gin.Context) {
 	creatorID, err := primitive.ObjectIDFromHex(c.Param("creatorId"))
 	if err != nil {
 		// 固定契约：creatorId 非法 → 查询空结果 → 500 Server error。
-		errors.AbortWithAppError(c, errors.New(500, "Server error"), h.Config.IsDev)
+		errors.Abort500C(c, "CPD0012", "Server error", err, h.Config.IsDev)
 		return
 	}
 	ctx := c.Request.Context()
 	profile, err := h.Repos.CreatorProfiles.FindByCreator(ctx, creatorID)
 	if repository.IsNotFound(err) {
-		c.JSON(404, gin.H{"message": "Profile not found"})
+		errors.AbortCoded(c, 404, "CPD0013", "Profile not found", h.Config.IsDev)
 		return
 	}
 	if err != nil {
-		errors.AbortWithAppError(c, errors.New(500, "Server error"), h.Config.IsDev)
+		errors.Abort500C(c, "CPD0014", "Server error", err, h.Config.IsDev)
 		return
 	}
 	episodes, err := h.creatorEpisodes(ctx, profile.CreatorID)
 	if err != nil {
-		errors.AbortWithAppError(c, errors.New(500, "Server error"), h.Config.IsDev)
+		errors.Abort500C(c, "CPD0015", "Server error", err, h.Config.IsDev)
 		return
 	}
 	c.JSON(200, gin.H{"profile": publicCreatorProfileJSON(profile), "episodes": episodes})
@@ -235,7 +235,7 @@ func (h *CreatorProfiles) creatorEpisodes(ctx context.Context, creatorID primiti
 }
 
 // creatorProfileJSON 组装创作者主页完整文档（创作者视角，含待审核字段）。
-// 缺失字段回填默认值（avatar/qqGroupLink ''、
+// 缺失字段回填默认值（avatar/qqGroupLink ”、
 // reviewStatus 'approved'、pendingChanges 嵌套默认对象、__v 0），与既有集合数据形态一致。
 func creatorProfileJSON(p *model.CreatorProfile) gin.H {
 	social := p.SocialLinks

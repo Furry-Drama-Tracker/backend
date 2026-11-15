@@ -31,17 +31,17 @@ type RefreshResult struct {
 // 返回 *errors.AppError（带 messageKey），handler 依状态码渲染。
 func (s *AuthService) VerifyRefreshToken(ctx context.Context, refreshToken string) (*RefreshResult, error) {
 	if refreshToken == "" {
-		return nil, errors.NewKey(401, "No refresh token", "auth.noRefreshToken")
+		return nil, errors.NewKeyC("AUT0075", 401, "No refresh token", "auth.noRefreshToken")
 	}
 	claims, err := s.Signer.Verify(refreshToken)
 	if err != nil {
 		if err == auth.ErrTokenExpired {
-			return nil, errors.NewKey(401, "Refresh token expired", "auth.refreshTokenExpired")
+			return nil, errors.NewKeyC("AUT0076", 401, "Refresh token expired", "auth.refreshTokenExpired")
 		}
-		return nil, errors.NewKey(401, "Invalid refresh token", "auth.invalidToken")
+		return nil, errors.NewKeyC("AUT0077", 401, "Invalid refresh token", "auth.invalidToken")
 	}
 	if claims.Purpose != "refresh" {
-		return nil, errors.NewKey(401, "Invalid token type", "auth.invalidToken")
+		return nil, errors.NewKeyC("AUT0078", 401, "Invalid token type", "auth.invalidToken")
 	}
 
 	hash := auth.HashToken(refreshToken)
@@ -51,12 +51,12 @@ func (s *AuthService) VerifyRefreshToken(ctx context.Context, refreshToken strin
 		if repository.IsNotFound(err) {
 			return s.handleRefreshMiss(ctx, hash, claims.ID)
 		}
-		return nil, errors.NewKey(500, "服务器错误", "")
+		return nil, errors.NewKeyC("AUT0079", 500, "服务器错误", "")
 	}
 
 	user, err := s.Repos.Users.FindByID(ctx, session.UserID)
 	if err != nil {
-		return nil, errors.NewKey(401, "User not found", "auth.userNotFound")
+		return nil, errors.NewKeyC("AUT0080", 401, "User not found", "auth.userNotFound")
 	}
 	return &RefreshResult{User: user, Session: session}, nil
 }
@@ -74,7 +74,7 @@ func (s *AuthService) handleRefreshMiss(ctx context.Context, hash, claimsID stri
 				Reason: model.RevokeRotated,
 				Detail: "old token reused within grace window",
 			})
-			return nil, errors.NewKey(409, "Concurrent refresh", "auth.concurrentRefresh")
+			return nil, errors.NewKeyC("AUT0081", 409, "Concurrent refresh", "auth.concurrentRefresh")
 		}
 	}
 	// 真实重用：吊销该用户全部 active session。
@@ -93,7 +93,7 @@ func (s *AuthService) handleRefreshMiss(ctx context.Context, hash, claimsID stri
 			})
 		}
 	}
-	return nil, errors.NewKey(401, "Refresh token reuse detected", "auth.refreshTokenReuse")
+	return nil, errors.NewKeyC("AUT0082", 401, "Refresh token reuse detected", "auth.refreshTokenReuse")
 }
 
 // RotateRefresh 轮换双 token：旧 session 已作废（VerifyRefreshToken 已做），

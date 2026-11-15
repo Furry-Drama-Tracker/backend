@@ -177,11 +177,11 @@ func episodeIDFromBody(body map[string]any) (primitive.ObjectID, bool, error) {
 	}
 	s, ok := raw.(string)
 	if !ok || s == "" {
-		return primitive.NilObjectID, false, errors.New(500, "invalid episodeId")
+		return primitive.NilObjectID, false, errors.NewC("HIS0001", 500, "invalid episodeId")
 	}
 	oid, err := primitive.ObjectIDFromHex(s)
 	if err != nil {
-		return primitive.NilObjectID, false, errors.New(500, "invalid episodeId")
+		return primitive.NilObjectID, false, errors.NewC("HIS0002", 500, "invalid episodeId")
 	}
 	return oid, true, nil
 }
@@ -255,36 +255,36 @@ func (h *Histories) Record(c *gin.Context) {
 	body := middleware.GetBody(c)
 	if body == nil {
 		// 非 JSON/urlencoded 请求体：请求体视为 undefined，解构失败 → 500（固定契约）。
-		errors.AbortWithAppError(c, errors.New(500, "Server error"), h.Config.IsDev)
+		errors.Abort500C(c, "HIS0003", "Server error", nil, h.Config.IsDev)
 		return
 	}
 	epNum, ok := jsParseInt(body["episodeNumber"])
 	if !ok {
-		errors.AbortWithAppError(c, errors.New(400, "Invalid episode number"), h.Config.IsDev)
+		errors.AbortCoded(c, 400, "HIS0004", "Invalid episode number", h.Config.IsDev)
 		return
 	}
 	// 记录端点无 !episodeId 校验：缺失/null → 按空 ID 查询 → 404；非法 hex → 500 Server error（固定契约）。
 	episodeID, present, err := episodeIDFromBody(body)
 	if err != nil {
-		errors.AbortWithAppError(c, errors.New(500, "Server error"), h.Config.IsDev)
+		errors.Abort500C(c, "HIS0005", "Server error", err, h.Config.IsDev)
 		return
 	}
 	if !present {
-		errors.AbortWithAppError(c, errors.New(404, "Episode not found"), h.Config.IsDev)
+		errors.AbortCoded(c, 404, "HIS0006", "Episode not found", h.Config.IsDev)
 		return
 	}
 	if _, err := h.Repos.Episodes.FindBasicByID(c.Request.Context(), episodeID); err != nil {
 		if repository.IsNotFound(err) {
-			errors.AbortWithAppError(c, errors.New(404, "Episode not found"), h.Config.IsDev)
+			errors.AbortCoded(c, 404, "HIS0007", "Episode not found", h.Config.IsDev)
 			return
 		}
-		errors.AbortWithAppError(c, errors.New(500, "Server error"), h.Config.IsDev)
+		errors.Abort500C(c, "HIS0008", "Server error", err, h.Config.IsDev)
 		return
 	}
 	user, _ := middleware.GetUser(c)
 	hist, ver, err := h.Repos.Histories.HistoryUpsertRecord(c.Request.Context(), user.ID, episodeID, epNum, time.Now())
 	if err != nil {
-		errors.AbortWithAppError(c, errors.New(500, "Server error"), h.Config.IsDev)
+		errors.Abort500C(c, "HIS0009", "Server error", err, h.Config.IsDev)
 		return
 	}
 	c.JSON(200, historyWriteJSON(hist, ver))
@@ -301,12 +301,12 @@ func (h *Histories) ContinueWatching(c *gin.Context) {
 	user, _ := middleware.GetUser(c)
 	rows, err := h.Repos.Histories.HistoryFindContinueWatching(c.Request.Context(), user.ID, 10)
 	if err != nil {
-		errors.AbortWithAppError(c, errors.New(500, "Server error"), h.Config.IsDev)
+		errors.Abort500C(c, "HIS0010", "Server error", err, h.Config.IsDev)
 		return
 	}
 	eps, err := h.historyEpisodeMap(c, rows)
 	if err != nil {
-		errors.AbortWithAppError(c, errors.New(500, "Server error"), h.Config.IsDev)
+		errors.Abort500C(c, "HIS0011", "Server error", err, h.Config.IsDev)
 		return
 	}
 	out := make([]gin.H, 0, len(rows))
@@ -361,7 +361,7 @@ func (h *Histories) List(c *gin.Context) {
 
 	total, err := h.Repos.Histories.HistoryCountByUser(c.Request.Context(), user.ID)
 	if err != nil {
-		errors.AbortWithAppError(c, errors.New(500, "Server error"), h.Config.IsDev)
+		errors.Abort500C(c, "HIS0012", "Server error", err, h.Config.IsDev)
 		return
 	}
 	var skip int64
@@ -374,12 +374,12 @@ func (h *Histories) List(c *gin.Context) {
 	}
 	rows, err := h.Repos.Histories.HistoryFindPage(c.Request.Context(), user.ID, skip, limit)
 	if err != nil {
-		errors.AbortWithAppError(c, errors.New(500, "Server error"), h.Config.IsDev)
+		errors.Abort500C(c, "HIS0013", "Server error", err, h.Config.IsDev)
 		return
 	}
 	eps, err := h.historyEpisodeMap(c, rows)
 	if err != nil {
-		errors.AbortWithAppError(c, errors.New(500, "Server error"), h.Config.IsDev)
+		errors.Abort500C(c, "HIS0014", "Server error", err, h.Config.IsDev)
 		return
 	}
 	out := make([]gin.H, 0, len(rows))
@@ -424,13 +424,13 @@ func (h *Histories) Check(c *gin.Context) {
 	user, _ := middleware.GetUser(c)
 	episodeID, err := primitive.ObjectIDFromHex(c.Param("episodeId"))
 	if err != nil {
-		errors.AbortWithAppError(c, errors.New(500, "Server error"), h.Config.IsDev)
+		errors.Abort500C(c, "HIS0015", "Server error", err, h.Config.IsDev)
 		return
 	}
 	row, err := h.Repos.Histories.HistoryFindCheck(c.Request.Context(), user.ID, episodeID)
 	if err != nil {
 		if !repository.IsNotFound(err) {
-			errors.AbortWithAppError(c, errors.New(500, "Server error"), h.Config.IsDev)
+			errors.Abort500C(c, "HIS0016", "Server error", err, h.Config.IsDev)
 			return
 		}
 		c.JSON(200, gin.H{"watchedEpisodes": []int{}, "lastWatchedEpisodeNumber": nil, "lastWatched": nil})
@@ -453,7 +453,7 @@ func (h *Histories) Check(c *gin.Context) {
 func (h *Histories) Clear(c *gin.Context) {
 	user, _ := middleware.GetUser(c)
 	if err := h.Repos.Histories.DeleteByUser(c.Request.Context(), user.ID); err != nil {
-		errors.AbortWithAppError(c, errors.New(500, "Server error"), h.Config.IsDev)
+		errors.Abort500C(c, "HIS0017", "Server error", err, h.Config.IsDev)
 		return
 	}
 	c.JSON(200, gin.H{"message": "All history cleared"})
@@ -471,11 +471,11 @@ func (h *Histories) DeleteOne(c *gin.Context) {
 	user, _ := middleware.GetUser(c)
 	episodeID, err := primitive.ObjectIDFromHex(c.Param("episodeId"))
 	if err != nil {
-		errors.AbortWithAppError(c, errors.New(500, "Server error"), h.Config.IsDev)
+		errors.Abort500C(c, "HIS0018", "Server error", err, h.Config.IsDev)
 		return
 	}
 	if err := h.Repos.Histories.HistoryDeleteOneByUserEpisode(c.Request.Context(), user.ID, episodeID); err != nil {
-		errors.AbortWithAppError(c, errors.New(500, "Server error"), h.Config.IsDev)
+		errors.Abort500C(c, "HIS0019", "Server error", err, h.Config.IsDev)
 		return
 	}
 	c.JSON(200, gin.H{"message": "History deleted"})
@@ -498,18 +498,18 @@ func (h *Histories) DeleteOne(c *gin.Context) {
 func (h *Ratings) Submit(c *gin.Context) {
 	body := middleware.GetBody(c)
 	if body == nil {
-		errors.AbortWithAppError(c, errors.New(500, "Server error"), h.Config.IsDev)
+		errors.Abort500C(c, "HIS0020", "Server error", nil, h.Config.IsDev)
 		return
 	}
 	scoreRaw := body["score"]
 	scoreNum, ok := jsToNumber(scoreRaw)
 	if jsFalsy(body["episodeId"]) || jsFalsy(scoreRaw) || !ok || scoreNum < 1 || scoreNum > 5 {
-		errors.AbortWithAppError(c, errors.New(400, "Invalid rating data"), h.Config.IsDev)
+		errors.AbortCoded(c, 400, "HIS0021", "Invalid rating data", h.Config.IsDev)
 		return
 	}
 	episodeID, _, err := episodeIDFromBody(body)
 	if err != nil {
-		errors.AbortWithAppError(c, errors.New(500, "Server error"), h.Config.IsDev)
+		errors.Abort500C(c, "HIS0022", "Server error", err, h.Config.IsDev)
 		return
 	}
 	user, _ := middleware.GetUser(c)
@@ -517,30 +517,30 @@ func (h *Ratings) Submit(c *gin.Context) {
 	episode, err := h.Repos.Episodes.FindByID(c.Request.Context(), episodeID)
 	if err != nil {
 		if repository.IsNotFound(err) {
-			errors.AbortWithAppError(c, errors.New(404, "Episode not found"), h.Config.IsDev)
+			errors.AbortCoded(c, 404, "HIS0023", "Episode not found", h.Config.IsDev)
 			return
 		}
-		errors.AbortWithAppError(c, errors.New(500, "Server error"), h.Config.IsDev)
+		errors.Abort500C(c, "HIS0024", "Server error", err, h.Config.IsDev)
 		return
 	}
 	// 仅允许对已审核通过的剧集评分（reviewStatus 缺失视为 approved，与既有集合默认值一致）。
 	if episode.ReviewStatus != "" && episode.ReviewStatus != "approved" {
-		errors.AbortWithAppError(c, errors.New(403, "该剧集暂不可评分"), h.Config.IsDev)
+		errors.AbortCoded(c, 403, "HIS0025", "该剧集暂不可评分", h.Config.IsDev)
 		return
 	}
 
 	if err := h.Repos.Ratings.RatingUpsertScore(c.Request.Context(), user.ID, episodeID, scoreNum, time.Now()); err != nil {
-		errors.AbortWithAppError(c, errors.New(500, "Server error"), h.Config.IsDev)
+		errors.Abort500C(c, "HIS0026", "Server error", err, h.Config.IsDev)
 		return
 	}
 	avg, count, err := h.Repos.Ratings.RatingAggregateStats(c.Request.Context(), episodeID)
 	if err != nil {
-		errors.AbortWithAppError(c, errors.New(500, "Server error"), h.Config.IsDev)
+		errors.Abort500C(c, "HIS0027", "Server error", err, h.Config.IsDev)
 		return
 	}
 	avgRounded := math.Round(avg*10) / 10 // 等价 Math.round(avg*10)/10（1 位小数）
 	if err := h.Repos.Episodes.RatingSetEpisodeStats(c.Request.Context(), episodeID, avgRounded, count); err != nil {
-		errors.AbortWithAppError(c, errors.New(500, "Server error"), h.Config.IsDev)
+		errors.Abort500C(c, "HIS0028", "Server error", err, h.Config.IsDev)
 		return
 	}
 	// 失效剧集缓存：episode_<id> 单键 + episodes_ 前缀。
@@ -564,29 +564,29 @@ func (h *Ratings) Remove(c *gin.Context) {
 	user, _ := middleware.GetUser(c)
 	episodeID, err := primitive.ObjectIDFromHex(c.Param("episodeId"))
 	if err != nil {
-		errors.AbortWithAppError(c, errors.New(500, "Server error"), h.Config.IsDev)
+		errors.Abort500C(c, "HIS0029", "Server error", err, h.Config.IsDev)
 		return
 	}
 	if _, err := h.Repos.Ratings.RatingFindScore(c.Request.Context(), user.ID, episodeID); err != nil {
 		if repository.IsNotFound(err) {
-			errors.AbortWithAppError(c, errors.New(404, "Rating not found"), h.Config.IsDev)
+			errors.AbortCoded(c, 404, "HIS0030", "Rating not found", h.Config.IsDev)
 			return
 		}
-		errors.AbortWithAppError(c, errors.New(500, "Server error"), h.Config.IsDev)
+		errors.Abort500C(c, "HIS0031", "Server error", err, h.Config.IsDev)
 		return
 	}
 	if err := h.Repos.Ratings.RatingDeleteByUserEpisode(c.Request.Context(), user.ID, episodeID); err != nil {
-		errors.AbortWithAppError(c, errors.New(500, "Server error"), h.Config.IsDev)
+		errors.Abort500C(c, "HIS0032", "Server error", err, h.Config.IsDev)
 		return
 	}
 	avg, count, err := h.Repos.Ratings.RatingAggregateStats(c.Request.Context(), episodeID)
 	if err != nil {
-		errors.AbortWithAppError(c, errors.New(500, "Server error"), h.Config.IsDev)
+		errors.Abort500C(c, "HIS0033", "Server error", err, h.Config.IsDev)
 		return
 	}
 	avgRounded := math.Round(avg*10) / 10
 	if err := h.Repos.Episodes.RatingSetEpisodeStats(c.Request.Context(), episodeID, avgRounded, count); err != nil {
-		errors.AbortWithAppError(c, errors.New(500, "Server error"), h.Config.IsDev)
+		errors.Abort500C(c, "HIS0034", "Server error", err, h.Config.IsDev)
 		return
 	}
 	middleware.EpisodeCache.Delete("episode_" + episodeID.Hex())
@@ -607,12 +607,12 @@ func (h *Ratings) Check(c *gin.Context) {
 	user, _ := middleware.GetUser(c)
 	episodeID, err := primitive.ObjectIDFromHex(c.Param("episodeId"))
 	if err != nil {
-		errors.AbortWithAppError(c, errors.New(500, "Server error"), h.Config.IsDev)
+		errors.Abort500C(c, "HIS0035", "Server error", err, h.Config.IsDev)
 		return
 	}
 	score, err := h.Repos.Ratings.RatingFindScore(c.Request.Context(), user.ID, episodeID)
 	if err != nil && !repository.IsNotFound(err) {
-		errors.AbortWithAppError(c, errors.New(500, "Server error"), h.Config.IsDev)
+		errors.Abort500C(c, "HIS0036", "Server error", err, h.Config.IsDev)
 		return
 	}
 	c.JSON(200, gin.H{"score": score})

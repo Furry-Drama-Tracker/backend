@@ -1,0 +1,69 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fdt.xiedada.net/schemas/errors.schema.json",
+  "title": "Furry Drama Tracker 错误码注册表",
+  "description": "后端全部 4xx/5xx 错误码（XXXYYYY：3 字母模块前缀 + 4 位文件内顺序号）的机器可读注册表。由 docs/gen_errors_json.py 从源码扫描生成，勿手改；新增错误码后重跑生成器刷新。",
+  "type": "object",
+  "required": ["$schema", "version", "refSpec", "codes"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string", "const": "./errors.schema.json" },
+    "version": { "type": "integer", "const": 1, "description": "注册表格式版本" },
+    "refSpec": {
+      "type": "object",
+      "description": "参考号（ref）规范",
+      "required": ["type", "range", "display"],
+      "additionalProperties": false,
+      "properties": {
+        "type": { "type": "string", "const": "integer", "description": "响应体 ref 字段为 JSON 整数" },
+        "range": { "type": "array", "items": { "type": "integer" }, "minItems": 2, "maxItems": 2, "const": [0, 999999999] },
+        "display": { "type": "string", "description": "前端展示契约：补零到 9 位后按三位一段空格分组" }
+      }
+    },
+    "codes": {
+      "type": "array",
+      "description": "全部错误码条目；code 全仓唯一（生成器已校验）",
+      "items": { "$ref": "#/$defs/codeEntry" }
+    }
+  },
+  "$defs": {
+    "codeEntry": {
+      "type": "object",
+      "required": ["code", "kind", "status", "message", "file", "line"],
+      "additionalProperties": false,
+      "properties": {
+        "code": {
+          "type": "string",
+          "pattern": "^[A-Z]{3}\\d{4}$",
+          "description": "错误码 XXXYYYY。grep 该码直达唯一调用点；新站点取同前缀仓库内下一个未用序号"
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "Abort500C", "AbortErrC", "AbortCoded", "AbortKeyed",
+            "NewC", "NewKeyC", "NewExtraC", "WrapC",
+            "codedBody", "fallback", "panic"
+          ],
+          "description": "调用形态：Abort*/codedBody 为 handler/中间件直写点；New*/WrapC 为 service/handler 构造后经渲染器输出；fallback=渲染器兜底；panic=panic 恢复"
+        },
+        "status": {
+          "type": ["integer", "null"],
+          "minimum": 400,
+          "maximum": 599,
+          "description": "HTTP 状态码；fallback 条目因状态不定为 null"
+        },
+        "message": {
+          "type": "string",
+          "description": " authored 响应文案（开发环境原样返回）；生产 4xx/5xx message 末尾由渲染器追加 \" [CODE·ref]\"，5xx 另有统一掩码。动态文案记为 <dynamic>"
+        },
+        "messageKey": {
+          "type": "string",
+          "description": "可选：前端 i18n 键（仅 NewKeyC/AbortKeyed 条目存在）"
+        },
+        "file": { "type": "string", "description": "调用点文件（相对 backend/）" },
+        "line": { "type": "integer", "minimum": 1, "description": "调用点行号（生成时快照，重构后以 grep code 为准）" },
+        "_note": { "type": "string", "description": "可选备注（仅 fallback/panic 条目）" }
+      }
+    }
+  }
+}

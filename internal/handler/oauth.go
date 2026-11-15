@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"github.com/Furry-Drama-Tracker/backend/internal/auth"
+	"github.com/Furry-Drama-Tracker/backend/internal/errors"
 )
 
 // ---- OAuth（QQ 预留）----
@@ -32,7 +33,7 @@ func (h *Auth) QQOAuthStart(c *gin.Context) {
 	}
 	url, err := h.Svc.QQ.GetAuthURL(c.Request.Context(), auth.RandomHex(16))
 	if err != nil {
-		c.JSON(500, gin.H{"message": "服务器错误"})
+		errors.Abort500C(c, "OAU0001", "服务器错误", err, h.Config.IsDev)
 		return
 	}
 	c.JSON(200, gin.H{"authUrl": url})

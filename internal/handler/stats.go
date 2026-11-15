@@ -13,6 +13,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 
 	"github.com/Furry-Drama-Tracker/backend/internal/config"
+	"github.com/Furry-Drama-Tracker/backend/internal/errors"
 	"github.com/Furry-Drama-Tracker/backend/internal/middleware"
 	"github.com/Furry-Drama-Tracker/backend/internal/ratelimit"
 	"github.com/Furry-Drama-Tracker/backend/internal/repository"
@@ -95,79 +96,79 @@ func (h *Stats) Overview(c *gin.Context) {
 	// 第一组并发聚合（等价 Promise.all）。
 	totalEpisodes, err := h.Repos.Episodes.CountDocuments(ctx, bson.M{"reviewStatus": "approved"})
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	pendingEpisodes, err := h.Repos.Episodes.CountDocuments(ctx, bson.M{"reviewStatus": "pending"})
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	totalUsers, err := h.Repos.Users.StatsUserCount(ctx, bson.M{})
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	totalFollows, err := h.Repos.Follows.FollowCount(ctx, bson.M{})
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	totalRatings, err := h.Repos.Ratings.StatsRatingCount(ctx, bson.M{})
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	pendingReports, err := h.Repos.Reports.ReportsCount(ctx, bson.M{"status": "pending"})
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	newUsers, err := h.Repos.Users.StatsUserCount(ctx, bson.M{"createdAt": bson.M{"$gte": thirtyDaysAgo}})
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	newEpisodes, err := h.Repos.Episodes.CountDocuments(ctx, bson.M{"createdAt": bson.M{"$gte": thirtyDaysAgo}})
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	totalViews, err := h.Repos.Episodes.StatsTotalViews(ctx)
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	ratingDistribution, err := h.Repos.Ratings.StatsRatingDistribution(ctx)
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	episodeStatusDist, err := h.Repos.Episodes.StatsEpisodeStatusDist(ctx)
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 
 	// 第二组：Top 榜单（等价第二组 Promise.all 并发）。
 	topRated, err := h.Repos.Episodes.StatsTopRated(ctx, 5)
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	mostViewed, err := h.Repos.Episodes.StatsTopViewed(ctx, 5)
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	mostFollowedRows, err := h.Repos.Follows.StatsTopFollowed(ctx, 5)
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	mostFollowedTitles, err := h.Repos.Episodes.StatsFindEpisodeTitles(ctx, statsRowIDs(mostFollowedRows))
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 
@@ -179,7 +180,7 @@ func (h *Stats) Overview(c *gin.Context) {
 	startDate, _ := time.Parse("2006-01-02", trendDays[0])
 	activityAgg, err := h.Repos.Histories.StatsActivityTrend(ctx, startDate)
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	activityMap := make(map[string]int64, len(activityAgg))
@@ -193,12 +194,12 @@ func (h *Stats) Overview(c *gin.Context) {
 
 	activeUsers, err := h.Repos.Histories.StatsDistinctActiveUsers(ctx, thirtyDaysAgo)
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	activeUsers7d, err := h.Repos.Histories.StatsDistinctActiveUsers(ctx, now.Add(-7*24*time.Hour))
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 
@@ -206,7 +207,7 @@ func (h *Stats) Overview(c *gin.Context) {
 	sevenDaysAgoDate := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.Local).AddDate(0, 0, -6)
 	dauAgg, err := h.Repos.Histories.StatsDAU(ctx, sevenDaysAgoDate)
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	dauMap := make(map[string]int64, len(dauAgg))
@@ -222,29 +223,29 @@ func (h *Stats) Overview(c *gin.Context) {
 	// Top 8 榜单。
 	topEpisodesByViews, err := h.Repos.Episodes.StatsTopViewed(ctx, 8)
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	topFollowRows, err := h.Repos.Follows.StatsTopFollowed(ctx, 8)
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	topFollowTitles, err := h.Repos.Episodes.StatsFindEpisodeTitles(ctx, statsRowIDs(topFollowRows))
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	topEpisodesByRating, err := h.Repos.Episodes.StatsTopByRating(ctx, 8)
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 
 	// 用户留存率（retention：lastWatched ≥ UTC 7 天前，7 天滑窗）。
 	retentionAgg, err := h.Repos.Histories.StatsRetention(ctx, now.Add(-7*24*time.Hour))
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	retentionMap := make(map[string]int64, len(retentionAgg))
@@ -267,7 +268,7 @@ func (h *Stats) Overview(c *gin.Context) {
 	// 用户注册趋势。
 	userTrendAgg, err := h.Repos.Users.StatsUserTrend(ctx, startDate)
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	userTrendMap := make(map[string]int64, len(userTrendAgg))
@@ -346,22 +347,22 @@ func (h *Stats) Calendar(c *gin.Context) {
 
 	released, err := h.Repos.SingleEpisodes.StatsCalendarReleased(ctx, start, end)
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	scheduled, err := h.Repos.SingleEpisodes.StatsCalendarScheduled(ctx, start, end)
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	premieres, err := h.Repos.Episodes.StatsFindPremieres(ctx, start, end)
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	upcomingSingles, err := h.Repos.SingleEpisodes.StatsCalendarUpcoming(ctx, start, end)
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 
@@ -378,7 +379,7 @@ func (h *Stats) Calendar(c *gin.Context) {
 	}
 	epDocs, err := h.Repos.Episodes.StatsCalendarEpisodeDocs(ctx, dedupIDs(epIDs))
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 
@@ -491,7 +492,7 @@ func (h *Stats) Collaborative(c *gin.Context) {
 
 	myHighRated, err := h.Repos.Ratings.StatsMyHighRated(ctx, user.ID)
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	if len(myHighRated) == 0 {
@@ -501,7 +502,7 @@ func (h *Stats) Collaborative(c *gin.Context) {
 
 	similarRatings, err := h.Repos.Ratings.StatsSimilarUserRatings(ctx, myHighRated, user.ID)
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	similarUserIds := uniqueRatingUserIDs(similarRatings)
@@ -512,19 +513,19 @@ func (h *Stats) Collaborative(c *gin.Context) {
 
 	myRated, err := h.Repos.Ratings.StatsMyRatedEpisodeIDs(ctx, user.ID)
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	myFollowed, err := h.Repos.Follows.StatsMyFollowedEpisodeIDs(ctx, user.ID)
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	exclude := dedupIDs(append(myRated, myFollowed...))
 
 	candidates, err := h.Repos.Ratings.StatsCandidateRatings(ctx, similarUserIds, exclude)
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 
@@ -570,7 +571,7 @@ func (h *Stats) Collaborative(c *gin.Context) {
 	}
 	eps, err := h.Repos.Episodes.StatsFindRecEpisodesByIDs(ctx, episodeIDs)
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	epMap := make(map[string]repository.StatsRecEpisode, len(eps))
@@ -610,12 +611,12 @@ func (h *Stats) Personalized(c *gin.Context) {
 
 	myFollowed, err := h.Repos.Follows.StatsMyFollowedEpisodeIDs(ctx, user.ID)
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	myRatings, err := h.Repos.Ratings.StatsMyRatedEpisodeIDs(ctx, user.ID)
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	excludeIds := dedupIDs(append(append([]primitive.ObjectID{}, myFollowed...), myRatings...))
@@ -625,7 +626,7 @@ func (h *Stats) Personalized(c *gin.Context) {
 	if len(interactedIDs) > 0 {
 		interactedEpisodes, err = h.Repos.Episodes.StatsInteractedEpisodes(ctx, interactedIDs)
 		if err != nil {
-			serverError(c)
+			serverError(c, err, h.Config.IsDev)
 			return
 		}
 	}
@@ -660,7 +661,7 @@ func (h *Stats) Personalized(c *gin.Context) {
 	if len(userTags) > 0 {
 		tagBased, err = h.Repos.Episodes.StatsRecByTags(ctx, mapKeys(userTags), excludeIds)
 		if err != nil {
-			serverError(c)
+			serverError(c, err, h.Config.IsDev)
 			return
 		}
 	}
@@ -682,7 +683,7 @@ func (h *Stats) Personalized(c *gin.Context) {
 	if len(userCategories) > 0 {
 		categoryBased, err = h.Repos.Episodes.StatsRecByCategory(ctx, mapKeys(userCategories), excludeIds)
 		if err != nil {
-			serverError(c)
+			serverError(c, err, h.Config.IsDev)
 			return
 		}
 	}
@@ -702,7 +703,7 @@ func (h *Stats) Personalized(c *gin.Context) {
 
 	popularEpisodes, err := h.Repos.Episodes.StatsRecPopular(ctx, excludeIds)
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	for _, ep := range popularEpisodes {
@@ -770,22 +771,22 @@ func (h *Stats) RelatedRecommendations(c *gin.Context) {
 	ctx := c.Request.Context()
 	oid, err := primitive.ObjectIDFromHex(c.Param("episodeId"))
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	episode, err := h.Repos.Episodes.FindByID(ctx, oid)
 	if err != nil {
 		if repository.IsNotFound(err) {
-			c.JSON(404, gin.H{"message": "Episode not found"})
+			errors.AbortCoded(c, 404, "STA0001", "Episode not found", h.Config.IsDev)
 			return
 		}
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 
 	total, err := h.Repos.Episodes.StatsCountRelated(ctx, oid)
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	skip := int64(0)
@@ -798,7 +799,7 @@ func (h *Stats) RelatedRecommendations(c *gin.Context) {
 	}
 	allEpisodes, err := h.Repos.Episodes.StatsRelatedEpisodes(ctx, oid, skip)
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 
@@ -889,17 +890,17 @@ func (h *Stats) ActivityHeatmap(c *gin.Context) {
 
 	followAgg, err := h.Repos.Follows.StatsHeatmapByFollow(ctx, startDate)
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	ratingAgg, err := h.Repos.Ratings.StatsHeatmapByRating(ctx, startDate)
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	episodeAgg, err := h.Repos.Episodes.StatsHeatmapByEpisode(ctx, startDate)
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 
@@ -944,7 +945,7 @@ func (h *Stats) EpisodeLifecycle(c *gin.Context) {
 	ctx := c.Request.Context()
 	topEpisodes, err := h.Repos.Episodes.StatsLifecycleEpisodes(ctx, 20)
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	now := time.Now()
@@ -979,22 +980,22 @@ func (h *Stats) Realtime(c *gin.Context) {
 
 	onlineUsers, err := h.Repos.Sessions.StatsSessionCountActiveSince(ctx, fiveMinAgo)
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	todayVisits, err := h.Repos.Sessions.StatsSessionCountActiveSince(ctx, todayStart)
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	todayNewUsers, err := h.Repos.Users.StatsUserCount(ctx, bson.M{"createdAt": bson.M{"$gte": todayStart}})
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	todayNewEpisodes, err := h.Repos.Episodes.CountDocuments(ctx, bson.M{"createdAt": bson.M{"$gte": todayStart}})
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	c.JSON(200, gin.H{

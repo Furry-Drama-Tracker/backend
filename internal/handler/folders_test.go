@@ -107,6 +107,20 @@ func folderDo(t *testing.T, r *gin.Engine, method, path string, body any, token 
 	return w.Code, w.Body.Bytes()
 }
 
+// decodeErrBody 解码 4xx/5xx 错误响应体，返回 (message, error 错误码, ref 参考号)。
+func decodeErrBody(t *testing.T, body []byte) (string, string, int64) {
+	t.Helper()
+	var obj struct {
+		Message string `json:"message"`
+		Error   string `json:"error"`
+		Ref     int64  `json:"ref"`
+	}
+	if err := json.Unmarshal(body, &obj); err != nil {
+		t.Fatalf("decode error body %q: %v", body, err)
+	}
+	return obj.Message, obj.Error, obj.Ref
+}
+
 func (e *folderTestEnv) insertEpisode(t *testing.T, ep *model.Episode) primitive.ObjectID {
 	t.Helper()
 	res, err := e.db.Collection("episodes").InsertOne(t.Context(), ep)
@@ -221,8 +235,10 @@ func TestFolderCreateValidateListUpdate(t *testing.T) {
 	if code, _ := folderDo(t, env.router, "PUT", "/api/folders/"+primitive.NewObjectID().Hex(), map[string]any{"name": "x"}, tok); code != 404 {
 		t.Fatalf("update missing: %d", code)
 	}
-	if code, body := folderDo(t, env.router, "PUT", "/api/folders/nothex", map[string]any{"name": "x"}, tok); code != 500 || string(body) != `{"message":"Server error"}` {
+	if code, body := folderDo(t, env.router, "PUT", "/api/folders/nothex", map[string]any{"name": "x"}, tok); code != 500 {
 		t.Fatalf("update invalid id: %d body=%s", code, body)
+	} else if msg, errCode, ref := decodeErrBody(t, body); msg != "Server error" || !strings.HasPrefix(errCode, "FOL") || ref <= 0 {
+		t.Fatalf("update invalid id body=%s", body)
 	}
 }
 
@@ -241,8 +257,10 @@ func TestFolderItemsAndDeleteClearsFolderId(t *testing.T) {
 	epID := env.insertEpisode(t, &model.Episode{Title: "Ep1", CoverImage: "img", CurrentEpisodes: 3, Status: "ongoing", ReviewStatus: "approved", CreatedAt: time.Now(), UpdatedAt: time.Now()})
 
 	// 未收藏的条目 → 404 'Item not found'。
-	if code, body := folderDo(t, env.router, "POST", "/api/folders/"+folderID.Hex()+"/items", map[string]any{"episodeId": primitive.NewObjectID().Hex()}, tok); code != 404 || string(body) != `{"message":"Item not found"}` {
-		t.Fatalf("add missing item: %d body=%s", code, body)
+	if code, body := folderDo(t, env.router, "POST", "/api/folders/"+folderID.Hex()+"/items", map[string]any{"episodeId": primitive.NewObjectID().Hex()}, tok); code != 404 {
+		t.Fatalf("status: %d body=%s", code, body)
+	} else if msg, errCode, ref := decodeErrBody(t, body); msg != "Item not found" || errCode == "" || ref <= 0 {
+		t.Fatalf("body=%s", body)
 	}
 
 	// 归入收藏夹。
@@ -344,8 +362,10 @@ func TestFolderShareFlowAndPublic(t *testing.T) {
 	if code, body := folderDo(t, env.router, "DELETE", "/api/folders/"+folderID.Hex()+"/share", nil, tok); code != 200 || string(body) != `{"message":"Share revoked"}` {
 		t.Fatalf("revoke: %d body=%s", code, body)
 	}
-	if code, body := folderDo(t, env.router, "GET", "/api/folders/shared/"+token, nil, ""); code != 404 || string(body) != `{"message":"Shared folder not found"}` {
-		t.Fatalf("shared after revoke: %d body=%s", code, body)
+	if code, body := folderDo(t, env.router, "GET", "/api/folders/shared/"+token, nil, ""); code != 404 {
+		t.Fatalf("status: %d body=%s", code, body)
+	} else if msg, errCode, ref := decodeErrBody(t, body); msg != "Shared folder not found" || errCode == "" || ref <= 0 {
+		t.Fatalf("body=%s", body)
 	}
 }
 
@@ -425,14 +445,20 @@ func TestSavedFolders(t *testing.T) {
 	}
 
 	// 校验分支。
-	if code, body := folderDo(t, env.router, "POST", "/api/saved-folders", map[string]any{}, savedTok); code != 400 || string(body) != `{"message":"shareToken is required"}` {
-		t.Fatalf("missing token: %d body=%s", code, body)
+	if code, body := folderDo(t, env.router, "POST", "/api/saved-folders", map[string]any{}, savedTok); code != 400 {
+		t.Fatalf("status: %d body=%s", code, body)
+	} else if msg, errCode, ref := decodeErrBody(t, body); msg != "shareToken is required" || errCode == "" || ref <= 0 {
+		t.Fatalf("body=%s", body)
 	}
-	if code, body := folderDo(t, env.router, "POST", "/api/saved-folders", map[string]any{"shareToken": "nope"}, savedTok); code != 404 || string(body) != `{"message":"Folder not found"}` {
-		t.Fatalf("bad token: %d body=%s", code, body)
+	if code, body := folderDo(t, env.router, "POST", "/api/saved-folders", map[string]any{"shareToken": "nope"}, savedTok); code != 404 {
+		t.Fatalf("status: %d body=%s", code, body)
+	} else if msg, errCode, ref := decodeErrBody(t, body); msg != "Folder not found" || errCode == "" || ref <= 0 {
+		t.Fatalf("body=%s", body)
 	}
-	if code, body := folderDo(t, env.router, "POST", "/api/saved-folders", map[string]any{"shareToken": token}, creatorTok); code != 400 || string(body) != `{"message":"不能收藏自己的收藏夹"}` {
-		t.Fatalf("own folder: %d body=%s", code, body)
+	if code, body := folderDo(t, env.router, "POST", "/api/saved-folders", map[string]any{"shareToken": token}, creatorTok); code != 400 {
+		t.Fatalf("status: %d body=%s", code, body)
+	} else if msg, errCode, ref := decodeErrBody(t, body); msg != "不能收藏自己的收藏夹" || errCode == "" || ref <= 0 {
+		t.Fatalf("body=%s", body)
 	}
 
 	// 成功收藏。
@@ -448,8 +474,10 @@ func TestSavedFolders(t *testing.T) {
 	sfID := sf["_id"].(string)
 
 	// 重复收藏 → 400。
-	if code, body := folderDo(t, env.router, "POST", "/api/saved-folders", map[string]any{"shareToken": token}, savedTok); code != 400 || string(body) != `{"message":"已收藏过该收藏夹"}` {
-		t.Fatalf("dup save: %d body=%s", code, body)
+	if code, body := folderDo(t, env.router, "POST", "/api/saved-folders", map[string]any{"shareToken": token}, savedTok); code != 400 {
+		t.Fatalf("status: %d body=%s", code, body)
+	} else if msg, errCode, ref := decodeErrBody(t, body); msg != "已收藏过该收藏夹" || errCode == "" || ref <= 0 {
+		t.Fatalf("body=%s", body)
 	}
 
 	// 列表长度 1；取消收藏。
@@ -465,8 +493,10 @@ func TestSavedFolders(t *testing.T) {
 	if code, body := folderDo(t, env.router, "DELETE", "/api/saved-folders/"+sfID, nil, savedTok); code != 200 || string(body) != `{"message":"Removed"}` {
 		t.Fatalf("unsave: %d body=%s", code, body)
 	}
-	if code, body := folderDo(t, env.router, "DELETE", "/api/saved-folders/"+primitive.NewObjectID().Hex(), nil, savedTok); code != 404 || string(body) != `{"message":"Saved folder not found"}` {
-		t.Fatalf("unsave missing: %d body=%s", code, body)
+	if code, body := folderDo(t, env.router, "DELETE", "/api/saved-folders/"+primitive.NewObjectID().Hex(), nil, savedTok); code != 404 {
+		t.Fatalf("status: %d body=%s", code, body)
+	} else if msg, errCode, ref := decodeErrBody(t, body); msg != "Saved folder not found" || errCode == "" || ref <= 0 {
+		t.Fatalf("body=%s", body)
 	}
 }
 
@@ -543,9 +573,11 @@ func TestFolderReorder(t *testing.T) {
 	if len(list) != 3 || list[0]["_id"] != ids[2] || list[2]["_id"] != ids[0] {
 		t.Fatalf("reorder list=%v", list)
 	}
-	// 非法 folderId → 500（固定契约）。
-	if code, body := folderDo(t, env.router, "PUT", "/api/folders/reorder", map[string]any{"folderIds": []string{"badid"}}, tok); code != 500 || string(body) != `{"message":"Server error"}` {
+	// 非法 folderId → 500（固定契约：message 不变，新增 error 错误码 + ref 参考号）。
+	if code, body := folderDo(t, env.router, "PUT", "/api/folders/reorder", map[string]any{"folderIds": []string{"badid"}}, tok); code != 500 {
 		t.Fatalf("reorder invalid id: %d body=%s", code, body)
+	} else if msg, errCode, ref := decodeErrBody(t, body); msg != "Server error" || !strings.HasPrefix(errCode, "FOL") || ref <= 0 {
+		t.Fatalf("reorder invalid id body=%s", body)
 	}
 	// 非本人收藏夹的 id 被静默忽略（filter 限定 userId），不报错。
 	if code, _ := folderDo(t, env.router, "PUT", "/api/folders/reorder", map[string]any{"folderIds": []string{primitive.NewObjectID().Hex()}}, tok); code != 200 {

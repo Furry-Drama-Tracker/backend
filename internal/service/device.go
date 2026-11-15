@@ -18,29 +18,29 @@ import (
 // method 决定第二因素类型："totp"（默认，TOTP 码或备份码）/"emailOtp"（邮箱验证码）。
 func (s *AuthService) Login2FA(c *gin.Context, identifier, challenge, method, token string, deviceInfo *auth.DeviceInfoPayload) (*LoginResult, error) {
 	if challenge == "" {
-		return nil, errors.New(400, "缺少2FA挑战令牌，请重新登录")
+		return nil, errors.NewC("DEV0002", 400, "缺少2FA挑战令牌，请重新登录")
 	}
 	challengeClaims, err := s.Signer.Verify(challenge)
 	if err != nil {
-		return nil, errors.New(400, "2FA挑战令牌已过期或无效，请重新登录")
+		return nil, errors.NewC("DEV0003", 400, "2FA挑战令牌已过期或无效，请重新登录")
 	}
 	if challengeClaims.Purpose != "2fa-challenge" {
-		return nil, errors.New(400, "无效的2FA挑战令牌")
+		return nil, errors.NewC("DEV0004", 400, "无效的2FA挑战令牌")
 	}
 
 	id := strings.ToLower(strings.TrimSpace(identifier))
 	user, err := s.Repos.Users.FindByLoginIdentifierWith2FA(c.Request.Context(), id)
 	if err != nil || !user.TwoFactorEnabled {
-		return nil, errors.New(400, "该账号未启用两步验证")
+		return nil, errors.NewC("DEV0005", 400, "该账号未启用两步验证")
 	}
 	if user.ID.Hex() != challengeClaims.ID {
-		return nil, errors.New(400, "验证失败")
+		return nil, errors.NewC("DEV0006", 400, "验证失败")
 	}
 	if repository.IsLocked(user) {
-		return nil, errors.New(423, "账号已被锁定，请30分钟后再试")
+		return nil, errors.NewC("DEV0007", 423, "账号已被锁定，请30分钟后再试")
 	}
 	if !user.IsEmailVerified && !s.SkipVerification(user) && !s.devTokenActive(c.GetHeader("x-dev-token")) {
-		return nil, errors.New(403, "请先验证邮箱后再登录")
+		return nil, errors.NewC("DEV0008", 403, "请先验证邮箱后再登录")
 	}
 
 	totpOK := false
@@ -70,7 +70,7 @@ func (s *AuthService) Login2FA(c *gin.Context, identifier, challenge, method, to
 		if totpOK {
 			accepted, err := s.Repos.Users.MarkTOTPStepUsed(c.Request.Context(), user.ID, totpStep)
 			if err != nil {
-				return nil, errors.New(500, "服务器错误")
+				return nil, errors.NewC("DEV0009", 500, "服务器错误")
 			}
 			if !accepted {
 				// 同一时间步重复提交：可能是重放，也可能是用户重复点击。
@@ -116,7 +116,7 @@ func (s *AuthService) Login2FA(c *gin.Context, identifier, challenge, method, to
 	}
 
 	if err := s.IssueSession(c, user, di, ip, "LOGIN_2FA"); err != nil {
-		return nil, errors.New(500, "服务器错误")
+		return nil, errors.NewC("DEV0010", 500, "服务器错误")
 	}
 	// 未识别设备 → 通知邮件（受偏好控制）；已识别设备不重复提醒。
 	if s.Mail != nil && !s.isKnownDevice(c.Request.Context(), c, user.ID) {
@@ -129,21 +129,21 @@ func (s *AuthService) Login2FA(c *gin.Context, identifier, challenge, method, to
 // 发送第二因素验证码（未验证邮箱的账号不提供该方法）。
 func (s *AuthService) Send2FAEmailOTP(ctx context.Context, challenge, devToken string) (string, error) {
 	if challenge == "" {
-		return "", errors.New(400, "缺少2FA挑战令牌，请重新登录")
+		return "", errors.NewC("DEV0011", 400, "缺少2FA挑战令牌，请重新登录")
 	}
 	claims, err := s.Signer.Verify(challenge)
 	if err != nil || claims.Purpose != "2fa-challenge" {
-		return "", errors.New(400, "2FA挑战令牌已过期或无效，请重新登录")
+		return "", errors.NewC("DEV0012", 400, "2FA挑战令牌已过期或无效，请重新登录")
 	}
 	user, err := s.Repos.Users.FindByID(ctx, claims.ID)
 	if err != nil {
-		return "", errors.New(400, "用户不存在")
+		return "", errors.NewC("DEV0013", 400, "用户不存在")
 	}
 	if !user.TwoFactorEnabled {
-		return "", errors.New(400, "该账号未启用两步验证")
+		return "", errors.NewC("DEV0014", 400, "该账号未启用两步验证")
 	}
 	if user.Email == "" || !user.IsEmailVerified {
-		return "", errors.New(400, "该账号未绑定已验证的邮箱")
+		return "", errors.NewC("DEV0015", 400, "该账号未绑定已验证的邮箱")
 	}
 	otpCode := s.EmailOTPCodes.Mint(code.Entry{
 		UserID:    user.ID.Hex(),
@@ -191,7 +191,7 @@ func (s *AuthService) rejectTwoFactor(ctx context.Context, user *model.User) err
 	_ = s.Repos.Users.IncLoginAttempts(ctx, user.ID)
 	nextAttempts := user.LoginAttempts + 1
 	if repository.IsLocked(user) || nextAttempts >= s.Config.Security.LoginMaxAttempts {
-		return errors.New(423, "账号已被锁定，请30分钟后再试")
+		return errors.NewC("DEV0016", 423, "账号已被锁定，请30分钟后再试")
 	}
-	return errors.New(400, "验证码无效")
+	return errors.NewC("DEV0017", 400, "验证码无效")
 }

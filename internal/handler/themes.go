@@ -2,7 +2,7 @@ package handler
 
 import (
 	"context"
-	"errors"
+	stderrors "errors"
 	"regexp"
 	"strings"
 	"time"
@@ -12,6 +12,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 
 	"github.com/Furry-Drama-Tracker/backend/internal/config"
+	"github.com/Furry-Drama-Tracker/backend/internal/errors"
 	"github.com/Furry-Drama-Tracker/backend/internal/middleware"
 	"github.com/Furry-Drama-Tracker/backend/internal/model"
 	"github.com/Furry-Drama-Tracker/backend/internal/ratelimit"
@@ -225,7 +226,7 @@ func (h *Themes) Active(c *gin.Context) {
 			c.JSON(200, gin.H{"theme": nil})
 			return
 		}
-		c.JSON(500, gin.H{"message": "获取默认主题失败"})
+		errors.Abort500C(c, "THM0001", "获取默认主题失败", err, h.Config.IsDev)
 		return
 	}
 	c.JSON(200, gin.H{"theme": themePublicJSON(t)})
@@ -240,7 +241,7 @@ func (h *Themes) Active(c *gin.Context) {
 func (h *Themes) List(c *gin.Context) {
 	list, err := h.Repos.Themes.FindSystemEnabled(c.Request.Context())
 	if err != nil {
-		c.JSON(500, gin.H{"message": "获取主题列表失败"})
+		errors.Abort500C(c, "THM0002", "获取主题列表失败", err, h.Config.IsDev)
 		return
 	}
 	out := make([]gin.H, 0, len(list))
@@ -262,7 +263,7 @@ func (h *Themes) MyList(c *gin.Context) {
 	user, _ := middleware.GetUser(c)
 	list, err := h.Repos.Themes.FindByOwner(c.Request.Context(), user.ID)
 	if err != nil {
-		c.JSON(500, gin.H{"message": "获取个人主题失败"})
+		errors.Abort500C(c, "THM0003", "获取个人主题失败", err, h.Config.IsDev)
 		return
 	}
 	out := make([]gin.H, 0, len(list))
@@ -314,6 +315,7 @@ func (h *Themes) resolveThemeSlot(ctx context.Context, c *gin.Context, user *mod
 //   - wallpaperTheme / iconsTheme：两槽当前主题（无则为 null，回落站点默认主题）；
 //   - wallpaperIsDefault / iconsIsDefault：该槽是否为默认主题兜底（非用户主动选择）；
 //   - 兼容旧单主题字段：按 applyIcons/applyWallpaper 拆分到对应槽。
+//
 // @Summary 获取当前用户生效主题
 // @Tags 主题
 // @Security bearerAuth
@@ -430,20 +432,20 @@ func (h *Themes) SetSelection(c *gin.Context) {
 		// 旧 body：单主题按应用组合拆槽。
 		oid, err := primitive.ObjectIDFromHex(rawID)
 		if err != nil {
-			c.JSON(400, gin.H{"message": "主题 ID 不合法"})
+			errors.AbortCoded(c, 400, "THM0004", "主题 ID 不合法", h.Config.IsDev)
 			return
 		}
 		t, err := h.Repos.Themes.FindByID(ctx, oid)
 		if err != nil {
 			if repository.IsNotFound(err) {
-				c.JSON(404, gin.H{"message": "主题不存在"})
+				errors.AbortCoded(c, 404, "THM0005", "主题不存在", h.Config.IsDev)
 				return
 			}
-			c.JSON(500, gin.H{"message": "设置主题失败"})
+			errors.Abort500C(c, "THM0006", "设置主题失败", err, h.Config.IsDev)
 			return
 		}
 		if !h.accessibleTheme(c, t) {
-			c.JSON(403, gin.H{"message": "无权使用该主题"})
+			errors.AbortCoded(c, 403, "THM0007", "无权使用该主题", h.Config.IsDev)
 			return
 		}
 		if bodyBool(body, "applyWallpaper", true) {
@@ -481,7 +483,7 @@ func (h *Themes) SetSelection(c *gin.Context) {
 		}
 	}
 	if !setWallpaper && !setIcons {
-		c.JSON(400, gin.H{"message": "请求需包含 wallpaperThemeId / iconsThemeId（或旧版 themeId）"})
+		errors.AbortCoded(c, 400, "THM0008", "请求需包含 wallpaperThemeId / iconsThemeId（或旧版 themeId）", h.Config.IsDev)
 		return
 	}
 
@@ -504,7 +506,7 @@ func (h *Themes) SetSelection(c *gin.Context) {
 	}
 
 	if err := h.Repos.Users.UpdateThemeSlots(ctx, user.ID, wallpaperID, iconsID); err != nil {
-		c.JSON(500, gin.H{"message": "设置主题失败"})
+		errors.Abort500C(c, "THM0009", "设置主题失败", err, h.Config.IsDev)
 		return
 	}
 
@@ -555,29 +557,29 @@ func (h *Themes) findValidatedTheme(c *gin.Context, raw string, forWallpaper boo
 	primitive.ObjectID, *model.Theme, error) {
 	oid, err := primitive.ObjectIDFromHex(strings.TrimSpace(raw))
 	if err != nil {
-		c.JSON(400, gin.H{"message": "主题 ID 不合法"})
+		errors.AbortCoded(c, 400, "THM0010", "主题 ID 不合法", h.Config.IsDev)
 		return primitive.NilObjectID, nil, err
 	}
 	t, err := h.Repos.Themes.FindByID(c.Request.Context(), oid)
 	if err != nil {
 		if repository.IsNotFound(err) {
-			c.JSON(404, gin.H{"message": "主题不存在"})
+			errors.AbortCoded(c, 404, "THM0011", "主题不存在", h.Config.IsDev)
 			return primitive.NilObjectID, nil, err
 		}
-		c.JSON(500, gin.H{"message": "设置主题失败"})
+		errors.Abort500C(c, "THM0012", "设置主题失败", err, h.Config.IsDev)
 		return primitive.NilObjectID, nil, err
 	}
 	if !h.accessibleTheme(c, t) {
-		c.JSON(403, gin.H{"message": "无权使用该主题"})
-		return primitive.NilObjectID, nil, errors.New("forbidden")
+		errors.AbortCoded(c, 403, "THM0013", "无权使用该主题", h.Config.IsDev)
+		return primitive.NilObjectID, nil, stderrors.New("forbidden")
 	}
 	if forWallpaper && t.WallpaperURL == "" {
-		c.JSON(400, gin.H{"message": "该主题不含壁纸，无法应用到背景"})
-		return primitive.NilObjectID, nil, errors.New("no wallpaper")
+		errors.AbortCoded(c, 400, "THM0014", "该主题不含壁纸，无法应用到背景", h.Config.IsDev)
+		return primitive.NilObjectID, nil, stderrors.New("no wallpaper")
 	}
 	if !forWallpaper && len(t.Icons) == 0 {
-		c.JSON(400, gin.H{"message": "该主题不含图标，无法应用到图标"})
-		return primitive.NilObjectID, nil, errors.New("no icons")
+		errors.AbortCoded(c, 400, "THM0015", "该主题不含图标，无法应用到图标", h.Config.IsDev)
+		return primitive.NilObjectID, nil, stderrors.New("no icons")
 	}
 	return oid, t, nil
 }
@@ -600,7 +602,7 @@ func (h *Themes) UpdateBackgroundPrefs(c *gin.Context) {
 	if v, ok := body["opacity"]; ok {
 		n := toInt(v)
 		if n < 0 || n > 100 {
-			c.JSON(400, gin.H{"message": "透明度需在 0-100 之间"})
+			errors.AbortCoded(c, 400, "THM0016", "透明度需在 0-100 之间", h.Config.IsDev)
 			return
 		}
 		patch.Opacity = &n
@@ -608,7 +610,7 @@ func (h *Themes) UpdateBackgroundPrefs(c *gin.Context) {
 	if v, ok := body["blur"]; ok {
 		n := toInt(v)
 		if n < 0 || n > 40 {
-			c.JSON(400, gin.H{"message": "模糊度需在 0-40 之间"})
+			errors.AbortCoded(c, 400, "THM0017", "模糊度需在 0-40 之间", h.Config.IsDev)
 			return
 		}
 		patch.Blur = &n
@@ -618,16 +620,16 @@ func (h *Themes) UpdateBackgroundPrefs(c *gin.Context) {
 		patch.Enabled = &b
 	}
 	if patch.Opacity == nil && patch.Blur == nil && patch.Enabled == nil {
-		c.JSON(400, gin.H{"message": "请求需包含 opacity / blur / enabled 至少其一"})
+		errors.AbortCoded(c, 400, "THM0018", "请求需包含 opacity / blur / enabled 至少其一", h.Config.IsDev)
 		return
 	}
 	if err := h.Repos.Users.UpdateBackgroundPrefs(c.Request.Context(), user.ID, patch); err != nil {
-		c.JSON(500, gin.H{"message": "保存背景设置失败"})
+		errors.Abort500C(c, "THM0019", "保存背景设置失败", err, h.Config.IsDev)
 		return
 	}
 	u, err := h.Repos.Users.FindByID(c.Request.Context(), user.ID)
 	if err != nil {
-		c.JSON(500, gin.H{"message": "保存背景设置失败"})
+		errors.Abort500C(c, "THM0020", "保存背景设置失败", err, h.Config.IsDev)
 		return
 	}
 	c.JSON(200, gin.H{"backgroundPrefs": u.BackgroundPrefs})
@@ -649,37 +651,37 @@ func (h *Themes) Create(c *gin.Context) {
 	body := cmsReadBody(c)
 	name := strings.TrimSpace(asString(body["name"]))
 	if name == "" || len([]rune(name)) > 30 {
-		c.JSON(400, gin.H{"message": "主题名称不能为空且不超过 30 个字符"})
+		errors.AbortCoded(c, 400, "THM0021", "主题名称不能为空且不超过 30 个字符", h.Config.IsDev)
 		return
 	}
 	description := strings.TrimSpace(asString(body["description"]))
 	if len([]rune(description)) > 200 {
-		c.JSON(400, gin.H{"message": "主题描述不能超过 200 个字符"})
+		errors.AbortCoded(c, 400, "THM0022", "主题描述不能超过 200 个字符", h.Config.IsDev)
 		return
 	}
 	wallpaperURL, errMsg := sanitizeThemeAssetURL(body["wallpaperUrl"])
 	if errMsg != "" {
-		c.JSON(400, gin.H{"message": errMsg})
+		errors.AbortCoded(c, 400, "THM0023", errMsg, h.Config.IsDev)
 		return
 	}
 	wallpaperThumb, errMsg := sanitizeThemeAssetURL(body["wallpaperThumb"])
 	if errMsg != "" {
-		c.JSON(400, gin.H{"message": errMsg})
+		errors.AbortCoded(c, 400, "THM0024", errMsg, h.Config.IsDev)
 		return
 	}
 	iconsRaw, _ := body["icons"].(map[string]any)
 	icons, errMsg := sanitizeThemeIcons(iconsRaw)
 	if errMsg != "" {
-		c.JSON(400, gin.H{"message": errMsg})
+		errors.AbortCoded(c, 400, "THM0025", errMsg, h.Config.IsDev)
 		return
 	}
 	accentColor, errMsg := sanitizeThemeAccentColor(body["accentColor"])
 	if errMsg != "" {
-		c.JSON(400, gin.H{"message": errMsg})
+		errors.AbortCoded(c, 400, "THM0026", errMsg, h.Config.IsDev)
 		return
 	}
 	if wallpaperURL == "" && len(icons) == 0 {
-		c.JSON(400, gin.H{"message": "主题需包含壁纸或图标至少其一"})
+		errors.AbortCoded(c, 400, "THM0027", "主题需包含壁纸或图标至少其一", h.Config.IsDev)
 		return
 	}
 	user, _ := middleware.GetUser(c)
@@ -701,7 +703,7 @@ func (h *Themes) Create(c *gin.Context) {
 		t.OwnerID = &user.ID
 	}
 	if err := h.Repos.Themes.Create(c.Request.Context(), t); err != nil {
-		c.JSON(500, gin.H{"message": "创建主题失败"})
+		errors.Abort500C(c, "THM0028", "创建主题失败", err, h.Config.IsDev)
 		return
 	}
 	c.JSON(200, themeJSON(t))
@@ -737,20 +739,20 @@ func canEditTheme(c *gin.Context, t *model.Theme) bool {
 func (h *Themes) Update(c *gin.Context) {
 	oid, err := primitive.ObjectIDFromHex(c.Param("id"))
 	if err != nil {
-		c.JSON(400, gin.H{"message": "主题 ID 不合法"})
+		errors.AbortCoded(c, 400, "THM0029", "主题 ID 不合法", h.Config.IsDev)
 		return
 	}
 	t, err := h.Repos.Themes.FindByID(c.Request.Context(), oid)
 	if err != nil {
 		if repository.IsNotFound(err) {
-			c.JSON(404, gin.H{"message": "主题不存在"})
+			errors.AbortCoded(c, 404, "THM0030", "主题不存在", h.Config.IsDev)
 			return
 		}
-		c.JSON(500, gin.H{"message": "更新主题失败"})
+		errors.Abort500C(c, "THM0031", "更新主题失败", err, h.Config.IsDev)
 		return
 	}
 	if !canEditTheme(c, t) {
-		c.JSON(403, gin.H{"message": "无权编辑该主题"})
+		errors.AbortCoded(c, 403, "THM0032", "无权编辑该主题", h.Config.IsDev)
 		return
 	}
 	body := cmsReadBody(c)
@@ -759,7 +761,7 @@ func (h *Themes) Update(c *gin.Context) {
 	if v, ok := body["name"]; ok {
 		name := strings.TrimSpace(asString(v))
 		if name == "" || len([]rune(name)) > 30 {
-			c.JSON(400, gin.H{"message": "主题名称不能为空且不超过 30 个字符"})
+			errors.AbortCoded(c, 400, "THM0033", "主题名称不能为空且不超过 30 个字符", h.Config.IsDev)
 			return
 		}
 		set["name"] = name
@@ -767,7 +769,7 @@ func (h *Themes) Update(c *gin.Context) {
 	if v, ok := body["description"]; ok {
 		desc := strings.TrimSpace(asString(v))
 		if len([]rune(desc)) > 200 {
-			c.JSON(400, gin.H{"message": "主题描述不能超过 200 个字符"})
+			errors.AbortCoded(c, 400, "THM0034", "主题描述不能超过 200 个字符", h.Config.IsDev)
 			return
 		}
 		set["description"] = desc
@@ -776,7 +778,7 @@ func (h *Themes) Update(c *gin.Context) {
 	if v, ok := body["wallpaperUrl"]; ok {
 		wallpaperURL, errMsg := sanitizeThemeAssetURL(v)
 		if errMsg != "" {
-			c.JSON(400, gin.H{"message": errMsg})
+			errors.AbortCoded(c, 400, "THM0035", errMsg, h.Config.IsDev)
 			return
 		}
 		set["wallpaperUrl"] = wallpaperURL
@@ -786,7 +788,7 @@ func (h *Themes) Update(c *gin.Context) {
 	if v, ok := body["wallpaperThumb"]; ok {
 		wallpaperThumb, errMsg := sanitizeThemeAssetURL(v)
 		if errMsg != "" {
-			c.JSON(400, gin.H{"message": errMsg})
+			errors.AbortCoded(c, 400, "THM0036", errMsg, h.Config.IsDev)
 			return
 		}
 		set["wallpaperThumb"] = wallpaperThumb
@@ -796,7 +798,7 @@ func (h *Themes) Update(c *gin.Context) {
 		iconsRaw, _ := v.(map[string]any)
 		icons, errMsg := sanitizeThemeIcons(iconsRaw)
 		if errMsg != "" {
-			c.JSON(400, gin.H{"message": errMsg})
+			errors.AbortCoded(c, 400, "THM0037", errMsg, h.Config.IsDev)
 			return
 		}
 		set["icons"] = icons
@@ -806,22 +808,22 @@ func (h *Themes) Update(c *gin.Context) {
 	if v, ok := body["accentColor"]; ok {
 		accentColor, errMsg := sanitizeThemeAccentColor(v)
 		if errMsg != "" {
-			c.JSON(400, gin.H{"message": errMsg})
+			errors.AbortCoded(c, 400, "THM0038", errMsg, h.Config.IsDev)
 			return
 		}
 		set["accentColor"] = accentColor
 	}
 	if contentTouched && finalWallpaper == "" && len(finalIcons) == 0 {
-		c.JSON(400, gin.H{"message": "主题需包含壁纸或图标至少其一"})
+		errors.AbortCoded(c, 400, "THM0039", "主题需包含壁纸或图标至少其一", h.Config.IsDev)
 		return
 	}
 	updated, err := h.Repos.Themes.FindOneAndUpdate(c.Request.Context(), oid, bson.M{"$set": set})
 	if err != nil {
 		if repository.IsNotFound(err) {
-			c.JSON(404, gin.H{"message": "主题不存在"})
+			errors.AbortCoded(c, 404, "THM0040", "主题不存在", h.Config.IsDev)
 			return
 		}
-		c.JSON(500, gin.H{"message": "更新主题失败"})
+		errors.Abort500C(c, "THM0041", "更新主题失败", err, h.Config.IsDev)
 		return
 	}
 	c.JSON(200, themeJSON(updated))
@@ -841,28 +843,28 @@ func (h *Themes) Update(c *gin.Context) {
 func (h *Themes) Delete(c *gin.Context) {
 	oid, err := primitive.ObjectIDFromHex(c.Param("id"))
 	if err != nil {
-		c.JSON(400, gin.H{"message": "主题 ID 不合法"})
+		errors.AbortCoded(c, 400, "THM0042", "主题 ID 不合法", h.Config.IsDev)
 		return
 	}
 	t, err := h.Repos.Themes.FindByID(c.Request.Context(), oid)
 	if err != nil {
 		if repository.IsNotFound(err) {
-			c.JSON(404, gin.H{"message": "主题不存在"})
+			errors.AbortCoded(c, 404, "THM0043", "主题不存在", h.Config.IsDev)
 			return
 		}
-		c.JSON(500, gin.H{"message": "删除主题失败"})
+		errors.Abort500C(c, "THM0044", "删除主题失败", err, h.Config.IsDev)
 		return
 	}
 	if !canEditTheme(c, t) {
-		c.JSON(403, gin.H{"message": "无权删除该主题"})
+		errors.AbortCoded(c, 403, "THM0045", "无权删除该主题", h.Config.IsDev)
 		return
 	}
 	if _, err := h.Repos.Themes.FindOneAndDelete(c.Request.Context(), oid); err != nil {
 		if repository.IsNotFound(err) {
-			c.JSON(404, gin.H{"message": "主题不存在"})
+			errors.AbortCoded(c, 404, "THM0046", "主题不存在", h.Config.IsDev)
 			return
 		}
-		c.JSON(500, gin.H{"message": "删除主题失败"})
+		errors.Abort500C(c, "THM0047", "删除主题失败", err, h.Config.IsDev)
 		return
 	}
 	// 回收用户引用与默认标记。
@@ -918,29 +920,29 @@ func (h *Themes) removeUnreferencedThemeFiles(ctx context.Context, t *model.Them
 func (h *Themes) Submit(c *gin.Context) {
 	oid, err := primitive.ObjectIDFromHex(c.Param("id"))
 	if err != nil {
-		c.JSON(400, gin.H{"message": "主题 ID 不合法"})
+		errors.AbortCoded(c, 400, "THM0048", "主题 ID 不合法", h.Config.IsDev)
 		return
 	}
 	t, err := h.Repos.Themes.FindByID(c.Request.Context(), oid)
 	if err != nil {
 		if repository.IsNotFound(err) {
-			c.JSON(404, gin.H{"message": "主题不存在"})
+			errors.AbortCoded(c, 404, "THM0049", "主题不存在", h.Config.IsDev)
 			return
 		}
-		c.JSON(500, gin.H{"message": "提交审核失败"})
+		errors.Abort500C(c, "THM0050", "提交审核失败", err, h.Config.IsDev)
 		return
 	}
 	u, _ := middleware.GetUser(c)
 	if t.IsSystem || t.OwnerID == nil || *t.OwnerID != u.ID {
-		c.JSON(403, gin.H{"message": "只能提交自己的个人主题"})
+		errors.AbortCoded(c, 403, "THM0051", "只能提交自己的个人主题", h.Config.IsDev)
 		return
 	}
 	if t.Status == model.ThemeStatusPending {
-		c.JSON(400, gin.H{"message": "该主题已在审核中"})
+		errors.AbortCoded(c, 400, "THM0052", "该主题已在审核中", h.Config.IsDev)
 		return
 	}
 	if t.Status == model.ThemeStatusApproved {
-		c.JSON(400, gin.H{"message": "该主题已是系统主题"})
+		errors.AbortCoded(c, 400, "THM0053", "该主题已是系统主题", h.Config.IsDev)
 		return
 	}
 	updated, err := h.Repos.Themes.FindOneAndUpdate(c.Request.Context(), oid, bson.M{"$set": bson.M{
@@ -949,7 +951,7 @@ func (h *Themes) Submit(c *gin.Context) {
 		"updatedAt":  time.Now().UTC().Truncate(time.Millisecond),
 	}})
 	if err != nil {
-		c.JSON(500, gin.H{"message": "提交审核失败"})
+		errors.Abort500C(c, "THM0054", "提交审核失败", err, h.Config.IsDev)
 		return
 	}
 	c.JSON(200, themeJSON(updated))
@@ -966,7 +968,7 @@ func (h *Themes) Submit(c *gin.Context) {
 func (h *Themes) AdminAll(c *gin.Context) {
 	list, err := h.Repos.Themes.FindAllAdmin(c.Request.Context())
 	if err != nil {
-		c.JSON(500, gin.H{"message": "获取主题列表失败"})
+		errors.Abort500C(c, "THM0055", "获取主题列表失败", err, h.Config.IsDev)
 		return
 	}
 	out := make([]gin.H, 0, len(list))
@@ -993,14 +995,14 @@ func (h *Themes) AdminAll(c *gin.Context) {
 func (h *Themes) Review(c *gin.Context) {
 	oid, err := primitive.ObjectIDFromHex(c.Param("id"))
 	if err != nil {
-		c.JSON(400, gin.H{"message": "主题 ID 不合法"})
+		errors.AbortCoded(c, 400, "THM0056", "主题 ID 不合法", h.Config.IsDev)
 		return
 	}
 	body := cmsReadBody(c)
 	action := asString(body["action"])
 	note := strings.TrimSpace(asString(body["note"]))
 	if len([]rune(note)) > 200 {
-		c.JSON(400, gin.H{"message": "审核备注不能超过 200 个字符"})
+		errors.AbortCoded(c, 400, "THM0057", "审核备注不能超过 200 个字符", h.Config.IsDev)
 		return
 	}
 	set := bson.M{"reviewNote": note, "updatedAt": time.Now().UTC().Truncate(time.Millisecond)}
@@ -1011,22 +1013,22 @@ func (h *Themes) Review(c *gin.Context) {
 		set["enabled"] = true
 	case "reject":
 		if t, err := h.Repos.Themes.FindByID(c.Request.Context(), oid); err == nil && t.IsSystem {
-			c.JSON(400, gin.H{"message": "系统主题无需审核"})
+			errors.AbortCoded(c, 400, "THM0058", "系统主题无需审核", h.Config.IsDev)
 			return
 		}
 		set["status"] = model.ThemeStatusRejected
 		set["isSystem"] = false
 	default:
-		c.JSON(400, gin.H{"message": "action 必须为 approve 或 reject"})
+		errors.AbortCoded(c, 400, "THM0059", "action 必须为 approve 或 reject", h.Config.IsDev)
 		return
 	}
 	updated, err := h.Repos.Themes.FindOneAndUpdate(c.Request.Context(), oid, bson.M{"$set": set})
 	if err != nil {
 		if repository.IsNotFound(err) {
-			c.JSON(404, gin.H{"message": "主题不存在"})
+			errors.AbortCoded(c, 404, "THM0060", "主题不存在", h.Config.IsDev)
 			return
 		}
-		c.JSON(500, gin.H{"message": "审核失败"})
+		errors.Abort500C(c, "THM0061", "审核失败", err, h.Config.IsDev)
 		return
 	}
 	// 审核结果站内通知主题作者（fire-and-forget，与剧集审核通知一致）。
@@ -1063,6 +1065,7 @@ func (h *Themes) notifyThemeReviewResult(t *model.Theme, action, note string) {
 // body: {"default": true|false}，缺省视为 true（兼容旧「设为默认」调用）。
 //   - true：设为默认（仅限启用的系统主题），并清除其它主题的默认标记；
 //   - false：取消该主题的默认标记，取消后站点允许没有任何默认主题。
+//
 // @Summary 设置/取消站点默认主题
 // @Tags 主题
 // @Security bearerAuth
@@ -1077,16 +1080,16 @@ func (h *Themes) notifyThemeReviewResult(t *model.Theme, action, note string) {
 func (h *Themes) SetDefault(c *gin.Context) {
 	oid, err := primitive.ObjectIDFromHex(c.Param("id"))
 	if err != nil {
-		c.JSON(400, gin.H{"message": "主题 ID 不合法"})
+		errors.AbortCoded(c, 400, "THM0062", "主题 ID 不合法", h.Config.IsDev)
 		return
 	}
 	t, err := h.Repos.Themes.FindByID(c.Request.Context(), oid)
 	if err != nil {
 		if repository.IsNotFound(err) {
-			c.JSON(404, gin.H{"message": "主题不存在"})
+			errors.AbortCoded(c, 404, "THM0063", "主题不存在", h.Config.IsDev)
 			return
 		}
-		c.JSON(500, gin.H{"message": "设置默认主题失败"})
+		errors.Abort500C(c, "THM0064", "设置默认主题失败", err, h.Config.IsDev)
 		return
 	}
 	body := cmsReadBody(c)
@@ -1097,7 +1100,7 @@ func (h *Themes) SetDefault(c *gin.Context) {
 	if !wantDefault {
 		// 取消默认：仅系统主题可操作（个人主题本就不可能是默认）。
 		if !t.IsSystem {
-			c.JSON(400, gin.H{"message": "只有系统主题可以取消默认"})
+			errors.AbortCoded(c, 400, "THM0065", "只有系统主题可以取消默认", h.Config.IsDev)
 			return
 		}
 		updated, err := h.Repos.Themes.FindOneAndUpdate(c.Request.Context(), oid, bson.M{"$set": bson.M{
@@ -1105,14 +1108,14 @@ func (h *Themes) SetDefault(c *gin.Context) {
 			"updatedAt": time.Now().UTC().Truncate(time.Millisecond),
 		}})
 		if err != nil {
-			c.JSON(500, gin.H{"message": "取消默认主题失败"})
+			errors.Abort500C(c, "THM0066", "取消默认主题失败", err, h.Config.IsDev)
 			return
 		}
 		c.JSON(200, themeJSON(updated))
 		return
 	}
 	if !t.IsSystem || !t.Enabled {
-		c.JSON(400, gin.H{"message": "只有启用的系统主题才能设为默认"})
+		errors.AbortCoded(c, 400, "THM0067", "只有启用的系统主题才能设为默认", h.Config.IsDev)
 		return
 	}
 	updated, err := h.Repos.Themes.FindOneAndUpdate(c.Request.Context(), oid, bson.M{"$set": bson.M{
@@ -1120,7 +1123,7 @@ func (h *Themes) SetDefault(c *gin.Context) {
 		"updatedAt": time.Now().UTC().Truncate(time.Millisecond),
 	}})
 	if err != nil {
-		c.JSON(500, gin.H{"message": "设置默认主题失败"})
+		errors.Abort500C(c, "THM0068", "设置默认主题失败", err, h.Config.IsDev)
 		return
 	}
 	// 清除其它主题的默认标记。
@@ -1144,16 +1147,16 @@ func (h *Themes) SetDefault(c *gin.Context) {
 func (h *Themes) AdminUpdate(c *gin.Context) {
 	oid, err := primitive.ObjectIDFromHex(c.Param("id"))
 	if err != nil {
-		c.JSON(400, gin.H{"message": "主题 ID 不合法"})
+		errors.AbortCoded(c, 400, "THM0069", "主题 ID 不合法", h.Config.IsDev)
 		return
 	}
 	t, err := h.Repos.Themes.FindByID(c.Request.Context(), oid)
 	if err != nil {
 		if repository.IsNotFound(err) {
-			c.JSON(404, gin.H{"message": "主题不存在"})
+			errors.AbortCoded(c, 404, "THM0070", "主题不存在", h.Config.IsDev)
 			return
 		}
-		c.JSON(500, gin.H{"message": "更新主题失败"})
+		errors.Abort500C(c, "THM0071", "更新主题失败", err, h.Config.IsDev)
 		return
 	}
 	body := cmsReadBody(c)
@@ -1167,7 +1170,7 @@ func (h *Themes) AdminUpdate(c *gin.Context) {
 		} else if !wantSystem && t.IsSystem {
 			// 系统 → 个人：退回 owner（无 owner 时保持系统但停用）。
 			if t.OwnerID == nil {
-				c.JSON(400, gin.H{"message": "该主题无创建者，无法转为个人主题"})
+				errors.AbortCoded(c, 400, "THM0072", "该主题无创建者，无法转为个人主题", h.Config.IsDev)
 				return
 			}
 			set["isSystem"] = false
@@ -1192,7 +1195,7 @@ func (h *Themes) AdminUpdate(c *gin.Context) {
 				finalEnabled = truthy(ev)
 			}
 			if !finalSystem || !finalEnabled {
-				c.JSON(400, gin.H{"message": "只有启用的系统主题才能设为默认"})
+				errors.AbortCoded(c, 400, "THM0073", "只有启用的系统主题才能设为默认", h.Config.IsDev)
 				return
 			}
 			set["isDefault"] = true
@@ -1203,10 +1206,10 @@ func (h *Themes) AdminUpdate(c *gin.Context) {
 	updated, err := h.Repos.Themes.FindOneAndUpdate(c.Request.Context(), oid, bson.M{"$set": set})
 	if err != nil {
 		if repository.IsNotFound(err) {
-			c.JSON(404, gin.H{"message": "主题不存在"})
+			errors.AbortCoded(c, 404, "THM0074", "主题不存在", h.Config.IsDev)
 			return
 		}
-		c.JSON(500, gin.H{"message": "更新主题失败"})
+		errors.Abort500C(c, "THM0075", "更新主题失败", err, h.Config.IsDev)
 		return
 	}
 	// 若被降级/停用的是默认主题，清除默认标记。
@@ -1249,10 +1252,10 @@ func (h *Themes) UploadIcon(c *gin.Context) {
 	url, err := upload.SaveSVG(c, "file")
 	if err != nil {
 		if err == upload.ErrNoFile {
-			c.JSON(400, gin.H{"message": "请选择要上传的 SVG 图标"})
+			errors.AbortCoded(c, 400, "THM0076", "请选择要上传的 SVG 图标", h.Config.IsDev)
 			return
 		}
-		c.JSON(400, gin.H{"message": err.Error()})
+		errors.AbortCoded(c, 400, "THM0077", err.Error(), h.Config.IsDev)
 		return
 	}
 	c.JSON(200, gin.H{"url": url})
@@ -1261,7 +1264,7 @@ func (h *Themes) UploadIcon(c *gin.Context) {
 // abortThemeUploadError 渲染主题资源上传错误（复用壁纸上传错误契约）。
 func abortThemeUploadError(c *gin.Context, cfg *config.Config, err error, fallback string) {
 	if err == upload.ErrNoFile {
-		c.JSON(400, gin.H{"message": "请选择要上传的图片"})
+		errors.AbortCoded(c, 400, "THM0078", "请选择要上传的图片", cfg.IsDev)
 		return
 	}
 	abortImageUploadError(c, cfg, err, fallback)

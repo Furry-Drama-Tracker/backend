@@ -14,13 +14,13 @@ import (
 // 返回 true 表示校验通过。
 func (h *Auth) reauthPassword(c *gin.Context, currentPassword string) bool {
 	if currentPassword == "" {
-		c.JSON(400, gin.H{"message": "请输入当前密码以确认操作"})
+		errors.AbortCoded(c, 400, "PAS0016", "请输入当前密码以确认操作", h.Config.IsDev)
 		return false
 	}
 	user, _ := middleware.GetUser(c)
 	u, err := h.Svc.Repos.Users.FindByIDWithAuth(c.Request.Context(), user.ID)
 	if err != nil || !auth.Compare(u.Password, currentPassword) {
-		c.JSON(400, gin.H{"message": "当前密码不正确"})
+		errors.AbortCoded(c, 400, "PAS0017", "当前密码不正确", h.Config.IsDev)
 		return false
 	}
 	return true
@@ -88,7 +88,7 @@ func (h *Auth) ListPasskeys(c *gin.Context) {
 	user, _ := middleware.GetUser(c)
 	list, err := h.Svc.ListPasskeys(c.Request.Context(), user.ID)
 	if err != nil {
-		c.JSON(500, gin.H{"message": "服务器错误"})
+		errors.Abort500C(c, "PAS0018", "服务器错误", err, h.Config.IsDev)
 		return
 	}
 	out := make([]gin.H, 0, len(list))
@@ -168,12 +168,10 @@ func (h *Auth) PasskeyLoginVerify(c *gin.Context) {
 	case res.User != nil:
 		c.JSON(200, h.Svc.SessionUserJSON(res.User))
 	case res.NeedVerification:
-		c.JSON(403, gin.H{
-			"message":          "请先验证邮箱后再登录，验证码已发送至您的邮箱",
-			"needVerification": true,
-			"email":            res.Email,
-		})
+		errors.AbortWithAppError(c, errors.NewExtraC("PAS0019", 403,
+			"请先验证邮箱后再登录，验证码已发送至您的邮箱",
+			map[string]any{"needVerification": true, "email": res.Email}), h.Config.IsDev)
 	default:
-		c.JSON(500, gin.H{"message": "服务器错误"})
+		errors.Abort500C(c, "PAS0020", "服务器错误", nil, h.Config.IsDev)
 	}
 }

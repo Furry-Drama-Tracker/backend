@@ -21,15 +21,15 @@ type DeletionResult struct {
 // 置 deletionRequestedAt + audit；必须再次校验当前密码，防止会话被盗后恶意注销。
 func (s *AuthService) RequestDeletion(ctx context.Context, user *model.User, password string) (*DeletionResult, error) {
 	if user.DeletionRequestedAt != nil {
-		return nil, errors.New(400, "已提交过注销申请")
+		return nil, errors.NewC("USR0014", 400, "已提交过注销申请")
 	}
 	full, err := s.Repos.Users.FindByIDWithAuth(ctx, user.ID)
 	if err != nil {
-		return nil, errors.New(500, "服务器错误")
+		return nil, errors.NewC("USR0015", 500, "服务器错误")
 	}
 	if !auth.Compare(full.Password, password) {
 		_ = s.Repos.Users.IncLoginAttempts(ctx, user.ID)
-		return nil, errors.New(400, "密码不正确")
+		return nil, errors.NewC("USR0016", 400, "密码不正确")
 	}
 	_ = s.Repos.Users.ResetLoginAttempts(ctx, user.ID)
 	now := time.Now()
@@ -38,7 +38,7 @@ func (s *AuthService) RequestDeletion(ctx context.Context, user *model.User, pas
 	// loginAttempts/lockUntil 覆写成零值——凭据被静默销毁，2FA 用户再也无法登录
 	// （也无法在宽限期内取消注销，宽限到期即被物理清除）。
 	if err := s.Repos.Users.SetDeletionRequestedAt(ctx, user.ID, &now); err != nil {
-		return nil, errors.New(500, "服务器错误")
+		return nil, errors.NewC("USR0017", 500, "服务器错误")
 	}
 	user.DeletionRequestedAt = &now
 	s.Audit(ctx, user, "ACCOUNT_DELETION_REQUESTED", "auth", "User requested account deletion", "")
@@ -49,11 +49,11 @@ func (s *AuthService) RequestDeletion(ctx context.Context, user *model.User, pas
 // 清除申请 + audit（流程固定）。
 func (s *AuthService) CancelDeletion(ctx context.Context, user *model.User) error {
 	if user.DeletionRequestedAt == nil {
-		return errors.New(400, "没有注销申请")
+		return errors.NewC("USR0018", 400, "没有注销申请")
 	}
 	// 同 RequestDeletion：只定点清除 deletionRequestedAt，不整文档替换。
 	if err := s.Repos.Users.SetDeletionRequestedAt(ctx, user.ID, nil); err != nil {
-		return errors.New(500, "服务器错误")
+		return errors.NewC("USR0019", 500, "服务器错误")
 	}
 	user.DeletionRequestedAt = nil
 	s.Audit(ctx, user, "ACCOUNT_DELETION_CANCELLED", "auth", "User cancelled account deletion", "")

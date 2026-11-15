@@ -47,7 +47,7 @@ func (h *AutoStatus) AutoComplete(c *gin.Context) {
 	ctx := c.Request.Context()
 	episodes, err := h.Repos.Episodes.AutoStatusFindOngoing(ctx)
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	updated := 0
@@ -58,7 +58,7 @@ func (h *AutoStatus) AutoComplete(c *gin.Context) {
 			ep.CurrentEpisodes >= *ep.TotalEpisodes {
 			ep.Status = "completed"
 			if err := h.Repos.Episodes.Save(ctx, ep); err != nil {
-				serverError(c)
+				serverError(c, err, h.Config.IsDev)
 				return
 			}
 			updated++
@@ -81,7 +81,7 @@ func (h *AutoStatus) CheckPremieres(c *gin.Context) {
 	ctx := c.Request.Context()
 	singles, err := h.Repos.SingleEpisodes.AutoStatusFindDuePremieres(ctx, now)
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	released := 0
@@ -91,7 +91,7 @@ func (h *AutoStatus) CheckPremieres(c *gin.Context) {
 		se.IsUpcoming = false
 		se.ReleaseDate = se.PremiereDate
 		if err := h.Repos.SingleEpisodes.AutoStatusSave(ctx, se); err != nil {
-			serverError(c)
+			serverError(c, err, h.Config.IsDev)
 			return
 		}
 		released++

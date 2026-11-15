@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"github.com/Furry-Drama-Tracker/backend/internal/config"
+	"github.com/Furry-Drama-Tracker/backend/internal/errors"
 	"github.com/Furry-Drama-Tracker/backend/internal/middleware"
 	"github.com/Furry-Drama-Tracker/backend/internal/model"
 	"github.com/Furry-Drama-Tracker/backend/internal/ratelimit"
@@ -51,7 +52,7 @@ func (h *Banners) Register(g *gin.RouterGroup) {
 func (h *Banners) List(c *gin.Context) {
 	banners, err := h.Repos.Banners.FindActiveSorted(c.Request.Context())
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	list := make([]gin.H, 0, len(banners))
@@ -70,7 +71,7 @@ func (h *Banners) List(c *gin.Context) {
 func (h *Banners) ListAll(c *gin.Context) {
 	banners, err := h.Repos.Banners.FindAllSorted(c.Request.Context())
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	list := make([]gin.H, 0, len(banners))
@@ -91,12 +92,12 @@ func (h *Banners) ListAll(c *gin.Context) {
 func (h *Banners) Create(c *gin.Context) {
 	body := cmsReadBody(c)
 	if !bannerLinkValid(body) {
-		c.JSON(400, gin.H{"message": "链接格式不合法，仅支持 http/https 协议"})
+		errors.AbortCoded(c, 400, "BAN0001", "链接格式不合法，仅支持 http/https 协议", h.Config.IsDev)
 		return
 	}
 	// title/image 必填（固定契约）：缺失或为空 → 500 Server error（catch-all）。
 	if asString(body["title"]) == "" || asString(body["image"]) == "" {
-		serverError(c)
+		serverError(c, nil, h.Config.IsDev)
 		return
 	}
 	active := true
@@ -116,7 +117,7 @@ func (h *Banners) Create(c *gin.Context) {
 		Active:     active,
 	}
 	if err := h.Repos.Banners.Create(c.Request.Context(), banner); err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	c.JSON(200, bannerJSON(banner))
@@ -134,22 +135,22 @@ func (h *Banners) Create(c *gin.Context) {
 func (h *Banners) Update(c *gin.Context) {
 	oid, err := primitive.ObjectIDFromHex(c.Param("id"))
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	body := cmsReadBody(c)
 	// 链接合法性检查在按 ID 查询之前（检查顺序是固定契约，勿调换）。
 	if !bannerLinkValid(body) {
-		c.JSON(400, gin.H{"message": "链接格式不合法，仅支持 http/https 协议"})
+		errors.AbortCoded(c, 400, "BAN0002", "链接格式不合法，仅支持 http/https 协议", h.Config.IsDev)
 		return
 	}
 	banner, err := h.Repos.Banners.FindByID(c.Request.Context(), oid)
 	if err != nil {
 		if repository.IsNotFound(err) {
-			c.JSON(404, gin.H{"message": "轮播图不存在"})
+			errors.AbortCoded(c, 404, "BAN0003", "轮播图不存在", h.Config.IsDev)
 			return
 		}
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	// 各字段仅 !== undefined 时更新（固定契约，勿改成覆盖式更新）。
@@ -184,7 +185,7 @@ func (h *Banners) Update(c *gin.Context) {
 		banner.Active = cmsCastBool(v)
 	}
 	if err := h.Repos.Banners.Save(c.Request.Context(), banner); err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	c.JSON(200, bannerJSON(banner))
@@ -200,19 +201,19 @@ func (h *Banners) Update(c *gin.Context) {
 func (h *Banners) Delete(c *gin.Context) {
 	oid, err := primitive.ObjectIDFromHex(c.Param("id"))
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	if _, err := h.Repos.Banners.FindByID(c.Request.Context(), oid); err != nil {
 		if repository.IsNotFound(err) {
-			c.JSON(404, gin.H{"message": "轮播图不存在"})
+			errors.AbortCoded(c, 404, "BAN0004", "轮播图不存在", h.Config.IsDev)
 			return
 		}
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	if err := h.Repos.Banners.DeleteByID(c.Request.Context(), oid); err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	c.JSON(200, gin.H{"message": "轮播图已删除"})

@@ -7,6 +7,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 
 	"github.com/Furry-Drama-Tracker/backend/internal/config"
+	"github.com/Furry-Drama-Tracker/backend/internal/errors"
 	"github.com/Furry-Drama-Tracker/backend/internal/middleware"
 	"github.com/Furry-Drama-Tracker/backend/internal/model"
 	"github.com/Furry-Drama-Tracker/backend/internal/ratelimit"
@@ -71,12 +72,12 @@ func (h *AuditLogs) List(c *gin.Context) {
 	ctx := c.Request.Context()
 	total, err := h.Repos.AuditLogs.AdminCount(ctx, query)
 	if err != nil {
-		c.JSON(500, gin.H{"message": "Server error"})
+		errors.Abort500C(c, "AUD0001", "Server error", err, h.Config.IsDev)
 		return
 	}
 	logs, err := h.Repos.AuditLogs.AdminFindPaged(ctx, query, page, limit)
 	if err != nil {
-		c.JSON(500, gin.H{"message": "Server error"})
+		errors.Abort500C(c, "AUD0002", "Server error", err, h.Config.IsDev)
 		return
 	}
 	list := make([]gin.H, 0, len(logs))

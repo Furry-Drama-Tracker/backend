@@ -1,0 +1,5951 @@
+{
+  "$schema": "./errors.schema.json",
+  "version": 1,
+  "refSpec": {
+    "type": "integer",
+    "range": [
+      0,
+      999999999
+    ],
+    "display": "前端补零到 9 位后按三位一段空格分组，如 123 456 789"
+  },
+  "codes": [
+    {
+      "code": "ACT0001",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/activity.go",
+      "line": 66
+    },
+    {
+      "code": "ACT0002",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/activity.go",
+      "line": 80
+    },
+    {
+      "code": "ACT0003",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/activity.go",
+      "line": 86
+    },
+    {
+      "code": "ACT0004",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/activity.go",
+      "line": 104
+    },
+    {
+      "code": "ACT0005",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/activity.go",
+      "line": 114
+    },
+    {
+      "code": "ACT0006",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/activity.go",
+      "line": 159
+    },
+    {
+      "code": "ACT0007",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/activity.go",
+      "line": 164
+    },
+    {
+      "code": "ACT0008",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/activity.go",
+      "line": 183
+    },
+    {
+      "code": "ACT0009",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/activity.go",
+      "line": 196
+    },
+    {
+      "code": "ADM0001",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "服务器错误",
+      "file": "internal/handler/admin.go",
+      "line": 113
+    },
+    {
+      "code": "ADM0002",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "服务器错误",
+      "file": "internal/handler/admin.go",
+      "line": 118
+    },
+    {
+      "code": "ADM0003",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "服务器错误",
+      "file": "internal/handler/admin.go",
+      "line": 123
+    },
+    {
+      "code": "ADM0004",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "服务器错误",
+      "file": "internal/handler/admin.go",
+      "line": 128
+    },
+    {
+      "code": "ADM0005",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "服务器错误",
+      "file": "internal/handler/admin.go",
+      "line": 133
+    },
+    {
+      "code": "ADM0006",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "服务器错误",
+      "file": "internal/handler/admin.go",
+      "line": 189
+    },
+    {
+      "code": "ADM0007",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "服务器错误",
+      "file": "internal/handler/admin.go",
+      "line": 195
+    },
+    {
+      "code": "ADM0008",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "<dynamic>",
+      "file": "internal/handler/admin.go",
+      "line": 224
+    },
+    {
+      "code": "ADM0009",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "请输入邮箱",
+      "file": "internal/handler/admin.go",
+      "line": 228
+    },
+    {
+      "code": "ADM0010",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "邮箱格式不正确",
+      "file": "internal/handler/admin.go",
+      "line": 232
+    },
+    {
+      "code": "ADM0011",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "无效的角色，仅可创建 admin 或 creator",
+      "file": "internal/handler/admin.go",
+      "line": 236
+    },
+    {
+      "code": "ADM0012",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "服务器错误",
+      "file": "internal/handler/admin.go",
+      "line": 242
+    },
+    {
+      "code": "ADM0013",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "该邮箱已注册",
+      "file": "internal/handler/admin.go",
+      "line": 246
+    },
+    {
+      "code": "ADM0014",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "账号ID需为3-20位字母、数字或下划线",
+      "file": "internal/handler/admin.go",
+      "line": 253
+    },
+    {
+      "code": "ADM0015",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "服务器错误",
+      "file": "internal/handler/admin.go",
+      "line": 264
+    },
+    {
+      "code": "ADM0016",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "服务器错误",
+      "file": "internal/handler/admin.go",
+      "line": 276
+    },
+    {
+      "code": "ADM0017",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "该账号ID已存在",
+      "file": "internal/handler/admin.go",
+      "line": 280
+    },
+    {
+      "code": "ADM0018",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "服务器错误",
+      "file": "internal/handler/admin.go",
+      "line": 287
+    },
+    {
+      "code": "ADM0019",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "服务器错误",
+      "file": "internal/handler/admin.go",
+      "line": 306
+    },
+    {
+      "code": "ADM0020",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "服务器错误",
+      "file": "internal/handler/admin.go",
+      "line": 342
+    },
+    {
+      "code": "ADM0021",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "不能删除自己的账号",
+      "file": "internal/handler/admin.go",
+      "line": 347
+    },
+    {
+      "code": "ADM0022",
+      "kind": "AbortCoded",
+      "status": 404,
+      "message": "账户不存在",
+      "file": "internal/handler/admin.go",
+      "line": 353
+    },
+    {
+      "code": "ADM0023",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "服务器错误",
+      "file": "internal/handler/admin.go",
+      "line": 357
+    },
+    {
+      "code": "ADM0024",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "该账户不是管理/创作者账户",
+      "file": "internal/handler/admin.go",
+      "line": 361
+    },
+    {
+      "code": "ADM0025",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "服务器错误",
+      "file": "internal/handler/admin.go",
+      "line": 367
+    },
+    {
+      "code": "ADM0026",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "不能删除最后一个超级管理员",
+      "file": "internal/handler/admin.go",
+      "line": 371
+    },
+    {
+      "code": "ADM0027",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "服务器错误",
+      "file": "internal/handler/admin.go",
+      "line": 376
+    },
+    {
+      "code": "ADM0028",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "服务器错误",
+      "file": "internal/handler/admin.go",
+      "line": 410
+    },
+    {
+      "code": "ADM0029",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "服务器错误",
+      "file": "internal/handler/admin.go",
+      "line": 416
+    },
+    {
+      "code": "ADM0030",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "服务器错误",
+      "file": "internal/handler/admin.go",
+      "line": 440
+    },
+    {
+      "code": "ADM0031",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "不能删除自己的账号",
+      "file": "internal/handler/admin.go",
+      "line": 445
+    },
+    {
+      "code": "ADM0032",
+      "kind": "AbortCoded",
+      "status": 404,
+      "message": "用户不存在",
+      "file": "internal/handler/admin.go",
+      "line": 451
+    },
+    {
+      "code": "ADM0033",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "服务器错误",
+      "file": "internal/handler/admin.go",
+      "line": 455
+    },
+    {
+      "code": "ADM0034",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "服务器错误",
+      "file": "internal/handler/admin.go",
+      "line": 461
+    },
+    {
+      "code": "ADM0035",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "不能删除最后一个超级管理员",
+      "file": "internal/handler/admin.go",
+      "line": 465
+    },
+    {
+      "code": "ADM0036",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "服务器错误",
+      "file": "internal/handler/admin.go",
+      "line": 470
+    },
+    {
+      "code": "ADM0037",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "服务器错误",
+      "file": "internal/handler/admin.go",
+      "line": 474
+    },
+    {
+      "code": "ADM0038",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "服务器错误",
+      "file": "internal/handler/admin.go",
+      "line": 478
+    },
+    {
+      "code": "ADM0039",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "服务器错误",
+      "file": "internal/handler/admin.go",
+      "line": 482
+    },
+    {
+      "code": "ADM0040",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "服务器错误",
+      "file": "internal/handler/admin.go",
+      "line": 486
+    },
+    {
+      "code": "ADM0041",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "服务器错误",
+      "file": "internal/handler/admin.go",
+      "line": 491
+    },
+    {
+      "code": "ADM0042",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "服务器错误",
+      "file": "internal/handler/admin.go",
+      "line": 495
+    },
+    {
+      "code": "ADM0043",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "服务器错误",
+      "file": "internal/handler/admin.go",
+      "line": 499
+    },
+    {
+      "code": "ADM0044",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "服务器错误",
+      "file": "internal/handler/admin.go",
+      "line": 503
+    },
+    {
+      "code": "ADM0045",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "服务器错误",
+      "file": "internal/handler/admin.go",
+      "line": 507
+    },
+    {
+      "code": "ADM0046",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "服务器错误",
+      "file": "internal/handler/admin.go",
+      "line": 513
+    },
+    {
+      "code": "ADM0047",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "服务器错误",
+      "file": "internal/handler/admin.go",
+      "line": 517
+    },
+    {
+      "code": "ADM0048",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "服务器错误",
+      "file": "internal/handler/admin.go",
+      "line": 531
+    },
+    {
+      "code": "ADM0049",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "无效的角色",
+      "file": "internal/handler/admin.go",
+      "line": 559
+    },
+    {
+      "code": "ADM0050",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "服务器错误",
+      "file": "internal/handler/admin.go",
+      "line": 565
+    },
+    {
+      "code": "ADM0051",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "不能修改自己的角色",
+      "file": "internal/handler/admin.go",
+      "line": 570
+    },
+    {
+      "code": "ADM0052",
+      "kind": "AbortCoded",
+      "status": 404,
+      "message": "账户不存在",
+      "file": "internal/handler/admin.go",
+      "line": 576
+    },
+    {
+      "code": "ADM0053",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "服务器错误",
+      "file": "internal/handler/admin.go",
+      "line": 580
+    },
+    {
+      "code": "ADM0054",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "服务器错误",
+      "file": "internal/handler/admin.go",
+      "line": 586
+    },
+    {
+      "code": "ADM0055",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "不能降级最后一个超级管理员",
+      "file": "internal/handler/admin.go",
+      "line": 590
+    },
+    {
+      "code": "ADM0056",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "服务器错误",
+      "file": "internal/handler/admin.go",
+      "line": 601
+    },
+    {
+      "code": "ADM0057",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "服务器错误",
+      "file": "internal/handler/admin.go",
+      "line": 636
+    },
+    {
+      "code": "ADM0058",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "服务器错误",
+      "file": "internal/handler/admin.go",
+      "line": 664
+    },
+    {
+      "code": "ADM0059",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "服务器错误",
+      "file": "internal/handler/admin.go",
+      "line": 673
+    },
+    {
+      "code": "ADM0060",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "服务器错误",
+      "file": "internal/handler/admin.go",
+      "line": 694
+    },
+    {
+      "code": "ADM0061",
+      "kind": "AbortCoded",
+      "status": 404,
+      "message": "创作者主页不存在",
+      "file": "internal/handler/admin.go",
+      "line": 700
+    },
+    {
+      "code": "ADM0062",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "服务器错误",
+      "file": "internal/handler/admin.go",
+      "line": 704
+    },
+    {
+      "code": "ADM0063",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "服务器错误",
+      "file": "internal/handler/admin.go",
+      "line": 709
+    },
+    {
+      "code": "ADM0064",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "服务器错误",
+      "file": "internal/handler/admin.go",
+      "line": 729
+    },
+    {
+      "code": "ADM0065",
+      "kind": "AbortCoded",
+      "status": 404,
+      "message": "创作者主页不存在",
+      "file": "internal/handler/admin.go",
+      "line": 758
+    },
+    {
+      "code": "ADM0066",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "服务器错误",
+      "file": "internal/handler/admin.go",
+      "line": 762
+    },
+    {
+      "code": "ADM0067",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "服务器错误",
+      "file": "internal/handler/admin.go",
+      "line": 780
+    },
+    {
+      "code": "ADM0068",
+      "kind": "AbortCoded",
+      "status": 404,
+      "message": "创作者主页不存在",
+      "file": "internal/handler/admin.go",
+      "line": 786
+    },
+    {
+      "code": "ADM0069",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "服务器错误",
+      "file": "internal/handler/admin.go",
+      "line": 790
+    },
+    {
+      "code": "ADM0070",
+      "kind": "AbortCoded",
+      "status": 404,
+      "message": "创作者主页不存在",
+      "file": "internal/handler/admin.go",
+      "line": 800
+    },
+    {
+      "code": "ADM0071",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "服务器错误",
+      "file": "internal/handler/admin.go",
+      "line": 804
+    },
+    {
+      "code": "ADM0072",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "服务器错误",
+      "file": "internal/handler/admin.go",
+      "line": 826
+    },
+    {
+      "code": "ADM0073",
+      "kind": "AbortCoded",
+      "status": 404,
+      "message": "创作者主页不存在",
+      "file": "internal/handler/admin.go",
+      "line": 843
+    },
+    {
+      "code": "ADM0074",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "服务器错误",
+      "file": "internal/handler/admin.go",
+      "line": 847
+    },
+    {
+      "code": "ADM0075",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "请输入密码",
+      "file": "internal/handler/admin.go",
+      "line": 870
+    },
+    {
+      "code": "ADM0076",
+      "kind": "AbortCoded",
+      "status": 404,
+      "message": "未找到",
+      "file": "internal/handler/admin.go",
+      "line": 876
+    },
+    {
+      "code": "ADM0077",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "服务器错误",
+      "file": "internal/handler/admin.go",
+      "line": 880
+    },
+    {
+      "code": "ADM0078",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "密码错误",
+      "file": "internal/handler/admin.go",
+      "line": 885
+    },
+    {
+      "code": "ADM0079",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "参数错误",
+      "file": "internal/handler/admin.go",
+      "line": 909
+    },
+    {
+      "code": "ADM0080",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "服务器错误",
+      "file": "internal/handler/admin.go",
+      "line": 914
+    },
+    {
+      "code": "ADM0081",
+      "kind": "AbortCoded",
+      "status": 404,
+      "message": "用户不存在",
+      "file": "internal/handler/admin.go",
+      "line": 920
+    },
+    {
+      "code": "ADM0082",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "服务器错误",
+      "file": "internal/handler/admin.go",
+      "line": 924
+    },
+    {
+      "code": "ADM0083",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "不能修改超级管理员或创作者的权限",
+      "file": "internal/handler/admin.go",
+      "line": 928
+    },
+    {
+      "code": "ADM0084",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "服务器错误",
+      "file": "internal/handler/admin.go",
+      "line": 938
+    },
+    {
+      "code": "ANN0001",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "标题和内容不能为空",
+      "file": "internal/handler/announcements.go",
+      "line": 135
+    },
+    {
+      "code": "ANN0002",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "公告链接必须为 http/https 地址",
+      "file": "internal/handler/announcements.go",
+      "line": 148
+    },
+    {
+      "code": "ANN0003",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "公告链接必须为 http/https 地址",
+      "file": "internal/handler/announcements.go",
+      "line": 213
+    },
+    {
+      "code": "ANN0004",
+      "kind": "AbortCoded",
+      "status": 404,
+      "message": "Announcement not found",
+      "file": "internal/handler/announcements.go",
+      "line": 236
+    },
+    {
+      "code": "ANN0005",
+      "kind": "AbortCoded",
+      "status": 404,
+      "message": "Announcement not found",
+      "file": "internal/handler/announcements.go",
+      "line": 245
+    },
+    {
+      "code": "ANN0006",
+      "kind": "AbortCoded",
+      "status": 404,
+      "message": "Announcement not found",
+      "file": "internal/handler/announcements.go",
+      "line": 294
+    },
+    {
+      "code": "ANN0007",
+      "kind": "AbortCoded",
+      "status": 404,
+      "message": "Announcement not found",
+      "file": "internal/handler/announcements.go",
+      "line": 324
+    },
+    {
+      "code": "ANN0008",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "该公告未启用邮件推送",
+      "file": "internal/handler/announcements.go",
+      "line": 331
+    },
+    {
+      "code": "ANN0009",
+      "kind": "AbortCoded",
+      "status": 404,
+      "message": "Announcement not found",
+      "file": "internal/handler/announcements.go",
+      "line": 369
+    },
+    {
+      "code": "ANN0010",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "该公告未启用通知推送",
+      "file": "internal/handler/announcements.go",
+      "line": 376
+    },
+    {
+      "code": "ANN0011",
+      "kind": "AbortCoded",
+      "status": 404,
+      "message": "Announcement not found",
+      "file": "internal/handler/announcements.go",
+      "line": 404
+    },
+    {
+      "code": "AUD0001",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/auditlogs.go",
+      "line": 75
+    },
+    {
+      "code": "AUD0002",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/auditlogs.go",
+      "line": 80
+    },
+    {
+      "code": "AUT0001",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "服务器错误",
+      "file": "internal/handler/auth.go",
+      "line": 49
+    },
+    {
+      "code": "AUT0002",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "accountId is required",
+      "file": "internal/handler/auth.go",
+      "line": 67
+    },
+    {
+      "code": "AUT0003",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "服务器错误",
+      "file": "internal/handler/auth.go",
+      "line": 173
+    },
+    {
+      "code": "AUT0004",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "服务器错误",
+      "file": "internal/handler/auth.go",
+      "line": 223
+    },
+    {
+      "code": "AUT0005",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "服务器错误",
+      "file": "internal/handler/auth.go",
+      "line": 278
+    },
+    {
+      "code": "AUT0006",
+      "kind": "NewC",
+      "status": 400,
+      "message": "邮箱格式不正确",
+      "file": "internal/service/email_change.go",
+      "line": 25
+    },
+    {
+      "code": "AUT0007",
+      "kind": "NewC",
+      "status": 404,
+      "message": "用户不存在",
+      "file": "internal/service/email_change.go",
+      "line": 29
+    },
+    {
+      "code": "AUT0008",
+      "kind": "NewC",
+      "status": 400,
+      "message": "密码不正确",
+      "file": "internal/service/email_change.go",
+      "line": 32
+    },
+    {
+      "code": "AUT0009",
+      "kind": "NewC",
+      "status": 400,
+      "message": "该邮箱已被其他账号使用",
+      "file": "internal/service/email_change.go",
+      "line": 35
+    },
+    {
+      "code": "AUT0010",
+      "kind": "NewC",
+      "status": 500,
+      "message": "服务器错误",
+      "file": "internal/service/email_change.go",
+      "line": 41
+    },
+    {
+      "code": "AUT0011",
+      "kind": "NewC",
+      "status": 400,
+      "message": "没有可更新的偏好设置",
+      "file": "internal/service/email_change.go",
+      "line": 70
+    },
+    {
+      "code": "AUT0012",
+      "kind": "NewC",
+      "status": 400,
+      "message": "没有可更新的偏好设置",
+      "file": "internal/service/email_change.go",
+      "line": 79
+    },
+    {
+      "code": "AUT0013",
+      "kind": "NewC",
+      "status": 500,
+      "message": "服务器错误",
+      "file": "internal/service/email_change.go",
+      "line": 82
+    },
+    {
+      "code": "AUT0014",
+      "kind": "NewC",
+      "status": 500,
+      "message": "服务器错误",
+      "file": "internal/service/email_change.go",
+      "line": 86
+    },
+    {
+      "code": "AUT0015",
+      "kind": "NewC",
+      "status": 400,
+      "message": "请输入验证码",
+      "file": "internal/service/email_change.go",
+      "line": 94
+    },
+    {
+      "code": "AUT0016",
+      "kind": "NewC",
+      "status": 400,
+      "message": "验证码无效或已过期，请重新获取",
+      "file": "internal/service/email_change.go",
+      "line": 98
+    },
+    {
+      "code": "AUT0017",
+      "kind": "NewC",
+      "status": 400,
+      "message": "尝试次数过多，验证码已作废，请重新获取",
+      "file": "internal/service/email_change.go",
+      "line": 103
+    },
+    {
+      "code": "AUT0018",
+      "kind": "NewC",
+      "status": 400,
+      "message": "验证码与邮箱不匹配",
+      "file": "internal/service/email_change.go",
+      "line": 108
+    },
+    {
+      "code": "AUT0019",
+      "kind": "NewC",
+      "status": 404,
+      "message": "用户不存在",
+      "file": "internal/service/email_change.go",
+      "line": 112
+    },
+    {
+      "code": "AUT0020",
+      "kind": "NewC",
+      "status": 400,
+      "message": "验证码已失效，请重新获取",
+      "file": "internal/service/email_change.go",
+      "line": 118
+    },
+    {
+      "code": "AUT0021",
+      "kind": "NewC",
+      "status": 500,
+      "message": "服务器错误",
+      "file": "internal/service/email_change.go",
+      "line": 121
+    },
+    {
+      "code": "AUT0022",
+      "kind": "NewC",
+      "status": 400,
+      "message": "请提供邮箱地址",
+      "file": "internal/service/email_change.go",
+      "line": 150
+    },
+    {
+      "code": "AUT0023",
+      "kind": "NewC",
+      "status": 400,
+      "message": "验证码错误或已过期",
+      "file": "internal/service/email_change.go",
+      "line": 153
+    },
+    {
+      "code": "AUT0024",
+      "kind": "NewC",
+      "status": 400,
+      "message": "邮箱格式不正确",
+      "file": "internal/service/email_change.go",
+      "line": 156
+    },
+    {
+      "code": "AUT0025",
+      "kind": "NewC",
+      "status": 400,
+      "message": "请填写密码和新邮箱",
+      "file": "internal/service/email_change.go",
+      "line": 179
+    },
+    {
+      "code": "AUT0026",
+      "kind": "NewC",
+      "status": 400,
+      "message": "验证码错误或已过期",
+      "file": "internal/service/email_change.go",
+      "line": 182
+    },
+    {
+      "code": "AUT0027",
+      "kind": "NewC",
+      "status": 400,
+      "message": "邮箱格式不正确",
+      "file": "internal/service/email_change.go",
+      "line": 186
+    },
+    {
+      "code": "AUT0028",
+      "kind": "NewC",
+      "status": 404,
+      "message": "用户不存在",
+      "file": "internal/service/email_change.go",
+      "line": 190
+    },
+    {
+      "code": "AUT0029",
+      "kind": "NewC",
+      "status": 423,
+      "message": "账号已被锁定，请30分钟后再试",
+      "file": "internal/service/email_change.go",
+      "line": 193
+    },
+    {
+      "code": "AUT0030",
+      "kind": "NewC",
+      "status": 400,
+      "message": "密码不正确",
+      "file": "internal/service/email_change.go",
+      "line": 197
+    },
+    {
+      "code": "AUT0031",
+      "kind": "NewC",
+      "status": 400,
+      "message": "新邮箱与当前邮箱相同",
+      "file": "internal/service/email_change.go",
+      "line": 201
+    },
+    {
+      "code": "AUT0032",
+      "kind": "NewC",
+      "status": 400,
+      "message": "该邮箱已被其他账号使用",
+      "file": "internal/service/email_change.go",
+      "line": 204
+    },
+    {
+      "code": "AUT0033",
+      "kind": "NewC",
+      "status": 500,
+      "message": "服务器错误",
+      "file": "internal/service/email_change.go",
+      "line": 214
+    },
+    {
+      "code": "AUT0034",
+      "kind": "NewC",
+      "status": 400,
+      "message": "缺少验证令牌",
+      "file": "internal/service/email_change.go",
+      "line": 237
+    },
+    {
+      "code": "AUT0035",
+      "kind": "NewC",
+      "status": 400,
+      "message": "无效的验证令牌",
+      "file": "internal/service/email_change.go",
+      "line": 241
+    },
+    {
+      "code": "AUT0036",
+      "kind": "NewC",
+      "status": 400,
+      "message": "该验证链接已使用，请重新申请",
+      "file": "internal/service/email_change.go",
+      "line": 245
+    },
+    {
+      "code": "AUT0037",
+      "kind": "NewC",
+      "status": 404,
+      "message": "用户不存在",
+      "file": "internal/service/email_change.go",
+      "line": 249
+    },
+    {
+      "code": "AUT0038",
+      "kind": "NewC",
+      "status": 400,
+      "message": "该验证链接已失效，请重新申请",
+      "file": "internal/service/email_change.go",
+      "line": 253
+    },
+    {
+      "code": "AUT0039",
+      "kind": "NewC",
+      "status": 400,
+      "message": "该邮箱已被其他账号使用",
+      "file": "internal/service/email_change.go",
+      "line": 257
+    },
+    {
+      "code": "AUT0040",
+      "kind": "NewC",
+      "status": 500,
+      "message": "服务器错误",
+      "file": "internal/service/email_change.go",
+      "line": 261
+    },
+    {
+      "code": "AUT0041",
+      "kind": "NewC",
+      "status": 400,
+      "message": "验证码错误或已过期",
+      "file": "internal/service/login.go",
+      "line": 56
+    },
+    {
+      "code": "AUT0042",
+      "kind": "NewC",
+      "status": 400,
+      "message": "用户名或密码错误",
+      "file": "internal/service/login.go",
+      "line": 62
+    },
+    {
+      "code": "AUT0043",
+      "kind": "NewC",
+      "status": 400,
+      "message": "用户名或密码错误",
+      "file": "internal/service/login.go",
+      "line": 65
+    },
+    {
+      "code": "AUT0044",
+      "kind": "NewC",
+      "status": 400,
+      "message": "用户名或密码错误",
+      "file": "internal/service/login.go",
+      "line": 73
+    },
+    {
+      "code": "AUT0045",
+      "kind": "NewC",
+      "status": 400,
+      "message": "用户名或密码错误",
+      "file": "internal/service/login.go",
+      "line": 80
+    },
+    {
+      "code": "AUT0046",
+      "kind": "NewC",
+      "status": 500,
+      "message": "服务器错误",
+      "file": "internal/service/login.go",
+      "line": 110
+    },
+    {
+      "code": "AUT0047",
+      "kind": "NewC",
+      "status": 500,
+      "message": "服务器错误",
+      "file": "internal/service/login.go",
+      "line": 139
+    },
+    {
+      "code": "AUT0048",
+      "kind": "NewC",
+      "status": 400,
+      "message": "请输入当前密码以确认操作",
+      "file": "internal/service/loginname.go",
+      "line": 158
+    },
+    {
+      "code": "AUT0049",
+      "kind": "NewC",
+      "status": 400,
+      "message": "当前密码不正确",
+      "file": "internal/service/loginname.go",
+      "line": 163
+    },
+    {
+      "code": "AUT0050",
+      "kind": "NewC",
+      "status": 400,
+      "message": "新用户名与当前用户名相同",
+      "file": "internal/service/loginname.go",
+      "line": 167
+    },
+    {
+      "code": "AUT0051",
+      "kind": "NewC",
+      "status": 400,
+      "message": "<dynamic>",
+      "file": "internal/service/loginname.go",
+      "line": 170
+    },
+    {
+      "code": "AUT0052",
+      "kind": "NewC",
+      "status": 500,
+      "message": "服务器错误",
+      "file": "internal/service/loginname.go",
+      "line": 177
+    },
+    {
+      "code": "AUT0053",
+      "kind": "NewC",
+      "status": 400,
+      "message": "该用户名已被占用",
+      "file": "internal/service/loginname.go",
+      "line": 180
+    },
+    {
+      "code": "AUT0054",
+      "kind": "NewC",
+      "status": 500,
+      "message": "服务器错误",
+      "file": "internal/service/loginname.go",
+      "line": 184
+    },
+    {
+      "code": "AUT0055",
+      "kind": "NewC",
+      "status": 400,
+      "message": "该用户名正在保留期，暂时不可使用",
+      "file": "internal/service/loginname.go",
+      "line": 187
+    },
+    {
+      "code": "AUT0056",
+      "kind": "NewC",
+      "status": 400,
+      "message": "<dynamic>",
+      "file": "internal/service/loginname.go",
+      "line": 200
+    },
+    {
+      "code": "AUT0057",
+      "kind": "NewC",
+      "status": 500,
+      "message": "服务器错误",
+      "file": "internal/service/loginname.go",
+      "line": 213
+    },
+    {
+      "code": "AUT0058",
+      "kind": "NewC",
+      "status": 400,
+      "message": "该用户名已被占用",
+      "file": "internal/service/loginname.go",
+      "line": 218
+    },
+    {
+      "code": "AUT0059",
+      "kind": "NewC",
+      "status": 500,
+      "message": "服务器错误",
+      "file": "internal/service/loginname.go",
+      "line": 220
+    },
+    {
+      "code": "AUT0060",
+      "kind": "NewC",
+      "status": 400,
+      "message": "<dynamic>",
+      "file": "internal/service/password.go",
+      "line": 19
+    },
+    {
+      "code": "AUT0061",
+      "kind": "NewC",
+      "status": 404,
+      "message": "用户不存在",
+      "file": "internal/service/password.go",
+      "line": 23
+    },
+    {
+      "code": "AUT0062",
+      "kind": "NewC",
+      "status": 400,
+      "message": "当前密码不正确",
+      "file": "internal/service/password.go",
+      "line": 27
+    },
+    {
+      "code": "AUT0063",
+      "kind": "NewC",
+      "status": 500,
+      "message": "服务器错误",
+      "file": "internal/service/password.go",
+      "line": 32
+    },
+    {
+      "code": "AUT0064",
+      "kind": "NewC",
+      "status": 500,
+      "message": "服务器错误",
+      "file": "internal/service/password.go",
+      "line": 35
+    },
+    {
+      "code": "AUT0065",
+      "kind": "NewC",
+      "status": 400,
+      "message": "验证码错误或已过期",
+      "file": "internal/service/password.go",
+      "line": 48
+    },
+    {
+      "code": "AUT0066",
+      "kind": "NewC",
+      "status": 400,
+      "message": "<dynamic>",
+      "file": "internal/service/password.go",
+      "line": 69
+    },
+    {
+      "code": "AUT0067",
+      "kind": "NewC",
+      "status": 400,
+      "message": "重置链接已过期，请重新获取",
+      "file": "internal/service/password.go",
+      "line": 74
+    },
+    {
+      "code": "AUT0068",
+      "kind": "NewC",
+      "status": 400,
+      "message": "无效的重置令牌",
+      "file": "internal/service/password.go",
+      "line": 76
+    },
+    {
+      "code": "AUT0069",
+      "kind": "NewC",
+      "status": 400,
+      "message": "无效的重置令牌",
+      "file": "internal/service/password.go",
+      "line": 79
+    },
+    {
+      "code": "AUT0070",
+      "kind": "NewC",
+      "status": 400,
+      "message": "该重置链接已使用，请重新获取",
+      "file": "internal/service/password.go",
+      "line": 83
+    },
+    {
+      "code": "AUT0071",
+      "kind": "NewC",
+      "status": 404,
+      "message": "用户不存在",
+      "file": "internal/service/password.go",
+      "line": 87
+    },
+    {
+      "code": "AUT0072",
+      "kind": "NewC",
+      "status": 400,
+      "message": "该重置链接已失效，请重新获取",
+      "file": "internal/service/password.go",
+      "line": 91
+    },
+    {
+      "code": "AUT0073",
+      "kind": "NewC",
+      "status": 500,
+      "message": "服务器错误",
+      "file": "internal/service/password.go",
+      "line": 95
+    },
+    {
+      "code": "AUT0074",
+      "kind": "NewC",
+      "status": 500,
+      "message": "服务器错误",
+      "file": "internal/service/password.go",
+      "line": 99
+    },
+    {
+      "code": "AUT0075",
+      "kind": "NewKeyC",
+      "status": 401,
+      "message": "No refresh token",
+      "messageKey": "auth.noRefreshToken",
+      "file": "internal/service/refresh.go",
+      "line": 34
+    },
+    {
+      "code": "AUT0076",
+      "kind": "NewKeyC",
+      "status": 401,
+      "message": "Refresh token expired",
+      "messageKey": "auth.refreshTokenExpired",
+      "file": "internal/service/refresh.go",
+      "line": 39
+    },
+    {
+      "code": "AUT0077",
+      "kind": "NewKeyC",
+      "status": 401,
+      "message": "Invalid refresh token",
+      "messageKey": "auth.invalidToken",
+      "file": "internal/service/refresh.go",
+      "line": 41
+    },
+    {
+      "code": "AUT0078",
+      "kind": "NewKeyC",
+      "status": 401,
+      "message": "Invalid token type",
+      "messageKey": "auth.invalidToken",
+      "file": "internal/service/refresh.go",
+      "line": 44
+    },
+    {
+      "code": "AUT0079",
+      "kind": "NewKeyC",
+      "status": 500,
+      "message": "服务器错误",
+      "file": "internal/service/refresh.go",
+      "line": 54
+    },
+    {
+      "code": "AUT0080",
+      "kind": "NewKeyC",
+      "status": 401,
+      "message": "User not found",
+      "messageKey": "auth.userNotFound",
+      "file": "internal/service/refresh.go",
+      "line": 59
+    },
+    {
+      "code": "AUT0081",
+      "kind": "NewKeyC",
+      "status": 409,
+      "message": "Concurrent refresh",
+      "messageKey": "auth.concurrentRefresh",
+      "file": "internal/service/refresh.go",
+      "line": 77
+    },
+    {
+      "code": "AUT0082",
+      "kind": "NewKeyC",
+      "status": 401,
+      "message": "Refresh token reuse detected",
+      "messageKey": "auth.refreshTokenReuse",
+      "file": "internal/service/refresh.go",
+      "line": 96
+    },
+    {
+      "code": "AUT0083",
+      "kind": "NewC",
+      "status": 400,
+      "message": "验证码错误或已过期",
+      "file": "internal/service/register.go",
+      "line": 44
+    },
+    {
+      "code": "AUT0084",
+      "kind": "NewC",
+      "status": 400,
+      "message": "邮箱格式不正确",
+      "file": "internal/service/register.go",
+      "line": 50
+    },
+    {
+      "code": "AUT0085",
+      "kind": "NewC",
+      "status": 400,
+      "message": "<dynamic>",
+      "file": "internal/service/register.go",
+      "line": 54
+    },
+    {
+      "code": "AUT0086",
+      "kind": "NewC",
+      "status": 400,
+      "message": "昵称长度需在1-20个字符之间",
+      "file": "internal/service/register.go",
+      "line": 57
+    },
+    {
+      "code": "AUT0087",
+      "kind": "NewC",
+      "status": 400,
+      "message": "<dynamic>",
+      "file": "internal/service/register.go",
+      "line": 60
+    },
+    {
+      "code": "AUT0088",
+      "kind": "NewC",
+      "status": 500,
+      "message": "服务器错误",
+      "file": "internal/service/register.go",
+      "line": 66
+    },
+    {
+      "code": "AUT0089",
+      "kind": "NewC",
+      "status": 400,
+      "message": "该邮箱不可注册",
+      "file": "internal/service/register.go",
+      "line": 69
+    },
+    {
+      "code": "AUT0090",
+      "kind": "NewC",
+      "status": 500,
+      "message": "服务器错误",
+      "file": "internal/service/register.go",
+      "line": 73
+    },
+    {
+      "code": "AUT0091",
+      "kind": "NewExtraC",
+      "status": 400,
+      "message": "该邮箱已被注册",
+      "file": "internal/service/register.go",
+      "line": 76
+    },
+    {
+      "code": "AUT0092",
+      "kind": "NewC",
+      "status": 500,
+      "message": "服务器错误",
+      "file": "internal/service/register.go",
+      "line": 79
+    },
+    {
+      "code": "AUT0093",
+      "kind": "NewC",
+      "status": 400,
+      "message": "该账号ID已被占用",
+      "file": "internal/service/register.go",
+      "line": 81
+    },
+    {
+      "code": "AUT0094",
+      "kind": "NewC",
+      "status": 500,
+      "message": "服务器错误",
+      "file": "internal/service/register.go",
+      "line": 86
+    },
+    {
+      "code": "AUT0095",
+      "kind": "NewC",
+      "status": 400,
+      "message": "该用户名正在保留期，暂时不可注册",
+      "file": "internal/service/register.go",
+      "line": 88
+    },
+    {
+      "code": "AUT0096",
+      "kind": "NewC",
+      "status": 500,
+      "message": "服务器错误",
+      "file": "internal/service/register.go",
+      "line": 93
+    },
+    {
+      "code": "AUT0097",
+      "kind": "NewC",
+      "status": 500,
+      "message": "服务器错误",
+      "file": "internal/service/register.go",
+      "line": 98
+    },
+    {
+      "code": "AUT0098",
+      "kind": "NewC",
+      "status": 400,
+      "message": "该信息已被使用",
+      "file": "internal/service/register.go",
+      "line": 127
+    },
+    {
+      "code": "AUT0099",
+      "kind": "NewC",
+      "status": 500,
+      "message": "服务器错误",
+      "file": "internal/service/register.go",
+      "line": 129
+    },
+    {
+      "code": "AUT0100",
+      "kind": "codedBody",
+      "status": 401,
+      "message": "Not authorized, no token",
+      "file": "internal/middleware/auth.go",
+      "line": 55
+    },
+    {
+      "code": "AUT0101",
+      "kind": "codedBody",
+      "status": 419,
+      "message": "Access token expired",
+      "file": "internal/middleware/auth.go",
+      "line": 61
+    },
+    {
+      "code": "AUT0102",
+      "kind": "codedBody",
+      "status": 419,
+      "message": "Not authorized, token failed",
+      "file": "internal/middleware/auth.go",
+      "line": 64
+    },
+    {
+      "code": "AUT0103",
+      "kind": "codedBody",
+      "status": 401,
+      "message": "Invalid token type",
+      "file": "internal/middleware/auth.go",
+      "line": 69
+    },
+    {
+      "code": "AUT0104",
+      "kind": "codedBody",
+      "status": 401,
+      "message": "Not authorized, user not found",
+      "file": "internal/middleware/auth.go",
+      "line": 74
+    },
+    {
+      "code": "AUT0105",
+      "kind": "codedBody",
+      "status": 401,
+      "message": "Not authorized, token revoked",
+      "file": "internal/middleware/auth.go",
+      "line": 106
+    },
+    {
+      "code": "AUT0106",
+      "kind": "codedBody",
+      "status": 403,
+      "message": "Not authorized",
+      "file": "internal/middleware/auth.go",
+      "line": 111
+    },
+    {
+      "code": "AUT0107",
+      "kind": "codedBody",
+      "status": 403,
+      "message": "请先修改管理员邮箱后再进行操作",
+      "file": "internal/middleware/auth.go",
+      "line": 147
+    },
+    {
+      "code": "AUT0108",
+      "kind": "NewExtraC",
+      "status": 403,
+      "message": "请先验证邮箱后再登录，验证码已发送至您的邮箱",
+      "file": "internal/handler/auth.go",
+      "line": 158
+    },
+    {
+      "code": "AUT0109",
+      "kind": "codedBody",
+      "status": 403,
+      "message": "管理员账号必须开启两步验证后才能继续操作",
+      "file": "internal/middleware/auth.go",
+      "line": 119
+    },
+    {
+      "code": "BAK0001",
+      "kind": "AbortCoded",
+      "status": 403,
+      "message": "需要超级管理员权限",
+      "file": "internal/handler/backup.go",
+      "line": 88
+    },
+    {
+      "code": "BAK0002",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "无效的备份数据",
+      "file": "internal/handler/backup.go",
+      "line": 146
+    },
+    {
+      "code": "BAK0003",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "无效的备份数据",
+      "file": "internal/handler/backup.go",
+      "line": 160
+    },
+    {
+      "code": "BAK0004",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "备份数据过大，最大支持50MB",
+      "file": "internal/handler/backup.go",
+      "line": 172
+    },
+    {
+      "code": "BAN0001",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "链接格式不合法，仅支持 http/https 协议",
+      "file": "internal/handler/banners.go",
+      "line": 95
+    },
+    {
+      "code": "BAN0002",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "链接格式不合法，仅支持 http/https 协议",
+      "file": "internal/handler/banners.go",
+      "line": 144
+    },
+    {
+      "code": "BAN0003",
+      "kind": "AbortCoded",
+      "status": 404,
+      "message": "轮播图不存在",
+      "file": "internal/handler/banners.go",
+      "line": 150
+    },
+    {
+      "code": "BAN0004",
+      "kind": "AbortCoded",
+      "status": 404,
+      "message": "轮播图不存在",
+      "file": "internal/handler/banners.go",
+      "line": 209
+    },
+    {
+      "code": "BDP0001",
+      "kind": "codedBody",
+      "status": null,
+      "message": "读取请求体失败: ",
+      "file": "internal/middleware/bodyparse.go",
+      "line": 85
+    },
+    {
+      "code": "BDP0002",
+      "kind": "codedBody",
+      "status": null,
+      "message": "request entity too large",
+      "file": "internal/middleware/bodyparse.go",
+      "line": 89
+    },
+    {
+      "code": "BDP0003",
+      "kind": "codedBody",
+      "status": null,
+      "message": "<dynamic>",
+      "file": "internal/middleware/bodyparse.go",
+      "line": 107
+    },
+    {
+      "code": "BDP0004",
+      "kind": "codedBody",
+      "status": null,
+      "message": "<dynamic>",
+      "file": "internal/middleware/bodyparse.go",
+      "line": 117
+    },
+    {
+      "code": "CAT0001",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "该分类已存在",
+      "file": "internal/handler/categories.go",
+      "line": 81
+    },
+    {
+      "code": "CAT0002",
+      "kind": "AbortCoded",
+      "status": 404,
+      "message": "分类不存在",
+      "file": "internal/handler/categories.go",
+      "line": 120
+    },
+    {
+      "code": "CAT0003",
+      "kind": "AbortCoded",
+      "status": 404,
+      "message": "分类不存在",
+      "file": "internal/handler/categories.go",
+      "line": 162
+    },
+    {
+      "code": "COR0001",
+      "kind": "codedBody",
+      "status": null,
+      "message": "CORS policy denied",
+      "file": "internal/middleware/cors.go",
+      "line": 28
+    },
+    {
+      "code": "CPD0001",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/creatorprofile.go",
+      "line": 70
+    },
+    {
+      "code": "CPD0002",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/creatorprofile.go",
+      "line": 74
+    },
+    {
+      "code": "CPD0003",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "头像地址必须为 /uploads/ 或 http(s) 地址",
+      "file": "internal/handler/creatorprofile.go",
+      "line": 98
+    },
+    {
+      "code": "CPD0004",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "<dynamic>",
+      "file": "internal/handler/creatorprofile.go",
+      "line": 103
+    },
+    {
+      "code": "CPD0005",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "QQ群链接必须为 http/https 地址",
+      "file": "internal/handler/creatorprofile.go",
+      "line": 108
+    },
+    {
+      "code": "CPD0006",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/creatorprofile.go",
+      "line": 122
+    },
+    {
+      "code": "CPD0007",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/creatorprofile.go",
+      "line": 129
+    },
+    {
+      "code": "CPD0008",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/creatorprofile.go",
+      "line": 149
+    },
+    {
+      "code": "CPD0009",
+      "kind": "AbortCoded",
+      "status": 404,
+      "message": "Profile not found",
+      "file": "internal/handler/creatorprofile.go",
+      "line": 155
+    },
+    {
+      "code": "CPD0010",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/creatorprofile.go",
+      "line": 159
+    },
+    {
+      "code": "CPD0011",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/creatorprofile.go",
+      "line": 164
+    },
+    {
+      "code": "CPD0012",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/creatorprofile.go",
+      "line": 182
+    },
+    {
+      "code": "CPD0013",
+      "kind": "AbortCoded",
+      "status": 404,
+      "message": "Profile not found",
+      "file": "internal/handler/creatorprofile.go",
+      "line": 188
+    },
+    {
+      "code": "CPD0014",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/creatorprofile.go",
+      "line": 192
+    },
+    {
+      "code": "CPD0015",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/creatorprofile.go",
+      "line": 197
+    },
+    {
+      "code": "CRT0001",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/creator.go",
+      "line": 90
+    },
+    {
+      "code": "CRT0002",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/creator.go",
+      "line": 96
+    },
+    {
+      "code": "CSR0001",
+      "kind": "codedBody",
+      "status": 403,
+      "message": "CSRF token mismatch",
+      "file": "internal/middleware/csrf.go",
+      "line": 23
+    },
+    {
+      "code": "CSR0002",
+      "kind": "codedBody",
+      "status": 403,
+      "message": "CSRF protection: missing X-XSRF-TOKEN header",
+      "file": "internal/middleware/csrf.go",
+      "line": 25
+    },
+    {
+      "code": "CSR0003",
+      "kind": "codedBody",
+      "status": 403,
+      "message": "CSRF protection: missing XSRF-TOKEN cookie, please refresh the page",
+      "file": "internal/middleware/csrf.go",
+      "line": 27
+    },
+    {
+      "code": "DEV0001",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "服务器错误",
+      "file": "internal/handler/device.go",
+      "line": 42
+    },
+    {
+      "code": "DEV0002",
+      "kind": "NewC",
+      "status": 400,
+      "message": "缺少2FA挑战令牌，请重新登录",
+      "file": "internal/service/device.go",
+      "line": 21
+    },
+    {
+      "code": "DEV0003",
+      "kind": "NewC",
+      "status": 400,
+      "message": "2FA挑战令牌已过期或无效，请重新登录",
+      "file": "internal/service/device.go",
+      "line": 25
+    },
+    {
+      "code": "DEV0004",
+      "kind": "NewC",
+      "status": 400,
+      "message": "无效的2FA挑战令牌",
+      "file": "internal/service/device.go",
+      "line": 28
+    },
+    {
+      "code": "DEV0005",
+      "kind": "NewC",
+      "status": 400,
+      "message": "该账号未启用两步验证",
+      "file": "internal/service/device.go",
+      "line": 34
+    },
+    {
+      "code": "DEV0006",
+      "kind": "NewC",
+      "status": 400,
+      "message": "验证失败",
+      "file": "internal/service/device.go",
+      "line": 37
+    },
+    {
+      "code": "DEV0007",
+      "kind": "NewC",
+      "status": 423,
+      "message": "账号已被锁定，请30分钟后再试",
+      "file": "internal/service/device.go",
+      "line": 40
+    },
+    {
+      "code": "DEV0008",
+      "kind": "NewC",
+      "status": 403,
+      "message": "请先验证邮箱后再登录",
+      "file": "internal/service/device.go",
+      "line": 43
+    },
+    {
+      "code": "DEV0009",
+      "kind": "NewC",
+      "status": 500,
+      "message": "服务器错误",
+      "file": "internal/service/device.go",
+      "line": 73
+    },
+    {
+      "code": "DEV0010",
+      "kind": "NewC",
+      "status": 500,
+      "message": "服务器错误",
+      "file": "internal/service/device.go",
+      "line": 119
+    },
+    {
+      "code": "DEV0011",
+      "kind": "NewC",
+      "status": 400,
+      "message": "缺少2FA挑战令牌，请重新登录",
+      "file": "internal/service/device.go",
+      "line": 132
+    },
+    {
+      "code": "DEV0012",
+      "kind": "NewC",
+      "status": 400,
+      "message": "2FA挑战令牌已过期或无效，请重新登录",
+      "file": "internal/service/device.go",
+      "line": 136
+    },
+    {
+      "code": "DEV0013",
+      "kind": "NewC",
+      "status": 400,
+      "message": "用户不存在",
+      "file": "internal/service/device.go",
+      "line": 140
+    },
+    {
+      "code": "DEV0014",
+      "kind": "NewC",
+      "status": 400,
+      "message": "该账号未启用两步验证",
+      "file": "internal/service/device.go",
+      "line": 143
+    },
+    {
+      "code": "DEV0015",
+      "kind": "NewC",
+      "status": 400,
+      "message": "该账号未绑定已验证的邮箱",
+      "file": "internal/service/device.go",
+      "line": 146
+    },
+    {
+      "code": "DEV0016",
+      "kind": "NewC",
+      "status": 423,
+      "message": "账号已被锁定，请30分钟后再试",
+      "file": "internal/service/device.go",
+      "line": 194
+    },
+    {
+      "code": "DEV0017",
+      "kind": "NewC",
+      "status": 400,
+      "message": "验证码无效",
+      "file": "internal/service/device.go",
+      "line": 196
+    },
+    {
+      "code": "EML0001",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "请输入密码确认注销",
+      "file": "internal/handler/email.go",
+      "line": 186
+    },
+    {
+      "code": "EPS0001",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "请选择要上传的图片",
+      "file": "internal/handler/episodes.go",
+      "line": 107
+    },
+    {
+      "code": "EPS0002",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "文件大小不能超过5MB",
+      "file": "internal/handler/episodes.go",
+      "line": 113
+    },
+    {
+      "code": "EPS0003",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "仅支持图片文件 (jpg, jpeg, png, gif, webp)",
+      "file": "internal/handler/episodes.go",
+      "line": 115
+    },
+    {
+      "code": "EPS0004",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "文件内容与类型不匹配，仅支持图片文件",
+      "file": "internal/handler/episodes.go",
+      "line": 117
+    },
+    {
+      "code": "EPS0005",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "文件上传错误",
+      "file": "internal/handler/episodes.go",
+      "line": 119
+    },
+    {
+      "code": "EPS0006",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "<dynamic>",
+      "file": "internal/handler/episodes.go",
+      "line": 127
+    },
+    {
+      "code": "EPS0007",
+      "kind": "AbortCoded",
+      "status": 404,
+      "message": "Episode not found",
+      "file": "internal/handler/episodes.go",
+      "line": 552
+    },
+    {
+      "code": "EPS0008",
+      "kind": "AbortCoded",
+      "status": 404,
+      "message": "Episode not found",
+      "file": "internal/handler/episodes.go",
+      "line": 565
+    },
+    {
+      "code": "EPS0009",
+      "kind": "AbortCoded",
+      "status": 404,
+      "message": "Episode not found",
+      "file": "internal/handler/episodes.go",
+      "line": 613
+    },
+    {
+      "code": "EPS0010",
+      "kind": "AbortCoded",
+      "status": 404,
+      "message": "Episode not found",
+      "file": "internal/handler/episodes.go",
+      "line": 620
+    },
+    {
+      "code": "EPS0011",
+      "kind": "AbortCoded",
+      "status": 404,
+      "message": "Episode not found",
+      "file": "internal/handler/episodes.go",
+      "line": 642
+    },
+    {
+      "code": "EPS0012",
+      "kind": "AbortCoded",
+      "status": 404,
+      "message": "Single episode not found",
+      "file": "internal/handler/episodes.go",
+      "line": 668
+    },
+    {
+      "code": "EPS0013",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "<dynamic>",
+      "file": "internal/handler/episodes.go",
+      "line": 717
+    },
+    {
+      "code": "EPS0014",
+      "kind": "AbortCoded",
+      "status": 404,
+      "message": "Single episode not found",
+      "file": "internal/handler/episodes.go",
+      "line": 746
+    },
+    {
+      "code": "EPS0015",
+      "kind": "AbortCoded",
+      "status": 403,
+      "message": "You do not have permission to edit this episode",
+      "file": "internal/handler/episodes.go",
+      "line": 756
+    },
+    {
+      "code": "EPS0016",
+      "kind": "AbortCoded",
+      "status": 404,
+      "message": "Single episode not found",
+      "file": "internal/handler/episodes.go",
+      "line": 767
+    },
+    {
+      "code": "EPS0017",
+      "kind": "AbortCoded",
+      "status": 404,
+      "message": "Single episode not found",
+      "file": "internal/handler/episodes.go",
+      "line": 870
+    },
+    {
+      "code": "EPS0018",
+      "kind": "AbortCoded",
+      "status": 403,
+      "message": "You do not have permission to delete this episode",
+      "file": "internal/handler/episodes.go",
+      "line": 880
+    },
+    {
+      "code": "EPS0019",
+      "kind": "AbortCoded",
+      "status": 404,
+      "message": "Single episode not found",
+      "file": "internal/handler/episodes.go",
+      "line": 886
+    },
+    {
+      "code": "EPS0020",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "<dynamic>",
+      "file": "internal/handler/episodes.go",
+      "line": 936
+    },
+    {
+      "code": "EPS0021",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "封面地址必须为 /uploads/ 或 http(s) 地址",
+      "file": "internal/handler/episodes.go",
+      "line": 941
+    },
+    {
+      "code": "EPS0022",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "<dynamic>",
+      "file": "internal/handler/episodes.go",
+      "line": 946
+    },
+    {
+      "code": "EPS0023",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "QQ群链接必须为 http/https 地址",
+      "file": "internal/handler/episodes.go",
+      "line": 951
+    },
+    {
+      "code": "EPS0024",
+      "kind": "AbortCoded",
+      "status": 404,
+      "message": "Episode not found",
+      "file": "internal/handler/episodes.go",
+      "line": 1010
+    },
+    {
+      "code": "EPS0025",
+      "kind": "AbortCoded",
+      "status": 403,
+      "message": "No permission to add episodes",
+      "file": "internal/handler/episodes.go",
+      "line": 1019
+    },
+    {
+      "code": "EPS0026",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "<dynamic>",
+      "file": "internal/handler/episodes.go",
+      "line": 1035
+    },
+    {
+      "code": "EPS0027",
+      "kind": "AbortCoded",
+      "status": 404,
+      "message": "Episode not found",
+      "file": "internal/handler/episodes.go",
+      "line": 1154
+    },
+    {
+      "code": "EPS0028",
+      "kind": "AbortCoded",
+      "status": 403,
+      "message": "You do not have permission to edit this episode",
+      "file": "internal/handler/episodes.go",
+      "line": 1164
+    },
+    {
+      "code": "EPS0029",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "<dynamic>",
+      "file": "internal/handler/episodes.go",
+      "line": 1173
+    },
+    {
+      "code": "EPS0030",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "QQ群链接必须为 http/https 地址",
+      "file": "internal/handler/episodes.go",
+      "line": 1181
+    },
+    {
+      "code": "EPS0031",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "封面地址必须为 /uploads/ 或 http(s) 地址",
+      "file": "internal/handler/episodes.go",
+      "line": 1189
+    },
+    {
+      "code": "EPS0032",
+      "kind": "AbortCoded",
+      "status": 404,
+      "message": "Episode not found",
+      "file": "internal/handler/episodes.go",
+      "line": 1317
+    },
+    {
+      "code": "EPS0033",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "只有被拒绝的剧集才能重新提交审核",
+      "file": "internal/handler/episodes.go",
+      "line": 1325
+    },
+    {
+      "code": "EPS0034",
+      "kind": "AbortCoded",
+      "status": 403,
+      "message": "You do not have permission to resubmit this episode",
+      "file": "internal/handler/episodes.go",
+      "line": 1330
+    },
+    {
+      "code": "EPS0035",
+      "kind": "AbortCoded",
+      "status": 404,
+      "message": "Episode not found",
+      "file": "internal/handler/episodes.go",
+      "line": 1368
+    },
+    {
+      "code": "EPS0036",
+      "kind": "AbortCoded",
+      "status": 403,
+      "message": "You do not have permission to delete this episode",
+      "file": "internal/handler/episodes.go",
+      "line": 1377
+    },
+    {
+      "code": "EPS0037",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/episodes.go",
+      "line": 1780
+    },
+    {
+      "code": "FBK0001",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "无效的反馈类型",
+      "file": "internal/handler/feedback.go",
+      "line": 81
+    },
+    {
+      "code": "FBK0002",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "内容不能为空",
+      "file": "internal/handler/feedback.go",
+      "line": 86
+    },
+    {
+      "code": "FBK0003",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "内容不能超过2000字",
+      "file": "internal/handler/feedback.go",
+      "line": 90
+    },
+    {
+      "code": "FBK0004",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/feedback.go",
+      "line": 112
+    },
+    {
+      "code": "FBK0005",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/feedback.go",
+      "line": 133
+    },
+    {
+      "code": "FBK0006",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/feedback.go",
+      "line": 139
+    },
+    {
+      "code": "FBK0007",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/feedback.go",
+      "line": 173
+    },
+    {
+      "code": "FBK0008",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/feedback.go",
+      "line": 179
+    },
+    {
+      "code": "FBK0009",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "无效的状态值",
+      "file": "internal/handler/feedback.go",
+      "line": 214
+    },
+    {
+      "code": "FBK0010",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/feedback.go",
+      "line": 232
+    },
+    {
+      "code": "FBK0011",
+      "kind": "AbortCoded",
+      "status": 404,
+      "message": "Not found",
+      "file": "internal/handler/feedback.go",
+      "line": 237
+    },
+    {
+      "code": "FBK0012",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/feedback.go",
+      "line": 241
+    },
+    {
+      "code": "FBK0013",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/feedback.go",
+      "line": 253
+    },
+    {
+      "code": "FLK0001",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "站点名称和链接为必填项",
+      "file": "internal/handler/friendlinks.go",
+      "line": 91
+    },
+    {
+      "code": "FLK0002",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "验证码错误或已过期",
+      "file": "internal/handler/friendlinks.go",
+      "line": 96
+    },
+    {
+      "code": "FLK0003",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "链接格式不合法，仅支持 http/https 协议",
+      "file": "internal/handler/friendlinks.go",
+      "line": 100
+    },
+    {
+      "code": "FLK0004",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "Logo URL 格式不合法",
+      "file": "internal/handler/friendlinks.go",
+      "line": 105
+    },
+    {
+      "code": "FLK0005",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "名称和链接为必填项",
+      "file": "internal/handler/friendlinks.go",
+      "line": 208
+    },
+    {
+      "code": "FLK0006",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "链接格式不合法，仅支持 http/https 协议",
+      "file": "internal/handler/friendlinks.go",
+      "line": 212
+    },
+    {
+      "code": "FLK0007",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "Logo URL 格式不合法",
+      "file": "internal/handler/friendlinks.go",
+      "line": 217
+    },
+    {
+      "code": "FLK0008",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "链接格式不合法，仅支持 http/https 协议",
+      "file": "internal/handler/friendlinks.go",
+      "line": 264
+    },
+    {
+      "code": "FLK0009",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "Logo URL 格式不合法",
+      "file": "internal/handler/friendlinks.go",
+      "line": 269
+    },
+    {
+      "code": "FLK0010",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "无效的状态值",
+      "file": "internal/handler/friendlinks.go",
+      "line": 274
+    },
+    {
+      "code": "FLK0011",
+      "kind": "AbortCoded",
+      "status": 404,
+      "message": "友链不存在",
+      "file": "internal/handler/friendlinks.go",
+      "line": 296
+    },
+    {
+      "code": "FLK0012",
+      "kind": "AbortCoded",
+      "status": 404,
+      "message": "友链不存在",
+      "file": "internal/handler/friendlinks.go",
+      "line": 343
+    },
+    {
+      "code": "FOL0001",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/folders.go",
+      "line": 86
+    },
+    {
+      "code": "FOL0002",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/folders.go",
+      "line": 96
+    },
+    {
+      "code": "FOL0003",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/folders.go",
+      "line": 140
+    },
+    {
+      "code": "FOL0004",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "文件夹名称不能为空",
+      "file": "internal/handler/folders.go",
+      "line": 173
+    },
+    {
+      "code": "FOL0005",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "文件夹名称不能超过50个字符",
+      "file": "internal/handler/folders.go",
+      "line": 177
+    },
+    {
+      "code": "FOL0006",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "无效的文件夹类型",
+      "file": "internal/handler/folders.go",
+      "line": 181
+    },
+    {
+      "code": "FOL0007",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/folders.go",
+      "line": 191
+    },
+    {
+      "code": "FOL0008",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/folders.go",
+      "line": 216
+    },
+    {
+      "code": "FOL0009",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/folders.go",
+      "line": 224
+    },
+    {
+      "code": "FOL0010",
+      "kind": "AbortCoded",
+      "status": 404,
+      "message": "Folder not found",
+      "file": "internal/handler/folders.go",
+      "line": 250
+    },
+    {
+      "code": "FOL0011",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/folders.go",
+      "line": 253
+    },
+    {
+      "code": "FOL0012",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "文件夹名称不能为空",
+      "file": "internal/handler/folders.go",
+      "line": 264
+    },
+    {
+      "code": "FOL0013",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "文件夹名称不能超过50个字符",
+      "file": "internal/handler/folders.go",
+      "line": 268
+    },
+    {
+      "code": "FOL0014",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/folders.go",
+      "line": 277
+    },
+    {
+      "code": "FOL0015",
+      "kind": "AbortCoded",
+      "status": 404,
+      "message": "Folder not found",
+      "file": "internal/handler/folders.go",
+      "line": 300
+    },
+    {
+      "code": "FOL0016",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/folders.go",
+      "line": 303
+    },
+    {
+      "code": "FOL0017",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/folders.go",
+      "line": 313
+    },
+    {
+      "code": "FOL0018",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/folders.go",
+      "line": 317
+    },
+    {
+      "code": "FOL0019",
+      "kind": "AbortCoded",
+      "status": 404,
+      "message": "Folder not found",
+      "file": "internal/handler/folders.go",
+      "line": 342
+    },
+    {
+      "code": "FOL0020",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/folders.go",
+      "line": 345
+    },
+    {
+      "code": "FOL0021",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/folders.go",
+      "line": 355
+    },
+    {
+      "code": "FOL0022",
+      "kind": "AbortCoded",
+      "status": 404,
+      "message": "Item not found",
+      "file": "internal/handler/folders.go",
+      "line": 362
+    },
+    {
+      "code": "FOL0023",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/folders.go",
+      "line": 365
+    },
+    {
+      "code": "FOL0024",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/folders.go",
+      "line": 370
+    },
+    {
+      "code": "FOL0025",
+      "kind": "AbortCoded",
+      "status": 404,
+      "message": "Item not found",
+      "file": "internal/handler/folders.go",
+      "line": 379
+    },
+    {
+      "code": "FOL0026",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/folders.go",
+      "line": 382
+    },
+    {
+      "code": "FOL0027",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/folders.go",
+      "line": 387
+    },
+    {
+      "code": "FOL0028",
+      "kind": "AbortCoded",
+      "status": 404,
+      "message": "Folder not found",
+      "file": "internal/handler/folders.go",
+      "line": 411
+    },
+    {
+      "code": "FOL0029",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/folders.go",
+      "line": 414
+    },
+    {
+      "code": "FOL0030",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/folders.go",
+      "line": 428
+    },
+    {
+      "code": "FOL0031",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/folders.go",
+      "line": 456
+    },
+    {
+      "code": "FOL0032",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/folders.go",
+      "line": 460
+    },
+    {
+      "code": "FOL0033",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/folders.go",
+      "line": 467
+    },
+    {
+      "code": "FOL0034",
+      "kind": "AbortCoded",
+      "status": 404,
+      "message": "Folder not found",
+      "file": "internal/handler/folders.go",
+      "line": 491
+    },
+    {
+      "code": "FOL0035",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/folders.go",
+      "line": 494
+    },
+    {
+      "code": "FOL0036",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/folders.go",
+      "line": 501
+    },
+    {
+      "code": "FOL0037",
+      "kind": "AbortCoded",
+      "status": 404,
+      "message": "Folder not found",
+      "file": "internal/handler/folders.go",
+      "line": 525
+    },
+    {
+      "code": "FOL0038",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/folders.go",
+      "line": 528
+    },
+    {
+      "code": "FOL0039",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/folders.go",
+      "line": 533
+    },
+    {
+      "code": "FOL0040",
+      "kind": "AbortCoded",
+      "status": 404,
+      "message": "Shared folder not found",
+      "file": "internal/handler/folders.go",
+      "line": 551
+    },
+    {
+      "code": "FOL0041",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/folders.go",
+      "line": 554
+    },
+    {
+      "code": "FOL0042",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/folders.go",
+      "line": 572
+    },
+    {
+      "code": "FOL0043",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/folders.go",
+      "line": 583
+    },
+    {
+      "code": "FOL0044",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/folders.go",
+      "line": 594
+    },
+    {
+      "code": "FOL0045",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/folders.go",
+      "line": 657
+    },
+    {
+      "code": "FOL0046",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "shareToken is required",
+      "file": "internal/handler/folders.go",
+      "line": 681
+    },
+    {
+      "code": "FOL0047",
+      "kind": "AbortCoded",
+      "status": 404,
+      "message": "Folder not found",
+      "file": "internal/handler/folders.go",
+      "line": 687
+    },
+    {
+      "code": "FOL0048",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/folders.go",
+      "line": 690
+    },
+    {
+      "code": "FOL0049",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "不能收藏自己的收藏夹",
+      "file": "internal/handler/folders.go",
+      "line": 694
+    },
+    {
+      "code": "FOL0050",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/folders.go",
+      "line": 699
+    },
+    {
+      "code": "FOL0051",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "已收藏过该收藏夹",
+      "file": "internal/handler/folders.go",
+      "line": 703
+    },
+    {
+      "code": "FOL0052",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/folders.go",
+      "line": 730
+    },
+    {
+      "code": "FOL0053",
+      "kind": "AbortCoded",
+      "status": 404,
+      "message": "Saved folder not found",
+      "file": "internal/handler/folders.go",
+      "line": 752
+    },
+    {
+      "code": "FOL0054",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/folders.go",
+      "line": 755
+    },
+    {
+      "code": "FOL0055",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/folders.go",
+      "line": 759
+    },
+    {
+      "code": "FOL0056",
+      "kind": "AbortCoded",
+      "status": 404,
+      "message": "Episode not found",
+      "file": "internal/handler/follows.go",
+      "line": 121
+    },
+    {
+      "code": "FOL0057",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/follows.go",
+      "line": 124
+    },
+    {
+      "code": "FOL0058",
+      "kind": "AbortCoded",
+      "status": 403,
+      "message": "该剧集暂不可追番",
+      "file": "internal/handler/follows.go",
+      "line": 129
+    },
+    {
+      "code": "FOL0059",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/follows.go",
+      "line": 143
+    },
+    {
+      "code": "FOL0060",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "收藏夹不存在或不属于当前用户",
+      "file": "internal/handler/follows.go",
+      "line": 150
+    },
+    {
+      "code": "FOL0061",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/follows.go",
+      "line": 153
+    },
+    {
+      "code": "FOL0062",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "Already following",
+      "file": "internal/handler/follows.go",
+      "line": 161
+    },
+    {
+      "code": "FOL0063",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/follows.go",
+      "line": 164
+    },
+    {
+      "code": "FOL0064",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/follows.go",
+      "line": 194
+    },
+    {
+      "code": "FOL0065",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/follows.go",
+      "line": 199
+    },
+    {
+      "code": "FOL0066",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/follows.go",
+      "line": 231
+    },
+    {
+      "code": "FOL0067",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/follows.go",
+      "line": 241
+    },
+    {
+      "code": "FOL0068",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/follows.go",
+      "line": 260
+    },
+    {
+      "code": "FOL0069",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/follows.go",
+      "line": 265
+    },
+    {
+      "code": "FOL0070",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/follows.go",
+      "line": 285
+    },
+    {
+      "code": "FOL0071",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/follows.go",
+      "line": 291
+    },
+    {
+      "code": "FOL0072",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/follows.go",
+      "line": 296
+    },
+    {
+      "code": "FOL0073",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/follows.go",
+      "line": 308
+    },
+    {
+      "code": "FOL0074",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/follows.go",
+      "line": 313
+    },
+    {
+      "code": "FOL0075",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/follows.go",
+      "line": 320
+    },
+    {
+      "code": "FOL0076",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/follows.go",
+      "line": 357
+    },
+    {
+      "code": "FOL0077",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/follows.go",
+      "line": 366
+    },
+    {
+      "code": "FOL0078",
+      "kind": "AbortCoded",
+      "status": 404,
+      "message": "Episode not found",
+      "file": "internal/handler/follows.go",
+      "line": 409
+    },
+    {
+      "code": "FOL0079",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/follows.go",
+      "line": 412
+    },
+    {
+      "code": "FOL0080",
+      "kind": "AbortCoded",
+      "status": 403,
+      "message": "该剧集暂不可收藏",
+      "file": "internal/handler/follows.go",
+      "line": 417
+    },
+    {
+      "code": "FOL0081",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/follows.go",
+      "line": 431
+    },
+    {
+      "code": "FOL0082",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "收藏夹不存在或不属于当前用户",
+      "file": "internal/handler/follows.go",
+      "line": 438
+    },
+    {
+      "code": "FOL0083",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/follows.go",
+      "line": 441
+    },
+    {
+      "code": "FOL0084",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "Already favorited",
+      "file": "internal/handler/follows.go",
+      "line": 449
+    },
+    {
+      "code": "FOL0085",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/follows.go",
+      "line": 452
+    },
+    {
+      "code": "FOL0086",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/follows.go",
+      "line": 475
+    },
+    {
+      "code": "FOL0087",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/follows.go",
+      "line": 480
+    },
+    {
+      "code": "FOL0088",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/follows.go",
+      "line": 512
+    },
+    {
+      "code": "FOL0089",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/follows.go",
+      "line": 522
+    },
+    {
+      "code": "FOL0090",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/follows.go",
+      "line": 540
+    },
+    {
+      "code": "FOL0091",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/follows.go",
+      "line": 545
+    },
+    {
+      "code": "FOL0092",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/follows.go",
+      "line": 565
+    },
+    {
+      "code": "FOL0093",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/follows.go",
+      "line": 571
+    },
+    {
+      "code": "FOL0094",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/follows.go",
+      "line": 576
+    },
+    {
+      "code": "FOL0095",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/follows.go",
+      "line": 587
+    },
+    {
+      "code": "FOL0096",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/follows.go",
+      "line": 592
+    },
+    {
+      "code": "FOL0097",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/follows.go",
+      "line": 599
+    },
+    {
+      "code": "FOL0098",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/follows.go",
+      "line": 637
+    },
+    {
+      "code": "FOL0099",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/follows.go",
+      "line": 642
+    },
+    {
+      "code": "FOL0100",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/follows.go",
+      "line": 647
+    },
+    {
+      "code": "FOL0101",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/follows.go",
+      "line": 654
+    },
+    {
+      "code": "FOL0102",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/follows.go",
+      "line": 673
+    },
+    {
+      "code": "FOL0103",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/follows.go",
+      "line": 682
+    },
+    {
+      "code": "HIS0001",
+      "kind": "NewC",
+      "status": 500,
+      "message": "invalid episodeId",
+      "file": "internal/handler/histories.go",
+      "line": 180
+    },
+    {
+      "code": "HIS0002",
+      "kind": "NewC",
+      "status": 500,
+      "message": "invalid episodeId",
+      "file": "internal/handler/histories.go",
+      "line": 184
+    },
+    {
+      "code": "HIS0003",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/histories.go",
+      "line": 258
+    },
+    {
+      "code": "HIS0004",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "Invalid episode number",
+      "file": "internal/handler/histories.go",
+      "line": 263
+    },
+    {
+      "code": "HIS0005",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/histories.go",
+      "line": 269
+    },
+    {
+      "code": "HIS0006",
+      "kind": "AbortCoded",
+      "status": 404,
+      "message": "Episode not found",
+      "file": "internal/handler/histories.go",
+      "line": 273
+    },
+    {
+      "code": "HIS0007",
+      "kind": "AbortCoded",
+      "status": 404,
+      "message": "Episode not found",
+      "file": "internal/handler/histories.go",
+      "line": 278
+    },
+    {
+      "code": "HIS0008",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/histories.go",
+      "line": 281
+    },
+    {
+      "code": "HIS0009",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/histories.go",
+      "line": 287
+    },
+    {
+      "code": "HIS0010",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/histories.go",
+      "line": 304
+    },
+    {
+      "code": "HIS0011",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/histories.go",
+      "line": 309
+    },
+    {
+      "code": "HIS0012",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/histories.go",
+      "line": 364
+    },
+    {
+      "code": "HIS0013",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/histories.go",
+      "line": 377
+    },
+    {
+      "code": "HIS0014",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/histories.go",
+      "line": 382
+    },
+    {
+      "code": "HIS0015",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/histories.go",
+      "line": 427
+    },
+    {
+      "code": "HIS0016",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/histories.go",
+      "line": 433
+    },
+    {
+      "code": "HIS0017",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/histories.go",
+      "line": 456
+    },
+    {
+      "code": "HIS0018",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/histories.go",
+      "line": 474
+    },
+    {
+      "code": "HIS0019",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/histories.go",
+      "line": 478
+    },
+    {
+      "code": "HIS0020",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/histories.go",
+      "line": 501
+    },
+    {
+      "code": "HIS0021",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "Invalid rating data",
+      "file": "internal/handler/histories.go",
+      "line": 507
+    },
+    {
+      "code": "HIS0022",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/histories.go",
+      "line": 512
+    },
+    {
+      "code": "HIS0023",
+      "kind": "AbortCoded",
+      "status": 404,
+      "message": "Episode not found",
+      "file": "internal/handler/histories.go",
+      "line": 520
+    },
+    {
+      "code": "HIS0024",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/histories.go",
+      "line": 523
+    },
+    {
+      "code": "HIS0025",
+      "kind": "AbortCoded",
+      "status": 403,
+      "message": "该剧集暂不可评分",
+      "file": "internal/handler/histories.go",
+      "line": 528
+    },
+    {
+      "code": "HIS0026",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/histories.go",
+      "line": 533
+    },
+    {
+      "code": "HIS0027",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/histories.go",
+      "line": 538
+    },
+    {
+      "code": "HIS0028",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/histories.go",
+      "line": 543
+    },
+    {
+      "code": "HIS0029",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/histories.go",
+      "line": 567
+    },
+    {
+      "code": "HIS0030",
+      "kind": "AbortCoded",
+      "status": 404,
+      "message": "Rating not found",
+      "file": "internal/handler/histories.go",
+      "line": 572
+    },
+    {
+      "code": "HIS0031",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/histories.go",
+      "line": 575
+    },
+    {
+      "code": "HIS0032",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/histories.go",
+      "line": 579
+    },
+    {
+      "code": "HIS0033",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/histories.go",
+      "line": 584
+    },
+    {
+      "code": "HIS0034",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/histories.go",
+      "line": 589
+    },
+    {
+      "code": "HIS0035",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/histories.go",
+      "line": 610
+    },
+    {
+      "code": "HIS0036",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/histories.go",
+      "line": 615
+    },
+    {
+      "code": "ICN0001",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "获取图标列表失败",
+      "file": "internal/handler/icons.go",
+      "line": 132
+    },
+    {
+      "code": "ICN0002",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "获取图标列表失败",
+      "file": "internal/handler/icons.go",
+      "line": 157
+    },
+    {
+      "code": "ICN0003",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "请选择要上传的 SVG 图标",
+      "file": "internal/handler/icons.go",
+      "line": 175
+    },
+    {
+      "code": "ICN0004",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "请选择要上传的 SVG 图标",
+      "file": "internal/handler/icons.go",
+      "line": 183
+    },
+    {
+      "code": "ICN0005",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "单次最多上传 50 个图标",
+      "file": "internal/handler/icons.go",
+      "line": 187
+    },
+    {
+      "code": "ICN0006",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "分类名不能超过 30 个字符",
+      "file": "internal/handler/icons.go",
+      "line": 195
+    },
+    {
+      "code": "ICN0007",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "图标 ID 不合法",
+      "file": "internal/handler/icons.go",
+      "line": 238
+    },
+    {
+      "code": "ICN0008",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "图标名称不能为空且不超过 50 个字符",
+      "file": "internal/handler/icons.go",
+      "line": 246
+    },
+    {
+      "code": "ICN0009",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "分类名不能超过 30 个字符",
+      "file": "internal/handler/icons.go",
+      "line": 257
+    },
+    {
+      "code": "ICN0010",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "描述不能超过 200 个字符",
+      "file": "internal/handler/icons.go",
+      "line": 265
+    },
+    {
+      "code": "ICN0011",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "<dynamic>",
+      "file": "internal/handler/icons.go",
+      "line": 277
+    },
+    {
+      "code": "ICN0012",
+      "kind": "AbortCoded",
+      "status": 404,
+      "message": "图标不存在",
+      "file": "internal/handler/icons.go",
+      "line": 285
+    },
+    {
+      "code": "ICN0013",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "更新图标失败",
+      "file": "internal/handler/icons.go",
+      "line": 288
+    },
+    {
+      "code": "ICN0014",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "图标 ID 不合法",
+      "file": "internal/handler/icons.go",
+      "line": 306
+    },
+    {
+      "code": "ICN0015",
+      "kind": "AbortCoded",
+      "status": 404,
+      "message": "图标不存在",
+      "file": "internal/handler/icons.go",
+      "line": 312
+    },
+    {
+      "code": "ICN0016",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "删除图标失败",
+      "file": "internal/handler/icons.go",
+      "line": 315
+    },
+    {
+      "code": "NTF0001",
+      "kind": "AbortCoded",
+      "status": 401,
+      "message": "认证信息无效",
+      "file": "internal/handler/notifications.go",
+      "line": 104
+    },
+    {
+      "code": "NTF0002",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "缺少剧集ID",
+      "file": "internal/handler/notifications.go",
+      "line": 254
+    },
+    {
+      "code": "NTF0003",
+      "kind": "AbortCoded",
+      "status": 404,
+      "message": "剧集不存在",
+      "file": "internal/handler/notifications.go",
+      "line": 266
+    },
+    {
+      "code": "NTF0004",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "无效的订阅信息",
+      "file": "internal/handler/notifications.go",
+      "line": 471
+    },
+    {
+      "code": "NTF0005",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "缺少endpoint",
+      "file": "internal/handler/notifications.go",
+      "line": 498
+    },
+    {
+      "code": "NTF0006",
+      "kind": "AbortCoded",
+      "status": 401,
+      "message": "需要认证",
+      "file": "internal/handler/notifications.go",
+      "line": 529
+    },
+    {
+      "code": "NTF0007",
+      "kind": "AbortCoded",
+      "status": 401,
+      "message": "认证信息无效",
+      "file": "internal/handler/notifications.go",
+      "line": 534
+    },
+    {
+      "code": "NTF0008",
+      "kind": "AbortCoded",
+      "status": 401,
+      "message": "无效的ticket",
+      "file": "internal/handler/notifications.go",
+      "line": 538
+    },
+    {
+      "code": "OAU0001",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "服务器错误",
+      "file": "internal/handler/oauth.go",
+      "line": 36
+    },
+    {
+      "code": "PAS0001",
+      "kind": "NewC",
+      "status": 500,
+      "message": "生成 Passkey 注册参数失败",
+      "file": "internal/service/passkey.go",
+      "line": 146
+    },
+    {
+      "code": "PAS0002",
+      "kind": "NewC",
+      "status": 400,
+      "message": "注册会话无效或已过期，请重新开始",
+      "file": "internal/service/passkey.go",
+      "line": 163
+    },
+    {
+      "code": "PAS0003",
+      "kind": "NewC",
+      "status": 400,
+      "message": "Passkey 注册校验失败：请确认使用的是本站发起的验证器",
+      "file": "internal/service/passkey.go",
+      "line": 167
+    },
+    {
+      "code": "PAS0004",
+      "kind": "NewC",
+      "status": 400,
+      "message": "该 Passkey 已注册过",
+      "file": "internal/service/passkey.go",
+      "line": 185
+    },
+    {
+      "code": "PAS0005",
+      "kind": "NewC",
+      "status": 500,
+      "message": "服务器错误",
+      "file": "internal/service/passkey.go",
+      "line": 187
+    },
+    {
+      "code": "PAS0006",
+      "kind": "NewC",
+      "status": 500,
+      "message": "生成 Passkey 登录参数失败",
+      "file": "internal/service/passkey.go",
+      "line": 216
+    },
+    {
+      "code": "PAS0007",
+      "kind": "NewC",
+      "status": 400,
+      "message": "登录会话无效或已过期，请重新开始",
+      "file": "internal/service/passkey.go",
+      "line": 239
+    },
+    {
+      "code": "PAS0008",
+      "kind": "NewC",
+      "status": 400,
+      "message": "Passkey 校验失败：请重试或改用密码登录",
+      "file": "internal/service/passkey.go",
+      "line": 250
+    },
+    {
+      "code": "PAS0009",
+      "kind": "NewC",
+      "status": 400,
+      "message": "登录会话无效或已过期，请重新开始",
+      "file": "internal/service/passkey.go",
+      "line": 266
+    },
+    {
+      "code": "PAS0010",
+      "kind": "NewC",
+      "status": 400,
+      "message": "Passkey 校验失败：请重试或改用密码登录",
+      "file": "internal/service/passkey.go",
+      "line": 271
+    },
+    {
+      "code": "PAS0011",
+      "kind": "NewC",
+      "status": 400,
+      "message": "该 Passkey 已被删除，请改用密码登录",
+      "file": "internal/service/passkey.go",
+      "line": 277
+    },
+    {
+      "code": "PAS0012",
+      "kind": "NewC",
+      "status": 400,
+      "message": "用户不存在",
+      "file": "internal/service/passkey.go",
+      "line": 281
+    },
+    {
+      "code": "PAS0013",
+      "kind": "NewC",
+      "status": 400,
+      "message": "用户名或密码错误",
+      "file": "internal/service/passkey.go",
+      "line": 306
+    },
+    {
+      "code": "PAS0014",
+      "kind": "NewC",
+      "status": 500,
+      "message": "服务器错误",
+      "file": "internal/service/passkey.go",
+      "line": 334
+    },
+    {
+      "code": "PAS0015",
+      "kind": "NewC",
+      "status": 500,
+      "message": "服务器错误",
+      "file": "internal/service/passkey.go",
+      "line": 350
+    },
+    {
+      "code": "PAS0016",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "请输入当前密码以确认操作",
+      "file": "internal/handler/passkey.go",
+      "line": 17
+    },
+    {
+      "code": "PAS0017",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "当前密码不正确",
+      "file": "internal/handler/passkey.go",
+      "line": 23
+    },
+    {
+      "code": "PAS0018",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "服务器错误",
+      "file": "internal/handler/passkey.go",
+      "line": 91
+    },
+    {
+      "code": "PAS0019",
+      "kind": "NewExtraC",
+      "status": 403,
+      "message": "请先验证邮箱后再登录，验证码已发送至您的邮箱",
+      "file": "internal/handler/passkey.go",
+      "line": 171
+    },
+    {
+      "code": "PAS0020",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "服务器错误",
+      "file": "internal/handler/passkey.go",
+      "line": 175
+    },
+    {
+      "code": "REV0001",
+      "kind": "AbortCoded",
+      "status": 403,
+      "message": "需要管理员权限",
+      "file": "internal/handler/review.go",
+      "line": 70
+    },
+    {
+      "code": "REV0002",
+      "kind": "AbortCoded",
+      "status": 404,
+      "message": "Episode not found",
+      "file": "internal/handler/review.go",
+      "line": 183
+    },
+    {
+      "code": "REV0003",
+      "kind": "AbortCoded",
+      "status": 404,
+      "message": "Episode not found",
+      "file": "internal/handler/review.go",
+      "line": 259
+    },
+    {
+      "code": "REV0004",
+      "kind": "AbortCoded",
+      "status": 404,
+      "message": "Editor not found",
+      "file": "internal/handler/review.go",
+      "line": 333
+    },
+    {
+      "code": "REV0005",
+      "kind": "AbortCoded",
+      "status": 404,
+      "message": "Episode not found",
+      "file": "internal/handler/review.go",
+      "line": 347
+    },
+    {
+      "code": "REV0006",
+      "kind": "AbortCoded",
+      "status": 404,
+      "message": "Episode not found",
+      "file": "internal/handler/review.go",
+      "line": 403
+    },
+    {
+      "code": "RLM0001",
+      "kind": "codedBody",
+      "status": 429,
+      "message": "<dynamic>",
+      "file": "internal/middleware/ratelimit.go",
+      "line": 149
+    },
+    {
+      "code": "RPT0001",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "Invalid target type",
+      "file": "internal/handler/reports.go",
+      "line": 65
+    },
+    {
+      "code": "RPT0002",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "Invalid reason",
+      "file": "internal/handler/reports.go",
+      "line": 69
+    },
+    {
+      "code": "RPT0003",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "描述不能超过2000个字符",
+      "file": "internal/handler/reports.go",
+      "line": 73
+    },
+    {
+      "code": "RPT0004",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "Already reported",
+      "file": "internal/handler/reports.go",
+      "line": 89
+    },
+    {
+      "code": "RPT0005",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "Invalid status",
+      "file": "internal/handler/reports.go",
+      "line": 190
+    },
+    {
+      "code": "RPT0006",
+      "kind": "AbortCoded",
+      "status": 404,
+      "message": "Report not found",
+      "file": "internal/handler/reports.go",
+      "line": 197
+    },
+    {
+      "code": "SER0001",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/series.go",
+      "line": 198
+    },
+    {
+      "code": "SER0002",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/series.go",
+      "line": 203
+    },
+    {
+      "code": "SER0003",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/series.go",
+      "line": 210
+    },
+    {
+      "code": "SER0004",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/series.go",
+      "line": 238
+    },
+    {
+      "code": "SER0005",
+      "kind": "AbortCoded",
+      "status": 404,
+      "message": "Not found",
+      "file": "internal/handler/series.go",
+      "line": 243
+    },
+    {
+      "code": "SER0006",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/series.go",
+      "line": 247
+    },
+    {
+      "code": "SER0007",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/series.go",
+      "line": 252
+    },
+    {
+      "code": "SER0008",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "名称必填",
+      "file": "internal/handler/series.go",
+      "line": 275
+    },
+    {
+      "code": "SER0009",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/series.go",
+      "line": 284
+    },
+    {
+      "code": "SER0010",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/series.go",
+      "line": 296
+    },
+    {
+      "code": "SER0011",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/series.go",
+      "line": 317
+    },
+    {
+      "code": "SER0012",
+      "kind": "AbortCoded",
+      "status": 404,
+      "message": "Not found",
+      "file": "internal/handler/series.go",
+      "line": 322
+    },
+    {
+      "code": "SER0013",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/series.go",
+      "line": 326
+    },
+    {
+      "code": "SER0014",
+      "kind": "AbortCoded",
+      "status": 403,
+      "message": "无权修改此系列",
+      "file": "internal/handler/series.go",
+      "line": 332
+    },
+    {
+      "code": "SER0015",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/series.go",
+      "line": 343
+    },
+    {
+      "code": "SER0016",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/series.go",
+      "line": 351
+    },
+    {
+      "code": "SER0017",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/series.go",
+      "line": 359
+    },
+    {
+      "code": "SER0018",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/series.go",
+      "line": 372
+    },
+    {
+      "code": "SER0019",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/series.go",
+      "line": 393
+    },
+    {
+      "code": "SER0020",
+      "kind": "AbortCoded",
+      "status": 403,
+      "message": "无权删除此系列",
+      "file": "internal/handler/series.go",
+      "line": 401
+    },
+    {
+      "code": "SER0021",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/series.go",
+      "line": 405
+    },
+    {
+      "code": "SER0022",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/series.go",
+      "line": 409
+    },
+    {
+      "code": "SES0001",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/usersession.go",
+      "line": 70
+    },
+    {
+      "code": "SES0002",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/usersession.go",
+      "line": 90
+    },
+    {
+      "code": "SES0003",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "设备名称不能为空",
+      "file": "internal/handler/usersession.go",
+      "line": 115
+    },
+    {
+      "code": "SES0004",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "会话不存在",
+      "file": "internal/handler/usersession.go",
+      "line": 124
+    },
+    {
+      "code": "SES0005",
+      "kind": "AbortCoded",
+      "status": 404,
+      "message": "会话不存在",
+      "file": "internal/handler/usersession.go",
+      "line": 129
+    },
+    {
+      "code": "SES0006",
+      "kind": "AbortCoded",
+      "status": 403,
+      "message": "权限不足",
+      "file": "internal/handler/usersession.go",
+      "line": 133
+    },
+    {
+      "code": "SES0007",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/usersession.go",
+      "line": 137
+    },
+    {
+      "code": "SES0008",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "会话不存在",
+      "file": "internal/handler/usersession.go",
+      "line": 157
+    },
+    {
+      "code": "SES0009",
+      "kind": "AbortCoded",
+      "status": 404,
+      "message": "会话不存在",
+      "file": "internal/handler/usersession.go",
+      "line": 162
+    },
+    {
+      "code": "SES0010",
+      "kind": "AbortCoded",
+      "status": 403,
+      "message": "权限不足",
+      "file": "internal/handler/usersession.go",
+      "line": 166
+    },
+    {
+      "code": "SES0011",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "不能下线当前设备，请使用退出登录",
+      "file": "internal/handler/usersession.go",
+      "line": 170
+    },
+    {
+      "code": "SES0012",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/usersession.go",
+      "line": 174
+    },
+    {
+      "code": "SES0013",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/usersession.go",
+      "line": 191
+    },
+    {
+      "code": "SES0014",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/usersession.go",
+      "line": 207
+    },
+    {
+      "code": "SES0015",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/usersession.go",
+      "line": 228
+    },
+    {
+      "code": "SES0016",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "会话不存在",
+      "file": "internal/handler/usersession.go",
+      "line": 255
+    },
+    {
+      "code": "SES0017",
+      "kind": "AbortCoded",
+      "status": 404,
+      "message": "会话不存在",
+      "file": "internal/handler/usersession.go",
+      "line": 259
+    },
+    {
+      "code": "SES0018",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/usersession.go",
+      "line": 263
+    },
+    {
+      "code": "SES0019",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "会话不存在",
+      "file": "internal/handler/usersession.go",
+      "line": 279
+    },
+    {
+      "code": "SES0020",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "Server error",
+      "file": "internal/handler/usersession.go",
+      "line": 283
+    },
+    {
+      "code": "SIT0001",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "请选择要上传的图片",
+      "file": "internal/handler/sitecontent.go",
+      "line": 104
+    },
+    {
+      "code": "SIT0002",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "文件大小不能超过5MB",
+      "file": "internal/handler/sitecontent.go",
+      "line": 110
+    },
+    {
+      "code": "SIT0003",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "仅支持图片文件 (jpg, jpeg, png, gif, webp)",
+      "file": "internal/handler/sitecontent.go",
+      "line": 112
+    },
+    {
+      "code": "SIT0004",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "文件内容与类型不匹配，仅支持图片文件",
+      "file": "internal/handler/sitecontent.go",
+      "line": 114
+    },
+    {
+      "code": "SIT0005",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "文件上传错误",
+      "file": "internal/handler/sitecontent.go",
+      "line": 116
+    },
+    {
+      "code": "SIT0006",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "<dynamic>",
+      "file": "internal/handler/sitecontent.go",
+      "line": 124
+    },
+    {
+      "code": "SIT0007",
+      "kind": "AbortCoded",
+      "status": 404,
+      "message": "Content not found",
+      "file": "internal/handler/sitecontent.go",
+      "line": 223
+    },
+    {
+      "code": "SIT0008",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "邮件服务配置已改为通过环境变量或配置文件设置，请勿在此修改",
+      "file": "internal/handler/sitecontent.go",
+      "line": 265
+    },
+    {
+      "code": "SIT0009",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "该站点内容的 content 必须是合法 JSON",
+      "file": "internal/handler/sitecontent.go",
+      "line": 276
+    },
+    {
+      "code": "SIT0010",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "请填写完整的邮件服务配置和收件地址",
+      "file": "internal/handler/sitecontent.go",
+      "line": 353
+    },
+    {
+      "code": "SIT0011",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "邮件发送失败，请检查邮件服务配置",
+      "file": "internal/handler/sitecontent.go",
+      "line": 362
+    },
+    {
+      "code": "SIT0012",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "邮件发送失败，请检查邮件服务配置",
+      "file": "internal/handler/sitecontent.go",
+      "line": 367
+    },
+    {
+      "code": "STA0001",
+      "kind": "AbortCoded",
+      "status": 404,
+      "message": "Episode not found",
+      "file": "internal/handler/stats.go",
+      "line": 780
+    },
+    {
+      "code": "SYS0001",
+      "kind": "fallback",
+      "status": null,
+      "message": "<dynamic>",
+      "file": "internal/errors/apperror.go",
+      "line": 40,
+      "_note": "未编码 4xx/5xx 的兜底错误码（渲染器 fallbackCode）"
+    },
+    {
+      "code": "SYS0500",
+      "kind": "panic",
+      "status": 500,
+      "message": "<dynamic>",
+      "file": "internal/server/app.go",
+      "line": 86,
+      "_note": "panic 恢复（CustomRecovery）"
+    },
+    {
+      "code": "TFA0001",
+      "kind": "AbortCoded",
+      "status": 403,
+      "message": "普通用户不可开启两步验证",
+      "file": "internal/handler/twofactor.go",
+      "line": 30
+    },
+    {
+      "code": "TFA0002",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "服务器错误",
+      "file": "internal/handler/twofactor.go",
+      "line": 35
+    },
+    {
+      "code": "TFA0003",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "2FA already enabled; disable it before re-enrolling",
+      "file": "internal/handler/twofactor.go",
+      "line": 41
+    },
+    {
+      "code": "TFA0004",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "服务器错误",
+      "file": "internal/handler/twofactor.go",
+      "line": 50
+    },
+    {
+      "code": "TFA0005",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "服务器错误",
+      "file": "internal/handler/twofactor.go",
+      "line": 58
+    },
+    {
+      "code": "TFA0006",
+      "kind": "AbortCoded",
+      "status": 403,
+      "message": "普通用户不可开启两步验证",
+      "file": "internal/handler/twofactor.go",
+      "line": 85
+    },
+    {
+      "code": "TFA0007",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "2FA not set up",
+      "file": "internal/handler/twofactor.go",
+      "line": 90
+    },
+    {
+      "code": "TFA0008",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "Invalid verification code",
+      "file": "internal/handler/twofactor.go",
+      "line": 95
+    },
+    {
+      "code": "TFA0009",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "服务器错误",
+      "file": "internal/handler/twofactor.go",
+      "line": 99
+    },
+    {
+      "code": "TFA0010",
+      "kind": "AbortCoded",
+      "status": 403,
+      "message": "管理员账号强制开启两步验证，不可自行关闭",
+      "file": "internal/handler/twofactor.go",
+      "line": 123
+    },
+    {
+      "code": "TFA0011",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "2FA not enabled",
+      "file": "internal/handler/twofactor.go",
+      "line": 128
+    },
+    {
+      "code": "TFA0012",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "服务器错误",
+      "file": "internal/handler/twofactor.go",
+      "line": 140
+    },
+    {
+      "code": "TFA0013",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "Invalid verification code",
+      "file": "internal/handler/twofactor.go",
+      "line": 151
+    },
+    {
+      "code": "TFA0014",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "服务器错误",
+      "file": "internal/handler/twofactor.go",
+      "line": 155
+    },
+    {
+      "code": "TFA0015",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "2FA not enabled for this account",
+      "file": "internal/handler/twofactor.go",
+      "line": 178
+    },
+    {
+      "code": "TFA0016",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "Invalid verification code",
+      "file": "internal/handler/twofactor.go",
+      "line": 185
+    },
+    {
+      "code": "THM0001",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "获取默认主题失败",
+      "file": "internal/handler/themes.go",
+      "line": 229
+    },
+    {
+      "code": "THM0002",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "获取主题列表失败",
+      "file": "internal/handler/themes.go",
+      "line": 244
+    },
+    {
+      "code": "THM0003",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "获取个人主题失败",
+      "file": "internal/handler/themes.go",
+      "line": 266
+    },
+    {
+      "code": "THM0004",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "主题 ID 不合法",
+      "file": "internal/handler/themes.go",
+      "line": 435
+    },
+    {
+      "code": "THM0005",
+      "kind": "AbortCoded",
+      "status": 404,
+      "message": "主题不存在",
+      "file": "internal/handler/themes.go",
+      "line": 441
+    },
+    {
+      "code": "THM0006",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "设置主题失败",
+      "file": "internal/handler/themes.go",
+      "line": 444
+    },
+    {
+      "code": "THM0007",
+      "kind": "AbortCoded",
+      "status": 403,
+      "message": "无权使用该主题",
+      "file": "internal/handler/themes.go",
+      "line": 448
+    },
+    {
+      "code": "THM0008",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "请求需包含 wallpaperThemeId / iconsThemeId（或旧版 themeId）",
+      "file": "internal/handler/themes.go",
+      "line": 486
+    },
+    {
+      "code": "THM0009",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "设置主题失败",
+      "file": "internal/handler/themes.go",
+      "line": 509
+    },
+    {
+      "code": "THM0010",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "主题 ID 不合法",
+      "file": "internal/handler/themes.go",
+      "line": 560
+    },
+    {
+      "code": "THM0011",
+      "kind": "AbortCoded",
+      "status": 404,
+      "message": "主题不存在",
+      "file": "internal/handler/themes.go",
+      "line": 566
+    },
+    {
+      "code": "THM0012",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "设置主题失败",
+      "file": "internal/handler/themes.go",
+      "line": 569
+    },
+    {
+      "code": "THM0013",
+      "kind": "AbortCoded",
+      "status": 403,
+      "message": "无权使用该主题",
+      "file": "internal/handler/themes.go",
+      "line": 573
+    },
+    {
+      "code": "THM0014",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "该主题不含壁纸，无法应用到背景",
+      "file": "internal/handler/themes.go",
+      "line": 577
+    },
+    {
+      "code": "THM0015",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "该主题不含图标，无法应用到图标",
+      "file": "internal/handler/themes.go",
+      "line": 581
+    },
+    {
+      "code": "THM0016",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "透明度需在 0-100 之间",
+      "file": "internal/handler/themes.go",
+      "line": 605
+    },
+    {
+      "code": "THM0017",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "模糊度需在 0-40 之间",
+      "file": "internal/handler/themes.go",
+      "line": 613
+    },
+    {
+      "code": "THM0018",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "请求需包含 opacity / blur / enabled 至少其一",
+      "file": "internal/handler/themes.go",
+      "line": 623
+    },
+    {
+      "code": "THM0019",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "保存背景设置失败",
+      "file": "internal/handler/themes.go",
+      "line": 627
+    },
+    {
+      "code": "THM0020",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "保存背景设置失败",
+      "file": "internal/handler/themes.go",
+      "line": 632
+    },
+    {
+      "code": "THM0021",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "主题名称不能为空且不超过 30 个字符",
+      "file": "internal/handler/themes.go",
+      "line": 654
+    },
+    {
+      "code": "THM0022",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "主题描述不能超过 200 个字符",
+      "file": "internal/handler/themes.go",
+      "line": 659
+    },
+    {
+      "code": "THM0023",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "<dynamic>",
+      "file": "internal/handler/themes.go",
+      "line": 664
+    },
+    {
+      "code": "THM0024",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "<dynamic>",
+      "file": "internal/handler/themes.go",
+      "line": 669
+    },
+    {
+      "code": "THM0025",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "<dynamic>",
+      "file": "internal/handler/themes.go",
+      "line": 675
+    },
+    {
+      "code": "THM0026",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "<dynamic>",
+      "file": "internal/handler/themes.go",
+      "line": 680
+    },
+    {
+      "code": "THM0027",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "主题需包含壁纸或图标至少其一",
+      "file": "internal/handler/themes.go",
+      "line": 684
+    },
+    {
+      "code": "THM0028",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "创建主题失败",
+      "file": "internal/handler/themes.go",
+      "line": 706
+    },
+    {
+      "code": "THM0029",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "主题 ID 不合法",
+      "file": "internal/handler/themes.go",
+      "line": 742
+    },
+    {
+      "code": "THM0030",
+      "kind": "AbortCoded",
+      "status": 404,
+      "message": "主题不存在",
+      "file": "internal/handler/themes.go",
+      "line": 748
+    },
+    {
+      "code": "THM0031",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "更新主题失败",
+      "file": "internal/handler/themes.go",
+      "line": 751
+    },
+    {
+      "code": "THM0032",
+      "kind": "AbortCoded",
+      "status": 403,
+      "message": "无权编辑该主题",
+      "file": "internal/handler/themes.go",
+      "line": 755
+    },
+    {
+      "code": "THM0033",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "主题名称不能为空且不超过 30 个字符",
+      "file": "internal/handler/themes.go",
+      "line": 764
+    },
+    {
+      "code": "THM0034",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "主题描述不能超过 200 个字符",
+      "file": "internal/handler/themes.go",
+      "line": 772
+    },
+    {
+      "code": "THM0035",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "<dynamic>",
+      "file": "internal/handler/themes.go",
+      "line": 781
+    },
+    {
+      "code": "THM0036",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "<dynamic>",
+      "file": "internal/handler/themes.go",
+      "line": 791
+    },
+    {
+      "code": "THM0037",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "<dynamic>",
+      "file": "internal/handler/themes.go",
+      "line": 801
+    },
+    {
+      "code": "THM0038",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "<dynamic>",
+      "file": "internal/handler/themes.go",
+      "line": 811
+    },
+    {
+      "code": "THM0039",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "主题需包含壁纸或图标至少其一",
+      "file": "internal/handler/themes.go",
+      "line": 817
+    },
+    {
+      "code": "THM0040",
+      "kind": "AbortCoded",
+      "status": 404,
+      "message": "主题不存在",
+      "file": "internal/handler/themes.go",
+      "line": 823
+    },
+    {
+      "code": "THM0041",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "更新主题失败",
+      "file": "internal/handler/themes.go",
+      "line": 826
+    },
+    {
+      "code": "THM0042",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "主题 ID 不合法",
+      "file": "internal/handler/themes.go",
+      "line": 846
+    },
+    {
+      "code": "THM0043",
+      "kind": "AbortCoded",
+      "status": 404,
+      "message": "主题不存在",
+      "file": "internal/handler/themes.go",
+      "line": 852
+    },
+    {
+      "code": "THM0044",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "删除主题失败",
+      "file": "internal/handler/themes.go",
+      "line": 855
+    },
+    {
+      "code": "THM0045",
+      "kind": "AbortCoded",
+      "status": 403,
+      "message": "无权删除该主题",
+      "file": "internal/handler/themes.go",
+      "line": 859
+    },
+    {
+      "code": "THM0046",
+      "kind": "AbortCoded",
+      "status": 404,
+      "message": "主题不存在",
+      "file": "internal/handler/themes.go",
+      "line": 864
+    },
+    {
+      "code": "THM0047",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "删除主题失败",
+      "file": "internal/handler/themes.go",
+      "line": 867
+    },
+    {
+      "code": "THM0048",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "主题 ID 不合法",
+      "file": "internal/handler/themes.go",
+      "line": 923
+    },
+    {
+      "code": "THM0049",
+      "kind": "AbortCoded",
+      "status": 404,
+      "message": "主题不存在",
+      "file": "internal/handler/themes.go",
+      "line": 929
+    },
+    {
+      "code": "THM0050",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "提交审核失败",
+      "file": "internal/handler/themes.go",
+      "line": 932
+    },
+    {
+      "code": "THM0051",
+      "kind": "AbortCoded",
+      "status": 403,
+      "message": "只能提交自己的个人主题",
+      "file": "internal/handler/themes.go",
+      "line": 937
+    },
+    {
+      "code": "THM0052",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "该主题已在审核中",
+      "file": "internal/handler/themes.go",
+      "line": 941
+    },
+    {
+      "code": "THM0053",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "该主题已是系统主题",
+      "file": "internal/handler/themes.go",
+      "line": 945
+    },
+    {
+      "code": "THM0054",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "提交审核失败",
+      "file": "internal/handler/themes.go",
+      "line": 954
+    },
+    {
+      "code": "THM0055",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "获取主题列表失败",
+      "file": "internal/handler/themes.go",
+      "line": 971
+    },
+    {
+      "code": "THM0056",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "主题 ID 不合法",
+      "file": "internal/handler/themes.go",
+      "line": 998
+    },
+    {
+      "code": "THM0057",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "审核备注不能超过 200 个字符",
+      "file": "internal/handler/themes.go",
+      "line": 1005
+    },
+    {
+      "code": "THM0058",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "系统主题无需审核",
+      "file": "internal/handler/themes.go",
+      "line": 1016
+    },
+    {
+      "code": "THM0059",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "action 必须为 approve 或 reject",
+      "file": "internal/handler/themes.go",
+      "line": 1022
+    },
+    {
+      "code": "THM0060",
+      "kind": "AbortCoded",
+      "status": 404,
+      "message": "主题不存在",
+      "file": "internal/handler/themes.go",
+      "line": 1028
+    },
+    {
+      "code": "THM0061",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "审核失败",
+      "file": "internal/handler/themes.go",
+      "line": 1031
+    },
+    {
+      "code": "THM0062",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "主题 ID 不合法",
+      "file": "internal/handler/themes.go",
+      "line": 1083
+    },
+    {
+      "code": "THM0063",
+      "kind": "AbortCoded",
+      "status": 404,
+      "message": "主题不存在",
+      "file": "internal/handler/themes.go",
+      "line": 1089
+    },
+    {
+      "code": "THM0064",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "设置默认主题失败",
+      "file": "internal/handler/themes.go",
+      "line": 1092
+    },
+    {
+      "code": "THM0065",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "只有系统主题可以取消默认",
+      "file": "internal/handler/themes.go",
+      "line": 1103
+    },
+    {
+      "code": "THM0066",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "取消默认主题失败",
+      "file": "internal/handler/themes.go",
+      "line": 1111
+    },
+    {
+      "code": "THM0067",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "只有启用的系统主题才能设为默认",
+      "file": "internal/handler/themes.go",
+      "line": 1118
+    },
+    {
+      "code": "THM0068",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "设置默认主题失败",
+      "file": "internal/handler/themes.go",
+      "line": 1126
+    },
+    {
+      "code": "THM0069",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "主题 ID 不合法",
+      "file": "internal/handler/themes.go",
+      "line": 1150
+    },
+    {
+      "code": "THM0070",
+      "kind": "AbortCoded",
+      "status": 404,
+      "message": "主题不存在",
+      "file": "internal/handler/themes.go",
+      "line": 1156
+    },
+    {
+      "code": "THM0071",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "更新主题失败",
+      "file": "internal/handler/themes.go",
+      "line": 1159
+    },
+    {
+      "code": "THM0072",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "该主题无创建者，无法转为个人主题",
+      "file": "internal/handler/themes.go",
+      "line": 1173
+    },
+    {
+      "code": "THM0073",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "只有启用的系统主题才能设为默认",
+      "file": "internal/handler/themes.go",
+      "line": 1198
+    },
+    {
+      "code": "THM0074",
+      "kind": "AbortCoded",
+      "status": 404,
+      "message": "主题不存在",
+      "file": "internal/handler/themes.go",
+      "line": 1209
+    },
+    {
+      "code": "THM0075",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "更新主题失败",
+      "file": "internal/handler/themes.go",
+      "line": 1212
+    },
+    {
+      "code": "THM0076",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "请选择要上传的 SVG 图标",
+      "file": "internal/handler/themes.go",
+      "line": 1255
+    },
+    {
+      "code": "THM0077",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "<dynamic>",
+      "file": "internal/handler/themes.go",
+      "line": 1258
+    },
+    {
+      "code": "THM0078",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "请选择要上传的图片",
+      "file": "internal/handler/themes.go",
+      "line": 1267
+    },
+    {
+      "code": "TRA0001",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "Missing key or targetLang",
+      "file": "internal/handler/translate.go",
+      "line": 249
+    },
+    {
+      "code": "TRA0002",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "Unsupported language",
+      "file": "internal/handler/translate.go",
+      "line": 253
+    },
+    {
+      "code": "TRA0004",
+      "kind": "AbortErrC",
+      "status": 504,
+      "message": "Translation request timeout",
+      "file": "internal/handler/translate.go",
+      "line": 283
+    },
+    {
+      "code": "TRA0005",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "Missing texts or targetLang",
+      "file": "internal/handler/translate.go",
+      "line": 304
+    },
+    {
+      "code": "TRA0006",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "Unsupported language",
+      "file": "internal/handler/translate.go",
+      "line": 308
+    },
+    {
+      "code": "TRA0008",
+      "kind": "AbortErrC",
+      "status": 504,
+      "message": "Translation request timeout",
+      "file": "internal/handler/translate.go",
+      "line": 350
+    },
+    {
+      "code": "TRA0010",
+      "kind": "AbortErrC",
+      "status": 504,
+      "message": "Translation request timeout",
+      "file": "internal/handler/translate.go",
+      "line": 359
+    },
+    {
+      "code": "TRS0001",
+      "kind": "AbortCoded",
+      "status": 404,
+      "message": "Episode not found",
+      "file": "internal/handler/episodetrash.go",
+      "line": 167
+    },
+    {
+      "code": "TRS0002",
+      "kind": "AbortCoded",
+      "status": 404,
+      "message": "Episode not found",
+      "file": "internal/handler/episodetrash.go",
+      "line": 227
+    },
+    {
+      "code": "TRS0003",
+      "kind": "AbortCoded",
+      "status": 404,
+      "message": "Episode not found",
+      "file": "internal/handler/episodetrash.go",
+      "line": 258
+    },
+    {
+      "code": "USR0001",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "头像上传失败",
+      "file": "internal/handler/users.go",
+      "line": 36
+    },
+    {
+      "code": "USR0002",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "昵称长度不能超过20个字符",
+      "file": "internal/handler/users.go",
+      "line": 57
+    },
+    {
+      "code": "USR0003",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "没有需要更新的数据",
+      "file": "internal/handler/users.go",
+      "line": 61
+    },
+    {
+      "code": "USR0004",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "服务器错误",
+      "file": "internal/handler/users.go",
+      "line": 66
+    },
+    {
+      "code": "USR0005",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "服务器错误",
+      "file": "internal/handler/users.go",
+      "line": 71
+    },
+    {
+      "code": "USR0006",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "name is required",
+      "file": "internal/handler/users.go",
+      "line": 126
+    },
+    {
+      "code": "USR0007",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "导出失败",
+      "file": "internal/handler/users.go",
+      "line": 144
+    },
+    {
+      "code": "USR0008",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "请选择要上传的图片",
+      "file": "internal/handler/users.go",
+      "line": 165
+    },
+    {
+      "code": "USR0009",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "<dynamic>",
+      "file": "internal/handler/users.go",
+      "line": 171
+    },
+    {
+      "code": "USR0010",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "仅支持图片文件 (jpg, jpeg, png, gif, webp)",
+      "file": "internal/handler/users.go",
+      "line": 173
+    },
+    {
+      "code": "USR0011",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "文件内容与类型不匹配，仅支持图片文件",
+      "file": "internal/handler/users.go",
+      "line": 175
+    },
+    {
+      "code": "USR0012",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "<dynamic>",
+      "file": "internal/handler/users.go",
+      "line": 177
+    },
+    {
+      "code": "USR0013",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "服务器错误",
+      "file": "internal/handler/users.go",
+      "line": 181
+    },
+    {
+      "code": "USR0014",
+      "kind": "NewC",
+      "status": 400,
+      "message": "已提交过注销申请",
+      "file": "internal/service/account.go",
+      "line": 24
+    },
+    {
+      "code": "USR0015",
+      "kind": "NewC",
+      "status": 500,
+      "message": "服务器错误",
+      "file": "internal/service/account.go",
+      "line": 28
+    },
+    {
+      "code": "USR0016",
+      "kind": "NewC",
+      "status": 400,
+      "message": "密码不正确",
+      "file": "internal/service/account.go",
+      "line": 32
+    },
+    {
+      "code": "USR0017",
+      "kind": "NewC",
+      "status": 500,
+      "message": "服务器错误",
+      "file": "internal/service/account.go",
+      "line": 41
+    },
+    {
+      "code": "USR0018",
+      "kind": "NewC",
+      "status": 400,
+      "message": "没有注销申请",
+      "file": "internal/service/account.go",
+      "line": 52
+    },
+    {
+      "code": "USR0019",
+      "kind": "NewC",
+      "status": 500,
+      "message": "服务器错误",
+      "file": "internal/service/account.go",
+      "line": 56
+    },
+    {
+      "code": "VER0001",
+      "kind": "AbortCoded",
+      "status": 404,
+      "message": "Version not found",
+      "file": "internal/handler/versions.go",
+      "line": 130
+    },
+    {
+      "code": "VER0002",
+      "kind": "AbortCoded",
+      "status": 404,
+      "message": "Version not found",
+      "file": "internal/handler/versions.go",
+      "line": 136
+    },
+    {
+      "code": "VER0003",
+      "kind": "AbortCoded",
+      "status": 404,
+      "message": "Version not found",
+      "file": "internal/handler/versions.go",
+      "line": 169
+    },
+    {
+      "code": "VER0004",
+      "kind": "AbortCoded",
+      "status": 404,
+      "message": "Version not found",
+      "file": "internal/handler/versions.go",
+      "line": 176
+    },
+    {
+      "code": "VER0005",
+      "kind": "AbortCoded",
+      "status": 404,
+      "message": "Version not found",
+      "file": "internal/handler/versions.go",
+      "line": 185
+    },
+    {
+      "code": "VER0006",
+      "kind": "AbortCoded",
+      "status": 404,
+      "message": "Version not found",
+      "file": "internal/handler/versions.go",
+      "line": 212
+    },
+    {
+      "code": "VER0007",
+      "kind": "AbortCoded",
+      "status": 404,
+      "message": "Version not found",
+      "file": "internal/handler/versions.go",
+      "line": 219
+    },
+    {
+      "code": "VER0008",
+      "kind": "AbortCoded",
+      "status": 404,
+      "message": "Episode not found",
+      "file": "internal/handler/versions.go",
+      "line": 228
+    },
+    {
+      "code": "VER0009",
+      "kind": "AbortCoded",
+      "status": 404,
+      "message": "Episode not found",
+      "file": "internal/handler/versions.go",
+      "line": 301
+    },
+    {
+      "code": "VER0010",
+      "kind": "AbortCoded",
+      "status": 403,
+      "message": "No permission to rollback this episode",
+      "file": "internal/handler/versions.go",
+      "line": 245
+    },
+    {
+      "code": "WAL0001",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "获取系统壁纸失败",
+      "file": "internal/handler/wallpapers.go",
+      "line": 62
+    },
+    {
+      "code": "WAL0002",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "获取系统壁纸失败",
+      "file": "internal/handler/wallpapers.go",
+      "line": 81
+    },
+    {
+      "code": "WAL0003",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "上传系统壁纸失败",
+      "file": "internal/handler/wallpapers.go",
+      "line": 120
+    },
+    {
+      "code": "WAL0004",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "更新系统壁纸失败",
+      "file": "internal/handler/wallpapers.go",
+      "line": 139
+    },
+    {
+      "code": "WAL0005",
+      "kind": "AbortCoded",
+      "status": 404,
+      "message": "壁纸不存在",
+      "file": "internal/handler/wallpapers.go",
+      "line": 156
+    },
+    {
+      "code": "WAL0006",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "更新系统壁纸失败",
+      "file": "internal/handler/wallpapers.go",
+      "line": 159
+    },
+    {
+      "code": "WAL0007",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "删除系统壁纸失败",
+      "file": "internal/handler/wallpapers.go",
+      "line": 176
+    },
+    {
+      "code": "WAL0008",
+      "kind": "AbortCoded",
+      "status": 404,
+      "message": "壁纸不存在",
+      "file": "internal/handler/wallpapers.go",
+      "line": 182
+    },
+    {
+      "code": "WAL0009",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "删除系统壁纸失败",
+      "file": "internal/handler/wallpapers.go",
+      "line": 185
+    },
+    {
+      "code": "WAL0010",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "获取个人壁纸失败",
+      "file": "internal/handler/wallpapers.go",
+      "line": 205
+    },
+    {
+      "code": "WAL0011",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "上传个人壁纸失败",
+      "file": "internal/handler/wallpapers.go",
+      "line": 234
+    },
+    {
+      "code": "WAL0012",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "个人壁纸最多 20 张，请先删除旧的",
+      "file": "internal/handler/wallpapers.go",
+      "line": 241
+    },
+    {
+      "code": "WAL0013",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "上传个人壁纸失败",
+      "file": "internal/handler/wallpapers.go",
+      "line": 247
+    },
+    {
+      "code": "WAL0014",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "无效的壁纸地址",
+      "file": "internal/handler/wallpapers.go",
+      "line": 266
+    },
+    {
+      "code": "WAL0015",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "删除个人壁纸失败",
+      "file": "internal/handler/wallpapers.go",
+      "line": 272
+    },
+    {
+      "code": "WAL0016",
+      "kind": "AbortCoded",
+      "status": 404,
+      "message": "壁纸不存在",
+      "file": "internal/handler/wallpapers.go",
+      "line": 283
+    },
+    {
+      "code": "WAL0017",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "删除个人壁纸失败",
+      "file": "internal/handler/wallpapers.go",
+      "line": 287
+    },
+    {
+      "code": "WAL0018",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "请选择要上传的图片",
+      "file": "internal/handler/wallpapers.go",
+      "line": 302
+    },
+    {
+      "code": "WAL0019",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "文件上传错误: File too large",
+      "file": "internal/handler/wallpapers.go",
+      "line": 308
+    },
+    {
+      "code": "WAL0020",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "<dynamic>",
+      "file": "internal/handler/wallpapers.go",
+      "line": 314
+    },
+    {
+      "code": "WAL0021",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "文件内容与类型不匹配，仅支持图片文件",
+      "file": "internal/handler/wallpapers.go",
+      "line": 316
+    },
+    {
+      "code": "WAL0022",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "<dynamic>",
+      "file": "internal/handler/wallpapers.go",
+      "line": 318
+    },
+    {
+      "code": "WAL0023",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "<dynamic>",
+      "file": "internal/handler/wallpapers.go",
+      "line": 322
+    }
+  ]
+}

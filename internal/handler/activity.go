@@ -63,7 +63,7 @@ func (h *Activity) Feed(c *gin.Context) {
 
 	follows, err := h.Repos.Follows.FindByUser(ctx, user.ID)
 	if err != nil {
-		errors.AbortWithAppError(c, errors.New(500, "Server error"), h.Config.IsDev)
+		errors.Abort500C(c, "ACT0001", "Server error", err, h.Config.IsDev)
 		return
 	}
 	followedIDs := followEpisodeIDs(follows)
@@ -77,13 +77,13 @@ func (h *Activity) Feed(c *gin.Context) {
 	// 1) 追番剧集的新单集（releaseDate 近 30 天）。
 	newEpisodes, err := h.Repos.SingleEpisodes.ActivitySinglesFollowedNew(ctx, followedIDs, thirtyDaysAgo)
 	if err != nil {
-		errors.AbortWithAppError(c, errors.New(500, "Server error"), h.Config.IsDev)
+		errors.Abort500C(c, "ACT0002", "Server error", err, h.Config.IsDev)
 		return
 	}
 	allIDs := append(append([]primitive.ObjectID{}, followedIDs...), singleEpisodeIDs(newEpisodes)...)
 	epMap, err := h.episodeMapByID(ctx, dedupIDs(allIDs))
 	if err != nil {
-		errors.AbortWithAppError(c, errors.New(500, "Server error"), h.Config.IsDev)
+		errors.Abort500C(c, "ACT0003", "Server error", err, h.Config.IsDev)
 		return
 	}
 	for i := range newEpisodes {
@@ -101,7 +101,7 @@ func (h *Activity) Feed(c *gin.Context) {
 		"updatedAt": bson.M{"$gte": thirtyDaysAgo},
 	}, bson.D{{Key: "updatedAt", Value: -1}}, 0, 0)
 	if err != nil {
-		errors.AbortWithAppError(c, errors.New(500, "Server error"), h.Config.IsDev)
+		errors.Abort500C(c, "ACT0004", "Server error", err, h.Config.IsDev)
 		return
 	}
 	for i := range recentlyUpdated {
@@ -111,7 +111,7 @@ func (h *Activity) Feed(c *gin.Context) {
 	// 3) 追番剧集的近期高分评分（score>=4，近 30 天，最多 50 条）。
 	highRatings, err := h.Repos.Ratings.ActivityHighRatings(ctx, followedIDs, thirtyDaysAgo, 50)
 	if err != nil {
-		errors.AbortWithAppError(c, errors.New(500, "Server error"), h.Config.IsDev)
+		errors.Abort500C(c, "ACT0005", "Server error", err, h.Config.IsDev)
 		return
 	}
 	for i := range highRatings {
@@ -156,12 +156,12 @@ func (h *Activity) PublicFeed(c *gin.Context) {
 	// 1) 全站近期新单集（最多 30 条，仅取已审核剧集）。
 	newEpisodes, err := h.Repos.SingleEpisodes.ActivitySinglesRecent(ctx, thirtyDaysAgo, 30)
 	if err != nil {
-		errors.AbortWithAppError(c, errors.New(500, "Server error"), h.Config.IsDev)
+		errors.Abort500C(c, "ACT0006", "Server error", err, h.Config.IsDev)
 		return
 	}
 	epMap, err := h.episodeMapByIDApproved(ctx, singleEpisodeIDs(newEpisodes))
 	if err != nil {
-		errors.AbortWithAppError(c, errors.New(500, "Server error"), h.Config.IsDev)
+		errors.Abort500C(c, "ACT0007", "Server error", err, h.Config.IsDev)
 		return
 	}
 	for i := range newEpisodes {
@@ -175,12 +175,12 @@ func (h *Activity) PublicFeed(c *gin.Context) {
 
 	// 2) 热门高分剧集（均分>=4 且有人评分，最多 10 条）。
 	trending, err := h.Repos.Episodes.FindList(ctx, bson.M{
-		"reviewStatus": "approved",
+		"reviewStatus":  "approved",
 		"averageRating": bson.M{"$gte": 4},
-		"ratingCount":  bson.M{"$gte": 1},
+		"ratingCount":   bson.M{"$gte": 1},
 	}, bson.D{{Key: "averageRating", Value: -1}, {Key: "ratingCount", Value: -1}}, 0, 10)
 	if err != nil {
-		errors.AbortWithAppError(c, errors.New(500, "Server error"), h.Config.IsDev)
+		errors.Abort500C(c, "ACT0008", "Server error", err, h.Config.IsDev)
 		return
 	}
 	for i := range trending {
@@ -193,7 +193,7 @@ func (h *Activity) PublicFeed(c *gin.Context) {
 		"updatedAt":    bson.M{"$gte": thirtyDaysAgo},
 	}, bson.D{{Key: "updatedAt", Value: -1}}, 0, 10)
 	if err != nil {
-		errors.AbortWithAppError(c, errors.New(500, "Server error"), h.Config.IsDev)
+		errors.Abort500C(c, "ACT0009", "Server error", err, h.Config.IsDev)
 		return
 	}
 	for i := range statusChanged {
@@ -237,8 +237,8 @@ func newEpisodeItem(ep model.Episode, se model.SingleEpisode) activityItem {
 		epRefEn = label
 	}
 	metadata := gin.H{
-		"episodeNumber":      se.EpisodeNumber,
-		"singleEpisodeTitle": se.Title,
+		"episodeNumber":        se.EpisodeNumber,
+		"singleEpisodeTitle":   se.Title,
 		"singleEpisodeTitleEn": se.TitleEn,
 	}
 	if label != "" {
@@ -247,15 +247,15 @@ func newEpisodeItem(ep model.Episode, se model.SingleEpisode) activityItem {
 	return activityItem{
 		sortTime: sortTime,
 		obj: gin.H{
-			"type":          "new_episode",
-			"episodeId":     ep.ID.Hex(),
-			"episodeTitle":  ep.Title,
+			"type":           "new_episode",
+			"episodeId":      ep.ID.Hex(),
+			"episodeTitle":   ep.Title,
 			"episodeTitleEn": ep.TitleEn,
-			"coverImage":    ep.CoverImage,
-			"description":   fmt.Sprintf("%s 发布了新单集：%s %s", ep.Title, epRef, se.Title),
-			"descriptionEn": fmt.Sprintf("%s released a new episode: %s %s", orFirstNonEmpty(ep.TitleEn, ep.Title), epRefEn, orFirstNonEmpty(se.TitleEn, se.Title)),
-			"date":          date,
-			"metadata":      metadata,
+			"coverImage":     ep.CoverImage,
+			"description":    fmt.Sprintf("%s 发布了新单集：%s %s", ep.Title, epRef, se.Title),
+			"descriptionEn":  fmt.Sprintf("%s released a new episode: %s %s", orFirstNonEmpty(ep.TitleEn, ep.Title), epRefEn, orFirstNonEmpty(se.TitleEn, se.Title)),
+			"date":           date,
+			"metadata":       metadata,
 		},
 	}
 }
@@ -274,15 +274,15 @@ func statusChangeItem(ep model.Episode) activityItem {
 	return activityItem{
 		sortTime: ep.UpdatedAt,
 		obj: gin.H{
-			"type":          "status_change",
-			"episodeId":     ep.ID.Hex(),
-			"episodeTitle":  ep.Title,
+			"type":           "status_change",
+			"episodeId":      ep.ID.Hex(),
+			"episodeTitle":   ep.Title,
 			"episodeTitleEn": ep.TitleEn,
-			"coverImage":    ep.CoverImage,
-			"description":   fmt.Sprintf("%s 状态变更为：%s", ep.Title, st),
-			"descriptionEn": fmt.Sprintf("%s status changed to: %s", orFirstNonEmpty(ep.TitleEn, ep.Title), ep.Status),
-			"date":          ep.UpdatedAt,
-			"metadata":      gin.H{"status": ep.Status},
+			"coverImage":     ep.CoverImage,
+			"description":    fmt.Sprintf("%s 状态变更为：%s", ep.Title, st),
+			"descriptionEn":  fmt.Sprintf("%s status changed to: %s", orFirstNonEmpty(ep.TitleEn, ep.Title), ep.Status),
+			"date":           ep.UpdatedAt,
+			"metadata":       gin.H{"status": ep.Status},
 		},
 	}
 }
@@ -293,15 +293,15 @@ func highRatingItem(ep model.Episode, rt model.Rating) activityItem {
 	return activityItem{
 		sortTime: rt.CreatedAt,
 		obj: gin.H{
-			"type":          "new_rating",
-			"episodeId":     ep.ID.Hex(),
-			"episodeTitle":  ep.Title,
+			"type":           "new_rating",
+			"episodeId":      ep.ID.Hex(),
+			"episodeTitle":   ep.Title,
 			"episodeTitleEn": ep.TitleEn,
-			"coverImage":    ep.CoverImage,
-			"description":   fmt.Sprintf("%s 获得了高评分：%d分", ep.Title, rt.Score),
-			"descriptionEn": fmt.Sprintf("%s received a high rating: %d/5", orFirstNonEmpty(ep.TitleEn, ep.Title), rt.Score),
-			"date":          rt.CreatedAt,
-			"metadata":      gin.H{"score": rt.Score, "averageRating": ep.AverageRating},
+			"coverImage":     ep.CoverImage,
+			"description":    fmt.Sprintf("%s 获得了高评分：%d分", ep.Title, rt.Score),
+			"descriptionEn":  fmt.Sprintf("%s received a high rating: %d/5", orFirstNonEmpty(ep.TitleEn, ep.Title), rt.Score),
+			"date":           rt.CreatedAt,
+			"metadata":       gin.H{"score": rt.Score, "averageRating": ep.AverageRating},
 		},
 	}
 }
@@ -311,15 +311,15 @@ func trendingItem(ep model.Episode) activityItem {
 	return activityItem{
 		sortTime: ep.UpdatedAt,
 		obj: gin.H{
-			"type":          "new_rating",
-			"episodeId":     ep.ID.Hex(),
-			"episodeTitle":  ep.Title,
+			"type":           "new_rating",
+			"episodeId":      ep.ID.Hex(),
+			"episodeTitle":   ep.Title,
 			"episodeTitleEn": ep.TitleEn,
-			"coverImage":    ep.CoverImage,
-			"description":   fmt.Sprintf("%s 获得了高评分：%g分（%d人评分）", ep.Title, ep.AverageRating, ep.RatingCount),
-			"descriptionEn": fmt.Sprintf("%s received a high rating: %g/5 (%d ratings)", orFirstNonEmpty(ep.TitleEn, ep.Title), ep.AverageRating, ep.RatingCount),
-			"date":          ep.UpdatedAt,
-			"metadata":      gin.H{"score": ep.AverageRating, "ratingCount": ep.RatingCount},
+			"coverImage":     ep.CoverImage,
+			"description":    fmt.Sprintf("%s 获得了高评分：%g分（%d人评分）", ep.Title, ep.AverageRating, ep.RatingCount),
+			"descriptionEn":  fmt.Sprintf("%s received a high rating: %g/5 (%d ratings)", orFirstNonEmpty(ep.TitleEn, ep.Title), ep.AverageRating, ep.RatingCount),
+			"date":           ep.UpdatedAt,
+			"metadata":       gin.H{"score": ep.AverageRating, "ratingCount": ep.RatingCount},
 		},
 	}
 }

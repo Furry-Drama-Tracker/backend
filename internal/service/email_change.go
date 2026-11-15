@@ -22,23 +22,23 @@ func (s *AuthService) ChangeEmail(c *gin.Context, userID interface{}, newEmail, 
 	ctx := c.Request.Context()
 	newEmail = strings.ToLower(strings.TrimSpace(newEmail))
 	if !EmailRegex.MatchString(newEmail) {
-		return errors.New(400, "邮箱格式不正确")
+		return errors.NewC("AUT0006", 400, "邮箱格式不正确")
 	}
 	user, err := s.Repos.Users.FindByIDWithAuth(ctx, userID)
 	if err != nil {
-		return errors.New(404, "用户不存在")
+		return errors.NewC("AUT0007", 404, "用户不存在")
 	}
 	if !auth.Compare(user.Password, password) {
-		return errors.New(400, "密码不正确")
+		return errors.NewC("AUT0008", 400, "密码不正确")
 	}
 	if exists, err := s.Repos.Users.ExistsByEmail(ctx, newEmail); err == nil && exists {
-		return errors.New(400, "该邮箱已被其他账号使用")
+		return errors.NewC("AUT0009", 400, "该邮箱已被其他账号使用")
 	}
 	// 置新邮箱为未验证（定点 $set，勿整文档替换）：user 来自 FindByIDWithAuth，
 	// 投影不含 2FA 密文，Save 会把 twoFactorSecret/twoFactorBackupCodes 清成零值，
 	// twoFactorEnabled 仍为 true → 登录卡死在永远无法通过的 2FA 挑战上（超管锁死）。
 	if err := s.Repos.Users.SetEmailPendingVerification(ctx, user.ID, newEmail); err != nil {
-		return errors.New(500, "服务器错误")
+		return errors.NewC("AUT0010", 500, "服务器错误")
 	}
 	user.Email = newEmail
 	user.IsEmailVerified = false
@@ -67,7 +67,7 @@ var EmailNotificationPrefsKeys = []string{
 // 返回更新后的完整偏好。
 func (s *AuthService) UpdateEmailNotificationPrefs(ctx context.Context, userID interface{}, prefs map[string]bool) (model.EmailNotificationPrefs, error) {
 	if len(prefs) == 0 {
-		return model.EmailNotificationPrefs{}, errors.New(400, "没有可更新的偏好设置")
+		return model.EmailNotificationPrefs{}, errors.NewC("AUT0011", 400, "没有可更新的偏好设置")
 	}
 	update := map[string]bool{}
 	for _, k := range EmailNotificationPrefsKeys {
@@ -76,14 +76,14 @@ func (s *AuthService) UpdateEmailNotificationPrefs(ctx context.Context, userID i
 		}
 	}
 	if len(update) == 0 {
-		return model.EmailNotificationPrefs{}, errors.New(400, "没有可更新的偏好设置")
+		return model.EmailNotificationPrefs{}, errors.NewC("AUT0012", 400, "没有可更新的偏好设置")
 	}
 	if err := s.Repos.Users.UpdateEmailNotificationPrefs(ctx, userID, update); err != nil {
-		return model.EmailNotificationPrefs{}, errors.New(500, "服务器错误")
+		return model.EmailNotificationPrefs{}, errors.NewC("AUT0013", 500, "服务器错误")
 	}
 	user, err := s.Repos.Users.FindByID(ctx, userID)
 	if err != nil {
-		return model.EmailNotificationPrefs{}, errors.New(500, "服务器错误")
+		return model.EmailNotificationPrefs{}, errors.NewC("AUT0014", 500, "服务器错误")
 	}
 	return user.EmailNotificationPrefs, nil
 }
@@ -91,34 +91,34 @@ func (s *AuthService) UpdateEmailNotificationPrefs(ctx context.Context, userID i
 // VerifyEmail POST /api/auth/verify-email（流程为固定契约）。
 func (s *AuthService) VerifyEmail(ctx context.Context, verifyCode, emailOpt string) error {
 	if verifyCode == "" {
-		return errors.New(400, "请输入验证码")
+		return errors.NewC("AUT0015", 400, "请输入验证码")
 	}
 	entry, ok := s.EmailVerifyCodes.Get(verifyCode)
 	if !ok || time.Now().After(entry.ExpiresAt) {
-		return errors.New(400, "验证码无效或已过期，请重新获取")
+		return errors.NewC("AUT0016", 400, "验证码无效或已过期，请重新获取")
 	}
 	entry.Attempts++
 	if entry.Attempts > 5 {
 		s.EmailVerifyCodes.Delete(verifyCode)
-		return errors.New(400, "尝试次数过多，验证码已作废，请重新获取")
+		return errors.NewC("AUT0017", 400, "尝试次数过多，验证码已作废，请重新获取")
 	}
 	s.EmailVerifyCodes.Set(verifyCode, entry)
 
 	if emailOpt != "" && !strings.EqualFold(emailOpt, entry.Email) {
-		return errors.New(400, "验证码与邮箱不匹配")
+		return errors.NewC("AUT0018", 400, "验证码与邮箱不匹配")
 	}
 	user, err := s.Repos.Users.FindByID(ctx, entry.UserID)
 	if err != nil {
-		return errors.New(404, "用户不存在")
+		return errors.NewC("AUT0019", 404, "用户不存在")
 	}
 	if user.IsEmailVerified {
 		return nil
 	}
 	if !strings.EqualFold(user.Email, entry.Email) {
-		return errors.New(400, "验证码已失效，请重新获取")
+		return errors.NewC("AUT0020", 400, "验证码已失效，请重新获取")
 	}
 	if err := s.Repos.Users.UpdateVerified(ctx, user.ID); err != nil {
-		return errors.New(500, "服务器错误")
+		return errors.NewC("AUT0021", 500, "服务器错误")
 	}
 	s.EmailVerifyCodes.Delete(verifyCode)
 	return nil
@@ -147,13 +147,13 @@ func (s *AuthService) ResendVerification(ctx context.Context, user *model.User) 
 func (s *AuthService) ResendVerificationByEmail(ctx context.Context, emailAddr, altcha, devToken string) (string, error) {
 	unified := "如果该邮箱已注册且未验证，验证码已发送"
 	if emailAddr == "" {
-		return "", errors.New(400, "请提供邮箱地址")
+		return "", errors.NewC("AUT0022", 400, "请提供邮箱地址")
 	}
 	if !s.VerifyAltcha(altcha, devToken) {
-		return "", errors.New(400, "验证码错误或已过期")
+		return "", errors.NewC("AUT0023", 400, "验证码错误或已过期")
 	}
 	if !EmailRegex.MatchString(emailAddr) {
-		return "", errors.New(400, "邮箱格式不正确")
+		return "", errors.NewC("AUT0024", 400, "邮箱格式不正确")
 	}
 	user, err := s.Repos.Users.FindByEmail(ctx, strings.ToLower(strings.TrimSpace(emailAddr)))
 	if err != nil || user.IsEmailVerified {
@@ -176,32 +176,32 @@ func (s *AuthService) ResendVerificationByEmail(ctx context.Context, emailAddr, 
 func (s *AuthService) RequestEmailChange(c *gin.Context, userID interface{}, password, newEmail, altcha string) error {
 	ctx := c.Request.Context()
 	if password == "" || newEmail == "" {
-		return errors.New(400, "请填写密码和新邮箱")
+		return errors.NewC("AUT0025", 400, "请填写密码和新邮箱")
 	}
 	if !s.VerifyAltcha(altcha, c.GetHeader("x-dev-token")) {
-		return errors.New(400, "验证码错误或已过期")
+		return errors.NewC("AUT0026", 400, "验证码错误或已过期")
 	}
 	newEmail = strings.ToLower(strings.TrimSpace(newEmail))
 	if !EmailRegex.MatchString(newEmail) {
-		return errors.New(400, "邮箱格式不正确")
+		return errors.NewC("AUT0027", 400, "邮箱格式不正确")
 	}
 	user, err := s.Repos.Users.FindByIDWithAuth(ctx, userID)
 	if err != nil {
-		return errors.New(404, "用户不存在")
+		return errors.NewC("AUT0028", 404, "用户不存在")
 	}
 	if repository.IsLocked(user) {
-		return errors.New(423, "账号已被锁定，请30分钟后再试")
+		return errors.NewC("AUT0029", 423, "账号已被锁定，请30分钟后再试")
 	}
 	if !auth.Compare(user.Password, password) {
 		_ = s.Repos.Users.IncLoginAttempts(ctx, user.ID)
-		return errors.New(400, "密码不正确")
+		return errors.NewC("AUT0030", 400, "密码不正确")
 	}
 	_ = s.Repos.Users.ResetLoginAttempts(ctx, user.ID)
 	if strings.EqualFold(user.Email, newEmail) {
-		return errors.New(400, "新邮箱与当前邮箱相同")
+		return errors.NewC("AUT0031", 400, "新邮箱与当前邮箱相同")
 	}
 	if exists, err := s.Repos.Users.ExistsByEmail(ctx, newEmail); err == nil && exists {
-		return errors.New(400, "该邮箱已被其他账号使用")
+		return errors.NewC("AUT0032", 400, "该邮箱已被其他账号使用")
 	}
 	if s.Mail == nil {
 		return errors.New(503, "邮件服务暂不可用，请稍后再试")
@@ -211,7 +211,7 @@ func (s *AuthService) RequestEmailChange(c *gin.Context, userID interface{}, pas
 		"type":     "email-change",
 	})
 	if err != nil {
-		return errors.New(500, "服务器错误")
+		return errors.NewC("AUT0033", 500, "服务器错误")
 	}
 	siteURL := s.Config.Server.FrontendURL
 	if siteURL == "" {
@@ -234,31 +234,31 @@ func (s *AuthService) RequestEmailChange(c *gin.Context, userID interface{}, pas
 // VerifyEmailChange POST /api/auth/verify-email-change（流程为固定契约）。
 func (s *AuthService) VerifyEmailChange(ctx context.Context, token string) (string, error) {
 	if token == "" {
-		return "", errors.New(400, "缺少验证令牌")
+		return "", errors.NewC("AUT0034", 400, "缺少验证令牌")
 	}
 	claims, err := s.Signer.Verify(token)
 	if err != nil || (claims.Type != "email-change" && claims.Purpose != "email-change") {
-		return "", errors.New(400, "无效的验证令牌")
+		return "", errors.NewC("AUT0035", 400, "无效的验证令牌")
 	}
 	tokenHash := auth.HashToken(token)
 	if used, err := s.Repos.UsedTokens.IsUsed(ctx, tokenHash); err == nil && used {
-		return "", errors.New(400, "该验证链接已使用，请重新申请")
+		return "", errors.NewC("AUT0036", 400, "该验证链接已使用，请重新申请")
 	}
 	user, err := s.Repos.Users.FindByID(ctx, claims.ID)
 	if err != nil {
-		return "", errors.New(404, "用户不存在")
+		return "", errors.NewC("AUT0037", 404, "用户不存在")
 	}
 	// 密码修改后，旧的换绑邮箱链接立即失效。
 	if user.PasswordChangedAt != nil && claims.IssuedAt != nil && claims.IssuedAt.Time.Before(*user.PasswordChangedAt) {
-		return "", errors.New(400, "该验证链接已失效，请重新申请")
+		return "", errors.NewC("AUT0038", 400, "该验证链接已失效，请重新申请")
 	}
 	newEmail := strings.ToLower(claims.NewEmail)
 	if exists, err := s.Repos.Users.ExistsByEmail(ctx, newEmail); err == nil && exists {
-		return "", errors.New(400, "该邮箱已被其他账号使用")
+		return "", errors.NewC("AUT0039", 400, "该邮箱已被其他账号使用")
 	}
 	_ = s.Repos.UsedTokens.MarkUsed(ctx, tokenHash, "email-change", time.Hour)
 	if err := s.Repos.Users.SetEmailVerifiedAndEmail(ctx, user.ID, newEmail); err != nil {
-		return "", errors.New(500, "服务器错误")
+		return "", errors.NewC("AUT0040", 500, "服务器错误")
 	}
 	_ = s.Repos.Sessions.DeactivateAllByUser(ctx, user.ID, model.RevokeEmailChanged)
 	return newEmail, nil

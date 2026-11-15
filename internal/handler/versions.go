@@ -12,6 +12,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 
 	"github.com/Furry-Drama-Tracker/backend/internal/config"
+	"github.com/Furry-Drama-Tracker/backend/internal/errors"
 	"github.com/Furry-Drama-Tracker/backend/internal/middleware"
 	"github.com/Furry-Drama-Tracker/backend/internal/model"
 	"github.com/Furry-Drama-Tracker/backend/internal/ratelimit"
@@ -68,28 +69,28 @@ var versionDiffFieldOrder = []string{
 func (h *Versions) List(c *gin.Context) {
 	episodeID, err := primitive.ObjectIDFromHex(c.Param("episodeId"))
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	page, limit, ok := versionsPage(c)
 	if !ok {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	ctx := c.Request.Context()
 	total, err := h.Repos.EpisodeVersions.CountByEpisode(ctx, episodeID)
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	versions, err := h.Repos.EpisodeVersions.VersionsFindByEpisodePage(ctx, episodeID, page, limit)
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	users, err := h.versionsUserRefs(ctx, changedByIDs(versions))
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	list := make([]gin.H, 0, len(versions))
@@ -121,26 +122,26 @@ func (h *Versions) List(c *gin.Context) {
 func (h *Versions) Get(c *gin.Context) {
 	episodeID, err := primitive.ObjectIDFromHex(c.Param("episodeId"))
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	versionNum, ok := versionsParseInt(c.Param("version"))
 	if !ok {
-		c.JSON(404, gin.H{"message": "Version not found"})
+		errors.AbortCoded(c, 404, "VER0001", "Version not found", h.Config.IsDev)
 		return
 	}
 	versionDoc, err := h.Repos.EpisodeVersions.VersionsFindOneByEpisodeVersion(c.Request.Context(), episodeID, versionNum)
 	if err != nil {
 		if repository.IsNotFound(err) {
-			c.JSON(404, gin.H{"message": "Version not found"})
+			errors.AbortCoded(c, 404, "VER0002", "Version not found", h.Config.IsDev)
 			return
 		}
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	users, err := h.versionsUserRefs(c.Request.Context(), changedByIDs([]model.EpisodeVersion{*versionDoc}))
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	c.JSON(200, versionsVersionJSON(versionDoc, users))
@@ -158,33 +159,33 @@ func (h *Versions) Get(c *gin.Context) {
 func (h *Versions) Diff(c *gin.Context) {
 	episodeID, err := primitive.ObjectIDFromHex(c.Param("episodeId"))
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	v1Num, v1OK := versionsParseInt(c.Param("v1"))
 	v2Num, v2OK := versionsParseInt(c.Param("v2"))
 	// parseInt 失败 → version 非法（NaN）→ 查询无匹配 → 404 "Version not found"。
 	if !v1OK || !v2OK {
-		c.JSON(404, gin.H{"message": "Version not found"})
+		errors.AbortCoded(c, 404, "VER0003", "Version not found", h.Config.IsDev)
 		return
 	}
 	ctx := c.Request.Context()
 	v1Doc, err := h.Repos.EpisodeVersions.VersionsFindOneByEpisodeVersion(ctx, episodeID, v1Num)
 	if err != nil {
 		if repository.IsNotFound(err) {
-			c.JSON(404, gin.H{"message": "Version not found"})
+			errors.AbortCoded(c, 404, "VER0004", "Version not found", h.Config.IsDev)
 			return
 		}
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	v2Doc, err := h.Repos.EpisodeVersions.VersionsFindOneByEpisodeVersion(ctx, episodeID, v2Num)
 	if err != nil {
 		if repository.IsNotFound(err) {
-			c.JSON(404, gin.H{"message": "Version not found"})
+			errors.AbortCoded(c, 404, "VER0005", "Version not found", h.Config.IsDev)
 			return
 		}
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	c.JSON(200, versionsDiff(v1Doc, v2Doc))
@@ -203,31 +204,31 @@ func (h *Versions) Diff(c *gin.Context) {
 func (h *Versions) Rollback(c *gin.Context) {
 	episodeID, err := primitive.ObjectIDFromHex(c.Param("episodeId"))
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	versionNum, ok := versionsParseInt(c.Param("version"))
 	if !ok {
-		c.JSON(404, gin.H{"message": "Version not found"})
+		errors.AbortCoded(c, 404, "VER0006", "Version not found", h.Config.IsDev)
 		return
 	}
 	ctx := c.Request.Context()
 	versionDoc, err := h.Repos.EpisodeVersions.VersionsFindOneByEpisodeVersion(ctx, episodeID, versionNum)
 	if err != nil {
 		if repository.IsNotFound(err) {
-			c.JSON(404, gin.H{"message": "Version not found"})
+			errors.AbortCoded(c, 404, "VER0007", "Version not found", h.Config.IsDev)
 			return
 		}
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	currentEpisode, err := h.Repos.Episodes.FindByID(ctx, episodeID)
 	if err != nil {
 		if repository.IsNotFound(err) {
-			c.JSON(404, gin.H{"message": "Episode not found"})
+			errors.AbortCoded(c, 404, "VER0008", "Episode not found", h.Config.IsDev)
 			return
 		}
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	user, _ := middleware.GetUser(c)
@@ -241,14 +242,14 @@ func (h *Versions) Rollback(c *gin.Context) {
 			}
 		}
 		if !isOwner && !isAllowed {
-			c.JSON(403, gin.H{"message": "No permission to rollback this episode"})
+			errors.AbortCoded(c, 403, "VER0010", "No permission to rollback this episode", h.Config.IsDev)
 			return
 		}
 	}
 
 	lastVersion, err := h.Repos.EpisodeVersions.FindLatest(ctx, episodeID)
 	if err != nil && !repository.IsNotFound(err) {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	newVersionNum := 1
@@ -262,20 +263,20 @@ func (h *Versions) Rollback(c *gin.Context) {
 		ChangedBy:     &user.ID,
 		ChangeSummary: fmt.Sprintf("Rolled back to version %s", c.Param("version")),
 	}); err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 
 	// 限制版本数量为 50（固定契约）。
 	versionCount, err := h.Repos.EpisodeVersions.CountByEpisode(ctx, episodeID)
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	if versionCount > 50 {
 		oldest, err := h.Repos.EpisodeVersions.FindOldestN(ctx, episodeID, versionCount-50)
 		if err != nil {
-			serverError(c)
+			serverError(c, err, h.Config.IsDev)
 			return
 		}
 		ids := make([]any, 0, len(oldest))
@@ -283,7 +284,7 @@ func (h *Versions) Rollback(c *gin.Context) {
 			ids = append(ids, v.ID)
 		}
 		if _, err := h.Repos.EpisodeVersions.DeleteManyByIDs(ctx, ids); err != nil {
-			serverError(c)
+			serverError(c, err, h.Config.IsDev)
 			return
 		}
 	}
@@ -297,10 +298,10 @@ func (h *Versions) Rollback(c *gin.Context) {
 	updated, err := h.Repos.Episodes.FindOneAndUpdate(ctx, episodeID, bson.M{"$set": rollbackData})
 	if err != nil {
 		if repository.IsNotFound(err) {
-			c.JSON(404, gin.H{"message": "Episode not found"})
+			errors.AbortCoded(c, 404, "VER0009", "Episode not found", h.Config.IsDev)
 			return
 		}
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	c.JSON(200, versionsEpisodeJSON(updated))

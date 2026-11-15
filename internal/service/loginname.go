@@ -155,36 +155,36 @@ type ChangeLoginNameInput struct {
 func (s *AuthService) ChangeLoginName(ctx context.Context, u *model.User, in ChangeLoginNameInput) (string, int, error) {
 	newName := strings.TrimSpace(in.NewLoginName)
 	if in.CurrentPassword == "" {
-		return "", 0, errors.New(400, "请输入当前密码以确认操作")
+		return "", 0, errors.NewC("AUT0048", 400, "请输入当前密码以确认操作")
 	}
 	// 密码再认证：u 来自中间件公开投影（无 password 哈希），重新带哈希加载。
 	full, err := s.Repos.Users.FindByIDWithAuth(ctx, u.ID)
 	if err != nil || !auth.Compare(full.Password, in.CurrentPassword) {
-		return "", 0, errors.New(400, "当前密码不正确")
+		return "", 0, errors.NewC("AUT0049", 400, "当前密码不正确")
 	}
 	newFold := strings.ToLower(newName)
 	if newFold == strings.ToLower(full.AccountID) && newName == full.AccountID {
-		return "", 0, errors.New(400, "新用户名与当前用户名相同")
+		return "", 0, errors.NewC("AUT0050", 400, "新用户名与当前用户名相同")
 	}
 	if msg := ValidateLoginName(newName, s.Config.Security.UsernameBlacklist); msg != "" {
-		return "", 0, errors.New(400, msg)
+		return "", 0, errors.NewC("AUT0051", 400, msg)
 	}
 	// 占用检查（折叠：accountIdLower 与保留期两处；保留期豁免自己——
 	// 大小写微调后旧名的折叠形式就是新名的折叠形式，不应挡住自己）。
 	if newFold != strings.ToLower(full.AccountID) {
 		exists, err := s.Repos.Users.ExistsByAccountID(ctx, newFold)
 		if err != nil {
-			return "", 0, errors.New(500, "服务器错误")
+			return "", 0, errors.NewC("AUT0052", 500, "服务器错误")
 		}
 		if exists {
-			return "", 0, errors.New(400, "该用户名已被占用")
+			return "", 0, errors.NewC("AUT0053", 400, "该用户名已被占用")
 		}
 		reserved, err := s.Repos.LoginNameRes.ExistsActive(ctx, newFold, time.Now(), full.ID.Hex())
 		if err != nil {
-			return "", 0, errors.New(500, "服务器错误")
+			return "", 0, errors.NewC("AUT0054", 500, "服务器错误")
 		}
 		if reserved {
-			return "", 0, errors.New(400, "该用户名正在保留期，暂时不可使用")
+			return "", 0, errors.NewC("AUT0055", 400, "该用户名正在保留期，暂时不可使用")
 		}
 	}
 	// 冷却检查。
@@ -197,7 +197,7 @@ func (s *AuthService) ChangeLoginName(ctx context.Context, u *model.User, in Cha
 				if days < 1 {
 					days = 1
 				}
-				return "", days, errors.New(400, fmt.Sprintf("改名冷却中，还需等待约%d天后才能再次改名", days))
+				return "", days, errors.NewC("AUT0056", 400, fmt.Sprintf("改名冷却中，还需等待约%d天后才能再次改名", days))
 			}
 		}
 	}
@@ -210,14 +210,14 @@ func (s *AuthService) ChangeLoginName(ctx context.Context, u *model.User, in Cha
 	}
 	if err := s.Repos.LoginNameRes.Reserve(ctx, strings.ToLower(full.AccountID), full.ID.Hex(),
 		time.Now().Add(time.Duration(reserveDays)*24*time.Hour)); err != nil {
-		return "", 0, errors.New(500, "服务器错误")
+		return "", 0, errors.NewC("AUT0057", 500, "服务器错误")
 	}
 	now := time.Now()
 	if err := s.Repos.Users.UpdateLoginName(ctx, full.ID, newName, now); err != nil {
 		if repository.IsDuplicateKey(err) {
-			return "", 0, errors.New(400, "该用户名已被占用")
+			return "", 0, errors.NewC("AUT0058", 400, "该用户名已被占用")
 		}
-		return "", 0, errors.New(500, "服务器错误")
+		return "", 0, errors.NewC("AUT0059", 500, "服务器错误")
 	}
 	s.Audit(ctx, full, "LOGIN_NAME_CHANGED", "auth",
 		"Login name changed: "+full.AccountID+" -> "+newName, "")

@@ -52,26 +52,26 @@ func (a *Auth) Protect(allowedRoles ...string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		token := auth.GetAccessToken(c)
 		if token == "" {
-			c.AbortWithStatusJSON(401, gin.H{"message": "Not authorized, no token", "messageKey": "auth.noToken"})
+			c.AbortWithStatusJSON(401, codedBody(c, "AUT0100", gin.H{"message": "Not authorized, no token", "messageKey": "auth.noToken"}))
 			return
 		}
 		claims, err := a.Signer.Verify(token)
 		if err != nil {
 			if err == auth.ErrTokenExpired {
-				c.AbortWithStatusJSON(419, gin.H{"message": "Access token expired", "messageKey": "auth.accessTokenExpired"})
+				c.AbortWithStatusJSON(419, codedBody(c, "AUT0101", gin.H{"message": "Access token expired", "messageKey": "auth.accessTokenExpired"}))
 				return
 			}
-			c.AbortWithStatusJSON(401, gin.H{"message": "Not authorized, token failed", "messageKey": "auth.invalidToken"})
+			c.AbortWithStatusJSON(401, codedBody(c, "AUT0102", gin.H{"message": "Not authorized, token failed", "messageKey": "auth.invalidToken"}))
 			return
 		}
 		// refresh/verify/2fa 等其它 purpose 不可用于访问（兼容历史无 purpose 令牌）。
 		if claims.Purpose != "" && claims.Purpose != "access" {
-			c.AbortWithStatusJSON(401, gin.H{"message": "Invalid token type", "messageKey": "auth.invalidToken"})
+			c.AbortWithStatusJSON(401, codedBody(c, "AUT0103", gin.H{"message": "Invalid token type", "messageKey": "auth.invalidToken"}))
 			return
 		}
 		user, err := a.Repos.Users.FindByID(c.Request.Context(), claims.ID)
 		if err != nil {
-			c.AbortWithStatusJSON(401, gin.H{"message": "Not authorized, user not found", "messageKey": "auth.userNotFound"})
+			c.AbortWithStatusJSON(401, codedBody(c, "AUT0104", gin.H{"message": "Not authorized, user not found", "messageKey": "auth.userNotFound"}))
 			return
 		}
 		// 新签发的 access token 带 jti，且对应 session 记录 access token 哈希。
@@ -103,12 +103,12 @@ func (a *Auth) Protect(allowedRoles ...string) gin.HandlerFunc {
 					Reason: reason,
 					Detail: detail,
 				})
-				c.AbortWithStatusJSON(401, gin.H{"message": "Not authorized, token revoked", "messageKey": "auth.invalidToken"})
+				c.AbortWithStatusJSON(401, codedBody(c, "AUT0105", gin.H{"message": "Not authorized, token revoked", "messageKey": "auth.invalidToken"}))
 				return
 			}
 		}
 		if len(allowedRoles) > 0 && !containsRole(allowedRoles, user.Role) {
-			c.AbortWithStatusJSON(403, gin.H{"message": "Not authorized", "messageKey": "auth.forbidden"})
+			c.AbortWithStatusJSON(403, codedBody(c, "AUT0106", gin.H{"message": "Not authorized", "messageKey": "auth.forbidden"}))
 			return
 		}
 		// 角色化 2FA：管理员/超管必须开启两步验证（policy gate）。
@@ -116,10 +116,10 @@ func (a *Auth) Protect(allowedRoles ...string) gin.HandlerFunc {
 		// （放行 /api/2fa/* 开启流程与 logout）。响应带 force2FASetup 供前端呈现阻断页。
 		if requiresTwoFactor(user) && !user.TwoFactorEnabled {
 			if a.blockedBy2FASetup(c.Request.Method, c.Request.URL.Path) {
-				c.AbortWithStatusJSON(403, gin.H{
+				c.AbortWithStatusJSON(403, codedBody(c, "AUT0109", gin.H{
 					"message":       "管理员账号必须开启两步验证后才能继续操作",
 					"force2FASetup": true,
-				})
+				}))
 				return
 			}
 		}
@@ -144,7 +144,7 @@ func (a *Auth) RequireEmailChanged() gin.HandlerFunc {
 				c.Next()
 				return
 			}
-			c.AbortWithStatusJSON(403, gin.H{"message": "请先修改管理员邮箱后再进行操作", "forceEmailChange": true})
+			c.AbortWithStatusJSON(403, codedBody(c, "AUT0107", gin.H{"message": "请先修改管理员邮箱后再进行操作", "forceEmailChange": true}))
 			return
 		}
 		c.Next()

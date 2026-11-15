@@ -104,19 +104,19 @@ func (h *Episodes) Upload(c *gin.Context) {
 	url, err := upload.SaveImage(c, "image", "cover", 5<<20)
 	if err != nil {
 		if err == upload.ErrNoFile {
-			c.JSON(400, gin.H{"message": "请选择要上传的图片"})
+			apperrors.AbortCoded(c, 400, "EPS0001", "请选择要上传的图片", h.Config.IsDev)
 			return
 		}
 		if ue, ok := err.(*apperrors.UploadError); ok {
 			switch ue.Code {
 			case "LIMIT_FILE_SIZE":
-				c.JSON(400, gin.H{"message": "文件大小不能超过5MB"})
+				apperrors.AbortCoded(c, 400, "EPS0002", "文件大小不能超过5MB", h.Config.IsDev)
 			case "LIMIT_FILE_TYPE":
-				c.JSON(400, gin.H{"message": "仅支持图片文件 (jpg, jpeg, png, gif, webp)"})
+				apperrors.AbortCoded(c, 400, "EPS0003", "仅支持图片文件 (jpg, jpeg, png, gif, webp)", h.Config.IsDev)
 			case "BAD_MAGIC":
-				c.JSON(400, gin.H{"message": "文件内容与类型不匹配，仅支持图片文件"})
+				apperrors.AbortCoded(c, 400, "EPS0004", "文件内容与类型不匹配，仅支持图片文件", h.Config.IsDev)
 			default:
-				c.JSON(400, gin.H{"message": "文件上传错误"})
+				apperrors.AbortCoded(c, 400, "EPS0005", "文件上传错误", h.Config.IsDev)
 			}
 			return
 		}
@@ -124,7 +124,7 @@ func (h *Episodes) Upload(c *gin.Context) {
 		if msg == "" {
 			msg = "文件上传失败"
 		}
-		c.JSON(400, gin.H{"message": msg})
+		apperrors.AbortCoded(c, 400, "EPS0006", msg, h.Config.IsDev)
 		return
 	}
 	c.JSON(200, gin.H{"url": url})
@@ -279,7 +279,7 @@ func (h *Episodes) List(c *gin.Context) {
 
 	total, err := h.Repos.Episodes.CountDocuments(ctx, query)
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	var skip, limit int64
@@ -291,12 +291,12 @@ func (h *Episodes) List(c *gin.Context) {
 	}
 	episodes, err := h.Repos.Episodes.FindList(ctx, query, sortOption, skip, limit)
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	users, err := h.userRefsForEpisodes(ctx, episodes)
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	list := make([]gin.H, 0, len(episodes))
@@ -349,7 +349,7 @@ func (h *Episodes) SearchSuggestions(c *gin.Context) {
 		},
 	}}}, bson.D{{Key: "views", Value: -1}}, 0, 5)
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	titles := make([]gin.H, 0, len(eps))
@@ -361,7 +361,7 @@ func (h *Episodes) SearchSuggestions(c *gin.Context) {
 		"tags": bson.M{"$regex": escaped, "$options": "i"},
 	}}}, nil, 0, 5)
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	re := regexp.MustCompile("(?i)" + escaped)
@@ -404,7 +404,7 @@ func (h *Episodes) PopularTags(c *gin.Context) {
 	}
 	result, err := h.Repos.Episodes.Aggregate(c.Request.Context(), pipeline)
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	// 空结果返回 [] 而非 null（固定契约，消费方依赖数组形态）。
@@ -452,7 +452,7 @@ func (h *Episodes) Search(c *gin.Context) {
 		},
 	}}}, bson.D{{Key: "views", Value: -1}}, 0, int64(limit))
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	out := make([]gin.H, 0, len(eps))
@@ -478,7 +478,7 @@ func (h *Episodes) Search(c *gin.Context) {
 func (h *Episodes) UserStatus(c *gin.Context) {
 	episodeID, err := primitive.ObjectIDFromHex(c.Param("id"))
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	user, _ := middleware.GetUser(c)
@@ -486,22 +486,22 @@ func (h *Episodes) UserStatus(c *gin.Context) {
 
 	follow, err := h.Repos.Follows.FollowFindByUserEpisode(ctx, user.ID, episodeID)
 	if err != nil && !repository.IsNotFound(err) {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	history, err := h.Repos.Histories.EpisodesFindByUserEpisode(ctx, user.ID, episodeID)
 	if err != nil && !repository.IsNotFound(err) {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	rating, err := h.Repos.Ratings.EpisodesFindByUserEpisode(ctx, user.ID, episodeID)
 	if err != nil && !repository.IsNotFound(err) {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	favorite, err := h.Repos.Favorites.FavoriteFindByUserEpisode(ctx, user.ID, episodeID)
 	if err != nil && !repository.IsNotFound(err) {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 
@@ -542,17 +542,17 @@ func (h *Episodes) Detail(c *gin.Context) {
 	}
 	oid, err := primitive.ObjectIDFromHex(idStr)
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	ctx := c.Request.Context()
 	episode, err := h.Repos.Episodes.FindByID(ctx, oid)
 	if err != nil {
 		if repository.IsNotFound(err) {
-			c.JSON(404, gin.H{"message": "Episode not found"})
+			apperrors.AbortCoded(c, 404, "EPS0007", "Episode not found", h.Config.IsDev)
 			return
 		}
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 
@@ -562,7 +562,7 @@ func (h *Episodes) Detail(c *gin.Context) {
 	if !isApproved {
 		user, ok := middleware.GetUser(c)
 		if !ok || !canViewUnapproved(user, episode) {
-			c.JSON(404, gin.H{"message": "Episode not found"})
+			apperrors.AbortCoded(c, 404, "EPS0008", "Episode not found", h.Config.IsDev)
 			return
 		}
 		// 待审核/未通过内容禁止被搜索引擎索引（对有权查看者返回时同样生效）。
@@ -571,12 +571,12 @@ func (h *Episodes) Detail(c *gin.Context) {
 
 	singles, err := h.Repos.SingleEpisodes.FindByEpisode(ctx, oid)
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	users, err := h.userRefsForEpisode(ctx, episode)
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	obj := h.episodeJSON(episode, users)
@@ -601,7 +601,7 @@ func (h *Episodes) IncView(c *gin.Context) {
 	idStr := c.Param("id")
 	oid, err := primitive.ObjectIDFromHex(idStr)
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	ctx := c.Request.Context()
@@ -610,14 +610,14 @@ func (h *Episodes) IncView(c *gin.Context) {
 	existing, err := h.Repos.Episodes.FindByID(ctx, oid)
 	if err != nil {
 		if repository.IsNotFound(err) {
-			c.JSON(404, gin.H{"message": "Episode not found"})
+			apperrors.AbortCoded(c, 404, "EPS0009", "Episode not found", h.Config.IsDev)
 			return
 		}
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	if existing.ReviewStatus != "" && existing.ReviewStatus != "approved" {
-		c.JSON(404, gin.H{"message": "Episode not found"})
+		apperrors.AbortCoded(c, 404, "EPS0010", "Episode not found", h.Config.IsDev)
 		return
 	}
 
@@ -639,10 +639,10 @@ func (h *Episodes) IncView(c *gin.Context) {
 	episode, err := h.Repos.Episodes.IncViews(ctx, oid)
 	if err != nil {
 		if repository.IsNotFound(err) {
-			c.JSON(404, gin.H{"message": "Episode not found"})
+			apperrors.AbortCoded(c, 404, "EPS0011", "Episode not found", h.Config.IsDev)
 			return
 		}
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	middleware.EpisodeCache.Delete("episode_" + idStr)
@@ -659,16 +659,16 @@ func (h *Episodes) IncView(c *gin.Context) {
 func (h *Episodes) SingleIncView(c *gin.Context) {
 	oid, err := primitive.ObjectIDFromHex(c.Param("id"))
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	s, err := h.Repos.SingleEpisodes.IncViews(c.Request.Context(), oid)
 	if err != nil {
 		if repository.IsNotFound(err) {
-			c.JSON(404, gin.H{"message": "Single episode not found"})
+			apperrors.AbortCoded(c, 404, "EPS0012", "Single episode not found", h.Config.IsDev)
 			return
 		}
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	c.JSON(200, singleEpisodeJSON(s))
@@ -686,7 +686,7 @@ func (h *Episodes) UpdateSingle(c *gin.Context) {
 	idStr := c.Param("id")
 	oid, err := primitive.ObjectIDFromHex(idStr)
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	body := h.readJSONBody(c)
@@ -714,7 +714,7 @@ func (h *Episodes) UpdateSingle(c *gin.Context) {
 	if v, ok := body["platformLinks"]; ok {
 		links, msg := sanitizePlatformLinks(v)
 		if msg != "" {
-			c.JSON(400, gin.H{"message": msg})
+			apperrors.AbortCoded(c, 400, "EPS0013", msg, h.Config.IsDev)
 			return
 		}
 		updateData["platformLinks"] = links
@@ -743,17 +743,17 @@ func (h *Episodes) UpdateSingle(c *gin.Context) {
 	oldSingle, err := h.Repos.SingleEpisodes.FindByID(ctx, oid)
 	if err != nil {
 		if repository.IsNotFound(err) {
-			c.JSON(404, gin.H{"message": "Single episode not found"})
+			apperrors.AbortCoded(c, 404, "EPS0014", "Single episode not found", h.Config.IsDev)
 			return
 		}
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	user, _ := middleware.GetUser(c)
 	if user.Role == "creator" {
 		parent, perr := h.Repos.Episodes.FindByID(ctx, oldSingle.EpisodeID)
 		if perr != nil || !canEdit(parent, user.ID) {
-			c.JSON(403, gin.H{"message": "You do not have permission to edit this episode"})
+			apperrors.AbortCoded(c, 403, "EPS0015", "You do not have permission to edit this episode", h.Config.IsDev)
 			return
 		}
 	}
@@ -764,10 +764,10 @@ func (h *Episodes) UpdateSingle(c *gin.Context) {
 	single, err := h.Repos.SingleEpisodes.FindOneAndUpdate(ctx, oid, bson.M{"$set": updateData})
 	if err != nil {
 		if repository.IsNotFound(err) {
-			c.JSON(404, gin.H{"message": "Single episode not found"})
+			apperrors.AbortCoded(c, 404, "EPS0016", "Single episode not found", h.Config.IsDev)
 			return
 		}
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 
@@ -777,17 +777,17 @@ func (h *Episodes) UpdateSingle(c *gin.Context) {
 	// 预告集变为可观看集：currentEpisodes +1 并通知追番用户。
 	if becameAvailable {
 		if err := h.Repos.Episodes.IncCurrentEpisodes(ctx, single.EpisodeID, 1); err != nil {
-			serverError(c)
+			serverError(c, err, h.Config.IsDev)
 			return
 		}
 		episode, err := h.Repos.Episodes.FindByID(ctx, single.EpisodeID)
 		if err != nil && !repository.IsNotFound(err) {
-			serverError(c)
+			serverError(c, err, h.Config.IsDev)
 			return
 		}
 		if episode != nil {
 			if err := h.notifyNewEpisode(ctx, single.EpisodeID, episode, single.EpisodeNumber, single.EpisodeLabel, "available"); err != nil {
-				serverError(c)
+				serverError(c, err, h.Config.IsDev)
 				return
 			}
 		}
@@ -835,12 +835,12 @@ func (h *Episodes) UpdateSingle(c *gin.Context) {
 			}
 			episode, err := h.Repos.Episodes.FindByID(ctx, single.EpisodeID)
 			if err != nil && !repository.IsNotFound(err) {
-				serverError(c)
+				serverError(c, err, h.Config.IsDev)
 				return
 			}
 			if episode != nil {
 				if err := h.notifyNewEpisode(ctx, single.EpisodeID, episode, single.EpisodeNumber, single.EpisodeLabel, eventType); err != nil {
-					serverError(c)
+					serverError(c, err, h.Config.IsDev)
 					return
 				}
 			}
@@ -860,39 +860,39 @@ func (h *Episodes) UpdateSingle(c *gin.Context) {
 func (h *Episodes) DeleteSingle(c *gin.Context) {
 	oid, err := primitive.ObjectIDFromHex(c.Param("id"))
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	ctx := c.Request.Context()
 	single, err := h.Repos.SingleEpisodes.FindByID(ctx, oid)
 	if err != nil {
 		if repository.IsNotFound(err) {
-			c.JSON(404, gin.H{"message": "Single episode not found"})
+			apperrors.AbortCoded(c, 404, "EPS0017", "Single episode not found", h.Config.IsDev)
 			return
 		}
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	user, _ := middleware.GetUser(c)
 	if user.Role == "creator" {
 		parent, perr := h.Repos.Episodes.FindByID(ctx, single.EpisodeID)
 		if perr != nil || !canEdit(parent, user.ID) {
-			c.JSON(403, gin.H{"message": "You do not have permission to delete this episode"})
+			apperrors.AbortCoded(c, 403, "EPS0018", "You do not have permission to delete this episode", h.Config.IsDev)
 			return
 		}
 	}
 	if _, err := h.Repos.SingleEpisodes.FindOneAndDelete(ctx, oid); err != nil {
 		if repository.IsNotFound(err) {
-			c.JSON(404, gin.H{"message": "Single episode not found"})
+			apperrors.AbortCoded(c, 404, "EPS0019", "Single episode not found", h.Config.IsDev)
 			return
 		}
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	// 仅可观看集才扣减 currentEpisodes（预告集添加时未计入）。
 	if !single.IsUpcoming {
 		if err := h.Repos.Episodes.IncCurrentEpisodes(c.Request.Context(), single.EpisodeID, -1); err != nil {
-			serverError(c)
+			serverError(c, err, h.Config.IsDev)
 			return
 		}
 	}
@@ -933,22 +933,22 @@ func (h *Episodes) Create(c *gin.Context) {
 		}
 	}
 	if len(msgs) > 0 {
-		c.JSON(400, gin.H{"message": strings.Join(msgs, ", ")})
+		apperrors.AbortCoded(c, 400, "EPS0020", strings.Join(msgs, ", "), h.Config.IsDev)
 		return
 	}
 	cover := strings.TrimSpace(asString(body["coverImage"]))
 	if !isSafeAssetURL(cover) {
-		c.JSON(400, gin.H{"message": "封面地址必须为 /uploads/ 或 http(s) 地址"})
+		apperrors.AbortCoded(c, 400, "EPS0021", "封面地址必须为 /uploads/ 或 http(s) 地址", h.Config.IsDev)
 		return
 	}
 	links, msg := sanitizePlatformLinks(body["platformLinks"])
 	if msg != "" {
-		c.JSON(400, gin.H{"message": msg})
+		apperrors.AbortCoded(c, 400, "EPS0022", msg, h.Config.IsDev)
 		return
 	}
 	qq := strings.TrimSpace(orDefaultString(body["qqGroupLink"], ""))
 	if qq != "" && !isHTTPURL(qq) {
-		c.JSON(400, gin.H{"message": "QQ群链接必须为 http/https 地址"})
+		apperrors.AbortCoded(c, 400, "EPS0023", "QQ群链接必须为 http/https 地址", h.Config.IsDev)
 		return
 	}
 
@@ -981,7 +981,7 @@ func (h *Episodes) Create(c *gin.Context) {
 		ReviewStatus:    reviewStatus,
 	}
 	if err := h.Repos.Episodes.Create(c.Request.Context(), e); err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	middleware.EpisodeCache.DeleteByPrefix("episodes_")
@@ -1000,39 +1000,39 @@ func (h *Episodes) CreateSingle(c *gin.Context) {
 	idStr := c.Param("id")
 	oid, err := primitive.ObjectIDFromHex(idStr)
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	ctx := c.Request.Context()
 	episode, err := h.Repos.Episodes.FindByID(ctx, oid)
 	if err != nil {
 		if repository.IsNotFound(err) {
-			c.JSON(404, gin.H{"message": "Episode not found"})
+			apperrors.AbortCoded(c, 404, "EPS0024", "Episode not found", h.Config.IsDev)
 			return
 		}
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	user, _ := middleware.GetUser(c)
 	if user.Role == "creator" {
 		if !canEdit(episode, user.ID) {
-			c.JSON(403, gin.H{"message": "No permission to add episodes"})
+			apperrors.AbortCoded(c, 403, "EPS0025", "No permission to add episodes", h.Config.IsDev)
 			return
 		}
 	}
 	body := h.readJSONBody(c)
 	// required 字段缺失/为空 → 该路由 catch-all → 500。
 	if asString(body["title"]) == "" {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	if _, ok := body["episodeNumber"]; !ok {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	singleLinks, msg := sanitizePlatformLinks(body["platformLinks"])
 	if msg != "" {
-		c.JSON(400, gin.H{"message": msg})
+		apperrors.AbortCoded(c, 400, "EPS0026", msg, h.Config.IsDev)
 		return
 	}
 
@@ -1059,25 +1059,25 @@ func (h *Episodes) CreateSingle(c *gin.Context) {
 	}
 
 	if err := h.Repos.SingleEpisodes.Create(ctx, single); err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	// 预告集不计入 currentEpisodes（不可观看），变可观看时才 +1。
 	if err := h.Repos.Episodes.AddSingleEpisodeUpdate(ctx, oid,
 		time.Now().UTC().Truncate(time.Millisecond), !isScheduled); err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	middleware.EpisodeCache.Delete("episode_" + idStr)
 
 	updatedEpisode, err := h.Repos.Episodes.FindByID(ctx, oid)
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	followers, err := h.Repos.Follows.EpisodesFindByEpisode(ctx, oid)
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	if len(followers) > 0 {
@@ -1110,7 +1110,7 @@ func (h *Episodes) CreateSingle(c *gin.Context) {
 			metadata["episodeLabel"] = single.EpisodeLabel
 		}
 		if err := h.insertFollowNotifications(ctx, followers, oid, updatedEpisode, notifMessage, metadata); err != nil {
-			serverError(c)
+			serverError(c, err, h.Config.IsDev)
 			return
 		}
 		pushTitle := fmt.Sprintf("《%s》更新了", updatedEpisode.Title)
@@ -1144,24 +1144,24 @@ func (h *Episodes) Update(c *gin.Context) {
 	idStr := c.Param("id")
 	oid, err := primitive.ObjectIDFromHex(idStr)
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	ctx := c.Request.Context()
 	episode, err := h.Repos.Episodes.FindByID(ctx, oid)
 	if err != nil {
 		if repository.IsNotFound(err) {
-			c.JSON(404, gin.H{"message": "Episode not found"})
+			apperrors.AbortCoded(c, 404, "EPS0027", "Episode not found", h.Config.IsDev)
 			return
 		}
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	user, _ := middleware.GetUser(c)
 	isCreatorRole := user.Role == "creator"
 	if isCreatorRole {
 		if !canEdit(episode, user.ID) {
-			c.JSON(403, gin.H{"message": "You do not have permission to edit this episode"})
+			apperrors.AbortCoded(c, 403, "EPS0028", "You do not have permission to edit this episode", h.Config.IsDev)
 			return
 		}
 	}
@@ -1170,7 +1170,7 @@ func (h *Episodes) Update(c *gin.Context) {
 	if v, ok := body["platformLinks"]; ok {
 		links, msg := sanitizePlatformLinks(v)
 		if msg != "" {
-			c.JSON(400, gin.H{"message": msg})
+			apperrors.AbortCoded(c, 400, "EPS0029", msg, h.Config.IsDev)
 			return
 		}
 		body["platformLinks"] = links
@@ -1178,7 +1178,7 @@ func (h *Episodes) Update(c *gin.Context) {
 	if v, ok := body["qqGroupLink"]; ok {
 		s := strings.TrimSpace(asString(v))
 		if s != "" && !isHTTPURL(s) {
-			c.JSON(400, gin.H{"message": "QQ群链接必须为 http/https 地址"})
+			apperrors.AbortCoded(c, 400, "EPS0030", "QQ群链接必须为 http/https 地址", h.Config.IsDev)
 			return
 		}
 		body["qqGroupLink"] = s
@@ -1186,7 +1186,7 @@ func (h *Episodes) Update(c *gin.Context) {
 	if v, ok := body["coverImage"]; ok {
 		s := strings.TrimSpace(asString(v))
 		if s != "" && !isSafeAssetURL(s) {
-			c.JSON(400, gin.H{"message": "封面地址必须为 /uploads/ 或 http(s) 地址"})
+			apperrors.AbortCoded(c, 400, "EPS0031", "封面地址必须为 /uploads/ 或 http(s) 地址", h.Config.IsDev)
 			return
 		}
 		body["coverImage"] = s
@@ -1195,7 +1195,7 @@ func (h *Episodes) Update(c *gin.Context) {
 	// 版本快照：保存编辑前的完整剧集 DTO（data 为完整快照）。
 	lastVersion, err := h.Repos.EpisodeVersions.FindLatest(ctx, oid)
 	if err != nil && !repository.IsNotFound(err) {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	newVersionNum := 1
@@ -1209,19 +1209,19 @@ func (h *Episodes) Update(c *gin.Context) {
 		ChangedBy:     &user.ID,
 		ChangeSummary: orDefaultString(body["changeSummary"], ""),
 	}); err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	// 限制版本数量为 50。
 	versionCount, err := h.Repos.EpisodeVersions.CountByEpisode(ctx, oid)
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	if versionCount > 50 {
 		oldest, err := h.Repos.EpisodeVersions.FindOldestN(ctx, oid, versionCount-50)
 		if err != nil {
-			serverError(c)
+			serverError(c, err, h.Config.IsDev)
 			return
 		}
 		ids := make([]any, 0, len(oldest))
@@ -1229,7 +1229,7 @@ func (h *Episodes) Update(c *gin.Context) {
 			ids = append(ids, v.ID)
 		}
 		if _, err := h.Repos.EpisodeVersions.DeleteManyByIDs(ctx, ids); err != nil {
-			serverError(c)
+			serverError(c, err, h.Config.IsDev)
 			return
 		}
 	}
@@ -1255,7 +1255,7 @@ func (h *Episodes) Update(c *gin.Context) {
 			"updatedAt":            now,
 		}})
 		if err != nil {
-			serverError(c)
+			serverError(c, err, h.Config.IsDev)
 			return
 		}
 		middleware.EpisodeCache.Delete("episode_" + idStr)
@@ -1276,7 +1276,7 @@ func (h *Episodes) Update(c *gin.Context) {
 	}
 	updated, err := h.Repos.Episodes.FindOneAndUpdate(ctx, oid, bson.M{"$set": setFields})
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 
@@ -1287,7 +1287,7 @@ func (h *Episodes) Update(c *gin.Context) {
 	}
 	if newCurrent > oldCurrentEpisodes {
 		if err := h.notifyEpisodeNumberChange(ctx, oid, oldCurrentEpisodes, newCurrent, updated); err != nil {
-			serverError(c)
+			serverError(c, err, h.Config.IsDev)
 			return
 		}
 	}
@@ -1307,27 +1307,27 @@ func (h *Episodes) Resubmit(c *gin.Context) {
 	idStr := c.Param("id")
 	oid, err := primitive.ObjectIDFromHex(idStr)
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	ctx := c.Request.Context()
 	episode, err := h.Repos.Episodes.FindByID(ctx, oid)
 	if err != nil {
 		if repository.IsNotFound(err) {
-			c.JSON(404, gin.H{"message": "Episode not found"})
+			apperrors.AbortCoded(c, 404, "EPS0032", "Episode not found", h.Config.IsDev)
 			return
 		}
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	// 只有 rejected 状态的剧集可以重新提交。
 	if episode.ReviewStatus != "rejected" {
-		c.JSON(400, gin.H{"message": "只有被拒绝的剧集才能重新提交审核"})
+		apperrors.AbortCoded(c, 400, "EPS0033", "只有被拒绝的剧集才能重新提交审核", h.Config.IsDev)
 		return
 	}
 	user, _ := middleware.GetUser(c)
 	if !canEdit(episode, user.ID) {
-		c.JSON(403, gin.H{"message": "You do not have permission to resubmit this episode"})
+		apperrors.AbortCoded(c, 403, "EPS0034", "You do not have permission to resubmit this episode", h.Config.IsDev)
 		return
 	}
 	episode.ReviewStatus = "pending"
@@ -1336,7 +1336,7 @@ func (h *Episodes) Resubmit(c *gin.Context) {
 	episode.ReviewedAt = nil
 	episode.UpdatedAt = time.Now().UTC().Truncate(time.Millisecond)
 	if err := h.Repos.Episodes.Save(ctx, episode); err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	middleware.EpisodeCache.Delete("episode_" + idStr)
@@ -1358,27 +1358,27 @@ func (h *Episodes) Delete(c *gin.Context) {
 	idStr := c.Param("id")
 	oid, err := primitive.ObjectIDFromHex(idStr)
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	ctx := c.Request.Context()
 	episode, err := h.Repos.Episodes.FindByID(ctx, oid)
 	if err != nil {
 		if repository.IsNotFound(err) {
-			c.JSON(404, gin.H{"message": "Episode not found"})
+			apperrors.AbortCoded(c, 404, "EPS0035", "Episode not found", h.Config.IsDev)
 			return
 		}
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	user, _ := middleware.GetUser(c)
 	// 创作者只能删除自己创建或被授权管理的剧集；admin/superadmin 不受此限。
 	if user.Role == "creator" && !canEdit(episode, user.ID) {
-		c.JSON(403, gin.H{"message": "You do not have permission to delete this episode"})
+		apperrors.AbortCoded(c, 403, "EPS0036", "You do not have permission to delete this episode", h.Config.IsDev)
 		return
 	}
 	if err := h.Repos.EpisodeTrash.MoveToTrash(ctx, episode, "deleted", "", &user.ID); err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	middleware.EpisodeCache.Delete("episode_" + idStr)
@@ -1776,8 +1776,8 @@ func (h *Episodes) readJSONBody(c *gin.Context) map[string]any {
 }
 
 // serverError 渲染 500（响应体固定为 {message:'Server error'}，勿改文案）。
-func serverError(c *gin.Context) {
-	c.JSON(500, gin.H{"message": "Server error"})
+func serverError(c *gin.Context, cause error, isDev bool) {
+	apperrors.Abort500C(c, "EPS0037", "Server error", cause, isDev)
 }
 
 // pruneViewLogLocked 清理过期/超限的观看去重记录（超 10000 条时按冷却期淘汰）。

@@ -15,6 +15,7 @@ import (
 	"github.com/Furry-Drama-Tracker/backend/internal/auth"
 	"github.com/Furry-Drama-Tracker/backend/internal/config"
 	"github.com/Furry-Drama-Tracker/backend/internal/email"
+	"github.com/Furry-Drama-Tracker/backend/internal/errors"
 	"github.com/Furry-Drama-Tracker/backend/internal/middleware"
 	"github.com/Furry-Drama-Tracker/backend/internal/model"
 	"github.com/Furry-Drama-Tracker/backend/internal/ratelimit"
@@ -109,27 +110,27 @@ func (h *Admin) PendingCounts(c *gin.Context) {
 	ctx := c.Request.Context()
 	episodes, err := h.Repos.Episodes.AdminCountPendingReview(ctx)
 	if err != nil {
-		c.JSON(500, gin.H{"message": "服务器错误"})
+		errors.Abort500C(c, "ADM0001", "服务器错误", err, h.Config.IsDev)
 		return
 	}
 	reports, err := h.Repos.Reports.AdminCountStatus(ctx, "pending")
 	if err != nil {
-		c.JSON(500, gin.H{"message": "服务器错误"})
+		errors.Abort500C(c, "ADM0002", "服务器错误", err, h.Config.IsDev)
 		return
 	}
 	feedbacks, err := h.Repos.Feedbacks.AdminCountStatus(ctx, "pending")
 	if err != nil {
-		c.JSON(500, gin.H{"message": "服务器错误"})
+		errors.Abort500C(c, "ADM0003", "服务器错误", err, h.Config.IsDev)
 		return
 	}
 	friendLinks, err := h.Repos.FriendLinks.AdminCountStatus(ctx, "pending")
 	if err != nil {
-		c.JSON(500, gin.H{"message": "服务器错误"})
+		errors.Abort500C(c, "ADM0004", "服务器错误", err, h.Config.IsDev)
 		return
 	}
 	themes, err := h.Repos.Themes.CountPending(ctx)
 	if err != nil {
-		c.JSON(500, gin.H{"message": "服务器错误"})
+		errors.Abort500C(c, "ADM0005", "服务器错误", err, h.Config.IsDev)
 		return
 	}
 	c.JSON(200, gin.H{"episodes": episodes, "reports": reports, "feedbacks": feedbacks, "friendLinks": friendLinks, "themes": themes})
@@ -185,13 +186,13 @@ func (h *Admin) List(c *gin.Context) {
 	ctx := c.Request.Context()
 	total, err := h.Repos.Users.AdminCountRoles(ctx, adminManagerRoles)
 	if err != nil {
-		c.JSON(500, gin.H{"message": "服务器错误"})
+		errors.Abort500C(c, "ADM0006", "服务器错误", err, h.Config.IsDev)
 		return
 	}
 	totalPages := adminTotalPages(total, limitNum)
 	users, err := h.Repos.Users.AdminFindRoles(ctx, adminManagerRoles, pageNum, limitNum)
 	if err != nil {
-		c.JSON(500, gin.H{"message": "服务器错误"})
+		errors.Abort500C(c, "ADM0007", "服务器错误", err, h.Config.IsDev)
 		return
 	}
 	list := make([]gin.H, 0, len(users))
@@ -220,36 +221,36 @@ func (h *Admin) RegisterAccount(c *gin.Context) {
 	accountId := asString(body["accountId"])
 
 	if msg := service.ValidatePassword(password); msg != "" {
-		c.JSON(400, gin.H{"message": msg})
+		errors.AbortCoded(c, 400, "ADM0008", msg, h.Config.IsDev)
 		return
 	}
 	if email == "" {
-		c.JSON(400, gin.H{"message": "请输入邮箱"})
+		errors.AbortCoded(c, 400, "ADM0009", "请输入邮箱", h.Config.IsDev)
 		return
 	}
 	if !service.EmailRegex.MatchString(email) {
-		c.JSON(400, gin.H{"message": "邮箱格式不正确"})
+		errors.AbortCoded(c, 400, "ADM0010", "邮箱格式不正确", h.Config.IsDev)
 		return
 	}
 	if role != "admin" && role != "creator" {
-		c.JSON(400, gin.H{"message": "无效的角色，仅可创建 admin 或 creator"})
+		errors.AbortCoded(c, 400, "ADM0011", "无效的角色，仅可创建 admin 或 creator", h.Config.IsDev)
 		return
 	}
 	ctx := c.Request.Context()
 	emailExists, err := h.Repos.Users.ExistsByEmail(ctx, email)
 	if err != nil {
-		c.JSON(500, gin.H{"message": "服务器错误"})
+		errors.Abort500C(c, "ADM0012", "服务器错误", err, h.Config.IsDev)
 		return
 	}
 	if emailExists {
-		c.JSON(400, gin.H{"message": "该邮箱已注册"})
+		errors.AbortCoded(c, 400, "ADM0013", "该邮箱已注册", h.Config.IsDev)
 		return
 	}
 	// 自动生成 accountId。
 	finalAccountId := strings.TrimSpace(accountId)
 	if finalAccountId != "" {
 		if len(finalAccountId) < 3 || len(finalAccountId) > 20 || !service.AccountIDRegex.MatchString(finalAccountId) {
-			c.JSON(400, gin.H{"message": "账号ID需为3-20位字母、数字或下划线"})
+			errors.AbortCoded(c, 400, "ADM0014", "账号ID需为3-20位字母、数字或下划线", h.Config.IsDev)
 			return
 		}
 	}
@@ -260,7 +261,7 @@ func (h *Admin) RegisterAccount(c *gin.Context) {
 		for {
 			exists, err := h.Repos.Users.ExistsByAccountID(ctx, finalAccountId)
 			if err != nil {
-				c.JSON(500, gin.H{"message": "服务器错误"})
+				errors.Abort500C(c, "ADM0015", "服务器错误", err, h.Config.IsDev)
 				return
 			}
 			if !exists {
@@ -272,18 +273,18 @@ func (h *Admin) RegisterAccount(c *gin.Context) {
 	} else {
 		idExists, err := h.Repos.Users.ExistsByAccountID(ctx, finalAccountId)
 		if err != nil {
-			c.JSON(500, gin.H{"message": "服务器错误"})
+			errors.Abort500C(c, "ADM0016", "服务器错误", err, h.Config.IsDev)
 			return
 		}
 		if idExists {
-			c.JSON(400, gin.H{"message": "该账号ID已存在"})
+			errors.AbortCoded(c, 400, "ADM0017", "该账号ID已存在", h.Config.IsDev)
 			return
 		}
 	}
 
 	hash, err := auth.Hash(password)
 	if err != nil {
-		c.JSON(500, gin.H{"message": "服务器错误"})
+		errors.Abort500C(c, "ADM0018", "服务器错误", err, h.Config.IsDev)
 		return
 	}
 	user := &model.User{
@@ -302,7 +303,7 @@ func (h *Admin) RegisterAccount(c *gin.Context) {
 		CreatedAt:              time.Now(),
 	}
 	if err := h.Repos.Users.Create(ctx, user); err != nil {
-		c.JSON(500, gin.H{"message": "服务器错误"})
+		errors.Abort500C(c, "ADM0019", "服务器错误", err, h.Config.IsDev)
 		return
 	}
 
@@ -338,41 +339,41 @@ func (h *Admin) DeleteAccount(c *gin.Context) {
 	oid, err := primitive.ObjectIDFromHex(idStr)
 	if err != nil {
 		// 固定契约：非法 ID → 500 服务器错误。
-		c.JSON(500, gin.H{"message": "服务器错误"})
+		errors.Abort500C(c, "ADM0020", "服务器错误", err, h.Config.IsDev)
 		return
 	}
 	user, _ := middleware.GetUser(c)
 	if user.ID.Hex() == idStr {
-		c.JSON(400, gin.H{"message": "不能删除自己的账号"})
+		errors.AbortCoded(c, 400, "ADM0021", "不能删除自己的账号", h.Config.IsDev)
 		return
 	}
 	ctx := c.Request.Context()
 	target, err := h.Repos.Users.FindByID(ctx, oid)
 	if repository.IsNotFound(err) {
-		c.JSON(404, gin.H{"message": "账户不存在"})
+		errors.AbortCoded(c, 404, "ADM0022", "账户不存在", h.Config.IsDev)
 		return
 	}
 	if err != nil {
-		c.JSON(500, gin.H{"message": "服务器错误"})
+		errors.Abort500C(c, "ADM0023", "服务器错误", err, h.Config.IsDev)
 		return
 	}
 	if target.Role != "admin" && target.Role != "superadmin" && target.Role != "creator" {
-		c.JSON(400, gin.H{"message": "该账户不是管理/创作者账户"})
+		errors.AbortCoded(c, 400, "ADM0024", "该账户不是管理/创作者账户", h.Config.IsDev)
 		return
 	}
 	if target.Role == "superadmin" {
 		count, err := h.Repos.Users.AdminCountRole(ctx, "superadmin")
 		if err != nil {
-			c.JSON(500, gin.H{"message": "服务器错误"})
+			errors.Abort500C(c, "ADM0025", "服务器错误", err, h.Config.IsDev)
 			return
 		}
 		if count <= 1 {
-			c.JSON(400, gin.H{"message": "不能删除最后一个超级管理员"})
+			errors.AbortCoded(c, 400, "ADM0026", "不能删除最后一个超级管理员", h.Config.IsDev)
 			return
 		}
 	}
 	if err := service.PurgeUserData(ctx, h.Repos, oid); err != nil {
-		c.JSON(500, gin.H{"message": "服务器错误"})
+		errors.Abort500C(c, "ADM0027", "服务器错误", err, h.Config.IsDev)
 		return
 	}
 	c.JSON(200, gin.H{"message": "账户已删除"})
@@ -406,13 +407,13 @@ func (h *Admin) ListUsers(c *gin.Context) {
 	ctx := c.Request.Context()
 	total, err := h.Repos.Users.AdminCountSearch(ctx, search)
 	if err != nil {
-		c.JSON(500, gin.H{"message": "服务器错误"})
+		errors.Abort500C(c, "ADM0028", "服务器错误", err, h.Config.IsDev)
 		return
 	}
 	totalPages := adminTotalPages(total, limitNum)
 	users, err := h.Repos.Users.AdminFindSearch(ctx, search, pageNum, limitNum)
 	if err != nil {
-		c.JSON(500, gin.H{"message": "服务器错误"})
+		errors.Abort500C(c, "ADM0029", "服务器错误", err, h.Config.IsDev)
 		return
 	}
 	list := make([]gin.H, 0, len(users))
@@ -436,84 +437,84 @@ func (h *Admin) DeleteUser(c *gin.Context) {
 	idStr := c.Param("id")
 	oid, err := primitive.ObjectIDFromHex(idStr)
 	if err != nil {
-		c.JSON(500, gin.H{"message": "服务器错误"})
+		errors.Abort500C(c, "ADM0030", "服务器错误", err, h.Config.IsDev)
 		return
 	}
 	user, _ := middleware.GetUser(c)
 	if user.ID.Hex() == idStr {
-		c.JSON(400, gin.H{"message": "不能删除自己的账号"})
+		errors.AbortCoded(c, 400, "ADM0031", "不能删除自己的账号", h.Config.IsDev)
 		return
 	}
 	ctx := c.Request.Context()
 	target, err := h.Repos.Users.FindByID(ctx, oid)
 	if repository.IsNotFound(err) {
-		c.JSON(404, gin.H{"message": "用户不存在"})
+		errors.AbortCoded(c, 404, "ADM0032", "用户不存在", h.Config.IsDev)
 		return
 	}
 	if err != nil {
-		c.JSON(500, gin.H{"message": "服务器错误"})
+		errors.Abort500C(c, "ADM0033", "服务器错误", err, h.Config.IsDev)
 		return
 	}
 	if target.Role == "superadmin" {
 		count, err := h.Repos.Users.AdminCountRole(ctx, "superadmin")
 		if err != nil {
-			c.JSON(500, gin.H{"message": "服务器错误"})
+			errors.Abort500C(c, "ADM0034", "服务器错误", err, h.Config.IsDev)
 			return
 		}
 		if count <= 1 {
-			c.JSON(400, gin.H{"message": "不能删除最后一个超级管理员"})
+			errors.AbortCoded(c, 400, "ADM0035", "不能删除最后一个超级管理员", h.Config.IsDev)
 			return
 		}
 	}
 	if err := h.Repos.Users.DeleteByID(ctx, oid); err != nil {
-		c.JSON(500, gin.H{"message": "服务器错误"})
+		errors.Abort500C(c, "ADM0036", "服务器错误", err, h.Config.IsDev)
 		return
 	}
 	if err := h.Repos.Follows.DeleteByUser(ctx, oid); err != nil {
-		c.JSON(500, gin.H{"message": "服务器错误"})
+		errors.Abort500C(c, "ADM0037", "服务器错误", err, h.Config.IsDev)
 		return
 	}
 	if err := h.Repos.Histories.DeleteByUser(ctx, oid); err != nil {
-		c.JSON(500, gin.H{"message": "服务器错误"})
+		errors.Abort500C(c, "ADM0038", "服务器错误", err, h.Config.IsDev)
 		return
 	}
 	if err := h.Repos.Notifications.DeleteByUser(ctx, oid); err != nil {
-		c.JSON(500, gin.H{"message": "服务器错误"})
+		errors.Abort500C(c, "ADM0039", "服务器错误", err, h.Config.IsDev)
 		return
 	}
 	if err := h.Repos.Favorites.DeleteByUser(ctx, oid); err != nil {
-		c.JSON(500, gin.H{"message": "服务器错误"})
+		errors.Abort500C(c, "ADM0040", "服务器错误", err, h.Config.IsDev)
 		return
 	}
 	// 举报集合按 legacy 字段名 reporter 删除（固定契约，勿改字段名）。
 	if err := h.Repos.Reports.AdminDeleteReportsByLegacyReporter(ctx, idStr); err != nil {
-		c.JSON(500, gin.H{"message": "服务器错误"})
+		errors.Abort500C(c, "ADM0041", "服务器错误", err, h.Config.IsDev)
 		return
 	}
 	if err := h.Repos.Feedbacks.DeleteByUser(ctx, oid); err != nil {
-		c.JSON(500, gin.H{"message": "服务器错误"})
+		errors.Abort500C(c, "ADM0042", "服务器错误", err, h.Config.IsDev)
 		return
 	}
 	if err := h.Repos.Sessions.DeleteByUser(ctx, oid); err != nil {
-		c.JSON(500, gin.H{"message": "服务器错误"})
+		errors.Abort500C(c, "ADM0043", "服务器错误", err, h.Config.IsDev)
 		return
 	}
 	if err := h.Repos.Users.AdminDeletePushSubscriptionsByUser(ctx, oid); err != nil {
-		c.JSON(500, gin.H{"message": "服务器错误"})
+		errors.Abort500C(c, "ADM0044", "服务器错误", err, h.Config.IsDev)
 		return
 	}
 	if err := h.Repos.Folders.AdminDeleteManyByUser(ctx, oid); err != nil {
-		c.JSON(500, gin.H{"message": "服务器错误"})
+		errors.Abort500C(c, "ADM0045", "服务器错误", err, h.Config.IsDev)
 		return
 	}
 	// 先取该用户评分，删除后重算受影响剧集的平均分/评分人数。
 	userRatings, err := h.Repos.Ratings.FindByUser(ctx, oid)
 	if err != nil {
-		c.JSON(500, gin.H{"message": "服务器错误"})
+		errors.Abort500C(c, "ADM0046", "服务器错误", err, h.Config.IsDev)
 		return
 	}
 	if err := h.Repos.Ratings.DeleteByUser(ctx, oid); err != nil {
-		c.JSON(500, gin.H{"message": "服务器错误"})
+		errors.Abort500C(c, "ADM0047", "服务器错误", err, h.Config.IsDev)
 		return
 	}
 	affected := make([]primitive.ObjectID, 0, len(userRatings))
@@ -527,7 +528,7 @@ func (h *Admin) DeleteUser(c *gin.Context) {
 	}
 	if len(affected) > 0 {
 		if err := h.Repos.Episodes.AdminRebuildEpisodeRatings(ctx, affected); err != nil {
-			c.JSON(500, gin.H{"message": "服务器错误"})
+			errors.Abort500C(c, "ADM0048", "服务器错误", err, h.Config.IsDev)
 			return
 		}
 	}
@@ -555,38 +556,38 @@ func (h *Admin) UpdateRole(c *gin.Context) {
 	_ = c.ShouldBindJSON(&body)
 	role := asString(body["role"])
 	if !adminContainsRole(adminUserRoles, role) {
-		c.JSON(400, gin.H{"message": "无效的角色"})
+		errors.AbortCoded(c, 400, "ADM0049", "无效的角色", h.Config.IsDev)
 		return
 	}
 	idStr := c.Param("id")
 	oid, err := primitive.ObjectIDFromHex(idStr)
 	if err != nil {
-		c.JSON(500, gin.H{"message": "服务器错误"})
+		errors.Abort500C(c, "ADM0050", "服务器错误", err, h.Config.IsDev)
 		return
 	}
 	user, _ := middleware.GetUser(c)
 	if user.ID.Hex() == idStr {
-		c.JSON(400, gin.H{"message": "不能修改自己的角色"})
+		errors.AbortCoded(c, 400, "ADM0051", "不能修改自己的角色", h.Config.IsDev)
 		return
 	}
 	ctx := c.Request.Context()
 	target, err := h.Repos.Users.FindByID(ctx, oid)
 	if repository.IsNotFound(err) {
-		c.JSON(404, gin.H{"message": "账户不存在"})
+		errors.AbortCoded(c, 404, "ADM0052", "账户不存在", h.Config.IsDev)
 		return
 	}
 	if err != nil {
-		c.JSON(500, gin.H{"message": "服务器错误"})
+		errors.Abort500C(c, "ADM0053", "服务器错误", err, h.Config.IsDev)
 		return
 	}
 	if target.Role == "superadmin" {
 		count, err := h.Repos.Users.AdminCountRole(ctx, "superadmin")
 		if err != nil {
-			c.JSON(500, gin.H{"message": "服务器错误"})
+			errors.Abort500C(c, "ADM0054", "服务器错误", err, h.Config.IsDev)
 			return
 		}
 		if count <= 1 {
-			c.JSON(400, gin.H{"message": "不能降级最后一个超级管理员"})
+			errors.AbortCoded(c, 400, "ADM0055", "不能降级最后一个超级管理员", h.Config.IsDev)
 			return
 		}
 	}
@@ -597,7 +598,7 @@ func (h *Admin) UpdateRole(c *gin.Context) {
 			c.JSON(200, nil)
 			return
 		}
-		c.JSON(500, gin.H{"message": "服务器错误"})
+		errors.Abort500C(c, "ADM0056", "服务器错误", err, h.Config.IsDev)
 		return
 	}
 	// 角色改为 creator 时自动创建 CreatorProfile（若尚不存在，失败静默）。
@@ -632,7 +633,7 @@ func (h *Admin) UpdateRole(c *gin.Context) {
 func (h *Admin) ListCreators(c *gin.Context) {
 	creators, err := h.Repos.Users.FindCreatorsByRole(c.Request.Context(), "creator")
 	if err != nil {
-		c.JSON(500, gin.H{"message": "服务器错误"})
+		errors.Abort500C(c, "ADM0057", "服务器错误", err, h.Config.IsDev)
 		return
 	}
 	list := make([]gin.H, 0, len(creators))
@@ -660,7 +661,7 @@ func (h *Admin) ListCreatorProfiles(c *gin.Context) {
 	ctx := c.Request.Context()
 	profiles, err := h.Repos.CreatorProfiles.AdminFindAllProfiles(ctx)
 	if err != nil {
-		c.JSON(500, gin.H{"message": "服务器错误"})
+		errors.Abort500C(c, "ADM0058", "服务器错误", err, h.Config.IsDev)
 		return
 	}
 	ids := make([]primitive.ObjectID, 0, len(profiles))
@@ -669,7 +670,7 @@ func (h *Admin) ListCreatorProfiles(c *gin.Context) {
 	}
 	refs, err := h.Repos.Users.AdminFindUserRefsByIDs(ctx, dedupIDs(ids))
 	if err != nil {
-		c.JSON(500, gin.H{"message": "服务器错误"})
+		errors.Abort500C(c, "ADM0059", "服务器错误", err, h.Config.IsDev)
 		return
 	}
 	list := make([]gin.H, 0, len(profiles))
@@ -690,22 +691,22 @@ func (h *Admin) ListCreatorProfiles(c *gin.Context) {
 func (h *Admin) GetCreatorProfile(c *gin.Context) {
 	oid, err := primitive.ObjectIDFromHex(c.Param("id"))
 	if err != nil {
-		c.JSON(500, gin.H{"message": "服务器错误"})
+		errors.Abort500C(c, "ADM0060", "服务器错误", err, h.Config.IsDev)
 		return
 	}
 	ctx := c.Request.Context()
 	profile, err := h.Repos.CreatorProfiles.AdminFindProfileByID(ctx, oid)
 	if repository.IsNotFound(err) {
-		c.JSON(404, gin.H{"message": "创作者主页不存在"})
+		errors.AbortCoded(c, 404, "ADM0061", "创作者主页不存在", h.Config.IsDev)
 		return
 	}
 	if err != nil {
-		c.JSON(500, gin.H{"message": "服务器错误"})
+		errors.Abort500C(c, "ADM0062", "服务器错误", err, h.Config.IsDev)
 		return
 	}
 	refs, err := h.Repos.Users.AdminFindUserRefsByIDs(ctx, []primitive.ObjectID{profile.CreatorID})
 	if err != nil {
-		c.JSON(500, gin.H{"message": "服务器错误"})
+		errors.Abort500C(c, "ADM0063", "服务器错误", err, h.Config.IsDev)
 		return
 	}
 	c.JSON(200, adminCreatorProfileJSON(profile, refs))
@@ -725,7 +726,7 @@ func (h *Admin) GetCreatorProfile(c *gin.Context) {
 func (h *Admin) UpdateCreatorProfile(c *gin.Context) {
 	oid, err := primitive.ObjectIDFromHex(c.Param("id"))
 	if err != nil {
-		c.JSON(500, gin.H{"message": "服务器错误"})
+		errors.Abort500C(c, "ADM0064", "服务器错误", err, h.Config.IsDev)
 		return
 	}
 	var body map[string]any
@@ -754,11 +755,11 @@ func (h *Admin) UpdateCreatorProfile(c *gin.Context) {
 	ctx := c.Request.Context()
 	updated, err := h.Repos.CreatorProfiles.AdminUpdateProfile(ctx, oid, set, false)
 	if repository.IsNotFound(err) {
-		c.JSON(404, gin.H{"message": "创作者主页不存在"})
+		errors.AbortCoded(c, 404, "ADM0065", "创作者主页不存在", h.Config.IsDev)
 		return
 	}
 	if err != nil {
-		c.JSON(500, gin.H{"message": "服务器错误"})
+		errors.Abort500C(c, "ADM0066", "服务器错误", err, h.Config.IsDev)
 		return
 	}
 	c.JSON(200, adminCreatorProfileJSON(updated, nil))
@@ -776,17 +777,17 @@ func (h *Admin) UpdateCreatorProfile(c *gin.Context) {
 func (h *Admin) ApproveCreatorProfile(c *gin.Context) {
 	oid, err := primitive.ObjectIDFromHex(c.Param("id"))
 	if err != nil {
-		c.JSON(500, gin.H{"message": "服务器错误"})
+		errors.Abort500C(c, "ADM0067", "服务器错误", err, h.Config.IsDev)
 		return
 	}
 	ctx := c.Request.Context()
 	profile, err := h.Repos.CreatorProfiles.AdminFindProfileByID(ctx, oid)
 	if repository.IsNotFound(err) {
-		c.JSON(404, gin.H{"message": "创作者主页不存在"})
+		errors.AbortCoded(c, 404, "ADM0068", "创作者主页不存在", h.Config.IsDev)
 		return
 	}
 	if err != nil {
-		c.JSON(500, gin.H{"message": "服务器错误"})
+		errors.Abort500C(c, "ADM0069", "服务器错误", err, h.Config.IsDev)
 		return
 	}
 	set := adminApplyPendingChanges(profile.PendingChanges)
@@ -796,11 +797,11 @@ func (h *Admin) ApproveCreatorProfile(c *gin.Context) {
 	set["updatedAt"] = time.Now()
 	updated, err := h.Repos.CreatorProfiles.AdminUpdateProfile(ctx, oid, set, true)
 	if repository.IsNotFound(err) {
-		c.JSON(404, gin.H{"message": "创作者主页不存在"})
+		errors.AbortCoded(c, 404, "ADM0070", "创作者主页不存在", h.Config.IsDev)
 		return
 	}
 	if err != nil {
-		c.JSON(500, gin.H{"message": "服务器错误"})
+		errors.Abort500C(c, "ADM0071", "服务器错误", err, h.Config.IsDev)
 		return
 	}
 	// 通知创作者主页修改已通过（站内通知 + Web Push 占位）。
@@ -822,7 +823,7 @@ func (h *Admin) ApproveCreatorProfile(c *gin.Context) {
 func (h *Admin) RejectCreatorProfile(c *gin.Context) {
 	oid, err := primitive.ObjectIDFromHex(c.Param("id"))
 	if err != nil {
-		c.JSON(500, gin.H{"message": "服务器错误"})
+		errors.Abort500C(c, "ADM0072", "服务器错误", err, h.Config.IsDev)
 		return
 	}
 	var body map[string]any
@@ -839,11 +840,11 @@ func (h *Admin) RejectCreatorProfile(c *gin.Context) {
 	}
 	updated, err := h.Repos.CreatorProfiles.AdminUpdateProfile(ctx, oid, set, true)
 	if repository.IsNotFound(err) {
-		c.JSON(404, gin.H{"message": "创作者主页不存在"})
+		errors.AbortCoded(c, 404, "ADM0073", "创作者主页不存在", h.Config.IsDev)
 		return
 	}
 	if err != nil {
-		c.JSON(500, gin.H{"message": "服务器错误"})
+		errors.Abort500C(c, "ADM0074", "服务器错误", err, h.Config.IsDev)
 		return
 	}
 	// 通知创作者主页修改未通过（站内通知 + Web Push 占位）。
@@ -866,22 +867,22 @@ func (h *Admin) VerifyPassword(c *gin.Context) {
 	_ = c.ShouldBindJSON(&body)
 	password := asString(body["password"])
 	if password == "" {
-		c.JSON(400, gin.H{"message": "请输入密码"})
+		errors.AbortCoded(c, 400, "ADM0075", "请输入密码", h.Config.IsDev)
 		return
 	}
 	user, _ := middleware.GetUser(c)
 	full, err := h.Repos.Users.FindByIDWithAuth(c.Request.Context(), user.ID)
 	if repository.IsNotFound(err) {
-		c.JSON(404, gin.H{"message": "未找到"})
+		errors.AbortCoded(c, 404, "ADM0076", "未找到", h.Config.IsDev)
 		return
 	}
 	if err != nil {
-		c.JSON(500, gin.H{"message": "服务器错误"})
+		errors.Abort500C(c, "ADM0077", "服务器错误", err, h.Config.IsDev)
 		return
 	}
 	if !auth.Compare(full.Password, password) {
 		_ = h.Repos.Users.IncLoginAttempts(c.Request.Context(), user.ID)
-		c.JSON(400, gin.H{"message": "密码错误"})
+		errors.AbortCoded(c, 400, "ADM0078", "密码错误", h.Config.IsDev)
 		return
 	}
 	_ = h.Repos.Users.ResetLoginAttempts(c.Request.Context(), user.ID)
@@ -905,26 +906,26 @@ func (h *Admin) ToggleAdminAccess(c *gin.Context) {
 	_ = c.ShouldBindJSON(&body)
 	adminAccess, ok := body["adminAccess"].(bool)
 	if !ok {
-		c.JSON(400, gin.H{"message": "参数错误"})
+		errors.AbortCoded(c, 400, "ADM0079", "参数错误", h.Config.IsDev)
 		return
 	}
 	oid, err := primitive.ObjectIDFromHex(c.Param("id"))
 	if err != nil {
-		c.JSON(500, gin.H{"message": "服务器错误"})
+		errors.Abort500C(c, "ADM0080", "服务器错误", err, h.Config.IsDev)
 		return
 	}
 	ctx := c.Request.Context()
 	user, err := h.Repos.Users.FindByID(ctx, oid)
 	if repository.IsNotFound(err) {
-		c.JSON(404, gin.H{"message": "用户不存在"})
+		errors.AbortCoded(c, 404, "ADM0081", "用户不存在", h.Config.IsDev)
 		return
 	}
 	if err != nil {
-		c.JSON(500, gin.H{"message": "服务器错误"})
+		errors.Abort500C(c, "ADM0082", "服务器错误", err, h.Config.IsDev)
 		return
 	}
 	if user.Role == "superadmin" || user.Role == "creator" {
-		c.JSON(400, gin.H{"message": "不能修改超级管理员或创作者的权限"})
+		errors.AbortCoded(c, 400, "ADM0083", "不能修改超级管理员或创作者的权限", h.Config.IsDev)
 		return
 	}
 	newRole := "user"
@@ -934,7 +935,7 @@ func (h *Admin) ToggleAdminAccess(c *gin.Context) {
 		message = "已授予管理后台权限"
 	}
 	if err := h.Repos.Users.AdminSetRole(ctx, oid, newRole); err != nil {
-		c.JSON(500, gin.H{"message": "服务器错误"})
+		errors.Abort500C(c, "ADM0084", "服务器错误", err, h.Config.IsDev)
 		return
 	}
 	c.JSON(200, gin.H{"message": message, "adminAccess": adminAccess, "role": newRole})

@@ -13,6 +13,7 @@ import (
 
 	"github.com/Furry-Drama-Tracker/backend/internal/config"
 	"github.com/Furry-Drama-Tracker/backend/internal/email"
+	"github.com/Furry-Drama-Tracker/backend/internal/errors"
 	"github.com/Furry-Drama-Tracker/backend/internal/middleware"
 	"github.com/Furry-Drama-Tracker/backend/internal/model"
 	"github.com/Furry-Drama-Tracker/backend/internal/pagination"
@@ -50,22 +51,24 @@ func NewReview(repos *repository.Repos, cfg *config.Config, amw *middleware.Auth
 func (h *Review) Register(g *gin.RouterGroup) {
 	protect := h.AuthMW.Protect(middleware.RoleCreator, middleware.RoleAdmin, middleware.RoleSuperAdmin)
 	reqEmail := h.AuthMW.RequireEmailChanged()
-	g.GET("/pending", protect, adminOnlyReview, h.Pending)
-	g.GET("/all", protect, adminOnlyReview, h.All)
-	g.PUT("/approve/:id", protect, adminOnlyReview, reqEmail, h.Approve)
-	g.PUT("/reject/:id", protect, adminOnlyReview, reqEmail, h.Reject)
-	g.PUT("/assign-editor/:episodeId", protect, adminOnlyReview, reqEmail, h.AssignEditor)
-	g.PUT("/remove-editor/:episodeId", protect, adminOnlyReview, reqEmail, h.RemoveEditor)
+	g.GET("/pending", protect, adminOnlyReview(h.Config.IsDev), h.Pending)
+	g.GET("/all", protect, adminOnlyReview(h.Config.IsDev), h.All)
+	g.PUT("/approve/:id", protect, adminOnlyReview(h.Config.IsDev), reqEmail, h.Approve)
+	g.PUT("/reject/:id", protect, adminOnlyReview(h.Config.IsDev), reqEmail, h.Reject)
+	g.PUT("/assign-editor/:episodeId", protect, adminOnlyReview(h.Config.IsDev), reqEmail, h.AssignEditor)
+	g.PUT("/remove-editor/:episodeId", protect, adminOnlyReview(h.Config.IsDev), reqEmail, h.RemoveEditor)
 }
 
 // adminOnlyReview 内联校验：非 admin/superadmin → 403 需要管理员权限。
-func adminOnlyReview(c *gin.Context) {
-	user, ok := middleware.GetUser(c)
-	if ok && (user.Role == middleware.RoleAdmin || user.Role == middleware.RoleSuperAdmin) {
-		c.Next()
-		return
+func adminOnlyReview(isDev bool) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		user, ok := middleware.GetUser(c)
+		if ok && (user.Role == middleware.RoleAdmin || user.Role == middleware.RoleSuperAdmin) {
+			c.Next()
+			return
+		}
+		errors.AbortCoded(c, 403, "REV0001", "需要管理员权限", isDev)
 	}
-	c.AbortWithStatusJSON(403, gin.H{"message": "需要管理员权限"})
 }
 
 // reviewPage 解析审核列表分页参数（固定契约）：
@@ -99,18 +102,18 @@ func (h *Review) Pending(c *gin.Context) {
 	query := bson.M{"$or": bson.A{bson.M{"reviewStatus": "pending"}, bson.M{"hasPendingChanges": true}}}
 	total, err := h.Repos.Episodes.CountDocuments(ctx, query)
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	episodes, err := h.Repos.Episodes.FindList(ctx, query,
 		bson.D{{Key: "updatedAt", Value: -1}}, int64((pageNum-1)*limitNum), int64(limitNum))
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	refs, err := h.fetchReviewRefs(ctx, episodes)
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	opt := reviewRefOpt{populateCreatedBy: true, createdByEmail: true, populateCustomAuthors: true, customAuthorsEmail: false}
@@ -134,18 +137,18 @@ func (h *Review) All(c *gin.Context) {
 	ctx := c.Request.Context()
 	total, err := h.Repos.Episodes.CountDocuments(ctx, bson.M{})
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	episodes, err := h.Repos.Episodes.FindList(ctx, bson.M{},
 		bson.D{{Key: "updatedAt", Value: -1}}, int64((pageNum-1)*limitNum), int64(limitNum))
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	refs, err := h.fetchReviewRefs(ctx, episodes)
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	opt := reviewRefOpt{populateCreatedBy: true, createdByEmail: true, populateAllowedEditors: true, allowedEditorsEmail: true}
@@ -170,17 +173,17 @@ func (h *Review) Approve(c *gin.Context) {
 	idStr := c.Param("id")
 	oid, err := primitive.ObjectIDFromHex(idStr)
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	ctx := c.Request.Context()
 	episode, err := h.Repos.Episodes.FindByID(ctx, oid)
 	if err != nil {
 		if repository.IsNotFound(err) {
-			c.JSON(404, gin.H{"message": "Episode not found"})
+			errors.AbortCoded(c, 404, "REV0002", "Episode not found", h.Config.IsDev)
 			return
 		}
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	note := h.readReviewNote(c)
@@ -198,13 +201,13 @@ func (h *Review) Approve(c *gin.Context) {
 		episode.ReviewedAt = &now
 		episode.UpdatedAt = now
 		if err := h.Repos.Episodes.Save(ctx, episode); err != nil {
-			serverError(c)
+			serverError(c, err, h.Config.IsDev)
 			return
 		}
 		// 集数增加时通知追番用户（审核通过时触发，而非创作者提交时）。
 		if episode.CurrentEpisodes > oldCurrentEpisodes {
 			if err := h.notifyEpisodeNumberChange(ctx, oid, oldCurrentEpisodes, episode.CurrentEpisodes, episode); err != nil {
-				serverError(c)
+				serverError(c, err, h.Config.IsDev)
 				return
 			}
 		}
@@ -223,7 +226,7 @@ func (h *Review) Approve(c *gin.Context) {
 		"reviewedAt":   time.Now().UTC().Truncate(time.Millisecond),
 	}})
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	middleware.EpisodeCache.Delete("episode_" + idStr)
@@ -246,17 +249,17 @@ func (h *Review) Reject(c *gin.Context) {
 	idStr := c.Param("id")
 	oid, err := primitive.ObjectIDFromHex(idStr)
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	ctx := c.Request.Context()
 	episode, err := h.Repos.Episodes.FindByID(ctx, oid)
 	if err != nil {
 		if repository.IsNotFound(err) {
-			c.JSON(404, gin.H{"message": "Episode not found"})
+			errors.AbortCoded(c, 404, "REV0003", "Episode not found", h.Config.IsDev)
 			return
 		}
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	note := h.readReviewNote(c)
@@ -271,7 +274,7 @@ func (h *Review) Reject(c *gin.Context) {
 		now := time.Now().UTC().Truncate(time.Millisecond)
 		episode.ReviewedAt = &now
 		if err := h.Repos.Episodes.Save(ctx, episode); err != nil {
-			serverError(c)
+			serverError(c, err, h.Config.IsDev)
 			return
 		}
 		middleware.EpisodeCache.Delete("episode_" + idStr)
@@ -291,11 +294,11 @@ func (h *Review) Reject(c *gin.Context) {
 		"reviewedAt":   time.Now().UTC().Truncate(time.Millisecond),
 	}})
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	if err := h.Repos.EpisodeTrash.MoveToTrash(ctx, updated, "rejected", note, &admin.ID); err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	middleware.EpisodeCache.Delete("episode_" + idStr)
@@ -321,30 +324,30 @@ func (h *Review) AssignEditor(c *gin.Context) {
 	_ = c.ShouldBindJSON(&req)
 	editorOID, err := primitive.ObjectIDFromHex(req.EditorID)
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	ctx := c.Request.Context()
 	if _, err := h.Repos.Users.FindByID(ctx, editorOID); err != nil {
 		if repository.IsNotFound(err) {
-			c.JSON(404, gin.H{"message": "Editor not found"})
+			errors.AbortCoded(c, 404, "REV0004", "Editor not found", h.Config.IsDev)
 			return
 		}
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	episodeOID, err := primitive.ObjectIDFromHex(episodeIdStr)
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	episode, err := h.Repos.Episodes.FindByID(ctx, episodeOID)
 	if err != nil {
 		if repository.IsNotFound(err) {
-			c.JSON(404, gin.H{"message": "Episode not found"})
+			errors.AbortCoded(c, 404, "REV0005", "Episode not found", h.Config.IsDev)
 			return
 		}
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	if episode.AllowedEditors == nil {
@@ -360,7 +363,7 @@ func (h *Review) AssignEditor(c *gin.Context) {
 	if !already {
 		episode.AllowedEditors = append(episode.AllowedEditors, editorOID)
 		if err := h.Repos.Episodes.Save(ctx, episode); err != nil {
-			serverError(c)
+			serverError(c, err, h.Config.IsDev)
 			return
 		}
 	}
@@ -385,22 +388,22 @@ func (h *Review) RemoveEditor(c *gin.Context) {
 	_ = c.ShouldBindJSON(&req)
 	editorOID, err := primitive.ObjectIDFromHex(req.EditorID)
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	ctx := c.Request.Context()
 	episodeOID, err := primitive.ObjectIDFromHex(episodeIdStr)
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	episode, err := h.Repos.Episodes.FindByID(ctx, episodeOID)
 	if err != nil {
 		if repository.IsNotFound(err) {
-			c.JSON(404, gin.H{"message": "Episode not found"})
+			errors.AbortCoded(c, 404, "REV0006", "Episode not found", h.Config.IsDev)
 			return
 		}
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	if episode.AllowedEditors != nil {
@@ -412,7 +415,7 @@ func (h *Review) RemoveEditor(c *gin.Context) {
 		}
 		episode.AllowedEditors = filtered
 		if err := h.Repos.Episodes.Save(ctx, episode); err != nil {
-			serverError(c)
+			serverError(c, err, h.Config.IsDev)
 			return
 		}
 	}
@@ -424,12 +427,12 @@ func (h *Review) RemoveEditor(c *gin.Context) {
 func (h *Review) reviewRefsResponse(c *gin.Context, episodeOID primitive.ObjectID, opt reviewRefOpt) {
 	updated, err := h.Repos.Episodes.FindByID(c.Request.Context(), episodeOID)
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	refs, err := h.Repos.Users.ReviewFindUserRefsByIDs(c.Request.Context(), dedupIDs(episodeRefIDs(updated)))
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	c.JSON(200, h.reviewEpisodeJSON(updated, refs, opt))
@@ -761,7 +764,7 @@ func episodeRefIDs(e *model.Episode) []primitive.ObjectID {
 	return ids
 }
 
-// readReviewNote 读取请求体 note（`note || ''` 宽松语义）。
+// readReviewNote 读取请求体 note（`note || ”` 宽松语义）。
 func (h *Review) readReviewNote(c *gin.Context) string {
 	var req struct {
 		Note string `json:"note"`

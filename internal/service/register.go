@@ -41,61 +41,61 @@ func (s *AuthService) Register(ctx context.Context, in RegisterInput) (*Register
 	email := strings.ToLower(strings.TrimSpace(in.Email))
 
 	if !s.VerifyAltcha(in.Altcha, in.DevToken) {
-		return nil, errors.New(400, "验证码错误或已过期")
+		return nil, errors.NewC("AUT0083", 400, "验证码错误或已过期")
 	}
 	// 注册凭据要求：用户名 + 密码 + （邮箱 或 外部身份）至少其一。
 	// QQ 登录上线后，OAuth 注册路径（externalidentities 有绑定、无邮箱）在此分支放行
 	// email 为空；本期 QQ 未开放，邮箱仍为必填。
 	if !EmailRegex.MatchString(email) {
-		return nil, errors.New(400, "邮箱格式不正确")
+		return nil, errors.NewC("AUT0084", 400, "邮箱格式不正确")
 	}
 	// 用户名（accountId 字段）新规则：小写 POSIX 风格 + 黑名单子串 + 保留名。
 	if msg := ValidateLoginName(accountID, s.Config.Security.UsernameBlacklist); msg != "" {
-		return nil, errors.New(400, msg)
+		return nil, errors.NewC("AUT0085", 400, msg)
 	}
 	if len([]rune(username)) < 1 || len([]rune(username)) > 20 {
-		return nil, errors.New(400, "昵称长度需在1-20个字符之间")
+		return nil, errors.NewC("AUT0086", 400, "昵称长度需在1-20个字符之间")
 	}
 	if msg := ValidatePassword(in.Password); msg != "" {
-		return nil, errors.New(400, msg)
+		return nil, errors.NewC("AUT0087", 400, msg)
 	}
 	// DEMO_EMAILS：注册时拒绝新建演示邮箱（必须已存在），对齐 L180-185。
 	if containsFoldSlice(s.Config.JWT.DemoEmails, strings.ToLower(email)) {
 		exists, err := s.Repos.Users.ExistsByEmail(ctx, email)
 		if err != nil {
-			return nil, errors.New(500, "服务器错误")
+			return nil, errors.NewC("AUT0088", 500, "服务器错误")
 		}
 		if !exists {
-			return nil, errors.New(400, "该邮箱不可注册")
+			return nil, errors.NewC("AUT0089", 400, "该邮箱不可注册")
 		}
 	}
 	if exists, err := s.Repos.Users.ExistsByEmail(ctx, email); err != nil {
-		return nil, errors.New(500, "服务器错误")
+		return nil, errors.NewC("AUT0090", 500, "服务器错误")
 	} else if exists {
 		// 附带 emailTaken 标志，前端引导去登录（切换登录时可预填该邮箱）。
-		return nil, errors.NewExtra(400, "该邮箱已被注册", map[string]any{"emailTaken": true})
+		return nil, errors.NewExtraC("AUT0091", 400, "该邮箱已被注册", map[string]any{"emailTaken": true})
 	}
 	if exists, err := s.Repos.Users.ExistsByAccountID(ctx, accountID); err != nil {
-		return nil, errors.New(500, "服务器错误")
+		return nil, errors.NewC("AUT0092", 500, "服务器错误")
 	} else if exists {
-		return nil, errors.New(400, "该账号ID已被占用")
+		return nil, errors.NewC("AUT0093", 400, "该账号ID已被占用")
 	}
 	// 旧用户名保留期检查（改名释放的旧名在 reservedUntil 内不可注册，防冒充；
 	// 按折叠小写匹配，注册者无自身豁免）。
 	if reserved, err := s.Repos.LoginNameRes.ExistsActive(ctx, strings.ToLower(accountID), time.Now(), nil); err != nil {
-		return nil, errors.New(500, "服务器错误")
+		return nil, errors.NewC("AUT0094", 500, "服务器错误")
 	} else if reserved {
-		return nil, errors.New(400, "该用户名正在保留期，暂时不可注册")
+		return nil, errors.NewC("AUT0095", 400, "该用户名正在保留期，暂时不可注册")
 	}
 
 	hash, err := auth.Hash(in.Password)
 	if err != nil {
-		return nil, errors.New(500, "服务器错误")
+		return nil, errors.NewC("AUT0096", 500, "服务器错误")
 	}
 	// UID 发号：注册顺序号（首个用户/seed=0；普通注册从计数器取号）。
 	uid, err := s.Repos.Counters.NextUID(ctx)
 	if err != nil {
-		return nil, errors.New(500, "服务器错误")
+		return nil, errors.NewC("AUT0097", 500, "服务器错误")
 	}
 	parsed := auth.ParseUserAgent(in.Ua)
 	di := auth.BuildDeviceInfo(in.DeviceInfo, parsed, in.Ua, in.AcceptLang)
@@ -124,9 +124,9 @@ func (s *AuthService) Register(ctx context.Context, in RegisterInput) (*Register
 	user.LastLoginAt = &last
 	if err := s.Repos.Users.Create(ctx, user); err != nil {
 		if repository.IsDuplicateKey(err) {
-			return nil, errors.New(400, "该信息已被使用")
+			return nil, errors.NewC("AUT0098", 400, "该信息已被使用")
 		}
-		return nil, errors.New(500, "服务器错误")
+		return nil, errors.NewC("AUT0099", 500, "服务器错误")
 	}
 
 	// 生成 6 位验证码并发送（10 分钟有效），对齐 L227-234。

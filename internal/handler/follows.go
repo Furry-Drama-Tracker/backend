@@ -118,15 +118,15 @@ func (h *Follows) Add(c *gin.Context) {
 	episode, err := h.Repos.Episodes.FollowEpisodeByID(c.Request.Context(), req.EpisodeID)
 	if err != nil {
 		if repository.IsNotFound(err) {
-			errors.AbortWithAppError(c, errors.New(404, "Episode not found"), h.Config.IsDev)
+			errors.AbortCoded(c, 404, "FOL0056", "Episode not found", h.Config.IsDev)
 			return
 		}
-		errors.AbortWithAppError(c, errors.New(500, "Server error"), h.Config.IsDev)
+		errors.Abort500C(c, "FOL0057", "Server error", err, h.Config.IsDev)
 		return
 	}
 	// 仅允许追番已审核通过的剧集（reviewStatus 检查，固定契约）。
 	if episode.ReviewStatus != "" && episode.ReviewStatus != "approved" {
-		errors.AbortWithAppError(c, errors.New(403, "该剧集暂不可追番"), h.Config.IsDev)
+		errors.AbortCoded(c, 403, "FOL0058", "该剧集暂不可追番", h.Config.IsDev)
 		return
 	}
 
@@ -140,17 +140,17 @@ func (h *Follows) Add(c *gin.Context) {
 	if req.FolderID != "" {
 		folderID, ok, ferr := parseRef(req.FolderID)
 		if ferr != nil {
-			errors.AbortWithAppError(c, errors.New(500, "Server error"), h.Config.IsDev)
+			errors.Abort500C(c, "FOL0059", "Server error", err, h.Config.IsDev)
 			return
 		}
 		if ok {
 			// 收藏夹必须存在且属于当前用户，防止向他人收藏夹注入条目。
 			if _, ferr := h.Repos.Folders.FollowFolderByIDAndUser(c.Request.Context(), folderID, user.ID); ferr != nil {
 				if repository.IsNotFound(ferr) {
-					errors.AbortWithAppError(c, errors.New(400, "收藏夹不存在或不属于当前用户"), h.Config.IsDev)
+					errors.AbortCoded(c, 400, "FOL0060", "收藏夹不存在或不属于当前用户", h.Config.IsDev)
 					return
 				}
-				errors.AbortWithAppError(c, errors.New(500, "Server error"), h.Config.IsDev)
+				errors.Abort500C(c, "FOL0061", "Server error", err, h.Config.IsDev)
 				return
 			}
 			follow.FolderID = &folderID
@@ -158,10 +158,10 @@ func (h *Follows) Add(c *gin.Context) {
 	}
 	if err := h.Repos.Follows.FollowInsert(c.Request.Context(), follow); err != nil {
 		if repository.IsDuplicateKey(err) {
-			errors.AbortWithAppError(c, errors.New(400, "Already following"), h.Config.IsDev)
+			errors.AbortCoded(c, 400, "FOL0062", "Already following", h.Config.IsDev)
 			return
 		}
-		errors.AbortWithAppError(c, errors.New(500, "Server error"), h.Config.IsDev)
+		errors.Abort500C(c, "FOL0063", "Server error", err, h.Config.IsDev)
 		return
 	}
 	c.JSON(200, followWriteRow{
@@ -191,12 +191,12 @@ func (h *Follows) Remove(c *gin.Context) {
 
 	oid, ok, err := parseRef(req.EpisodeID)
 	if err != nil {
-		errors.AbortWithAppError(c, errors.New(500, "Server error"), h.Config.IsDev)
+		errors.Abort500C(c, "FOL0064", "Server error", err, h.Config.IsDev)
 		return
 	}
 	if ok {
 		if err := h.Repos.Follows.FollowDeleteOne(c.Request.Context(), user.ID, oid); err != nil {
-			errors.AbortWithAppError(c, errors.New(500, "Server error"), h.Config.IsDev)
+			errors.Abort500C(c, "FOL0065", "Server error", err, h.Config.IsDev)
 			return
 		}
 	}
@@ -228,7 +228,7 @@ func (h *Follows) List(c *gin.Context) {
 		} else {
 			oid, _, ferr := parseRef(folderID)
 			if ferr != nil {
-				errors.AbortWithAppError(c, errors.New(500, "Server error"), h.Config.IsDev)
+				errors.Abort500C(c, "FOL0066", "Server error", ferr, h.Config.IsDev)
 				return
 			}
 			filter["folderId"] = oid
@@ -238,7 +238,7 @@ func (h *Follows) List(c *gin.Context) {
 	ctx := c.Request.Context()
 	total, err := h.Repos.Follows.FollowCount(ctx, filter)
 	if err != nil {
-		errors.AbortWithAppError(c, errors.New(500, "Server error"), h.Config.IsDev)
+		errors.Abort500C(c, "FOL0067", "Server error", err, h.Config.IsDev)
 		return
 	}
 	totalPages := pq.TotalPages(total)
@@ -257,12 +257,12 @@ func (h *Follows) List(c *gin.Context) {
 		}
 		allItems, ferr := h.Repos.Follows.FollowListLimited(ctx, filter, maxItems)
 		if ferr != nil {
-			errors.AbortWithAppError(c, errors.New(500, "Server error"), h.Config.IsDev)
+			errors.Abort500C(c, "FOL0068", "Server error", err, h.Config.IsDev)
 			return
 		}
 		episodeMap, ferr = h.Repos.Episodes.FollowEpisodesByIDs(ctx, followEpisodeIDs(allItems))
 		if ferr != nil {
-			errors.AbortWithAppError(c, errors.New(500, "Server error"), h.Config.IsDev)
+			errors.Abort500C(c, "FOL0069", "Server error", err, h.Config.IsDev)
 			return
 		}
 		if sortParam == "name" {
@@ -282,18 +282,18 @@ func (h *Follows) List(c *gin.Context) {
 		}
 		allItems, ferr := h.Repos.Follows.FollowListLimited(ctx, filter, maxItems)
 		if ferr != nil {
-			errors.AbortWithAppError(c, errors.New(500, "Server error"), h.Config.IsDev)
+			errors.Abort500C(c, "FOL0070", "Server error", err, h.Config.IsDev)
 			return
 		}
 		ids := followEpisodeIDs(allItems)
 		episodeMap, ferr = h.Repos.Episodes.FollowEpisodesByIDs(ctx, ids)
 		if ferr != nil {
-			errors.AbortWithAppError(c, errors.New(500, "Server error"), h.Config.IsDev)
+			errors.Abort500C(c, "FOL0071", "Server error", err, h.Config.IsDev)
 			return
 		}
 		historyMap, ferr := h.Repos.Histories.FollowLastWatchedMap(ctx, user.ID, ids)
 		if ferr != nil {
-			errors.AbortWithAppError(c, errors.New(500, "Server error"), h.Config.IsDev)
+			errors.Abort500C(c, "FOL0072", "Server error", err, h.Config.IsDev)
 			return
 		}
 		// 缺 lastWatched 的按 epoch 视为最旧（等价 `x || new Date(0)`）。
@@ -305,19 +305,19 @@ func (h *Follows) List(c *gin.Context) {
 		// 默认分支：sort({createdAt:-1}).skip().limit()（Follow 无 updatedAt 字段）。
 		pageItems, err = h.Repos.Follows.FollowListPaged(ctx, filter, pq.Page, pq.Limit)
 		if err != nil {
-			errors.AbortWithAppError(c, errors.New(500, "Server error"), h.Config.IsDev)
+			errors.Abort500C(c, "FOL0073", "Server error", err, h.Config.IsDev)
 			return
 		}
 		episodeMap, err = h.Repos.Episodes.FollowEpisodesByIDs(ctx, followEpisodeIDs(pageItems))
 		if err != nil {
-			errors.AbortWithAppError(c, errors.New(500, "Server error"), h.Config.IsDev)
+			errors.Abort500C(c, "FOL0074", "Server error", err, h.Config.IsDev)
 			return
 		}
 	}
 
 	folderMap, ferr := h.Repos.Folders.FollowFoldersByIDs(ctx, followFolderIDs(pageItems))
 	if ferr != nil {
-		errors.AbortWithAppError(c, errors.New(500, "Server error"), h.Config.IsDev)
+		errors.Abort500C(c, "FOL0075", "Server error", err, h.Config.IsDev)
 		return
 	}
 
@@ -354,7 +354,7 @@ func (h *Follows) Check(c *gin.Context) {
 	user, _ := middleware.GetUser(c)
 	oid, ok, err := parseRef(c.Param("episodeId"))
 	if err != nil {
-		errors.AbortWithAppError(c, errors.New(500, "Server error"), h.Config.IsDev)
+		errors.Abort500C(c, "FOL0076", "Server error", err, h.Config.IsDev)
 		return
 	}
 	if !ok {
@@ -363,7 +363,7 @@ func (h *Follows) Check(c *gin.Context) {
 	}
 	follow, err := h.Repos.Follows.FollowFindByUserEpisode(c.Request.Context(), user.ID, oid)
 	if err != nil && !repository.IsNotFound(err) {
-		errors.AbortWithAppError(c, errors.New(500, "Server error"), h.Config.IsDev)
+		errors.Abort500C(c, "FOL0077", "Server error", err, h.Config.IsDev)
 		return
 	}
 	// 未追番时 followedAtEpisodes 省略（undefined 键被 JSON 序列化丢弃，固定契约）。
@@ -406,15 +406,15 @@ func (h *Favorites) Add(c *gin.Context) {
 	episode, err := h.Repos.Episodes.FollowEpisodeByID(c.Request.Context(), req.EpisodeID)
 	if err != nil {
 		if repository.IsNotFound(err) {
-			errors.AbortWithAppError(c, errors.New(404, "Episode not found"), h.Config.IsDev)
+			errors.AbortCoded(c, 404, "FOL0078", "Episode not found", h.Config.IsDev)
 			return
 		}
-		errors.AbortWithAppError(c, errors.New(500, "Server error"), h.Config.IsDev)
+		errors.Abort500C(c, "FOL0079", "Server error", err, h.Config.IsDev)
 		return
 	}
 	// 仅允许收藏已审核通过的剧集（reviewStatus 检查，固定契约）。
 	if episode.ReviewStatus != "" && episode.ReviewStatus != "approved" {
-		errors.AbortWithAppError(c, errors.New(403, "该剧集暂不可收藏"), h.Config.IsDev)
+		errors.AbortCoded(c, 403, "FOL0080", "该剧集暂不可收藏", h.Config.IsDev)
 		return
 	}
 
@@ -428,17 +428,17 @@ func (h *Favorites) Add(c *gin.Context) {
 	if req.FolderID != "" {
 		folderID, ok, ferr := parseRef(req.FolderID)
 		if ferr != nil {
-			errors.AbortWithAppError(c, errors.New(500, "Server error"), h.Config.IsDev)
+			errors.Abort500C(c, "FOL0081", "Server error", err, h.Config.IsDev)
 			return
 		}
 		if ok {
 			// 收藏夹必须存在且属于当前用户（归属校验）。
 			if _, ferr := h.Repos.Folders.FollowFolderByIDAndUser(c.Request.Context(), folderID, user.ID); ferr != nil {
 				if repository.IsNotFound(ferr) {
-					errors.AbortWithAppError(c, errors.New(400, "收藏夹不存在或不属于当前用户"), h.Config.IsDev)
+					errors.AbortCoded(c, 400, "FOL0082", "收藏夹不存在或不属于当前用户", h.Config.IsDev)
 					return
 				}
-				errors.AbortWithAppError(c, errors.New(500, "Server error"), h.Config.IsDev)
+				errors.Abort500C(c, "FOL0083", "Server error", err, h.Config.IsDev)
 				return
 			}
 			fav.FolderID = &folderID
@@ -446,10 +446,10 @@ func (h *Favorites) Add(c *gin.Context) {
 	}
 	if err := h.Repos.Favorites.FavoriteInsert(c.Request.Context(), fav); err != nil {
 		if repository.IsDuplicateKey(err) {
-			errors.AbortWithAppError(c, errors.New(400, "Already favorited"), h.Config.IsDev)
+			errors.AbortCoded(c, 400, "FOL0084", "Already favorited", h.Config.IsDev)
 			return
 		}
-		errors.AbortWithAppError(c, errors.New(500, "Server error"), h.Config.IsDev)
+		errors.Abort500C(c, "FOL0085", "Server error", err, h.Config.IsDev)
 		return
 	}
 	c.JSON(200, gin.H{"message": "Favorited"})
@@ -472,12 +472,12 @@ func (h *Favorites) Remove(c *gin.Context) {
 
 	oid, ok, err := parseRef(req.EpisodeID)
 	if err != nil {
-		errors.AbortWithAppError(c, errors.New(500, "Server error"), h.Config.IsDev)
+		errors.Abort500C(c, "FOL0086", "Server error", err, h.Config.IsDev)
 		return
 	}
 	if ok {
 		if err := h.Repos.Favorites.FavoriteDeleteOne(c.Request.Context(), user.ID, oid); err != nil {
-			errors.AbortWithAppError(c, errors.New(500, "Server error"), h.Config.IsDev)
+			errors.Abort500C(c, "FOL0087", "Server error", err, h.Config.IsDev)
 			return
 		}
 	}
@@ -509,7 +509,7 @@ func (h *Favorites) List(c *gin.Context) {
 		} else {
 			oid, _, ferr := parseRef(folderID)
 			if ferr != nil {
-				errors.AbortWithAppError(c, errors.New(500, "Server error"), h.Config.IsDev)
+				errors.Abort500C(c, "FOL0088", "Server error", ferr, h.Config.IsDev)
 				return
 			}
 			filter["folderId"] = oid
@@ -519,7 +519,7 @@ func (h *Favorites) List(c *gin.Context) {
 	ctx := c.Request.Context()
 	total, err := h.Repos.Favorites.FavoriteCount(ctx, filter)
 	if err != nil {
-		errors.AbortWithAppError(c, errors.New(500, "Server error"), h.Config.IsDev)
+		errors.Abort500C(c, "FOL0089", "Server error", err, h.Config.IsDev)
 		return
 	}
 	totalPages := pq.TotalPages(total)
@@ -537,12 +537,12 @@ func (h *Favorites) List(c *gin.Context) {
 		}
 		allItems, ferr := h.Repos.Favorites.FavoriteListLimited(ctx, filter, maxItems)
 		if ferr != nil {
-			errors.AbortWithAppError(c, errors.New(500, "Server error"), h.Config.IsDev)
+			errors.Abort500C(c, "FOL0090", "Server error", err, h.Config.IsDev)
 			return
 		}
 		episodeMap, ferr = h.Repos.Episodes.FollowEpisodesByIDs(ctx, favoriteEpisodeIDs(allItems))
 		if ferr != nil {
-			errors.AbortWithAppError(c, errors.New(500, "Server error"), h.Config.IsDev)
+			errors.Abort500C(c, "FOL0091", "Server error", err, h.Config.IsDev)
 			return
 		}
 		if sortParam == "name" {
@@ -562,18 +562,18 @@ func (h *Favorites) List(c *gin.Context) {
 		}
 		allItems, ferr := h.Repos.Favorites.FavoriteListLimited(ctx, filter, maxItems)
 		if ferr != nil {
-			errors.AbortWithAppError(c, errors.New(500, "Server error"), h.Config.IsDev)
+			errors.Abort500C(c, "FOL0092", "Server error", err, h.Config.IsDev)
 			return
 		}
 		ids := favoriteEpisodeIDs(allItems)
 		episodeMap, ferr = h.Repos.Episodes.FollowEpisodesByIDs(ctx, ids)
 		if ferr != nil {
-			errors.AbortWithAppError(c, errors.New(500, "Server error"), h.Config.IsDev)
+			errors.Abort500C(c, "FOL0093", "Server error", err, h.Config.IsDev)
 			return
 		}
 		historyMap, ferr := h.Repos.Histories.FollowLastWatchedMap(ctx, user.ID, ids)
 		if ferr != nil {
-			errors.AbortWithAppError(c, errors.New(500, "Server error"), h.Config.IsDev)
+			errors.Abort500C(c, "FOL0094", "Server error", err, h.Config.IsDev)
 			return
 		}
 		sort.SliceStable(allItems, func(i, j int) bool {
@@ -584,19 +584,19 @@ func (h *Favorites) List(c *gin.Context) {
 		// 默认分支：sort({updatedAt:-1}).skip().limit()。
 		pageItems, err = h.Repos.Favorites.FavoriteListPaged(ctx, filter, pq.Page, pq.Limit)
 		if err != nil {
-			errors.AbortWithAppError(c, errors.New(500, "Server error"), h.Config.IsDev)
+			errors.Abort500C(c, "FOL0095", "Server error", err, h.Config.IsDev)
 			return
 		}
 		episodeMap, err = h.Repos.Episodes.FollowEpisodesByIDs(ctx, favoriteEpisodeIDs(pageItems))
 		if err != nil {
-			errors.AbortWithAppError(c, errors.New(500, "Server error"), h.Config.IsDev)
+			errors.Abort500C(c, "FOL0096", "Server error", err, h.Config.IsDev)
 			return
 		}
 	}
 
 	folderMap, ferr := h.Repos.Folders.FollowFoldersByIDs(ctx, favoriteFolderIDs(pageItems))
 	if ferr != nil {
-		errors.AbortWithAppError(c, errors.New(500, "Server error"), h.Config.IsDev)
+		errors.Abort500C(c, "FOL0097", "Server error", err, h.Config.IsDev)
 		return
 	}
 
@@ -634,24 +634,24 @@ func (h *Favorites) Counts(c *gin.Context) {
 
 	total, err := h.Repos.Favorites.FavoriteCount(ctx, bson.M{"userId": user.ID})
 	if err != nil {
-		errors.AbortWithAppError(c, errors.New(500, "Server error"), h.Config.IsDev)
+		errors.Abort500C(c, "FOL0098", "Server error", err, h.Config.IsDev)
 		return
 	}
 	unclassified, err := h.Repos.Favorites.FavoriteCount(ctx, bson.M{"userId": user.ID, "folderId": nil})
 	if err != nil {
-		errors.AbortWithAppError(c, errors.New(500, "Server error"), h.Config.IsDev)
+		errors.Abort500C(c, "FOL0099", "Server error", err, h.Config.IsDev)
 		return
 	}
 	folderIDs, err := h.Repos.Folders.FollowFavoriteFolderIDs(ctx, user.ID)
 	if err != nil {
-		errors.AbortWithAppError(c, errors.New(500, "Server error"), h.Config.IsDev)
+		errors.Abort500C(c, "FOL0100", "Server error", err, h.Config.IsDev)
 		return
 	}
 	folderCounts := make(map[string]int64, len(folderIDs))
 	for _, fid := range folderIDs {
 		n, err := h.Repos.Favorites.FavoriteCount(ctx, bson.M{"userId": user.ID, "folderId": fid})
 		if err != nil {
-			errors.AbortWithAppError(c, errors.New(500, "Server error"), h.Config.IsDev)
+			errors.Abort500C(c, "FOL0101", "Server error", err, h.Config.IsDev)
 			return
 		}
 		folderCounts[fid.Hex()] = n
@@ -670,7 +670,7 @@ func (h *Favorites) Check(c *gin.Context) {
 	user, _ := middleware.GetUser(c)
 	oid, ok, err := parseRef(c.Param("episodeId"))
 	if err != nil {
-		errors.AbortWithAppError(c, errors.New(500, "Server error"), h.Config.IsDev)
+		errors.Abort500C(c, "FOL0102", "Server error", err, h.Config.IsDev)
 		return
 	}
 	if !ok {
@@ -679,7 +679,7 @@ func (h *Favorites) Check(c *gin.Context) {
 	}
 	fav, err := h.Repos.Favorites.FavoriteFindByUserEpisode(c.Request.Context(), user.ID, oid)
 	if err != nil && !repository.IsNotFound(err) {
-		errors.AbortWithAppError(c, errors.New(500, "Server error"), h.Config.IsDev)
+		errors.Abort500C(c, "FOL0103", "Server error", err, h.Config.IsDev)
 		return
 	}
 	c.JSON(200, gin.H{"isFavorite": fav != nil})

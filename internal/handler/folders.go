@@ -12,6 +12,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 
 	"github.com/Furry-Drama-Tracker/backend/internal/config"
+	"github.com/Furry-Drama-Tracker/backend/internal/errors"
 	"github.com/Furry-Drama-Tracker/backend/internal/middleware"
 	"github.com/Furry-Drama-Tracker/backend/internal/model"
 	"github.com/Furry-Drama-Tracker/backend/internal/ratelimit"
@@ -82,7 +83,7 @@ func (h *SavedFolders) Register(g *gin.RouterGroup) {
 func (h *Folders) requireObjectID(c *gin.Context, param string) (primitive.ObjectID, bool) {
 	id, err := primitive.ObjectIDFromHex(c.Param(param))
 	if err != nil {
-		c.JSON(500, gin.H{"message": "Server error"})
+		errors.Abort500C(c, "FOL0001", "Server error", err, h.Config.IsDev)
 		return primitive.NilObjectID, false
 	}
 	return id, true
@@ -92,7 +93,7 @@ func (h *Folders) requireObjectID(c *gin.Context, param string) (primitive.Objec
 func (h *SavedFolders) requireObjectID(c *gin.Context, param string) (primitive.ObjectID, bool) {
 	id, err := primitive.ObjectIDFromHex(c.Param(param))
 	if err != nil {
-		c.JSON(500, gin.H{"message": "Server error"})
+		errors.Abort500C(c, "FOL0002", "Server error", err, h.Config.IsDev)
 		return primitive.NilObjectID, false
 	}
 	return id, true
@@ -136,7 +137,7 @@ func (h *Folders) ListFolders(c *gin.Context) {
 	user, _ := middleware.GetUser(c)
 	folders, err := h.Repos.Folders.FindUserFolders(c.Request.Context(), user.ID, c.Query("type"))
 	if err != nil {
-		c.JSON(500, gin.H{"message": "Server error"})
+		errors.Abort500C(c, "FOL0003", "Server error", err, h.Config.IsDev)
 		return
 	}
 	ids := make([]primitive.ObjectID, 0, len(folders))
@@ -169,15 +170,15 @@ func (h *Folders) CreateFolder(c *gin.Context) {
 	_ = c.ShouldBindJSON(&req)
 	name := strings.TrimSpace(req.Name)
 	if name == "" {
-		c.JSON(400, gin.H{"message": "文件夹名称不能为空"})
+		errors.AbortCoded(c, 400, "FOL0004", "文件夹名称不能为空", h.Config.IsDev)
 		return
 	}
 	if len([]rune(name)) > 50 {
-		c.JSON(400, gin.H{"message": "文件夹名称不能超过50个字符"})
+		errors.AbortCoded(c, 400, "FOL0005", "文件夹名称不能超过50个字符", h.Config.IsDev)
 		return
 	}
 	if req.Type != "follow" && req.Type != "favorite" {
-		c.JSON(400, gin.H{"message": "无效的文件夹类型"})
+		errors.AbortCoded(c, 400, "FOL0006", "无效的文件夹类型", h.Config.IsDev)
 		return
 	}
 	folder := &model.Folder{
@@ -187,7 +188,7 @@ func (h *Folders) CreateFolder(c *gin.Context) {
 		CreatedAt: time.Now(),
 	}
 	if err := h.Repos.Folders.Create(c.Request.Context(), folder); err != nil {
-		c.JSON(500, gin.H{"message": "Server error"})
+		errors.Abort500C(c, "FOL0007", "Server error", err, h.Config.IsDev)
 		return
 	}
 	c.JSON(200, folder)
@@ -212,7 +213,7 @@ func (h *Folders) ReorderFolders(c *gin.Context) {
 		oid, err := primitive.ObjectIDFromHex(id)
 		if err != nil {
 			// 固定契约：非法 _id → 500 Server error。
-			c.JSON(500, gin.H{"message": "Server error"})
+			errors.Abort500C(c, "FOL0008", "Server error", err, h.Config.IsDev)
 			return
 		}
 		// 必须转成 ObjectID：字符串 _id 在 Mongo 查询中不匹配 ObjectID 文档
@@ -220,7 +221,7 @@ func (h *Folders) ReorderFolders(c *gin.Context) {
 		ids[i] = oid
 	}
 	if err := h.Repos.Folders.Reorder(c.Request.Context(), user.ID, ids); err != nil {
-		c.JSON(500, gin.H{"message": "Server error"})
+		errors.Abort500C(c, "FOL0009", "Server error", err, h.Config.IsDev)
 		return
 	}
 	c.JSON(200, gin.H{"message": "Reordered"})
@@ -246,10 +247,10 @@ func (h *Folders) UpdateFolder(c *gin.Context) {
 	folder, err := h.Repos.Folders.FindOwnedByID(c.Request.Context(), id, user.ID)
 	if err != nil {
 		if repository.IsNotFound(err) {
-			c.JSON(404, gin.H{"message": "Folder not found"})
+			errors.AbortCoded(c, 404, "FOL0010", "Folder not found", h.Config.IsDev)
 			return
 		}
-		c.JSON(500, gin.H{"message": "Server error"})
+		errors.Abort500C(c, "FOL0011", "Server error", err, h.Config.IsDev)
 		return
 	}
 	var req struct {
@@ -260,11 +261,11 @@ func (h *Folders) UpdateFolder(c *gin.Context) {
 	if req.Name != nil {
 		name := strings.TrimSpace(*req.Name)
 		if name == "" {
-			c.JSON(400, gin.H{"message": "文件夹名称不能为空"})
+			errors.AbortCoded(c, 400, "FOL0012", "文件夹名称不能为空", h.Config.IsDev)
 			return
 		}
 		if len([]rune(name)) > 50 {
-			c.JSON(400, gin.H{"message": "文件夹名称不能超过50个字符"})
+			errors.AbortCoded(c, 400, "FOL0013", "文件夹名称不能超过50个字符", h.Config.IsDev)
 			return
 		}
 		folder.Name = name
@@ -273,7 +274,7 @@ func (h *Folders) UpdateFolder(c *gin.Context) {
 		folder.Description = strings.TrimSpace(*req.Description)
 	}
 	if err := h.Repos.Folders.Save(c.Request.Context(), folder); err != nil {
-		c.JSON(500, gin.H{"message": "Server error"})
+		errors.Abort500C(c, "FOL0014", "Server error", err, h.Config.IsDev)
 		return
 	}
 	c.JSON(200, folder)
@@ -296,10 +297,10 @@ func (h *Folders) DeleteFolder(c *gin.Context) {
 	folder, err := h.Repos.Folders.FindOwnedByID(c.Request.Context(), id, user.ID)
 	if err != nil {
 		if repository.IsNotFound(err) {
-			c.JSON(404, gin.H{"message": "Folder not found"})
+			errors.AbortCoded(c, 404, "FOL0015", "Folder not found", h.Config.IsDev)
 			return
 		}
-		c.JSON(500, gin.H{"message": "Server error"})
+		errors.Abort500C(c, "FOL0016", "Server error", err, h.Config.IsDev)
 		return
 	}
 	var clearErr error
@@ -309,11 +310,11 @@ func (h *Folders) DeleteFolder(c *gin.Context) {
 		clearErr = h.Repos.Favorites.FolderClearByFolderID(c.Request.Context(), id)
 	}
 	if clearErr != nil {
-		c.JSON(500, gin.H{"message": "Server error"})
+		errors.Abort500C(c, "FOL0017", "Server error", err, h.Config.IsDev)
 		return
 	}
 	if err := h.Repos.Folders.DeleteByID(c.Request.Context(), id); err != nil {
-		c.JSON(500, gin.H{"message": "Server error"})
+		errors.Abort500C(c, "FOL0018", "Server error", err, h.Config.IsDev)
 		return
 	}
 	c.JSON(200, gin.H{"message": "Folder deleted"})
@@ -338,10 +339,10 @@ func (h *Folders) AddFolderItem(c *gin.Context) {
 	folder, err := h.Repos.Folders.FindOwnedByID(c.Request.Context(), id, user.ID)
 	if err != nil {
 		if repository.IsNotFound(err) {
-			c.JSON(404, gin.H{"message": "Folder not found"})
+			errors.AbortCoded(c, 404, "FOL0019", "Folder not found", h.Config.IsDev)
 			return
 		}
-		c.JSON(500, gin.H{"message": "Server error"})
+		errors.Abort500C(c, "FOL0020", "Server error", err, h.Config.IsDev)
 		return
 	}
 	var req struct {
@@ -351,22 +352,22 @@ func (h *Folders) AddFolderItem(c *gin.Context) {
 	episodeID, err := primitive.ObjectIDFromHex(req.EpisodeID)
 	if err != nil {
 		// 固定契约：episodeId 非法 → 500 Server error。
-		c.JSON(500, gin.H{"message": "Server error"})
+		errors.Abort500C(c, "FOL0021", "Server error", err, h.Config.IsDev)
 		return
 	}
 	if folder.Type == "follow" {
 		item, err := h.Repos.Follows.FolderFindByUserEpisode(c.Request.Context(), user.ID, episodeID)
 		if err != nil {
 			if repository.IsNotFound(err) {
-				c.JSON(404, gin.H{"message": "Item not found"})
+				errors.AbortCoded(c, 404, "FOL0022", "Item not found", h.Config.IsDev)
 				return
 			}
-			c.JSON(500, gin.H{"message": "Server error"})
+			errors.Abort500C(c, "FOL0023", "Server error", err, h.Config.IsDev)
 			return
 		}
 		item.FolderID = &folder.ID
 		if err := h.Repos.Follows.FolderSave(c.Request.Context(), item); err != nil {
-			c.JSON(500, gin.H{"message": "Server error"})
+			errors.Abort500C(c, "FOL0024", "Server error", err, h.Config.IsDev)
 			return
 		}
 		c.JSON(200, item)
@@ -375,15 +376,15 @@ func (h *Folders) AddFolderItem(c *gin.Context) {
 	item, err := h.Repos.Favorites.FolderFindByUserEpisode(c.Request.Context(), user.ID, episodeID)
 	if err != nil {
 		if repository.IsNotFound(err) {
-			c.JSON(404, gin.H{"message": "Item not found"})
+			errors.AbortCoded(c, 404, "FOL0025", "Item not found", h.Config.IsDev)
 			return
 		}
-		c.JSON(500, gin.H{"message": "Server error"})
+		errors.Abort500C(c, "FOL0026", "Server error", err, h.Config.IsDev)
 		return
 	}
 	item.FolderID = &folder.ID
 	if err := h.Repos.Favorites.FolderSave(c.Request.Context(), item); err != nil {
-		c.JSON(500, gin.H{"message": "Server error"})
+		errors.Abort500C(c, "FOL0027", "Server error", err, h.Config.IsDev)
 		return
 	}
 	c.JSON(200, item)
@@ -407,10 +408,10 @@ func (h *Folders) RemoveFolderItem(c *gin.Context) {
 	folder, err := h.Repos.Folders.FindOwnedByID(c.Request.Context(), id, user.ID)
 	if err != nil {
 		if repository.IsNotFound(err) {
-			c.JSON(404, gin.H{"message": "Folder not found"})
+			errors.AbortCoded(c, 404, "FOL0028", "Folder not found", h.Config.IsDev)
 			return
 		}
-		c.JSON(500, gin.H{"message": "Server error"})
+		errors.Abort500C(c, "FOL0029", "Server error", err, h.Config.IsDev)
 		return
 	}
 	episodeID, ok := h.requireObjectID(c, "episodeId")
@@ -424,7 +425,7 @@ func (h *Folders) RemoveFolderItem(c *gin.Context) {
 		rmErr = h.Repos.Favorites.FolderRemoveItem(c.Request.Context(), user.ID, episodeID, id)
 	}
 	if rmErr != nil {
-		c.JSON(500, gin.H{"message": "Server error"})
+		errors.Abort500C(c, "FOL0030", "Server error", err, h.Config.IsDev)
 		return
 	}
 	c.JSON(200, gin.H{"message": "Item removed from folder"})
@@ -452,18 +453,18 @@ func (h *Folders) ShareUnclassified(c *gin.Context) {
 			CreatedAt: time.Now(),
 		}
 		if err := h.Repos.Folders.Create(c.Request.Context(), virtualFolder); err != nil {
-			c.JSON(500, gin.H{"message": "Server error"})
+			errors.Abort500C(c, "FOL0031", "Server error", err, h.Config.IsDev)
 			return
 		}
 	default:
-		c.JSON(500, gin.H{"message": "Server error"})
+		errors.Abort500C(c, "FOL0032", "Server error", err, h.Config.IsDev)
 		return
 	}
 	if virtualFolder.ShareToken == nil {
 		token := newShareToken()
 		virtualFolder.ShareToken = &token
 		if err := h.Repos.Folders.Save(c.Request.Context(), virtualFolder); err != nil {
-			c.JSON(500, gin.H{"message": "Server error"})
+			errors.Abort500C(c, "FOL0033", "Server error", err, h.Config.IsDev)
 			return
 		}
 	}
@@ -487,17 +488,17 @@ func (h *Folders) ShareFolder(c *gin.Context) {
 	folder, err := h.Repos.Folders.FindOwnedByID(c.Request.Context(), id, user.ID)
 	if err != nil {
 		if repository.IsNotFound(err) {
-			c.JSON(404, gin.H{"message": "Folder not found"})
+			errors.AbortCoded(c, 404, "FOL0034", "Folder not found", h.Config.IsDev)
 			return
 		}
-		c.JSON(500, gin.H{"message": "Server error"})
+		errors.Abort500C(c, "FOL0035", "Server error", err, h.Config.IsDev)
 		return
 	}
 	if folder.ShareToken == nil {
 		token := newShareToken()
 		folder.ShareToken = &token
 		if err := h.Repos.Folders.Save(c.Request.Context(), folder); err != nil {
-			c.JSON(500, gin.H{"message": "Server error"})
+			errors.Abort500C(c, "FOL0036", "Server error", err, h.Config.IsDev)
 			return
 		}
 	}
@@ -521,15 +522,15 @@ func (h *Folders) RevokeShare(c *gin.Context) {
 	folder, err := h.Repos.Folders.FindOwnedByID(c.Request.Context(), id, user.ID)
 	if err != nil {
 		if repository.IsNotFound(err) {
-			c.JSON(404, gin.H{"message": "Folder not found"})
+			errors.AbortCoded(c, 404, "FOL0037", "Folder not found", h.Config.IsDev)
 			return
 		}
-		c.JSON(500, gin.H{"message": "Server error"})
+		errors.Abort500C(c, "FOL0038", "Server error", err, h.Config.IsDev)
 		return
 	}
 	folder.ShareToken = nil
 	if err := h.Repos.Folders.Save(c.Request.Context(), folder); err != nil {
-		c.JSON(500, gin.H{"message": "Server error"})
+		errors.Abort500C(c, "FOL0039", "Server error", err, h.Config.IsDev)
 		return
 	}
 	c.JSON(200, gin.H{"message": "Share revoked"})
@@ -547,10 +548,10 @@ func (h *Folders) SharedFolder(c *gin.Context) {
 	folder, err := h.Repos.Folders.FindByShareToken(c.Request.Context(), c.Param("shareToken"))
 	if err != nil {
 		if repository.IsNotFound(err) {
-			c.JSON(404, gin.H{"message": "Shared folder not found"})
+			errors.AbortCoded(c, 404, "FOL0040", "Shared folder not found", h.Config.IsDev)
 			return
 		}
-		c.JSON(500, gin.H{"message": "Server error"})
+		errors.Abort500C(c, "FOL0041", "Server error", err, h.Config.IsDev)
 		return
 	}
 	isUnclassified := folder.Name == "__unclassified__"
@@ -568,7 +569,7 @@ func (h *Folders) SharedFolder(c *gin.Context) {
 	if folder.Type == "follow" {
 		items, err := h.Repos.Follows.FolderFindShared(ctx, filter)
 		if err != nil {
-			c.JSON(500, gin.H{"message": "Server error"})
+			errors.Abort500C(c, "FOL0042", "Server error", err, h.Config.IsDev)
 			return
 		}
 		itemCount = len(items)
@@ -579,7 +580,7 @@ func (h *Folders) SharedFolder(c *gin.Context) {
 	} else {
 		items, err := h.Repos.Favorites.FolderFindShared(ctx, filter)
 		if err != nil {
-			c.JSON(500, gin.H{"message": "Server error"})
+			errors.Abort500C(c, "FOL0043", "Server error", err, h.Config.IsDev)
 			return
 		}
 		itemCount = len(items)
@@ -590,7 +591,7 @@ func (h *Folders) SharedFolder(c *gin.Context) {
 	}
 	episodes, err := h.buildSharedEpisodes(ctx, episodeIDs, itemCount)
 	if err != nil {
-		c.JSON(500, gin.H{"message": "Server error"})
+		errors.Abort500C(c, "FOL0044", "Server error", err, h.Config.IsDev)
 		return
 	}
 
@@ -653,7 +654,7 @@ func (h *SavedFolders) ListSavedFolders(c *gin.Context) {
 	user, _ := middleware.GetUser(c)
 	list, err := h.Repos.SavedFolders.FindByUser(c.Request.Context(), user.ID)
 	if err != nil {
-		c.JSON(500, gin.H{"message": "Server error"})
+		errors.Abort500C(c, "FOL0045", "Server error", err, h.Config.IsDev)
 		return
 	}
 	c.JSON(200, list)
@@ -677,29 +678,29 @@ func (h *SavedFolders) CreateSavedFolder(c *gin.Context) {
 	}
 	_ = c.ShouldBindJSON(&req)
 	if req.ShareToken == "" {
-		c.JSON(400, gin.H{"message": "shareToken is required"})
+		errors.AbortCoded(c, 400, "FOL0046", "shareToken is required", h.Config.IsDev)
 		return
 	}
 	folder, err := h.Repos.Folders.FindByShareToken(c.Request.Context(), req.ShareToken)
 	if err != nil {
 		if repository.IsNotFound(err) {
-			c.JSON(404, gin.H{"message": "Folder not found"})
+			errors.AbortCoded(c, 404, "FOL0047", "Folder not found", h.Config.IsDev)
 			return
 		}
-		c.JSON(500, gin.H{"message": "Server error"})
+		errors.Abort500C(c, "FOL0048", "Server error", err, h.Config.IsDev)
 		return
 	}
 	if folder.UserID == user.ID {
-		c.JSON(400, gin.H{"message": "不能收藏自己的收藏夹"})
+		errors.AbortCoded(c, 400, "FOL0049", "不能收藏自己的收藏夹", h.Config.IsDev)
 		return
 	}
 	existing, err := h.Repos.SavedFolders.FindByUserAndShareToken(c.Request.Context(), user.ID, req.ShareToken)
 	if err != nil && !repository.IsNotFound(err) {
-		c.JSON(500, gin.H{"message": "Server error"})
+		errors.Abort500C(c, "FOL0050", "Server error", err, h.Config.IsDev)
 		return
 	}
 	if existing != nil {
-		c.JSON(400, gin.H{"message": "已收藏过该收藏夹"})
+		errors.AbortCoded(c, 400, "FOL0051", "已收藏过该收藏夹", h.Config.IsDev)
 		return
 	}
 	isUnclassified := folder.Name == "__unclassified__"
@@ -726,7 +727,7 @@ func (h *SavedFolders) CreateSavedFolder(c *gin.Context) {
 	}
 	if err := h.Repos.SavedFolders.Create(c.Request.Context(), sf); err != nil {
 		// 并发重复收藏：唯一键冲突（E11000）→ 500。
-		c.JSON(500, gin.H{"message": "Server error"})
+		errors.Abort500C(c, "FOL0052", "Server error", err, h.Config.IsDev)
 		return
 	}
 	c.JSON(200, sf)
@@ -748,14 +749,14 @@ func (h *SavedFolders) DeleteSavedFolder(c *gin.Context) {
 	}
 	if _, err := h.Repos.SavedFolders.FindOwnedByID(c.Request.Context(), id, user.ID); err != nil {
 		if repository.IsNotFound(err) {
-			c.JSON(404, gin.H{"message": "Saved folder not found"})
+			errors.AbortCoded(c, 404, "FOL0053", "Saved folder not found", h.Config.IsDev)
 			return
 		}
-		c.JSON(500, gin.H{"message": "Server error"})
+		errors.Abort500C(c, "FOL0054", "Server error", err, h.Config.IsDev)
 		return
 	}
 	if err := h.Repos.SavedFolders.DeleteByID(c.Request.Context(), id); err != nil {
-		c.JSON(500, gin.H{"message": "Server error"})
+		errors.Abort500C(c, "FOL0055", "Server error", err, h.Config.IsDev)
 		return
 	}
 	c.JSON(200, gin.H{"message": "Removed"})

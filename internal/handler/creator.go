@@ -87,13 +87,13 @@ func (h *Creator) creatorEpisodeList(c *gin.Context, filter bson.M, page, limit 
 	ctx := c.Request.Context()
 	total, err := h.Repos.Episodes.CountDocuments(ctx, filter)
 	if err != nil {
-		errors.AbortWithAppError(c, errors.New(500, "Server error"), h.Config.IsDev)
+		errors.Abort500C(c, "CRT0001", "Server error", err, h.Config.IsDev)
 		return
 	}
 	eps, err := h.Repos.Episodes.FindList(ctx, filter,
 		bson.D{{Key: "updatedAt", Value: -1}}, int64((page-1)*limit), int64(limit))
 	if err != nil {
-		errors.AbortWithAppError(c, errors.New(500, "Server error"), h.Config.IsDev)
+		errors.Abort500C(c, "CRT0002", "Server error", err, h.Config.IsDev)
 		return
 	}
 	list := make([]gin.H, 0, len(eps))

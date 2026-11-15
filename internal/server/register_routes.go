@@ -201,7 +201,7 @@ func RegisterRoutes(d Deps, api *gin.RouterGroup, opts middleware.RateLimitOpts,
 	router.Mount(api, "/review", rv.Register)
 
 	// ---- 剧集回收站域（删除/审核拒绝的剧集移入此处，仅 admin/superadmin）----
-	et := handler.NewEpisodeTrash(d.Repos, amw)
+	et := handler.NewEpisodeTrash(d.Repos, amw, d.Config.IsDev)
 	router.Mount(api, "/episode-trash", et.Register)
 
 	// ---- 分类 / 轮播图 / 后台自动任务 / 版本历史域 ----
@@ -245,6 +245,6 @@ func RegisterRoutes(d Deps, api *gin.RouterGroup, opts middleware.RateLimitOpts,
 	router.Mount(api, "/activity", ac.Register)
 
 	// 前台公开站点规模数据（用户数/剧集数/在线人数），只读聚合，无鉴权
-	ss := handler.NewSiteStats(d.Repos)
+	ss := handler.NewSiteStats(d.Repos, d.Config.IsDev)
 	router.Mount(api, "/site-stats", ss.Register)
 }

@@ -2,7 +2,8 @@
 //
 // 中间件顺序是固定契约，勿重排；新增中间件需确认放置位置：
 //
-//	recovery → gzip → securityheaders → cors → 30s 超时 → slowlogger →
+//	recovery(JSON+SYS0500) → requestRef → gzip → securityheaders → cors →
+//	30s 超时 → slowlogger →
 //	bodyparse(1mb/50mb) → sanitizeInput → sanitizeHeaders →
 //	GET /api/csrf-token → CSRF 校验(非 GET) → apiTracker → requestLogger →
 //	[受限流路由组 /api] globalLimiter(300/min) → /api/health →
@@ -16,11 +17,13 @@
 package server
 
 import (
+	"fmt"
 	"log/slog"
 	"net/http"
 	"os"
 	"path"
 	"path/filepath"
+	"runtime/debug"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -59,11 +62,36 @@ func NewApp(d Deps) *gin.Engine {
 		gin.SetMode(gin.ReleaseMode)
 	}
 	r := gin.New()
-	r.Use(gin.Recovery())
 	log := d.Log
 	if log == nil {
 		log = logging.New(d.Config.IsDev)
 	}
+	errors.SetLogger(log)
+	// panic 恢复：JSON 500（错误码 SYS0500 + 参考号 + stack 入日志），
+	// 替换 gin.Recovery 的纯文本 500（会绕过统一 JSON 信封与错误码契约）。
+	r.Use(gin.CustomRecovery(func(c *gin.Context, rec any) {
+		ref := int64(0)
+		if v, ok := c.Get(errors.ContextRefID); ok {
+			if n, ok := v.(int64); ok {
+				ref = n
+			}
+		}
+		stack := string(debug.Stack())
+		log.Error("panic recovered",
+			"ref", ref,
+			"path", c.Request.URL.Path,
+			"panic", fmt.Sprint(rec),
+			"stack", stack,
+		)
+		body := gin.H{"error": "SYS0500", "ref": ref}
+		if d.Config.IsDev {
+			body["message"] = fmt.Sprintf("panic: %v", rec)
+			body["stack"] = stack
+		} else {
+			body["message"] = fmt.Sprintf("服务器内部错误 [SYS0500·%d]", ref)
+		}
+		c.AbortWithStatusJSON(http.StatusInternalServerError, body)
+	}))
 	// 认证诊断事件记录器：结构化写 stderr + 异步落 authevents（30 天 TTL）。
 	rec := authlog.New(log, d.Repos.AuthEvents)
 
@@ -96,7 +124,8 @@ func NewApp(d Deps) *gin.Engine {
 		r.TrustedPlatform = srv.ProxyTrustedPlatform
 	}
 
-	// ---- 全局中间件（顺序为固定契约，勿重排）----
+	// ---- 全局中间件（顺序为固定契约，勿重排；RequestRef 须最前，供日志与错误渲染取参考号）----
+	r.Use(middleware.RequestRef())
 	r.Use(middleware.Gzip())
 	r.Use(middleware.SecurityHeaders())
 	r.Use(middleware.CORS(d.Config.Server.AllowOrigins))

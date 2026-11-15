@@ -12,6 +12,7 @@ import (
 
 	"github.com/Furry-Drama-Tracker/backend/internal/config"
 	"github.com/Furry-Drama-Tracker/backend/internal/email"
+	"github.com/Furry-Drama-Tracker/backend/internal/errors"
 	"github.com/Furry-Drama-Tracker/backend/internal/middleware"
 	"github.com/Furry-Drama-Tracker/backend/internal/model"
 	"github.com/Furry-Drama-Tracker/backend/internal/ratelimit"
@@ -71,7 +72,7 @@ func (h *Announcements) Active(c *gin.Context) {
 	channel := c.Query("channel")
 	list, err := h.Repos.Announcements.FindActive(c.Request.Context(), channel)
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	out := make([]gin.H, 0, len(list))
@@ -107,7 +108,7 @@ func (h *Announcements) PublicDetail(c *gin.Context) {
 func (h *Announcements) AdminList(c *gin.Context) {
 	list, err := h.Repos.Announcements.FindAll(c.Request.Context())
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	out := make([]gin.H, 0, len(list))
@@ -131,7 +132,7 @@ func (h *Announcements) Create(c *gin.Context) {
 	title := asString(body["title"])
 	content := asString(body["content"])
 	if title == "" || content == "" {
-		c.JSON(400, gin.H{"message": "标题和内容不能为空"})
+		errors.AbortCoded(c, 400, "ANN0001", "标题和内容不能为空", h.Config.IsDev)
 		return
 	}
 	// type 枚举校验（固定契约）：type 非法 → 500 Server error。
@@ -139,12 +140,12 @@ func (h *Announcements) Create(c *gin.Context) {
 	switch annType {
 	case "info", "warning", "maintenance", "update":
 	default:
-		serverError(c)
+		serverError(c, nil, h.Config.IsDev)
 		return
 	}
 	link := orDefaultString(body["link"], "")
 	if link != "" && !isHTTPURL(link) {
-		c.JSON(400, gin.H{"message": "公告链接必须为 http/https 地址"})
+		errors.AbortCoded(c, 400, "ANN0002", "公告链接必须为 http/https 地址", h.Config.IsDev)
 		return
 	}
 	user, _ := middleware.GetUser(c)
@@ -167,7 +168,7 @@ func (h *Announcements) Create(c *gin.Context) {
 		CreatedBy:        &user.ID,
 	}
 	if err := h.Repos.Announcements.Create(c.Request.Context(), a); err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	// 发布时自动推送通知与邮件（仅在 active 且已到发布时间）。
@@ -191,7 +192,7 @@ func (h *Announcements) Create(c *gin.Context) {
 func (h *Announcements) Update(c *gin.Context) {
 	oid, err := primitive.ObjectIDFromHex(c.Param("id"))
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	ctx := c.Request.Context()
@@ -202,14 +203,14 @@ func (h *Announcements) Update(c *gin.Context) {
 		switch asString(v) {
 		case "info", "warning", "maintenance", "update":
 		default:
-			serverError(c)
+			serverError(c, err, h.Config.IsDev)
 			return
 		}
 	}
 	if v, ok := body["link"]; ok {
 		link := strings.TrimSpace(asString(v))
 		if link != "" && !isHTTPURL(link) {
-			c.JSON(400, gin.H{"message": "公告链接必须为 http/https 地址"})
+			errors.AbortCoded(c, 400, "ANN0003", "公告链接必须为 http/https 地址", h.Config.IsDev)
 			return
 		}
 		body["link"] = link
@@ -232,19 +233,19 @@ func (h *Announcements) Update(c *gin.Context) {
 	oldAnn, err := h.Repos.Announcements.FindByID(ctx, oid)
 	if err != nil {
 		if repository.IsNotFound(err) {
-			c.JSON(404, gin.H{"message": "Announcement not found"})
+			errors.AbortCoded(c, 404, "ANN0004", "Announcement not found", h.Config.IsDev)
 			return
 		}
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	announcement, err := h.Repos.Announcements.FindOneAndUpdate(ctx, oid, bson.M{"$set": updateData})
 	if err != nil {
 		if repository.IsNotFound(err) {
-			c.JSON(404, gin.H{"message": "Announcement not found"})
+			errors.AbortCoded(c, 404, "ANN0005", "Announcement not found", h.Config.IsDev)
 			return
 		}
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 
@@ -264,7 +265,7 @@ func (h *Announcements) Update(c *gin.Context) {
 			announcement.EmailSentCount = 0
 		}
 		if err := h.Repos.Announcements.Save(ctx, announcement); err != nil {
-			serverError(c)
+			serverError(c, err, h.Config.IsDev)
 			return
 		}
 		h.broadcastAnnouncement(ctx, announcement)
@@ -283,17 +284,17 @@ func (h *Announcements) Update(c *gin.Context) {
 func (h *Announcements) Delete(c *gin.Context) {
 	oid, err := primitive.ObjectIDFromHex(c.Param("id"))
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	ctx := c.Request.Context()
 	a, err := h.Repos.Announcements.FindOneAndDelete(ctx, oid)
 	if err != nil {
 		if repository.IsNotFound(err) {
-			c.JSON(404, gin.H{"message": "Announcement not found"})
+			errors.AbortCoded(c, 404, "ANN0006", "Announcement not found", h.Config.IsDev)
 			return
 		}
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	// 同步清理通知中心中相关条目（忽略清理失败）。
@@ -313,26 +314,26 @@ func (h *Announcements) Delete(c *gin.Context) {
 func (h *Announcements) SendEmail(c *gin.Context) {
 	oid, err := primitive.ObjectIDFromHex(c.Param("id"))
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	ctx := c.Request.Context()
 	a, err := h.Repos.Announcements.FindByID(ctx, oid)
 	if err != nil {
 		if repository.IsNotFound(err) {
-			c.JSON(404, gin.H{"message": "Announcement not found"})
+			errors.AbortCoded(c, 404, "ANN0007", "Announcement not found", h.Config.IsDev)
 			return
 		}
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	if !a.SendEmail {
-		c.JSON(400, gin.H{"message": "该公告未启用邮件推送"})
+		errors.AbortCoded(c, 400, "ANN0008", "该公告未启用邮件推送", h.Config.IsDev)
 		return
 	}
 	sent, err := h.sendAnnouncementEmails(ctx, a)
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	now := time.Now().UTC().Truncate(time.Millisecond)
@@ -340,7 +341,7 @@ func (h *Announcements) SendEmail(c *gin.Context) {
 	a.EmailSentAt = &now
 	a.EmailSentCount = sent
 	if err := h.Repos.Announcements.Save(ctx, a); err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	c.JSON(200, gin.H{"message": fmt.Sprintf("邮件推送完成，成功发送 %d 封", sent), "sent": sent})
@@ -358,31 +359,31 @@ func (h *Announcements) SendEmail(c *gin.Context) {
 func (h *Announcements) SendNotification(c *gin.Context) {
 	oid, err := primitive.ObjectIDFromHex(c.Param("id"))
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	ctx := c.Request.Context()
 	a, err := h.Repos.Announcements.FindByID(ctx, oid)
 	if err != nil {
 		if repository.IsNotFound(err) {
-			c.JSON(404, gin.H{"message": "Announcement not found"})
+			errors.AbortCoded(c, 404, "ANN0009", "Announcement not found", h.Config.IsDev)
 			return
 		}
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	if !a.SendNotification {
-		c.JSON(400, gin.H{"message": "该公告未启用通知推送"})
+		errors.AbortCoded(c, 400, "ANN0010", "该公告未启用通知推送", h.Config.IsDev)
 		return
 	}
 	count, err := h.sendAnnouncementNotifications(ctx, a)
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	a.NotificationSent = true
 	if err := h.Repos.Announcements.Save(ctx, a); err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return
 	}
 	c.JSON(200, gin.H{"message": fmt.Sprintf("通知推送完成，发送 %d 条", count), "count": count})
@@ -394,16 +395,16 @@ func (h *Announcements) SendNotification(c *gin.Context) {
 func (h *Announcements) findAnnouncement(c *gin.Context) (*model.Announcement, bool) {
 	oid, err := primitive.ObjectIDFromHex(c.Param("id"))
 	if err != nil {
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return nil, false
 	}
 	a, err := h.Repos.Announcements.FindByID(c.Request.Context(), oid)
 	if err != nil {
 		if repository.IsNotFound(err) {
-			c.JSON(404, gin.H{"message": "Announcement not found"})
+			errors.AbortCoded(c, 404, "ANN0011", "Announcement not found", h.Config.IsDev)
 			return nil, false
 		}
-		serverError(c)
+		serverError(c, err, h.Config.IsDev)
 		return nil, false
 	}
 	return a, true

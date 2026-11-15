@@ -12,8 +12,8 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	webauthnlib "github.com/go-webauthn/webauthn/webauthn"
 	"github.com/go-webauthn/webauthn/protocol"
+	webauthnlib "github.com/go-webauthn/webauthn/webauthn"
 
 	"github.com/Furry-Drama-Tracker/backend/internal/auth"
 	"github.com/Furry-Drama-Tracker/backend/internal/code"
@@ -143,7 +143,7 @@ func (s *AuthService) BeginPasskeyRegistration(ctx context.Context, u *model.Use
 	creation, sd, err := wa.BeginRegistration(passkeyUser{s: s, user: u})
 	if err != nil {
 		slog.Warn("webauthn BeginRegistration failed", "err", err)
-		return nil, "", errors.New(500, "生成 Passkey 注册参数失败")
+		return nil, "", errors.NewC("PAS0001", 500, "生成 Passkey 注册参数失败")
 	}
 	key := auth.RandomHex(16)
 	s.passkeyCeremonies.put(key, passkeyCeremony{session: *sd})
@@ -160,11 +160,11 @@ func (s *AuthService) FinishPasskeyRegistration(ctx context.Context, u *model.Us
 	}
 	cer, ok := s.passkeyCeremonies.take(ceremonyKey)
 	if !ok || cer.discoverable {
-		return nil, errors.New(400, "注册会话无效或已过期，请重新开始")
+		return nil, errors.NewC("PAS0002", 400, "注册会话无效或已过期，请重新开始")
 	}
 	credential, err := wa.FinishRegistration(passkeyUser{s: s, user: u}, cer.session, r)
 	if err != nil {
-		return nil, errors.New(400, "Passkey 注册校验失败：请确认使用的是本站发起的验证器")
+		return nil, errors.NewC("PAS0003", 400, "Passkey 注册校验失败：请确认使用的是本站发起的验证器")
 	}
 	pk := &model.Passkey{
 		CredentialID:    encodeB64URL(credential.ID),
@@ -182,9 +182,9 @@ func (s *AuthService) FinishPasskeyRegistration(ctx context.Context, u *model.Us
 	}
 	if err := s.Repos.Passkeys.Create(ctx, pk); err != nil {
 		if repository.IsDuplicateKey(err) {
-			return nil, errors.New(400, "该 Passkey 已注册过")
+			return nil, errors.NewC("PAS0004", 400, "该 Passkey 已注册过")
 		}
-		return nil, errors.New(500, "服务器错误")
+		return nil, errors.NewC("PAS0005", 500, "服务器错误")
 	}
 	s.Audit(ctx, u, "PASSKEY_ADDED", "auth", "User added a passkey", "")
 	return pk, nil
@@ -213,7 +213,7 @@ func (s *AuthService) BeginPasskeyLogin(ctx context.Context, identifier string) 
 	}
 	if err != nil {
 		slog.Warn("webauthn BeginLogin failed", "err", err)
-		return nil, "", errors.New(500, "生成 Passkey 登录参数失败")
+		return nil, "", errors.NewC("PAS0006", 500, "生成 Passkey 登录参数失败")
 	}
 	key := auth.RandomHex(16)
 	cer := passkeyCeremony{session: *sd, discoverable: id == ""}
@@ -236,7 +236,7 @@ func (s *AuthService) finishPasskeyLogin(ctx context.Context, ceremonyKey string
 	}
 	cer, ok := s.passkeyCeremonies.take(ceremonyKey)
 	if !ok {
-		return nil, nil, errors.New(400, "登录会话无效或已过期，请重新开始")
+		return nil, nil, errors.NewC("PAS0007", 400, "登录会话无效或已过期，请重新开始")
 	}
 
 	var (
@@ -247,7 +247,7 @@ func (s *AuthService) finishPasskeyLogin(ctx context.Context, ceremonyKey string
 		// 可发现凭据：先解析浏览器请求体，再按 user handle（UID 大端 8 字节）查用户。
 		parsedResponse, perr := protocol.ParseCredentialRequestResponseBody(r.Body)
 		if perr != nil {
-			return nil, nil, errors.New(400, "Passkey 校验失败：请重试或改用密码登录")
+			return nil, nil, errors.NewC("PAS0008", 400, "Passkey 校验失败：请重试或改用密码登录")
 		}
 		credential, err = wa.ValidateDiscoverableLogin(func(rawID, userHandle []byte) (webauthnlib.User, error) {
 			uid, uerr := uidFromBytes(userHandle)
@@ -263,22 +263,22 @@ func (s *AuthService) finishPasskeyLogin(ctx context.Context, ceremonyKey string
 	} else {
 		expected, ferr := s.Repos.Users.FindByID(ctx, cer.expectedUserID)
 		if ferr != nil {
-			return nil, nil, errors.New(400, "登录会话无效或已过期，请重新开始")
+			return nil, nil, errors.NewC("PAS0009", 400, "登录会话无效或已过期，请重新开始")
 		}
 		credential, err = wa.FinishLogin(passkeyUser{s: s, user: expected}, cer.session, r)
 	}
 	if err != nil {
-		return nil, nil, errors.New(400, "Passkey 校验失败：请重试或改用密码登录")
+		return nil, nil, errors.NewC("PAS0010", 400, "Passkey 校验失败：请重试或改用密码登录")
 	}
 
 	// 按凭据 ID 找回我们的记录（user handle 校验已保证账号正确）。
 	pk, perr := s.Repos.Passkeys.FindByCredentialID(ctx, encodeB64URL(credential.ID))
 	if perr != nil {
-		return nil, nil, errors.New(400, "该 Passkey 已被删除，请改用密码登录")
+		return nil, nil, errors.NewC("PAS0011", 400, "该 Passkey 已被删除，请改用密码登录")
 	}
 	user, uerr := s.Repos.Users.FindByIDWithAuth(ctx, pk.UserID)
 	if uerr != nil {
-		return nil, nil, errors.New(400, "用户不存在")
+		return nil, nil, errors.NewC("PAS0012", 400, "用户不存在")
 	}
 	// 签名计数更新（凭据克隆检测）+ 备份标志同步。
 	if credential.Authenticator.SignCount > pk.SignCount || credential.Flags.BackupState != pk.BackupState {
@@ -303,7 +303,7 @@ func (s *AuthService) PasskeyLogin(c *gin.Context, ceremonyKey string) (*LoginRe
 		deleteAt := user.DeletionRequestedAt.Add(DeletionGraceDays * 24 * time.Hour)
 		if time.Now().After(deleteAt) {
 			if err := s.purgeUser(ctx, user.ID); err == nil {
-				return nil, errors.New(400, "用户名或密码错误")
+				return nil, errors.NewC("PAS0013", 400, "用户名或密码错误")
 			}
 		}
 	}
@@ -331,7 +331,7 @@ func (s *AuthService) PasskeyLogin(c *gin.Context, ceremonyKey string) (*LoginRe
 	now := time.Now()
 	_ = s.Repos.Users.UpdateDeviceInfoAndLogin(ctx, user.ID, di, now, ip, region)
 	if err := s.IssueSession(c, user, di, ip, "LOGIN_PASSKEY"); err != nil {
-		return nil, errors.New(500, "服务器错误")
+		return nil, errors.NewC("PAS0014", 500, "服务器错误")
 	}
 	if s.Mail != nil && !s.isKnownDevice(ctx, c, user.ID) {
 		go s.sendNewDeviceNotification(user, parsed, ip, region)
@@ -347,7 +347,7 @@ func (s *AuthService) ListPasskeys(ctx context.Context, userID any) ([]model.Pas
 // DeletePasskey 删除用户的一条凭据（属主校验在 repo filter）。
 func (s *AuthService) DeletePasskey(ctx context.Context, u *model.User, pkID any) error {
 	if err := s.Repos.Passkeys.DeleteByID(ctx, pkID, u.ID); err != nil {
-		return errors.New(500, "服务器错误")
+		return errors.NewC("PAS0015", 500, "服务器错误")
 	}
 	s.Audit(ctx, u, "PASSKEY_REMOVED", "auth", "User removed a passkey", "")
 	return nil
