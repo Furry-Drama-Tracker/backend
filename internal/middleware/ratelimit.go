@@ -146,7 +146,7 @@ func RateLimit(spec ratelimit.Spec, opts RateLimitOpts) gin.HandlerFunc {
 					"retry_after_s", retryAfter,
 				)
 			}
-			c.AbortWithStatusJSON(429, codedBody(c, "RLM0001", gin.H{"message": spec.Message}))
+			c.AbortWithStatusJSON(429, codedBody(c, 429, "RLM0001", gin.H{"message": spec.Message}))
 			return
 		}
 		c.Next()

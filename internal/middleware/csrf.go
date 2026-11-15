@@ -20,11 +20,11 @@ func CSRF() gin.HandlerFunc {
 		headerTok := auth.GetHeaderCSRFToken(c)
 		switch {
 		case cookieTok != "" && headerTok != "" && cookieTok != headerTok:
-			c.AbortWithStatusJSON(403, codedBody(c, "CSR0001", gin.H{"message": "CSRF token mismatch"}))
+			c.AbortWithStatusJSON(403, codedBody(c, 403, "CSR0001", gin.H{"message": "CSRF token mismatch"}))
 		case cookieTok != "" && headerTok == "":
-			c.AbortWithStatusJSON(403, codedBody(c, "CSR0002", gin.H{"message": "CSRF protection: missing X-XSRF-TOKEN header"}))
+			c.AbortWithStatusJSON(403, codedBody(c, 403, "CSR0002", gin.H{"message": "CSRF protection: missing X-XSRF-TOKEN header"}))
 		case cookieTok == "":
-			c.AbortWithStatusJSON(403, codedBody(c, "CSR0003", gin.H{"message": "CSRF protection: missing XSRF-TOKEN cookie, please refresh the page"}))
+			c.AbortWithStatusJSON(403, codedBody(c, 403, "CSR0003", gin.H{"message": "CSRF protection: missing XSRF-TOKEN cookie, please refresh the page"}))
 		default:
 			// cookie 与 header 均存在且相等：放行。
 			c.Next()

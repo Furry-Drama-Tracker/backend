@@ -36,6 +36,9 @@ func TestAbortAppErrorCodedBody(t *testing.T) {
 		if body["error"] != "TST0001" {
 			t.Fatalf("st=%d error = %v", st, body["error"])
 		}
+		if body["status"] != float64(st) {
+			t.Fatalf("st=%d body.status = %v", st, body["status"])
+		}
 		ref, ok := body["ref"].(float64)
 		if !ok || ref < 0 || ref >= 1_000_000_000 {
 			t.Fatalf("st=%d ref = %v", st, body["ref"])

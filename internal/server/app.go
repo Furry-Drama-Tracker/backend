@@ -83,7 +83,7 @@ func NewApp(d Deps) *gin.Engine {
 			"panic", fmt.Sprint(rec),
 			"stack", stack,
 		)
-		body := gin.H{"message": "服务器内部错误", "error": "SYS0500", "ref": ref}
+		body := gin.H{"message": "服务器内部错误", "error": "SYS0500", "ref": ref, "status": http.StatusInternalServerError}
 		if d.Config.IsDev {
 			body["message"] = fmt.Sprintf("panic: %v", rec)
 			body["stack"] = stack

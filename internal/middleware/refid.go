@@ -33,10 +33,11 @@ func refFromCtx(c *gin.Context) int64 {
 	return 0
 }
 
-// codedBody 在中间件固定契约响应字段上补 error（错误码）与 ref（参考号）。
-// message 文本保持不变（auth.Protect 等响应契约为固定值，勿内嵌 [CODE·ref] 后缀）；
-// 生产 message 内嵌后缀仅发生在 errors 渲染器的 handler/service 路径。
-func codedBody(c *gin.Context, code string, fields gin.H) gin.H {
+// codedBody 在中间件固定契约响应字段上补 status/error（错误码）/ref（参考号）。
+// message 文本保持不变（auth.Protect 等响应契约为固定值，勿内嵌出错编号后缀）；
+// 编号展示由前端从 JSON 字段拼装。
+func codedBody(c *gin.Context, status int, code string, fields gin.H) gin.H {
+	fields["status"] = status
 	fields["error"] = code
 	fields["ref"] = refFromCtx(c)
 	return fields

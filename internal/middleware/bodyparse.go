@@ -82,11 +82,11 @@ func BodyParse() gin.HandlerFunc {
 
 		data, err := io.ReadAll(io.LimitReader(c.Request.Body, limit+1))
 		if err != nil {
-			c.AbortWithStatusJSON(http.StatusBadRequest, codedBody(c, "BDP0001", gin.H{"message": "读取请求体失败: " + err.Error()}))
+			c.AbortWithStatusJSON(http.StatusBadRequest, codedBody(c, http.StatusBadRequest, "BDP0001", gin.H{"message": "读取请求体失败: " + err.Error()}))
 			return
 		}
 		if int64(len(data)) > limit {
-			c.AbortWithStatusJSON(http.StatusRequestEntityTooLarge, codedBody(c, "BDP0002", gin.H{"message": "request entity too large"}))
+			c.AbortWithStatusJSON(http.StatusRequestEntityTooLarge, codedBody(c, http.StatusRequestEntityTooLarge, "BDP0002", gin.H{"message": "request entity too large"}))
 			return
 		}
 		// 还原 Body 供后续中间件/handler 读取（解析只消费流，而 SanitizeInput
@@ -104,7 +104,7 @@ func BodyParse() gin.HandlerFunc {
 			if err := json.Unmarshal(data, &v); err != nil {
 				// JSON 语法错误文案固定为 encoding/json 错误原文（契约，勿本地化/勿改），
 				// 状态码 400。
-				c.AbortWithStatusJSON(http.StatusBadRequest, codedBody(c, "BDP0003", gin.H{"message": err.Error()}))
+				c.AbortWithStatusJSON(http.StatusBadRequest, codedBody(c, http.StatusBadRequest, "BDP0003", gin.H{"message": err.Error()}))
 				return
 			}
 			// 标量/数组体 → 不存（非对象体时字段读取得到零值，固定行为）。
@@ -114,7 +114,7 @@ func BodyParse() gin.HandlerFunc {
 		} else {
 			values, err := url.ParseQuery(string(data))
 			if err != nil {
-				c.AbortWithStatusJSON(http.StatusBadRequest, codedBody(c, "BDP0004", gin.H{"message": err.Error()}))
+				c.AbortWithStatusJSON(http.StatusBadRequest, codedBody(c, http.StatusBadRequest, "BDP0004", gin.H{"message": err.Error()}))
 				return
 			}
 			m := make(map[string]any, len(values))
