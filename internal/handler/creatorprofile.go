@@ -229,7 +229,7 @@ func (h *CreatorProfiles) creatorEpisodes(ctx context.Context, creatorID primiti
 	}
 	out := make([]gin.H, 0, len(eps))
 	for i := range eps {
-		out = append(out, episodeDocJSON(&eps[i]))
+		out = append(out, stripEpisodeReviewFields(episodeDocJSON(&eps[i])))
 	}
 	return out, nil
 }

@@ -219,7 +219,13 @@ func (h *Auth) Refresh(c *gin.Context) {
 		errors.AbortWithAppError(c, err, h.Config.IsDev)
 		return
 	}
-	if err := h.Svc.RotateRefresh(c, res.User, res.Session); err != nil {
+	if err := h.Svc.RotateRefresh(c, res.User, res.Session, res.StartedAt); err != nil {
+		if appErr, ok := err.(*errors.AppError); ok {
+			// 轮换防栅命中（改密吊销竞态）：按 401 AppError 渲染，
+			// 让客户端停止使用已消费的 refresh 链。
+			errors.AbortWithAppError(c, appErr, h.Config.IsDev)
+			return
+		}
 		errors.Abort500C(c, "AUT0004", "服务器错误", err, h.Config.IsDev)
 		return
 	}

@@ -25,11 +25,15 @@ const ConcurrentRefreshGrace = 2 * time.Minute
 type RefreshResult struct {
 	User    *model.User
 	Session *model.UserSession
+	// StartedAt 记录本次校验起点（原子取用旧会话之前）。RotateRefresh 插入
+	// 新会话后复核 passwordChangedAt，堵住"吊销扫不到尚未插入的新会话"的竞态。
+	StartedAt time.Time
 }
 
 // VerifyRefreshToken 校验 refresh token 并原子"取用并作废"（轮换语义为固定契约，勿改）。
 // 返回 *errors.AppError（带 messageKey），handler 依状态码渲染。
 func (s *AuthService) VerifyRefreshToken(ctx context.Context, refreshToken string) (*RefreshResult, error) {
+	startedAt := time.Now()
 	if refreshToken == "" {
 		return nil, errors.NewKeyC("AUT0075", 401, "No refresh token", "auth.noRefreshToken")
 	}
@@ -58,7 +62,7 @@ func (s *AuthService) VerifyRefreshToken(ctx context.Context, refreshToken strin
 	if err != nil {
 		return nil, errors.NewKeyC("AUT0080", 401, "User not found", "auth.userNotFound")
 	}
-	return &RefreshResult{User: user, Session: session}, nil
+	return &RefreshResult{User: user, Session: session, StartedAt: startedAt}, nil
 }
 
 // handleRefreshMiss 处理未抢到 session：并发宽限内 → 409，否则吊销全部 → 401 reuse。
@@ -98,7 +102,8 @@ func (s *AuthService) handleRefreshMiss(ctx context.Context, hash, claimsID stri
 
 // RotateRefresh 轮换双 token：旧 session 已作废（VerifyRefreshToken 已做），
 // 新建 session（继承 deviceInfo/ip/loginAt），设新 cookie（流程为固定契约）。
-func (s *AuthService) RotateRefresh(c *gin.Context, user *model.User, old *model.UserSession) error {
+// startedAt 是本次轮换校验的起点，用于插入后复核 passwordChangedAt。
+func (s *AuthService) RotateRefresh(c *gin.Context, user *model.User, old *model.UserSession, startedAt time.Time) error {
 	accessToken, err := s.Signer.Sign(user.ID.Hex(), "access", s.Config.JWT.AccessTTL, map[string]string{"jti": auth.RandomHex(24)})
 	if err != nil {
 		return err
@@ -123,6 +128,15 @@ func (s *AuthService) RotateRefresh(c *gin.Context, user *model.User, old *model
 	}
 	if err := s.Repos.Sessions.Create(c.Request.Context(), newSession); err != nil {
 		return err
+	}
+	// 轮换防栅：原子取用（VerifyRefreshToken）与插入新会话之间存在窗口，
+	// 改密/重置的 DeactivateAllByUser 可能已提交却扫不到尚未插入的新会话。
+	// 插入后复核 passwordChangedAt：若在本次轮换开始后被更新，立即作废
+	// 刚插入的会话，不让它逃脱吊销。
+	if fresh, ferr := s.Repos.Users.FindByID(c.Request.Context(), user.ID); ferr == nil &&
+		fresh.PasswordChangedAt != nil && fresh.PasswordChangedAt.After(startedAt) {
+		_ = s.Repos.Sessions.DeactivateByTokenHash(c.Request.Context(), auth.HashToken(accessToken), model.RevokePasswordChanged)
+		return errors.NewKeyC("AUT0110", 401, "Refresh token expired", "auth.refreshTokenExpired")
 	}
 	auth.SetAuthCookies(c, accessToken, refreshToken, !s.Config.IsDev)
 	return nil

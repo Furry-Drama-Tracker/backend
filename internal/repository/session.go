@@ -206,7 +206,11 @@ func (r *SessionRepo) UpsertByTokenHash(ctx context.Context, tokenHash string, u
 	s := &model.UserSession{}
 	err := r.coll.FindOneAndUpdate(
 		ctx,
-		bson.M{"tokenHash": tokenHash},
+		// 只允许刷新仍处于 active 的会话（防"复活已吊销会话"的 TOCTOU）：
+		// 已吊销文档不再匹配本过滤条件；upsert 的插入分支随后会撞 tokenHash
+		// 唯一 sparse 索引（E11000）而失败，而不是把 isActive 重新置回 true。
+		// 历史无 jti 令牌（无会话文档）的插入路径不受影响。
+		bson.M{"tokenHash": tokenHash, "isActive": true},
 		bson.M{
 			"$set":         bson.M{"userId": userID, "deviceInfo": deviceInfo, "ip": ip, "isActive": true, "lastActiveAt": now},
 			"$setOnInsert": bson.M{"loginAt": now},

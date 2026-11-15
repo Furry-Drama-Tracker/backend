@@ -44,12 +44,14 @@ type FollowsEpisodeDoc struct {
 	QQGroupLink          string               `bson:"qqGroupLink" json:"qqGroupLink"`
 	QQGroupNumber        string               `bson:"qqGroupNumber" json:"qqGroupNumber"`
 	ReviewStatus         string               `bson:"reviewStatus" json:"reviewStatus"`
-	ReviewNote           string               `bson:"reviewNote" json:"reviewNote"`
-	PendingChanges       primitive.M          `bson:"pendingChanges" json:"pendingChanges"`
-	HasPendingChanges    bool                 `bson:"hasPendingChanges" json:"hasPendingChanges"`
-	PendingChangeSummary string               `bson:"pendingChangeSummary" json:"pendingChangeSummary"`
-	ReviewedBy           *primitive.ObjectID  `bson:"reviewedBy" json:"reviewedBy"`
-	ReviewedAt           *time.Time           `bson:"reviewedAt" json:"reviewedAt"`
+	// 审核内部字段（审核备注/待审核草稿/审核人）不进 JSON：追番/收藏列表面向
+	// 登录用户展开完整剧集文档，不得携带审核内部状态（bson 标签保持原样解码）。
+	ReviewNote           string               `bson:"reviewNote" json:"-"`
+	PendingChanges       primitive.M          `bson:"pendingChanges" json:"-"`
+	HasPendingChanges    bool                 `bson:"hasPendingChanges" json:"-"`
+	PendingChangeSummary string               `bson:"pendingChangeSummary" json:"-"`
+	ReviewedBy           *primitive.ObjectID  `bson:"reviewedBy" json:"-"`
+	ReviewedAt           *time.Time           `bson:"reviewedAt" json:"-"`
 	CreatedAt            time.Time            `bson:"createdAt" json:"createdAt"`
 	UpdatedAt            time.Time            `bson:"updatedAt" json:"updatedAt"`
 }

@@ -301,7 +301,7 @@ func (h *Episodes) List(c *gin.Context) {
 	}
 	list := make([]gin.H, 0, len(episodes))
 	for i := range episodes {
-		list = append(list, h.episodeJSON(&episodes[i], users))
+		list = append(list, stripEpisodeReviewFields(h.episodeJSON(&episodes[i], users)))
 	}
 	var result gin.H
 	if usePagination {
@@ -579,7 +579,7 @@ func (h *Episodes) Detail(c *gin.Context) {
 		serverError(c, err, h.Config.IsDev)
 		return
 	}
-	obj := h.episodeJSON(episode, users)
+	obj := stripEpisodeReviewFields(h.episodeJSON(episode, users))
 	singlesList := make([]gin.H, 0, len(singles))
 	for i := range singles {
 		singlesList = append(singlesList, singleEpisodeJSON(&singles[i]))
@@ -628,7 +628,7 @@ func (h *Episodes) IncView(c *gin.Context) {
 	h.viewMu.Unlock()
 	if ok && now.Sub(lastView) < viewCooldown {
 		// 冷却期内：不计数，直接返回当前剧集。
-		c.JSON(200, h.episodeJSON(existing, nil))
+		c.JSON(200, stripEpisodeReviewFields(h.episodeJSON(existing, nil)))
 		return
 	}
 	h.viewMu.Lock()
@@ -647,7 +647,7 @@ func (h *Episodes) IncView(c *gin.Context) {
 	}
 	middleware.EpisodeCache.Delete("episode_" + idStr)
 	middleware.EpisodeCache.DeleteByPrefix("episodes_")
-	c.JSON(200, h.episodeJSON(episode, nil))
+	c.JSON(200, stripEpisodeReviewFields(h.episodeJSON(episode, nil)))
 }
 
 // SingleIncView PUT /api/episodes/single/:id/view（viewLimiter）。
@@ -1660,6 +1660,17 @@ func (h *Episodes) episodeJSON(e *model.Episode, users map[string]repository.Epi
 		"updatedAt":            e.UpdatedAt,
 		"__v":                  e.VersionKey,
 	}
+}
+
+// stripEpisodeReviewFields 从剧集 DTO 删除审核内部字段，供匿名可达的公开端点
+// （List/Detail/IncView/creator-profile 公开主页）使用，对齐 themePublicJSON /
+// publicCreatorProfileJSON 的公开视图约定；创作中心/审核/回滚等私有视图不受影响。
+func stripEpisodeReviewFields(obj gin.H) gin.H {
+	for _, k := range []string{"reviewNote", "pendingChanges", "hasPendingChanges",
+		"pendingChangeSummary", "reviewedBy", "reviewedAt"} {
+		delete(obj, k)
+	}
+	return obj
 }
 
 // singleEpisodeJSON 组装单集响应对象。

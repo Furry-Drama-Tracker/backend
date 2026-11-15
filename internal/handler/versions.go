@@ -72,6 +72,10 @@ func (h *Versions) List(c *gin.Context) {
 		serverError(c, err, h.Config.IsDev)
 		return
 	}
+	if !h.canReadVersions(c, episodeID) {
+		errors.AbortCoded(c, 404, "VER0011", "Episode not found", h.Config.IsDev)
+		return
+	}
 	page, limit, ok := versionsPage(c)
 	if !ok {
 		serverError(c, err, h.Config.IsDev)
@@ -125,6 +129,10 @@ func (h *Versions) Get(c *gin.Context) {
 		serverError(c, err, h.Config.IsDev)
 		return
 	}
+	if !h.canReadVersions(c, episodeID) {
+		errors.AbortCoded(c, 404, "VER0011", "Episode not found", h.Config.IsDev)
+		return
+	}
 	versionNum, ok := versionsParseInt(c.Param("version"))
 	if !ok {
 		errors.AbortCoded(c, 404, "VER0001", "Version not found", h.Config.IsDev)
@@ -160,6 +168,10 @@ func (h *Versions) Diff(c *gin.Context) {
 	episodeID, err := primitive.ObjectIDFromHex(c.Param("episodeId"))
 	if err != nil {
 		serverError(c, err, h.Config.IsDev)
+		return
+	}
+	if !h.canReadVersions(c, episodeID) {
+		errors.AbortCoded(c, 404, "VER0011", "Episode not found", h.Config.IsDev)
 		return
 	}
 	v1Num, v1OK := versionsParseInt(c.Param("v1"))
@@ -359,6 +371,31 @@ func versionsParseInt(s string) (int, bool) {
 		n = -n
 	}
 	return int(n), true
+}
+
+// canReadVersions 校验当前用户能否读取某剧集的版本历史：
+// 剧集不存在（含已移入回收站）按无权处理；管理员/超管放行；
+// 创作者仅限本人创建或被授权编辑（AllowedEditors）的剧集，未授权按 404 处理避免泄露。
+func (h *Versions) canReadVersions(c *gin.Context, episodeID primitive.ObjectID) bool {
+	episode, err := h.Repos.Episodes.FindByID(c.Request.Context(), episodeID)
+	if err != nil {
+		return false
+	}
+	user, _ := middleware.GetUser(c)
+	if user.Role == "creator" {
+		isOwner := episode.CreatedBy != nil && *episode.CreatedBy == user.ID
+		isAllowed := false
+		for _, ed := range episode.AllowedEditors {
+			if ed == user.ID {
+				isAllowed = true
+				break
+			}
+		}
+		if !isOwner && !isAllowed {
+			return false
+		}
+	}
+	return true
 }
 
 // versionsUserRefs 批量查 changedBy 用户引用（输出 accountId/username 字段）。
