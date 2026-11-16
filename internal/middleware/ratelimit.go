@@ -1,6 +1,8 @@
 package middleware
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
 	"fmt"
 	"log/slog"
 	"strconv"
@@ -101,9 +103,17 @@ func RateLimit(spec ratelimit.Spec, opts RateLimitOpts) gin.HandlerFunc {
 		switch spec.Name {
 		case ratelimit.RequestEmailChangeName:
 			// 同时按来源 IP 与目标邮箱限流，避免攻击者用不同邮箱刷验证邮件。
-			key = spec.Name + ":" + ratelimit.IPKey(ip) + ":" + strings.ToLower(newEmailFromBody(c))
+			key = spec.Name + ":" + ratelimit.IPKey(ip) + ":" + keyDigest(strings.ToLower(newEmailFromBody(c)))
 		case ratelimit.AuthName, ratelimit.TwoFactorName, ratelimit.PasswordResetName,
 			ratelimit.EmailVerifyName:
+			// verify-email 挂载例外：该端点按 code 解析验证条目（email 只是
+			// 可选匹配谓词，不是查找键），请求体 email 与被保护资源无绑定——
+			// 按 email 取 key 会让每次换随机 email 的猜测请求各得一个新桶，
+			// spec 对爆破完全失效。该挂载固定回退 IP key（需配合正确配置
+			// trusted_proxies，否则 IP key 同样可被代理标头轮换绕过）。
+			if path == "/api/auth/verify-email" {
+				break
+			}
 			// 凭证/邮件类限流：key 绑定目标邮箱（请求体 email 小写）。
 			// 来源 IP 可经伪造代理标头轮换（CWE-348），key 中保留 IP 分量会让
 			// 这些 spec 在 IP 轮换下退化为无限流——按邮箱绑定后，对同一账号的
@@ -111,7 +121,7 @@ func RateLimit(spec ratelimit.Spec, opts RateLimitOpts) gin.HandlerFunc {
 			// 请求体无 email 的挂载（reset-password / change-password / 2fa/* /
 			// confirm-device-login 等无邮箱体端点）回退到原 IP key（与旧行为一致）。
 			if email := emailFromBody(c); email != "" {
-				key = spec.Name + ":" + email
+				key = spec.Name + ":" + keyDigest(email)
 			}
 		}
 
@@ -176,4 +186,15 @@ func emailFromBody(c *gin.Context) string {
 		return strings.ToLower(strings.TrimSpace(v))
 	}
 	return ""
+}
+
+// keyDigest 把请求体中攻击者可控的限流键分量压缩为定长摘要：相同输入恒映射到相同
+// key（限流语义不变），内存 store 中每条计数条目的驻留体积不再随请求体输入长度
+// 线性增长（CWE-770：无上限资源分配；emailFromBody 的键最长可达请求体上限 ~1MB）。
+func keyDigest(s string) string {
+	if s == "" {
+		return ""
+	}
+	sum := sha256.Sum256([]byte(s))
+	return hex.EncodeToString(sum[:])
 }

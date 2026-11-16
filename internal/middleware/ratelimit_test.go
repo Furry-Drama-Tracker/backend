@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -206,5 +207,91 @@ func TestRateLimitClientIPTrustedProxies(t *testing.T) {
 	// 受信来源、不同标头 IP → 独立桶。
 	if c := get("127.0.0.1:2222", map[string]string{"CF-Connecting-IP": "8.8.8.8"}); c != 200 {
 		t.Fatalf("受信来源不同标头 IP 应独立计数: %d", c)
+	}
+}
+
+// TestKeyDigestStableAndFixedLength 限流键摘要：空串保持空（无 email 体端点回退
+// IP key 的语义）、相同输入恒等（限流语义不变）、定长且区分不同输入
+// （CWE-770：键驻留体积不得随请求体输入长度线性增长）。
+func TestKeyDigestStableAndFixedLength(t *testing.T) {
+	if keyDigest("") != "" {
+		t.Fatal("空串应保持空")
+	}
+	long := strings.Repeat("a", 1<<20)
+	d := keyDigest(long)
+	if len(d) != 64 {
+		t.Fatalf("摘要应为 64 hex 字符, got %d", len(d))
+	}
+	if d != keyDigest(long) {
+		t.Fatal("相同输入必须映射到相同 key")
+	}
+	if keyDigest("a@b.com") == keyDigest("c@d.com") {
+		t.Fatal("不同输入不应共享桶")
+	}
+}
+
+// TestRateLimitVerifyEmailIgnoresBodyEmail verify-email 挂载固定回退 IP key：
+// 该端点按 code 解析条目、请求体 email 不绑定被猜测的资源，若按 email 取 key，
+// 每次换随机 email 的猜测请求各得一个新桶，spec 的 5/h 对 6 位码爆破完全失效。
+func TestRateLimitVerifyEmailIgnoresBodyEmail(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	r := gin.New()
+	r.RemoteIPHeaders = []string{"CF-Connecting-IP", "X-Real-IP", "X-Forwarded-For"}
+	spec := ratelimit.EmailVerifySpec
+	r.POST("/api/auth/verify-email", BodyParse(), RateLimit(spec, RateLimitOpts{IsDev: true}),
+		func(c *gin.Context) { c.JSON(200, gin.H{"ok": true}) })
+
+	post := func(body string) int {
+		req := httptest.NewRequest(http.MethodPost, "/api/auth/verify-email", strings.NewReader(body))
+		req.Header.Set("Content-Type", "application/json")
+		req.RemoteAddr = "10.1.1.1:1234"
+		w := httptest.NewRecorder()
+		r.ServeHTTP(w, req)
+		return w.Code
+	}
+
+	for i := 0; i < spec.Max; i++ {
+		body := `{"code":"000000","email":"guess` + strconv.Itoa(i) + `@x.com"}`
+		if c := post(body); c != 200 {
+			t.Fatalf("第 %d 次应通过: %d", i+1, c)
+		}
+	}
+	if c := post(`{"code":"000000","email":"fresh@x.com"}`); c != 429 {
+		t.Fatalf("换随机 email 仍应命中同一 IP 桶（429）, got %d", c)
+	}
+}
+
+// TestRateLimitEmailKeyDigestedStillPerAccount 邮箱绑定型 spec 仍按目标账号分桶：
+// 同一邮箱换 IP 命中同一桶（CWE-348 伪造代理标头轮换无法绕过），不同邮箱独立。
+func TestRateLimitEmailKeyDigestedStillPerAccount(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	r := gin.New()
+	r.RemoteIPHeaders = []string{"CF-Connecting-IP", "X-Real-IP", "X-Forwarded-For"}
+	spec := ratelimit.AuthSpec
+	r.POST("/api/auth/login", BodyParse(), RateLimit(spec, RateLimitOpts{IsDev: true}),
+		func(c *gin.Context) { c.JSON(200, gin.H{"ok": true}) })
+
+	post := func(remote, email string) int {
+		req := httptest.NewRequest(http.MethodPost, "/api/auth/login",
+			strings.NewReader(`{"email":"`+email+`"}`))
+		req.Header.Set("Content-Type", "application/json")
+		req.RemoteAddr = remote
+		w := httptest.NewRecorder()
+		r.ServeHTTP(w, req)
+		return w.Code
+	}
+
+	for i := 0; i < spec.Max; i++ {
+		if c := post("10.2.0."+strconv.Itoa(i+1)+":1234", "victim@x.com"); c != 200 {
+			t.Fatalf("第 %d 次应通过: %d", i+1, c)
+		}
+	}
+	// 换来源 IP 但同一邮箱 → 同一桶（429）。
+	if c := post("10.2.9.9:1234", "victim@x.com"); c != 429 {
+		t.Fatalf("同邮箱换 IP 应命中同一桶（429）, got %d", c)
+	}
+	// 不同邮箱 → 独立桶。
+	if c := post("10.2.9.9:1234", "other@x.com"); c != 200 {
+		t.Fatalf("不同邮箱应独立计数: %d", c)
 	}
 }

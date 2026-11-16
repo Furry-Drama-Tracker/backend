@@ -141,9 +141,9 @@ func TestForce2FASetupGate(t *testing.T) {
 	if resp := c2.json("GET", "/api/auth/me", nil, &me); resp.StatusCode != 200 {
 		t.Fatalf("GET must not be blocked: %d", resp.StatusCode)
 	}
-	// 2FA 开启流程放行（此账号已是 admin）。
+	// 2FA 开启流程放行（此账号已是 admin）；仍须密码再认证。
 	var setup map[string]any
-	if resp := c2.json("POST", "/api/2fa/enable", nil, &setup); resp.StatusCode != 200 || setup["secret"] == nil {
+	if resp := c2.json("POST", "/api/2fa/enable", map[string]any{"currentPassword": testPassword}, &setup); resp.StatusCode != 200 || setup["secret"] == nil {
 		t.Fatalf("2fa enable must be allowed under gate: %d body=%v", resp.StatusCode, setup)
 	}
 }

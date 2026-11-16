@@ -76,6 +76,9 @@ type client struct {
 	token string
 }
 
+// testPassword 是测试账号的登录密码（注册/登录/敏感操作再认证共用）。
+const testPassword = "pass1234"
+
 func newClient(t *testing.T, base string) *client {
 	t.Helper()
 	jar, _ := cookiejar.New(nil)
@@ -137,7 +140,7 @@ func (c *client) register(email string) *http.Response {
 		"accountId": "it" + strings.ReplaceAll(time.Now().Format("150405.000000"), ".", "")[:10],
 		"username":  "ituser",
 		"email":     email,
-		"password":  "pass1234",
+		"password":  testPassword,
 	}, &out)
 }
 
@@ -253,7 +256,7 @@ func TestTwoFactorLoginFlow(t *testing.T) {
 	promoteRole(t, repos, userIDByEmail(t, repos, email), "creator")
 
 	var setup map[string]any
-	resp := c.json("POST", "/api/2fa/enable", nil, &setup)
+	resp := c.json("POST", "/api/2fa/enable", map[string]any{"currentPassword": testPassword}, &setup)
 	if resp.StatusCode != 200 || setup["secret"] == nil {
 		t.Fatalf("2fa enable: %d body=%v", resp.StatusCode, setup)
 	}
@@ -302,10 +305,11 @@ func backupCodesFrom(t *testing.T, setup map[string]any) []string {
 }
 
 // enable2FA 完成 enable → verify-enable 两步，返回 secret 与明文备份码。
+// /2fa/enable 要求密码再认证（植入持久凭据），故带上测试账号密码。
 func enable2FA(t *testing.T, c *client) (string, []string) {
 	t.Helper()
 	var setup map[string]any
-	if resp := c.json("POST", "/api/2fa/enable", nil, &setup); resp.StatusCode != 200 || setup["secret"] == nil {
+	if resp := c.json("POST", "/api/2fa/enable", map[string]any{"currentPassword": testPassword}, &setup); resp.StatusCode != 200 || setup["secret"] == nil {
 		t.Fatalf("2fa enable: %d body=%v", resp.StatusCode, setup)
 	}
 	secret, _ := setup["secret"].(string)
@@ -330,9 +334,9 @@ func TestTwoFactorEnableTwiceRejected(t *testing.T) {
 
 	enable2FA(t, c)
 
-	// 第二次 enable：必须 400。
+	// 第二次 enable：必须 400（带正确密码，确保拒绝理由是已启用而非缺密码）。
 	var again map[string]any
-	resp := c.json("POST", "/api/2fa/enable", nil, &again)
+	resp := c.json("POST", "/api/2fa/enable", map[string]any{"currentPassword": testPassword}, &again)
 	if resp.StatusCode != 400 {
 		t.Fatalf("second 2fa enable must be rejected: %d body=%v", resp.StatusCode, again)
 	}

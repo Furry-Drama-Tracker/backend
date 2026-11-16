@@ -145,6 +145,9 @@ func (s *AuthService) Send2FAEmailOTP(ctx context.Context, challenge, devToken s
 	if user.Email == "" || !user.IsEmailVerified {
 		return "", errors.NewC("DEV0015", 400, "该账号未绑定已验证的邮箱")
 	}
+	// 同一账号同时只保留一个邮件 OTP：签发新码前作废旧码，
+	// 使第二因素键空间恒为 900k，而不是随 Mint 请求数线性放大。
+	s.EmailOTPCodes.DeleteForUser(user.ID.Hex())
 	otpCode := s.EmailOTPCodes.Mint(code.Entry{
 		UserID:    user.ID.Hex(),
 		Email:     user.Email,

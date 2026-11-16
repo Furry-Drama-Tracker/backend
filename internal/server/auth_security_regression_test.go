@@ -372,3 +372,97 @@ func TestEmailOTPSecondFactor(t *testing.T) {
 		t.Fatalf("totp path after emailOtp rejection: %d body=%v", resp.StatusCode, done)
 	}
 }
+
+// TestEnable2FARequiresPasswordReauth 2FA 注册是凭据生命周期写入（植入 TOTP secret +
+// 备份码并明文下发）：仅持有效会话不得授权，必须密码再认证——否则被窃会话可以给
+// 账号种上攻击者自己的第二因素，跨密码轮换存续且所有者无法自助移除。
+func TestEnable2FARequiresPasswordReauth(t *testing.T) {
+	ts, repos := testServerWithRepos(t)
+	c := newClient(t, ts.URL)
+	email := "it2fare_" + fmt.Sprintf("%d", time.Now().UnixNano()%1e7) + "@test.com"
+	c.registerAndLogin(email)
+	promoteRole(t, repos, userIDByEmail(t, repos, email), "creator")
+
+	for _, tc := range []struct {
+		name string
+		body map[string]any
+		code string
+	}{
+		{"空对象体", map[string]any{}, "PAS0016"},
+		{"密码错误", map[string]any{"currentPassword": "wrongpass1"}, "PAS0017"},
+	} {
+		var out map[string]any
+		resp := c.json("POST", "/api/2fa/enable", tc.body, &out)
+		if resp.StatusCode != 400 || out["error"] != tc.code || out["secret"] != nil {
+			t.Fatalf("%s: %d body=%v", tc.name, resp.StatusCode, out)
+		}
+	}
+
+	// 无请求体（axios.post(url) 不传 data 的形态：无 body、无 Content-Type）：
+	// bodyparse 只对 JSON/form 解析，故放行，由 handler 按缺密码返回 PAS0016——
+	// 不得变成 SYS0002 请求格式错误（非对象 JSON 才走那条）。
+	var noBody map[string]any
+	if resp := c.json("POST", "/api/2fa/enable", nil, &noBody); resp.StatusCode != 400 || noBody["error"] != "PAS0016" {
+		t.Fatalf("无请求体应 400 PAS0016: %d body=%v", resp.StatusCode, noBody)
+	}
+
+	// 正确密码 → 正常签发 secret 并完成启用。
+	enable2FA(t, c)
+}
+
+// TestTwoFactorChallengeDoesNotResetLoginAttempts 密码正确但认证停在 2FA 挑战阶段时
+// 不得清零失败计数：否则"正确密码登录 + OTP 猜测"交替循环可让 login-2fa 的 5 次
+// 锁定永不触发（CWE-307）。清零点在 Login2FA 完整通过之后。
+func TestTwoFactorChallengeDoesNotResetLoginAttempts(t *testing.T) {
+	ts, repos := testServerWithRepos(t)
+	c := newClient(t, ts.URL)
+	email := "it2faatt_" + fmt.Sprintf("%d", time.Now().UnixNano()%1e7) + "@test.com"
+	c.registerAndLogin(email)
+	uid := userIDByEmail(t, repos, email)
+	promoteRole(t, repos, uid, "creator")
+	secret, _ := enable2FA(t, c)
+
+	attempts := func() int {
+		// publicProjection 屏蔽了 loginAttempts，需走 WithAuth 变体。
+		u, err := repos.Users.FindByIDWithAuth(t.Context(), uid)
+		if err != nil {
+			t.Fatalf("find user: %v", err)
+		}
+		return u.LoginAttempts
+	}
+	login := func(password string) map[string]any {
+		var out map[string]any
+		c.json("POST", "/api/auth/login", map[string]any{"email": email, "password": password}, &out)
+		return out
+	}
+
+	// 两次密码错误 → 失败计数 2。
+	for i := 0; i < 2; i++ {
+		login("wrongpass1")
+	}
+	if got := attempts(); got != 2 {
+		t.Fatalf("失败计数应为 2, got %d", got)
+	}
+
+	// 正确密码 → 2FA 挑战；计数必须保持不变。
+	out := login(testPassword)
+	if out["need2FA"] != true {
+		t.Fatalf("need2FA expected: %v", out)
+	}
+	if got := attempts(); got != 2 {
+		t.Fatalf("2FA 挑战阶段不得清零失败计数, got %d", got)
+	}
+
+	// 完整通过第二因素 → 清零。
+	challenge, _ := out["twoFactorChallenge"].(string)
+	var done map[string]any
+	resp := c.json("POST", "/api/auth/login-2fa", map[string]any{
+		"email": email, "twoFactorChallenge": challenge, "twoFactorToken": totpCode(secret, time.Now()),
+	}, &done)
+	if resp.StatusCode != 200 {
+		t.Fatalf("login-2fa: %d body=%v", resp.StatusCode, done)
+	}
+	if got := attempts(); got != 0 {
+		t.Fatalf("2FA 成功后应清零失败计数, got %d", got)
+	}
+}

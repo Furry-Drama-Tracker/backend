@@ -79,7 +79,6 @@ func (s *AuthService) Login(c *gin.Context, in LoginInput) (*LoginResult, error)
 		_ = s.Repos.Users.IncLoginAttempts(ctx, user.ID)
 		return nil, errors.NewC("AUT0045", 400, "用户名或密码错误")
 	}
-	_ = s.Repos.Users.ResetLoginAttempts(ctx, user.ID)
 
 	// 邮箱未验证：发验证码（除非 skipVerification 或 dev-token 绕过）。
 	if !user.IsEmailVerified && !s.SkipVerification(user) && !s.devTokenActive(in.DevToken) {
@@ -92,6 +91,8 @@ func (s *AuthService) Login(c *gin.Context, in LoginInput) (*LoginResult, error)
 		if s.Mail != nil {
 			go s.Mail.SendVerificationCodeEmail(context.Background(), user.Email, verifyCode, "login")
 		}
+		// 密码已证实且本分支无第二因素待完成：此处清零失败计数。
+		_ = s.Repos.Users.ResetLoginAttempts(ctx, user.ID)
 		return &LoginResult{Email: user.Email, NeedVerification: true}, nil
 	}
 
@@ -134,6 +135,12 @@ func (s *AuthService) Login(c *gin.Context, in LoginInput) (*LoginResult, error)
 	// 登录态字段定点更新（勿整文档替换）：并发密码轮换落库后，
 	// 本请求早前加载的旧结构若整体回写会把新哈希回滚（复活旧密码）。
 	_ = s.Repos.Users.UpdateDeviceInfoAndLogin(ctx, user.ID, di, now, ip, region)
+
+	// 认证已完整（密码正确且无 2FA 挑战待完成）才清零失败计数。
+	// 2FA 账号的计数由 Login2FA 成功路径清零；在签发 2FA 挑战前清零会使
+	// rejectTwoFactor 的锁定（失败计数不清零契约）永远无法生效，
+	// 第二因素将只剩全局限流一个吞吐量级约束。
+	_ = s.Repos.Users.ResetLoginAttempts(ctx, user.ID)
 
 	if err := s.IssueSession(c, user, di, ip, "LOGIN"); err != nil {
 		return nil, errors.NewC("AUT0047", 500, "服务器错误")

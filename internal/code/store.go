@@ -100,6 +100,20 @@ func (s *Store) SetFresh(code string, e Entry) bool {
 	return true
 }
 
+// DeleteForUser 删除该用户当前全部未过期验证码（同一用户新码签发时旧码作废）。
+// 防止凭挑战令牌反复 Mint 造成同账号多码并存、把第二因素的键空间
+// 从 900k 稀释成随请求数线性放大的命中概率。
+func (s *Store) DeleteForUser(userID string) {
+	now := time.Now()
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	for k, e := range s.items {
+		if e.UserID == userID && now.Before(e.ExpiresAt) {
+			delete(s.items, k)
+		}
+	}
+}
+
 // Mint 生成并存入一个与现有未过期条目不冲突的验证码并返回之。
 // 900k 键空间下冲突概率可忽略；连续冲突视为异常，最后退回 Set 保证可用。
 func (s *Store) Mint(e Entry) string {

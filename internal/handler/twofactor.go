@@ -25,6 +25,20 @@ func (h *Auth) twoFactorKeyHex() string {
 // @Success 200 {object} map[string]any "secret/backupCodes/otpauthUrl"
 // @Router /2fa/enable [post]
 func (h *Auth) Enable2FA(c *gin.Context) {
+	// 密码再认证：2FA 注册是凭据生命周期写入——植入一个新的持久凭据
+	// （TOTP secret + 10 个备份码，且响应明文下发）。仅持有效会话不应
+	// 授权该写入：被窃会话（XSS、令牌泄露、无人值守浏览器）若能植入
+	// 自有第二因素，将获得跨密码轮换存续、所有者无法自助移除的持久
+	// 凭据。与 passkey 注册/删除、登录名与邮箱修改一致要求当前密码
+	// （前端需同步在开启 2FA 入口采集 currentPassword，复用 passkey
+	// 流程的 PAS0016/PAS0017 提示交互）。
+	var req struct {
+		CurrentPassword string `json:"currentPassword"`
+	}
+	_ = c.ShouldBindJSON(&req)
+	if !h.reauthPassword(c, req.CurrentPassword) {
+		return
+	}
 	user, _ := middleware.GetUser(c)
 	if user.Role == middleware.RoleUser {
 		errors.AbortCoded(c, 403, "TFA0001", "普通用户不可开启两步验证", h.Config.IsDev)

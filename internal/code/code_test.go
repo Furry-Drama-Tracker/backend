@@ -76,6 +76,25 @@ func TestSetFreshAllowsExpiredReuse(t *testing.T) {
 	}
 }
 
+// TestDeleteForUserOnlyDropsTargetUsersLiveCodes 新码签发前作废同账号旧码，
+// 使第二因素键空间不随 Mint 次数放大（不得删到其他用户的码）。
+func TestDeleteForUserOnlyDropsTargetUsersLiveCodes(t *testing.T) {
+	s := NewStore(time.Hour)
+	defer s.Stop()
+	s.Set("111111", Entry{UserID: "u1"})
+	s.Set("222222", Entry{UserID: "u1"})
+	s.Set("333333", Entry{UserID: "u2"})
+	s.DeleteForUser("u1")
+	for _, c := range []string{"111111", "222222"} {
+		if _, ok := s.Get(c); ok {
+			t.Fatalf("用户 u1 的码 %s 应被删除", c)
+		}
+	}
+	if _, ok := s.Get("333333"); !ok {
+		t.Fatal("其他用户的码不得受影响")
+	}
+}
+
 // TestMintNoLiveCollision Mint 签发的码与既有未过期条目不冲突，
 // 且原属主的条目不被改动（对照旧行为：Set 会静默覆盖）。
 func TestMintNoLiveCollision(t *testing.T) {
