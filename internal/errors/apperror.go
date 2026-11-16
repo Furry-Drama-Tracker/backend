@@ -2,7 +2,8 @@
 //
 // 全局错误响应规则：
 //   - CORS 拒绝 → 403 {"message":"CORS policy denied"}
-//   - 文件上传错误（大小/类型超限等）→ 400 {"message":"文件上传错误: <msg>"}
+//   - 文件上传错误（大小/类型超限等）→ 400，错误码 UPL0001-UPL0004，
+//     message 保持 "文件上传错误: <msg>"
 //   - 其它 → err.Status || 500；生产环境 5xx 不泄露内部 message（"服务器内部错误"）
 //   - 开发环境响应体附带 stack
 //   - 4xx/5xx 响应体统一附带 error（错误码 XXXYYYY，模块前缀+文件内顺序号，
@@ -36,8 +37,32 @@ const ContextRefID = "refID"
 // refMax 是参考号上界（半开区间），取值空间 0..999999999 即 000000000-999999999。
 const refMax = 1_000_000_000
 
-// fallbackCode 是未编码 4xx/5xx 的兜底错误码。
-const fallbackCode = "SYS0001"
+// 兜底错误码：400/404 使用更具体的 SYS0002/SYS0003，其余未编码错误回退 SYS0001。
+const (
+	fallbackCode   = "SYS0001"
+	badRequestCode = "SYS0002"
+	notFoundCode   = "SYS0003"
+)
+
+// 上传错误码：UploadError.Code 为历史标识，渲染时映射为标准 XXXYYYY 错误码。
+const (
+	uploadCodeSize    = "UPL0001"
+	uploadCodeType    = "UPL0002"
+	uploadCodeMagic   = "UPL0003"
+	uploadCodeUnknown = "UPL0004"
+)
+
+// defaultCodeFor 返回未显式编码时的兜底错误码。
+func defaultCodeFor(status int) string {
+	switch status {
+	case http.StatusBadRequest:
+		return badRequestCode
+	case http.StatusNotFound:
+		return notFoundCode
+	default:
+		return fallbackCode
+	}
+}
 
 // ErrorBody 是 4xx/5xx 统一错误信封的 Swagger 契约模型（渲染实现见 abortAppError，
 // 契约详见 backend/AGENTS.md「错误码与参考号」）。@Failure 注解统一引用本模型。
@@ -160,8 +185,8 @@ func IsNotFound(err error) bool {
 	return errors.As(err, &ae) && ae.Status == http.StatusNotFound
 }
 
-// UploadError 是文件上传错误（LIMIT_FILE_SIZE / LIMIT_FILE_TYPE 等），
-// 由上传中间件抛给全局处理器。
+// UploadError 是文件上传错误（Code 为历史标识：LIMIT_FILE_SIZE / LIMIT_FILE_TYPE /
+// BAD_MAGIC 等），渲染时映射为 UPL0001-UPL0004 标准错误码。
 type UploadError struct {
 	Code    string // "LIMIT_FILE_SIZE" | "LIMIT_FILE_TYPE" | ...
 	Message string
@@ -176,6 +201,29 @@ func IsUploadError(err error) bool {
 	return errors.As(err, &ue)
 }
 
+// uploadErrorCode 把 UploadError 的历史 Code 映射为标准错误码。
+func uploadErrorCode(legacy string) string {
+	switch legacy {
+	case "LIMIT_FILE_SIZE":
+		return uploadCodeSize
+	case "LIMIT_FILE_TYPE":
+		return uploadCodeType
+	case "BAD_MAGIC":
+		return uploadCodeMagic
+	default:
+		return uploadCodeUnknown
+	}
+}
+
+// uploadErrorCodeOf 返回上传错误的标准码；非 UploadError 回退 UPL0004。
+func uploadErrorCodeOf(err error) string {
+	var ue *UploadError
+	if errors.As(err, &ue) {
+		return uploadErrorCode(ue.Code)
+	}
+	return uploadCodeUnknown
+}
+
 // AbortWithAppError 把 AppError 写入响应并中止请求链。
 // 若错误不是 *AppError，回退为 500（生产隐藏 message）。
 func AbortWithAppError(c *gin.Context, err error, isDev bool) {
@@ -186,7 +234,11 @@ func AbortWithAppError(c *gin.Context, err error, isDev bool) {
 	}
 	var ue *UploadError
 	if errors.As(err, &ue) {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": "文件上传错误: " + ue.Message})
+		abortAppError(c, &AppError{
+			Message: "文件上传错误: " + ue.Message, Status: http.StatusBadRequest,
+			Code: uploadErrorCode(ue.Code), Cause: ue, IsOperational: true,
+			site: callerSite(1),
+		}, isDev)
 		return
 	}
 	abortAppError(c, &AppError{Message: err.Error(), Status: http.StatusInternalServerError}, isDev)
@@ -257,7 +309,7 @@ func abortAppError(c *gin.Context, ae *AppError, isDev bool) {
 	if status >= 400 {
 		code := ae.Code
 		if code == "" {
-			code = fallbackCode
+			code = defaultCodeFor(status)
 		}
 		ref := refFromContext(c)
 		body["error"] = code
@@ -302,7 +354,11 @@ func Handler(isDev func() bool) gin.HandlerFunc {
 		if len(c.Errors) > 0 {
 			err := c.Errors.Last().Err
 			if isUploadError(err) {
-				c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": "文件上传错误: " + err.Error()})
+				abortAppError(c, &AppError{
+					Message: "文件上传错误: " + err.Error(), Status: http.StatusBadRequest,
+					Code: uploadErrorCodeOf(err), Cause: err, IsOperational: true,
+					site: "apperror.go:Handler",
+				}, isDev())
 				return
 			}
 			dev := isDev()

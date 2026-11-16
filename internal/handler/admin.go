@@ -287,10 +287,16 @@ func (h *Admin) RegisterAccount(c *gin.Context) {
 		errors.Abort500C(c, "ADM0018", "服务器错误", err, h.Config.IsDev)
 		return
 	}
+	uid, err := h.Repos.Counters.NextUID(ctx)
+	if err != nil {
+		errors.Abort500C(c, "ADM0085", "服务器错误", err, h.Config.IsDev)
+		return
+	}
 	user := &model.User{
 		// UserRepo.Create 不像 EpisodeRepo.Create 那样补默认 _id，
 		// 这里显式分配，保证响应与 CreatorProfile.creatorId 使用真实 ID。
 		ID:                     primitive.NewObjectID(),
+		UID:                    uid,
 		AccountID:              finalAccountId,
 		Username:               orDefaultString(username, finalAccountId),
 		Email:                  email,

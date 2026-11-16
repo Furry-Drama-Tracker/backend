@@ -52,7 +52,8 @@ func GetBody(c *gin.Context) map[string]any {
 //
 // 大小上限 1MB，/api/backup/import（含子路径）放宽到 50MB
 // （仅 JSON；urlencoded 保持 1MB——50MB 放宽只作用于 JSON 解析，固定行为）。
-// 超限 → 413 {"message":"request entity too large"}；JSON 语法错误 → 400。
+// 超限 → 413 {"message":"request entity too large"}；JSON 语法错误 → 400 BDP0003；
+// 非对象 JSON（数组/标量）→ 400 SYS0002（API 请求体必须是 JSON 对象）。
 // 解析结果经 SetBody 存入上下文，供 GetBody / 限流 key 使用；同时把原始体还原到
 // c.Request.Body，保证后续 SanitizeInput（W1）与 handler 的 ShouldBindJSON 可读。
 func BodyParse() gin.HandlerFunc {
@@ -107,10 +108,15 @@ func BodyParse() gin.HandlerFunc {
 				c.AbortWithStatusJSON(http.StatusBadRequest, codedBody(c, http.StatusBadRequest, "BDP0003", gin.H{"message": err.Error()}))
 				return
 			}
-			// 标量/数组体 → 不存（非对象体时字段读取得到零值，固定行为）。
-			if m, ok := v.(map[string]any); ok {
-				SetBody(c, m)
+			// 标量/数组体不是合法 API 请求体：统一按请求格式错误返回，
+			// 避免后续 handler 读到零值后表现为误导性的业务错误。
+			m, ok := v.(map[string]any)
+			if !ok {
+				c.AbortWithStatusJSON(http.StatusBadRequest,
+					codedBody(c, http.StatusBadRequest, "SYS0002", gin.H{"message": "请求格式错误"}))
+				return
 			}
+			SetBody(c, m)
 		} else {
 			values, err := url.ParseQuery(string(data))
 			if err != nil {

@@ -90,6 +90,82 @@ func TestAbortAppErrorFallbackCode(t *testing.T) {
 	}
 }
 
+// TestAbortAppErrorStatusFallbackCodes 400/404 未编码时分别回退 SYS0002/SYS0003。
+func TestAbortAppErrorStatusFallbackCodes(t *testing.T) {
+	for _, tc := range []struct {
+		status int
+		code   string
+	}{
+		{http.StatusBadRequest, "SYS0002"},
+		{http.StatusNotFound, "SYS0003"},
+		{http.StatusInternalServerError, fallbackCode},
+	} {
+		_, body := render(t, true, &AppError{Message: "m", Status: tc.status})
+		if body["error"] != tc.code {
+			t.Fatalf("status=%d error=%v want %s", tc.status, body["error"], tc.code)
+		}
+	}
+}
+
+// TestUploadErrorCodedEnvelope 上传错误也走统一 4xx 信封，历史 Code 映射为 UPL 码。
+func TestUploadErrorCodedEnvelope(t *testing.T) {
+	for _, tc := range []struct {
+		legacy string
+		code   string
+	}{
+		{"LIMIT_FILE_SIZE", "UPL0001"},
+		{"LIMIT_FILE_TYPE", "UPL0002"},
+		{"BAD_MAGIC", "UPL0003"},
+		{"OTHER", "UPL0004"},
+	} {
+		gin.SetMode(gin.TestMode)
+		r := gin.New()
+		r.GET("/x", func(c *gin.Context) {
+			AbortWithAppError(c, &UploadError{Code: tc.legacy, Message: "msg"}, true)
+		})
+		w := httptest.NewRecorder()
+		r.ServeHTTP(w, httptest.NewRequest("GET", "/x", nil))
+		if w.Code != http.StatusBadRequest {
+			t.Fatalf("%s status=%d want 400", tc.legacy, w.Code)
+		}
+		var body map[string]any
+		if err := json.Unmarshal(w.Body.Bytes(), &body); err != nil {
+			t.Fatalf("%s decode %q: %v", tc.legacy, w.Body.String(), err)
+		}
+		if body["error"] != tc.code || body["status"] != float64(http.StatusBadRequest) {
+			t.Fatalf("%s body=%v want error=%s status=400", tc.legacy, body, tc.code)
+		}
+		if _, ok := body["ref"].(float64); !ok {
+			t.Fatalf("%s ref 缺失: %v", tc.legacy, body)
+		}
+		if body["message"] != "文件上传错误: msg" {
+			t.Fatalf("%s message=%v", tc.legacy, body["message"])
+		}
+	}
+}
+
+// TestHandlerUploadErrorCodedEnvelope 全局 Handler 捕获 UploadError 时同样带码。
+func TestHandlerUploadErrorCodedEnvelope(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	r := gin.New()
+	r.Use(Handler(func() bool { return true }))
+	r.GET("/x", func(c *gin.Context) {
+		_ = c.Error(&UploadError{Code: "BAD_MAGIC", Message: "bad"})
+	})
+	w := httptest.NewRecorder()
+	r.ServeHTTP(w, httptest.NewRequest("GET", "/x", nil))
+	if w.Code != http.StatusBadRequest {
+		t.Fatalf("status=%d want 400 body=%s", w.Code, w.Body.String())
+	}
+	var body map[string]any
+	if err := json.Unmarshal(w.Body.Bytes(), &body); err != nil {
+		t.Fatalf("decode %q: %v", w.Body.String(), err)
+	}
+	if body["error"] != "UPL0003" || body["status"] != float64(http.StatusBadRequest) {
+		t.Fatalf("body=%v", body)
+	}
+}
+
 // TestAbortAppErrorKeepsExtraFields messageKey / Extra 附加字段保留；
 // Extra 不允许覆盖 message/messageKey/error/ref。
 func TestAbortAppErrorKeepsExtraFields(t *testing.T) {

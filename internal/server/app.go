@@ -166,6 +166,12 @@ func NewApp(d Deps) *gin.Engine {
 	r.GET("/uploads/*filepath", serveUploads)
 	r.HEAD("/uploads/*filepath", serveUploads)
 
+	// 未命中路由：统一 404 JSON 信封（SYS0003），替换 gin 默认的纯文本
+	// "404 page not found"，保证端点不存在也可按错误码/参考号排障。
+	r.NoRoute(func(c *gin.Context) {
+		errors.AbortCoded(c, http.StatusNotFound, "SYS0003", "接口不存在", d.Config.IsDev)
+	})
+
 	// TODO(M4): swagger（仅非生产）/api/docs
 
 	// ---- 全局错误处理（最后注册）----

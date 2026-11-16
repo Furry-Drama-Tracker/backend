@@ -175,7 +175,7 @@ def scan_file(path):
             "status": status,
             "message": json.loads(msg) if (msg.startswith('"') and msg.endswith('"')) else "<dynamic>",
             **({"messageKey": msg_key} if msg_key else {}),
-            "file": str(path.relative_to(ROOT)),
+            "file": path.relative_to(ROOT).as_posix(),
             "line": ln,
         })
         i = close
@@ -210,7 +210,7 @@ def scan_file(path):
             "kind": "codedBody",
             "status": st,
             "message": msg,
-            "file": str(path.relative_to(ROOT)),
+            "file": path.relative_to(ROOT).as_posix(),
             "line": ln,
         })
         i = close

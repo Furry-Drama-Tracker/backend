@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -18,6 +19,7 @@ import (
 	"github.com/Furry-Drama-Tracker/backend/internal/auth"
 	"github.com/Furry-Drama-Tracker/backend/internal/config"
 	"github.com/Furry-Drama-Tracker/backend/internal/handler"
+	"github.com/Furry-Drama-Tracker/backend/internal/indexes"
 	"github.com/Furry-Drama-Tracker/backend/internal/middleware"
 	"github.com/Furry-Drama-Tracker/backend/internal/ratelimit"
 	"github.com/Furry-Drama-Tracker/backend/internal/repository"
@@ -297,6 +299,50 @@ func TestAdminRegisterAndRoleFlow(t *testing.T) {
 	w, data = e.do(t, "DELETE", "/api/admin/"+superID.Hex(), nil, e.token(t, sadm2ID), false)
 	if w.Code != 200 {
 		t.Fatalf("delete superadmin status=%d body=%s want 200", w.Code, string(data))
+	}
+}
+
+// TestAdminRegisterAllocatesUID 验证管理员创建账号走计数器发号，不会与既有 uid=0 冲突。
+func TestAdminRegisterAllocatesUID(t *testing.T) {
+	e := newAdminTestEnv(t)
+	superID := e.insertUser(t, "sadm", "super", "super@test.com", "superadmin", "pass1234")
+
+	// 模拟生产：seed 超管占用 uid=0，且唯一索引已建立。
+	if _, err := e.db.Collection("users").UpdateOne(context.Background(),
+		bson.M{"_id": superID}, bson.M{"$set": bson.M{"uid": int64(0)}}); err != nil {
+		t.Fatalf("set seed uid: %v", err)
+	}
+	if err := indexes.Ensure(context.Background(), e.db); err != nil {
+		t.Fatalf("ensure indexes: %v", err)
+	}
+
+	for i, email := range []string{"newadmin1@test.com", "newadmin2@test.com"} {
+		w, data := e.do(t, "POST", "/api/admin/register", map[string]any{
+			"username": fmt.Sprintf("newadmin%d", i+1),
+			"email":    email,
+			"password": "pass1234",
+			"role":     "admin",
+		}, e.token(t, superID), false)
+		if w.Code != 200 {
+			t.Fatalf("register account %d status=%d body=%s want 200", i+1, w.Code, string(data))
+		}
+		var created struct {
+			ID string `json:"_id"`
+		}
+		decode(t, data, &created)
+		oid, err := primitive.ObjectIDFromHex(created.ID)
+		if err != nil {
+			t.Fatalf("created id %q: %v", created.ID, err)
+		}
+		var got struct {
+			UID int64 `bson:"uid"`
+		}
+		if err := e.db.Collection("users").FindOne(context.Background(), bson.M{"_id": oid}).Decode(&got); err != nil {
+			t.Fatalf("find created user: %v", err)
+		}
+		if got.UID != int64(i+1) {
+			t.Fatalf("created account %d uid=%d want %d", i+1, got.UID, i+1)
+		}
 	}
 }
 

@@ -5,8 +5,7 @@
 //   - 类型不符 → UploadError{Code:"LIMIT_FILE_TYPE"}
 //   - 魔数不符 → UploadError{Code:"BAD_MAGIC"}（文件已删除）
 //   - 超出大小 → UploadError{Code:"LIMIT_FILE_SIZE"}
-//   - 无文件   → ErrNoFile（调用方应回 400 {"message":"请选择要上传的图片"}，
-//     固定契约）
+//   - 无文件   → ErrNoFile（调用方回 400 固定文案，错误码由各 handler 域分配）
 package upload
 
 import (
@@ -44,8 +43,8 @@ func SetDir(dir string) {
 	}
 }
 
-// ErrNoFile 表示请求中没有指定字段的文件（对应路由层
-// 400 {"message":"请选择要上传的图片"} 校验，不属于上传错误码契约）。
+// ErrNoFile 表示请求中没有指定字段的文件（路由层回 400 固定文案，
+// 错误码由各 handler 域分配，不属于 UploadError）。
 var ErrNoFile = errors.New("请选择要上传的图片")
 
 // 扩展名与 MIME 过滤正则：

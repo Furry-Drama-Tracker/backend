@@ -87,7 +87,7 @@ deploy/               systemd unit + ini 模板 + run.sh
 
 ## 错误码与参考号（2026-11 契约，勿破坏）
 
-所有 4xx/5xx 响应体统一附带四个信号（200 与 health 503 / oauth 501 / 上传 400 信封除外）：
+所有 4xx/5xx 响应体统一附带四个信号（200 与 health 503 / oauth 501 除外）：
 
 ```json
 {"message": "该邮箱已注册", "error": "USR0007", "ref": 123456789, "status": 400}
@@ -102,7 +102,8 @@ deploy/               systemd unit + ini 模板 + run.sh
 - **边缘预留（ESA）**：ESA 边缘错误响应固定信封（Schema `docs/esa-error.schema.json`，错误 ID 注册表 `docs/esa-errors.csv`——新 ID 取 CSV 内下一序号）：`{"message":"...","error":"ESAXXXX","ref":0,"esa_request_id":"<UUID>","esa_rule":<数字>,"status":451}`。`ref 恒为 0` 标记边缘响应——无服务端请求日志，按 ref grep 不到属预期；排障用 `esa_request_id`（ESA 控制台查边缘日志）与 `esa_rule`（命中的规则）。已登记：`ESA0001` 地区限制（451）。
 - **Swagger**：`@Failure` 注解统一引用 `errors.ErrorBody` 信封模型（108 处），主描述在 `cmd/server/main.go`；改动后 `make docs`（swag init）再生成 `docs/docs.go`。
 - **机器注册表**：`docs/errors.json`（741+ 条目，含 code/kind/status/message/file/line）+ `docs/errors.schema.json`；生成器 `python3 docs/gen_errors_json.py`——新增错误码后重跑，输出字节稳定可提交；未提交修改（WIP）的文件按 HEAD 内容扫描，注册表只反映已提交契约。
-- 例外不加码：`/api/health` 503（独立信封）、oauth 501（业务性未开放）、`UploadError` 400 信封。
+- 例外不加码：`/api/health` 503（独立信封）、oauth 501（业务性未开放）。
+- 框架级兜底码：`SYS0002` = 请求格式错误（非对象 JSON / 未显式编码的 400）、`SYS0003` = 接口不存在（NoRoute 404）；上传错误映射为 `UPL0001`（大小）/`UPL0002`（类型）/`UPL0003`（魔数）/`UPL0004`（其它）。
 
 ## 行为一致性铁律
 

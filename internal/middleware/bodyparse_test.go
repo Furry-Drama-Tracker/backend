@@ -91,6 +91,20 @@ func TestBodyParseInvalidJSON400(t *testing.T) {
 	}
 }
 
+func TestBodyParseNonObjectJSON400(t *testing.T) {
+	r := bodyRouter()
+	w := do(r, http.MethodPost, "/api/x", `[1,2,3]`, "application/json")
+	if w.Code != http.StatusBadRequest {
+		t.Fatalf("数组 JSON 状态码=%d, want 400", w.Code)
+	}
+	if !strings.Contains(w.Body.String(), `"error":"SYS0002"`) {
+		t.Fatalf("数组 JSON 应返回 SYS0002: %s", w.Body.String())
+	}
+	if !strings.Contains(w.Body.String(), `"message":"请求格式错误"`) {
+		t.Fatalf("数组 JSON message 不符: %s", w.Body.String())
+	}
+}
+
 func TestBodyParseOtherContentTypeSkipped(t *testing.T) {
 	r := bodyRouter()
 	// text/plain 不解析

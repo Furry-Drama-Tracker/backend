@@ -440,7 +440,7 @@ Stats 域带 `middleware.Cache`（TTL 5min、上限 200 条，按完整 URI 缓�
 
 已停用上传端点：`/icons/upload`（图标包）与 `/themes/upload-icon`（主题图标）路由未注册（主题只保留壁纸），端点对客户端表现为 404；恢复方式见 `internal/handler/icons.go`、`themes.go` 内注释。
 
-上传错误码：`LIMIT_FILE_SIZE`/`LIMIT_FILE_TYPE`/`BAD_MAGIC`，渲染为 400 固定文案（部分旧 handler 对类型不符刻意 500，属既有契约）。`RemoveFile` 只接受上传目录下单层路径段（拒 `..`/分隔符）。
+上传错误：内部标识 `LIMIT_FILE_SIZE`/`LIMIT_FILE_TYPE`/`BAD_MAGIC` 渲染为统一 400 信封，错误码分别为 `UPL0001`/`UPL0002`/`UPL0003`（未知上传错误 `UPL0004`）；各 handler 仍可返回自身域错误码（如 `USR0009`/`WAL0019`）。部分旧 handler 对类型不符刻意 500，属既有契约。`RemoveFile` 只接受上传目录下单层路径段（拒 `..`/分隔符）。
 
 ## 错误码（messageKey → 前端 i18n）
 
