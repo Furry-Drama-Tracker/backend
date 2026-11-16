@@ -76,7 +76,7 @@
 
 | 方法 | 路径 | 鉴权 | 请求要点 | 响应要点 |
 |---|---|---|---|---|
-| POST | `/2fa/enable` | 登录 | — | 200 `{secret,backupCodes,otpauthUrl}`（secret 为 base64，AES 加密存储；备份码仅返回明文，库内存哈希）；**已启用时 400**（必须先 disable 才能重新注册） |
+| POST | `/2fa/enable` | 登录 | `{currentPassword}`（**密码再认证**，缺失 PAS0016 / 不对 PAS0017） | 200 `{secret,backupCodes,otpauthUrl}`（secret 为 base64，AES 加密存储；备份码仅返回明文，库内存哈希）；**已启用时 400**（必须先 disable 才能重新注册） |
 | POST | `/2fa/verify-enable` | 登录 | `{token}`（TOTP） | 200 `{message:"2FA enabled successfully"}` |
 | POST | `/2fa/disable` | 登录 | `{token}`（TOTP 或备份码） | 200 `{message:"2FA disabled successfully"}` |
 | POST | `/2fa/verify` | 登录 | `{token}` | 200 `{verified:true}` |

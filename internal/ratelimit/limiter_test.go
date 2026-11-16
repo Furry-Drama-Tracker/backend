@@ -65,7 +65,7 @@ func TestSpecParams(t *testing.T) {
 			[]string{"/auth/forgot-password", "/auth/reset-password", "/auth/change-password"}},
 		{"changeEmail", ChangeEmailSpec, time.Hour, 3, "操作过于频繁，请稍后再试", []string{"/auth/change-email"}},
 		{"twoFactor", TwoFactorSpec, 15 * time.Minute, 5, "操作过于频繁，请15分钟后再试",
-			[]string{"/auth/login-2fa", "/2fa/verify-enable", "/2fa/disable",
+			[]string{"/auth/login-2fa", "/2fa/enable", "/2fa/verify-enable", "/2fa/disable",
 				"/2fa/verify", "/auth/2fa/email-otp/send"}},
 		{"refresh", RefreshSpec, 15 * time.Minute, 60, "会话刷新过于频繁，请稍后再试",
 			[]string{"/auth/refresh"}},

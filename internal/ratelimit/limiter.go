@@ -83,13 +83,15 @@ var (
 		Window: time.Hour, Max: 3,
 		Message: "操作过于频繁，请稍后再试",
 	}
-	// TwoFactorSpec 2FA 限流器 5/15min（挂 login-2fa/verify-enable/disable/verify
-	// 与邮件 OTP 发码四处）。
+	// TwoFactorSpec 2FA 限流器 5/15min（挂 login-2fa/enable/verify-enable/disable/
+	// verify 与邮件 OTP 发码五处）。
+	// 注意：/2fa/enable 是凭据写入（植入第二因素），必须在本列内——曾因缺项而
+	// 实际无限流（限流中间件对非挂载路径 no-op，只剩全局 300/min）。
 	// 注意：/auth/refresh 不在此列——正常轮换流量与暴力破解额度共桶会让
 	// 移动网络（运营商 NAT 共享出口 IP）用户被误伤成 429，见 RefreshSpec。
 	TwoFactorSpec = Spec{
 		Name: TwoFactorName,
-		Mounts: []string{"/auth/login-2fa", "/2fa/verify-enable", "/2fa/disable",
+		Mounts: []string{"/auth/login-2fa", "/2fa/enable", "/2fa/verify-enable", "/2fa/disable",
 			"/2fa/verify", "/auth/2fa/email-otp/send"},
 		Window: 15 * time.Minute, Max: 5,
 		Message: "操作过于频繁，请15分钟后再试",

@@ -295,3 +295,34 @@ func TestRateLimitEmailKeyDigestedStillPerAccount(t *testing.T) {
 		t.Fatalf("不同邮箱应独立计数: %d", c)
 	}
 }
+
+// TestRateLimitTwoFactorSpecCoversEnable /2fa/enable 必须命中 2FA 限流器：
+// 该端点曾因 TwoFactorSpec.Mounts 缺项，限流中间件对非挂载路径 no-op，
+// 实际只剩全局 300/min（凭据写入端点的爆破/刷量约束形同虚设）。
+func TestRateLimitTwoFactorSpecCoversEnable(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	r := gin.New()
+	r.RemoteIPHeaders = []string{"CF-Connecting-IP", "X-Real-IP", "X-Forwarded-For"}
+	spec := ratelimit.TwoFactorSpec
+	r.POST("/api/2fa/enable", RateLimit(spec, RateLimitOpts{IsDev: true}),
+		func(c *gin.Context) { c.JSON(200, gin.H{"ok": true}) })
+
+	post := func() int {
+		req := httptest.NewRequest(http.MethodPost, "/api/2fa/enable",
+			strings.NewReader(`{"currentPassword":"pass1234"}`))
+		req.Header.Set("Content-Type", "application/json")
+		req.RemoteAddr = "10.3.0.1:1234"
+		w := httptest.NewRecorder()
+		r.ServeHTTP(w, req)
+		return w.Code
+	}
+
+	for i := 0; i < spec.Max; i++ {
+		if c := post(); c != 200 {
+			t.Fatalf("第 %d 次应通过: %d", i+1, c)
+		}
+	}
+	if c := post(); c != 429 {
+		t.Fatalf("超过 2FA 限流额度应 429, got %d", c)
+	}
+}

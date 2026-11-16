@@ -383,27 +383,20 @@ func TestEnable2FARequiresPasswordReauth(t *testing.T) {
 	c.registerAndLogin(email)
 	promoteRole(t, repos, userIDByEmail(t, repos, email), "creator")
 
-	for _, tc := range []struct {
-		name string
-		body map[string]any
-		code string
-	}{
-		{"空对象体", map[string]any{}, "PAS0016"},
-		{"密码错误", map[string]any{"currentPassword": "wrongpass1"}, "PAS0017"},
-	} {
-		var out map[string]any
-		resp := c.json("POST", "/api/2fa/enable", tc.body, &out)
-		if resp.StatusCode != 400 || out["error"] != tc.code || out["secret"] != nil {
-			t.Fatalf("%s: %d body=%v", tc.name, resp.StatusCode, out)
-		}
-	}
-
+	// 本用例共 4 次 2FA 桶内请求（enable 3 次 + verify-enable 1 次），
+	// 不贴 TwoFactorSpec 的 5/15min 上限（/2fa/enable 已入 Mounts）。
 	// 无请求体（axios.post(url) 不传 data 的形态：无 body、无 Content-Type）：
 	// bodyparse 只对 JSON/form 解析，故放行，由 handler 按缺密码返回 PAS0016——
 	// 不得变成 SYS0002 请求格式错误（非对象 JSON 才走那条）。
 	var noBody map[string]any
 	if resp := c.json("POST", "/api/2fa/enable", nil, &noBody); resp.StatusCode != 400 || noBody["error"] != "PAS0016" {
 		t.Fatalf("无请求体应 400 PAS0016: %d body=%v", resp.StatusCode, noBody)
+	}
+
+	// 有请求体但密码错 → PAS0017，同样不得签发 secret。
+	var wrong map[string]any
+	if resp := c.json("POST", "/api/2fa/enable", map[string]any{"currentPassword": "wrongpass1"}, &wrong); resp.StatusCode != 400 || wrong["error"] != "PAS0017" || wrong["secret"] != nil {
+		t.Fatalf("密码错误应 400 PAS0017: %d body=%v", resp.StatusCode, wrong)
 	}
 
 	// 正确密码 → 正常签发 secret 并完成启用。
