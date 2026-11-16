@@ -100,6 +100,30 @@ RESERVED = [
         "file": "（ESA 边缘配置，非本仓库）", "line": None,
         "_note": "ESA 地区限制拦截；ref 恒为 0",
     },
+    {
+        "code": "UPL0001", "kind": "upload", "status": 400,
+        "message": "文件上传错误: File too large",
+        "file": "internal/errors/apperror.go", "line": None,
+        "_note": "UploadError LIMIT_FILE_SIZE",
+    },
+    {
+        "code": "UPL0002", "kind": "upload", "status": 400,
+        "message": "文件上传错误: 仅支持图片文件 (jpg, jpeg, png, gif, webp)",
+        "file": "internal/errors/apperror.go", "line": None,
+        "_note": "UploadError LIMIT_FILE_TYPE",
+    },
+    {
+        "code": "UPL0003", "kind": "upload", "status": 400,
+        "message": "文件上传错误: 文件内容与类型不匹配，仅支持图片文件",
+        "file": "internal/errors/apperror.go", "line": None,
+        "_note": "UploadError BAD_MAGIC",
+    },
+    {
+        "code": "UPL0004", "kind": "upload", "status": 400,
+        "message": "<dynamic>",
+        "file": "internal/errors/apperror.go", "line": None,
+        "_note": "UploadError 其它/未知 Code",
+    },
 ]
 
 
@@ -152,10 +176,8 @@ def scan_file(path):
         elif kind in ("AbortErrC", "AbortCoded", "AbortKeyed"):
             # (c, status, code, msg[, cause|key], isDev)
             code = args[2].strip('"') if len(args) > 2 else ""
-            try:
-                status = int(args[1])
-            except (ValueError, IndexError):
-                status = None
+            raw_status = args[1].strip() if len(args) > 1 else ""
+            status = int(raw_status) if raw_status.isdigit() else HTTP_CONST.get(raw_status)
             msg = args[3] if len(args) > 3 else "<dynamic>"
             if kind == "AbortKeyed" and len(args) > 4:
                 msg_key = args[4].strip('"')
@@ -227,7 +249,8 @@ def main():
     entries.extend(RESERVED)
     # 渲染器兜底与 panic 恢复（不在构造器清单里）
     ae_text = (ROOT / "internal/errors/apperror.go").read_text()
-    ae_line = next(i + 1 for i, l in enumerate(ae_text.split("\n")) if 'fallbackCode = "SYS0001"' in l)
+    ae_line = next(i + 1 for i, l in enumerate(ae_text.split("\n"))
+                   if re.search(r'\bfallbackCode\s*=\s*"SYS0001"', l))
     entries.append({
         "code": "SYS0001", "kind": "fallback", "status": None,
         "message": "<dynamic>",

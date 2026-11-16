@@ -232,7 +232,7 @@
       "status": 500,
       "message": "服务器错误",
       "file": "internal/handler/admin.go",
-      "line": 306
+      "line": 312
     },
     {
       "code": "ADM0020",
@@ -240,7 +240,7 @@
       "status": 500,
       "message": "服务器错误",
       "file": "internal/handler/admin.go",
-      "line": 342
+      "line": 348
     },
     {
       "code": "ADM0021",
@@ -248,7 +248,7 @@
       "status": 400,
       "message": "不能删除自己的账号",
       "file": "internal/handler/admin.go",
-      "line": 347
+      "line": 353
     },
     {
       "code": "ADM0022",
@@ -256,7 +256,7 @@
       "status": 404,
       "message": "账户不存在",
       "file": "internal/handler/admin.go",
-      "line": 353
+      "line": 359
     },
     {
       "code": "ADM0023",
@@ -264,7 +264,7 @@
       "status": 500,
       "message": "服务器错误",
       "file": "internal/handler/admin.go",
-      "line": 357
+      "line": 363
     },
     {
       "code": "ADM0024",
@@ -272,7 +272,7 @@
       "status": 400,
       "message": "该账户不是管理/创作者账户",
       "file": "internal/handler/admin.go",
-      "line": 361
+      "line": 367
     },
     {
       "code": "ADM0025",
@@ -280,7 +280,7 @@
       "status": 500,
       "message": "服务器错误",
       "file": "internal/handler/admin.go",
-      "line": 367
+      "line": 373
     },
     {
       "code": "ADM0026",
@@ -288,7 +288,7 @@
       "status": 400,
       "message": "不能删除最后一个超级管理员",
       "file": "internal/handler/admin.go",
-      "line": 371
+      "line": 377
     },
     {
       "code": "ADM0027",
@@ -296,7 +296,7 @@
       "status": 500,
       "message": "服务器错误",
       "file": "internal/handler/admin.go",
-      "line": 376
+      "line": 382
     },
     {
       "code": "ADM0028",
@@ -304,7 +304,7 @@
       "status": 500,
       "message": "服务器错误",
       "file": "internal/handler/admin.go",
-      "line": 410
+      "line": 416
     },
     {
       "code": "ADM0029",
@@ -312,7 +312,7 @@
       "status": 500,
       "message": "服务器错误",
       "file": "internal/handler/admin.go",
-      "line": 416
+      "line": 422
     },
     {
       "code": "ADM0030",
@@ -320,7 +320,7 @@
       "status": 500,
       "message": "服务器错误",
       "file": "internal/handler/admin.go",
-      "line": 440
+      "line": 446
     },
     {
       "code": "ADM0031",
@@ -328,7 +328,7 @@
       "status": 400,
       "message": "不能删除自己的账号",
       "file": "internal/handler/admin.go",
-      "line": 445
+      "line": 451
     },
     {
       "code": "ADM0032",
@@ -336,7 +336,7 @@
       "status": 404,
       "message": "用户不存在",
       "file": "internal/handler/admin.go",
-      "line": 451
+      "line": 457
     },
     {
       "code": "ADM0033",
@@ -344,7 +344,7 @@
       "status": 500,
       "message": "服务器错误",
       "file": "internal/handler/admin.go",
-      "line": 455
+      "line": 461
     },
     {
       "code": "ADM0034",
@@ -352,7 +352,7 @@
       "status": 500,
       "message": "服务器错误",
       "file": "internal/handler/admin.go",
-      "line": 461
+      "line": 467
     },
     {
       "code": "ADM0035",
@@ -360,7 +360,7 @@
       "status": 400,
       "message": "不能删除最后一个超级管理员",
       "file": "internal/handler/admin.go",
-      "line": 465
+      "line": 471
     },
     {
       "code": "ADM0036",
@@ -368,7 +368,7 @@
       "status": 500,
       "message": "服务器错误",
       "file": "internal/handler/admin.go",
-      "line": 470
+      "line": 476
     },
     {
       "code": "ADM0037",
@@ -376,7 +376,7 @@
       "status": 500,
       "message": "服务器错误",
       "file": "internal/handler/admin.go",
-      "line": 474
+      "line": 480
     },
     {
       "code": "ADM0038",
@@ -384,7 +384,7 @@
       "status": 500,
       "message": "服务器错误",
       "file": "internal/handler/admin.go",
-      "line": 478
+      "line": 484
     },
     {
       "code": "ADM0039",
@@ -392,7 +392,7 @@
       "status": 500,
       "message": "服务器错误",
       "file": "internal/handler/admin.go",
-      "line": 482
+      "line": 488
     },
     {
       "code": "ADM0040",
@@ -400,7 +400,7 @@
       "status": 500,
       "message": "服务器错误",
       "file": "internal/handler/admin.go",
-      "line": 486
+      "line": 492
     },
     {
       "code": "ADM0041",
@@ -408,7 +408,7 @@
       "status": 500,
       "message": "服务器错误",
       "file": "internal/handler/admin.go",
-      "line": 491
+      "line": 497
     },
     {
       "code": "ADM0042",
@@ -416,7 +416,7 @@
       "status": 500,
       "message": "服务器错误",
       "file": "internal/handler/admin.go",
-      "line": 495
+      "line": 501
     },
     {
       "code": "ADM0043",
@@ -424,7 +424,7 @@
       "status": 500,
       "message": "服务器错误",
       "file": "internal/handler/admin.go",
-      "line": 499
+      "line": 505
     },
     {
       "code": "ADM0044",
@@ -432,7 +432,7 @@
       "status": 500,
       "message": "服务器错误",
       "file": "internal/handler/admin.go",
-      "line": 503
+      "line": 509
     },
     {
       "code": "ADM0045",
@@ -440,7 +440,7 @@
       "status": 500,
       "message": "服务器错误",
       "file": "internal/handler/admin.go",
-      "line": 507
+      "line": 513
     },
     {
       "code": "ADM0046",
@@ -448,7 +448,7 @@
       "status": 500,
       "message": "服务器错误",
       "file": "internal/handler/admin.go",
-      "line": 513
+      "line": 519
     },
     {
       "code": "ADM0047",
@@ -456,7 +456,7 @@
       "status": 500,
       "message": "服务器错误",
       "file": "internal/handler/admin.go",
-      "line": 517
+      "line": 523
     },
     {
       "code": "ADM0048",
@@ -464,7 +464,7 @@
       "status": 500,
       "message": "服务器错误",
       "file": "internal/handler/admin.go",
-      "line": 531
+      "line": 537
     },
     {
       "code": "ADM0049",
@@ -472,7 +472,7 @@
       "status": 400,
       "message": "无效的角色",
       "file": "internal/handler/admin.go",
-      "line": 559
+      "line": 565
     },
     {
       "code": "ADM0050",
@@ -480,7 +480,7 @@
       "status": 500,
       "message": "服务器错误",
       "file": "internal/handler/admin.go",
-      "line": 565
+      "line": 571
     },
     {
       "code": "ADM0051",
@@ -488,7 +488,7 @@
       "status": 400,
       "message": "不能修改自己的角色",
       "file": "internal/handler/admin.go",
-      "line": 570
+      "line": 576
     },
     {
       "code": "ADM0052",
@@ -496,7 +496,7 @@
       "status": 404,
       "message": "账户不存在",
       "file": "internal/handler/admin.go",
-      "line": 576
+      "line": 582
     },
     {
       "code": "ADM0053",
@@ -504,7 +504,7 @@
       "status": 500,
       "message": "服务器错误",
       "file": "internal/handler/admin.go",
-      "line": 580
+      "line": 586
     },
     {
       "code": "ADM0054",
@@ -512,7 +512,7 @@
       "status": 500,
       "message": "服务器错误",
       "file": "internal/handler/admin.go",
-      "line": 586
+      "line": 592
     },
     {
       "code": "ADM0055",
@@ -520,7 +520,7 @@
       "status": 400,
       "message": "不能降级最后一个超级管理员",
       "file": "internal/handler/admin.go",
-      "line": 590
+      "line": 596
     },
     {
       "code": "ADM0056",
@@ -528,7 +528,7 @@
       "status": 500,
       "message": "服务器错误",
       "file": "internal/handler/admin.go",
-      "line": 601
+      "line": 607
     },
     {
       "code": "ADM0057",
@@ -536,7 +536,7 @@
       "status": 500,
       "message": "服务器错误",
       "file": "internal/handler/admin.go",
-      "line": 636
+      "line": 642
     },
     {
       "code": "ADM0058",
@@ -544,7 +544,7 @@
       "status": 500,
       "message": "服务器错误",
       "file": "internal/handler/admin.go",
-      "line": 664
+      "line": 670
     },
     {
       "code": "ADM0059",
@@ -552,7 +552,7 @@
       "status": 500,
       "message": "服务器错误",
       "file": "internal/handler/admin.go",
-      "line": 673
+      "line": 679
     },
     {
       "code": "ADM0060",
@@ -560,7 +560,7 @@
       "status": 500,
       "message": "服务器错误",
       "file": "internal/handler/admin.go",
-      "line": 694
+      "line": 700
     },
     {
       "code": "ADM0061",
@@ -568,7 +568,7 @@
       "status": 404,
       "message": "创作者主页不存在",
       "file": "internal/handler/admin.go",
-      "line": 700
+      "line": 706
     },
     {
       "code": "ADM0062",
@@ -576,7 +576,7 @@
       "status": 500,
       "message": "服务器错误",
       "file": "internal/handler/admin.go",
-      "line": 704
+      "line": 710
     },
     {
       "code": "ADM0063",
@@ -584,7 +584,7 @@
       "status": 500,
       "message": "服务器错误",
       "file": "internal/handler/admin.go",
-      "line": 709
+      "line": 715
     },
     {
       "code": "ADM0064",
@@ -592,7 +592,7 @@
       "status": 500,
       "message": "服务器错误",
       "file": "internal/handler/admin.go",
-      "line": 729
+      "line": 735
     },
     {
       "code": "ADM0065",
@@ -600,7 +600,7 @@
       "status": 404,
       "message": "创作者主页不存在",
       "file": "internal/handler/admin.go",
-      "line": 758
+      "line": 764
     },
     {
       "code": "ADM0066",
@@ -608,7 +608,7 @@
       "status": 500,
       "message": "服务器错误",
       "file": "internal/handler/admin.go",
-      "line": 762
+      "line": 768
     },
     {
       "code": "ADM0067",
@@ -616,7 +616,7 @@
       "status": 500,
       "message": "服务器错误",
       "file": "internal/handler/admin.go",
-      "line": 780
+      "line": 786
     },
     {
       "code": "ADM0068",
@@ -624,7 +624,7 @@
       "status": 404,
       "message": "创作者主页不存在",
       "file": "internal/handler/admin.go",
-      "line": 786
+      "line": 792
     },
     {
       "code": "ADM0069",
@@ -632,7 +632,7 @@
       "status": 500,
       "message": "服务器错误",
       "file": "internal/handler/admin.go",
-      "line": 790
+      "line": 796
     },
     {
       "code": "ADM0070",
@@ -640,7 +640,7 @@
       "status": 404,
       "message": "创作者主页不存在",
       "file": "internal/handler/admin.go",
-      "line": 800
+      "line": 806
     },
     {
       "code": "ADM0071",
@@ -648,7 +648,7 @@
       "status": 500,
       "message": "服务器错误",
       "file": "internal/handler/admin.go",
-      "line": 804
+      "line": 810
     },
     {
       "code": "ADM0072",
@@ -656,7 +656,7 @@
       "status": 500,
       "message": "服务器错误",
       "file": "internal/handler/admin.go",
-      "line": 826
+      "line": 832
     },
     {
       "code": "ADM0073",
@@ -664,7 +664,7 @@
       "status": 404,
       "message": "创作者主页不存在",
       "file": "internal/handler/admin.go",
-      "line": 843
+      "line": 849
     },
     {
       "code": "ADM0074",
@@ -672,7 +672,7 @@
       "status": 500,
       "message": "服务器错误",
       "file": "internal/handler/admin.go",
-      "line": 847
+      "line": 853
     },
     {
       "code": "ADM0075",
@@ -680,7 +680,7 @@
       "status": 400,
       "message": "请输入密码",
       "file": "internal/handler/admin.go",
-      "line": 870
+      "line": 876
     },
     {
       "code": "ADM0076",
@@ -688,7 +688,7 @@
       "status": 404,
       "message": "未找到",
       "file": "internal/handler/admin.go",
-      "line": 876
+      "line": 882
     },
     {
       "code": "ADM0077",
@@ -696,7 +696,7 @@
       "status": 500,
       "message": "服务器错误",
       "file": "internal/handler/admin.go",
-      "line": 880
+      "line": 886
     },
     {
       "code": "ADM0078",
@@ -704,7 +704,7 @@
       "status": 400,
       "message": "密码错误",
       "file": "internal/handler/admin.go",
-      "line": 885
+      "line": 891
     },
     {
       "code": "ADM0079",
@@ -712,7 +712,7 @@
       "status": 400,
       "message": "参数错误",
       "file": "internal/handler/admin.go",
-      "line": 909
+      "line": 915
     },
     {
       "code": "ADM0080",
@@ -720,7 +720,7 @@
       "status": 500,
       "message": "服务器错误",
       "file": "internal/handler/admin.go",
-      "line": 914
+      "line": 920
     },
     {
       "code": "ADM0081",
@@ -728,7 +728,7 @@
       "status": 404,
       "message": "用户不存在",
       "file": "internal/handler/admin.go",
-      "line": 920
+      "line": 926
     },
     {
       "code": "ADM0082",
@@ -736,7 +736,7 @@
       "status": 500,
       "message": "服务器错误",
       "file": "internal/handler/admin.go",
-      "line": 924
+      "line": 930
     },
     {
       "code": "ADM0083",
@@ -744,7 +744,7 @@
       "status": 400,
       "message": "不能修改超级管理员或创作者的权限",
       "file": "internal/handler/admin.go",
-      "line": 928
+      "line": 934
     },
     {
       "code": "ADM0084",
@@ -752,7 +752,15 @@
       "status": 500,
       "message": "服务器错误",
       "file": "internal/handler/admin.go",
-      "line": 938
+      "line": 944
+    },
+    {
+      "code": "ADM0085",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "服务器错误",
+      "file": "internal/handler/admin.go",
+      "line": 292
     },
     {
       "code": "ANN0001",
@@ -1816,7 +1824,7 @@
       "status": 400,
       "message": "读取请求体失败: ",
       "file": "internal/middleware/bodyparse.go",
-      "line": 85
+      "line": 86
     },
     {
       "code": "BDP0002",
@@ -1824,7 +1832,7 @@
       "status": 413,
       "message": "request entity too large",
       "file": "internal/middleware/bodyparse.go",
-      "line": 89
+      "line": 90
     },
     {
       "code": "BDP0003",
@@ -1832,7 +1840,7 @@
       "status": 400,
       "message": "<dynamic>",
       "file": "internal/middleware/bodyparse.go",
-      "line": 107
+      "line": 108
     },
     {
       "code": "BDP0004",
@@ -1840,7 +1848,7 @@
       "status": 400,
       "message": "<dynamic>",
       "file": "internal/middleware/bodyparse.go",
-      "line": 117
+      "line": 123
     },
     {
       "code": "CAT0001",
@@ -4705,8 +4713,24 @@
       "status": null,
       "message": "<dynamic>",
       "file": "internal/errors/apperror.go",
-      "line": 40,
+      "line": 42,
       "_note": "未编码 4xx/5xx 的兜底错误码（渲染器 fallbackCode）"
+    },
+    {
+      "code": "SYS0002",
+      "kind": "codedBody",
+      "status": 400,
+      "message": "请求格式错误",
+      "file": "internal/middleware/bodyparse.go",
+      "line": 116
+    },
+    {
+      "code": "SYS0003",
+      "kind": "AbortCoded",
+      "status": 404,
+      "message": "接口不存在",
+      "file": "internal/server/app.go",
+      "line": 172
     },
     {
       "code": "SYS0500",
@@ -5548,6 +5572,42 @@
       "message": "Episode not found",
       "file": "internal/handler/episodetrash.go",
       "line": 258
+    },
+    {
+      "code": "UPL0001",
+      "kind": "upload",
+      "status": 400,
+      "message": "文件上传错误: File too large",
+      "file": "internal/errors/apperror.go",
+      "line": null,
+      "_note": "UploadError LIMIT_FILE_SIZE"
+    },
+    {
+      "code": "UPL0002",
+      "kind": "upload",
+      "status": 400,
+      "message": "文件上传错误: 仅支持图片文件 (jpg, jpeg, png, gif, webp)",
+      "file": "internal/errors/apperror.go",
+      "line": null,
+      "_note": "UploadError LIMIT_FILE_TYPE"
+    },
+    {
+      "code": "UPL0003",
+      "kind": "upload",
+      "status": 400,
+      "message": "文件上传错误: 文件内容与类型不匹配，仅支持图片文件",
+      "file": "internal/errors/apperror.go",
+      "line": null,
+      "_note": "UploadError BAD_MAGIC"
+    },
+    {
+      "code": "UPL0004",
+      "kind": "upload",
+      "status": 400,
+      "message": "<dynamic>",
+      "file": "internal/errors/apperror.go",
+      "line": null,
+      "_note": "UploadError 其它/未知 Code"
     },
     {
       "code": "USR0001",
