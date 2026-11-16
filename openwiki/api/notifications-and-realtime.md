@@ -20,15 +20,15 @@ sources:
     resource: repo://internal/repository/push_subscription.go
   - id: openwiki-source-f7acf9d278285ec2e6b81113
     resource: repo://internal/service/auth_service.go
-generated: { by: "zcode", at: "2026-11-13T18:41:36.261Z" }
+generated: { by: "zcode", at: "2026-11-16T17:33:30.305Z" }
 verified:
   - by: openwiki/0.7.2
-    at: 2026-11-13T18:41:36.261Z
+    at: 2026-11-16T17:33:30.305Z
 ---
 
 # 通知与实时推送
 
-通知投递分为持久化的站内通知，以及两种完成度不同的传输方式：通过数据库轮询推送新通知的 SSE 流，和没有发送器的 Web Push 订阅登记。
+通知投递分为持久化的站内通知，以及两种完成度不同的传输方式：通过数据库轮询推送新通知的 SSE 流，和没有发送器的 Web Push 订阅登记。4xx/5xx 响应统一走错误信封 `{message, error, ref, status}`，本域错误码前缀为 `NTF`。
 
 ## 通知文档
 
@@ -72,7 +72,7 @@ verified:
 
 ## SSE 流
 
-`GET /notifications/stream` 在路由层是公开的，因为它使用短期票据而不是 access token 认证。`GET /auth/sse-ticket`（需认证）签发有效 30 秒、purpose 为 `sse-ticket` 的 JWT。流 handler 校验 JWT 签名与 purpose，并把 subject 当作 user ID。
+`GET /notifications/stream` 在路由层是公开的，因为它使用短期票据而不是 access token 认证。`GET /auth/sse-ticket`（需认证）签发有效 30 秒、purpose 为 `sse-ticket` 的 JWT。流 handler 校验 JWT 签名与 purpose，并把 subject 当作 user ID；票据缺失或无效返回 401 `NTF0001`，user ID 非法同样按 401 处理。
 
 连接簿记在进程内并由互斥锁保护：
 
@@ -92,7 +92,7 @@ handler 写入 SSE 头（`text/event-stream`、`no-cache`、`keep-alive`、`X-Ac
 
 `episodeUpdate`、`newDeviceLogin`、`feedbackReply`、`friendLinkStatus`、`friendLinkApply`、`announcement`、`reviewResult`。
 
-这些偏好不会阻止通知创建，只门控对应的邮件发送；邮件由生产领域异步发送，且仅在邮箱已验证时发送。例如剧集更新邮件检查 `episodeUpdate`，反馈回复检查 `feedbackReply`，审核结果检查 `reviewResult`。
+这些偏好不会阻止通知创建，只门控对应的邮件发送；邮件由生产领域异步发送，且仅在邮箱已验证时发送。例如剧集更新邮件检查 `episodeUpdate`，反馈回复检查 `feedbackReply`，审核结果检查 `reviewResult`。注意 `email` 自 ADR-020 起是可选字段：无邮箱用户（如外部登录发号路径）的文档缺省该字段，用户对象输出为空串 `""`，前端按空值展示「未绑定邮箱」，因此这类用户天然收不到任何邮件通知。
 
 偏好通过 `PUT /api/auth/email-notification-prefs` 管理，并出现在 `/auth/me` 响应中。`/auth/me` 与登录/refresh 响应的用户对象是固定字段契约（`勿增删`）：登录/refresh 用 `SessionUserJSON`，`/auth/me` 用 `MeJSON`（额外带 `avatar` 与偏好对象）；两者当前都包含 `_id`、`uid`（数字用户锚）、`accountId`、`username`、`email`、`role`、`twoFactorEnabled`（前端 2FA 状态展示的权威来源）、`force2FASetup`（admin/superadmin 未开 2FA 时的强制设置标记）与 `forceEmailChange`（超管未改默认邮箱标记）。
 
@@ -112,6 +112,7 @@ handler 写入 SSE 头（`text/event-stream`、`no-cache`、`keep-alive`、`X-Ac
 
 ## 相关阅读
 
+- [错误信封与错误码契约](error-envelope.md)——`{message, error, ref, status}` 响应体与 `NTF` 错误码。
 - [会话与令牌生命周期](../auth/session-and-token-lifecycle.md)——令牌 purpose 与签名。
 - [邮件发送](../integrations/email-delivery.md)——实际邮件传输与偏好检查。
 - [外部服务](../integrations/external-services.md)——VAPID 配置。

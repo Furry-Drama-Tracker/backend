@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "pageVersion": "sha256:5a07284d201ebc84ec53f93c40b4a156f941431e60bcfc655b042840f878721d",
+  "pageVersion": "sha256:5aba020ec939f01d73aaf37b695d9039b8db547cc76b7b1ff84d6a64a1e224f3",
   "claims": [
     {
       "id": "claim_9d5c0f9d432440f1b13cc0b99d629064",
@@ -71,7 +71,7 @@
           "version": "repo-lines-v1:sha256:c89c1189b1d3f45339ca2c8e0680452d5f6f4f457330339d252a58064bd78de3:eyJzZWxlY3RlZExpbmVDb3VudCI6MTYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjZlZjYxN2E1ZjgxNWNhYjRhZmM0NmFhYWVkYmEzMjNiZjY5MjcwMGYwZGRkYTg2ZDZjMmU2M2U4ZTI4NWY1YTgiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjgzODQ3ZjE5N2QyMTYxMDY2NzllNGIzYjRmNmE5NzgwM2ViMzQ2ZTdmOGU2ZmZmNWU4OWU4YTQ4NDhjODk4YjUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjQwZWVjZTQwOGY1NmQyYThiMjc4ZGFmZWRmNjUzMDg5M2QwNjA1NDNlZWU3MTgyN2IzNzM2OGJkYmI3ZjYxMGUifQ"
         },
         {
-          "resource": "repo://internal/service/login.go#L124-L128",
+          "resource": "repo://internal/service/login.go#L125-L129",
           "version": "repo-lines-v1:sha256:f10dd78dc198da32695f1ef0fa1a03f9613051009e9d1e7a388f923aa5071b89:eyJzZWxlY3RlZExpbmVDb3VudCI6NSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiMDdmOTE5YzgzMjBhYTU5ZmFkZTJmYzRmMWFiODU0OTgwN2ViYzEzNzIyMDEyYjEyMmU5YjUxNmYxMjM2ZTE1MiIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNjdjZGE4MmRhNjA2MjM4ZTA1ZTYyMzk5NTY5YzVlZTAzOTkzNDE5NjQ4YWU1ZDQzYTJiZjhjZDYzNDdmODI2MyIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiMTcxZGRjNGRlMGE5OTc3MDdmNTJiNzE4ZTEwZDIzYmYzZmE0ZDMyZWNhZjI1YWUxMjhhMjRiOGY0YWMxZWY0NCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiNTFkYTRiY2U1ZTA5NmFjMTFmMThiNzIyMTI0ZTdmMzkxNGM4N2M5ZDNjNDQwMWUzZDkzYmQ4OGM1YTlkMjRjZCJ9"
         },
         {
@@ -89,7 +89,7 @@
           "version": "repo-lines-v1:sha256:40430e9d62dbbd0dd5944884e3b8dcbfe649edfdac18fd0fbc3fc69bf9f41d26:eyJzZWxlY3RlZExpbmVDb3VudCI6NiwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiODA5NjI3ZGZmZmRiM2UwYzMyMTFlZjVhMGE0YjM3MzQwMmQ1YTNhOTBhNDA5MzZkZjFjZDVhZWFmNzFhN2YzMSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNDEyY2EzNDVjY2Y3NWJmOWMwODA2YmNlNjk1YmU4ZGU4MDhiNzk5ODQyNTFhN2E1NGQyMDJjZjYxMDFkZDQ1MSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNTM0OTdmMmM4MDBmMWU5ZGE3ODljZDhkYTEwNWYxOWY3ZTZkZWJmZDcwMWRjYzE3NTUzNTYzNDY5NGU4NjQ2OCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiNmRmNDU4NjA0YzI2Nzk1ODliMGMzNTVjZTVmNmU0ZGM2Y2FmYjgwYWY1MTZmNjQ0MDJmMzkzZGQzY2U1OWM5MCJ9"
         },
         {
-          "resource": "repo://internal/handler/notifications.go#L445-L452",
+          "resource": "repo://internal/handler/notifications.go#L446-L453",
           "version": "repo-lines-v1:sha256:d8c507dfacb2da3a10452369cc02ed7134438c69bf357564a1b347a57619bb82:eyJzZWxlY3RlZExpbmVDb3VudCI6OCwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiNGExYmVmMDJiNDZiODQ1OGM3MzJkMGI3YmQyOGE4MGVjMTg5ODlkNDJhZGIwYTg3MTIyOGVhNjQxYjJmNmE3YyIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNDEyY2EzNDVjY2Y3NWJmOWMwODA2YmNlNjk1YmU4ZGU4MDhiNzk5ODQyNTFhN2E1NGQyMDJjZjYxMDFkZDQ1MSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiYTM0MmVlODAyMjc1NWVmOGMyNDkxNWQ0YTMwNDc4NTJmNGY3M2VlYzllZTE3Yjk4ZGJjNmMxOGNiNjFiYzZiZSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiOWI3Mzk2NjMyODBmYzQ3NjVkNjUzYTJlYWE5NzYzMDU5ZDM5ZmI3Y2IzMmRmNTYzNzMwMzM3MTk5OGJkNzQ3YiJ9"
         }
       ]
@@ -99,7 +99,7 @@
       "statement": "The VAPID private key is never used because web push sending is a no-op placeholder in every domain.",
       "evidence": [
         {
-          "resource": "repo://internal/handler/reports.go#L261-L270",
+          "resource": "repo://internal/handler/reports.go#L262-L271",
           "version": "repo-lines-v1:sha256:a9de898e15135c9aef0324fcac86c6daed0405cdd06a72dc60a4eb6bd35ac9c7:eyJzZWxlY3RlZExpbmVDb3VudCI6MTAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImNkMGYxMzJjZWRhMmUxODlhY2EyMTg2MWEwYzFkZDIxNDNkZGFhNmVjOTUxNTdmZWE1M2FkYWYwMDk2NWUyZjgiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
         }
       ]
@@ -130,11 +130,11 @@
     },
     {
       "id": "claim_0bc6c4d2db014e269e7694e770013108",
-      "statement": "QQ 互联 OAuth 是预留路由 /api/auth/qq/*（status/start/callback）：凭据未配置时 provider disabled，已配置时实现仍返回 501「QQ 登录尚未开放」待接入 SDK；status 端点返回 {enabled}；externalidentities 集合已建 (provider, openid) 唯一索引（provider 预留 qq），注册路径已为无邮箱外部身份预留分支。",
+      "statement": "QQ 互联 OAuth 是预留路由 /api/auth/qq/*（status/start/callback）：凭据未配置时 provider disabled，已配置时实现仍返回 501「QQ 登录尚未开放」待接入 SDK（响应保持裸 {message}，不带错误信封，属错误码契约例外）；status 端点返回 {enabled}；externalidentities 集合已建 (provider, openid) 唯一索引（provider 预留 qq），注册路径已为无邮箱外部身份预留分支（ADR-020 email 可选字段的动机）。",
       "evidence": [
         {
-          "resource": "repo://internal/handler/oauth.go#L16-L53",
-          "version": "repo-lines-v1:sha256:6f7148b6d530b27a9da151f027594d22b16066f748a6b2ab3d9ef840d4d68d29:eyJzZWxlY3RlZExpbmVDb3VudCI6MzgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjcwN2I3OGM0YmM1YTk5MTA0MGEzYTc4ZjM2YmVmM2IxNmE2YmRmMDliZjQ1MTMxYzQzOWM2YTBhNjIzODg0N2QiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImEwZjEzZTNlMTg0Y2FiYTY0NThjMzAyZjA5MTdhNGE3OWE4MjI4ZDBkMTQ5ZTU5OGY2YmRmOTgxZDUzMjM3NzciLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+          "resource": "repo://internal/handler/oauth.go#L16-L54",
+          "version": "repo-lines-v1:sha256:f896a55f6c0f134ca99178b1322a7dabde4d0a502f50c5de1f86d50992cf557d:eyJzZWxlY3RlZExpbmVDb3VudCI6MzksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImE3MGE4OGUwMzJkOWYwMjEzZjhlYmM5YzcxOTA1ZDdlOGY3YjkyYzAyMjRkYjk1ZDQwMTFkYWRkM2FlNDQwNzYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImFkNTU3Mzk4OGE5N2IwNzE3NmI4OWMyYzljZjE0MjQxNzY1ZjhmNDkxY2ViM2YzYzBmNWNmMWQwMzQ0ZGEyOWQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
         },
         {
           "resource": "repo://internal/model/authfactors.go#L9-L21",
@@ -149,6 +149,6 @@
   ],
   "verification": {
     "by": "openwiki/0.7.2",
-    "at": "2026-11-13T18:41:36.261Z"
+    "at": "2026-11-16T17:33:30.305Z"
   }
 }

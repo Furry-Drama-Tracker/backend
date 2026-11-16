@@ -40,10 +40,10 @@ sources:
     resource: repo://internal/service/password.go
   - id: openwiki-source-d97c9077329c5637a8dbc18d
     resource: repo://internal/service/purge.go
-generated: { by: "zcode", at: "2026-11-13T18:41:36.261Z" }
+generated: { by: "zcode", at: "2026-11-16T17:33:30.305Z" }
 verified:
   - by: openwiki/0.7.2
-    at: 2026-11-13T18:41:36.261Z
+    at: 2026-11-16T17:33:30.305Z
 ---
 
 # 账号安全能力
@@ -83,7 +83,8 @@ verified:
 
 2FA 是创作者及以上才开放的能力，策略由角色对比落地：
 
-- **普通用户禁开**：`POST /2fa/enable` 与 `POST /2fa/verify-enable` 对 `role=user` 直接 403「普通用户不可开启两步验证」；
+- **普通用户禁开**：`POST /2fa/enable` 与 `POST /2fa/verify-enable` 对 `role=user` 直接 403「普通用户不可开启两步验证」（`TFA0001`/`TFA0006`）；
+- **enable 需密码再认证（2026-11）**：2FA 注册是植入持久凭据（TOTP secret + 10 个备份码且响应明文下发），被窃会话若能植入自有第二因素，将获得跨密码轮换存续、所有者无法自助移除的持久凭据。因此 `/2fa/enable` 要求请求体携带 `currentPassword`，经 `reauthPassword`（复用 Passkey 注册/删除的 `PAS0016`/`PAS0017` 提示交互）校验后才继续；`/2fa/enable` 同时已补入 `TwoFactorSpec` 限流挂载（此前缺项导致该端点实际只剩全局 300/min 兜底）；
 - **管理员强制**：admin/superadmin 必须开启 2FA——登录/refresh/`/me` 响应携带 `force2FASetup` 标记，前端拦截强制设置流程；同时 `POST /2fa/disable` 对 admin/superadmin 返回 403「管理员账号强制开启两步验证，不可自行关闭」。管理员丢失验证器被锁在强制设置流程外时，只能用 `cmd/useradmin clear-2fa` 带外恢复（清 2FA + 吊销全部会话，重新走强制设置）；
 - **降级联动**：后台 `UpdateRole` 把开启 2FA 的账号降级为 `user` 时自动关闭 2FA、吊销全部会话并写 `ROLE_DOWNGRADE_2FA_OFF` 审计（见管理与审核 API 页）。
 
@@ -103,7 +104,7 @@ verified:
 
 | 路由 | 行为 |
 |---|---|
-| `POST /2fa/enable` | **角色门控**（user 403）；**已启用时返回 400**；未启用时生成 secret 与备用码，secret 加密、备用码哈希存储，返回 `secret`/`secretBase32`/`backupCodes`/`otpauthUrl`，但仍保持 2FA 关闭 |
+| `POST /2fa/enable` | **角色门控**（user 403）；**密码再认证**（`currentPassword` + `reauthPassword`，2026-11 起）；**已启用时返回 400**；未启用时生成 secret 与备用码，secret 加密、备用码哈希存储，返回 `secret`/`secretBase32`/`backupCodes`/`otpauthUrl`，但仍保持 2FA 关闭 |
 | `POST /2fa/verify-enable` | 角色门控；要求有效 TOTP，然后设置 `twoFactorEnabled` |
 | `POST /2fa/verify` | 校验 TOTP 或备用码；使用过的备用码会被消费（剩余数组以哈希格式落库） |
 | `POST /2fa/disable` | 角色门控（admin/superadmin 403）；要求 TOTP 或备用码；**无凭据恢复通道**（见下） |
@@ -114,9 +115,9 @@ verified:
 
 `emailOtp` 是用户系统重构新增的第二因素方法。登录响应 `Need2FA` 附带 `twoFactorMethods` 列表告知前端可用方法：`totp` 恒有（TOTP 密钥在 2FA 开启时必已注册），`emailOtp` 仅邮箱已验证时可用。
 
-- 发送（`Send2FAEmailOTP`）校验 `2fa-challenge` 挑战令牌、2FA 已启用与邮箱已验证，然后向独立的 `EmailOTPCodes` store 写入六位码并发送邮件。该 store 与注册/登录验证码存储共享六位命名空间但独立实例，避免同码跨流程误消费；签发走 `code.Store.Mint`，保证不覆盖任何未过期条目（ADR-019）。
+- 发送（`Send2FAEmailOTP`）校验 `2fa-challenge` 挑战令牌、2FA 已启用与邮箱已验证（`email` 为可选字段：无邮箱或未验证邮箱的账号返回 `DEV0015`，邮箱 OTP 对其不可用），然后向独立的 `EmailOTPCodes` store 写入六位码并发送邮件。该 store 与注册/登录验证码存储共享六位命名空间但独立实例，避免同码跨流程误消费；签发走 `code.Store.Mint`，保证不覆盖任何未过期条目（ADR-019）。**签发新码前先 `DeleteForUser` 作废同账号全部未过期旧码**（2026-11）：防止凭挑战令牌反复 Mint 造成同账号多码并存、把第二因素键空间从 900k 稀释成随请求数线性放大的命中概率。
 - 校验（`consumeEmailOTP`）一次性消费并限五次尝试；码属于别的账号时按校验失败处理，不消费、不留痕（防跨账号枚举）。
-- 任一方法的校验失败都走 `rejectTwoFactor`：递增 `loginAttempts`，达到阈值返回 423 锁定。
+- 任一方法的校验失败都走 `rejectTwoFactor`：递增 `loginAttempts`，达到阈值返回 423 锁定。配合 2026-11 的登录侧修复：密码已通过但停在 2FA 挑战阶段**不清零失败计数**（清零点移到完整认证成功之后），否则"正确密码 + OTP 猜测"交替请求会让锁定永不触发（CWE-307）。
 
 ### 2FA 无凭据恢复通道（ADR-019）
 
@@ -173,11 +174,13 @@ Passkey 是用户系统重构新增的认证方式（`internal/service/passkey.g
 
 登录用户（`POST /auth/resend-verification`）与带 Altcha 的邮箱方式（`POST /auth/resend-verification-by-email`）都可以重发。后者始终返回统一消息，避免泄露账号是否存在。SMTP 未配置时，登录用户重发路径返回“邮件服务未配置，请联系管理员”。
 
+限流注意：`/api/auth/verify-email` 的 `emailVerify` spec 挂载固定回退 IP key——该端点按 code 解析验证条目，请求体 email 与被保护资源无绑定，按 email 分桶会让爆破 spec 失效（详见[请求生命周期](../architecture/request-lifecycle.md)）。
+
 ## 邮箱变更
 
 有两条不同流程：
 
-- **普通用户**：`POST /auth/request-email-change` 需要当前密码与 Altcha，检查锁定状态，拒绝相同地址或已被使用的地址，并签发一小时有效、携带新地址的 `email-change` 令牌。确认链接发送到新地址。`POST /auth/verify-email-change` 校验 purpose，通过 `usedtokens` 强制一次性使用，重新检查唯一性，把新地址设为已验证，并吊销全部会话。
+- **普通用户**：`POST /auth/request-email-change` 需要当前密码与 Altcha，检查锁定状态，拒绝相同地址或已被使用的地址，并签发一小时有效、携带新地址的 `email-change` 令牌。确认链接发送到新地址。`POST /auth/verify-email-change` 校验 purpose，通过 `usedtokens` 强制一次性使用，重新检查唯一性，把新地址设为已验证，并吊销全部会话。email 成为可选字段（ADR-020）后，`SetEmailVerifiedAndEmail`/`SetEmailPendingVerification` 等显式 `$set email` 的写入口仍只取已校验非空邮箱，不破坏"不得写 `email:\"\"`"的口径。
 - **超管强制变更**：`PUT /auth/change-email` 仅限超管并附加 `RequireEmailChanged`。它校验密码，用定点更新 `SetEmailPendingVerification` 把新地址设为未验证（不再整文档替换，避免清空 2FA 密文），发送验证码，审计，吊销全部会话并清除 cookie。该流程用于让刚初始化的超管替换默认邮箱。
 
 ## 通知偏好
@@ -221,6 +224,7 @@ Passkey 是用户系统重构新增的认证方式（`internal/service/passkey.g
 
 ## 相关阅读
 
+- [错误信封与错误码契约](../api/error-envelope.md)——本域错误码前缀（AUT/DEV/PAS/TFA/SES/USR 等）。
 - [配置与环境变量](../architecture/configuration.md)——加密与 Altcha 密钥来源、WebAuthn RP 推导。
 - [注册与登录流程](login-and-registration.md)——登录标识符、设备令牌与 2FA 分支。
 - [工具与上传 API](../api/utilities-and-uploads.md)——用户名改名完整流程。

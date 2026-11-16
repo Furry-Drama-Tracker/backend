@@ -3,9 +3,6 @@ type: api-domain
 title: 内容目录 API
 description: 剧集与系列目录、审核门控的写入路径、观看计数与缓存，以及用户追番、收藏、收藏夹、历史与评分域的行为。
 tags: [api, episodes, series, follows, favorites, folders, histories, ratings]
-verified:
-  - by: openwiki/0.7.2
-    at: 2026-11-11T16:33:08.526Z
 sources:
   - id: openwiki-source-f89e324c07065d291ea97e16
     resource: repo://internal/handler/episodes.go
@@ -23,12 +20,15 @@ sources:
     resource: repo://internal/model/episode.go
   - id: openwiki-source-7dbb03889219204710573384
     resource: repo://internal/model/misc.go
-generated: { by: "zcode", at: "2026-11-11T16:33:08.526Z" }
+generated: { by: "zcode", at: "2026-11-16T17:33:30.305Z" }
+verified:
+  - by: openwiki/0.7.2
+    at: 2026-11-16T17:33:30.305Z
 ---
 
 # 内容目录 API
 
-内容目录是产品的核心面。它横跨多个挂载路由组，共享 `episodes` 集合与一个公共缓存：`/episodes`、`/series`、`/follows`、`/favorites`、`/folders`、`/saved-folders`、`/histories` 与 `/ratings`。handler 直接调用 repository；只有认证与导出路径使用 service 层。
+内容目录是产品的核心面。它横跨多个挂载路由组，共享 `episodes` 集合与一个公共缓存：`/episodes`、`/series`、`/follows`、`/favorites`、`/folders`、`/saved-folders`、`/histories` 与 `/ratings`。handler 直接调用 repository；只有认证与导出路径使用 service 层。4xx/5xx 响应统一走错误信封 `{message, error, ref, status}`；本域通用 500 复用 `episodes.go` 的共享 `serverError`（`EPS0037`），域内错误码前缀有 `EPS`（剧集）、`SER`（系列）、`FOL`（追番）、`FLD`（收藏夹）、`HIS`（历史）、`RAT`（评分）等。
 
 ## 剧集目录与单集
 
@@ -38,6 +38,7 @@ generated: { by: "zcode", at: "2026-11-11T16:33:08.526Z" }
 
 - 公开列表与搜索只包含 `reviewStatus` 为 `approved` 或缺失（遗留文档早于该字段）的文档。
 - `GET /episodes/:id` 使用 `OptionalAuth`。未审核剧集返回 404，除非调用者是创作者、授权编辑、自定义作者或管理员；有权查看者还会收到 `X-Robots-Tag: noindex, nofollow`。
+- 匿名可达的公开端点（列表、详情、观看计数、创作者公开主页）会对输出 DTO 调用 `stripEpisodeReviewFields`，删除 `reviewNote`、`pendingChanges`、`hasPendingChanges`、`pendingChangeSummary`、`reviewedBy`、`reviewedAt` 六个审核内部字段（CWE-200 信息泄露修复，2026-11）。追番/收藏列表展开剧集用的 `repository.FollowsEpisodeDoc` 同步把同组字段改为 `json:"-"`（`reviewStatus` 保留），创作中心与审核等私有视图不受影响。
 - 追番、收藏与评分写入会以 403 拒绝未审核剧集，用户无法与未发布内容交互。
 
 ### 列表、搜索与缓存
@@ -114,12 +115,14 @@ generated: { by: "zcode", at: "2026-11-11T16:33:08.526Z" }
 ## 横切行为
 
 - 所有用户内容库端点都需要认证，并且只操作调用者自己的文档。
-- 对象 ID 是 hex 字符串；路径或请求体中格式非法的 ID 通常表现为 500 `Server error`，与旧 API 一致。
+- 对象 ID 是 hex 字符串；路径或请求体中格式非法的 ID 通常表现为 500 `Server error`（信封码 `EPS0037`），与旧 API 一致。
+- **版本历史读取授权**：`GET /versions/list|:id|diff` 在读取前经 `canReadVersions` 校验——剧集不存在（含已进回收站）或调用者既非管理员/超管、又非创作者本人或授权编辑时，一律按 404 `VER0011` 处理（CWE-639 IDOR 修复，2026-11；用 404 而非 403 以避免泄露剧集存在性）。回滚端点本就要求可编辑权限。
 - 目录变更会使共享剧集缓存失效；部分操作还会触发站内通知与邮件。
 - 推送发送在该域中已定义但当前为空实现。
 
 ## 相关阅读
 
+- [错误信封与错误码契约](error-envelope.md)——`{message, error, ref, status}` 响应体与错误码注册表。
 - [管理与审核 API](administration-and-moderation.md)——通过/拒绝与回收站语义。
 - [上传、RSS、翻译、备份与分页](utilities-and-uploads.md)——封面上传与分页。
 - [持久化与数据模型](../architecture/persistence-and-data-model.md)——集合布局与 ObjectID 处理。

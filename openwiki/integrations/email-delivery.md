@@ -18,10 +18,10 @@ sources:
     resource: repo://internal/email/templates.go
   - id: openwiki-source-f89e324c07065d291ea97e16
     resource: repo://internal/handler/episodes.go
-generated: { by: "zcode", at: "2026-11-04T15:34:40.691Z" }
+generated: { by: "zcode", at: "2026-11-16T17:33:30.305Z" }
 verified:
   - by: openwiki/0.7.2
-    at: 2026-11-04T15:34:40.691Z
+    at: 2026-11-16T17:33:30.305Z
 ---
 
 # 邮件发送
@@ -106,8 +106,11 @@ SMTP 配置只来自 `config.Email`，由 ini `[email]` 段或 `EMAIL_*` 环境�
 - 发送失败：记录错误；调用方通常忽略。
 - 需要确认的邮箱变更在邮件不可用时返回 503，因为流程无法继续。
 
+调用邮件链路（邮箱验证、重置、变更、偏好设置）的错误响应统一走错误信封 `{message, error, ref, status}`，service 层带 `AUT00xx` 错误码。`users.email` 是可选字段（ADR-020）后，所有邮件发送点仍只对已校验非空邮箱触发——无邮箱用户的文档缺省该字段、JSON 输出为空串，收件人检查天然不命中，不会向空地址投递。
+
 ## 相关阅读
 
+- [错误信封与错误码契约](../api/error-envelope.md)——邮件链路错误响应的信封与 `AUT00xx` 码。
 - [通知与实时推送](../api/notifications-and-realtime.md)——偏好键与站内通知。
 - [账号安全能力](../auth/account-security.md)——验证与重置流程。
 - [可观测性与后台任务](../operations/observability-and-background-jobs.md)——stdout 与 stderr 日志分流。

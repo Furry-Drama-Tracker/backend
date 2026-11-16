@@ -38,10 +38,10 @@ sources:
     resource: repo://internal/service/passkey.go
   - id: openwiki-source-3f2309f0c3b4e4f8068472e9
     resource: repo://internal/service/register.go
-generated: { by: "zcode", at: "2026-11-13T18:41:36.261Z" }
+generated: { by: "zcode", at: "2026-11-16T17:33:30.305Z" }
 verified:
   - by: openwiki/0.7.2
-    at: 2026-11-13T18:41:36.261Z
+    at: 2026-11-16T17:33:30.305Z
 ---
 
 # 约定与有意保留的怪癖
@@ -60,14 +60,15 @@ verified:
 
 ## 错误契约
 
-`AppError` 携带状态、消息、可选 message key、cause、operational 标志与 extra 标志。渲染规则：
+`AppError` 携带状态、消息、可选 message key、cause、operational 标志、extra 标志与错误码。渲染规则：
 
 - 状态 0 变为 500；
 - 生产环境中状态 500 及以上始终返回“服务器内部错误”，忽略内部消息；
 - 开发环境中 5xx 可以包含由 cause 派生的 `stack`；
 - 设置了 `messageKey` 时会包含；
 - extra 字段合并进响应体，但不能覆盖 `message` 与 `messageKey`；
-- 上传错误渲染为 400，并带“文件上传错误: ...”前缀。
+- 上传错误渲染为 400，并带“文件上传错误: ...”前缀；
+- **4xx/5xx 响应体统一为错误信封 `{message, error, ref, status}`**（2026-11 契约）：`error` 是 `XXXYYYY` 错误码（**码即注册表**——`grep` 直达唯一调用点，新站点取同前缀最大序号 +1，前缀不得跨模块复用），`ref` 是每请求 0-999999999 随机参考号（响应头 `X-Ref-ID` 同值）。**message 恒为纯文案**——绝不把编号拼进 message，展示格式 `USR0007-000123456` 由前端从字段拼装。例外：health 503 与 oauth 501 不带码；ESA 边缘信封的 `ref` 恒为 0（无服务端日志，排障用 `esa_request_id`）。
 
 `errors.Handler` 作为全局兜底存在，但它注册在路由之后，因此实践中领域 handler 必须自行渲染错误。不要假设未处理错误会被转换。
 
@@ -109,8 +110,10 @@ verified:
 | 怪癖 | 原因 | 后果 |
 |---|---|---|
 | 端点限流只匹配 `/api/<mount>` 与子路径 | 单前缀路由（v1 镜像已移除） | 其他前缀（包括 `/api/v1`）不会触发端点限流 |
-| 共享 spec 的路由共用限流器 | `RegisterRoutes` 按 spec 名/窗口/上限缓存 | 2FA 预算在 Mounts 五条路由间共享（`/2fa/enable` 调用了同一 spec 工厂但不在 Mounts 内，不计数）；refresh 用独立 `RefreshSpec`（60/15min），见 ADR-015 |
-| 凭证/邮件类限流键绑定目标邮箱（请求体 email 小写） | 来源 IP 可经伪造代理标头轮换，IP 键退化为无限流（ADR-019） | auth/twoFactor/passwordReset/emailVerify 四个 spec 在带 email 请求体时改用 `spec:邮箱` 计数；无邮箱体端点回退 IP 键；改 key 组成会重置既有计数 |
+| 共享 spec 的路由共用限流器 | `RegisterRoutes` 按 spec 名/窗口/上限缓存 | 2FA 预算在 Mounts 六条路由间共享（2026-11 补入 `/2fa/enable`——它是植入持久凭据的端点，此前缺项导致实际只剩全局 300/min）；refresh 用独立 `RefreshSpec`（60/15min），见 ADR-015 |
+| 凭证/邮件类限流键绑定目标邮箱（请求体 email 小写后 sha256 摘要） | 来源 IP 可经伪造代理标头轮换，IP 键退化为无限流（ADR-019）；keyDigest 同时修复 CWE-770 键驻留体积随输入长度膨胀 | auth/twoFactor/passwordReset/emailVerify 四个 spec 在带 email 请求体时改用 `spec:sha256(邮箱)` 计数；无邮箱体端点回退 IP 键；`/api/auth/verify-email` 固定回退 IP key（email 与被保护资源无绑定，按 email 分桶会让爆破 spec 失效）；改 key 组成会重置既有计数 |
+| 非对象 JSON 请求体（数组/标量）→ 400 SYS0002 | 旧行为静默丢弃、handler 读零值后表现为误导性业务错误 | API 请求体必须是 JSON 对象；JSON 语法错误仍是 `BDP0003`（encoding/json 原文） |
+| 任何写路径不得写 `users.email:""` | email 是可选字段（ADR-020）：空串是"字段存在"，稀疏唯一索引 email_1 仍对其计唯一性 | 无邮箱 = 文档缺省该字段；存量空串/null 由 `email_unique_sparse_v1` 迁移清理；API 输出缺省为 `""` 由前端按空值展示 |
 | otpauth secret 展示格式是 RFC 4648 Base32，内部存储保持标准 base64 | otpauth:// 规范要求 Base32（无填充大写），既有密文是 base64 | `/2fa/enable` 同时返回 `secret`（base64，既有字段）与 `secretBase32`（工具识别用）；两格式勿混改 |
 | 验证码签发走 `Mint`/`SetFresh`，不覆盖未过期同码条目 | 六位码是全用户共享命名空间，静默覆盖会把攻击者已知的 code 解析到别的账号（ADR-019） | 原地写回（尝试计数）仍走 `Set`；Mint 连续 100 次冲突回退 `Set` 保可用性 |
 | 已知设备判定只比对 fdt-device cookie ↔ 会话 deviceTokenHash | User-Agent 客户端完全可控、可枚举重放（CWE-290，ADR-019） | 旧会话无 deviceTokenHash 时不匹配（fail-closed），下次登录多收一封新设备提醒邮件——一次性预期摩擦 |
@@ -151,6 +154,7 @@ verified:
 
 ## 相关阅读
 
+- [错误信封与错误码契约](../api/error-envelope.md)——信封四字段、构造器选型、注册表生成与 ESA 边缘信封。
 - [架构总览](../architecture/overview.md)——这些规则保护的分层。
 - [请求生命周期与中间件管线](../architecture/request-lifecycle.md)——限流与 CSRF 机制。
 - [测试策略](testing.md)——回归闸门。

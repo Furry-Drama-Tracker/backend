@@ -22,10 +22,10 @@ sources:
     resource: repo://internal/middleware/optional_auth.go
   - id: openwiki-source-7106c8455bb73d12832c8523
     resource: repo://internal/server/app.go
-generated: { by: "zcode", at: "2026-11-13T18:41:36.261Z" }
+generated: { by: "zcode", at: "2026-11-16T17:33:30.305Z" }
 verified:
   - by: openwiki/0.7.2
-    at: 2026-11-13T18:41:36.261Z
+    at: 2026-11-16T17:33:30.305Z
 ---
 
 # 鉴权中间件与角色
@@ -50,20 +50,20 @@ verified:
 
 | 条件 | 状态码 | 响应体 |
 |---|---|---|
-| 无令牌 | 401 | `{"message":"Not authorized, no token","messageKey":"auth.noToken"}` |
-| 令牌过期 | 419 | `{"message":"Access token expired","messageKey":"auth.accessTokenExpired"}` |
-| 令牌非法、签名错误或 purpose 非 access | 401 | `invalidToken` |
-| 用户已不存在 | 401 | `auth.userNotFound` |
-| 令牌带 `jti` 但会话已失效、不存在或不属于该用户 | 401 | `{"message":"Not authorized, token revoked","messageKey":"auth.invalidToken"}` |
-| 角色不在允许列表 | 403 | `{"message":"Not authorized","messageKey":"auth.forbidden"}` |
+| 无令牌 | 401 | `{"message":"Not authorized, no token","messageKey":"auth.noToken"}`（`AUT0101`） |
+| 令牌过期 | 419 | `{"message":"Access token expired","messageKey":"auth.accessTokenExpired"}`（`AUT0102`） |
+| 令牌非法、签名错误或 purpose 非 access | 401 | `invalidToken`（`AUT0103`） |
+| 用户已不存在 | 401 | `auth.userNotFound`（`AUT0104`） |
+| 令牌带 `jti` 但会话已失效、不存在或不属于该用户 | 401 | `{"message":"Not authorized, token revoked","messageKey":"auth.invalidToken"}`（`AUT0105`） |
+| 角色不在允许列表 | 403 | `{"message":"Not authorized","messageKey":"auth.forbidden"}`（`AUT0106`） |
 
-空 purpose 被视为 access，以兼容旧令牌；其他任何 purpose 都会被拒绝。成功时把用户存入 `auth.user`、原始令牌存入 `auth.token`，然后启动一个 fire-and-forget 的会话活跃时间更新。
+上表 message/messageKey 文本是固定契约、保持不变；2026-11 起各失败响应经 `codedBody` 补齐信封的 `error`/`ref`/`status` 字段（错误码如括号内所示）。空 purpose 被视为 access，以兼容旧令牌；其他任何 purpose 都会被拒绝。成功时把用户存入 `auth.user`、原始令牌存入 `auth.token`，然后启动一个 fire-and-forget 的会话活跃时间更新。
 
 带 `jti` 的 access 令牌会额外查询 `usersessions.tokenHash`：登出、改密或管理员下线让会话失活后，access 令牌立即失效，而不是等到 15 分钟自然过期。历史上没有 `jti` 的旧令牌跳过该检查，最多再存活一个 access TTL，用于平滑过渡。
 
 会话检查失败时，`Protect` 还会通过 `Rec` 记录一条 `session_revoked` 认证诊断事件：`reason` 取会话文档的 `revokeReason`（记录它为何被吊销），`detail` 区分"session lookup failed"（查询失败）与"session user mismatch"（会话不属于该用户），并带 IP、UA 与路径——这是"用户莫名掉登录"排障的核心证据。响应本身不变，仍是 401 `auth.invalidToken`。
 
-角色检查之后还有一道 **force2FASetup 策略门禁**：admin/superadmin 角色且未开启 2FA 时，非 GET 写操作被拦截（放行 GET、含 `2fa`/`logout`/`verify` 的路径），返回 403 与 `{"force2FASetup": true}`，把账号锁定在 2FA 设置流程中。这是服务端对「管理员强制 2FA」的执行点（前端仅呈现阻断页），白名单模式与 `RequireEmailChanged` 一致。
+角色检查之后还有一道 **force2FASetup 策略门禁**：admin/superadmin 角色且未开启 2FA 时，非 GET 写操作被拦截（放行 GET、含 `2fa`/`logout`/`verify` 的路径），返回 403 与 `{"force2FASetup": true}`（错误码 `AUT0109`，message「管理员账号必须开启两步验证后才能继续操作」），把账号锁定在 2FA 设置流程中。这是服务端对「管理员强制 2FA」的执行点（前端仅呈现阻断页），白名单模式与 `RequireEmailChanged` 一致。
 
 419 不是标准 HTTP 状态，但它是前端调用 `/api/auth/refresh` 的信号。
 
@@ -105,7 +105,7 @@ verified:
 CSRF 使用双提交 cookie：
 
 - `GET /api/csrf-token` 设置 `XSRF-TOKEN` 并在 JSON 中返回相同值。cookie **不是** HttpOnly（前端必须读取），`SameSite=Strict`，路径 `/`，生命周期为配置的 `csrf_max_age_h`（默认 24 小时）。
-- 非 GET 请求由 `CSRF` 中间件比较 cookie 与 `X-XSRF-TOKEN` 头。不匹配、缺少头、缺少 cookie 各返回不同的 403 消息。
+- 非 GET 请求由 `CSRF` 中间件比较 cookie 与 `X-XSRF-TOKEN` 头。不匹配、缺少头、缺少 cookie 各返回不同的 403 消息，message 文本固定、信封带 `CSR0001`/`CSR0002`/`CSR0003`。
 - token 端点注册在校验中间件之前，因此即使其他路由会因 CSRF 失败，它也始终可访问。
 
 由于 CSRF cookie 非 HttpOnly 且校验是普通相等比较，该方案依赖浏览器同源 cookie 策略与 CORS 限制，而不是服务端令牌存储。
@@ -127,11 +127,12 @@ SSE 通知流不使用 `Protect`，因为 EventSource 不能设置 `Authorizatio
 
 ## 排障语境
 
-- 419（access 过期）触发前端调用 `/api/auth/refresh`；refresh 独立使用 `RefreshSpec`（60/15min），不再与 2FA 桶（5/15min，Mounts 五条路由）共享配额。
+- 419（access 过期）触发前端调用 `/api/auth/refresh`；refresh 独立使用 `RefreshSpec`（60/15min），不再与 2FA 桶（5/15min，Mounts 六条路由，2026-11 补入 `/2fa/enable`）共享配额。
 - 429（限流命中）时中间件输出 `event=ratelimited` 诊断日志，带限流器名（spec 名）、路径、IP 与 Retry-After——排障时可直接在 journalctl 中按 `event=ratelimited reason=<spec>` 过滤，不再只有一个 429 状态码。
 
 ## 相关阅读
 
+- [错误信封与错误码契约](../api/error-envelope.md)——`AUT010x`/`CSR000x` 等中间件错误码与参考号。
 - [请求生命周期与中间件管线](../architecture/request-lifecycle.md)——CSRF 与守卫在链中的位置。
 - [会话与令牌生命周期](session-and-token-lifecycle.md)——refresh 轮换与 419 处理。
 - [管理与审核 API](../api/administration-and-moderation.md)——角色门控的管理路由。

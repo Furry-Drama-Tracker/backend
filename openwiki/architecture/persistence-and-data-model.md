@@ -26,10 +26,10 @@ sources:
     resource: repo://internal/repository/repos.go
   - id: openwiki-source-f9cd993b1da0967b3ad454b7
     resource: repo://internal/repository/user.go
-generated: { by: "zcode", at: "2026-11-13T18:41:36.261Z" }
+generated: { by: "zcode", at: "2026-11-16T17:33:30.305Z" }
 verified:
   - by: openwiki/0.7.2
-    at: 2026-11-13T18:41:36.261Z
+    at: 2026-11-16T17:33:30.305Z
 ---
 
 # 持久化与数据模型
@@ -94,6 +94,7 @@ neo-server 通过官方 Go 驱动（`go.mongodb.org/mongo-driver` v1）访问 Mo
 - 敏感字段除 handler 侧 DTO 外还使用 `json:"-"`：`password`、`twoFactorSecret`、`twoFactorBackupCodes`、`loginAttempts` 与 `lockUntil`。
 - MongoDB 的 `__v` 版本键建模为 `VersionKey int`，标签为 `bson:"__v,omitempty"`，响应中常输出 `__v`。
 - 遗留默认值通过显式构造函数表达，例如七个邮件通知偏好默认 true、背景偏好默认空图片与 opacity 30/blur 0、个人壁纸归一化为 `[]` 而非 `null`。
+- `users.email` 是**可选字段**（ADR-020，`email_unique_sparse_v1` 迁移起）：`model.User.Email` 的 bson 标签带 `omitempty`——无邮箱用户（如外部登录发号路径）的文档**缺省该字段**，JSON 输出仍为 `""` 由前端按空值展示。**写入口径铁律：任何写路径不得写 `email:""`**——空串是"字段存在"，稀疏唯一索引仍对其计唯一性；有无邮箱以字段缺省为准，显式 `$set email` 的写入口只从 change-email 链路与 useradmin CLI 取已校验非空邮箱。
 - `singleepisodes` 的 `episodeLabel` 是显示用集数序号（自由字符串）：存量文档缺省为空串，读取时由响应层经 `episodeRefText` 回退为「第N集」，因此该字段无需数据迁移。
 - 部分文档携带只读不写的遗留字段，例如 `themeId` 与 `themeApplyIcons`/`themeApplyWallpaper`，读取时会迁移到双槽主题模型。
 
@@ -127,7 +128,7 @@ repository 使用共享的 10 秒 `contextTimeout`，每个操作创建子上下
 
 `internal/indexes` 包含幂等的 `Ensure(ctx, db)`，会创建以下索引：
 
-- `users`：唯一 `email`、唯一 `accountId`、唯一稀疏 `accountIdLower`（折叠唯一性）、唯一稀疏 `uid`；
+- `users`：唯一稀疏 `email`（可选字段，ADR-020）、唯一 `accountId`、唯一稀疏 `accountIdLower`（折叠唯一性）、唯一稀疏 `uid`；
 - `loginnamereservations`：唯一 `loginName`、`reservedUntil` TTL（0 秒，到期自动释放保留名）；
 - `externalidentities`：唯一 `provider+openid`、`userId`；
 - `passkeys`：唯一 `credentialId`、`userId`；
@@ -153,15 +154,16 @@ repository 使用共享的 10 秒 `contextTimeout`，每个操作创建子上下
 
 ## 迁移
 
-`internal/migrate` 实现五项幂等、带标记的迁移，标记存储在 `settings` 集合：
+`internal/migrate` 实现六项幂等、带标记的迁移，标记存储在 `settings` 集合：
 
 1. `accountId_migration_v1`——为缺失 `accountId` 的用户回填：把用户名中非单词字符替换为 `_`、转小写，冲突时追加 `_N`。
 2. `role_migration_v1`——把遗留 `adminAccess: true` 用户转为 `role: "admin"`，并移除所有用户的 `adminAccess` 字段。
 3. `creatorProfile_migration_v1`——删除旧 `adminId_1` 索引，把 `adminId` 重命名为 `creatorId`，并为缺少主页的 creator、admin、superadmin 用户创建初始主页。
 4. `uid_backfill_v1`——为缺 `uid` 的用户按 `createdAt` 升序派发连续 UID（已有 uid 的不动），结束后把 `counters.uid` 计数器推进到已发最大号，保证后续注册发号不冲突。
 5. `loginname_lower_backfill_v1`——为存量用户回填 `accountIdLower`（存储保留原样大小写）；仅当两个只差大小写的变体折叠后冲突时，按 `_id` 序给后出现的变体追加 `_N` 后缀改名。
+6. `email_unique_sparse_v1`——email 成为可选字段（ADR-020）：`users.email_1` 若存在且不带 sparse 则 drop（同名索引改选项必须先删，随后由 `indexes.Ensure` 以 unique+sparse 重建），并用 `$unset` 把存量 `email:""`/null 清成缺字段（`$in: ["", null]` 同时匹配缺字段文档，对其是 no-op）。幂等可重入：已 sparse 的索引不再 drop。drop→重建存在瞬时唯一性空窗，单实例启动期可接受。
 
-每个迁移先检查 `settings.GetFlag`，成功后写入 `{done: true}`。`migrate.Run` 在首个错误处停止。它在 `main` 中先于索引创建、先于开始监听执行——这个顺序对 `uid_backfill_v1` 是硬约束（uid 唯一稀疏索引在回填完成后才建立）；失败只打印 `[WARN]` 并继续启动，因此遗留数据转换失败时需要人工处理后重启。
+每个迁移先检查 `settings.GetFlag`，成功后写入 `{done: true}`。`migrate.Run` 在首个错误处停止。它在 `main` 中先于索引创建、先于开始监听执行——这个顺序对 `uid_backfill_v1` 是硬约束（uid 唯一稀疏索引在回填完成后才建立），对 `email_unique_sparse_v1` 同理（重建的稀疏索引在迁移后才建立）；失败只打印 `[WARN]` 并继续启动，因此遗留数据转换失败时需要人工处理后重启。
 
 ## 运维影响
 

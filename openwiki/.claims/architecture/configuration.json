@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "pageVersion": "sha256:6dee872a8452df104742015b73c9670393ac7c20dbfc74f5e3494c02120d2c48",
+  "pageVersion": "sha256:eeb530792aea611376d4afd8e4edaa2771ea18d03ad18edd21ccc4c005046ddb",
   "claims": [
     {
       "id": "claim_030a3007b94e4501b11d17747e3599e5",
@@ -49,7 +49,7 @@
           "version": "repo-lines-v1:sha256:26337ea676a2bd368f040d23d72ddb0c2565c204edcf33b42a134e1bfc15ea73:eyJzZWxlY3RlZExpbmVDb3VudCI6NSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiNmI5ODJlMjE3MTA4YTA2MzhlNDIwYTIyNjdmNjUyOTI1NTIxNWNlZjE3YzU3ZTk3MTI4M2MxN2MwMDAyMWNmYiIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiODZlY2Y3OGUzYzBhZGRiNzkwNWM4ZTJkYTlhOWUwNzExODE4NGZmMWQ0ZDYxMWQ5Zjg1MDI2YTU5NmIzZTBhYiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZjc2YmEwNzIwMGI4MTcyNDY0YWViMmRhZWE5ZDhjM2ZiZmY4NjMyNGExNDEyZjIwYjdhYjY5ZTMzMzhjNWVlNSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiYjExZTFmZDEzNzE4ZGJlYWIwOTFmYzNjMjdjYzJhMzczNjg0OGJhMDFlODNhNDMzZGU5NWU0NmYwZTY0MmQxZSJ9"
         },
         {
-          "resource": "repo://internal/server/app.go#L74-L82",
+          "resource": "repo://internal/server/app.go#L100-L108",
           "version": "repo-lines-v1:sha256:4bed602597500e45cf86fba3f3ef53b1459a1ac01026cfd01ccf0b6333153886:eyJzZWxlY3RlZExpbmVDb3VudCI6OSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiYWUxNzUwYmIzZWFhYmIxZTEzYzBhMDAxNzgzYzE5ZjQwMzE3NzY2YzA1MTE2NzlhMTE2Y2M0YWVjNDQ4ZjZkYSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiYTQxNmRmMWI2YTgxMjU2NGM0OTRkMzdkMmJkMDZmNGQ4MzkyNWYzMmM3Y2MyNDMwZTU2Y2ExY2VjZmFkNTRiZCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZWFhNTA2ODIzOGQ0Mzg1YjFkYjZjZTYwMjZiNzQ2ODc1NDg2YzFmZmVkYmE2NmFkN2Y1MmUyZWQwMmZlMjFhNyIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiYTNhY2JiMDJkMjI2Y2IzMmU5MjNkMmEwZjVkMWI1NzgyZjBmYmM2ZjdhZTBlMWQ4ZmZkMzUwMWY1OWY5NTM4YSJ9"
         }
       ]
@@ -59,7 +59,7 @@
       "statement": "启动仅在 JWT_SECRET 缺失或短于 32 字符、ENCRYPTION_KEY 已配置但短于 32 字符、MONGO_URI 缺失，或 trusted_proxies 含非法 IP/CIDR 项时致命退出；弱密钥与占位生产 CORS 源仍为告警不阻断；IP 地域开关开启时打 SECURITY WARN 并注明首选数据源（aliyun 提示会把客户端 IP 发至该 API，czdb 提示本地库查询），首选为 aliyun 且未配置 AppCode 时追加不可用告警。",
       "evidence": [
         {
-          "resource": "repo://cmd/server/main.go#L58-L77",
+          "resource": "repo://cmd/server/main.go#L61-L80",
           "version": "repo-lines-v1:sha256:1bd5b6e0b9a8a6bb0fb54f07095fdb4286e0ada0cfc5c78703fbded016287872:eyJzZWxlY3RlZExpbmVDb3VudCI6MjAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjJiODgyZDdhZDFmYmNiODM1NzE1ZDdiZDEyNWVmZDZmMjUyMWRkYzkyMzA0NGMxNWQ5OTkyMjQ0M2Q0NTBhNDEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjRhNDkxZjhiODc3Y2NlNGM3NjlhOGFkMGE4MzQ1YzhjZGQ2YjI2OGFkNzUzZDMwMTNhZmUzMDVmNDYzZDI1N2UiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImZiMWM0ODkyMDkyNzVkZmI5ZThkZWIzNjAyODU1Y2EyMmQxNWVhMDE0M2JlMWQ2MzYxNDMzYTQ5ZDVhNzZkM2MiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImVlNjVmMGIxZGFmZGZjM2Q1NzQ3YWFkNmU4NzZiZWNjMzk0ZjQ5ODI3YzJhNjU1ZDU4ZWM4ZWIyYTFjMmZmNzIifQ"
         },
         {
@@ -145,6 +145,6 @@
   ],
   "verification": {
     "by": "openwiki/0.7.2",
-    "at": "2026-11-13T18:41:36.261Z"
+    "at": "2026-11-16T17:33:30.305Z"
   }
 }

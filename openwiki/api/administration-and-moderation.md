@@ -5,7 +5,7 @@ description: 后台管理、剧集审核与回收站、举报、统计、分类�
 tags: [api, admin, moderation, review, audit, statistics]
 verified:
   - by: openwiki/0.7.2
-    at: 2026-11-13T18:41:36.261Z
+    at: 2026-11-16T17:33:30.305Z
 sources:
   - id: openwiki-source-85047375915a57a29b05d0cd
     resource: repo://cmd/useradmin/main.go
@@ -27,12 +27,14 @@ sources:
     resource: repo://internal/handler/stats.go
   - id: openwiki-source-54e2988cad872a1deb6494f6
     resource: repo://internal/repository/episode_trash.go
-generated: { by: "zcode", at: "2026-11-13T18:41:36.261Z" }
+generated: { by: "zcode", at: "2026-11-16T17:33:30.305Z" }
 ---
 
 # 管理与审核 API
 
 管理面分散在多个挂载路由组中，而不是集中在单一包内。它们都位于受限流的 `/api` 组下，并通过 `router.Mount` 以单前缀挂载；每个 handler 都是薄 HTTP 层，直接调用 repository 或委托 service。鉴权通过 `middleware.Auth.Protect(...)` 的角色列表表达，部分域再叠加内联角色校验。
+
+错误响应已全部纳入统一错误信封（2026-11 契约）：4xx/5xx 响应体为 `{message, error, ref, status}`，`error` 是 `XXXYYYY` 错误码（grep 直达唯一调用点）。本域常用前缀：`ADM`（后台管理）、`REV`（审核）、`TRS`（回收站）、`RPT`（举报）、`AUD`（审计日志）、`CAT`/`BAN`（分类/轮播图）。多数 handler 的通用 500 走 `episodes.go` 里的共享 `serverError` 辅助函数，固定渲染 `EPS0037`（message `Server error`）。
 
 ## 鉴权层级
 
@@ -50,7 +52,7 @@ generated: { by: "zcode", at: "2026-11-13T18:41:36.261Z" }
 
 新增路由时有两个细节需要注意：
 
-- `adminOnlyReview` 是内联 handler 校验，不是 `Protect` 角色列表。非 `admin` / `superadmin` 的调用者会收到 403，因此“创作者可进入的 `Protect` 列表 + 该内联校验”最终等价于“仅管理员可访问”。
+- `adminOnlyReview` 是内联 handler 校验，不是 `Protect` 角色列表。非 `admin` / `superadmin` 的调用者会收到 403（错误码 `REV0001`），因此“创作者可进入的 `Protect` 列表 + 该内联校验”最终等价于“仅管理员可访问”。它是工厂函数 `adminOnlyReview(isDev bool) gin.HandlerFunc`，由 `Review.Register` / 回收站路由传入 `Config.IsDev` 后挂载——因为内联校验要自行渲染带码响应，需要知道开发模式开关。
 - `RequireEmailChanged` 会拦截默认超管邮箱（`admin@furry09.com`）发出的非 GET 请求，直到邮箱被修改。它挂在 `/admin` 的变更类 `superadmin` 路由上，所以刚初始化的超管可以查看但不能修改。
 
 ## 后台管理
@@ -65,7 +67,7 @@ generated: { by: "zcode", at: "2026-11-13T18:41:36.261Z" }
 
 账号管理分为三类角色：
 
-- `RegisterAccount` 只接受 `admin` 和 `creator` 角色，使用共享密码强度规则，推导或校验唯一 `accountId`，将用户创建为邮箱已验证；创作者账号会尝试创建 `CreatorProfile`（失败静默），并发送“账号已创建”邮件。
+- `RegisterAccount` 只接受 `admin` 和 `creator` 角色，使用共享密码强度规则，推导或校验唯一 `accountId`，将用户创建为邮箱已验证；创作者账号会尝试创建 `CreatorProfile`（失败静默），并发送“账号已创建”邮件。`UID` 由 `counters` 集合的原子 `FindOneAndUpdate({$inc})`（`NextUID`）发号（失败码 `ADM0085`）——修复了此前两个管理员并发建号可能拿到相同 UID 的问题；注册/登录名路径共用同一计数器。
 - `DeleteAccount` 拒绝删除自己、拒绝删除最后一个 `superadmin`，且只接受管理或创作者账号。删除委托 `service.PurgeUserData` 做 best-effort 级联清理（单个集合失败不阻断），比 `DeleteUser` 宽松。
 - `DeleteUser` 执行完整级联：追番、历史、通知、收藏、收藏夹、反馈、会话、推送订阅与举报（举报同时按遗留字段 `reporter` 与 `reporterId` 清理），删除该用户的评分，然后对每个受影响的剧集重算平均分与评分人数；随后继续清理收藏夹收藏项、主题与创作者主页。任一步失败即返回 500。
 - `UpdateRole` 接受 `user`、`creator`、`admin`、`superadmin`；拒绝修改自己、拒绝降级最后一个 `superadmin`，并在账号变为 `creator` 时创建 `CreatorProfile`。角色化 2FA 策略在此落地：把开启 2FA 的账号降级为 `user` 时，自动关闭其 2FA（旧凭据一并清除）、以 `RevokeAdmin` 原因吊销全部会话，并写入 `ROLE_DOWNGRADE_2FA_OFF` 审计记录——普通用户不允许持有 2FA，降级必须保持策略一致。
@@ -90,7 +92,7 @@ generated: { by: "zcode", at: "2026-11-13T18:41:36.261Z" }
 - **已审核剧集的待审核改动被拒绝**：丢弃 `pendingChanges`，线上内容不变，记录备注与审核人，并通知创作者。
 - **从未通过的待审核剧集被拒绝**：标记为 rejected，并把整个文档移入剧集回收站（原因 `rejected`），立即从公开列表与个人列表消失。
 
-审核通过导致 `currentEpisodes` 增加时，`notifyEpisodeNumberChange` 会为每个新增集数向全部追番用户写入一条 `new_episode` 通知，然后向邮箱已验证且开启 `episodeUpdate` 偏好的用户发送更新邮件。邮件按 `(剧集, 集数, 事件)` 去重一小时，使用上限 2000 条的内存映射。
+审核通过导致 `currentEpisodes` 增加时，`notifyEpisodeNumberChange` 会为每个新增集数向全部追番用户写入一条 `new_episode` 通知，然后向邮箱已验证且开启 `episodeUpdate` 偏好的用户发送更新邮件。邮件按 `(剧集, 集数, 事件)` 去重一小时，使用上限 2000 条的内存映射。approve/reject 目标剧集不存在时分别返回 404 `REV0002`/`REV0003`。
 
 ## 剧集回收站
 
@@ -100,13 +102,13 @@ generated: { by: "zcode", at: "2026-11-13T18:41:36.261Z" }
 - `Restore` 用原 `_id` 重新插入 `episodes`（版本历史保持有效）并删除回收站副本；如果删除副本失败，会回滚插入。
 - `Purge` 是破坏性路径，删除回收站文档及其关联的单集、版本、追番、收藏、历史、评分和通知。
 
-HTTP 层只暴露列表、版本日志、恢复与彻底删除，四者均为管理员专属。
+HTTP 层只暴露列表、版本日志、恢复与彻底删除，四者均为管理员专属；恢复/彻底删除目标不存在时返回 404（`TRS0002`/`TRS0003`）。
 
 ## 举报
 
 任何登录用户都可以举报 `episode` 或 `creator`。原因必须是 `inappropriate`、`copyright`、`spam`、`misleading` 或 `other`，描述限制为 2000 个 UTF-16 码元。同一举报者对同一目标的第二条待处理举报会以 `Already reported` 拒绝。
 
-列表与处理仅管理员可用。处理接受 `resolved` 或 `dismissed`，保存处理人与备注，并向举报者写入 `report_result` 通知。Web Push 是空实现，因此只送达站内通知。
+列表与处理仅管理员可用。处理接受 `resolved` 或 `dismissed`（非法值返回 400 `RPT0005`，举报不存在返回 404 `RPT0006`），保存处理人与备注，并向举报者写入 `report_result` 通知。Web Push 是空实现，因此只送达站内通知。
 
 ## 统计
 
@@ -121,8 +123,8 @@ HTTP 层只暴露列表、版本日志、恢复与彻底删除，四者均为管
 
 两个域都为 GET 和 POST 同时注册 `""` 与 `"/"`，以避免 Gin 自动尾斜杠重定向，因为接口契约要求两种形式都直接匹配。
 
-- 分类：公开列表按 `order` 再按创建时间排序。管理员创建时拒绝重名；缺失名称会落到通用 500 路径，这是既有设计。更新与删除仅管理员可用。
-- 轮播图：公开列表只返回 `active` 记录，按 `order` 升序、创建时间降序。`/banners/all` 返回全部但需要管理员权限。链接只允许 `http`/`https`，缺失 `title` 或 `image` 同样落到通用 500 路径。
+- 分类：公开列表按 `order` 再按创建时间排序。管理员创建时拒绝重名（`CAT0001`）；缺失名称会落到通用 500 路径（`EPS0037`，固定契约），这是既有设计。更新与删除仅管理员可用，目标不存在时分别返回 `CAT0002`/`CAT0003`。
+- 轮播图：公开列表只返回 `active` 记录，按 `order` 升序、创建时间降序。`/banners/all` 返回全部但需要管理员权限。链接只允许 `http`/`https`（`BAN0001`/`BAN0002`），缺失 `title` 或 `image` 同样落到通用 500 路径（`EPS0037`）；更新与删除目标不存在时返回 `BAN0003`/`BAN0004`。
 
 ## 自动任务
 
@@ -152,6 +154,7 @@ HTTP 层只暴露列表、版本日志、恢复与彻底删除，四者均为管
 
 ## 相关阅读
 
-- [内容目录 API](content-catalog.md)——被审核的剧集文档。
+- [错误信封与错误码契约](error-envelope.md)——`{message, error, ref, status}` 响应体与错误码注册表。
+- [内容目录 API](content-catalog.md)——被审核的剧集文档与共享 `serverError` 辅助函数。
 - [鉴权中间件与角色](../auth/middleware-and-authorization.md)——`Protect` 状态码与 `RequireEmailChanged`。
 - [邮件发送](../integrations/email-delivery.md)——审核与追番通知邮件。

@@ -1,13 +1,13 @@
 {
   "schemaVersion": 1,
-  "pageVersion": "sha256:0e171d6f36071f2f31137577182b1a0e23329274382bd4d957af3176f47106b7",
+  "pageVersion": "sha256:99149286126a4da74159638e6c73f42707289130031bcdd97c6ab77949efcaf5",
   "claims": [
     {
       "id": "claim_5048775d39784f869d86ba80c02f62d9",
       "statement": "启动顺序：解析 flags → 加载配置并打弱密钥/占位 CORS 告警与 IP 地域开关状态（按首选数据源打 SECURITY WARN，aliyun 未配 AppCode 追加不可用告警）→ 连接并 ping MongoDB → 构造 Repos 与签名器 → 五项迁移与索引（告警不阻断）→ 启动清理 cron → 创建上传与图标目录 → 装配 Gin → 监听并等待 SIGTERM/SIGINT。",
       "evidence": [
         {
-          "resource": "repo://cmd/server/main.go#L45-L120",
+          "resource": "repo://cmd/server/main.go#L48-L123",
           "version": "repo-lines-v1:sha256:93fe04cb315bf1481308972436ef3f597f55a037c90401793820901b9e93e33c:eyJzZWxlY3RlZExpbmVDb3VudCI6NzYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjMxNWQ2NGY5NzFiMjRmNzAxZDM0Yzc3ZjEyNWFkOTNkNzBiN2I0MGEwMmMwMjM2YjA0NTM5M2UyNGJmNmI1ZmQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImE1NzExYmE5OWI4MDUxMzZiNzYyODAzMDkzZmFhN2RiNWU0ZGYyOTcyNDg2ZDA5OTFjNThhZTFkMGIyMjc1YjAiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijk5N2FhOTZlM2Q5ZDhhNTVhNzI1ZGUyN2IxNGUzZjIxMzhiYTc2NTdhMDZmYzA4NmVhYTYwZTc1MzU2Njg0OGIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjJhZjYxN2Q4NzA2ZGM1MDgzYzBlMjEzMmYwZmJjNGRmYjIxMGU1Y2FlYWEyMGQ1NzA1YzViY2QwZWU5NTA2MGEifQ"
         }
       ]
@@ -17,7 +17,7 @@
       "statement": "Graceful shutdown uses a 10-second context, while the server enforces a 65-second read-header timeout, 30-second read and write timeouts, and a 5-second idle timeout.",
       "evidence": [
         {
-          "resource": "repo://cmd/server/main.go#L125-L158",
+          "resource": "repo://cmd/server/main.go#L128-L161",
           "version": "repo-lines-v1:sha256:bb6df499ed53ba733dde1544f7f826e32fb71a557a6559f13b51d4f4e4768f31:eyJzZWxlY3RlZExpbmVDb3VudCI6MzQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjNlNmM4ZmQxODA2ZDkxNDg3OWI1MTYzZGJjNGE4MzgzZDNmZWE2ODYyODg5NTZlNzUxMWI1ZTEzNWNjNmY3NjAiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImEyNzZkYTFkMmZlZTNiMTc4NGU0ZDBiYjU2YmI2YWFiYjU0M2MwZjZmYmRlMDY0M2E3NTMyYTQ0MTBhNmU0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjhjNTU1YzRkNzAyMmZmZTQyZjA1NjlkOTNkOWZkNDQ3Nzg0MmM4MjUxZGExYjY3NWIyMGE2ZDQ5Mjg0ODBhODUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImRlNTAzZmU0NTM3NTQwYzhiY2ZhYmRiZDY3NWY5YmRhZWFkMjViYjJkNDkxY2ViZTM2YzAwNjU2YjE0YTQwNGIifQ"
         }
       ]
@@ -27,7 +27,7 @@
       "statement": "Both the uploads directory and the icon directory are created at startup with MkdirAll as warnings on failure, and the icon directory is also created before SVG writes.",
       "evidence": [
         {
-          "resource": "repo://cmd/server/main.go#L108-L117",
+          "resource": "repo://cmd/server/main.go#L111-L120",
           "version": "repo-lines-v1:sha256:1b1c4d9afa7e03d538fab6d3bf49046c12ce8549a0c98ecf622a598949508293:eyJzZWxlY3RlZExpbmVDb3VudCI6MTAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY3Y2RhODJkYTYwNjIzOGUwNWU2MjM5OTU2OWM1ZWUwMzk5MzQxOTY0OGFlNWQ0M2EyYmY4Y2Q2MzQ3ZjgyNjMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijc0NTRiYzM1NTZmYzUxZTE4NmNlYzNkOWZjOWMwMDc1YzI3MmI4ODFmNjg2YThmODliNmEyMzNmZTdjZDllNTgiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjhhYWE2MzgyMGJiNzA5MWM2ODcwNjhlN2FjNmM4ZTFhZDQ2MWJmNTRmOTI4OGQ3MDg4MTBjZjMxYjFkZDFhOGUifQ"
         },
         {
@@ -41,7 +41,7 @@
       "statement": "The listener supports tcp host-port, Unix socket paths with stale-file removal and 0660 permissions, and Linux abstract Unix sockets.",
       "evidence": [
         {
-          "resource": "repo://cmd/server/main.go#L159-L188",
+          "resource": "repo://cmd/server/main.go#L162-L191",
           "version": "repo-lines-v1:sha256:13e7f8676d6276359104663fca4de89b7b4b43ec2a45af4bf536253e89f217a3:eyJzZWxlY3RlZExpbmVDb3VudCI6MzAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImJlYjhlM2U5NGE1N2NkYjA5NmYyMDQwYmUxMDQxOWI0ZmNhNTczYWE5ZTU1MzZlNjM2MGNhOTg5ODg4MzM5MTgiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjYyOTcwZTQxNWI2NjYyNmIzOWYwOThjMDZjZTE1YTBiZWFhOTZlN2NiZjZmNmQwZTFkYjNhNTA3Y2EwZjU2ODIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjoxLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEifQ"
         }
       ]
@@ -135,6 +135,6 @@
   ],
   "verification": {
     "by": "openwiki/0.7.2",
-    "at": "2026-11-13T18:41:36.261Z"
+    "at": "2026-11-16T17:33:30.305Z"
   }
 }

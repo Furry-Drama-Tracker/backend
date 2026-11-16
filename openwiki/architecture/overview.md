@@ -26,10 +26,10 @@ sources:
     resource: repo://internal/service/auth_service.go
   - id: openwiki-source-62a9837f2b45c92ae81ca775
     resource: repo://internal/upload/upload.go
-generated: { by: "zcode", at: "2026-11-13T18:41:36.261Z" }
+generated: { by: "zcode", at: "2026-11-16T17:33:30.305Z" }
 verified:
   - by: openwiki/0.7.2
-    at: 2026-11-13T18:41:36.261Z
+    at: 2026-11-16T17:33:30.305Z
 ---
 
 # 架构总览
@@ -58,6 +58,8 @@ middleware  handler  <-- HTTP 关注点
 
 1. **`middleware` 会直接访问 `repository`。** 认证中间件直接加载用户并更新会话活跃时间，不经过 service。因此依赖规则更准确地说是“禁止向上导入”，而不是严格的线性管线。
 2. **大多数 handler 并不薄。** 认证 handler 委托给 `service.AuthService`，但内容、CMS 与管理 handler 经常直接查询 repository、聚合数据并在内联做业务决策。仅 `internal/handler/episodes.go` 就超过 2000 行。应把 service 层理解为认证专用，而不是通用业务层。
+
+另有一条横切所有层的响应契约：全部 4xx/5xx 响应体为统一错误信封 `{message, error, ref, status}`（2026-11 起），由 `internal/errors` 包统一渲染，各层按构造器选型协作——详见[错误信封与错误码契约](../api/error-envelope.md)。
 
 `internal/server` 是唯一知道所有依赖的包。它以下的包不会自行构造协作者，只有少数有记录的例外（通知 handler 从数据库句柄自行构造推送订阅 repository）。
 
@@ -116,7 +118,7 @@ type Deps struct {
 | `handler` | HTTP 解析与响应组装；40 多个按领域分组的文件 |
 | `service` | 认证/账号领域逻辑：登录分支、refresh 轮换、设备链、2FA、邮箱变更、导出、用户名（登录名）改名与保留期、Passkey/WebAuthn 仪式 |
 | `repository` | MongoDB 访问，按集合区域一文件，`Repos` 聚合，ObjectID 辅助 |
-| `model` | 带 BSON 标签的文档结构与面向 JSON 的子文档 |
+| `model` | 带 BSON 标签的文档结构与面向 JSON 的子文档；`users.email` 是可选字段（ADR-020，bson `omitempty` + email_1 稀疏唯一索引，无邮箱用户文档缺省该字段，任何写路径不得写 `email:""`） |
 | `auth` | JWT 签名、cookie、bcrypt、TOTP（含一次性时间步）、备份码哈希、字段加密、User-Agent 解析、Base32 换算 |
 | `authlog` | 认证诊断事件记录器：stderr 结构化日志（`event=...`）+ `authevents` 异步落库（30 天 TTL） |
 | `security` | bluemonday XSS 清洗与密码强度 |
@@ -128,7 +130,7 @@ type Deps struct {
 | `upload` | 图片与 SVG 存储、校验、删除（O_EXCL 落盘 + 剥离执行位） |
 | `pagination` | 共享 `page`/`limit` 解析与结果形状 |
 | `logging` | debug 或 info 级别的 slog 文本日志 |
-| `migrate` | 五项幂等启动数据迁移（accountId 回填、角色迁移、创作者主页迁移、UID 派发、用户名折叠回填；settings 集合标记控制，启动时调用，失败告警继续） |
+| `migrate` | 六项幂等启动数据迁移（accountId 回填、角色迁移、创作者主页迁移、UID 派发、用户名折叠回填、email 稀疏唯一迁移 `email_unique_sparse_v1`；settings 集合标记控制，启动时调用，失败告警继续） |
 | `indexes` | 幂等索引创建（启动时调用，单个冲突不阻断其余） |
 | `cron` | 会话、已读通知与到期注销账号清理任务 |
 
@@ -157,6 +159,7 @@ ADR 记录了取舍：独立仓库与 AGPL 许可、显式四层分离、构造�
 
 ## 相关阅读
 
+- [错误信封与错误码契约](../api/error-envelope.md)——横切所有 handler 的 4xx/5xx 响应契约。
 - [请求生命周期与中间件管线](request-lifecycle.md)——准确的中间件顺序。
 - [持久化与数据模型](persistence-and-data-model.md)——集合与 ObjectID 规则。
 - [约定与有意保留的怪癖](../quality/conventions-and-gotchas.md)——不能被“清理”的规则。

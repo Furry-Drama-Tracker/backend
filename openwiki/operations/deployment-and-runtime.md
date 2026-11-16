@@ -28,10 +28,10 @@ sources:
     resource: repo://Makefile
   - id: openwiki-source-1ffe96277832af9ddb17aa8f
     resource: repo://winres/winres.json
-generated: { by: "zcode", at: "2026-11-13T18:41:36.261Z" }
+generated: { by: "zcode", at: "2026-11-16T17:33:30.305Z" }
 verified:
   - by: openwiki/0.7.2
-    at: 2026-11-13T18:41:36.261Z
+    at: 2026-11-16T17:33:30.305Z
 ---
 
 # 部署与运行时
@@ -67,6 +67,8 @@ Windows 可执行文件内嵌应用图标与版本元数据：`FDT-Icon.ico` 经
 - `main` 分支推送额外把产物覆盖发布到 tag=`latest` 的滚动 Release：先删后建（`gh release delete latest --cleanup-tag`），含 `checksums.txt`；`concurrency: release, cancel-in-progress` 保证只保留最新一次。
 - CI 干净检出使 Go 自动烙入 `vcs.revision`，无 `+dirty`，产物随代码变化可复现。
 
+改动错误码后的发布前检查：新增/调整任何带码错误响应后重跑 `python3 docs/gen_errors_json.py` 刷新机器注册表 `docs/errors.json`（输出字节稳定可直接提交），改了 Swagger 注解则重跑 `make docs`——两者都是已提交契约的一部分，未提交的 WIP 修改不会进入注册表（详见[错误信封与错误码契约](../api/error-envelope.md)）。
+
 ## 启动顺序
 
 `cmd/server/main.go` 按顺序执行：
@@ -78,7 +80,7 @@ Windows 可执行文件内嵌应用图标与版本元数据：`FDT-Icon.ico` 经
 5. 运行 `migrate.Run` 与 `indexes.Ensure`（60 秒上下文）；失败只打印 `[WARN]` 并继续启动。
 6. 启动 `cron.StartSessions`：过期会话、已读通知、到期注销账号清理。
 7. 应用上传与图标目录配置，并用 `MkdirAll` 创建两个目录；失败只告警。
-8. 构建 Gin 应用。
+8. 构建 Gin 应用——`server.NewApp` 在装配时调用 `errors.SetLogger(log)` 把 slog 注入 errors 包（5xx ERROR 日志输出器），注册 JSON panic 恢复（`SYS0500`）与 `NoRoute` 404 信封（`SYS0003`）。
 9. 创建监听器；失败即退出。
 10. 开始服务。
 11. 等待 SIGTERM/SIGINT 或服务错误。

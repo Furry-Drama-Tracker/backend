@@ -22,10 +22,10 @@ sources:
     resource: repo://internal/service/auth_service.go
   - id: openwiki-source-27784338c57fd749bd43470e
     resource: repo://internal/service/refresh.go
-generated: { by: "zcode", at: "2026-11-13T18:41:36.261Z" }
+generated: { by: "zcode", at: "2026-11-16T17:33:30.305Z" }
 verified:
   - by: openwiki/0.7.2
-    at: 2026-11-13T18:41:36.261Z
+    at: 2026-11-16T17:33:30.305Z
 ---
 
 # 会话与令牌生命周期
@@ -86,7 +86,9 @@ refresh cookie 的窄路径意味着刷新与登出请求必须位于 `/api/auth
 - 会话在 **2 分钟**（`ConcurrentRefreshGrace`）内被置为无效 → **409** `auth.concurrentRefresh`。这被视为合法并发刷新（多标签页、弱网重发），并记录 `refresh_grace` 事件。handler **不会**清除 cookie，也**不会**吊销会话。宽限期从旧值 30 秒放宽，避免移动端后台挂起后迟到的旧 token 被误判为重用而吊销全部会话。
 - 否则 → **401** `auth.refreshTokenReuse`。该用户所有活跃会话都会被置为无效（`revokeReason="refresh_reuse"`），强制重新登录，并记录 `refresh_reuse` 事件。
 
-成功占用后加载用户并轮换：带新 `jti` 的新 access 令牌、带新 `jti` 的新 refresh 令牌、继承设备信息与原登录时间且记录两者哈希的新会话，以及新 cookie。旧会话保持非活跃。
+成功占用后加载用户并轮换：带新 `jti` 的新 access 令牌、带新 `jti` 的新 refresh 令牌、继承设备信息与原登录时间且记录两者哈希的新会话，以及新 cookie。旧会话保持非活跃。**轮换防栅（2026-11，CWE-367 修复）**：`VerifyRefreshToken` 原子取用与插入新会话之间存在窗口，改密/重置触发的 `DeactivateAllByUser` 可能已提交却扫不到尚未插入的新会话，新会话会"逃脱吊销"。`RotateRefresh` 因此在插入后复核 `passwordChangedAt`（`RefreshResult.StartedAt` 记录本次校验起点）：若在起点之后被更新，立即以 `password_changed` 原因作废刚插入的会话并返回 401 `AUT0110`，让客户端停止使用已消费的 refresh 链；handler 对该 AppError 按标准错误信封渲染。
+
+**会话复活 TOCTOU（2026-11，同轮修复）**：历史登录路径的 `UpsertByTokenHash` 过滤只按 `tokenHash` 匹配——并发下"取用作废"与"upsert 刷新"交错时，upsert 会把刚吊销的会话重新置回 `isActive: true`（复活已吊销会话）。现在过滤条件加 `isActive: true`：已吊销文档不再匹配，upsert 的插入分支撞 `tokenHash` 唯一稀疏索引（E11000 → `SES0001`），而不是把 `isActive` 写回 true。
 
 `jti` 是安全关键。没有它，同一秒内的两次轮换可能签发出字节完全相同的 refresh 令牌，存储哈希也会与新会话匹配，重用检测会静默失效。
 
@@ -131,6 +133,7 @@ refresh cookie 的窄路径意味着刷新与登出请求必须位于 `/api/auth
 
 ## 相关阅读
 
+- [错误信封与错误码契约](../api/error-envelope.md)——`AUT007x`/`AUT0110`/`SES0001` 等错误码。
 - [注册与登录流程](login-and-registration.md)——会话最初如何创建。
 - [鉴权中间件与角色](middleware-and-authorization.md)——419 处理与守卫行为。
 - [通知与实时推送](../api/notifications-and-realtime.md)——SSE 票据变体。

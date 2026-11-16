@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "pageVersion": "sha256:d6a076462579fa05df1e58e13d399ae85412db8489a9b62bcdc6a752cb4d01a0",
+  "pageVersion": "sha256:4d0159f5c3b4a7fd0f79e855635ea69346eb17016020e155076c62bb89337335",
   "claims": [
     {
       "id": "claim_44a225440a434f3cb0ddbdb067d86cf1",
@@ -111,11 +111,11 @@
       "statement": "剧集更新邮件（buildEpisodeUpdateEmail）在 epLabel 非空时用它替换「第N集/第 N 集」称呼；available/preview/preview_video/preview_info 四种事件分支的收件人文案仍是固定契约。",
       "evidence": [
         {
-          "resource": "repo://internal/handler/episodes.go#L1567-L1620",
+          "resource": "repo://internal/handler/episodes.go#L1566-L1619",
           "version": "repo-lines-v1:sha256:c703702641a58ce061425453c5ae21daec8b967805cea36cd49b281619edf729:eyJzZWxlY3RlZExpbmVDb3VudCI6NTQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImYyNjJhYTFjNjBmNjY1MjM3NWQyMzBkZjUxMzBlMjgzODNkZjcwZDMzM2M1NzE1NWQ0ODNiNThkNWZkNWVhM2YiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjIzNjUyZjAwZWRiNGM5OTBkMzIxYTU1YzE1M2E4OTgzZGQ2NDQ1NzNhNjJlNDAzNjgyMGJmZGI5NGQ0ZjA4Y2UiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUwZTUyN2Y3OTM0OWY0MmNjOWQ2OTQ0NWU2OTc2NjNkYjIzNzRjNGVlN2JlY2ZmODNiYmUwNmU5ZWU4ODlhMjkiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjA5Zjc2YmI3YTYyYTI2MzhhODBiY2NmZDE0N2Y3ZDkyYTBkNzc5NTM4MDdlMTY5NDhhZjY0ZjZkOTRkZTRhNWEifQ"
         },
         {
-          "resource": "repo://internal/handler/episodes.go#L1886-L1893",
+          "resource": "repo://internal/handler/episodes.go#L1877-L1884",
           "version": "repo-lines-v1:sha256:ae3e940214500a4760f082232d38ae176d2a8d56d008bf342766aa873df0da0b:eyJzZWxlY3RlZExpbmVDb3VudCI6OCwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiYjU5N2Q5Yjc3MmMxNDgyMTI5ZTYxYjRkYmYzM2FkNDhiNzkxYjY3MDNjYWJmNjJlMDI1ODJhMDM3MGJlNGQ3NyIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNDEyY2EzNDVjY2Y3NWJmOWMwODA2YmNlNjk1YmU4ZGU4MDhiNzk5ODQyNTFhN2E1NGQyMDJjZjYxMDFkZDQ1MSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNDQ1NjU1ODJiZmU4YzEzOTczNThjODg5OTkyN2M3NmJlNzkyYTBjODNkN2MwNDI4ZWJmOWQyZjY3YWUzZmVkZiIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiOGE5ZDc1NWEyYWMzODkxNjAwMGYyOGI2YWFiZTU3NTA0OGEyYzEzYWQ2MDBhZjkzNWE5ODM1NjQ3Y2FmZGRmZCJ9"
         }
       ]
@@ -123,6 +123,6 @@
   ],
   "verification": {
     "by": "openwiki/0.7.2",
-    "at": "2026-11-04T15:34:40.691Z"
+    "at": "2026-11-16T17:33:30.305Z"
   }
 }

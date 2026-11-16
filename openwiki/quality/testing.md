@@ -30,10 +30,10 @@ sources:
     resource: repo://internal/server/series_test.go
   - id: openwiki-source-012f2c78e3b1446dfc35803f
     resource: repo://Makefile
-generated: { by: "zcode", at: "2026-11-13T18:41:36.261Z" }
+generated: { by: "zcode", at: "2026-11-16T17:33:30.305Z" }
 verified:
   - by: openwiki/0.7.2
-    at: 2026-11-13T18:41:36.261Z
+    at: 2026-11-16T17:33:30.305Z
 ---
 
 # 测试策略
@@ -87,10 +87,17 @@ CI 只构建不测试：`.github/workflows/release.yml` 在每次推送时做 8 
 
 用户系统重构与安全加固（快照 3058134 之后）新增两个集成测试文件与一个迁移用例：
 
-- `internal/server/auth_security_regression_test.go`（ADR-019 回归闸门）：`TestDeletionRequestCancelPreservesCredentials`（注销申请/取消后 2FA 凭据与锁定字段不被覆写——定点写回归）、`TestNewDeviceLoginNoGate`（新设备登录不再被设备验证码拦截）、`TestEmailBoundLoginRateLimit`（凭证限流键绑定目标邮箱）、`TestDisable2FAWithoutStoredCredentials`（无凭据恢复通道）、`TestEmailOTPSecondFactor`（邮箱 OTP 第二因素发送与消费）。
+- `internal/server/auth_security_regression_test.go`（ADR-019 回归闸门，2026-11 再扩充）：`TestDeletionRequestCancelPreservesCredentials`（注销申请/取消后 2FA 凭据与锁定字段不被覆写——定点写回归）、`TestNewDeviceLoginNoGate`（新设备登录不再被设备验证码拦截）、`TestEmailBoundLoginRateLimit`（凭证限流键绑定目标邮箱）、`TestDisable2FAWithoutStoredCredentials`（无凭据恢复通道）、`TestEmailOTPSecondFactor`（邮箱 OTP 第二因素发送与消费）、`TestEnable2FARequiresPasswordReauth`（`/2fa/enable` 缺 `currentPassword` 被拒）、`TestTwoFactorChallengeDoesNotResetLoginAttempts`（2FA 挑战阶段不清零失败计数，CWE-307）。
 - `internal/server/loginname_passkey_test.go`：`TestUsernameLoginAndUID`（UID 发号与折叠登录）、`TestLoginNameChangeFlow`（改名：密码再认证/冷却/保留期）、`TestForce2FASetupGate`（管理员未开 2FA 的 force2FASetup 门禁）、`TestUsernameCaseInsensitiveLogin`（大小写折叠登录）。
-- `internal/migrate/migrate_test.go` 补充 `TestMigrateLoginNameLowerBackfill`（折叠回填与大小写冲突改名）。
+- `internal/migrate/migrate_test.go` 补充 `TestMigrateLoginNameLowerBackfill`（折叠回填与大小写冲突改名）与 `TestMigrateEmailUniqueSparse`/`TestMigrateEmailUniqueSparseNoDropWhenSparse`（email 稀疏唯一迁移：drop 旧非 sparse 索引、清理空串/null、已 sparse 时幂等不 drop）。
 - 集成夹具 `testServerWithRepos` 现同时返回 `*repository.Repos`（供直接查库断言），并把改名冷却/保留期配置为生产默认值。
+
+错误信封契约（快照 0bfa8b2，2026-11）新增的测试面：
+
+- `internal/server/error_contract_test.go`：`TestUnknownRouteReturnsCoded404`——未命中路由必须返回 404 信封（`SYS0003`/`status`/`ref` 字段齐全）。
+- `internal/middleware/ratelimit_test.go`：限流键 sha256 摘要（相同输入同桶、不同输入不同桶）、verify-email 固定 IP 同桶与 email 分桶回归。
+- `internal/middleware/refid_test.go` 与 `internal/middleware/bodyparse_test.go`：参考号中间件与请求体解析（含非对象 JSON → `SYS0002`）。
+- `internal/service/validate_password_test.go`：密码 72 字节边界（含多字节字符）表驱动用例；`internal/code/code_test.go`：`DeleteForUser` 只删未过期条目。
 
 ## 夹具模式
 
@@ -134,6 +141,7 @@ CI 只构建不测试：`.github/workflows/release.yml` 在每次推送时做 8 
 
 ## 相关阅读
 
+- [错误信封与错误码契约](../api/error-envelope.md)——错误契约测试断言的信封字段。
 - [快速开始](../quickstart.md)——本地设置。
 - [约定与有意保留的怪癖](conventions-and-gotchas.md)——测试保护的兼容规则。
 - [请求生命周期与中间件管线](../architecture/request-lifecycle.md)——被断言的中间件。

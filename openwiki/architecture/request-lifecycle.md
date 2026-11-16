@@ -24,10 +24,10 @@ sources:
     resource: repo://internal/server/app.go
   - id: openwiki-source-ebbcecfb3e8c07ba5e940ccd
     resource: repo://internal/server/register_routes.go
-generated: { by: "zcode", at: "2026-11-13T18:41:36.261Z" }
+generated: { by: "zcode", at: "2026-11-16T17:33:30.305Z" }
 verified:
   - by: openwiki/0.7.2
-    at: 2026-11-13T18:41:36.261Z
+    at: 2026-11-16T17:33:30.305Z
 ---
 
 # 请求生命周期与中间件管线
@@ -37,7 +37,8 @@ verified:
 ## 管线
 
 ```
-gin.Recovery
+gin.CustomRecovery（panic → JSON 500 SYS0500，替换纯文本 Recovery）
+  -> RequestRef（最前：生成参考号，X-Ref-ID 响应头 + refID 上下文）
   -> Gzip
   -> SecurityHeaders
   -> CORS
@@ -55,10 +56,15 @@ gin.Recovery
        -> Swagger UI（仅开发环境）
        -> 领域路由（单前缀挂载在 /api 下）
   -> /uploads 静态路由
+  -> NoRoute：404 SYS0003「接口不存在」
   -> errors.Handler（最后注册）
 ```
 
-在中间件之前，`NewApp` 还做两件装配：构造 `authlog.Recorder`（stderr 结构化日志 + `authevents` 落库）供鉴权链与限流器使用；并按 `[server]` 配置装配客户端 IP 识别（详见下文）。
+在中间件之前，`NewApp` 还做三件装配：调用 `errors.SetLogger(log)` 把 slog 注入 errors 包（5xx ERROR 日志的输出器）；构造 `authlog.Recorder`（stderr 结构化日志 + `authevents` 落库）供鉴权链与限流器使用；并按 `[server]` 配置装配客户端 IP 识别（详见下文）。
+
+### 参考号（RequestRef）
+
+`middleware.RequestRef` 是全局链的第一环：用 `crypto/rand` 生成 0-999999999 的十进制参考号，写入 Gin 上下文（键 `errors.ContextRefID`）并设置 `X-Ref-ID` 响应头。errors 渲染器、`RequestLogger` 与 panic 恢复都读取同一参考号，因此响应头、响应体 `ref` 字段与日志行可以用同一个值关联（排障流程见[错误信封与错误码契约](../api/error-envelope.md)）。它必须保持最前——后续所有中间件与错误渲染都依赖它已写入。
 
 ### 客户端 IP 识别（引擎级装配）
 
@@ -73,7 +79,7 @@ gin.Recovery
 
 ### Recovery、压缩与响应头
 
-`gin.Recovery` 把 panic 转为 500 响应。Gzip 在客户端接受 gzip 时压缩响应，排除已压缩的图片扩展名（含 webp）。`SecurityHeaders` 为每个响应设置 CSP（`img-src` 允许 `https:` 以支持外链封面）、一年含子域的 HSTS、`X-Frame-Options: SAMEORIGIN`、`nosniff`、`Referrer-Policy: no-referrer`、`Permissions-Policy`（关闭相机/麦克风/定位/支付）、`X-XSS-Protection: 0` 及相关头。
+panic 恢复用 `gin.CustomRecovery` 替换了 gin 默认的纯文本 500（后者会绕过统一 JSON 信封契约）：panic 渲染为 JSON 500，错误码 `SYS0500`、带参考号，stack 只进日志（`panic recovered`，带 ref/path/stack）；开发模式额外在响应体回显 panic 值与 stack。Gzip 在客户端接受 gzip 时压缩响应，排除已压缩的图片扩展名（含 webp）。`SecurityHeaders` 为每个响应设置 CSP（`img-src` 允许 `https:` 以支持外链封面）、一年含子域的 HSTS、`X-Frame-Options: SAMEORIGIN`、`nosniff`、`Referrer-Policy: no-referrer`、`Permissions-Policy`（关闭相机/麦克风/定位/支付）、`X-XSS-Protection: 0` 及相关头。
 
 ### CORS
 
@@ -89,8 +95,9 @@ gin.Recovery
 
 - 全局硬上限：12 MB；备份导入路径为 51 MB。
 - JSON/form 解析上限：1 MB；`/api/backup/import`（及子路径）的 JSON 为 50 MB。
-- 超限返回 413 `request entity too large`。
-- JSON 语法错误返回 400。
+- 超限返回 413 `request entity too large`（信封码 `BDP0002`）；读取失败 400 `BDP0001`。
+- JSON 语法错误返回 400（`BDP0003`，message 固定为 `encoding/json` 错误原文）；urlencoded 解析失败 400 `BDP0004`。
+- **非对象 JSON（数组/标量）返回 400 `SYS0002`「请求格式错误」**（2026-11 起）：此前标量/数组体被静默丢弃、handler 读到零值后表现为误导性业务错误，现在统一按请求格式错误拒绝。
 - 解析后的请求体存入 Gin 上下文供后续中间件使用，原始字节会还原到 `c.Request.Body`，使 handler 可以再次绑定。
 - 非 JSON/form 内容类型原样通过，特别是 multipart 上传，稍后由上传 handler 读取。
 
@@ -114,9 +121,11 @@ gin.Recovery
 | Cookie | Header | 结果 |
 |---|---|---|
 | 存在 | 存在且相等 | 放行 |
-| 存在 | 存在但不同 | 403 `CSRF token mismatch` |
-| 存在 | 缺失 | 403 缺少 header |
-| 缺失 | 任意 | 403 缺少 cookie |
+| 存在 | 存在但不同 | 403 `CSRF token mismatch`（`CSR0001`） |
+| 存在 | 缺失 | 403 缺少 header（`CSR0002`） |
+| 缺失 | 任意 | 403 缺少 cookie（`CSR0003`） |
+
+三种 403 的 message 文本保持原契约值不变，信封的 `error`/`ref`/`status` 字段由 `codedBody` 补齐。
 
 ### 统计与日志
 
@@ -137,14 +146,14 @@ gin.Recovery
 
 两个后果容易被忽略：
 
-1. 每次 `RateLimit` 调用都会创建带独立内存计数的新限流器。但 `RegisterRoutes` 用 `spec.Name|window|max` 做键缓存限流器，因此同一 spec 的所有路由共享同一计数器与预算。例如 TwoFactorSpec 的 Mounts 清单为 5 条路由（`/auth/login-2fa`、`/auth/2fa/email-otp/send`、`/2fa/verify-enable`、`/2fa/disable`、`/2fa/verify`），它们共用同一个 5 次/15 分钟桶；`/2fa/enable` 虽然也调用了同一 spec 工厂，但不在 Mounts 清单内，端点匹配不命中、不计入该桶（既有挂载语义）；`/auth/refresh` 不在此列，它使用独立的 `RefreshSpec`（60 次/15 分钟）。Passkey 仪式有独立的 `PasskeySpec`（10 次/15 分钟，覆盖 `/passkeys/register/*` 与 `/auth/passkey/*`）。
+1. 每次 `RateLimit` 调用都会创建带独立内存计数的新限流器。但 `RegisterRoutes` 用 `spec.Name|window|max` 做键缓存限流器，因此同一 spec 的所有路由共享同一计数器与预算。例如 TwoFactorSpec 的 Mounts 清单为 6 条路由（`/auth/login-2fa`、`/2fa/enable`、`/2fa/verify-enable`、`/2fa/disable`、`/2fa/verify`、`/auth/2fa/email-otp/send`），它们共用同一个 5 次/15 分钟桶——`/2fa/enable` 于 2026-11 补入挂载清单：它是植入持久凭据（第二因素）的端点，此前缺项导致实际只剩全局 300/min 兜底；`/auth/refresh` 不在此列，它使用独立的 `RefreshSpec`（60 次/15 分钟）。Passkey 仪式有独立的 `PasskeySpec`（10 次/15 分钟，覆盖 `/passkeys/register/*` 与 `/auth/passkey/*`）。
 2. 动态路由如 `/episodes/:id/view` 无法用挂载匹配表达，因此其配置的限流器永远不会触发。
 
 限流器使用 `ulule/limiter` 与内存存储，因此计数是固定窗口且进程本地的。响应包含 draft-6 `RateLimit-*` 头，429 时包含 `Retry-After`。
 
-限流键在凭证/邮件类 spec 上绑定目标账号（ADR-019）：`auth`、`twoFactor`、`passwordReset`、`emailVerify` 四个 spec 在请求体带 `email` 时改用 `spec:邮箱`（小写）计数——来源 IP 可经伪造代理标头轮换（CWE-348），保留 IP 分量会让这些 spec 在 IP 轮换下退化为无限流；绑定邮箱后，对同一账号的猜测无论换多少来源 IP 都共享同一计数桶。请求体无 `email` 的挂载（`reset-password`、`change-password`、`2fa/*` 等无邮箱体端点）回退到原 `spec:IP` 键，与旧行为一致。`requestEmailChange` 仍同时按来源 IP 与目标新邮箱小写值限流，避免用不同邮箱刷验证邮件。Passkey 仪式请求体不含 email，天然走 IP 键（仪式本身有 ceremony 会话一次性约束）。
+限流键在凭证/邮件类 spec 上绑定目标账号（ADR-019）：`auth`、`twoFactor`、`passwordReset`、`emailVerify` 四个 spec 在请求体带 `email` 时改用 `spec:sha256(邮箱小写)` 计数（`keyDigest` 把攻击者可控的键分量压缩为定长摘要——语义不变，但内存 store 中计数条目的驻留体积不再随请求体长度线性增长，修复 CWE-770 无上限资源分配）——来源 IP 可经伪造代理标头轮换（CWE-348），保留 IP 分量会让这些 spec 在 IP 轮换下退化为无限流；绑定邮箱后，对同一账号的猜测无论换多少来源 IP 都共享同一计数桶。请求体无 `email` 的挂载（`reset-password`、`change-password`、`2fa/*` 等无邮箱体端点）回退到原 `spec:IP` 键，与旧行为一致。**`/api/auth/verify-email` 是固定例外**：该端点按 code 解析验证条目，请求体 `email` 只是与被保护资源无绑定的可选匹配谓词——按 email 取键会让每次换随机 email 的猜测各得一个新桶，5/h spec 对爆破完全失效，因此该挂载固定回退 IP key（需配合正确的 `trusted_proxies` 配置）。`requestEmailChange` 仍同时按来源 IP 与目标新邮箱小写值限流，避免用不同邮箱刷验证邮件。Passkey 仪式请求体不含 email，天然走 IP 键（仪式本身有 ceremony 会话一次性约束）。
 
-429 命中时，中间件还会通过 `RateLimitOpts.Log` 输出一条认证诊断事件：`event=ratelimited`，带限流器名（spec 名写入 reason）、路径、IP 与 retry_after 秒数——在此之前日志里只有一个 429 状态码，无法区分是登录、refresh 还是全局限流命中。
+429 命中时，响应体走带码信封（`RLM0001`，message 为 spec 的固定文案），并设置 draft-6 `RateLimit-*` 头与 `Retry-After`。中间件还会通过 `RateLimitOpts.Log` 输出一条认证诊断事件：`event=ratelimited`，带限流器名（spec 名写入 reason）、路径、IP 与 retry_after 秒数——在此之前日志里只有一个 429 状态码，无法区分是登录、refresh 还是全局限流命中。
 
 ## 单前缀路由
 
@@ -158,12 +167,17 @@ gin.Recovery
 
 ## 错误渲染
 
-handler 主要通过 `errors.AbortWithAppError` 显式渲染错误，它映射 `AppError` 状态与消息，附加 `messageKey` 与额外标志，并在生产隐藏 5xx 详情、在开发暴露堆栈。
+4xx/5xx 响应的完整渲染契约在[错误信封与错误码契约](../api/error-envelope.md)页。本管线视角的要点：
+
+- handler 主要通过 `errors.AbortWithAppError` / `Abort500C` / `AbortCoded` 显式渲染错误：响应体为 `{message, error, ref, status}`，message 纯文案、生产 5xx 掩码「服务器内部错误」，5xx 额外打一行 ERROR 日志（code/ref/path/site/cause）。
+- 中间件层的固定契约响应（CSRF、限流、bodyparse）用 `codedBody` 在原 message 上补 `status`/`error`/`ref`。
+- 未命中路由渲染 404 `SYS0003`「接口不存在」（`NoRoute`）；panic 渲染 500 `SYS0500`；漏网错误由最后注册的 `errors.Handler` 兜底渲染 `SYS0501`。
 
 `errors.Handler` 在 `NewApp` 最后通过 `r.Use` 注册，位于所有路由之后。由于 Gin 在注册每个路由时快照中间件链，这次最终注册不会包裹此前注册的业务路由。实践中全局兜底渲染不覆盖这些路由，正确性依赖显式 abort 调用。之后新增的路由会有不同行为，扩展引擎时需要留意该顺序。
 
 ## 修改时的顺序规则
 
+- `RequestRef` 必须保持全局链最前：后续中间件与错误渲染都读取它写入的参考号。
 - 不要把 CSRF 校验移到 csrf-token 路由之前。
 - 不要把全局限流器移出 `/api` 组；`/api/health` 与所有领域路由依赖它。
 - 请求体解析必须早于清洗，因为清洗期望可读的请求体。
@@ -172,6 +186,7 @@ handler 主要通过 `errors.AbortWithAppError` 显式渲染错误，它映射 `
 
 ## 相关阅读
 
+- [错误信封与错误码契约](../api/error-envelope.md)——4xx/5xx 响应体、错误码与参考号契约。
 - [架构总览](overview.md)——包边界。
 - [鉴权中间件与角色](../auth/middleware-and-authorization.md)——`Protect` 行为。
 - [会话与令牌生命周期](../auth/session-and-token-lifecycle.md)——cookie 与令牌语义。

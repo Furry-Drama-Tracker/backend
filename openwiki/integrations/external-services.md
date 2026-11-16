@@ -24,10 +24,10 @@ sources:
     resource: repo://internal/service/oauth.go
   - id: openwiki-source-3f2309f0c3b4e4f8068472e9
     resource: repo://internal/service/register.go
-generated: { by: "zcode", at: "2026-11-13T18:41:36.261Z" }
+generated: { by: "zcode", at: "2026-11-16T17:33:30.305Z" }
 verified:
   - by: openwiki/0.7.2
-    at: 2026-11-13T18:41:36.261Z
+    at: 2026-11-16T17:33:30.305Z
 ---
 
 # 外部服务
@@ -81,7 +81,9 @@ HMAC 密钥在设置 `ALTCHA_HMAC_KEY` 时使用它，否则使用 `"altcha-" + 
 
 ## QQ 互联 OAuth（预留，501）
 
-`/api/auth/qq/*`（`status`/`start`/`callback`）是外部身份提供方的预留路由。`OAuthConfig`（`[oauth]` 的 `qq_app_id`/`qq_app_key` 或 `QQ_APPID`/`QQ_APPKEY`）配置齐全时 provider 视为启用，但当前后端实现仍返回 501「QQ 登录尚未开放」，待接入 SDK。`GET /api/auth/qq/status` 返回 `{"enabled": <bool>}` 供前端探测。`externalidentities` 集合已建好（`(provider, openid)` 唯一索引，provider 预留 `"qq"`），上线前不会有数据；注册路径已为「OAuth 绑定、无邮箱」的外部身份预留分支。
+`/api/auth/qq/*`（`status`/`start`/`callback`）是外部身份提供方的预留路由。`OAuthConfig`（`[oauth]` 的 `qq_app_id`/`qq_app_key` 或 `QQ_APPID`/`QQ_APPKEY`）配置齐全时 provider 视为启用，但当前后端实现仍返回 501「QQ 登录尚未开放」，待接入 SDK。`GET /api/auth/qq/status` 返回 `{"enabled": <bool>}` 供前端探测。`externalidentities` 集合已建好（`(provider, openid)` 唯一索引，provider 预留 `"qq"`），上线前不会有数据；注册路径已为「OAuth 绑定、无邮箱」的外部身份预留分支——这正是 ADR-020 把 `users.email` 改为可选字段（缺字段 + 稀疏唯一索引）的直接动机：外部登录发号的用户没有邮箱，非稀疏的唯一索引会让第二个无邮箱用户必然撞唯一约束。
+
+501 响应保持 `{"message": "QQ 登录尚未开放"}` 裸形态，**不**带错误信封的 `error`/`ref`/`status` 字段——这是错误码契约明列的例外（业务性"未开放"）；Swagger 注解虽统一引用 `errors.ErrorBody`，本端点的实际响应仍按例外处理。
 
 ## VAPID 与 Web Push
 
@@ -106,6 +108,7 @@ Web Push 投递尚未实现：每个领域的 `sendPushToUser` 辅助函数都�
 
 ## 相关阅读
 
+- [错误信封与错误码契约](../api/error-envelope.md)——错误码契约及其 501/oauth 例外。
 - [配置与环境变量](../architecture/configuration.md)——密钥与 VAPID 配置。
 - [注册与登录流程](../auth/login-and-registration.md)——验证码与地域查询所在位置。
 - [通知与实时推送](../api/notifications-and-realtime.md)——推送订阅及其当前空发送器。

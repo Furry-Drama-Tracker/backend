@@ -28,10 +28,10 @@ sources:
     resource: repo://internal/service/login.go
   - id: openwiki-source-012f2c78e3b1446dfc35803f
     resource: repo://Makefile
-generated: { by: "zcode", at: "2026-11-13T18:41:36.261Z" }
+generated: { by: "zcode", at: "2026-11-16T17:33:30.305Z" }
 verified:
   - by: openwiki/0.7.2
-    at: 2026-11-13T18:41:36.261Z
+    at: 2026-11-16T17:33:30.305Z
 ---
 
 # 快速开始
@@ -87,6 +87,7 @@ go vet ./...
 |---|---|
 | 理解包布局与依赖注入 | [架构总览](architecture/overview.md) |
 | 跟踪请求经过中间件、CSRF 与限流 | [请求生命周期与中间件管线](architecture/request-lifecycle.md) |
+| 处理 4xx/5xx 错误响应、错误码或排障参考号 | [错误信封与错误码契约](api/error-envelope.md) |
 | 配置或部署服务 | [配置与环境变量](architecture/configuration.md) 与 [部署与运行时](operations/deployment-and-runtime.md) |
 | 处理 MongoDB 集合、索引或迁移 | [持久化与数据模型](architecture/persistence-and-data-model.md) |
 | 修改登录、刷新或鉴权行为 | [注册与登录流程](auth/login-and-registration.md)、[会话与令牌生命周期](auth/session-and-token-lifecycle.md)、[鉴权中间件与角色](auth/middleware-and-authorization.md) |
@@ -105,10 +106,12 @@ go vet ./...
 
 - 每个领域路由只挂载在 `/api` 下（单前缀，v1 镜像已移除）；端点限流只匹配 `/api/<mount>`，全局限流覆盖所有 `/api/*`。
 - 管理员与普通用户共用 `/api/auth/login`；登录标识符支持用户名（折叠小写）与邮箱；登录后由 `GET /api/admin/verify` 校验后台权限，没有独立的 `/api/admin/login`。
-- **角色化 2FA**：普通用户禁开 2FA，admin/superadmin 强制开启且不可自行关闭——未开启时非 GET 写操作被 force2FASetup 门禁拦截（403 + `force2FASetup`）；管理员丢失验证器用 `cmd/useradmin clear-2fa` 带外恢复。
+- **角色化 2FA**：普通用户禁开 2FA，admin/superadmin 强制开启且不可自行关闭——未开启时非 GET 写操作被 force2FASetup 门禁拦截（403 + `force2FASetup`）；管理员丢失验证器用 `cmd/useradmin clear-2fa` 带外恢复。2026-11 起 `POST /api/2fa/enable` 额外要求请求体携带 `currentPassword`（密码再认证），并已纳入 2FA 限流桶。
 - **新设备不再拦截登录**（2026-11 重构）：登录成功后只发提醒邮件，"已知设备"由 `fdt-device` cookie ↔ 会话 `deviceTokenHash` 判定；User-Agent 仅作展示。
+- **错误排障口径（2026-11 契约）**：所有 4xx/5xx 响应体为 `{message, error, ref, status}`——拿用户报的错误码（如 `USR0007`）grep 源码直达唯一调用点，拿 `ref`（或响应头 `X-Ref-ID`）grep 服务日志定位请求；message 恒为纯文案，生产 5xx 掩码「服务器内部错误」。详见[错误信封与错误码契约](api/error-envelope.md)。
+- **email 是可选字段**（ADR-020）：无邮箱用户（外部登录预留）的文档缺省该字段、API 输出 `""`；任何写路径不得写 `email:""`。
 - 非 GET 请求需要 CSRF，419 表示 access 令牌过期。
 - Refresh 令牌带随机 `jti` 轮换；2 分钟并发宽限期外的重用会吊销全部会话（`/auth/refresh` 有独立的 60 次/15 分钟限流，不与 2FA 桶共享）。带 `jti` 的 access 令牌也会在会话失效后立即被拒绝。用户报"掉登录"时用 `make diag` 查会话吊销原因与认证事件。
 - IP 地域解析默认禁用（`IP_REGION_ENABLED`/`ip_region_enabled` 缺省 false，数据出境合规）：登录/注册不外呼，`LastLoginRegion` 记为「未知」；开启后按 `[security].ip_region_provider` 装配 aliyun 云市场 API 或 czdb 离线库并互相兜底（ADR-018）。代理标头信任策略由 `[server]` 的 `trust_proxy_headers`/`proxy_ip_headers`/`trusted_proxies` 配置装配。
-- 索引创建、五项数据迁移与会话/通知/注销账号清理 cron 都在启动时执行，但失败只告警；Web Push 发送仍是空实现。不要假设它们成功。
+- 索引创建、六项数据迁移（含 email 稀疏唯一迁移 `email_unique_sparse_v1`）与会话/通知/注销账号清理 cron 都在启动时执行，但失败只告警；Web Push 发送仍是空实现。不要假设它们成功。
 - 验证码（含 2FA 邮件 OTP 独立 store）、Passkey 仪式会话、限流计数、剧集缓存与 SSE 连接状态是进程本地的，多实例部署需要共享存储。

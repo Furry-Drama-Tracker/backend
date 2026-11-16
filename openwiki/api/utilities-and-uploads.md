@@ -34,15 +34,15 @@ sources:
     resource: repo://internal/upload/svg.go
   - id: openwiki-source-62a9837f2b45c92ae81ca775
     resource: repo://internal/upload/upload.go
-generated: { by: "zcode", at: "2026-11-13T18:41:36.261Z" }
+generated: { by: "zcode", at: "2026-11-16T17:33:30.305Z" }
 verified:
   - by: openwiki/0.7.2
-    at: 2026-11-13T18:41:36.261Z
+    at: 2026-11-16T17:33:30.305Z
 ---
 
 # 上传、RSS、翻译、备份与分页
 
-本页覆盖其他功能依赖的服务型领域：二进制存储、用户名改名、订阅生成、机器翻译、数据可移植性，以及大多数列表端点共用的分页辅助。
+本页覆盖其他功能依赖的服务型领域：二进制存储、用户名改名、订阅生成、机器翻译、数据可移植性，以及大多数列表端点共用的分页辅助。4xx/5xx 响应统一走错误信封 `{message, error, ref, status}`；上传错误经 `internal/errors` 的 `UploadError` 识别后映射为 `UPL0001`（大小）/`UPL0002`（类型）/`UPL0003`（魔数）/`UPL0004`（其它），bodyparse 中间件的固定契约响应带 `BDP0001`-`BDP0004`（读取失败/超限/JSON 语法错误/urlencoded 解析失败）与非对象 JSON 的 `SYS0002`。
 
 ## 图片上传
 
@@ -60,7 +60,7 @@ verified:
 - 目标文件用 `os.OpenFile(O_WRONLY|O_CREATE|O_EXCL)` 打开：文件名随机，正常不会冲突，同时避免覆盖已有文件或跟随符号链接。
 - 落盘后 `stripExecBits` 强制移除可执行位（Unix 为 `Mode() & ^0o111`，保留读写位；Windows 无 Unix 执行位，为空操作）。剥离失败会删除该文件并返回错误，避免留下未知权限的文件。
 
-返回 URL 为 `/uploads/<文件名>`。`maxBytes <= 0` 时默认 5 MB。调用方选择不同前缀与限制，例如封面 5 MB、壁纸与主题资源 8 MB、站点内容图片 5 MB。
+返回 URL 为 `/uploads/<文件名>`。`maxBytes <= 0` 时默认 5 MB。调用方选择不同前缀与限制，例如封面 5 MB、壁纸与主题资源 8 MB、站点内容图片 5 MB。上传错误统一由调用方的 `abortUploadError` / `abortImageUploadError` 类辅助函数渲染：`ErrNoFile` 与各 `UploadError.Code` 被映射为带码信封（域内另有 `WAL0018`-`WAL0023`、`ICN0003`、`THM0075`-`THM0076` 等更细的域级码），不再走裸 500。
 
 `RemoveFile` 只接受上传目录下单层路径段。空字符串、`.`、`..`、含分隔符的名称以及包含 `..` 的名称都会被拒绝，防止被污染的数据库值删除目录外文件。文件不存在视为成功。
 
@@ -165,6 +165,7 @@ HTTP 请求体限制对 `/api/backup/import` 单独放宽到 50 MB，且只对 J
 
 ## 相关阅读
 
+- [错误信封与错误码契约](error-envelope.md)——`{message, error, ref, status}` 响应体、UPL 上传错误映射与 BDP 请求体错误码。
 - [请求生命周期与中间件管线](../architecture/request-lifecycle.md)——请求体大小限制与静态路由位置。
 - [账号安全能力](../auth/account-security.md)——密码再认证与 2FA 策略。
 - [内容目录 API](content-catalog.md)——上传调用点。

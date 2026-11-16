@@ -22,10 +22,10 @@ sources:
     resource: repo://internal/service/password.go
   - id: openwiki-source-3f2309f0c3b4e4f8068472e9
     resource: repo://internal/service/register.go
-generated: { by: "zcode", at: "2026-11-13T18:41:36.261Z" }
+generated: { by: "zcode", at: "2026-11-16T17:33:30.305Z" }
 verified:
   - by: openwiki/0.7.2
-    at: 2026-11-13T18:41:36.261Z
+    at: 2026-11-16T17:33:30.305Z
 ---
 
 # 注册与登录流程
@@ -52,7 +52,7 @@ verified:
 2. 邮箱正则。
 3. **用户名（accountId）规则**（`ValidateLoginName`）：3–32 字符，`^[A-Za-z_][A-Za-z0-9_-]{2,31}$`（首字符字母或下划线）；显式拒绝 `.`/`..`；内置黑名单子串匹配（admin/root/system/api 等，可与 `[security].username_blacklist` 合并）；保留名精确匹配（me/self/login 等）。存储保留原样大小写，唯一性按折叠小写判定。
 4. 昵称长度 1–20。
-5. 密码强度。
+5. 密码强度（`ValidatePassword`：8 位起、至少一个字母与数字；2026-11 起新增 **72 字节上限**——对齐 bcrypt 硬限制，x/crypto v0.42+ 对超长口令直接报错而非静默截断，不前置校验会把合法注册变成 500；文案提示汉字/表情符号占多字节）。
 6. 演示邮箱保护：`DEMO_EMAILS` 中的地址不能新注册（仅当该邮箱尚不存在）。
 7. 邮箱唯一性——失败返回 `emailTaken: true` 供前端引导。
 8. 账号 ID 唯一性（折叠小写比较）。
@@ -71,7 +71,7 @@ verified:
 3. **锁定检查**——返回通用凭据错误而不是锁定专用消息，避免暴露锁定状态。
 4. **注销宽限期**——如果已过七天删除截止时间，调用 `PurgeUserData` 做级联物理清理，然后返回通用凭据错误。如果清理失败，流程继续，因此清理失败不会阻塞登录。
 5. **密码校验**——失败递增 `loginAttempts` 并返回通用 400。
-6. **重置失败计数**——密码正确时清零。
+6. **重置失败计数**——2026-11 起清零点后移（CWE-307）：密码通过但停在 2FA 挑战阶段**不再清零**，否则“正确密码 + OTP 猜测”交替请求会让锁定永不触发。现在清零只发生在两处：密码通过且无第二因素待完成的邮箱未验证分支，以及完整认证成功之后。
 7. **邮箱验证**——未验证（且未跳过）时经 `Mint` 生成并发送验证码，结果为 `NeedVerification`。
 8. **演示/跳过自动验证**——开发环境中演示邮箱自动标记为已验证（`UpdateVerified` 定点更新，避免整文档替换清空 2FA 密文）。
 9. **2FA**——已启用时签发五分钟的 `2fa-challenge` 令牌并返回 `Need2FA`，响应附带 `twoFactorMethods` 列表（`totp` 恒有；`emailOtp` 仅邮箱已验证时可用）。
@@ -79,12 +79,12 @@ verified:
 
 **新设备不再拦截登录**（2026-11 重构变更）：旧实现的“新设备 → 设备验证码邮件 → `verify-device`/`confirm-device-login` 确认链”已整体移除（两个路由也已删除）。现在新设备只在登录成功后收到一封提醒邮件（受 `emailNotificationPrefs.newDeviceLogin` 控制），是事后提醒而非屏障。“已知设备”由服务端签发的设备令牌判定（见下节）。
 
-handler 把结果映射为响应：
+handler 把结果映射为响应（错误分支走带码信封 `{message, error, ref, status}`，本域前缀 `AUT`）：
 
 | 结果 | 状态码 | 响应信号 |
 |---|---|---|
 | `User != nil` | 200 | 会话用户对象 |
-| `NeedVerification` | 403 | `needVerification`、`email` |
+| `NeedVerification` | 403 | `needVerification`、`email`（`AUT0108`，经 `NewExtraC` 携带布尔标志） |
 | `Need2FA` | 200 | `need2FA`、`email`、`twoFactorChallenge`、`twoFactorMethods` |
 
 2FA 挑战保持 200 而验证分支为 403，这是有意设计。
@@ -138,6 +138,7 @@ handler 把结果映射为响应：
 
 ## 相关阅读
 
+- [错误信封与错误码契约](../api/error-envelope.md)——`{message, error, ref, status}` 响应体与 `AUT` 错误码。
 - [会话与令牌生命周期](session-and-token-lifecycle.md)——轮换与重用检测、设备令牌。
 - [账号安全能力](account-security.md)——角色化 2FA 策略、Passkey 与邮箱 OTP 细节。
 - [外部服务](../integrations/external-services.md)——Altcha 与 IP 地域行为。

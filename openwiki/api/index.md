@@ -3,5 +3,6 @@
 - [管理与审核 API](administration-and-moderation.md) - 后台管理、剧集审核与回收站、举报、统计、分类管理、自动任务、版本历史与审计日志的角色门槛和副作用。
 - [CMS 与站点内容 API](cms-and-site-content.md) - 公告、壁纸、友情链接、主题、SVG 图标、站点内容键、创作者主页、动态流与反馈的建模、权限门控，与邮件和通知的联动，以及图标上传端点的停用状态。
 - [内容目录 API](content-catalog.md) - 剧集与系列目录、审核门控的写入路径、观看计数与缓存，以及用户追番、收藏、收藏夹、历史与评分域的行为。
+- [错误信封与错误码契约](error-envelope.md) - 4xx/5xx 统一错误信封 {message, error, ref, status} 的渲染管线、错误码构造器家族、参考号中间件、机器注册表生成与 ESA 边缘信封。
 - [通知与实时推送](notifications-and-realtime.md) - 通知文档与端点、SSE 流的票据认证与连接上限、邮件通知偏好，以及已存储但不会发送的 Web Push 订阅。
 - [工具与上传 API](utilities-and-uploads.md) - 共享图片与 SVG 上传校验与落盘安全（O_EXCL、剥离执行位）、用户名（登录名）改名与预检、静态上传服务、RSS 订阅、翻译提供方回退、整库备份导出/导入限制，以及通用分页契约。

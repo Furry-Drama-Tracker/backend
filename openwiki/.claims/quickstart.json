@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "pageVersion": "sha256:0ce27d6805e6f152951d10bc4ff592d4c0a59d13eb2abfa5e8145e942f51dd0f",
+  "pageVersion": "sha256:0346e14b237d9d25d9dac9dc3c7e10867959ab4a85069614878784b32bd9742a",
   "claims": [
     {
       "id": "claim_fc955c86188c43aeb6166babbb7bf27c",
@@ -31,7 +31,7 @@
           "version": "repo-lines-v1:sha256:b207f6c33b089620e3fe1e7a0b5b2c4ef6c3e9a4b25bd365485fad7533679012:eyJzZWxlY3RlZExpbmVDb3VudCI6MTcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjYzN2NjZjRlNDU0NjgwYWE3MzdlMmIyYTVhZWNlNTQzNWI3ZDYyOTdjZjg3MDhhMjk1ZTMzMmEwMjMxOTA0YWMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjE1MjZlODFhZWNiOTFmZmQ4NWQ1NDNhZGIxNzkxYjU5MDQ1ODBlMWJlZjRlZTIyZWNkMjA2NDJmNmJlMjYyNDUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjRjMDcyZmEyYWJhNTc2YWQzNWNkNDk4YjVjYzY2MWMxNGIwNTRlYTk0OGZkYmFhMTJlNjFhMjI3MGM3NzUyZDAifQ"
         },
         {
-          "resource": "repo://internal/server/app.go#L124-L132",
+          "resource": "repo://internal/server/app.go#L151-L159",
           "version": "repo-lines-v1:sha256:cced5c1143f2e1dff4aeb4b054c68f20e471e7b12eebe27d7ffe9c4f71395d41:eyJzZWxlY3RlZExpbmVDb3VudCI6OSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiZmVkNTFhMThiYTIzYTQyNDhlOWE3MjhlZDRmMzE5YTM1YmUxYThmZGUxZDE4ODFhMjE3ZjYxZjU2NTMxN2U0NiIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiOGJiZmJjZmQ4NTNhNmNiMTE3M2NiYzYwOGUyOTMyMzQ0ZjUzNDE5NWY4MmNiNWVjMTU4OGRlZTc3MDBmZDE2ZCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiYjY5MTE4MzM5YzA1MjRkMGM3YTRjYWRlOGRkYThlNzA4MDMzYmE3NjBjY2JlMGU1NjQzZWY0OGQwZmViZGZjNSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiYmY0MDBlNGQ2ZDY1YWZmOTU5ZjRiZjAxNWY1ZjM2ZDMwNDI2ZTM2NWM3NjRjN2I3MmMxY2ViODNhYmIyNzMzNSJ9"
         }
       ]
@@ -55,7 +55,7 @@
       "statement": "Index creation, migrations, and account-deletion, session, and notification cleanup cron jobs run at startup with warning-only failures, web push sending remains a no-op, and verification codes, rate limits, the episode cache, and SSE connection state are process-local.",
       "evidence": [
         {
-          "resource": "repo://cmd/server/main.go#L92-L118",
+          "resource": "repo://cmd/server/main.go#L95-L121",
           "version": "repo-lines-v1:sha256:b6382f7d494a1d56f3057b639cebd08a4841f4710e2ba87739c8d6cb66644c35:eyJzZWxlY3RlZExpbmVDb3VudCI6MjcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImYzODkyZWFlMzEzYjk1ZWNmNDc2YTc5YzAyZWU5NGRmYWNmNjA0OTliZGI3NmFlM2FlNThkNDJhY2U0MzY5OWYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImIwNGYxNDkxMmViYzU2NTYxMGVlYjE0MDIwYmE5ZDg3NGM5N2JlMWJlYTA2YzhmYzVkMzkxZjljODY1Yjk1YmYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjY0MDUzYzM0MjRkNDFlODZiNGJmNDRmZmI1MzA1ZTA0MjBlOGJmMTFkNzgyZTBkOWVjN2U1NjExYzE1ZmI4YTciLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjU5ZTcxOGM3Y2RkNDMzZDIwOTczNmVjZTk0ODZhZjUyMGJiYzE1NzU0N2NiNzRkMWQ3YzA0MzMxMmMxMmY2MmIifQ"
         },
         {
@@ -67,11 +67,11 @@
           "version": "repo-lines-v1:sha256:d6f998871da02331b65e043f320f155f45506fc7ae6a5bdb4dc744cad25ddb94:eyJzZWxlY3RlZExpbmVDb3VudCI6OCwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiZmNjYTNjYjdlMDI1YzI4MTViNGNhOTkwODdiYmE3ODgzZDA0NGE3ZGE2ZTc3ZDkwYzY2OGNmNTVlMmFkZGQxOCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMjNlN2M0Mzk5NDU2NzQ2NWMzOGUzZTM0YjdjMDFmNzI1M2Y5ZGIxMTIxNjc3OTJiNjU5ZWMxZWEzYjAyNjA1OCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiN2U0NDM4NWE5YTE3YWY2NmUyMmYzYWMwZTBkZWI4ZWQzYmMxZjgzYzU5MWU5YmM2MWQ2M2E1ZGY1ZDg0NDE5ZCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiYTBkZjk5NjcwMmRjZjQ5Nzg4MTQxOGUxYTgzNmMyNzljYzJjOGE2MGUxN2UwYWMxZjI4ODNmYWRiZDkyY2YwNSJ9"
         },
         {
-          "resource": "repo://internal/handler/notifications.go#L23-L29",
+          "resource": "repo://internal/handler/notifications.go#L24-L30",
           "version": "repo-lines-v1:sha256:cb219791c962a1252bc4650e07dd7cbec18c73bbc06a30d9e8205d4e3aadc733:eyJzZWxlY3RlZExpbmVDb3VudCI6NywiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiZDBkOTg2YjBkZjdlOWM0N2FhNzgyYjA2NjA5NDY5YmM4ZWVjYTQ3NjEyYjgzOGNmODI5ZGRhNGJjZGRkMzMyOSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiYTExMDczMDFlYTE1ZWQ4MjdhZmQ2OGE3ZTUzNzA1NTFjZjRmZWQyM2RhMTk4ZTkyYWRhYjdkMjNmODQ5NmQ3OSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiMjAyYjQwNjYzMDIwZTcwZDlhYzk4OWMzODFkMjE5NDEyOGE2MjFjNzEyNzU5OGIyZDkxNTRkOWNhYmM2OGVkMCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZjcwNDhiZjc2OWI5Mzk0ZTcxMzM2MGVhOGM1ZTZiN2QxMDI2NzUyNjM2MjlmNTc1MjRkOTVlMjM0MjRhZGM4YSJ9"
         },
         {
-          "resource": "repo://internal/handler/notifications.go#L48-L56",
+          "resource": "repo://internal/handler/notifications.go#L49-L57",
           "version": "repo-lines-v1:sha256:0be949842ee626279800ae2c29d5aadf309af2a6f9f7ce13b01791a34ef7ccdb:eyJzZWxlY3RlZExpbmVDb3VudCI6OSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiZDRhMTEzNWNmMGMzODQ0ZWQ0MDA4MGVjMDZiNGZlYzNlMjk1ODYzYzhhMWIyMDk3ZjBlY2NjNThkNzdiMTRhNyIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNGMwODZjNzA5OWE3YTJhYmJkYzczMDU3NWIwYWY5ZjY1OTkxOWIzMDgwMzQzNDg5MDI5ZGI4NjJmMzZmYmY4YyIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiYmU5N2NjN2Y4YzRkMDY3NThmZDBjMmU1NzUzM2ZlZmU3NWE5NmE3YzI4ZTljMGIxNTgyYzIwYTE0ZTlkNjQ0MCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZjMxZGRkNzc2MjliNmEwMWFlYWNkZDg4YWJiOWFjNWYzZDc0ZWQyMTJiNGZkMTExNGZhMmQyYmRlYWM3MDI0MCJ9"
         }
       ]
@@ -88,21 +88,25 @@
     },
     {
       "id": "claim_950fb8598f88446aabde6d423170e8af",
-      "statement": "角色化 2FA：普通用户禁开 2FA，admin/superadmin 强制开启且未开启时非 GET 写操作被 force2FASetup 门禁拦截（403 + force2FASetup 标记）；新设备登录不再被验证码拦截，只发提醒邮件（已知设备由 fdt-device cookie ↔ 会话 deviceTokenHash 判定）。",
+      "statement": "角色化 2FA：普通用户禁开 2FA，admin/superadmin 强制开启且未开启时非 GET 写操作被 force2FASetup 门禁拦截（403 + force2FASetup 标记，AUT0109）；/2fa/enable 需密码再认证并已入限流挂载；新设备登录不再被验证码拦截，只发提醒邮件（已知设备由 fdt-device cookie ↔ 会话 deviceTokenHash 判定）。",
       "evidence": [
         {
-          "resource": "repo://internal/middleware/auth.go#L114-L125",
-          "version": "repo-lines-v1:sha256:338a20f787dc31fce8b2b1b2cc1336f07a4a2684a5f3c53ae03ca73c969ec90e:eyJzZWxlY3RlZExpbmVDb3VudCI6MTIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjMwZjhlYTA1NzQyZTVlNzg4MWJkZmYxMjFiMDkzODY2ZmUwODVhYjhiMDEyM2QxM2JlNGE4ZDQzMjc5MjAzNTgiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY0ZWZjNDk0MThkMjZkY2YxMjliMjJhNmFhMjExMDhjZWVjMzc2NzdhMzJkMDhlOWQ1ZmVlMzVkZGE2NmJiOWQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImMxZTc0ZjQyZDlmOGZiMjQ5YjBkZDBhYmZhZjZlMTc2OWEzNjM4NTc4Y2FhNDM1ZTE4NGIyMjNmZDgxYjRkOTMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjMwMWY1OGVlOTc5Njg1Y2NlZWEzN2M2NGY1MTk5NTExZDUyYTY3ZmFjMDUwZDFiMGY1NWEyNjU4YWQ5MWYwMjgifQ"
+          "resource": "repo://internal/middleware/auth.go#L51-L134",
+          "version": "repo-lines-v1:sha256:2fe2a8e5392f07cfd784f3884e126039d2157b1dba592941c57c19988004db5c:eyJzZWxlY3RlZExpbmVDb3VudCI6ODQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjZkZWRhY2ViMzQ2NDJhMGIxZWJhMDVmZTQ0YTc0YmNhNTIyNTg4NDllOTU4ZjliM2Q2ZGQ5NmI2ZjVjYWE0ZjAiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjljMmZiYjEwZTQwZjcxODc5MzA5OGI5YWE3N2ExZjg3MWJkYjhiZmU4ZTlmMzg5ODdmM2I0OTgwOTY1YjE0ZTIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjlhMzJkZDdiNDQ4OWU5MzBhNTVjNmUwNGIyZjBkMzgyMDE2ZDgxMDA3MzU2YmM4OTE0NzY3MDYwMzJlOWMyMGQifQ"
         },
         {
-          "resource": "repo://internal/service/login.go#L141-L168",
-          "version": "repo-lines-v1:sha256:336d2632bfe22ed98fd05a4df1e3f9a8d1fd40bc51df08a6e41f42e15f1dbbb8:eyJzZWxlY3RlZExpbmVDb3VudCI6MjgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImNhNGE3ZDEwYjA2ZDBjY2NmZDk1Yzk4NzQ1NDM3OGFkYzYxN2E1YmRiNDE3YTlhMjE4MzI2YjY5YzBkOTA1NjQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImU0ZWM3YWZhNjc2ZGU1MzZkNjc1NTYxMjkwYzRkZGQ2NjBhNWExN2VhOWUyMzAxY2NmNDkzMGFhNDUxNTk1Y2UiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjU3MmRiMDEzMjliODJhY2VlZDkwMTRhZGEzNjUyNzYwMDNkNzA2MDRkNWViNWNlYWE5ZDczNGY5YjEwYWJmNGEifQ"
+          "resource": "repo://internal/service/login.go#L197-L211",
+          "version": "repo-lines-v1:sha256:94e64aa09e56e85ea776c771f1f070aafe100147ea8d4da8babd7881c8a49262:eyJzZWxlY3RlZExpbmVDb3VudCI6MTUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImY5NzljNjA1OWJlYTgzYTg2NDFiMDY1YmRjNGM2NDZhNWQyNDE3NGYyNWQyNmI3ZDdjNmI0YzYwNzNiYjVkYTIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImZlNTA3ODNjODMwMGY2YTU3MWMzMTEzMDg1YTZmYmQwMmUxZjFlZjNjMTZhMDFlNjFkYTBiNDhjM2JjYWE1M2EiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjhhZmE5NTBmZWY2ZjY4YWQ3MWUwMmUwMWViYWMwOTUxZDViYjg2YjAyZDgwNWY0NDZhYjUwM2YzZmNkZWMxNWIifQ"
+        },
+        {
+          "resource": "repo://internal/service/login.go#L47-L154",
+          "version": "repo-lines-v1:sha256:65e959c23b72f68959b0f1a14a87ca5beaf52832ba1edec5299fe80d9c8dc92a:eyJzZWxlY3RlZExpbmVDb3VudCI6MTA4LCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiJkZTIzYmFiMTJmMGMwNDBmNTZmYTljYTJkZDAwN2I3Mzk3ZWU1NzcwYWQ4YTRiMDIyYTdjN2ViMGY3ZWIwNTQ2IiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiI0MTJjYTM0NWNjZjc1YmY5YzA4MDZiY2U2OTViZThkZTgwOGI3OTk4NDI1MWE3YTU0ZDIwMmNmNjEwMWRkNDUxIiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiJiNzg3M2NiNjJhMzVjOTk2ZWFlMTM4ODZiOGY4NTJjNWEyOTM1YjM2ZTE5NGQ2OTc0ZjNkZDY1NzM2MGJlMDkwIiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MywiZm9sbG93aW5nQ29udGV4dEhhc2giOiIwOGFjMDNmYTQwYmY5ZGNhYjBlMWNkZTcwODIxYzllMzI0ODVlMmIyNmEyZTA3MTFlMTY3ODU0ODMzMWU2MTQ3In0"
         }
       ]
     }
   ],
   "verification": {
     "by": "openwiki/0.7.2",
-    "at": "2026-11-13T18:41:36.261Z"
+    "at": "2026-11-16T17:33:30.305Z"
   }
 }

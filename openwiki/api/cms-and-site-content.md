@@ -3,9 +3,6 @@ type: api-domain
 title: CMS 与站点内容 API
 description: 公告、壁纸、友情链接、主题、SVG 图标、站点内容键、创作者主页、动态流与反馈的建模、权限门控，与邮件和通知的联动，以及图标上传端点的停用状态。
 tags: [api, cms, themes, icons, announcements, creator, feedback]
-verified:
-  - by: openwiki/0.7.2
-    at: 2026-11-11T16:33:08.526Z
 sources:
   - id: openwiki-source-b10e065a15408ca747b6184f
     resource: repo://internal/email/client.go
@@ -33,12 +30,15 @@ sources:
     resource: repo://internal/handler/wallpapers.go
   - id: openwiki-source-0b6d7f0465da2820a1a264ef
     resource: repo://internal/model/theme.go
-generated: { by: "zcode", at: "2026-11-11T16:33:08.526Z" }
+generated: { by: "zcode", at: "2026-11-16T17:33:30.305Z" }
+verified:
+  - by: openwiki/0.7.2
+    at: 2026-11-16T17:33:30.305Z
 ---
 
 # CMS 与站点内容 API
 
-这些域共享 `cms_helpers.go` 工具，并遵循同一形态：公开读取面、登录用户自有资源，以及超管或管理员管理端点。所有路由都通过 `router.Mount` 挂在 `/api` 下（单前缀，无 v1 镜像），并且每个请求都先经过全局中间件管线。
+这些域共享 `cms_helpers.go` 工具，并遵循同一形态：公开读取面、登录用户自有资源，以及超管或管理员管理端点。所有路由都通过 `router.Mount` 挂在 `/api` 下（单前缀，无 v1 镜像），并且每个请求都先经过全局中间件管线。4xx/5xx 响应统一走错误信封 `{message, error, ref, status}`；本域错误码前缀：`SIT`（站点内容）、`ANN`（公告）、`WAL`（壁纸）、`THM`（主题）、`ICN`（图标）、`CRP`（创作者主页）、`ACT`（动态流）、`FBK`（反馈）等。
 
 ## 站点内容
 
@@ -59,7 +59,7 @@ generated: { by: "zcode", at: "2026-11-11T16:33:08.526Z" }
 
 公告由超管管理，所有路由（包括读）都附加 `RequireEmailChanged`。公开面是 `GET /active`（可按 `popup` 或 `banner` 渠道过滤，由 repository 限制条数）和 `GET /:id`。
 
-创建接受四种固定类型（`info`、`warning`、`maintenance`、`update`），其他类型会落到通用 500 路径。`link` 为空或必须是 `http`/`https`，否则返回 400。新建公告在 active 且 `publishAt` 不在未来时会立即广播。更新时，如果 `active`、`sendNotification` 或 `sendEmail` 从 false 变为 true，会先重置对应的已发送标志再重新广播，避免被去重逻辑压制。删除公告时也会删除引用它的通知中心条目。
+创建接受四种固定类型（`info`、`warning`、`maintenance`、`update`），其他类型会落到通用 500 路径（共享 `serverError`，`EPS0037`）。标题/内容缺失返回 400 `ANN0001`，`link` 非空且非 `http`/`https` 返回 400 `ANN0002`。新建公告在 active 且 `publishAt` 不在未来时会立即广播。更新时，如果 `active`、`sendNotification` 或 `sendEmail` 从 false 变为 true，会先重置对应的已发送标志再重新广播，避免被去重逻辑压制。删除公告时也会删除引用它的通知中心条目。
 
 广播有两条独立通道：
 
@@ -144,6 +144,7 @@ generated: { by: "zcode", at: "2026-11-11T16:33:08.526Z" }
 
 ## 相关阅读
 
+- [错误信封与错误码契约](error-envelope.md)——`{message, error, ref, status}` 响应体、错误码前缀与上传错误映射。
 - [上传、RSS、翻译、备份与分页](utilities-and-uploads.md)——共享上传实现与落盘安全约束。
 - [邮件发送](../integrations/email-delivery.md)——模板辅助函数与按收件人限流。
 - [外部服务](../integrations/external-services.md)——友链申请使用的 Altcha 校验。

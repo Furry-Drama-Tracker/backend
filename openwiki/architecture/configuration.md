@@ -25,7 +25,7 @@ sources:
 generated: { by: "zcode", at: "2026-11-13T18:41:36.261Z" }
 verified:
   - by: openwiki/0.7.2
-    at: 2026-11-13T18:41:36.261Z
+    at: 2026-11-16T17:33:30.305Z
 ---
 
 # 配置与环境变量

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "pageVersion": "sha256:7b7849bfe6a751717f16343348b023544f765960c7f5d88c6e8af7e6cca358a1",
+  "pageVersion": "sha256:0be9c31ff71f6497e0b71e3d0cb8b80adcdda26a0475eaff9e3a0ccabdc57495",
   "claims": [
     {
       "id": "claim_813d5398a03447928aea6cd62fb23b94",
@@ -31,12 +31,12 @@
       "statement": "Models map documents with bson tags and JSON tags, hide password and 2FA and lockout fields from JSON, model the __v version key, and normalize legacy defaults through explicit constructors.",
       "evidence": [
         {
-          "resource": "repo://internal/model/model.go#L19-L63",
-          "version": "repo-lines-v1:sha256:e064c8b63fa1c8706d1fba02300d48576194c76d36321ee586b22ce5c9d74811:eyJzZWxlY3RlZExpbmVDb3VudCI6NDUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijk5ZjZlYWRjMmIyYzFmNjJlNzE5YTU3ZTk4OTBlMmE1OGQwYjgyMTQ3OTBhMTdmMWNiYzhiMjQ5ZjY1YzFhZTgiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImIyZjAwNjg2OWRkMjBjYjQ0MGYyZjIzMjlmNTViMDliOTUyNzU5ZWZhODc5ZmZmZTJiN2M5M2I4OTA0YzNhYjMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImM0YjVmNjdlMDhjZDA3MGZhYmUzODYyMGIxNWE0MTAwNzAzOWYzZGQyZmFlMDgxOTJhYzFkODRlN2VlNmVmOWMifQ"
+          "resource": "repo://internal/model/model.go#L19-L70",
+          "version": "repo-lines-v1:sha256:606cc48ed20109722d797cc2bcf13eaa4565415b0f294460387e84b519366890:eyJzZWxlY3RlZExpbmVDb3VudCI6NTIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImIyZjAwNjg2OWRkMjBjYjQ0MGYyZjIzMjlmNTViMDliOTUyNzU5ZWZhODc5ZmZmZTJiN2M5M2I4OTA0YzNhYjMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImM5MTQ1YjI2OTBmMzAzOGZjMjRjOGMxZDBjN2IyZjlhMzc1Mzk2Y2U4NzM2NmQxODk1N2I3MzIyODZiY2JiOTcifQ"
         },
         {
-          "resource": "repo://internal/model/model.go#L76-L108",
-          "version": "repo-lines-v1:sha256:e9866a9bbce525727a661e41c055ee9ab5c812b8c503b2bbddac72fc13a62c86:eyJzZWxlY3RlZExpbmVDb3VudCI6MzMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjNlYWZmN2NhYTYzNGE3ODE4MWRjOTZkZmZlYWRhN2Y4MzM0MGEyNWM3ZTVhZDYyMWZhZWI4YjViNTA0NzEwZjEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjU3OTUyYzk1NzExZmI1M2ExNjBhOGRkOWQ1OTdhNzM1ODg2YWI0ZTkxNzUzYmY4ZjcwZTA5NTZmMDIwODNiZDEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjAzNDAyNDZiMjBhY2QxOTI3MWM4MjNiZGIyNzhmZDRkNTAzZTRlOTA5OTNlNDQxMDIwNWE4NTFmN2EwY2IxMjkifQ"
+          "resource": "repo://internal/model/model.go#L74-L115",
+          "version": "repo-lines-v1:sha256:e802f9b4105bb98b251d8186117dd0ffa29e61c9f6260ec4a9ec051e988bde77:eyJzZWxlY3RlZExpbmVDb3VudCI6NDIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjJhNzllYzIwYmRhZmI1YWEzMWQzNWRmMjk0OTk4NWM0N2E5YTcyZjQ3Yzg2YjUxZTZmZGJjMWVhMDAzNjg5NWUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImM5MTQ1YjI2OTBmMzAzOGZjMjRjOGMxZDBjN2IyZjlhMzc1Mzk2Y2U4NzM2NmQxODk1N2I3MzIyODZiY2JiOTciLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjI0MGM4M2FmYjBmZTc5NmM5NWM3NGI2ZTU2MDBmZTI4Y2MxMTExZjdlYTZmMWU2NDBkZWIwNWQxMjg1MDY0ZWQifQ"
         }
       ]
     },
@@ -62,29 +62,33 @@
     },
     {
       "id": "claim_3150083fe0c643febce1165e6ed3d549",
-      "statement": "indexes 包为 users（email/accountId/accountIdLower/uid 唯一，后两者稀疏）、loginnamereservations（loginName 唯一 + reservedUntil TTL）、externalidentities（provider+openid 唯一）、passkeys（credentialId 唯一）、sessions、tokens、histories、notifications、ratings、follows、favorites、auditlogs、authevents（userId+at、email+at、at TTL 30 天）、apiusages、sitecontents、folders、episodes、series、themes 与 reports 定义唯一/TTL 索引，按名称幂等创建且单个失败不阻断其余。",
+      "statement": "indexes 包为 users（email 唯一稀疏/accountId 唯一/accountIdLower 唯一稀疏/uid 唯一稀疏）、loginnamereservations（loginName 唯一 + reservedUntil TTL）、externalidentities（provider+openid 唯一）、passkeys（credentialId 唯一）、sessions、tokens、histories、notifications、ratings、follows、favorites、auditlogs、authevents（userId+at、email+at、at TTL 30 天）、apiusages、sitecontents、folders、episodes、series、themes 与 reports 定义唯一/TTL 索引，按名称幂等创建且单个失败不阻断其余。",
       "evidence": [
         {
-          "resource": "repo://internal/indexes/indexes.go#L45-L141",
-          "version": "repo-lines-v1:sha256:fbf6cffa5a762de911f3783918d43dead73a30f1eeb4dac7c379dd6e1898ed82:eyJzZWxlY3RlZExpbmVDb3VudCI6OTcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjU0Nzg5MGI4NDM2OTQ5Y2E1ZjY4NGM5NTllODA5N2Y4ZDYyMDU3MTVmN2RiNzY5M2MyNGQyOWY3ZjQ2NWI4MmQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY3Y2RhODJkYTYwNjIzOGUwNWU2MjM5OTU2OWM1ZWUwMzk5MzQxOTY0OGFlNWQ0M2EyYmY4Y2Q2MzQ3ZjgyNjMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijc1MWU1ZTk3NjY0MzliNDExZTY5MGQ1Njc5NWI3Mjc0ZjRlYTQ2MzNiMmE2YmJiMzBhMTdiYzAzNzU3YjYwMmYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImU4MWJiY2Y5N2RlNjZjZmU1MDViNDI5ZDY4NDUzNjc4Zjc1Y2VlZTQyMzBmZDQxNTc4NjdhM2NjOWY2OWM5YWUifQ"
+          "resource": "repo://internal/indexes/indexes.go#L45-L192",
+          "version": "repo-lines-v1:sha256:e9253688f5ab3931c76256594f84975a35fb5cd9e167e090c932f8558c0b12e4:eyJzZWxlY3RlZExpbmVDb3VudCI6MTQ4LCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiI1NDc4OTBiODQzNjk0OWNhNWY2ODRjOTU5ZTgwOTdmOGQ2MjA1NzE1ZjdkYjc2OTNjMjRkMjlmN2Y0NjViODJkIiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiIwNGQ1ZWYxMDMyYzNjYzYxNTE2ZmNmOGI3NDNhZmFmODZkZDk2YzBiNzIzOGQ5Y2M1MWJjM2JkMjM5YjU1YzI5IiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiI3NTFlNWU5NzY2NDM5YjQxMWU2OTBkNTY3OTViNzI3NGY0ZWE0NjMzYjJhNmJiYjMwYTE3YmMwMzc1N2I2MDJmIiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MSwiZm9sbG93aW5nQ29udGV4dEhhc2giOiI0MTJjYTM0NWNjZjc1YmY5YzA4MDZiY2U2OTViZThkZTgwOGI3OTk4NDI1MWE3YTU0ZDIwMmNmNjEwMWRkNDUxIn0"
         }
       ]
     },
     {
       "id": "claim_42beadfc09f94ad6a320b6c5b0b87193",
-      "statement": "The migrate package implements five marker-gated migrations — accountId backfill, adminAccess-to-role conversion, creatorProfile adminId-to-creatorId plus profile creation, uid backfill (createdAt order, counter advanced to max), and accountIdLower backfill with case-collision rename — stopping at the first error and running before index creation.",
+      "statement": "The migrate package implements six marker-gated migrations — accountId backfill, adminAccess-to-role conversion, creatorProfile adminId-to-creatorId plus profile creation, uid backfill (createdAt order, counter advanced to max), accountIdLower backfill with case-collision rename, and email unique-sparse conversion (drop the old non-sparse email_1 index and $unset empty/null emails) — stopping at the first error and running before index creation.",
       "evidence": [
         {
-          "resource": "repo://internal/migrate/migrate.go#L200-L370",
-          "version": "repo-lines-v1:sha256:14aa06907bd02c70aebb2c197f0f3076446c7b0c2c28929388c2f5ae88c7cbd8:eyJzZWxlY3RlZExpbmVDb3VudCI6MTcxLCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiI4NGJkOWNiYjQ5MTc0Njg0NmViZWEyYjUwNGUzNTk5MjI4MzkxZWMyNmZmMGNiYzIwYjMyNjkwMTAxYmI3NjI2IiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiI0MTJjYTM0NWNjZjc1YmY5YzA4MDZiY2U2OTViZThkZTgwOGI3OTk4NDI1MWE3YTU0ZDIwMmNmNjEwMWRkNDUxIiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiI5MDQ3ZWFmNmY3MzMyMjcyNTMzZjI3NWJhYjJjOWFiODVkNzk0MmQyNTE4NTllNjRiNmUyNWEyZTlmZjBkMTNmIiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MCwiZm9sbG93aW5nQ29udGV4dEhhc2giOiJlM2IwYzQ0Mjk4ZmMxYzE0OWFmYmY0Yzg5OTZmYjkyNDI3YWU0MWU0NjQ5YjkzNGNhNDk1OTkxYjc4NTJiODU1In0"
+          "resource": "repo://internal/migrate/migrate.go#L209-L386",
+          "version": "repo-lines-v1:sha256:ee27c92b1f5f97fbce2d002dc367d5c6cddce91300b5288c6fa636208353e720:eyJzZWxlY3RlZExpbmVDb3VudCI6MTc4LCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiI2ZGQ1YjcwNWVjMDBmMzUzM2Q3NTBhZGUzNWEwNDhjZmM1MmYyNDQ0NmI3MjNmYmIzZjkxY2Y2YTZlM2E0ZDVmIiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiJiNmYwNmYyOWU0MmI1MjBiMzg5M2QxN2JlYWVhNTIwOTI0M2RkMzQ3YzRmOWQ2YmI0OTU1OTY0ZGU1OWIxYjkxIiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiIzODVlYzQ4ODBkZGUzYTdiM2RiMDdlZTQ1MGQ0MTEzNjhhYjQxYzdlMGVkMjI5NDlkMDZkZjc2NzYxMjY4ZjgxIiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MywiZm9sbG93aW5nQ29udGV4dEhhc2giOiJlOWYwMTQxNGYzZmNiMmUxNzdkMWE3ODM4NDBmNTI2Njg5YjZkNzkyN2RlNzU2YzE2ZTNmOTZjNmE2MzVmNjQ0In0"
         },
         {
-          "resource": "repo://internal/migrate/migrate.go#L26-L64",
-          "version": "repo-lines-v1:sha256:d74d129a389dd9c27abb6f5c3216bc7b93ec2ace38736a2f215e73e8499b4b58:eyJzZWxlY3RlZExpbmVDb3VudCI6MzksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImYwZDRhMTc5OGZhZDFjMjA3ZjRhMTdjNjk0ZDFiZTU5YzkwMzYzMjYzMzhkMWQyYjJiNTdiNDE0Y2QxYjA2ZWEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjFiMDE3N2JjMjQxYTA5OGNlOTBjN2NjMDcxNGFjZWZlOTllNjhlMjE1NmRkMDE5NjViZGFhZDUxZDZlNjEzYTAifQ"
+          "resource": "repo://internal/migrate/migrate.go#L387-L440",
+          "version": "repo-lines-v1:sha256:cded248aad0729c0cad75d64366dafa8c1e8ad4eb134185c64b5b8d3aa106b88:eyJzZWxlY3RlZExpbmVDb3VudCI6NTQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImFmNjI4MjFmNjkyOWYxOWIxNDNhZTkxOTVhZTVmNzA2ZTU4YmQ2NjU4ZWQ4ZmEwMzk2ODhhOTNjYWNmZjYyYjEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ2OTk5OTI1ZTJjOGVhNDNiMTY1M2QxYjQ5N2NhNWQxOGFiOTM4YmI4NWRmY2Q2YWY1MzM2ZTA4MDFjNThiZGUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjIwMTRkYjE2MWYxOTU4MjljNmVjOWQxNzY4ZDQyYzdkZjc0Y2Q3ZDk2NzliNTc5YWM2MDcwOThiYmMwMmY1YTIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjoxLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEifQ"
         },
         {
-          "resource": "repo://internal/migrate/migrate.go#L66-L198",
-          "version": "repo-lines-v1:sha256:31995949a7b9786bc6b930e764d825aa4a56de14c1ef346cb41f77a66682b388:eyJzZWxlY3RlZExpbmVDb3VudCI6MTMzLCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiI3ODExOTBhMWM3M2QzNzkwOTdlOTI5ZTcwMWY5OWEyM2QxMWRjOTQyMjVlZDU0ZjI3N2QzZjk2NTAwZDE1ZjcwIiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiI0MTJjYTM0NWNjZjc1YmY5YzA4MDZiY2U2OTViZThkZTgwOGI3OTk4NDI1MWE3YTU0ZDIwMmNmNjEwMWRkNDUxIiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiIxNjMxYjZlMmNhMDdkOGJhZjBlYjQ0ZTc0OWRiZjQ5MGIzOTJlM2E1MzRlZjYxMDIyNzcxMTQ2Y2RmOWFmMWEyIiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MywiZm9sbG93aW5nQ29udGV4dEhhc2giOiJmZjA4ODRkZmRlMzg2YWIyMzMzZTIyOGQ0YzRjNzA0MDYwZTc1OWJjZTdmOTUxMjI5OGQ4ZWY2YTRhZjQ3ZWJlIn0"
+          "resource": "repo://internal/migrate/migrate.go#L50-L76",
+          "version": "repo-lines-v1:sha256:d5750afbde036a2c853891dcf87e8c3b4d2db52f54ed8d87814a7179ed8140b8:eyJzZWxlY3RlZExpbmVDb3VudCI6MjcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImJjNjIxNDk3MTFmZjAyZWYwMjIzNTMwMzk3YTEzZmM4ZmY3YmUyNWNjYTAwOGM0NjJlZGE5NjZhN2ZlNDA3ODUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjUyYjc1ZDNmYWY0N2ZjMjI5NjhiMmEzMmZlNDExMTM4NjEzMDM5NDBjMWNkZTUwYTgyOGM5MjJkZWEwYjg1YTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjVkYzJhZjNlYmU2OWNmMDAyYTNlNGNiZjAwMWI0ZmQ2MDJlNmY0MDhkOTVlMzA0ZTRkNTFiZjU4ZTI1MWE4ZDQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImZiYzM3ZDA1N2YzOGEwMWU4NmIxNWI2NzUwYjg3Mzk1ZTdjYzAzNGFiMTUyNTIwMjE2YWIxNzgyM2RmOTNjNTMifQ"
+        },
+        {
+          "resource": "repo://internal/migrate/migrate.go#L77-L142",
+          "version": "repo-lines-v1:sha256:9aea8f0d1bd6c6d1536b3dc0b333b872bff1be2eb68e91d8ac3416ca21ff6843:eyJzZWxlY3RlZExpbmVDb3VudCI6NjYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjI5MDRhODlmZDcwMWE5OGM0YjYwYTNkOTA5ZGIyOThmZGRiYTdlZTgyNmRlODBlNTRjODkyOTgyMDU0ZGRkOWMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjEyMGQzYzMwOGIyMjE2ZjRiZDMzMzgzOTliN2U1ZGZiZjNiZWYyYTQzZDk1ODMwZGUwNTZlNjQwZDk0MjVlNTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUyOGE5Y2E2YzVhMjQxMjQ3YzM3MmZiMzkxM2I3MGMyYTA0N2MwNDRjNTAyOTQ1MDJiODZiMTFiODM1NzRjZjIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImU3ZDcyMjk2NGIwZTE1OTEzNmYzMmU0OGJjYmExYjM2ZGRiYzA2NWQzNzQzNGNjYWE0NDVlZDIzMjU4MWZmM2UifQ"
         }
       ]
     },
@@ -93,7 +97,7 @@
       "statement": "SingleEpisode 模型携带 episodeLabel 字段（bson:\"episodeLabel\"，显示用集数序号）；存量文档缺省为空串，不做数据迁移，读取时由响应层 singleEpisodeJSON 经 episodeRefText 回退为「第N集」。",
       "evidence": [
         {
-          "resource": "repo://internal/handler/episodes.go#L1669-L1689",
+          "resource": "repo://internal/handler/episodes.go#L1680-L1700",
           "version": "repo-lines-v1:sha256:597e17f0719e3c4173f320f44b4f06fdddfb3ed86e35643ccd22819ba33278e0:eyJzZWxlY3RlZExpbmVDb3VudCI6MjEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjBmMzdhNGM2MGM2YjcyMTQyOTQ5ZjcyMzRhOWM3MzU0MTk2MmRkMTNlYTk3NzE3NzQ1NWFiOTkxZGMyZTc5YTQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjRmMGMwZGIzOWVlNzgyOWJiZWM4NGE2NTZjNjRlODk1M2VjMmJlMzhlMDdlYjZlNDA2N2M3OWQ1MWFlMTAyN2EiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjVmNmRkMDY1NDY2YTFhZWYyN2RkZjRkNDQ3OTBkMDFkN2EzMzhmYmUxZjE0Zjg2M2IwZTFiZTI0ZTdlM2E2NmIifQ"
         },
         {
@@ -115,6 +119,6 @@
   ],
   "verification": {
     "by": "openwiki/0.7.2",
-    "at": "2026-11-13T18:41:36.261Z"
+    "at": "2026-11-16T17:33:30.305Z"
   }
 }
