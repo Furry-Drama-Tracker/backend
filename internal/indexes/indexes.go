@@ -46,7 +46,7 @@ func (s indexSpec) options() *options.IndexOptions {
 //
 // 清单（键与 TTL 秒数）：
 //
-//	users:            email 唯一, accountId 唯一
+//	users:            email 唯一 sparse, accountId 唯一
 //	usersessions:     userId+isActive, isActive+lastActiveAt, refreshTokenHash 唯一 sparse
 //	usedtokens:       tokenHash 唯一, expiresAt TTL 0s
 //	histories:        lastWatched TTL 365d, userId+lastWatched
@@ -60,7 +60,10 @@ func (s indexSpec) options() *options.IndexOptions {
 //	folders:          userId+type
 func Ensure(ctx context.Context, db *mongo.Database) error {
 	specs := []indexSpec{
-		{coll: "users", name: "email_1", keys: bson.D{{Key: "email", Value: 1}}, unique: true},
+		// email 是可选字段（sparse）：缺 email 的用户文档不参与唯一性，无邮箱用户可共存。
+		// 注意空串仍算"字段存在"会占唯一性槽——写入口径不得写 email:""，
+		// 存量空串由迁移 email_unique_sparse_v1 清理（旧非 sparse 索引同名改选项需先 drop）。
+		{coll: "users", name: "email_1", keys: bson.D{{Key: "email", Value: 1}}, unique: true, sparse: true},
 		{coll: "users", name: "accountId_1", keys: bson.D{{Key: "accountId", Value: 1}}, unique: true},
 		// 用户名折叠小写唯一（GitHub 式大小写策略：登录/唯一性按折叠判定；
 		// sparse 容忍迁移前的缺失字段，loginname_lower_backfill_v1 会全部回填）。

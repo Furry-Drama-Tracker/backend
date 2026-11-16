@@ -5,6 +5,8 @@
 //   - role_migration_v1：adminAccess 布尔字段 → role 字符串角色
 //   - creatorProfile_migration_v1：CreatorProfile.adminId 字段重命名为 creatorId，
 //     并为 creator/admin/superadmin 角色补建创作者主页
+//   - email_unique_sparse_v1：users.email_1 唯一索引 → unique+sparse（email 成为
+//     可选字段），并清理存量 email 空串/null
 package migrate
 
 import (
@@ -31,6 +33,7 @@ const (
 	keyCreatorProfileMigration = "creatorProfile_migration_v1"
 	keyUIDBackfillMigration    = "uid_backfill_v1"
 	keyLoginNameLowerMigration = "loginname_lower_backfill_v1"
+	keyEmailUniqueSparse       = "email_unique_sparse_v1"
 )
 
 // nonWordRegex 对应 JS 的 /[^\w]/g（\w = [A-Za-z0-9_]）。
@@ -59,6 +62,9 @@ func Run(ctx context.Context, db *mongo.Database, repos *repository.Repos) error
 	}
 	if err := migrateLoginNameLowerBackfill(ctx, db, repos); err != nil {
 		return fmt.Errorf("migrate loginname lower backfill: %w", err)
+	}
+	if err := migrateEmailUniqueSparse(ctx, db, repos); err != nil {
+		return fmt.Errorf("migrate email unique sparse: %w", err)
 	}
 	return nil
 }
@@ -367,4 +373,69 @@ func migrateCreatorProfile(ctx context.Context, db *mongo.Database, repos *repos
 		slog.Info("已为角色用户补建创作者主页", "count", created)
 	}
 	return repos.Settings.SetFlag(ctx, keyCreatorProfileMigration, bson.M{"done": true})
+}
+
+// migrateEmailUniqueSparse 把 users.email_1 唯一索引迁移为 unique+sparse
+//（email 成为可选字段：缺 email 字段的用户文档不参与唯一性，无邮箱用户可共存）。
+//
+//  1. email_1 已存在且不带 sparse → drop。同名索引改选项必须先删除；启动顺序
+//     migrate 先于 indexes.Ensure（cmd/server），删除后由 Ensure 按新 spec 重建。
+//  2. $unset 存量 email 为空串/null 的字段：稀疏索引只放过"缺字段"的文档，
+//     空串是"字段存在"仍占唯一性槽（多个无邮箱用户会撞唯一约束），必须清成缺字段。
+//
+// 幂等可重入：已 sparse 的索引不 drop；$unset 对缺字段是 no-op。
+func migrateEmailUniqueSparse(ctx context.Context, db *mongo.Database, repos *repository.Repos) error {
+	done, err := repos.Settings.GetFlag(ctx, keyEmailUniqueSparse)
+	if err != nil {
+		return err
+	}
+	if done {
+		return nil
+	}
+
+	users := db.Collection("users")
+
+	// 检查 email_1 现存选项：仅当存在且非 sparse 时才需要 drop（sparse 的选项
+	// 缺省不出现在索引文档里，按 bool 零值判定即可）。
+	cur, err := users.Indexes().List(ctx)
+	if err != nil {
+		return err
+	}
+	found, sparse := false, false
+	for cur.Next(ctx) {
+		var idx struct {
+			Name   string `bson:"name"`
+			Sparse bool   `bson:"sparse"`
+		}
+		if err := cur.Decode(&idx); err != nil {
+			cur.Close(ctx)
+			return err
+		}
+		if idx.Name == "email_1" {
+			found, sparse = true, idx.Sparse
+		}
+	}
+	if err := cur.Err(); err != nil {
+		cur.Close(ctx)
+		return err
+	}
+	cur.Close(ctx)
+	if found && !sparse {
+		if _, err := users.Indexes().DropOne(ctx, "email_1"); err != nil {
+			return err
+		}
+		slog.Info("已删除旧 users.email_1 唯一索引（indexes.Ensure 将以 unique+sparse 重建）")
+	}
+
+	// 空串/null 统一清成缺字段（$in 的 null 同时匹配缺字段文档，$unset 对其是 no-op）。
+	res, err := users.UpdateMany(ctx,
+		bson.M{"email": bson.M{"$in": []any{"", nil}}},
+		bson.M{"$unset": bson.M{"email": ""}})
+	if err != nil {
+		return err
+	}
+	if res.ModifiedCount > 0 {
+		slog.Info("已清理存量空邮箱字段", "count", res.ModifiedCount)
+	}
+	return repos.Settings.SetFlag(ctx, keyEmailUniqueSparse, bson.M{"done": true})
 }

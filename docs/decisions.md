@@ -221,3 +221,17 @@
   - Mint 在连续 100 次冲突（概率≈0）时回退 `Set` 保证可用性；
   - `SetDeletionRequestedAt(nil)` 写 BSON null，与 `*time.Time` 零值解码及 `FindDeletionRequestedBefore`（`$ne: nil`）语义一致；
   - 注销申请/取消失败现在如实返回 500（旧实现吞错返回 200 但未落库）。
+
+## ADR-020 users.email 成为可选字段（稀疏唯一索引 + 迁移）
+
+- **决策**：`users.email` 改为**可选字段**——`model.User.Email` 的 bson 标签加 `omitempty`（文档缺省该字段即"未绑定邮箱"）；`users.email_1` 唯一索引迁移为 **unique+sparse**（迁移 `email_unique_sparse_v1`：drop 旧非 sparse 索引 + `$unset` 存量 `email:""`/null，随后 `indexes.Ensure` 按新 spec 重建）。**写入口径铁律：不得写 `email:""`**——空串是"字段存在"，稀疏索引仍对其计唯一性；有无邮箱以字段缺省为准。
+- **背景**：外部登录（QQ 互联等）发号路径的用户没有邮箱；非 sparse 的 email 唯一索引使第二个无邮箱用户必然撞唯一约束。为 QQ 登录上线做数据结构预留（2026-11，应用审核中，登录链路另行落地）。
+- **替代方案**：
+  - 占位邮箱（`<openid>@qq.connect.…` 占位 + 按邮箱域判定"无邮箱"）：可行，但引入保留域防冒占、UI 展示噪音与清理规则，被"文档直接缺字段"取代；
+  - partial 唯一索引（`{email: {$gt: ""}}`）：同样要 drop 重建，且"空串=无邮箱"的口径不如"缺字段"直观。
+- **取舍 / 兼容性**：
+  - 既有用户数据零改动（真实邮箱不受影响）；`email` 的 JSON 输出契约不变（缺省输出 `""`），前端按空值展示"未绑定邮箱"；
+  - 启动顺序 `migrate.Run` 先于 `indexes.Ensure`（cmd/server），drop→重建存在瞬时唯一性空窗，单实例启动期可接受；已 sparse 的索引不会被 drop（迁移幂等可重入）；
+  - 清理条件 `$in: ["", null]` 同时匹配缺字段文档（`$unset` 对其是 no-op）；
+  - 备份导入（`cleanBackupDocs` 只保留源文档已有字段）天然兼容缺字段文档；
+  - `SetEmailVerifiedAndEmail` / `SetEmailPendingVerification` 等显式 `$set email` 的写入口只从 change-email 链路与 useradmin CLI 取已校验非空邮箱，不破坏不变量。

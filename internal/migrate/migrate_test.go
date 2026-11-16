@@ -2,9 +2,11 @@ package migrate
 
 import (
 	"context"
+	"fmt"
 	"testing"
 	"time"
 
+	"github.com/Furry-Drama-Tracker/backend/internal/indexes"
 	"github.com/Furry-Drama-Tracker/backend/internal/repository"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -304,5 +306,140 @@ func TestMigrateLoginNameLowerBackfill(t *testing.T) {
 	}
 	if err := users.FindOne(ctx, bson.M{"_id": oidAlice}).Decode(&got); err != nil || got.AccountID != "Alice" {
 		t.Fatalf("second run must not change names: %+v", got)
+	}
+}
+
+// emailIndex 查询 users.email_1 索引的存在性与选项（sparse 未设置时驱动解不出该键）。
+func emailIndex(t *testing.T, users *mongo.Collection) (found, unique, sparse bool) {
+	t.Helper()
+	ctx := context.Background()
+	cur, err := users.Indexes().List(ctx)
+	if err != nil {
+		t.Fatalf("list indexes: %v", err)
+	}
+	defer cur.Close(ctx)
+	for cur.Next(ctx) {
+		var idx bson.M
+		if err := cur.Decode(&idx); err != nil {
+			t.Fatalf("decode index: %v", err)
+		}
+		if name, _ := idx["name"].(string); name == "email_1" {
+			u, _ := idx["unique"].(bool)
+			s, _ := idx["sparse"].(bool)
+			return true, u, s
+		}
+	}
+	if err := cur.Err(); err != nil {
+		t.Fatalf("list indexes: %v", err)
+	}
+	return false, false, false
+}
+
+// TestMigrateEmailUniqueSparse 验证 email 可选字段迁移：
+// 旧非 sparse 唯一索引被删除并由 indexes.Ensure 重建为 unique+sparse、
+// 存量 email:"" 清成缺字段、多个无邮箱用户可共存、真实邮箱唯一性保留、幂等。
+func TestMigrateEmailUniqueSparse(t *testing.T) {
+	db, cleanup := testDB(t)
+	defer cleanup()
+	ctx := context.Background()
+	users := db.Collection("users")
+
+	// 旧索引形态：unique 非 sparse（email 必填时代的产物）。
+	if _, err := users.Indexes().CreateOne(ctx, mongo.IndexModel{
+		Keys:    bson.D{{Key: "email", Value: 1}},
+		Options: options.Index().SetName("email_1").SetUnique(true),
+	}); err != nil {
+		t.Fatalf("create legacy index: %v", err)
+	}
+
+	oidEmpty := primitive.NewObjectID()   // 存量 email:""
+	oidMissing := primitive.NewObjectID() // 存量缺 email 字段
+	mustInsert(t, users, bson.M{"_id": oidEmpty, "accountId": "empty", "email": ""})
+	mustInsert(t, users, bson.M{"_id": oidMissing, "accountId": "missing"})
+	mustInsert(t, users, bson.M{"_id": primitive.NewObjectID(), "accountId": "real", "email": "a@example.com"})
+
+	repos := repository.NewRepos(db, 5, 30)
+	if err := migrateEmailUniqueSparse(ctx, db, repos); err != nil {
+		t.Fatalf("migrateEmailUniqueSparse: %v", err)
+	}
+	// 与生产启动顺序一致（cmd/server：migrate.Run → indexes.Ensure）。
+	if err := indexes.Ensure(ctx, db); err != nil {
+		t.Fatalf("indexes.Ensure: %v", err)
+	}
+
+	// 索引断言：email_1 重建为 unique+sparse。
+	found, unique, sparse := emailIndex(t, users)
+	if !found || !unique || !sparse {
+		t.Fatalf("email_1 after migration: found=%v unique=%v sparse=%v, want found+unique+sparse", found, unique, sparse)
+	}
+
+	// 空串清理断言：email 字段缺省（而非 ""），缺字段文档不动。
+	var doc bson.M
+	if err := users.FindOne(ctx, bson.M{"_id": oidEmpty}).Decode(&doc); err != nil {
+		t.Fatalf("find empty-email user: %v", err)
+	}
+	if v, has := doc["email"]; has {
+		t.Errorf("legacy email:\"\" not cleared, still present: %v", v)
+	}
+	if err := users.FindOne(ctx, bson.M{"_id": oidMissing}).Decode(&doc); err != nil {
+		t.Fatalf("find missing-email user: %v", err)
+	}
+	if _, has := doc["email"]; has {
+		t.Error("missing-email user must stay field-less")
+	}
+
+	// 功能断言：多个无邮箱用户共存（旧索引下第二个即撞唯一约束）。
+	for i := 0; i < 3; i++ {
+		mustInsert(t, users, bson.M{"accountId": fmt.Sprintf("qq%d", i)})
+	}
+	// 真实邮箱唯一性保留。
+	if _, err := users.InsertOne(ctx, bson.M{"accountId": "dup", "email": "a@example.com"}); err == nil {
+		t.Fatal("duplicate email must still be rejected")
+	}
+
+	// 标记已写入，幂等：二次运行不报错。
+	done, err := repos.Settings.GetFlag(ctx, keyEmailUniqueSparse)
+	if err != nil || !done {
+		t.Fatalf("migration flag: done=%v err=%v, want true", done, err)
+	}
+	if err := migrateEmailUniqueSparse(ctx, db, repos); err != nil {
+		t.Fatalf("second run: %v", err)
+	}
+}
+
+// TestMigrateEmailUniqueSparseNoDropWhenSparse 验证 email_1 已是 sparse 时迁移不 drop
+//（迁移后未调用 Ensure，索引必须仍在），且迁移前无索引/缺字段文档均无副作用。
+func TestMigrateEmailUniqueSparseNoDropWhenSparse(t *testing.T) {
+	db, cleanup := testDB(t)
+	defer cleanup()
+	ctx := context.Background()
+	users := db.Collection("users")
+
+	// 新库直建（indexes.Ensure 新 spec：unique+sparse）。
+	if err := indexes.Ensure(ctx, db); err != nil {
+		t.Fatalf("indexes.Ensure: %v", err)
+	}
+	mustInsert(t, users, bson.M{"accountId": "noemail1"})
+	mustInsert(t, users, bson.M{"accountId": "noemail2"})
+
+	repos := repository.NewRepos(db, 5, 30)
+	if err := migrateEmailUniqueSparse(ctx, db, repos); err != nil {
+		t.Fatalf("migrateEmailUniqueSparse: %v", err)
+	}
+
+	// 已 sparse 的索引不得被 drop（此处刻意不调用 Ensure：若被误删会立即暴露）。
+	found, unique, sparse := emailIndex(t, users)
+	if !found || !unique || !sparse {
+		t.Fatalf("email_1 must survive migration: found=%v unique=%v sparse=%v", found, unique, sparse)
+	}
+	// 无邮箱文档不受影响。
+	cnt, err := users.CountDocuments(ctx, bson.M{"email": bson.M{"$exists": false}})
+	if err != nil || cnt != 2 {
+		t.Fatalf("no-email docs = %d (err=%v), want 2", cnt, err)
+	}
+
+	done, err := repos.Settings.GetFlag(ctx, keyEmailUniqueSparse)
+	if err != nil || !done {
+		t.Fatalf("migration flag: done=%v err=%v, want true", done, err)
 	}
 }

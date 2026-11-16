@@ -28,7 +28,10 @@ type User struct {
 	// 唯一性判定一律走它（accountIdLower_1 唯一索引）；存储保留原样大小写。
 	AccountIDLower        string             `bson:"accountIdLower" json:"-"`
 	Username               string             `bson:"username" json:"username"`
-	Email                  string             `bson:"email" json:"email"`
+	// Email 是可选字段（omitempty，email_unique_sparse_v1 迁移起）：无邮箱用户
+	//（如外部登录直接发号）文档不含该字段，稀疏唯一索引 email_1 不对其计唯一性。
+	// 写入口径不得写 email:""——空串是"字段存在"，仍占唯一性槽；有无邮箱以字段缺省为准。
+	Email                  string             `bson:"email,omitempty" json:"email"`
 	Password               string             `bson:"password" json:"-"`
 	Avatar                 string             `bson:"avatar" json:"avatar"`
 	// LoginNameChangedAt 是最近一次用户名（accountId）改名时间（nil=从未改过），

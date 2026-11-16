@@ -124,6 +124,7 @@ deploy/               systemd unit + ini 模板 + run.sh
 8. 行为怪癖与有意偏离（XSS 处理、固定窗口限流等）集中在 `docs/decisions.md`——**改动任何行为前先读**；`go test ./...` 是行为回归闸门
 9. **会话墓碑**：任何把会话置为 `isActive=false` 的路径都必须写 `revokeReason`（`model.Revoke*`），不得静默置废——`make diag` 与 `authevents` 排障链依赖它；认证失败/吊销事件统一走 `authlog.Recorder`（stderr `event=` + `authevents`）
 10. **维护 CLI**：`go run ./cmd/useradmin <list|show|set-role|reset-password|clear-2fa|unlock|rename|set-email|verify-email|revoke-sessions>`（直连 Mongo，破坏性操作需确认，`--yes` 跳过）——管理员锁死/丢 2FA 的唯一自救通道
+11. **email 是可选字段**（`email_unique_sparse_v1` 起，ADR-020）：无邮箱用户的文档**缺省 email 字段**（`model.User.Email` bson 带 `omitempty`），`users.email_1` 为 unique+**sparse**；任何写路径**不得写 `email:""`**（空串是"字段存在"仍占稀疏唯一槽），有无邮箱以字段缺省为准；API 输出 `email: ""` 由前端按空值展示"未绑定邮箱"
 
 <!-- OPENWIKI:START -->
 
