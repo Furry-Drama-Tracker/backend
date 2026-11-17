@@ -1,9 +1,13 @@
 package errors
 
 import (
+	"bytes"
 	"encoding/json"
+	"errors"
+	"log/slog"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 
 	"github.com/gin-gonic/gin"
@@ -202,5 +206,53 @@ func TestNewRefIDRange(t *testing.T) {
 		if n := NewRefID(); n < 0 || n >= 1_000_000_000 {
 			t.Fatalf("ref out of range: %d", n)
 		}
+	}
+}
+
+// TestCallerSiteSkip 钉死 skip 语义：1 = CallerSite 的直接调用方。
+// 历史上 Abort500C 用 skip=1 导致 site 恒指 apperror.go 自身（无定位能力），
+// 此处连同 wrapper 场景一起防回归。
+func TestCallerSiteSkip(t *testing.T) {
+	if site := CallerSite(1); !strings.Contains(site, "apperror_test.go:") {
+		t.Fatalf("CallerSite(1) = %q, 应指向本测试文件", site)
+	}
+}
+
+// callerSiteViaHelper 模拟 serverError 式共享助手：助手内取 skip=2 = 助手的调用方。
+func callerSiteViaHelper() string { return CallerSite(2) }
+
+func TestCallerSiteSeesThroughWrapper(t *testing.T) {
+	if site := callerSiteViaHelper(); !strings.Contains(site, "apperror_test.go:") {
+		t.Fatalf("helper 转递 site = %q, 应看到测试调用行", site)
+	}
+}
+
+// TestAbort500SiteC5xxLog 显式 site 的 5xx 出口：日志带 code/ref/path/site/cause；
+// Abort500C（skip 修正后）自动抓取自身调用方而非 apperror.go 内部行。
+func TestAbort500SiteC5xxLog(t *testing.T) {
+	var buf bytes.Buffer
+	prev := logger
+	SetLogger(slog.New(slog.NewTextHandler(&buf, nil)))
+	defer func() { logger = prev }()
+
+	c, _ := gin.CreateTestContext(httptest.NewRecorder())
+	c.Request = httptest.NewRequest("POST", "/api/episodes/x/episodes", nil)
+	Abort500SiteC(c, "internal/handler/episodes.go:1026", "EPS0037", "Server error",
+		errors.New("boom"), false)
+	for _, want := range []string{
+		"msg=5xx", "code=EPS0037", "path=/api/episodes/x/episodes",
+		"site=internal/handler/episodes.go:1026", "cause=boom", "ref=",
+	} {
+		if !strings.Contains(buf.String(), want) {
+			t.Fatalf("5xx 日志缺 %q:\n%s", want, buf.String())
+		}
+	}
+
+	buf.Reset()
+	c2, _ := gin.CreateTestContext(httptest.NewRecorder())
+	c2.Request = httptest.NewRequest("GET", "/y", nil)
+	Abort500C(c2, "TST0500", "m", errors.New("x"), false)
+	if !strings.Contains(buf.String(), "site=internal/errors/apperror_test.go:") {
+		t.Fatalf("Abort500C site 未指向调用方:\n%s", buf.String())
 	}
 }

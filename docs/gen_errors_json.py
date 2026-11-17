@@ -4,8 +4,8 @@
 用法（在 backend/ 目录下）:
     python3 docs/gen_errors_json.py
 
-覆盖模式：errors/apperrors 的 NewC/NewKeyC/NewExtraC/WrapC/Abort500C/AbortErrC/
-AbortCoded/AbortKeyed，middleware 的 codedBody，以及渲染器兜底 SYS0001 与
+覆盖模式：errors/apperrors 的 NewC/NewKeyC/NewExtraC/WrapC/Abort500C/Abort500SiteC/
+AbortErrC/AbortCoded/AbortKeyed，middleware 的 codedBody，以及渲染器兜底 SYS0001 与
 panic 恢复 SYS0500。新增错误码后重跑本脚本即可刷新注册表（输出字节稳定，
 可安全提交）。"""
 import json
@@ -16,7 +16,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 SCAN_DIRS = ["internal/handler", "internal/service", "internal/middleware", "internal/server", "internal/errors"]
-CTORS = {"NewC", "NewKeyC", "NewExtraC", "WrapC", "Abort500C", "AbortErrC", "AbortCoded", "AbortKeyed"}
+CTORS = {"NewC", "NewKeyC", "NewExtraC", "WrapC", "Abort500C", "Abort500SiteC", "AbortErrC", "AbortCoded", "AbortKeyed"}
 CODE_RE = re.compile(r'"([A-Z]{3}\d{4})"')
 HTTP_CONST = {
     "http.StatusBadRequest": 400, "http.StatusUnauthorized": 401,
@@ -154,7 +154,7 @@ def scan_file(path):
     entries = []
     i = 0
     while True:
-        m = re.search(r"\b(?:errors|apperrors)\.(NewC|NewKeyC|NewExtraC|WrapC|Abort500C|AbortErrC|AbortCoded|AbortKeyed)\(", text[i:])
+        m = re.search(r"\b(?:errors|apperrors)\.(NewC|NewKeyC|NewExtraC|WrapC|Abort500C|Abort500SiteC|AbortErrC|AbortCoded|AbortKeyed)\(", text[i:])
         if not m:
             break
         kind = m.group(1)
@@ -168,11 +168,13 @@ def scan_file(path):
         args = split_args(text[open_idx + 1:close])
         ln = line_of(text, i + m.start())
         status, msg, msg_key = None, "<dynamic>", None
-        if kind == "Abort500C":
-            # (c, code, msg, cause, isDev)
-            code = args[1].strip('"') if len(args) > 1 else ""
+        if kind in ("Abort500C", "Abort500SiteC"):
+            # Abort500C: (c, code, msg, cause, isDev)
+            # Abort500SiteC: (c, site, code, msg, cause, isDev) —— 参数整体后移一位
+            off = 1 if kind == "Abort500SiteC" else 0
+            code = args[1 + off].strip('"') if len(args) > 1 + off else ""
             status = 500
-            msg = args[2] if len(args) > 2 else "<dynamic>"
+            msg = args[2 + off] if len(args) > 2 + off else "<dynamic>"
         elif kind in ("AbortErrC", "AbortCoded", "AbortKeyed"):
             # (c, status, code, msg[, cause|key], isDev)
             code = args[2].strip('"') if len(args) > 2 else ""

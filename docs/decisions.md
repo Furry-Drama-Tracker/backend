@@ -235,3 +235,19 @@
   - 清理条件 `$in: ["", null]` 同时匹配缺字段文档（`$unset` 对其是 no-op）；
   - 备份导入（`cleanBackupDocs` 只保留源文档已有字段）天然兼容缺字段文档；
   - `SetEmailVerifiedAndEmail` / `SetEmailPendingVerification` 等显式 `$set email` 的写入口只从 change-email 链路与 useradmin CLI 取已校验非空邮箱，不破坏不变量。
+
+## ADR-021 CreateSingle 必填缺失 500 → 400（EPS0038）+ 5xx site 指向真实调用点
+
+- **决策**：
+  - `POST /api/episodes/:id/episodes`（CreateSingle）必填校验对齐同文件 `Create`（EPS0020）固定契约：`title` 为空/非字符串或 `episodeNumber` 字段缺失 → **400 `EPS0038`**，消息聚合 mongoose 风格 ``Path `title` is required., Path `episodeNumber` is required.``；`episodeNumber` 仍只校验字段存在性（值不校验），与旧行为一致；
+  - errors 包导出 `CallerSite`、新增 `Abort500SiteC`（显式 site 的 500 出口）；`Abort500C/AbortErrC/AbortCoded/AbortKeyed/AbortWithAppError` 的 `callerSite(1)` 自指修正为 skip=2；episodes 的共享助手 `serverError` 以 `CallerSite(2)` 抓真实调用点转递。site 仅入 5xx 日志，不进响应体，对外契约不变；
+  - `docs/gen_errors_json.py` CTORS/解析同步支持 `Abort500SiteC`（参数整体后移一位）。
+- **背景**：线上 EPS0037 排障受阻——该码是 episodes 模块 60 处共用的 500 兜底，5xx 日志 site 恒为 `apperror.go:252`（skip 自指）；CreateSingle 必填缺失走 catch-all 时传入的 `err == nil`，日志连 `cause` 都没有（`duration_ms=1` + 无 cause 即此特征），参考号无法定位到具体原因。同文件 `Create` 早已是 400，二者契约不一致。
+- **替代方案**：
+  - 保留 500 仅补哨兵 cause：日志可读但语义错误（客户端错误回 5xx，污染告警与 5xx 日志）；
+  - 每字段一个新码（EPS0038/39）：与 Create 的"单调用点聚合 msgs"风格不一致，被单码方案取代。
+- **取舍 / 兼容性**：
+  - 前端零改动：`addSingleEpisode` 对错误统一走 `formatApiError`（message + 编号拼装，无状态码分支），400 与 500 展示路径相同；
+  - 「非法 id → 500」等其余 500 固定契约不动（这些路径 cause 非空，日志本就可读）；
+  - 修正后 EPS0037 的 5xx 日志带真实 `site`（如 `episodes.go:1072`）与非空 `cause`，nil-err 调用点已清零；
+  - 错误码注册表新增 EPS0038（工作树修改按 HEAD 扫描，需提交后重跑 `python3 docs/gen_errors_json.py` 刷新）。

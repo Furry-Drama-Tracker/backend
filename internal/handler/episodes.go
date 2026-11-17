@@ -1021,13 +1021,17 @@ func (h *Episodes) CreateSingle(c *gin.Context) {
 		}
 	}
 	body := h.readJSONBody(c)
-	// required 字段缺失/为空 → 该路由 catch-all → 500。
+	// 必填字段校验（对齐 Create/EPS0020 固定契约）：缺失 → 400（历史为 500
+	// catch-all，2026-11 修正，见 docs/decisions.md ADR-021）。
+	var msgs []string
 	if asString(body["title"]) == "" {
-		serverError(c, err, h.Config.IsDev)
-		return
+		msgs = append(msgs, "Path `title` is required.")
 	}
 	if _, ok := body["episodeNumber"]; !ok {
-		serverError(c, err, h.Config.IsDev)
+		msgs = append(msgs, "Path `episodeNumber` is required.")
+	}
+	if len(msgs) > 0 {
+		apperrors.AbortCoded(c, 400, "EPS0038", strings.Join(msgs, ", "), h.Config.IsDev)
 		return
 	}
 	singleLinks, msg := sanitizePlatformLinks(body["platformLinks"])
@@ -1787,8 +1791,10 @@ func (h *Episodes) readJSONBody(c *gin.Context) map[string]any {
 }
 
 // serverError 渲染 500（响应体固定为 {message:'Server error'}，勿改文案）。
+// 本助手被全模块 60 处共用，Abort500C 只能看到助手帧，故显式抓取真实调用点
+// 转递给 Abort500SiteC（5xx 日志 site 字段从此可定位到具体端点行，ADR-021）。
 func serverError(c *gin.Context, cause error, isDev bool) {
-	apperrors.Abort500C(c, "EPS0037", "Server error", cause, isDev)
+	apperrors.Abort500SiteC(c, apperrors.CallerSite(2), "EPS0037", "Server error", cause, isDev)
 }
 
 // pruneViewLogLocked 清理过期/超限的观看去重记录（超 10000 条时按冷却期淘汰）。

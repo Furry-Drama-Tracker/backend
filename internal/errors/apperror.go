@@ -122,8 +122,10 @@ func (e *AppError) Error() string {
 // Unwrap 支持 errors.Is / errors.As 透传 Cause。
 func (e *AppError) Unwrap() error { return e.Cause }
 
-// callerSite 抓取第 skip 层调用点 "file:line"（路径裁剪到 backend/ 之后）。
-func callerSite(skip int) string {
+// CallerSite 抓取第 skip 层调用点 "file:line"（路径裁剪到 backend/ 之后）。
+// skip 语义同 runtime.Caller（0=CallerSite 自身调用行）；导出供共享错误助手
+// （如 handler 的 serverError）转递真实调用点给 Abort500SiteC。
+func CallerSite(skip int) string {
 	_, file, line, ok := runtime.Caller(skip)
 	if !ok {
 		return ""
@@ -161,22 +163,22 @@ func Wrap(status int, message string, cause error) *AppError {
 
 // NewC 构造带错误码的操作错误，site 自动抓取调用点。
 func NewC(code string, status int, message string) *AppError {
-	return &AppError{Message: message, Status: status, Code: code, IsOperational: true, site: callerSite(2)}
+	return &AppError{Message: message, Status: status, Code: code, IsOperational: true, site: CallerSite(2)}
 }
 
 // NewKeyC 构造带错误码与 messageKey 的操作错误。
 func NewKeyC(code string, status int, message, messageKey string) *AppError {
-	return &AppError{Message: message, Status: status, MessageKey: messageKey, Code: code, IsOperational: true, site: callerSite(2)}
+	return &AppError{Message: message, Status: status, MessageKey: messageKey, Code: code, IsOperational: true, site: CallerSite(2)}
 }
 
 // NewExtraC 构造带错误码与附加标志字段的操作错误。
 func NewExtraC(code string, status int, message string, extra map[string]any) *AppError {
-	return &AppError{Message: message, Status: status, Extra: extra, Code: code, IsOperational: true, site: callerSite(2)}
+	return &AppError{Message: message, Status: status, Extra: extra, Code: code, IsOperational: true, site: CallerSite(2)}
 }
 
 // WrapC 包裹底层错误为带错误码的操作错误。
 func WrapC(code string, status int, message string, cause error) *AppError {
-	return &AppError{Message: message, Status: status, Cause: cause, Code: code, IsOperational: true, site: callerSite(2)}
+	return &AppError{Message: message, Status: status, Cause: cause, Code: code, IsOperational: true, site: CallerSite(2)}
 }
 
 // IsNotFound 判断错误是否为"资源不存在"语义（404）。
@@ -237,7 +239,7 @@ func AbortWithAppError(c *gin.Context, err error, isDev bool) {
 		abortAppError(c, &AppError{
 			Message: "文件上传错误: " + ue.Message, Status: http.StatusBadRequest,
 			Code: uploadErrorCode(ue.Code), Cause: ue, IsOperational: true,
-			site: callerSite(1),
+			site: CallerSite(2),
 		}, isDev)
 		return
 	}
@@ -246,10 +248,21 @@ func AbortWithAppError(c *gin.Context, err error, isDev bool) {
 
 // Abort500C 渲染 5xx 并中止请求链（handler 直写 5xx 的标准出口）：
 // 生产隐藏 message、附带 error/ref、打一行 ERROR 日志（含 site=调用点）。
+// 注意：经共享助手（如 episodes 的 serverError）转发时 site 只能看到助手帧，
+// 此类场景应改用 Abort500SiteC 显式转递真实调用点。
 func Abort500C(c *gin.Context, code, message string, cause error, isDev bool) {
 	abortAppError(c, &AppError{
 		Message: message, Status: http.StatusInternalServerError, Code: code,
-		Cause: cause, IsOperational: true, site: callerSite(1),
+		Cause: cause, IsOperational: true, site: CallerSite(2),
+	}, isDev)
+}
+
+// Abort500SiteC 同 Abort500C，但 site 显式传入——供共享错误助手转递真实调用点
+// （助手内以 CallerSite(N) 抓取自身调用方后传入；site 为空时 5xx 日志省略该字段）。
+func Abort500SiteC(c *gin.Context, site, code, message string, cause error, isDev bool) {
+	abortAppError(c, &AppError{
+		Message: message, Status: http.StatusInternalServerError, Code: code,
+		Cause: cause, IsOperational: true, site: site,
 	}, isDev)
 }
 
@@ -257,19 +270,19 @@ func Abort500C(c *gin.Context, code, message string, cause error, isDev bool) {
 func AbortErrC(c *gin.Context, status int, code, message string, cause error, isDev bool) {
 	abortAppError(c, &AppError{
 		Message: message, Status: status, Code: code,
-		Cause: cause, IsOperational: true, site: callerSite(1),
+		Cause: cause, IsOperational: true, site: CallerSite(2),
 	}, isDev)
 }
 
 // AbortCoded 渲染 4xx 并中止请求链（handler/中间件直写 4xx 的标准出口）：
 // 附带 error/ref；生产 message 末尾追加 " [CODE·ref]"。
 func AbortCoded(c *gin.Context, status int, code, message string, isDev bool) {
-	abortAppError(c, &AppError{Message: message, Status: status, Code: code, IsOperational: true, site: callerSite(1)}, isDev)
+	abortAppError(c, &AppError{Message: message, Status: status, Code: code, IsOperational: true, site: CallerSite(2)}, isDev)
 }
 
 // AbortKeyed 同 AbortCoded，另带 messageKey（鉴权等 i18n 场景）。
 func AbortKeyed(c *gin.Context, status int, code, message, messageKey string, isDev bool) {
-	abortAppError(c, &AppError{Message: message, Status: status, MessageKey: messageKey, Code: code, IsOperational: true, site: callerSite(1)}, isDev)
+	abortAppError(c, &AppError{Message: message, Status: status, MessageKey: messageKey, Code: code, IsOperational: true, site: CallerSite(2)}, isDev)
 }
 
 // refFromContext 读取请求参考号；无中间件（单测等）时现场生成。

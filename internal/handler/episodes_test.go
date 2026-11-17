@@ -721,3 +721,49 @@ func TestEpisodesPermission(t *testing.T) {
 		t.Fatalf("bad id detail should 500: %d %v", resp.StatusCode, out)
 	}
 }
+
+// TestEpisodesCreateSingleRequiredFields 必填字段缺失 → 400 EPS0038（对齐 Create/EPS0020
+// 固定契约；历史为 500 catch-all 且日志无 cause，2026-11 修正，见 ADR-021）。
+func TestEpisodesCreateSingleRequiredFields(t *testing.T) {
+	repos, signer, ts := episodesTestApp(t)
+	adminID := primitive.NewObjectID().Hex()
+	insertUser(t, repos, adminID, "admin")
+	admin := newEPClient(t, ts.URL, mustToken(t, signer, adminID))
+
+	var created map[string]any
+	resp := admin.json("POST", "/api/episodes", map[string]any{
+		"title": "必填校验", "description": "d", "coverImage": "/uploads/c.png",
+	}, &created)
+	if resp.StatusCode != 201 {
+		t.Fatalf("create: %d", resp.StatusCode)
+	}
+	episodeID := created["_id"].(string)
+
+	// 两个字段都缺 → 400，消息合并两个字段提示。
+	var out map[string]any
+	resp = admin.json("POST", "/api/episodes/"+episodeID+"/episodes", map[string]any{}, &out)
+	if resp.StatusCode != 400 {
+		t.Fatalf("missing both should 400: %d %v", resp.StatusCode, out)
+	}
+	if out["error"] != "EPS0038" {
+		t.Fatalf("code = %v, want EPS0038", out["error"])
+	}
+	msg, _ := out["message"].(string)
+	if !strings.Contains(msg, "`title`") || !strings.Contains(msg, "`episodeNumber`") {
+		t.Fatalf("message 应同时点名两个字段: %v", out["message"])
+	}
+
+	// 只缺 title。
+	resp = admin.json("POST", "/api/episodes/"+episodeID+"/episodes",
+		map[string]any{"episodeNumber": 1}, &out)
+	if resp.StatusCode != 400 || out["error"] != "EPS0038" {
+		t.Fatalf("missing title: %d %v", resp.StatusCode, out)
+	}
+
+	// 只缺 episodeNumber（episodeNumber 仅校验字段存在性，与旧行为一致）。
+	resp = admin.json("POST", "/api/episodes/"+episodeID+"/episodes",
+		map[string]any{"title": "第一集"}, &out)
+	if resp.StatusCode != 400 || out["error"] != "EPS0038" {
+		t.Fatalf("missing episodeNumber: %d %v", resp.StatusCode, out)
+	}
+}
