@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "pageVersion": "sha256:94865938714270953f9e84f57c1cd00ae08489c158b4ebbb3ce1f73b60144021",
+  "pageVersion": "sha256:e9637c15ae3b1e86cf348775689356860e5d89934727421c80f02e34908ac2bd",
   "claims": [
     {
       "id": "claim_deb47bdd79be4295a6916727d8f6bc09",
@@ -17,7 +17,7 @@
       "statement": "AppError rendering maps status 0 to 500, hides 5xx messages in production, exposes a stack in development, preserves messageKey, prevents extra fields from overriding message or messageKey, and attaches the {error, ref, status} envelope fields to every 4xx/5xx body.",
       "evidence": [
         {
-          "resource": "repo://internal/errors/apperror.go#L286-L326",
+          "resource": "repo://internal/errors/apperror.go#L299-L339",
           "version": "repo-lines-v1:sha256:fa4936d100d1d7a4110bf0dbf590da9a3dc050a8e09f4eeacf68636acd889eff:eyJzZWxlY3RlZExpbmVDb3VudCI6NDEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ1ZDIxMTFlYTM5ZmM4NTNhZjNkNjgwMTMxM2NiYmQ2ZDBjMWRlMTk2NGEwNzk5ZTk0N2NiMTk3NzY2NmU4Y2IiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjAyZGQxZWI3OWVlNTcxYTI1NzMxMTg4MjQ5M2IyY2IxYWNiZmY5ZjZiOWY3YzVjMTFhNzViZmFhZTQ4Njg1YzgiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImQ2OTQ0OWE5YjlkNzg3ZDg4OGQ2NzlmNDk2N2M2YjFkZmUxOTUyMGJiOWNiOGY1YWNiNzM3ZGQ2NTRmNGUyZjQifQ"
         }
       ]
@@ -52,11 +52,11 @@
     },
     {
       "id": "claim_3659554e27ba4b15bea8a5fdb8869ca2",
-      "statement": "XSS 清洗仍剥除不允许的标签而保留文本（不转义标记），与 bluemonday 替换决策一致；该决策在 docs/decisions.md 中的位置随新增 ADR-013..020 后移。",
+      "statement": "XSS 清洗仍剥除不允许的标签而保留文本（不转义标记），与 bluemonday 替换决策一致；该决策在 docs/decisions.md 中的位置随新增 ADR-013..022 后移。",
       "evidence": [
         {
           "resource": "repo://docs/decisions.md",
-          "version": "repo-file-v1:sha256:1523e4a2630d353e2187deadf2181cda7db55a966ce395e0e70f749f7ba455b6"
+          "version": "repo-file-v1:sha256:92db763a731c3b6022da4bf46ac4f2edb527f9618dad4b96fe2958445995187b"
         },
         {
           "resource": "repo://internal/security/xss.go#L32-L52",
@@ -97,11 +97,11 @@
       "statement": "集数称呼是新的固定契约：站内通知、Push、邮件、RSS 与更新日历的集数文案统一经 episodeRefText(episodeNumber, episodeLabel) 输出——自定义 label 非空时用它，否则回退「第N集」。",
       "evidence": [
         {
-          "resource": "repo://internal/handler/episodes.go#L1412-L1459",
+          "resource": "repo://internal/handler/episodes.go#L1455-L1502",
           "version": "repo-lines-v1:sha256:829b8cc4435e85636045a1c72307259c1d5bf9193ffd4c03d43dac0a53384bf6:eyJzZWxlY3RlZExpbmVDb3VudCI6NDgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImU2NGQ1NzkwYjBlYTllYjZmOTdjZGQ3ZTk0YTQ5MTAwYjI2ZGE2YjE0MzIxNTcyMjhlZDk5NzAwYzdhZGY5MzAiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImI4OGQxZDE5YzFmZmUyZWUzNDBlZWI5ZGQ5MGRhNzgwZjYwYzIxZTgwZjQ1ZDQ5ZWRiODU5YmRlN2JjZTkxZDAiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImQ4ZGExYTRlZmExMDgwZTU4MTE5MDM0NzE3NDg0ZDM5NzBmYmFlOGRkNmVmODFiMWY4ZmEyODUyNDRjNTkyYWUifQ"
         },
         {
-          "resource": "repo://internal/handler/episodes.go#L1879-L1884",
+          "resource": "repo://internal/handler/episodes.go#L1924-L1929",
           "version": "repo-lines-v1:sha256:6b6cfbeb204fdee9accc7c15aac93e7e13b67989b922672828a583b58cbe86b3:eyJzZWxlY3RlZExpbmVDb3VudCI6NiwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiOTQzODQ5Yjc2OTU3NGViMjY3Zjk2MDAyZmMzNGRkZTFhZWY0NjgzODY2MmFiNTU1ZWVhMzk5OGYxZDEwN2ZiNiIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNDEyY2EzNDVjY2Y3NWJmOWMwODA2YmNlNjk1YmU4ZGU4MDhiNzk5ODQyNTFhN2E1NGQyMDJjZjYxMDFkZDQ1MSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZmQxNGFlY2VjNmFhYTE3OTk1YjEwNTBhNzdhZDZmY2RhZmI3NjA3ZjRkZmJlMGE5ZGI5MDYwOTZmNmY5ZjhiNyIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiOGE5ZDc1NWEyYWMzODkxNjAwMGYyOGI2YWFiZTU3NTA0OGEyYzEzYWQ2MDBhZjkzNWE5ODM1NjQ3Y2FmZGRmZCJ9"
         }
       ]
@@ -151,6 +151,6 @@
   ],
   "verification": {
     "by": "openwiki/0.7.2",
-    "at": "2026-11-16T17:33:30.305Z"
+    "at": "2026-11-17T17:20:26.784Z"
   }
 }

@@ -14,6 +14,8 @@ sources:
     resource: repo://deploy/furry-drama-be-neo.ini
   - id: openwiki-source-965e9675b33e3892958fab10
     resource: repo://deploy/furry-drama-be-neo.service
+  - id: openwiki-source-db33e0b2a6bda7efb94d4efc
+    resource: repo://deploy/nginx.conf.example
   - id: openwiki-source-523bc741245510a618f572a9
     resource: repo://deploy/run.sh
   - id: openwiki-source-f9cd993b1da0967b3ad454b7
@@ -28,10 +30,10 @@ sources:
     resource: repo://Makefile
   - id: openwiki-source-1ffe96277832af9ddb17aa8f
     resource: repo://winres/winres.json
-generated: { by: "zcode", at: "2026-11-16T17:33:30.305Z" }
+generated: { by: "zcode", at: "2026-11-17T17:20:26.784Z" }
 verified:
   - by: openwiki/0.7.2
-    at: 2026-11-16T17:33:30.305Z
+    at: 2026-11-17T17:20:26.784Z
 ---
 
 # 部署与运行时
@@ -74,7 +76,7 @@ Windows 可执行文件内嵌应用图标与版本元数据：`FDT-Icon.ico` 经
 `cmd/server/main.go` 按顺序执行：
 
 1. 解析 `--config` 与 `--listen`。
-2. `config.Load`——缺少或过短的 `JWT_SECRET`、过短的 `ENCRYPTION_KEY`，或缺少 `MONGO_URI`，以状态码 1 退出；弱密钥与占位 CORS 源只打印 `[SECURITY WARN]`；随后打印 IP 地域解析开关状态（开启时按首选数据源打 `[SECURITY WARN]`：aliyun 提示会把客户端 IP 发送至该 API，czdb 提示查询走本地库；首选为 aliyun 且未配 AppCode 时追加不可用告警；关闭时提示记「未知」）。
+2. `config.Load`——缺少或过短的 `JWT_SECRET`、过短的 `ENCRYPTION_KEY`，或缺少 `MONGO_URI`，以状态码 1 退出；弱密钥与占位 CORS 源只打印 `[SECURITY WARN]`；生产环境信任代理标头但 `trusted_proxies` 未配置时同样只打 `[SECURITY WARN]`（2026-11 ADR-022 新增，见下文「反向代理加固」）；随后打印 IP 地域解析开关状态（开启时按首选数据源打 `[SECURITY WARN]`：aliyun 提示会把客户端 IP 发送至该 API，czdb 提示查询走本地库；首选为 aliyun 且未配 AppCode 时追加不可用告警；关闭时提示记「未知」）。
 3. `repository.Connect`，15 秒上下文——连接或 ping 失败即退出。
 4. 构造 `Repos` 与 JWT 签名器。
 5. 运行 `migrate.Run` 与 `indexes.Ensure`（60 秒上下文）；失败只打印 `[WARN]` 并继续启动。
@@ -103,7 +105,7 @@ Windows 可执行文件内嵌应用图标与版本元数据：`FDT-Icon.ico` 经
 - `unix:/path/to.sock` → Unix domain socket，先删除残留文件并设置权限 `0660`；
 - `unix:@name` → Linux abstract socket，无文件或权限。
 
-默认是 `tcp:127.0.0.1:5000`（仅回环）。缺少 flag 时使用 ini 的 `listen`，但要注意省略该键的 ini 会清空默认值而不是保留。要从外部访问必须显式设置 `tcp:0.0.0.0:5000`。
+默认是 `tcp:127.0.0.1:5000`（仅回环）。缺少 flag 时使用 ini 的 `listen`，但要注意省略该键的 ini 会清空默认值而不是保留。要从外部访问必须显式设置 `tcp:0.0.0.0:5000`——**勿绑 `0.0.0.0` 直曝公网**（2026-11 ADR-022 部署加固口径：`run.sh` 默认值与 systemd 注释均已从 `0.0.0.0:5000` 收紧为 `127.0.0.1:5000`），对外访问统一经反向代理（见下文「反向代理加固」）。
 
 ## HTTP 服务器超时
 
@@ -134,7 +136,7 @@ Windows 可执行文件内嵌应用图标与版本元数据：`FDT-Icon.ico` 经
 
 注释掉的 `Environment=` 行展示了预期的密钥注入方式：`JWT_SECRET` 与 `MONGO_URI`。
 
-若要改为 TCP，把 `ExecStart` 中的 `--listen` 改为 `tcp:0.0.0.0:5000` 并去掉 socket 依赖。反向代理应终止 TLS，通过 `CF-Connecting-IP`、`X-Real-IP` 或 `X-Forwarded-For` 转发真实客户端 IP，并单独服务前端。
+若要改为 TCP，把 `ExecStart` 中的 `--listen` 改为 `tcp:127.0.0.1:5000`（勿绑 `0.0.0.0` 直曝公网，unit 注释已按此口径更新）并去掉 socket 依赖。反向代理应终止 TLS，并按「反向代理加固」一节覆盖写入或只放行受信来源的代理标头，同时单独服务前端。
 
 ## ini 模板
 
@@ -145,7 +147,7 @@ Windows 可执行文件内嵌应用图标与版本元数据：`FDT-Icon.ico` 经
 3. 设置 `[database].uri` 与可选 `name`；
 4. 把 `uploads_dir` 设为持久可写路径；
 5. 如需邮件，配置 `[email]`；
-6. 把 `allow_origins` 设为真实前端源；按反代拓扑核对 `[server]` 代理标头四键（`trust_proxy_headers`、`proxy_ip_headers`、`trusted_proxies`、`proxy_trusted_platform`，ESA → 本机反代拓扑建议 `trusted_proxies = 127.0.0.1, ::1`）；
+6. 把 `allow_origins` 设为真实前端源；按反代拓扑核对 `[server]` 代理标头四键（`trust_proxy_headers`、`proxy_ip_headers`、`trusted_proxies`、`proxy_trusted_platform`，ESA → 本机反代拓扑建议 `trusted_proxies = 127.0.0.1, ::1`）——注意 `trusted_proxies` 只校验直连对端，还须按「反向代理加固」一节在反代层处理代理标头，否则生产启动会打 trust-all `[SECURITY WARN]`（未配置时）或伪造标头仍被透传采信（已配置但反代未覆盖写入时）；
 7. 保持 `[security].ip_region_enabled = false`（数据出境合规，ADR-017/ADR-018）；开启才需配置 provider 与对应数据源凭据；
 8. Passkey 默认从 `frontend_url`/`site_url` 推导 RP；站点走裸域名下子域部署时按需显式设置 `[webauthn].rp_id`；
 9. 可选地显式设置 `encryption_key` 与 `altcha_hmac_key`。
@@ -154,7 +156,16 @@ Windows 可执行文件内嵌应用图标与版本元数据：`FDT-Icon.ico` 经
 
 ## run.sh
 
-`deploy/run.sh` 是无 systemd 主机上的最小备选。尽管注释提到 nohup，它当前在前台 `exec` 二进制，并期望外部守护进程将其转入后台。二进制缺失时快速失败，使用 `CONFIG` 与可选的 listen 参数。
+`deploy/run.sh` 是无 systemd 主机上的最小备选。尽管注释提到 nohup，它当前在前台 `exec` 二进制，并期望外部守护进程将其转入后台。二进制缺失时快速失败，使用 `CONFIG` 与可选的 listen 参数——默认监听自 2026-11 起收紧为 `tcp:127.0.0.1:5000`（仅回环），对外访问须经反代（见下节）。
+
+## 反向代理加固（nginx.conf.example）
+
+`deploy/nginx.conf.example`（2026-11 ADR-022 新增）回答一个核心问题：**让 Go 进程看到的代理标头（`CF-Connecting-IP` / `X-Real-IP` / `X-Forwarded-For`）一定来自可信网关，而不是客户端伪造**——这是 IP 维度限流（登录/注册/验证码/全局限流）与审计归因（`LastLoginIP`、新设备提醒邮件、authevents）可信的前提。仅在 Go 侧配 `trusted_proxies` 封不死伪造路径：socket/loopback 部署下 Go 的直连对端恒为本机反代、永远「受信」，客户端经反代透传的伪造 `CF-Connecting-IP` 仍会被原样采信。示例给出两种互补形态：
+
+- **形态 A（经 CDN/ESA 回源）**：用 `geo` + `allow`/防火墙把源站限制为只接受 CDN 回源网段，让 `CF-Connecting-IP` 只可能由 CDN 边缘覆盖写入；nginx 原样转发该头，**禁加** `proxy_set_header CF-Connecting-IP ...`（会覆盖掉 CDN 写入的真实访客 IP，后端记录到的一律是 CDN 节点 IP）。
+- **形态 B（无 CDN，访客直连本机 nginx）**：nginx 用 `$remote_addr` 覆盖写入全部优先标头，客户端自带的任何代理标头都不外传。
+
+配套 Go 侧（backend.ini）：`trust_proxy_headers = true`、`trusted_proxies = 127.0.0.1, ::1`（形态 A 还需追加 CDN 回源网段，否则 XFF 回溯停在 CDN 节点 IP）、`proxy_ip_headers = CF-Connecting-IP,X-Real-IP,X-Forwarded-For`。公共代理段还包括 SSE 需要的 `proxy_buffering off` + 放长读超时 + HTTP/1.1 长连接，以及 `client_max_body_size 10m`（后端另有更严的类型/魔数校验）。
 
 ## useradmin 维护 CLI
 

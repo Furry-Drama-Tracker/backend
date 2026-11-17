@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "pageVersion": "sha256:67a85e1b68e312656fcae40f6a4bff1e15a5e5c6e497041206def35afe57fe82",
+  "pageVersion": "sha256:a4d43f9f104078c8ad89e744d06733dcc123a93bf1dd43b5d5129ac758449717",
   "claims": [
     {
       "id": "claim_3dc757f78d214ae8806c94eae0464b20",
@@ -101,8 +101,8 @@
           "version": "repo-lines-v1:sha256:fcc98bebc43a9bdd67e546aac2ad209b62a40355eb4b64924cabe0461aa4e94f:eyJzZWxlY3RlZExpbmVDb3VudCI6MzgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjcyMWQ2MWVlYWI5OTZiMzg4YWRhYjYzM2M3NzZmNjQxM2IyMzM1ZjU2N2ZlODA4NDQwYzNkMTZlZGY2Zjk3ZGMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImVlNGMzZWIyYTE1YjRlOTgxNzU2NzM4MTJhMmFhZTViMWY1ZDBlMDZlYWIwMzAyYjI0MmIzYzFiMzRjM2MyOTIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjAwZDY2ZWIyZTdlMWQ0OWVlODFhNjEzNzFhNTMwMTBiZTNhYTBlN2NhYjk3MDZlMmY1ZGM0MGQ5ZThmNDNiOTEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjQ3NmZmYTY2YTJjNTBkZTEwZmYzNGQ5YmViYmQ1YWEwMGVmZDRlOTUxYWU5MjY0MzMyOTg0YjQ0ZGFkOWJhMTkifQ"
         },
         {
-          "resource": "repo://internal/service/login.go#L68-L78",
-          "version": "repo-lines-v1:sha256:76ba7a5e8a90734f80ca13a85abe2a0eb36639535574c15abb4d07da17e26a31:eyJzZWxlY3RlZExpbmVDb3VudCI6MTEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImE3YjgwNGMyMTE5MmFhOWM0Y2UxYzQ1ZWZkNWMzZWU5MzQzMzViZWU2YzJhNDk0ZTE1MThkMzNhNDYzM2I1ZDEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImI5NDI1OTg0ZDY0YzFiYzA1MGU3MjJkZWFiZTM5ZDA0NzJhN2JkNjM5NjFlZWFhMmViZThlZmZmNzk3YTNkMmYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjZmZDlmOTUyNjhkM2ZhNGM2NGY2NDk2NGE2YjEwYTk3ODlkMmExYjcyYmRmMGJmZjM5Yjk2MDRlYTE3MGU5NDciLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjE1MzQ2MTA3Y2U4YjZkMWY1YzU2ODM0YWU2MTBhNjM0YzViYTBkYTVkYzlkNjdjNGFjMWQ1MDcxNDczMzBmMDIifQ"
+          "resource": "repo://internal/service/login.go#L68-L76",
+          "version": "repo-lines-v1:sha256:60221b6642ce95081fb56e48e0b841a364ef84df038348a2037d0b1f86d32ad2:eyJzZWxlY3RlZExpbmVDb3VudCI6OSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiYTdiODA0YzIxMTkyYWE5YzRjZTFjNDVlZmQ1YzNlZTkzNDMzNWJlZTZjMmE0OTRlMTUxOGQzM2E0NjMzYjVkMSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNjdjZGE4MmRhNjA2MjM4ZTA1ZTYyMzk5NTY5YzVlZTAzOTkzNDE5NjQ4YWU1ZDQzYTJiZjhjZDYzNDdmODI2MyIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiMDlhYmE4MDRjZmRjZDFhMDAwMjQxNzViN2RkM2IxMTBmMTk4ODEwMzkwZGEwNjQxMzgyNDk3NTBmNGE3MWU4ZCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiNmY2NDE3NDAwZThhZWY1YWQ2ZWNlYTc5ZWEyOWRmY2Y1ODNhMTY0NTJiN2Y1YzA1ZTMxMzFkYWFkY2IzNzYwMSJ9"
         },
         {
           "resource": "repo://internal/service/purge.go#L14-L30",
@@ -162,18 +162,22 @@
     },
     {
       "id": "claim_fe1c4e13eccc4360915a7d162836896f",
-      "statement": "emailOtp 是第二因素方法之一：登录 Need2FA 响应附带 twoFactorMethods（totp 恒有，emailOtp 仅邮箱已验证）；发送端点凭 2fa-challenge 挑战令牌向独立 EmailOTPCodes store 写入六位码，签发新码前 DeleteForUser 作废同账号旧码（键空间恒 900k），校验一次性消费限 5 次尝试，码属他人按失败处理不消费不留痕；失败统一走 rejectTwoFactor 累计锁定，2FA 挑战阶段不清零登录失败计数。",
+      "statement": "emailOtp 是第二因素方法之一：登录 Need2FA 响应附带 twoFactorMethods（totp 恒有，emailOtp 仅邮箱已验证）；发送端点凭 2fa-challenge 挑战令牌向独立 EmailOTPCodes store 写入六位码，签发新码前 DeleteForUser 作废同账号旧码（键空间恒 900k），校验一次性消费限 5 次尝试，码属他人按失败处理不消费不留痕；失败名额已在猜测前经 TryIncLoginAttempts 原子占用，校验失败仅返回 DEV0017（rejectTwoFactor 不再计数，ADR-022），名额耗尽/已锁定的请求在占用阶段即被 DEV0016 423 拒绝，2FA 挑战阶段不清零登录失败计数。",
       "evidence": [
         {
-          "resource": "repo://internal/service/device.go#L130-L199",
-          "version": "repo-lines-v1:sha256:64b3d11491ec58c2b50df282aa2406506d856d606468cb7f0bf260bfdc000186:eyJzZWxlY3RlZExpbmVDb3VudCI6NzAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjM0YmQwN2NlNDQzYTEwMTg4Y2EzNjgxNjU4ZjVlMDFiNzUzOWU5ODZjODZiNDUxZDFiNzhjYWFmMDMwYTliZTAiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjVmNjNlMzMyY2E4Y2RhMTQ1MjFhNTA0MTFhODMxODM2NjU3MTI3MzNiYjVkMTA1MTg4YTc5OTY4MDYxNDA2NTAiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjNjMDQzZWZhM2ZmMWNkNDRhNDZkZGE0NjZjZTNlODFhODhjNzFlYTQ4MDAyMDkyMjhiZGVjYzhkNzhjNzhhYjYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjoxLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEifQ"
+          "resource": "repo://internal/service/device.go#L130-L168",
+          "version": "repo-lines-v1:sha256:d1281174e1ce23cc9d87cbc6435155138d1aaceff91491875fcebfe418de8cdf:eyJzZWxlY3RlZExpbmVDb3VudCI6MzksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImI0ZThiZGNhZDEyYWE3ZmZiN2E2ODJjOGQ3MmUzZjA3NmNmZGIwMjI4MDdiOTZiZTBkNmEwN2JhMDhjMGRlODAiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjM4NmE5NDBkNTg1ZjZjYjEzNmRmMjk4MWIxYzQzOGI1ZTcxZmEzZjMxMDVmMmE3MzhhMjNmNzFkYzI5NzVkMjIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjJkNzI3OTBkOTE0M2U4OTEzMmYxMzk1ZjI2Mjk2MThiNjJiNjFjYmZjYjFhOTJlZDc0ZWQ5YmNkZGMzZDM0OWYifQ"
         },
         {
-          "resource": "repo://internal/service/device.go#L19-L127",
-          "version": "repo-lines-v1:sha256:e9a619ad120eb7cbc396297af2dab885d40820c1cde5a8ba9c91001b4eb554e6:eyJzZWxlY3RlZExpbmVDb3VudCI6MTA5LCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiI0NDc2NTY5ODEzZjQ3OGI4NzliNzY5N2Y1YzcyYzMzZDFiYmRhNzBmZDBkMDlhMGViYmY0NmM3ZTUzMWQxMGJjIiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiIwMWJhNDcxOWM4MGI2ZmU5MTFiMDkxYTdjMDUxMjRiNjRlZWVjZTk2NGUwOWMwNThlZjhmOTgwNWRhY2E1NDZiIiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiI1NGQwZmI1NDRmODVkNGE4ZjZkZTAxYjBmYzEwODBhZjZhZmM5YzhkNjlhNjE2NTFkMDNmOTkyMTFlMzk4ZGRlIiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MywiZm9sbG93aW5nQ29udGV4dEhhc2giOiJlYzIyZWY5MGRlNDE5ODA3MWQ1NzZkZTliODI1ZDA2YWM1MDg3YjQxNmVhNGMwYjRlZTQzMzg2NDYzNzcwY2Y3In0"
+          "resource": "repo://internal/service/device.go#L170-L203",
+          "version": "repo-lines-v1:sha256:bbfc70a6db90d9f193492da4d5aee405ec732247615cecbadad1e7229e940db5:eyJzZWxlY3RlZExpbmVDb3VudCI6MzQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4OWFiY2JlMjg0ZmZlMGRkZDM4ZTYyMDhmMWEyYmI4ZDdkZGJhOTRlYzZhMDNlY2Y5ZGJhMmI3ZTUyNGMwYTQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImIyOTU2YjQxN2RhNmZhNDIwYTZiYzhjYjIwODAxNDEyYmFlNGJhMTkyZmEwNmIwZWEwMTAxOTY5ZGJhMjdhYWUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
         },
         {
-          "resource": "repo://internal/service/login.go#L179-L185",
+          "resource": "repo://internal/service/device.go#L46-L52",
+          "version": "repo-lines-v1:sha256:3ca7bb4e318ffacfc4df7828582b8f56c1bb8d2c97cca42dbdc2949013b3e1f0:eyJzZWxlY3RlZExpbmVDb3VudCI6NywiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiZGQ5NjFlNjk0ZTYyNWI2NTIwNGQ4ZmYzYzhiMzRhOGYxNWFjMTgxMDk5YmVlZGY3NzdkMjQ4NzA4Y2I3OTg0NSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMDFiYTQ3MTljODBiNmZlOTExYjA5MWE3YzA1MTI0YjY0ZWVlY2U5NjRlMDljMDU4ZWY4Zjk4MDVkYWNhNTQ2YiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNzNiMTdmYWRjNTVjZGIzNmUzZmM5ZDQ0OGY4YWRmZWU3NTkwOGQ4Y2NhMTZmN2M0NTAxOTJiZjVhNjJmYzAwNCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZjMxMzllYmEwOWU2NTljY2FiMmJkMzVjOThjZjIyYzg5MDhiZTAyOWIxOGU5NjkyNDZjZDI1ZTViMGEwZDg5OCJ9"
+        },
+        {
+          "resource": "repo://internal/service/login.go#L197-L203",
           "version": "repo-lines-v1:sha256:b0bb3b0f1cdfa67b7663fd38754ace3459ef05f166b7d59e3d327bbe7d6c301e:eyJzZWxlY3RlZExpbmVDb3VudCI6NywiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiM2VjZjVhZGI4MzQzNWY3ZjNkN2E2OGY1NjNmMTc0YTFhODc3Mjk0NzlhNDAwNGE3YjRiZWE3ODEzNjJkMGNjYyIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNDEyY2EzNDVjY2Y3NWJmOWMwODA2YmNlNjk1YmU4ZGU4MDhiNzk5ODQyNTFhN2E1NGQyMDJjZjYxMDFkZDQ1MSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNTcyZGIwMTMyOWI4MmFjZWVkOTAxNGFkYTM2NTI3NjAwM2Q3MDYwNGQ1ZWI1Y2VhYTlkNzM0ZjliMTBhYmY0YSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiYmM1ZDJiMjQ3NmJiMTk1ZWQzYmIzYzAxMjM3MzBjZDY2YjMxMWE1Mjg3Zjc3ZGFhYjMwMzhmOTA0ZTFjYTA3MiJ9"
         }
       ]
@@ -229,6 +233,6 @@
   ],
   "verification": {
     "by": "openwiki/0.7.2",
-    "at": "2026-11-16T17:33:30.305Z"
+    "at": "2026-11-17T17:20:26.784Z"
   }
 }

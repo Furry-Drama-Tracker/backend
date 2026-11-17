@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "pageVersion": "sha256:eeb530792aea611376d4afd8e4edaa2771ea18d03ad18edd21ccc4c005046ddb",
+  "pageVersion": "sha256:ba8a5fcd29ca21d6dc9311456751e9718145bcfb8aedf33654fd2a4793c68e07",
   "claims": [
     {
       "id": "claim_030a3007b94e4501b11d17747e3599e5",
@@ -21,8 +21,8 @@
       "statement": "The ini file uses server, database, jwt, email, vapid, webauthn, oauth, and security sections, with Go duration syntax for access and refresh TTLs; invalid durations are ignored.",
       "evidence": [
         {
-          "resource": "repo://deploy/furry-drama-be-neo.ini#L1-L114",
-          "version": "repo-lines-v1:sha256:ec7c4868571d27aacce36e065c5a86cf04595f35439e5b6ef21742bd69c30f11:eyJzZWxlY3RlZExpbmVDb3VudCI6MTE0LCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiI2NjkzYmY3NzBjNDAxYTVjM2JlNzM0ZTFlMTk4ODI4ODJiMzI0YTY5YTRkMTM3ZjE5Y2E5YzI5YjU2Yjg0ZDdhIiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiJkNDQxMmYyYTE0NTU2ZjQ4YzUxMGE5M2FjN2Y0MjNjNjA2ODczMWY5ZjYwNTBkYjQxMmYxYjM4MjU5MDg4ZDIyIiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MCwicHJlY2VkaW5nQ29udGV4dEhhc2giOiJlM2IwYzQ0Mjk4ZmMxYzE0OWFmYmY0Yzg5OTZmYjkyNDI3YWU0MWU0NjQ5YjkzNGNhNDk1OTkxYjc4NTJiODU1IiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MCwiZm9sbG93aW5nQ29udGV4dEhhc2giOiJlM2IwYzQ0Mjk4ZmMxYzE0OWFmYmY0Yzg5OTZmYjkyNDI3YWU0MWU0NjQ5YjkzNGNhNDk1OTkxYjc4NTJiODU1In0"
+          "resource": "repo://deploy/furry-drama-be-neo.ini#L1-L118",
+          "version": "repo-lines-v1:sha256:100ca5e940f9b328d3e8a2a6dc5933ce0941f822c16d44171c7bd2f3d848d83c:eyJzZWxlY3RlZExpbmVDb3VudCI6MTE4LCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiI2NjkzYmY3NzBjNDAxYTVjM2JlNzM0ZTFlMTk4ODI4ODJiMzI0YTY5YTRkMTM3ZjE5Y2E5YzI5YjU2Yjg0ZDdhIiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiJkNDQxMmYyYTE0NTU2ZjQ4YzUxMGE5M2FjN2Y0MjNjNjA2ODczMWY5ZjYwNTBkYjQxMmYxYjM4MjU5MDg4ZDIyIiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MCwicHJlY2VkaW5nQ29udGV4dEhhc2giOiJlM2IwYzQ0Mjk4ZmMxYzE0OWFmYmY0Yzg5OTZmYjkyNDI3YWU0MWU0NjQ5YjkzNGNhNDk1OTkxYjc4NTJiODU1IiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MCwiZm9sbG93aW5nQ29udGV4dEhhc2giOiJlM2IwYzQ0Mjk4ZmMxYzE0OWFmYmY0Yzg5OTZmYjkyNDI3YWU0MWU0NjQ5YjkzNGNhNDk1OTkxYjc4NTJiODU1In0"
         },
         {
           "resource": "repo://internal/config/config.go#L322-L429",
@@ -56,11 +56,11 @@
     },
     {
       "id": "claim_48ad663b712c4f348025b2225331fddb",
-      "statement": "启动仅在 JWT_SECRET 缺失或短于 32 字符、ENCRYPTION_KEY 已配置但短于 32 字符、MONGO_URI 缺失，或 trusted_proxies 含非法 IP/CIDR 项时致命退出；弱密钥与占位生产 CORS 源仍为告警不阻断；IP 地域开关开启时打 SECURITY WARN 并注明首选数据源（aliyun 提示会把客户端 IP 发至该 API，czdb 提示本地库查询），首选为 aliyun 且未配置 AppCode 时追加不可用告警。",
+      "statement": "启动仅在 JWT_SECRET 缺失或短于 32 字符、ENCRYPTION_KEY 已配置但短于 32 字符、MONGO_URI 缺失，或 trusted_proxies 含非法 IP/CIDR 项时致命退出；弱密钥与占位生产 CORS 源仍为告警不阻断；生产信任代理标头但 trusted_proxies 未配置时打 SECURITY WARN（不阻断，2026-11 ADR-022 新增）；IP 地域开关开启时打 SECURITY WARN 并注明首选数据源（aliyun 提示会把客户端 IP 发至该 API，czdb 提示本地库查询），首选为 aliyun 且未配置 AppCode 时追加不可用告警。",
       "evidence": [
         {
-          "resource": "repo://cmd/server/main.go#L61-L80",
-          "version": "repo-lines-v1:sha256:1bd5b6e0b9a8a6bb0fb54f07095fdb4286e0ada0cfc5c78703fbded016287872:eyJzZWxlY3RlZExpbmVDb3VudCI6MjAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjJiODgyZDdhZDFmYmNiODM1NzE1ZDdiZDEyNWVmZDZmMjUyMWRkYzkyMzA0NGMxNWQ5OTkyMjQ0M2Q0NTBhNDEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjRhNDkxZjhiODc3Y2NlNGM3NjlhOGFkMGE4MzQ1YzhjZGQ2YjI2OGFkNzUzZDMwMTNhZmUzMDVmNDYzZDI1N2UiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImZiMWM0ODkyMDkyNzVkZmI5ZThkZWIzNjAyODU1Y2EyMmQxNWVhMDE0M2JlMWQ2MzYxNDMzYTQ5ZDVhNzZkM2MiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImVlNjVmMGIxZGFmZGZjM2Q1NzQ3YWFkNmU4NzZiZWNjMzk0ZjQ5ODI3YzJhNjU1ZDU4ZWM4ZWIyYTFjMmZmNzIifQ"
+          "resource": "repo://cmd/server/main.go#L61-L93",
+          "version": "repo-lines-v1:sha256:c9c894a017fb8728aaa583a2cd3d265b2d91c8c3f4150310aebe83e0040ae7c5:eyJzZWxlY3RlZExpbmVDb3VudCI6MzMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjJiODgyZDdhZDFmYmNiODM1NzE1ZDdiZDEyNWVmZDZmMjUyMWRkYzkyMzA0NGMxNWQ5OTkyMjQ0M2Q0NTBhNDEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImE5OTk5YTQxZjgxMTliNjdjNzQzOTIzY2I4Zjg2MWZjM2Y5NjBiODE3ZTg1N2I0YjA0MGEzNzc1ZTE1ODdjODgiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImZiMWM0ODkyMDkyNzVkZmI5ZThkZWIzNjAyODU1Y2EyMmQxNWVhMDE0M2JlMWQ2MzYxNDMzYTQ5ZDVhNzZkM2MiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjhlOTFhY2NiYzRlNGFhZmQxZTk2YzJiNDU1YzBhMjk0NjVjMjkzMzYwNDUxZTc3MWFmMWI3OWEyMTdkNmQ4ZjIifQ"
         },
         {
           "resource": "repo://internal/config/config.go#L514-L551",
@@ -141,10 +141,24 @@
           "version": "repo-lines-v1:sha256:1fed848c1255ffcdd26d4bece5431eeb1dcda0e212cc1f5ec3d2aed18d225655:eyJzZWxlY3RlZExpbmVDb3VudCI6MjAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImM3YTg0MjhmYjkxMDhjY2I1MzFjMGI5YzI5MDc5MzYwZDIwODUwZmE1ZDI0OTI5NGQ5Y2NkZGE3ODI1YjAzOWEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY0ZWZjNDk0MThkMjZkY2YxMjliMjJhNmFhMjExMDhjZWVjMzc2NzdhMzJkMDhlOWQ1ZmVlMzVkZGE2NmJiOWQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjY2MjJjMTllOGVkZTJjYTVkYzJmNzJhMjhlM2JkY2I2Y2U3OTA2NGExNDMzMDQ1NjI3YTY4M2I3YmQ1OWFjNGEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjIzYTk2MGQyMzRjYjcxZTVmMjVjYmMxYTNmYmJiNGFkYWY1MjE5ZWI2MTMyZTRlMjE5OTQ4OTI5OGIxMDRkZTQifQ"
         }
       ]
+    },
+    {
+      "id": "claim_b8c1c2bddd104be09a5106c0f2ecba2c",
+      "statement": "trusted_proxies 只校验「直连对端」是否受信：socket/loopback 部署下对端恒为本机反代，防不住经反代透传的客户端伪造代理标头——必须在反代层覆盖写入代理标头（deploy/nginx.conf.example 形态 B）或仅放行 CDN 回源网段（形态 A），否则 IP 维度限流可被伪造标头轮换绕过、IP 归因可被伪造（ADR-022，2026-11）。",
+      "evidence": [
+        {
+          "resource": "repo://deploy/furry-drama-be-neo.ini#L31-L41",
+          "version": "repo-lines-v1:sha256:b175a91b520771d81030e38372c2ff2aa888aa057a9076bbd6c2558463523aea:eyJzZWxlY3RlZExpbmVDb3VudCI6MTEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijk5MjNhNjBhYzA2MWRhMzYxMGZlYjE5YWQ1MjY0MWRkY2RiY2ZhOWY3NDZiYWZjOGRmNGNjYTE5MWRhNDk0YzciLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjgyM2VlMzU2NDE1NmNmZGEzODBlNjFjZDMzYTc3YWYwMjU0ZGMyYjMzOWQwMzAwN2UyYWViOWMxZjYxY2YwYTgiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjZlZjU5N2VlZDhhYmJlMTBiZWFiMTI1ZWIwZGEyZTY2N2NlYTIzZmE5ZWExMzkzNjczMGM5YTcxMDZkNzFjNjUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImVmYWUzNTk1N2JhYTljOGFkYWZkYjYwOTgxMTA5ZDI4NzU4YmJjZjY2YTU5MmU1YTRmNzk5ZWI3OTVlMDdkMjcifQ"
+        },
+        {
+          "resource": "repo://deploy/nginx.conf.example#L1-L30",
+          "version": "repo-lines-v1:sha256:8268e21a9738434546c394ea498bb4bd356736c4d56f893c9cdd05cca53c41d8:eyJzZWxlY3RlZExpbmVDb3VudCI6MzAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY2OTNiZjc3MGM0MDFhNWMzYmU3MzRlMWUxOTg4Mjg4MmIzMjRhNjlhNGQxMzdmMTljYTljMjliNTZiODRkN2EiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImQ2OGM3MjlhOTVmZGVjYWM2ODU5NTZlNjY3MTE4MTdhZjliZGI5YjY0YmQyZjk4OTg5ZWVkYzJmNjZlZTk3NDQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjhhMzJlNTgzNzkyZTYwYzYxNjc5NzZkMDM3MzBmOGZhNzgxM2Q3ZTE1NjE0YjUwZGZhODU4N2NkYWZiYjY3ZTUifQ"
+        }
+      ]
     }
   ],
   "verification": {
     "by": "openwiki/0.7.2",
-    "at": "2026-11-16T17:33:30.305Z"
+    "at": "2026-11-17T17:20:26.784Z"
   }
 }

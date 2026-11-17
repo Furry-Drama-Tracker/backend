@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "pageVersion": "sha256:0fcf85bf8a5c747ff19a10be57b11d8bf95dac7c7cf81ca4dd464db0471a37fd",
+  "pageVersion": "sha256:5e5f078ad2613b0220fc5e93ad36b4a5420f27cd03fc24334c4817fda5380f46",
   "claims": [
     {
       "id": "claim_663a630ac6fb40d4ad42080b26bcfb33",
@@ -24,29 +24,33 @@
     },
     {
       "id": "claim_1ba163f395ed4f8cad91e9f95b4ec505",
-      "statement": "Login branches execute in the order Altcha, folded identifier lookup (username via accountIdLower or email), lockout, deletion grace, password, email verification, 2FA challenge (with twoFactorMethods), success; a missing account returns the same generic credential error as a wrong password, the new-device verification chain has been removed (new devices only get a post-login notification email), and the handler maps success and 2FA to 200 and verification to 403 (AUT0108 via NewExtraC with needVerification/email extra fields).",
+      "statement": "Login branches execute in the order Altcha, folded identifier lookup (username via accountIdLower or email), lockout, deletion grace, failure-quota pre-occupation (TryIncLoginAttempts before the bcrypt compare — exhausted quota or locked account returns the same generic AUT0043 credential error without comparing), password, email verification, 2FA challenge (with twoFactorMethods), success; a missing account returns the same generic credential error as a wrong password, the new-device verification chain has been removed (new devices only get a post-login notification email), and the handler maps success and 2FA to 200 and verification to 403 (AUT0108 via NewExtraC with needVerification/email extra fields).",
       "evidence": [
         {
           "resource": "repo://internal/handler/auth.go#L150-L178",
           "version": "repo-lines-v1:sha256:3a3a35470cb6dd2b12a0482e169daad7b6e4516d243ddf12740520b8790ff48d:eyJzZWxlY3RlZExpbmVDb3VudCI6MjksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImZlMWI0OWRjNzJmNjMyNjNkYzRmODFkZDIxZGYzZWRiZmU2NWU5NjVlN2FmMjhjNDM4OGFmMjc0NThlZTYwY2YiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjhkNmNhNTE2NmViNGZhMDI5N2EwMWY0Mjc2MTI3YjFmYzkwNWJmZGExMDMzZmRkMmI0NDk4Zjg5MWM3OGE2ZDgiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjQ3NTc3ZTNlMTFjYmM2N2FlODA4MDI1YTE2ZDJmNzUwNjAwN2VhMjdiYjZiNWU4NDM1Y2JkOWYwNTk0NmYyODEifQ"
         },
         {
-          "resource": "repo://internal/service/login.go#L45-L154",
-          "version": "repo-lines-v1:sha256:011cc37eaba26397b7de1a92b9e2b5bdc0e997cc5c8653ffeadd14c7f7f3163e:eyJzZWxlY3RlZExpbmVDb3VudCI6MTEwLCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiI1NGNjM2E0NGMzYmRlOGIzNzBkNmI0ZDIxMWMwNjhhZTllN2JjZTVlMGYyODk4ZTQ2ODYxMmIxOThkNTExMDhlIiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiI0MTJjYTM0NWNjZjc1YmY5YzA4MDZiY2U2OTViZThkZTgwOGI3OTk4NDI1MWE3YTU0ZDIwMmNmNjEwMWRkNDUxIiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiI5N2RiMzc5YmFjM2MzYjdlNzhjZDY2ZjE0ZWE1YzFkNWU2ZGRhMzM2NzZmN2MxZmI0ODEwZDQ1YWUxNjRmZDY0IiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MywiZm9sbG93aW5nQ29udGV4dEhhc2giOiIwOGFjMDNmYTQwYmY5ZGNhYjBlMWNkZTcwODIxYzllMzI0ODVlMmIyNmEyZTA3MTFlMTY3ODU0ODMzMWU2MTQ3In0"
+          "resource": "repo://internal/service/login.go#L47-L155",
+          "version": "repo-lines-v1:sha256:177db9567a7e648c9b411377faa375f2e501fb4c5c0a74eb67b0b67955a57f5c:eyJzZWxlY3RlZExpbmVDb3VudCI6MTA5LCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiJkZTIzYmFiMTJmMGMwNDBmNTZmYTljYTJkZDAwN2I3Mzk3ZWU1NzcwYWQ4YTRiMDIyYTdjN2ViMGY3ZWIwNTQ2IiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiIwMWJhNDcxOWM4MGI2ZmU5MTFiMDkxYTdjMDUxMjRiNjRlZWVjZTk2NGUwOWMwNThlZjhmOTgwNWRhY2E1NDZiIiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiJiNzg3M2NiNjJhMzVjOTk2ZWFlMTM4ODZiOGY4NTJjNWEyOTM1YjM2ZTE5NGQ2OTc0ZjNkZDY1NzM2MGJlMDkwIiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MywiZm9sbG93aW5nQ29udGV4dEhhc2giOiI5ODU3ZGYwYWZmNjA3YzQwMGM5MmZiMGQ4Yzk5ZDFiZmI3ZmU2YTQ0OThkZDM2ZTExZWE2YmYwNDllNjRiYTdhIn0"
         }
       ]
     },
     {
       "id": "claim_cc64c711e78f44a9bb4bdf41924b0186",
-      "statement": "账号锁定使用 loginAttempts 与 lockUntil（默认 5 次/30 分钟），普通登录锁定返回通用凭据错误，改密码输错当前密码同样递增 loginAttempts——语义不变；改密成功后以 password_changed 原因吊销全部会话；2026-11 起登录失败计数的清零点后移到邮箱未验证分支与完整认证成功之后（2FA 挑战阶段不清零，CWE-307）。",
+      "statement": "账号锁定使用 loginAttempts 与 lockUntil（默认 5 次/30 分钟）。登录与 2FA 路径自 2026-11 ADR-022 起改为 TryIncLoginAttempts 前置原子占用（单文档条件更新：未锁定且未达阈值才 $inc，占满时同步上锁；占不到名额直接拒绝 AUT0043/DEV0016），并发猜测预算恒为阈值；IncLoginAttempts 仍保留用于改密路径——改密码输错当前密码同样递增 loginAttempts；改密成功后以 password_changed 原因吊销全部会话；登录失败计数的清零点在邮箱未验证分支与完整认证成功之后（2FA 挑战阶段不清零，CWE-307）。",
       "evidence": [
         {
-          "resource": "repo://internal/repository/user.go#L262-L285",
-          "version": "repo-lines-v1:sha256:6707a16680b1f34908e96fe5d50ad79326819853743d9a830b19e26e64423d04:eyJzZWxlY3RlZExpbmVDb3VudCI6MjQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijk5NzUzODhlNTY0ZGIwNjMzNjdmZGE5N2JkZTliYTgzMWI2NTM1MGViMzNjM2QxMTE2ZGZhYzkyMWE3YzM1ODEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjRmMTc2NGU3YjBkZmMxMDYzNTg0N2RiOWFmMWM5MzA2OTMyOTdkODZhNmYzZmY0ZWJkNjJjNDQ5ZTg3MTMyZWEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjEyMTAyZGY1NTMzOTcyYzEwMzVjM2IzMDc0MzFmMzk2NTk5NjFmNmNlYTVkMzc5NzNkMDcyZWJmNGFhYjU1MGQifQ"
+          "resource": "repo://internal/repository/user.go#L262-L293",
+          "version": "repo-lines-v1:sha256:e1ab82f46320f4e59673e939574e015ee1c400d53adcd0ef5eb35e0daa96df6b:eyJzZWxlY3RlZExpbmVDb3VudCI6MzIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijk5NzUzODhlNTY0ZGIwNjMzNjdmZGE5N2JkZTliYTgzMWI2NTM1MGViMzNjM2QxMTE2ZGZhYzkyMWE3YzM1ODEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjRmMTc2NGU3YjBkZmMxMDYzNTg0N2RiOWFmMWM5MzA2OTMyOTdkODZhNmYzZmY0ZWJkNjJjNDQ5ZTg3MTMyZWEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImJmYmE4YTk3YWM3MmFmYTdhZTdjNGI0MGFmODk1NjUxOTEyMTA0ZThmYWNiN2Y0MzQ0NjVhYWM1ZjFjNTQyZjAifQ"
         },
         {
-          "resource": "repo://internal/service/login.go#L47-L154",
-          "version": "repo-lines-v1:sha256:65e959c23b72f68959b0f1a14a87ca5beaf52832ba1edec5299fe80d9c8dc92a:eyJzZWxlY3RlZExpbmVDb3VudCI6MTA4LCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiJkZTIzYmFiMTJmMGMwNDBmNTZmYTljYTJkZDAwN2I3Mzk3ZWU1NzcwYWQ4YTRiMDIyYTdjN2ViMGY3ZWIwNTQ2IiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiI0MTJjYTM0NWNjZjc1YmY5YzA4MDZiY2U2OTViZThkZTgwOGI3OTk4NDI1MWE3YTU0ZDIwMmNmNjEwMWRkNDUxIiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiJiNzg3M2NiNjJhMzVjOTk2ZWFlMTM4ODZiOGY4NTJjNWEyOTM1YjM2ZTE5NGQ2OTc0ZjNkZDY1NzM2MGJlMDkwIiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MywiZm9sbG93aW5nQ29udGV4dEhhc2giOiIwOGFjMDNmYTQwYmY5ZGNhYjBlMWNkZTcwODIxYzllMzI0ODVlMmIyNmEyZTA3MTFlMTY3ODU0ODMzMWU2MTQ3In0"
+          "resource": "repo://internal/repository/user.go#L295-L336",
+          "version": "repo-lines-v1:sha256:b9f4dcc8c098c5a9f6958ca9c7e4a6f7044e6ee2d7f7c6ca4ee5b3371f270885:eyJzZWxlY3RlZExpbmVDb3VudCI6NDIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjcyMzQ4MWIyNzFmNjZkNTM1M2Q0ZmZjZTQzNDc2N2VhZmQzOGM4Y2RhNDNmMjU4MTNjYmFhZjhmZWFiZWUxOGQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImU1N2QzMTBlZTg3NWJiMGM2MDFkM2Y2YThhYjA5NDlkY2UwYTZjODZjMjI4YTMzNDhiNWE5ODhhMGEyYjcwZTYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6Ijk5MjgwMGUxN2UzNzVhYmFiZjllZmFiNGFlZDdmYzdhNjkwNjRlNmI0YTdhNzY2YjY1ODRlMjYwN2FiZTViMTcifQ"
+        },
+        {
+          "resource": "repo://internal/service/login.go#L78-L88",
+          "version": "repo-lines-v1:sha256:45035d4e135bdd4c447bccef3c462d60767ee2c7b1050999cd322cbeb9f52fe7:eyJzZWxlY3RlZExpbmVDb3VudCI6MTEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjA1MzkzMGI1ZDU1MDA0NjUxZTMwMTM0NmU0YjA3MzBjMTE4ZDM5NWU0MjgwOWQwY2JlYTUzOTU4NDAyYTZmMDciLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY3Y2RhODJkYTYwNjIzOGUwNWU2MjM5OTU2OWM1ZWUwMzk5MzQxOTY0OGFlNWQ0M2EyYmY4Y2Q2MzQ3ZjgyNjMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjIyZjJmZjVmZWVjNjBmNTg3YzhmYWU0ZTg3ZjgwOWE2NjFjZmZlZDZiNDdhYWU1ZjZkNmEyNjUzYWE4OTUyZWYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjE4MDk4MDhkZjQ0ZWNmYmRiZjgxZmQwNjQ1YzNjOTM0ZjQ1NjM1MTBhM2NiYTRhMmM0MWVmYWM3MWY5NmM1ZWEifQ"
         },
         {
           "resource": "repo://internal/service/password.go#L17-L41",
@@ -63,22 +67,30 @@
           "version": "repo-lines-v1:sha256:05525f5cd1cb0937706c248ff98be616f4a8ad388c944c4fb9ada1f92386d1d5:eyJzZWxlY3RlZExpbmVDb3VudCI6NiwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiMGQ2MDNlNjQwMzRiODI2OTQ2OTJjZjc4OWY1MjU2YWQxMDBkNzA3NTBmZWJiNjJiZmM5YWViZWNmODM1ZjY5NiIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNTI5YWEwZmUzOTQ3ZjJlZmI4NmVmYTVlYjkwMGZjNjkzYjIzZThmMDRlOTk5NDkxMDg4NDMwNWY5ZWZkMTA4NCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiODU1NGJkMDk0NTczZjA2ZmEyZDYwZDkwNDQ4NWM0ZGZkMWM3MDE4MWYzOWQyZjAxMGExNzVkMTFiMjI0MGJiYiIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiNTYzMzAwMzhjZDEwY2RjYjI2NzI2YThkZWEwNzdmNDAwZGRlYTY2MTFiMmEyYTRhZWIwMWI2NmRmM2Y5NzA3NyJ9"
         },
         {
-          "resource": "repo://internal/service/login.go#L148-L175",
-          "version": "repo-lines-v1:sha256:336d2632bfe22ed98fd05a4df1e3f9a8d1fd40bc51df08a6e41f42e15f1dbbb8:eyJzZWxlY3RlZExpbmVDb3VudCI6MjgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImNhNGE3ZDEwYjA2ZDBjY2NmZDk1Yzk4NzQ1NDM3OGFkYzYxN2E1YmRiNDE3YTlhMjE4MzI2YjY5YzBkOTA1NjQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImU0ZWM3YWZhNjc2ZGU1MzZkNjc1NTYxMjkwYzRkZGQ2NjBhNWExN2VhOWUyMzAxY2NmNDkzMGFhNDUxNTk1Y2UiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjU3MmRiMDEzMjliODJhY2VlZDkwMTRhZGEzNjUyNzYwMDNkNzA2MDRkNWViNWNlYWE5ZDczNGY5YjEwYWJmNGEifQ"
+          "resource": "repo://internal/service/login.go#L174-L228",
+          "version": "repo-lines-v1:sha256:6a5267c343cd340e9b679229a5ce3f132e21a38ddc4c0e2228f9c4f54dd14755:eyJzZWxlY3RlZExpbmVDb3VudCI6NTUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ1ZmYzMmMzOTA4OGRiMzQ5M2U1MTk3OGIwNmY3NTU4NTRlNzIwNDMyMmUxMTA3NDA2ZjNjZmU5Yzc1NmU5NTEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjBhYjQ3Mjk4ZTQ2ODM5OTE3NTE2ODZiZTU5MDA2MmFlNDRhYjFjNjI5YzRjNDdhZTRjZTk0Yjc5ZjI4M2U3NmYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjMwMzMwODc5MjFlYjJmOTRmNzc3MDQ4NmUwMWY2NTU0NjZhMzViMDBkNDRjMGNhMjZjN2JmNzFkODQ5NTJjYmEifQ"
         }
       ]
     },
     {
       "id": "claim_8adfc89ccb214869a2073fd0bf1f3ea5",
-      "statement": "2FA 登录挑战是五分钟、purpose 为 2fa-challenge 的令牌；method 决定第二因素：emailOtp（一次性消费独立 EmailOTPCodes，限五次尝试）或默认 totp/备份码（VerifyTOTPStep 命中的时间步经 users.twoFactorLastStep 原子标记一次性消费，同一步重复提交记 twofa_replay 事件；ConsumeBackupCode 消费并就地升级为哈希）；登录态字段定点更新，任一方法失败递增锁定计数。",
+      "statement": "2FA 登录挑战是五分钟、purpose 为 2fa-challenge 的令牌；method 决定第二因素：emailOtp（一次性消费独立 EmailOTPCodes，限五次尝试）或默认 totp/备份码（VerifyTOTPStep 命中的时间步经 users.twoFactorLastStep 原子标记一次性消费，同一步重复提交记 twofa_replay 事件；ConsumeBackupCode 消费并就地升级为哈希）；登录态字段定点更新；失败名额在猜测前经 TryIncLoginAttempts 原子占用，校验失败仅返回 DEV0017（rejectTwoFactor 不再计数，ADR-022），配额耗尽/已锁定在占用阶段被 DEV0016 423 拒绝。",
       "evidence": [
         {
-          "resource": "repo://internal/repository/user.go#L523-L546",
-          "version": "repo-lines-v1:sha256:7114be1ace69f9dc12eea2dbf01073095cdd372c02c1a45e92fd0765dfa31afd:eyJzZWxlY3RlZExpbmVDb3VudCI6MjQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjFjOTY5Y2YzNjhiYzM3OTI5MTczZGMyMGY5YmI0NmY4N2RiYmM4YmVjN2Y5YmVhOWIzNmY0MGI2MGJlMDYxNGMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjdmY2VmZTEwZmQxZmIxOTdhYjFmNGRiMzA4N2QxODA1MzRiODkyYThhMDg5YjRhNTIzOTFlODJjZmQ4ZGYzNTMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImQ5MjJlMzA1NDZmNzA0MjI1ZmJiMGNmYWY4ZDY5ZTVhMjY4ODRiYzYyZDczZDRmYjNmYjBkZjdjZDg5MjkwMTkiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjNhYmZhNmE0NjhlZjU4NWQ3M2JmOWVmODEwZTVmNDZiZGNjZGIzM2Q2ZjQ2MWU4MjNlN2M1MTU3NDkwYTA4OTMifQ"
+          "resource": "repo://internal/repository/user.go#L566-L590",
+          "version": "repo-lines-v1:sha256:31130281ef1a81ad99072e7744282cbd1cb210bdf3fe5d137992f8e1a5847d0c:eyJzZWxlY3RlZExpbmVDb3VudCI6MjUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjFjOTY5Y2YzNjhiYzM3OTI5MTczZGMyMGY5YmI0NmY4N2RiYmM4YmVjN2Y5YmVhOWIzNmY0MGI2MGJlMDYxNGMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijc3YTM2MWE4NzZmMmQ4Y2JmZjVhYWVlMjI4NTUxM2JmZmMxMWI1NzU2OWQ1MGNiODRhMjRkNTdmZDllN2I4OWEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImQ5MjJlMzA1NDZmNzA0MjI1ZmJiMGNmYWY4ZDY5ZTVhMjY4ODRiYzYyZDczZDRmYjNmYjBkZjdjZDg5MjkwMTkiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjRjZmE0M2MyNDUxNmZjZDAyMDBkOWI2MmFiZjE4MTdiMjA4ZDgxM2Y1ODY3MGQ2YWRkNDc3ZGIwYzM2YzZhMDkifQ"
         },
         {
-          "resource": "repo://internal/service/device.go#L19-L127",
-          "version": "repo-lines-v1:sha256:e9a619ad120eb7cbc396297af2dab885d40820c1cde5a8ba9c91001b4eb554e6:eyJzZWxlY3RlZExpbmVDb3VudCI6MTA5LCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiI0NDc2NTY5ODEzZjQ3OGI4NzliNzY5N2Y1YzcyYzMzZDFiYmRhNzBmZDBkMDlhMGViYmY0NmM3ZTUzMWQxMGJjIiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiIwMWJhNDcxOWM4MGI2ZmU5MTFiMDkxYTdjMDUxMjRiNjRlZWVjZTk2NGUwOWMwNThlZjhmOTgwNWRhY2E1NDZiIiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiI1NGQwZmI1NDRmODVkNGE4ZjZkZTAxYjBmYzEwODBhZjZhZmM5YzhkNjlhNjE2NTFkMDNmOTkyMTFlMzk4ZGRlIiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MywiZm9sbG93aW5nQ29udGV4dEhhc2giOiJlYzIyZWY5MGRlNDE5ODA3MWQ1NzZkZTliODI1ZDA2YWM1MDg3YjQxNmVhNGMwYjRlZTQzMzg2NDYzNzcwY2Y3In0"
+          "resource": "repo://internal/service/device.go#L19-L133",
+          "version": "repo-lines-v1:sha256:16455eb7ef85cc1b888f9ac98b6dc4b352d60f58b0e5c88647949c3cf8dad46a:eyJzZWxlY3RlZExpbmVDb3VudCI6MTE1LCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiI0NDc2NTY5ODEzZjQ3OGI4NzliNzY5N2Y1YzcyYzMzZDFiYmRhNzBmZDBkMDlhMGViYmY0NmM3ZTUzMWQxMGJjIiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiI0MTJjYTM0NWNjZjc1YmY5YzA4MDZiY2U2OTViZThkZTgwOGI3OTk4NDI1MWE3YTU0ZDIwMmNmNjEwMWRkNDUxIiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiI1NGQwZmI1NDRmODVkNGE4ZjZkZTAxYjBmYzEwODBhZjZhZmM5YzhkNjlhNjE2NTFkMDNmOTkyMTFlMzk4ZGRlIiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MywiZm9sbG93aW5nQ29udGV4dEhhc2giOiIzYzA0M2VmYTNmZjFjZDQ0YTQ2ZGRhNDY2Y2UzZTgxYTg4YzcxZWE0ODAwMjA5MjI4YmRlY2M4ZDc4Yzc4YWI2In0"
+        },
+        {
+          "resource": "repo://internal/service/device.go#L201-L203",
+          "version": "repo-lines-v1:sha256:8f2fea51e943f02cbb1eb96de89cb4d5531f29ce8e506b52998eac18443cea97:eyJzZWxlY3RlZExpbmVDb3VudCI6MywiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiOGY2MzFkNDJlZWFiMTY5Y2U3NWI1Y2MzY2FjMjQyMmYzYzc1YjI1MzVhYTJjNzY0ZmU4MWRhY2Y2NGUxNzk5OSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNDEyY2EzNDVjY2Y3NWJmOWMwODA2YmNlNjk1YmU4ZGU4MDhiNzk5ODQyNTFhN2E1NGQyMDJjZjYxMDFkZDQ1MSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNjg1ZDAzZjdjMzJiNDRlYjQwNjdlZTg0NGE2YzdkNDU1ZGRjNjgwODM5MGI1OWUwZTNiZDhkZjYwNDY5YjE1NSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjAsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZTNiMGM0NDI5OGZjMWMxNDlhZmJmNGM4OTk2ZmI5MjQyN2FlNDFlNDY0OWI5MzRjYTQ5NTk5MWI3ODUyYjg1NSJ9"
+        },
+        {
+          "resource": "repo://internal/service/device.go#L46-L52",
+          "version": "repo-lines-v1:sha256:3ca7bb4e318ffacfc4df7828582b8f56c1bb8d2c97cca42dbdc2949013b3e1f0:eyJzZWxlY3RlZExpbmVDb3VudCI6NywiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiZGQ5NjFlNjk0ZTYyNWI2NTIwNGQ4ZmYzYzhiMzRhOGYxNWFjMTgxMDk5YmVlZGY3NzdkMjQ4NzA4Y2I3OTg0NSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMDFiYTQ3MTljODBiNmZlOTExYjA5MWE3YzA1MTI0YjY0ZWVlY2U5NjRlMDljMDU4ZWY4Zjk4MDVkYWNhNTQ2YiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNzNiMTdmYWRjNTVjZGIzNmUzZmM5ZDQ0OGY4YWRmZWU3NTkwOGQ4Y2NhMTZmN2M0NTAxOTJiZjVhNjJmYzAwNCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZjMxMzllYmEwOWU2NTljY2FiMmJkMzVjOThjZjIyYzg5MDhiZTAyOWIxOGU5NjkyNDZjZDI1ZTViMGEwZDg5OCJ9"
         }
       ]
     },
@@ -111,18 +123,36 @@
       "statement": "登录标识符支持用户名与邮箱：含 @ 按邮箱查找，否则按 accountIdLower 折叠小写查找（FindByLoginIdentifierWithAuth/With2FA），登录前统一小写化并回退兼容旧 email 字段——Admin 与 admin 视为同一账号。",
       "evidence": [
         {
-          "resource": "repo://internal/repository/user.go#L88-L98",
-          "version": "repo-lines-v1:sha256:47664979d72ee4f607f0af5e295b8a7cc38322634256186f2ddfffa63a032347:eyJzZWxlY3RlZExpbmVDb3VudCI6MTEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImI1Njk2ZWZkYjE4OTVlYWJmM2QyYzgzNmU1YzI0MjgxNDczN2YxMjBlNGIwYjMzY2JkZjVkNGIzNjlmYWFjYWQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjljMzZiMWI3OGQyODFjNGQ4ZDk2MGNiMzFlYmYwMzAwYmUyNGZmMTEwZDkyYmNiM2NlNzkzZmFlODI1MWMyMmUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImU0NjE1NTBmYjQxNWNiODIzZmZhOWMyMTdhNTMyNTRhOTYyNWM4ZjNjZGY2Zjk2NjkzMzgxYmIyNTcxZWJiYmEifQ"
+          "resource": "repo://internal/repository/user.go#L93-L108",
+          "version": "repo-lines-v1:sha256:a4e50d929d52848f8f6250a6e2b7072b5cab5ed8db7ba8755b2a4bc8427366a3:eyJzZWxlY3RlZExpbmVDb3VudCI6MTYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjExZjMyYjViOWRkMGU0N2RhMjc0MWQ3Y2JjMmUyNmM1MTlhMjk0MzQ0ZmEyMTk2ZGExMDQwODk1ZTBhZWJhZDUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjEyMWZkY2RiMGFmMzFhZTM5NWNjNzQ3ZjVmNDU4ODQ4MjQwNjIwMGUyODAyZDQ5ZmEzY2VhZTcxYmUyMmI5OGUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjA0YmM5MTEyZTExNmMzNWNjMjViYzE3ZTRjN2E4NjdjNWYyNjQwNzMyNWM4ZGNiZTkyM2M2MzdmYTEwOWRmZGYifQ"
         },
         {
           "resource": "repo://internal/service/login.go#L47-L96",
-          "version": "repo-lines-v1:sha256:e42696890341233d4b3d23d66784a444f289f08c42b1c79844861c1dcaf0c177:eyJzZWxlY3RlZExpbmVDb3VudCI6NTAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImRlMjNiYWIxMmYwYzA0MGY1NmZhOWNhMmRkMDA3YjczOTdlZTU3NzBhZDhhNGIwMjJhN2M3ZWIwZjdlYjA1NDYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjMxNTdmMGYxNGE2OWY0MmJjYzg4MWUxOTdjMzFjYjQ4ZTQwOWI5Mjk3ZDViZGVjMjJkZTliY2MxYzgzMTE0YzciLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImI3ODczY2I2MmEzNWM5OTZlYWUxMzg4NmI4Zjg1MmM1YTI5MzViMzZlMTk0ZDY5NzRmM2RkNjU3MzYwYmUwOTAiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjZjMGFiYmJkNDc3ZDdkZDI1MTY0MjIyNjBmZGQzODliM2FlYjFhMDY1MTE4MjRjNzI1MzA4MTg0OGMxMmNhMTMifQ"
+          "version": "repo-lines-v1:sha256:79906274dd675c71c095d414a7bebea4ab387090aaf73f4e5611546a923d5169:eyJzZWxlY3RlZExpbmVDb3VudCI6NTAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImRlMjNiYWIxMmYwYzA0MGY1NmZhOWNhMmRkMDA3YjczOTdlZTU3NzBhZDhhNGIwMjJhN2M3ZWIwZjdlYjA1NDYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjIxZTVjM2QzYTQxODIxNzEwMDY5MjQ5YWYyOGMyZjhiZmNmYmRmOWQxMDg5YmQ2NDk2OGM0YTg3Y2I0ZGM0MDAiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImI3ODczY2I2MmEzNWM5OTZlYWUxMzg4NmI4Zjg1MmM1YTI5MzViMzZlMTk0ZDY5NzRmM2RkNjU3MzYwYmUwOTAiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjIwNDkyNGJhOTk5MzNlNjhjZTdkOTE3OThiYzA5MTE0MzRjZTQ2NWMwODU1MWE3N2I5ODFhZmUyOGUwZjlmOWIifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_10c24379ac464eeabd5a56de8186b2ac",
+      "statement": "UserRepo.TryIncLoginAttempts 把失败配额占用收进单文档条件更新（ADR-022，2026-11）：先重启过期锁，然后仅当未锁定且 loginAttempts 未达阈值（或字段缺失，兼容 Express 时期遗留文档）时原子 $inc，本次占用达到阈值时同步上锁——过滤器即状态守卫加配额守卫，并发下恰好放行 maxAttempts 次，消除读快照→校验→事后计数的 TOCTOU 窗口；密码路径与 2FA 路径共用，成功路径随后的 ResetLoginAttempts 清除占用（含瞬态锁）。",
+      "evidence": [
+        {
+          "resource": "repo://internal/repository/user.go#L295-L336",
+          "version": "repo-lines-v1:sha256:b9f4dcc8c098c5a9f6958ca9c7e4a6f7044e6ee2d7f7c6ca4ee5b3371f270885:eyJzZWxlY3RlZExpbmVDb3VudCI6NDIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjcyMzQ4MWIyNzFmNjZkNTM1M2Q0ZmZjZTQzNDc2N2VhZmQzOGM4Y2RhNDNmMjU4MTNjYmFhZjhmZWFiZWUxOGQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImU1N2QzMTBlZTg3NWJiMGM2MDFkM2Y2YThhYjA5NDlkY2UwYTZjODZjMjI4YTMzNDhiNWE5ODhhMGEyYjcwZTYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6Ijk5MjgwMGUxN2UzNzVhYmFiZjllZmFiNGFlZDdmYzdhNjkwNjRlNmI0YTdhNzY2YjY1ODRlMjYwN2FiZTViMTcifQ"
+        },
+        {
+          "resource": "repo://internal/service/device.go#L46-L51",
+          "version": "repo-lines-v1:sha256:33015fb348802c792f5aaf839bdbc8ae6d53dac5c9a47d303f2425d5bd0a209c:eyJzZWxlY3RlZExpbmVDb3VudCI6NiwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiZGQ5NjFlNjk0ZTYyNWI2NTIwNGQ4ZmYzYzhiMzRhOGYxNWFjMTgxMDk5YmVlZGY3NzdkMjQ4NzA4Y2I3OTg0NSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNjdjZGE4MmRhNjA2MjM4ZTA1ZTYyMzk5NTY5YzVlZTAzOTkzNDE5NjQ4YWU1ZDQzYTJiZjhjZDYzNDdmODI2MyIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNzNiMTdmYWRjNTVjZGIzNmUzZmM5ZDQ0OGY4YWRmZWU3NTkwOGQ4Y2NhMTZmN2M0NTAxOTJiZjVhNjJmYzAwNCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZWEzMGZkODU4ZmViNjU3NjdlMTEzYjU3NmJhYjMzMjk5NzZhYTA5ZDEzNzlmN2E3N2IwZjczOWQ5YThjYjI1MiJ9"
+        },
+        {
+          "resource": "repo://internal/service/login.go#L78-L88",
+          "version": "repo-lines-v1:sha256:45035d4e135bdd4c447bccef3c462d60767ee2c7b1050999cd322cbeb9f52fe7:eyJzZWxlY3RlZExpbmVDb3VudCI6MTEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjA1MzkzMGI1ZDU1MDA0NjUxZTMwMTM0NmU0YjA3MzBjMTE4ZDM5NWU0MjgwOWQwY2JlYTUzOTU4NDAyYTZmMDciLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY3Y2RhODJkYTYwNjIzOGUwNWU2MjM5OTU2OWM1ZWUwMzk5MzQxOTY0OGFlNWQ0M2EyYmY4Y2Q2MzQ3ZjgyNjMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjIyZjJmZjVmZWVjNjBmNTg3YzhmYWU0ZTg3ZjgwOWE2NjFjZmZlZDZiNDdhYWU1ZjZkNmEyNjUzYWE4OTUyZWYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjE4MDk4MDhkZjQ0ZWNmYmRiZjgxZmQwNjQ1YzNjOTM0ZjQ1NjM1MTBhM2NiYTRhMmM0MWVmYWM3MWY5NmM1ZWEifQ"
         }
       ]
     }
   ],
   "verification": {
     "by": "openwiki/0.7.2",
-    "at": "2026-11-16T17:33:30.305Z"
+    "at": "2026-11-17T17:20:26.784Z"
   }
 }

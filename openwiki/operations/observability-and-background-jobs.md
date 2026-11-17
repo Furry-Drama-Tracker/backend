@@ -12,10 +12,14 @@ sources:
     resource: repo://internal/cron/cron.go
   - id: openwiki-source-b10e065a15408ca747b6184f
     resource: repo://internal/email/client.go
+  - id: openwiki-source-9002449d5a813a8783166c8a
+    resource: repo://internal/errors/apperror.go
   - id: openwiki-source-44e96c77b4637e4ff46c5518
     resource: repo://internal/handler/admin.go
   - id: openwiki-source-1649edbcafe0eab861fed46a
     resource: repo://internal/handler/backup.go
+  - id: openwiki-source-f89e324c07065d291ea97e16
+    resource: repo://internal/handler/episodes.go
   - id: openwiki-source-3a7c36409770ce04e5cdeef4
     resource: repo://internal/handler/translate.go
   - id: openwiki-source-a5147957bc4eb2270289c610
@@ -38,10 +42,10 @@ sources:
     resource: repo://internal/service/password.go
   - id: openwiki-source-27784338c57fd749bd43470e
     resource: repo://internal/service/refresh.go
-generated: { by: "zcode", at: "2026-11-16T17:33:30.305Z" }
+generated: { by: "zcode", at: "2026-11-17T17:20:26.784Z" }
 verified:
   - by: openwiki/0.7.2
-    at: 2026-11-16T17:33:30.305Z
+    at: 2026-11-17T17:20:26.784Z
 ---
 
 # 可观测性与后台任务
@@ -81,7 +85,7 @@ Gin 在开发环境使用 debug 模式，生产环境使用 release 模式。因
 
 `RequestLogger` 在鉴权之后运行，当方法不是 GET、状态至少 400 或耗时超过一秒时记录。字段包括 method、path、status、duration、客户端 IP（统一取自 `c.ClientIP()`；签名已简化为 `RequestLogger(log)`，不再接收 trustXFF 参数）、上下文中的 user ID，以及 2026-11 起每行都带的 **ref**（`middleware.RequestRef` 写入上下文的请求参考号）。5xx 为 ERROR，4xx 或慢请求为 WARN，其余为 INFO。
 
-参考号是错误排障的关联键：响应头 `X-Ref-ID` 与 4xx/5xx 响应体 `ref` 字段同值，`RequestLogger` 行、5xx 渲染的专用 ERROR 行（`internal/errors` 包的 `log5xx`：`code`/`ref`/`path`/`site`——`runtime.Caller` 抓取的错误构造点 file:line——与 `cause`）以及 panic 恢复日志（`panic recovered`，带 ref 与 stack）都可以用同一个 ref 串联。排障流程：拿用户报的错误码 grep 源码定位调用点，拿 ref grep 日志定位请求（详见[错误信封与错误码契约](../api/error-envelope.md)）。
+参考号是错误排障的关联键：响应头 `X-Ref-ID` 与 4xx/5xx 响应体 `ref` 字段同值，`RequestLogger` 行、5xx 渲染的专用 ERROR 行（`internal/errors` 包的 `log5xx`：`code`/`ref`/`path`/`site`——错误构造点 file:line——与 `cause`）以及 panic 恢复日志（`panic recovered`，带 ref 与 stack）都可以用同一个 ref 串联。2026-11 ADR-021 修正后 `site` 可信地指向**真实调用点**：errors 包各构造器的 skip 自指（`callerSite(1)` 抓到 errors 自身行号）修正为 `CallerSite(2)`，共享错误助手（如 episodes 全模块共用的 `serverError`/`EPS0037` 500 兜底）改以 `Abort500SiteC` 显式转递调用方行号——此前这类 5xx 日志 site 恒为 `apperror.go` 行号、无法定位到具体端点，现在形如 `episodes.go:1072`。排障流程：拿用户报的错误码 grep 源码定位调用点，拿 ref grep 日志定位请求，必要时用 site 直接跳到端点行（详见[错误信封与错误码契约](../api/error-envelope.md)）。
 
 由于一秒以内且状态低于 400 的 GET 请求会被跳过，普通读取不会记录。这降低了日志量，但也意味着成功的公开流量在请求日志中不可见。
 

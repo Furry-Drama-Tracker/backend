@@ -1,14 +1,14 @@
 {
   "schemaVersion": 1,
-  "pageVersion": "sha256:510f70917ed1a0194a8667cdcbfb3fd728667d1ad665748cba3bdd17e7977460",
+  "pageVersion": "sha256:657c824fcc1704f391576a865cb3a719fa7c900521d02847f8459ab2e6fa1b4e",
   "claims": [
     {
       "id": "claim_c845bf9476c04bc59d141d6f5c00fd02",
-      "statement": "启动链：解析 --config/--listen → 加载配置并打弱密钥/占位 CORS 告警与 IP 地域开关状态（开启时按首选数据源打 SECURITY WARN，aliyun 未配 AppCode 追加不可用告警）→ 连接并 ping MongoDB → 构造 Repos 与 JWT 签名器 → 五项启动迁移与索引（告警不阻断）→ 启动清理 cron → 配置并创建上传/图标目录 → 装配 Gin 应用（构造 authlog.Recorder）→ 监听并等待 SIGTERM/SIGINT，10 秒优雅关停。",
+      "statement": "启动链：解析 --config/--listen → 加载配置并打弱密钥/占位 CORS 告警与生产 trust-all 代理标头告警（trusted_proxies 未配置时 SECURITY WARN，不阻断）与 IP 地域开关状态（开启时按首选数据源打 SECURITY WARN，aliyun 未配 AppCode 追加不可用告警）→ 连接并 ping MongoDB → 构造 Repos 与 JWT 签名器 → 六项启动迁移与索引（告警不阻断）→ 启动清理 cron → 配置并创建上传/图标目录 → 装配 Gin 应用（构造 authlog.Recorder）→ 监听并等待 SIGTERM/SIGINT，10 秒优雅关停。",
       "evidence": [
         {
-          "resource": "repo://cmd/server/main.go#L48-L123",
-          "version": "repo-lines-v1:sha256:93fe04cb315bf1481308972436ef3f597f55a037c90401793820901b9e93e33c:eyJzZWxlY3RlZExpbmVDb3VudCI6NzYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjMxNWQ2NGY5NzFiMjRmNzAxZDM0Yzc3ZjEyNWFkOTNkNzBiN2I0MGEwMmMwMjM2YjA0NTM5M2UyNGJmNmI1ZmQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImE1NzExYmE5OWI4MDUxMzZiNzYyODAzMDkzZmFhN2RiNWU0ZGYyOTcyNDg2ZDA5OTFjNThhZTFkMGIyMjc1YjAiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijk5N2FhOTZlM2Q5ZDhhNTVhNzI1ZGUyN2IxNGUzZjIxMzhiYTc2NTdhMDZmYzA4NmVhYTYwZTc1MzU2Njg0OGIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjJhZjYxN2Q4NzA2ZGM1MDgzYzBlMjEzMmYwZmJjNGRmYjIxMGU1Y2FlYWEyMGQ1NzA1YzViY2QwZWU5NTA2MGEifQ"
+          "resource": "repo://cmd/server/main.go#L48-L139",
+          "version": "repo-lines-v1:sha256:a742f8ba860aae2164bcce8683d52f5f556a7ef2b1d39206cffd4d2e576a0d08:eyJzZWxlY3RlZExpbmVDb3VudCI6OTIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjMxNWQ2NGY5NzFiMjRmNzAxZDM0Yzc3ZjEyNWFkOTNkNzBiN2I0MGEwMmMwMjM2YjA0NTM5M2UyNGJmNmI1ZmQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImE1NzExYmE5OWI4MDUxMzZiNzYyODAzMDkzZmFhN2RiNWU0ZGYyOTcyNDg2ZDA5OTFjNThhZTFkMGIyMjc1YjAiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijk5N2FhOTZlM2Q5ZDhhNTVhNzI1ZGUyN2IxNGUzZjIxMzhiYTc2NTdhMDZmYzA4NmVhYTYwZTc1MzU2Njg0OGIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjJhZjYxN2Q4NzA2ZGM1MDgzYzBlMjEzMmYwZmJjNGRmYjIxMGU1Y2FlYWEyMGQ1NzA1YzViY2QwZWU5NTA2MGEifQ"
         }
       ]
     },
@@ -99,6 +99,6 @@
   ],
   "verification": {
     "by": "openwiki/0.7.2",
-    "at": "2026-11-16T17:33:30.305Z"
+    "at": "2026-11-17T17:20:26.784Z"
   }
 }

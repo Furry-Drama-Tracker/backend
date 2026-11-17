@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "pageVersion": "sha256:c6be7c011f92acfba5d67407b7e3b3571de905a58e2ff2a77b72ee7d57c46f9e",
+  "pageVersion": "sha256:cad43f6701a7c9472f6e81829de2178a1bd53236a1b81dbb599ae773527a0c74",
   "claims": [
     {
       "id": "claim_69fe8826aa0e42f289efa55280becd25",
@@ -41,7 +41,7 @@
       "statement": "Creator-created episodes start as pending review while admin and superadmin creations are approved immediately.",
       "evidence": [
         {
-          "resource": "repo://internal/handler/episodes.go#L911-L989",
+          "resource": "repo://internal/handler/episodes.go#L918-L996",
           "version": "repo-lines-v1:sha256:b2bdd78f553c1b1d691190734f0606d239210a6932676bcd3f220cf3e7e70374:eyJzZWxlY3RlZExpbmVDb3VudCI6NzksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjdlZGU0NTE2ZTM2ZDhjMTJiNDZkM2NlODc4YWYwNTA1YWFhZjdkZDI1MGViNzM1MjllNTk3NTdlNTA3YzBjNmQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjRhNWVmZWZkNDQ1YmJkMGY2M2M2ZmI0ZjVhMTE3NDFjYjUyZjZlNWI3NTIzMTkxYWQ1NTkyOTM1MzBjMmZlMDEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6Ijk1YTcxYzYzNjBiODMxZjMwZjhjNTFmNDhhZWVkZGQwZmM3OGRlZTYzMTE3Yjk2NTJiYWU0MTFjYjFhMjhhNDEifQ"
         }
       ]
@@ -51,7 +51,7 @@
       "statement": "Editing an approved episode as a creator stores changes in pendingChanges without altering live fields, while every edit first writes a version snapshot and retains at most 50 versions.",
       "evidence": [
         {
-          "resource": "repo://internal/handler/episodes.go#L1143-L1296",
+          "resource": "repo://internal/handler/episodes.go#L1186-L1339",
           "version": "repo-lines-v1:sha256:7ea0fb6e9f8110e9731ca4e6d08a18b94492fbe540f83f3c59d99f7dd3ba846e:eyJzZWxlY3RlZExpbmVDb3VudCI6MTU0LCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiJmNmUyYTdlMDYwZTc3NmUzOWQ0ZTcyMTZhYTk2MThhMjIyZjM4YWFmZTUwNGM5NTNhMmUxMTEzZjk3MTAyNGQ4IiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiI0MGRlMjhjZGMzNzBmYmQyYTc1YTY4MDlkMzk1ZjY2OGViMGM5NzRmZGEwNWQ0ZTdmYzg1NmFkZTEyYjU2NDAyIiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiIyMTVkNGM2OTdhZTAyYTFjMGFkNmMxMzJjMDNmZDUyNTQwODljMWExMTA1Mzc0MDc0M2Y0YWUwNWQ5NTg0YzVkIiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MywiZm9sbG93aW5nQ29udGV4dEhhc2giOiJlNmI3ZmVjOThhYWRjMWY0ZjA2MDEyNzMwY2VmMWQwYTNlOWY2Y2NhZDkyMjkzMDk3NzgzZjg5Y2JjODEzOWM2In0"
         }
       ]
@@ -61,7 +61,7 @@
       "statement": "Deleting an episode moves the document into the episode trash with reason deleted instead of physically removing it, and creators may only delete episodes they can edit.",
       "evidence": [
         {
-          "resource": "repo://internal/handler/episodes.go#L1357-L1387",
+          "resource": "repo://internal/handler/episodes.go#L1400-L1430",
           "version": "repo-lines-v1:sha256:19c4397f17abe2d6f11268040a572e8c0c98c33561f2fff656a186bef7e98886:eyJzZWxlY3RlZExpbmVDb3VudCI6MzEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjJiZTdlODlkYjA5MjI3NTAxMzY1YjUyMGQwZWY4NDRiNDk0YzIxN2Q1NzU0ZWMwZjYzNDg3Njg5YTczZjMxMjAiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImZlYTg3NjY0NTlmZTFhN2E0YjY3NTc0ZTM1ZWFlYjkzZGRiZjk1YTRmNzc0MGRiZWVlMTkxZDVlN2JiMzUwNTkiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjA0NTkzMmMzY2Q4MmY2NGMzYzgyNzUxMTRhNzZkZmEzZGRhYTEyN2YxYzBjYzI3NDAzYzFhZGJjNDkzYjU1MjIifQ"
         }
       ]
@@ -71,16 +71,16 @@
       "statement": "Creating a single episode or increasing currentEpisodes writes one new_episode notification per follower per episode number and de-duplicates update emails per episode, number, and event for one hour.",
       "evidence": [
         {
-          "resource": "repo://internal/handler/episodes.go#L999-L1142",
-          "version": "repo-lines-v1:sha256:cfd9e00c4d08dd21f80ce354b2c6b136cf60744272f3b59ac31b92db53aa9b17:eyJzZWxlY3RlZExpbmVDb3VudCI6MTQ0LCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiIxMjY3MmZkNTA4YjRhYmVmOWQxZmRmOTkyZTA3MzA5MjUxZjQ0ZWNjMjMyZTZiZjRlMjdiMGVkYmY0Yjg0ZDAxIiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiI1NzViMjlhMWI5NmNjZjMxMGI0YzVkZjdjYTU2NzhhOWMyOWViN2E4YjA4ZDVjOWQ4ZTQ5OTFmMzZjMWFlNGY4IiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiJhMjIzODM0NjRjZDBlODJjZmQyNWFjNjI1MzUwMWQ2OGJlOGZjM2JkYzdhMmFmNGViZDA5YTA0YjFjYWFjMTFlIiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MywiZm9sbG93aW5nQ29udGV4dEhhc2giOiJiZDQwZjA3ZDJlNDlmMGZmZTFkNzYwNTUzYzc5YWVhYjBkZTdhMmY5ZWRiYjI1MDA2Yzc2OTNmZTM2OTE3ZjYwIn0"
+          "resource": "repo://internal/handler/episodes.go#L1029-L1185",
+          "version": "repo-lines-v1:sha256:53ecbf6246c5e6640ce05d62c7e99c4b8ed24b4d1fe49a8f279febc3a80494ce:eyJzZWxlY3RlZExpbmVDb3VudCI6MTU3LCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiIxMjY3MmZkNTA4YjRhYmVmOWQxZmRmOTkyZTA3MzA5MjUxZjQ0ZWNjMjMyZTZiZjRlMjdiMGVkYmY0Yjg0ZDAxIiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiI1NzViMjlhMWI5NmNjZjMxMGI0YzVkZjdjYTU2NzhhOWMyOWViN2E4YjA4ZDVjOWQ4ZTQ5OTFmMzZjMWFlNGY4IiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiIxZjM0MmJkZGVhZjJhN2Y3MWIwMDVlYzE3YzhhY2M5NTgzODJmZDJiNzEzMmIyZmU5NGEyOWQ4NTZlN2RjMzVlIiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MywiZm9sbG93aW5nQ29udGV4dEhhc2giOiJiZDQwZjA3ZDJlNDlmMGZmZTFkNzYwNTUzYzc5YWVhYjBkZTdhMmY5ZWRiYjI1MDA2Yzc2OTNmZTM2OTE3ZjYwIn0"
         },
         {
-          "resource": "repo://internal/handler/episodes.go#L1412-L1461",
-          "version": "repo-lines-v1:sha256:6c564f692d8a5345293e41b85f1bd7756e88068896d9bde8180af7a10d571877:eyJzZWxlY3RlZExpbmVDb3VudCI6NTAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImU2NGQ1NzkwYjBlYTllYjZmOTdjZGQ3ZTk0YTQ5MTAwYjI2ZGE2YjE0MzIxNTcyMjhlZDk5NzAwYzdhZGY5MzAiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImQ3ZTJmNWQxMjFkZjBkNDQyZDYxOTU5ZGVjNzk5YjQzMTg0OWZkY2RiNmJjOGM4ZWUwNzFhNGM3ZDg0YTdjNTkiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImI4OGQxZDE5YzFmZmUyZWUzNDBlZWI5ZGQ5MGRhNzgwZjYwYzIxZTgwZjQ1ZDQ5ZWRiODU5YmRlN2JjZTkxZDAiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjdhNzYwY2E5MzUyNjhhYTExZTZmYmI3ODY4YmU1Nzc2MWUxM2EwZTZiZDZjMmJiZjhhNDNlMTk1ZDBmOWYyMGUifQ"
+          "resource": "repo://internal/handler/episodes.go#L1505-L1550",
+          "version": "repo-lines-v1:sha256:d8adf7ed85923d42cd5dc8451da01d6a102a0a45c9af33a6774c29bb1ba0a8e7:eyJzZWxlY3RlZExpbmVDb3VudCI6NDYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijg4ZDczZGUyMGI4MzJjMTY1ZDM5ZDVkMzZlMjFiOTlhNzU2OTc3NTZlY2UwMmI5NTljODhmMzhkNzJiYjA5MzYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImMzZTExNGU2MGUxZWY1MjZkMWUzNTc1YmQzMzEzZThjMTcwZGZjMzZmZmViMGI0YWUyMTNmYjkyYWRhNTA4MTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijc3NTE0YjNlNjk2MTdiYzBhOGI1NWIwNjg2ZTYzZDE0MDAzMjAzYWNkYmE1NTBjMjU2OWJlMGMzMjkxN2YxNWMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjMzMTQ4OTExNDAzYzE1OGMwY2U1YjliMDRkOTllNjBlNGUwMTdhYzAyOTJhZjQ0NjZlMmI0ZTUyYzBhNDczNTkifQ"
         },
         {
-          "resource": "repo://internal/handler/episodes.go#L1516-L1538",
-          "version": "repo-lines-v1:sha256:fed1e2325dc6918d9541640a3d79a29b0a4493c493f4aba6e29db3aaa31d0672:eyJzZWxlY3RlZExpbmVDb3VudCI6MjMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjIwNWJlODZmZTFjODBmMDRmYmYxOGI0YmY2MDM0OGFlZDRkYzM1YjcwNjA1MzY5ZDBiMTRjOTlkMGI0NDc2OWUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijg1ZWM2MWU5YjJhNTAyOWZlOTk2YmYyNjVhMWJjNzM2OTA1NDA2NWI4OWYxYzJmYzcxMWIyMmRiMjUzYzJjYmMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjhkYjFiOTE1OTYzYmEzYWE1YWZmYjhlOGMyNmJlOTgwYzNlYjk1N2QzNDk4MmNjMGY1NWFmMGFlODkxZDQ4OWYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjIxMGY4NmExNWRmOWYxODA2ODUzOGQ0NjYxOWNkZjIwZWI4NjBkZDk2NzZmMmE2YTg5NjFkNjcxODRlMGRiYjIifQ"
+          "resource": "repo://internal/handler/episodes.go#L1559-L1580",
+          "version": "repo-lines-v1:sha256:9fbb0e4da5fd51c91ff3a3022155898a9ac9b95620b1dd7e7f553f7cc7980284:eyJzZWxlY3RlZExpbmVDb3VudCI6MjIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjIwNWJlODZmZTFjODBmMDRmYmYxOGI0YmY2MDM0OGFlZDRkYzM1YjcwNjA1MzY5ZDBiMTRjOTlkMGI0NDc2OWUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImQzODJhYWMzMGNjNDQ0N2ZhM2U1ODBlNjA1MTVlMDFkYmRhZjg5N2VkNDdmMDFiMWNiMGY3YTM1ODMwMTIxZTgiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjhkYjFiOTE1OTYzYmEzYWE1YWZmYjhlOGMyNmJlOTgwYzNlYjk1N2QzNDk4MmNjMGY1NWFmMGFlODkxZDQ4OWYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImIwYjJlYjQzM2U5OTMyYzhjZWNhZDE5YjgzZDdiMzdmODJjMjIxZTgzMTY2YjUzYThjMGJhNmQ5NWEyOTk2MjIifQ"
         }
       ]
     },
@@ -159,11 +159,11 @@
       "statement": "Creators can only update or delete single episodes whose parent episode they are allowed to edit, returning 403 otherwise.",
       "evidence": [
         {
-          "resource": "repo://internal/handler/episodes.go#L685-L859",
-          "version": "repo-lines-v1:sha256:d3885a76f87b35a9d1c530403351a5764b444781b544d7a8efbeef7b8e0d903b:eyJzZWxlY3RlZExpbmVDb3VudCI6MTc1LCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiI1YjViYzgyODExMmRlNjExNTYzOTE3YzJhMDU0MmU3MTEzNTFmMzcwZDAzYWZjZTc3NjFiZWEwM2RhNjg4ODg5IiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiI3NTQzNDFjMjRiNzE4ZDZmNGE2MjE2MDRjYzhkNTRkOWY4N2MzZjU1Mzk3Y2E5NTlmZTUwNmI4MmRmYmQxMTQ3IiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiI2ZDM4NzViMzRkMzM3YmE0MmQzMGY0NmUwZWI1YjZhMWVlMTQ0OTE3NGQxZDAzNDQ2NjA3YTQwNzkwNzVmNjY5IiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MywiZm9sbG93aW5nQ29udGV4dEhhc2giOiJhZWNmNTNjMDczZWUyMDhjMTAxYmZmMDEzZWY1Y2ZkMWY0NDc2ZjlhODZlOGQ1YTcwZGIyMThkY2M1NDExOTI4In0"
+          "resource": "repo://internal/handler/episodes.go#L686-L866",
+          "version": "repo-lines-v1:sha256:90ffb55c0bef2a59cb35557005100145c1c732ebbc0b94e53a6e752d1b0d9b97:eyJzZWxlY3RlZExpbmVDb3VudCI6MTgxLCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiI1YjViYzgyODExMmRlNjExNTYzOTE3YzJhMDU0MmU3MTEzNTFmMzcwZDAzYWZjZTc3NjFiZWEwM2RhNjg4ODg5IiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiI3NTQzNDFjMjRiNzE4ZDZmNGE2MjE2MDRjYzhkNTRkOWY4N2MzZjU1Mzk3Y2E5NTlmZTUwNmI4MmRmYmQxMTQ3IiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiJjMTBhNGJlMTAxY2RlM2VlODlhZmJjYWRkMzdjZmZkZDgyY2ZmYzdmNWE1NTJiNGMxMmFjYzUxOTVmMmYwOTE5IiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MywiZm9sbG93aW5nQ29udGV4dEhhc2giOiJhZWNmNTNjMDczZWUyMDhjMTAxYmZmMDEzZWY1Y2ZkMWY0NDc2ZjlhODZlOGQ1YTcwZGIyMThkY2M1NDExOTI4In0"
         },
         {
-          "resource": "repo://internal/handler/episodes.go#L860-L910",
+          "resource": "repo://internal/handler/episodes.go#L867-L917",
           "version": "repo-lines-v1:sha256:bc341387309a53baf98446a5c5fea1d176ff0cc175b4debc9d7fc2a58f0f34b9:eyJzZWxlY3RlZExpbmVDb3VudCI6NTEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImM2MWZjYjZjOTZjODYzODRiMGY5MmEyZjdjNDc0YTQ3YzUzYjI3NjExZWM3Y2Q2NGVlZDUwMDA1MmVjYTNlYmYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImE0ZGQ1ODlmMjA2Yzk2MTRjMzE4NjJkZWFiMTA2YWEwOWZhNTU5OWRhN2I5OGVmZDBhZTMxZTM2N2JiMWE0MzgiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImYxYjYxOGQxMzU0NjY0ZGU4ZjQwOWU1N2E4NTllNDcyMjk0ZmVlNTA3ZjAyMThhYTBlZTEzZDA1OTA4ZjNhZWMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjFhZDk0YzRkZWEzM2MwZDFjMjhiOGVjMGM5MzJjODRhZWJmNjkxZWNmMGRhYTNlZmE4MTU1ZTUxZDM5ZDA2ZWEifQ"
         }
       ]
@@ -183,11 +183,11 @@
       "statement": "Episode creation and update reject coverImage values that are not /uploads/ paths or http(s) URLs, sanitize platformLinks, and require qqGroupLink to be http(s).",
       "evidence": [
         {
-          "resource": "repo://internal/handler/episodes.go#L1143-L1296",
+          "resource": "repo://internal/handler/episodes.go#L1186-L1339",
           "version": "repo-lines-v1:sha256:7ea0fb6e9f8110e9731ca4e6d08a18b94492fbe540f83f3c59d99f7dd3ba846e:eyJzZWxlY3RlZExpbmVDb3VudCI6MTU0LCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiJmNmUyYTdlMDYwZTc3NmUzOWQ0ZTcyMTZhYTk2MThhMjIyZjM4YWFmZTUwNGM5NTNhMmUxMTEzZjk3MTAyNGQ4IiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiI0MGRlMjhjZGMzNzBmYmQyYTc1YTY4MDlkMzk1ZjY2OGViMGM5NzRmZGEwNWQ0ZTdmYzg1NmFkZTEyYjU2NDAyIiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiIyMTVkNGM2OTdhZTAyYTFjMGFkNmMxMzJjMDNmZDUyNTQwODljMWExMTA1Mzc0MDc0M2Y0YWUwNWQ5NTg0YzVkIiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MywiZm9sbG93aW5nQ29udGV4dEhhc2giOiJlNmI3ZmVjOThhYWRjMWY0ZjA2MDEyNzMwY2VmMWQwYTNlOWY2Y2NhZDkyMjkzMDk3NzgzZjg5Y2JjODEzOWM2In0"
         },
         {
-          "resource": "repo://internal/handler/episodes.go#L911-L989",
+          "resource": "repo://internal/handler/episodes.go#L918-L996",
           "version": "repo-lines-v1:sha256:b2bdd78f553c1b1d691190734f0606d239210a6932676bcd3f220cf3e7e70374:eyJzZWxlY3RlZExpbmVDb3VudCI6NzksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjdlZGU0NTE2ZTM2ZDhjMTJiNDZkM2NlODc4YWYwNTA1YWFhZjdkZDI1MGViNzM1MjllNTk3NTdlNTA3YzBjNmQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjRhNWVmZWZkNDQ1YmJkMGY2M2M2ZmI0ZjVhMTE3NDFjYjUyZjZlNWI3NTIzMTkxYWQ1NTkyOTM1MzBjMmZlMDEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6Ijk1YTcxYzYzNjBiODMxZjMwZjhjNTFmNDhhZWVkZGQwZmM3OGRlZTYzMTE3Yjk2NTJiYWU0MTFjYjFhMjhhNDEifQ"
         }
       ]
@@ -197,11 +197,11 @@
       "statement": "创建与更新单集都接受 episodeLabel（去除首尾空白）并持久化为显示用序号；episodeNumber 仍是排序、currentEpisodes 计数与已看/新更新判断依据。",
       "evidence": [
         {
-          "resource": "repo://internal/handler/episodes.go#L1040-L1046",
+          "resource": "repo://internal/handler/episodes.go#L1083-L1089",
           "version": "repo-lines-v1:sha256:4076f5be3407f1ca81966cef7a17d6dc92bebec2750dc1db5b7baad3639fdcd0:eyJzZWxlY3RlZExpbmVDb3VudCI6NywiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiYTFiZThlZDYyMDRlNGM5M2ZiNGFlMTFkMDc0N2M4NGYyZGIwZmI5ODZiNDU0MGNiYTMxZGE1ZmVjYWI5Y2RjMyIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiYzMyYTliMDFiYWE1YjI1M2EwMDI2ZTQ3OWZjZTRmMDc4NGFkOWNiMjc5YmY5NDgzNzU0NzcyNjBmNWMxMzE1MiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNmU3NTdlZTgzZDdmZGM2NGI2N2Q1M2RhZTAwNTUyMjlhMDJmOTkyYTMzNTRjNDA3OGExZTA3YmRmN2I0NDcxNCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiMDUzNjY0Y2QxMWE0YzNjZjcyYWFhNmFiOGNkNmQwMDk2MGZjYjAwNjNhYzYyNTNhMjA5NTk4MTM2NWY5OWRhNiJ9"
         },
         {
-          "resource": "repo://internal/handler/episodes.go#L697-L701",
+          "resource": "repo://internal/handler/episodes.go#L698-L702",
           "version": "repo-lines-v1:sha256:f8f46b70e9ccc51c091682e2e8355a98acb6600e14b0fc1c6b38fd785bca6f0a:eyJzZWxlY3RlZExpbmVDb3VudCI6NSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiODNhNzE2NTU2ZTFlMzMzOTg0Y2QxODRiZDQ4MDZjMGVkNTdlYjNhYTViYjRjZTFhNDdlZDc4ODcwZTIzMjlhNyIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNjdjZGE4MmRhNjA2MjM4ZTA1ZTYyMzk5NTY5YzVlZTAzOTkzNDE5NjQ4YWU1ZDQzYTJiZjhjZDYzNDdmODI2MyIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiMzc5NmU5YzRiYmM3ZjNmYmI2OWMxYjdlMjMxZGUyZDRkMmJmYjk0ODU5YjU5OGUzNTI0ODdkZDA5Y2ZlNmU5MyIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiOTU2ZDAzNjVlMDNmMjhkZjY0ZWEzNzhhNzM2ZDExOGRjZjljY2M5YWE5ZDNlNGZmMzNhOGU4NTNmMzE1ODAxYSJ9"
         },
         {
@@ -219,10 +219,38 @@
           "version": "repo-lines-v1:sha256:1467bdbd1120170bf031610d81188e371d3becac2306aef3efaef662baf753a4:eyJzZWxlY3RlZExpbmVDb3VudCI6NTIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjJhMjRkZjZmYTQyNzFiMjVkMWVmN2ZiNDc4OTBiZDk1ODMzOGYwY2FlMmU4ZmRiODgzNTQ5MzhiYjBlOWYxOTMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjVlNmMyZTI5ZjgzY2FlMTQ0NzYwY2Y5MGQ2OTk5NDFiNjYxZGUzMmMxZDcxZDM5MWMzZTgzNzM2NGM2MjczYWIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjE2NWFiOGJiY2YxOGFkMmU3ZWYyZDk1NGI4NGMwNzk0ODMyYjVlYjBlZDQwOGIxNzE3NzFhMjk1Nzc2YWU5YmIifQ"
         }
       ]
+    },
+    {
+      "id": "claim_eb25929165664e61a9e10598456ebd05",
+      "statement": "POST /episodes/:id/episodes（CreateSingle）对必填字段做前置校验：title 为空（或非字符串）或 episodeNumber 字段缺失时聚合为 400 EPS0038（mongoose 风格消息；2026-11 之前该路径走 500 catch-all，ADR-021），episodeNumber 仍只校验字段存在性。",
+      "evidence": [
+        {
+          "resource": "repo://internal/handler/episodes.go#L1053-L1066",
+          "version": "repo-lines-v1:sha256:90373ea6b6bbf729bf8000405b350c9d24e2c15b6a440704adb876538535b337:eyJzZWxlY3RlZExpbmVDb3VudCI6MTQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjMyYWViZTk3NmVkNmE1OTg0NDhlYmEwMDQ2N2U1YmNhZTFhNGRiZWYxMTVlOGUyMGM2ZjEyNDQ1NzNmNzBkMmIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY3Y2RhODJkYTYwNjIzOGUwNWU2MjM5OTU2OWM1ZWUwMzk5MzQxOTY0OGFlNWQ0M2EyYmY4Y2Q2MzQ3ZjgyNjMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImE2NjJjMDU4NmI0M2Y0NTc3OTJiZDdjMmZiYTJiMWQ2OGUzYTIyZWQ5MmI4MzJhZDNlNjg3ZWM4NTA3ZGYyYzAiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImE3YzE1OTcwZGYzYzA5Zjk5Nzg3NjA4ZWI3ZmEwYWEyMzE3ZTdiMTIwNzQxZDBkZjUwYWM3MzVhNjRmYjlmYjAifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_5450d651ce49415587da2ad47f4670d4",
+      "statement": "创作者单集播放链接门禁：单集集合没有审核字段（无 pendingChanges 等价物），CreateSingle 与 UpdateSingle 对 role=creator 且请求体携带非空 platformLinks（map 中任一非空字符串值）返回 403 EPS0039；空对象/缺省视为未提交，不影响清空语义；编号/标题/排期等常规字段与管理员操作不受限（CWE-863，2026-11）。",
+      "evidence": [
+        {
+          "resource": "repo://internal/handler/episodes.go#L1067-L1075",
+          "version": "repo-lines-v1:sha256:f36195ddf28fc1135d54b25bf93dc6aa8330f96654d8cb5f2d749733265551f2:eyJzZWxlY3RlZExpbmVDb3VudCI6OSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiNTM2MzNkY2MzMTc4ZThlOTk0YTdmZDNmYmQ2NmMzNWNhZGVlZTRmMTEzM2UyMGJjMzBiOTNkNTRlZWIxYWE3NyIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNjdjZGE4MmRhNjA2MjM4ZTA1ZTYyMzk5NTY5YzVlZTAzOTkzNDE5NjQ4YWU1ZDQzYTJiZjhjZDYzNDdmODI2MyIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNzZjYzczNjkzYjI1ZGQ3M2ZjOWI4ZmRkOWMzYTUyZDcwN2NmZGQ5MjM0YTVjYjE1OTcyNDc2NTA3ZGI5Y2VjMyIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiMTBkNzIxNmQ0NWYzMjI5OGNlZDJkM2E3YWI0MGY4MzRkYWU2NjA4Y2VkNTQ3ZDI2MDM5MTY0MjE0ZWNiNzA3MyJ9"
+        },
+        {
+          "resource": "repo://internal/handler/episodes.go#L760-L765",
+          "version": "repo-lines-v1:sha256:2d93d52cead87a10d6aca9b90a0bc3cff5fb7c9259fc60559b9f70ce9d03a485:eyJzZWxlY3RlZExpbmVDb3VudCI6NiwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiYjM3MTY0ZTFkNzM5YmRkMDljOGZhNWM0NTkxNGQ3MjMxZDEwYjVhNDE5MTJmMzExNWU0MWRkZTdiNjEyNjAxZCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNjRlZmM0OTQxOGQyNmRjZjEyOWIyMmE2YWEyMTEwOGNlZWMzNzY3N2EzMmQwOGU5ZDVmZWUzNWRkYTY2YmI5ZCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiMDUxZmVjNzM1ODI4MWNmYThiMDczZmY5NTk3NGZjNTdiYzUxMGUxODg1ZTgwZTM4N2UwMmRkODY5NWY5ZDFkZiIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZjRmZDRmZTkyNzE0YzdjMjlkM2RiZjIxOWRhNGQzOWMzNjEwYTAxYWQ1MzNjODQwMjZhNjFhNjE1ZmExMjQzYSJ9"
+        },
+        {
+          "resource": "repo://internal/handler/episodes.go#L998-L1018",
+          "version": "repo-lines-v1:sha256:f11ab8456de25d1531949e4a4486139d1bc8c6147a890acaa01bc5d657736f0f:eyJzZWxlY3RlZExpbmVDb3VudCI6MjEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImMzMzIyMzE5N2M2MjY0ZTVlNWVhYTI4MWVjYjU0Y2Q3OWUzOGQ1OWRiYjIyNmJkNWQyZmQ4MGI4NTA4Zjc3ZmIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjkzZDZhMDcwNWFjZWEwNzY4M2UzYThlYWFmMjljYTZjMjA1ZmZlODdhYzU2YTNjOTk1OTM4YWRmZGQxY2FkMmEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6Ijk1YTcxYzYzNjBiODMxZjMwZjhjNTFmNDhhZWVkZGQwZmM3OGRlZTYzMTE3Yjk2NTJiYWU0MTFjYjFhMjhhNDEifQ"
+        }
+      ]
     }
   ],
   "verification": {
     "by": "openwiki/0.7.2",
-    "at": "2026-11-16T17:33:30.305Z"
+    "at": "2026-11-17T17:20:26.784Z"
   }
 }

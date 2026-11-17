@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "pageVersion": "sha256:493261ff090df9f54fef78f780e2a0379285ad4924fdb0258150c5940a7193c4",
+  "pageVersion": "sha256:a1c15d8bc9d1a7211918307e448d815971d023867c6143584a2569aaab92c6bc",
   "claims": [
     {
       "id": "claim_a2655c2278574cc7b9689b7d01c1b000",
@@ -31,26 +31,30 @@
       "statement": "abortAppError 是统一渲染出口：生产 5xx 掩码 message，messageKey 与 Extra 标志字段并入响应体但不可覆盖五个保留字段，状态≥400 时补 error/ref/status；AppError.Code 缺省时按状态兜底（400→SYS0002、404→SYS0003、其余→SYS0001）。",
       "evidence": [
         {
-          "resource": "repo://internal/errors/apperror.go#L229-L246",
-          "version": "repo-lines-v1:sha256:00fe27c403252353e22cf9bff1c2e3e4b3e65b8ab6065459c710acff4b833e97:eyJzZWxlY3RlZExpbmVDb3VudCI6MTgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjZlOTYyNjU1MDAwMjE2MzJmNGZmYjFhODUyODBhYjU3MTJmNGM1MTVmNmVlNzhjYTgxZmYyNTlhMzc1ZmI3YTkiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjBhMmU3MzE2OTU3MzgxNjRiNTRmNTFjNjViYTQ3NWNiZGM5NjhkNjUyOTg4MTZlMjY1YzE3M2MxYTU2OTRlMjIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImNiMTJjYzM4MzUzY2M0MzhiZWQ1MmY2Y2ExODJiNmVlY2I3ZDRkNzU1OTFhOWRkOTA2ZDU1NWExOTM0MDdkNGQifQ"
+          "resource": "repo://internal/errors/apperror.go#L231-L251",
+          "version": "repo-lines-v1:sha256:f3aed73b2f7a020678abfada4c10e6770e7a48ed5064ddba7d96571777e042c6:eyJzZWxlY3RlZExpbmVDb3VudCI6MjEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjZlOTYyNjU1MDAwMjE2MzJmNGZmYjFhODUyODBhYjU3MTJmNGM1MTVmNmVlNzhjYTgxZmYyNTlhMzc1ZmI3YTkiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjUwNGI1NTQ5NTFmYmRmMTE3MjNjYTQzMDE3MmFkMTI3N2U1NGVjNDgzYmNiYWY2MDQ4MmQzNzliNmVjZjFhNWQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjBhMmU3MzE2OTU3MzgxNjRiNTRmNTFjNjViYTQ3NWNiZGM5NjhkNjUyOTg4MTZlMjY1YzE3M2MxYTU2OTRlMjIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImE2MDQ3NDBhZDU0OGVhMjc2ODg0NDUyZTJiMzNhYzE4OTZiYjQwNTVmZmNiZTc2MjU1NzAzNDY2Y2I2MmJhZWUifQ"
         },
         {
-          "resource": "repo://internal/errors/apperror.go#L286-L326",
-          "version": "repo-lines-v1:sha256:fa4936d100d1d7a4110bf0dbf590da9a3dc050a8e09f4eeacf68636acd889eff:eyJzZWxlY3RlZExpbmVDb3VudCI6NDEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ1ZDIxMTFlYTM5ZmM4NTNhZjNkNjgwMTMxM2NiYmQ2ZDBjMWRlMTk2NGEwNzk5ZTk0N2NiMTk3NzY2NmU4Y2IiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjAyZGQxZWI3OWVlNTcxYTI1NzMxMTg4MjQ5M2IyY2IxYWNiZmY5ZjZiOWY3YzVjMTFhNzViZmFhZTQ4Njg1YzgiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImQ2OTQ0OWE5YjlkNzg3ZDg4OGQ2NzlmNDk2N2M2YjFkZmUxOTUyMGJiOWNiOGY1YWNiNzM3ZGQ2NTRmNGUyZjQifQ"
+          "resource": "repo://internal/errors/apperror.go#L299-L340",
+          "version": "repo-lines-v1:sha256:04fbc1460d4839903d5d03f5078d848a068793098af429736de50a6bc385cd6c:eyJzZWxlY3RlZExpbmVDb3VudCI6NDIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ1ZDIxMTFlYTM5ZmM4NTNhZjNkNjgwMTMxM2NiYmQ2ZDBjMWRlMTk2NGEwNzk5ZTk0N2NiMTk3NzY2NmU4Y2IiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjAyZGQxZWI3OWVlNTcxYTI1NzMxMTg4MjQ5M2IyY2IxYWNiZmY5ZjZiOWY3YzVjMTFhNzViZmFhZTQ4Njg1YzgiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImFmZWUzZTcxZDM2OTBjYTNjYzNkYWUxMTg3ZTY2YWJhMmUxNmZhMjMzY2YxMjkyYjk3OTFlNGFiODEzYTZjZTAifQ"
         }
       ]
     },
     {
       "id": "claim_695aa60aae3e47ffbf1fb9a54833d9c2",
-      "statement": "带错误码构造器按调用层分流：service 层用 NewC/NewKeyC/NewExtraC/WrapC，handler 直写用 Abort500C/AbortErrC/AbortCoded/AbortKeyed，中间件固定契约响应用 codedBody；带码构造器经 runtime.Caller 自动抓取构造点 file:line 存入 AppError.site（不进响应体）。",
+      "statement": "带错误码构造器按调用层分流：service 层用 NewC/NewKeyC/NewExtraC/WrapC，handler 直写用 Abort500C/Abort500SiteC/AbortErrC/AbortCoded/AbortKeyed，中间件固定契约响应用 codedBody；带码构造器经导出的 CallerSite（runtime.Caller 包装，skip=2 指向真实调用方）自动抓取构造点 file:line 存入 AppError.site（不进响应体）。",
       "evidence": [
         {
-          "resource": "repo://internal/errors/apperror.go#L163-L182",
-          "version": "repo-lines-v1:sha256:4ee215582826e31a879208f91fe396c0ac244f71e988cfaacb3dcd7498cd1551:eyJzZWxlY3RlZExpbmVDb3VudCI6MjAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjNkMTE5ZTI4Yzg1OTg2NTc0YjdmNDc0NjlhNjc3ZWE2YTQ4ZGUwMzVjNWVhYTVmNTVkYjExNjQyMWIyMDI1NmUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImFhN2IyZjE3NjFmYTEyYTgzNTI0ODUyMDM3OTE3YWU1MzY3NzE4OTNiNTczZTYzZDMxYjE1YTFhNTgxNjEwODYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImE3ZTgwOGM3MmRkZjBhNTVjZWRjZjVlNzViZTQ3YjBhOWE4MDIyYTk5NjcxMzIwZjU0MzM4MzgyNTEwNTUxZmIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjcyMzRkN2I0NmY5MTg4MDkyNjM2ZTAwNmM0ZmQ0NzI0NjA2NTU1OGUzNmU4ZGQxMjc0M2VmYTM0MGZmMjFjOGEifQ"
+          "resource": "repo://internal/errors/apperror.go#L125-L139",
+          "version": "repo-lines-v1:sha256:2f197c71f55ef78bcc99dd8c2d6b987caacdd23e928d8f4342a376460e084073:eyJzZWxlY3RlZExpbmVDb3VudCI6MTUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjEwMzIxOTdiMzU1NmUwOWEzYTYxZWY0ZTFmZDJhYWFmNmFiZWM1ZjcxMTcyM2Q2Yjk2ZmFkNzUwODZiOTJkMmUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjJhMjU2YzNkN2QxM2FhNzY3YjI0OGQ3NjAyMjcxOTlhZWVkZjI0OGExZGUxMDA0ODA1YjJiYThkYjViMGFkOGEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjkwNmZlZDVlY2VhZjBhZTRkNTc2NzBkOGUyOTA4NWNiM2ZmMmRjMWEyOWU0ZmNkZWI4MjkyN2IyNWI0ODY4NDAifQ"
         },
         {
-          "resource": "repo://internal/errors/apperror.go#L247-L274",
-          "version": "repo-lines-v1:sha256:9719cd7402352c653fcfcc45c4baa5b3877f4087133dd64d9a00406c1f4c28f7:eyJzZWxlY3RlZExpbmVDb3VudCI6MjgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjNjMzVlZmJkYTA0NWUxMTk0MjE2MTkxMjk5MDE0NWFjYWJjNjUxYWFkN2VkNjFmMzUxMGQwZTA4ODE1YTRmOTIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjZlYjcyMjZkZTU0MGNlYTEwZTkzZjNjYjdmN2E2NzA1OGYxYWYzMmY0ODkxNTNlM2QyNzUxYTcwNTMwOWRmYjMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6Ijk1ODMxYWE5MWU3NGE3MGVhYjkzYWEzMzk2MmM5ZjA0OTAzZWU3MTc1N2VlZTRmZTI4MDIyNDhjM2JmZDE3MTIifQ"
+          "resource": "repo://internal/errors/apperror.go#L163-L190",
+          "version": "repo-lines-v1:sha256:2898c611494b0444f850343ae26852336095be5fbf06a6f834af29b60a09a18b:eyJzZWxlY3RlZExpbmVDb3VudCI6MjgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijg5YmRjM2ZhNTZhZWE3ZjZkNGExODIwYTIwMTY5MjRkOTY1ODQxYzZiMWQyMjAxYTdlMzU3YjE5MWNmMDJhMDgiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjcyNjJkYTU1ZDdmMTFmMGNjZDQ2ZTVmZTM5ZWE2MDE0ZmI5NGU5OTc5YWE3YTRiMGI4MTY1M2NmMzQ2ZDA3MWUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImE0ZmQ1ZTNjYTg5Zjk3Y2NlZWY3MGZkOGNiNmM2NjdiMGFhM2MxNWNlZjhhYmZmNjBkYjU2NDM4MTE4ZDcwODMifQ"
+        },
+        {
+          "resource": "repo://internal/errors/apperror.go#L249-L287",
+          "version": "repo-lines-v1:sha256:dc235a300e3957d55a79770e1623a7046029a8969ae76b7919bdba32c6261a86:eyJzZWxlY3RlZExpbmVDb3VudCI6MzksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjNjMzVlZmJkYTA0NWUxMTk0MjE2MTkxMjk5MDE0NWFjYWJjNjUxYWFkN2VkNjFmMzUxMGQwZTA4ODE1YTRmOTIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjZlYjcyMjZkZTU0MGNlYTEwZTkzZjNjYjdmN2E2NzA1OGYxYWYzMmY0ODkxNTNlM2QyNzUxYTcwNTMwOWRmYjMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6Ijk1ODMxYWE5MWU3NGE3MGVhYjkzYWEzMzk2MmM5ZjA0OTAzZWU3MTc1N2VlZTRmZTI4MDIyNDhjM2JmZDE3MTIifQ"
         }
       ]
     },
@@ -59,7 +63,7 @@
       "statement": "panic 恢复、全局兜底与未命中路由都走 JSON 信封：gin.CustomRecovery 渲染 SYS0500（stack 只进日志，开发模式回显），最后注册的 errors.Handler 把 c.Errors 漏网错误渲染为 SYS0501，NoRoute 渲染 404 SYS0003「接口不存在」。",
       "evidence": [
         {
-          "resource": "repo://internal/errors/apperror.go#L348-L372",
+          "resource": "repo://internal/errors/apperror.go#L361-L385",
           "version": "repo-lines-v1:sha256:d972a62718759a6aa7b41a64a925e503680c843cb5c77536b9b3e55621d48c04:eyJzZWxlY3RlZExpbmVDb3VudCI6MjUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImMyYjBiZTM1MTA5Y2E2MDhmMmRiNzYwNzQ1NjIwY2Q5NTliMWJiZTQ2YmE4MTVkNmI3ZmZjZDdjYmU5NGNkYWEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjYyNDFhMzkxZTg5YWMzMjk1MWM5OTc0YzA5MmVhZjVkNzRhNWJlYjMyNGRjODkwMDlhMzdjYjVmMDFmZmUzMTciLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjMyZWY2NWE5NTIzOGZjY2Y4MDc0MzU4ZDBlZTkyY2ZjYjYyZDI2NDRmMWYwOWQyM2Y2MmRjODc4MjcxNmYwOTUifQ"
         },
         {
@@ -77,7 +81,7 @@
       "statement": "UploadError 的历史 Code 映射为标准错误码：LIMIT_FILE_SIZE→UPL0001、LIMIT_FILE_TYPE→UPL0002、BAD_MAGIC→UPL0003、其它→UPL0004，message 前缀「文件上传错误: 」保留。",
       "evidence": [
         {
-          "resource": "repo://internal/errors/apperror.go#L218-L226",
+          "resource": "repo://internal/errors/apperror.go#L220-L228",
           "version": "repo-lines-v1:sha256:0a9a7f87d330c03f8f0f7dc6cee8189fe69058b4960d8ca2fe7af2490d6a6576:eyJzZWxlY3RlZExpbmVDb3VudCI6OSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiODE5ZTNmMGI5ZWFkYTI0OTYzZjJlNjc0Y2M4ZjAwMWZlYjQ3ZjI1N2NjYTk2NmQ1ZmY4ZTNhOTIwOGQzM2RkOCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMDFiYTQ3MTljODBiNmZlOTExYjA5MWE3YzA1MTI0YjY0ZWVlY2U5NjRlMDljMDU4ZWY4Zjk4MDVkYWNhNTQ2YiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZjI5NjQwNzljM2M1YzgxNTIwZWYzM2EyYjlkMmUxNWExYjg0ZDcyODBkYjg1OTBkY2Q2NTc0N2UzZTAxMmE0MCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZGIwY2YyNDUyN2FmOWE4OWMxZjc1ZjM1ZDkyMGRmMDlhMDcxZDZkYmUzYjQ3OTJhNjdiYTRlMzQ1MDk4MWQ4NCJ9"
         },
         {
@@ -91,7 +95,7 @@
       "statement": "5xx 渲染时额外打一行 stdout ERROR 日志（code/ref/path/site/cause，site 为 runtime.Caller 抓取的错误构造点），RequestLogger 每行也带 ref，使「grep 错误码定位调用点、grep ref 定位请求」的排障闭环成立。",
       "evidence": [
         {
-          "resource": "repo://internal/errors/apperror.go#L329-L346",
+          "resource": "repo://internal/errors/apperror.go#L342-L359",
           "version": "repo-lines-v1:sha256:61517732809ae40c06e50ec68c383b61f2927d500e54e82d473073294e3f1de9:eyJzZWxlY3RlZExpbmVDb3VudCI6MTgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImZhZjI3MmExMGUwNzRmMzU2NzQyNmYzMTdmMGYyZjdjMzhhYjQ5ZGE0M2EwOWUyZDE4NGJhODU3NTAyMTEyMGUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjFjMDgyOWZhODhkYzA0NzljODhkZTNlN2M2MjE5NWNlOWM0M2IxMDQ5NjQ2MmNiYzgyZmM3YTUzNWM3NTljNDgiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUwM2ZmOGZmNjUyYWFhNWJjYzM4YTUwOTJlZWM2NzA1MTMzMGE5NjRlMWMyY2FiMGQ2MDVkMGY3NTlhZTU3MDAifQ"
         },
         {
@@ -116,15 +120,15 @@
     },
     {
       "id": "claim_87da2a4783d04065a0a781887b88dc4a",
-      "statement": "docs/errors.json 是机器可读错误码注册表（753 条、41 前缀，含 code/kind/status/message/file/line），由 docs/gen_errors_json.py 扫描 internal/{handler,service,middleware,server,errors} 全部带码调用点生成，输出字节稳定可提交；WIP 修改按 HEAD 内容扫描。",
+      "statement": "docs/errors.json 是机器可读错误码注册表（756 条、41 前缀，含 code/kind/status/message/file/line），由 docs/gen_errors_json.py 扫描 internal/{handler,service,middleware,server,errors} 全部带码调用点生成（CTORS 含 Abort500SiteC，参数相对 Abort500C 整体后移一位），输出字节稳定可提交；WIP 修改按 HEAD 内容扫描。",
       "evidence": [
         {
           "resource": "repo://docs/errors.json#L1-L8",
           "version": "repo-lines-v1:sha256:ba0a027070e3f715cc5abce009bec760c19c0a1724de1342db4f480fe92c9232:eyJzZWxlY3RlZExpbmVDb3VudCI6OCwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiYTZmYjA4ZmRhMWFjYjk1N2I2MTE2YmQzNzgxMWExZmU0MWEwMTYxMWMwNjMxZWRiZjc4NmQ2ODg5YTI3YTU1YyIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNTY2MTQ5YTE5YjA2YjVhM2RlMDljY2Q0YzRlOGZiY2ExYmQ4Y2EzYjU5Y2M5NjA5NmVjYTIxMzYyMWQxOTliMSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjAsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZTNiMGM0NDI5OGZjMWMxNDlhZmJmNGM4OTk2ZmI5MjQyN2FlNDFlNDY0OWI5MzRjYTQ5NTk5MWI3ODUyYjg1NSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiMmQ2NTNjNzBkN2QxZTNkMmMyN2ZjYjc0YjI4ZGQ3MzUzY2FiYmM4MjEyZGQzYmVkNWViOTIzNTIyNDVmNWYwZCJ9"
         },
         {
-          "resource": "repo://docs/gen_errors_json.py#L1-L17",
-          "version": "repo-lines-v1:sha256:be662abf3abf24aa8fe2f820cf66050dfeef5d5d56c25e10f9ba1316149c0edb:eyJzZWxlY3RlZExpbmVDb3VudCI6MTcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImQ2ODJjYmRiNGM4YjA3NTE4YmY0ODZjNTg5OTBmYzM5MTc4M2FhMjBhOTE2YmZiMjdhZDIxMWViMWQ1YzM2NDIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ3YjNiNzhlODhjMjg1MTFiNzlkYTZlNjAxMGY5YzE1MDcyZTljYWY1NjcxZDU5YTMzMDcyNjVjYTUyNzRmOWYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjFjMjcyY2NkMDE3YjFlZjNiOTUwODQzZjExMjhkMGI4NTZmZjc5MWQ1NmFkYzgxMjMxM2U1ZmI0NWQwMWJkZjkifQ"
+          "resource": "repo://docs/gen_errors_json.py#L1-L19",
+          "version": "repo-lines-v1:sha256:0ad4b9a289d9738ae8e881c42cc022107d1afa3c48cfa5614ef5c19efda86de9:eyJzZWxlY3RlZExpbmVDb3VudCI6MTksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImQ2ODJjYmRiNGM4YjA3NTE4YmY0ODZjNTg5OTBmYzM5MTc4M2FhMjBhOTE2YmZiMjdhZDIxMWViMWQ1YzM2NDIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjMwMTlhZjRiNDJlN2JlNWQ5MjZmYWUyYjg3ZDNjMjczNzA1OTMyNDM3YWRiYTZkOWU0Y2ExOTY3NzFjNmJkOTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjNiYTVjYTgzMTM5MGViZDBlYjkzNWM0NzM3ZmE1OGE1Njk1YzI3YjMyMDRhZmMzOWUxN2U3NzllZGMxZjdmNTMifQ"
         }
       ]
     },
@@ -141,10 +145,24 @@
           "version": "repo-lines-v1:sha256:4d3a37b4ef6b70746867343f3c40326a8ff217186d78a105b50c70099583b6b3:eyJzZWxlY3RlZExpbmVDb3VudCI6MiwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiNmFjOWJjN2Y0OTg2NGNhMGUxMjEzOTlkOThlZWMwMDRjYTc4ZGFjNDdmNGM3YTQ2NDIzNzk5ZmY3OWI2NjM5MCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiM2Y0YmRlYmRkYTdmNjkxOWQ1ZWZmZTNjNTJiZDQzNTg4MWQ4ZmVjMzZmODRiOTljNWZlYWU5MGFhYzdlZWY4YyIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjAsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZTNiMGM0NDI5OGZjMWMxNDlhZmJmNGM4OTk2ZmI5MjQyN2FlNDFlNDY0OWI5MzRjYTQ5NTk5MWI3ODUyYjg1NSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjAsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZTNiMGM0NDI5OGZjMWMxNDlhZmJmNGM4OTk2ZmI5MjQyN2FlNDFlNDY0OWI5MzRjYTQ5NTk5MWI3ODUyYjg1NSJ9"
         }
       ]
+    },
+    {
+      "id": "claim_abc404def20e48cc9c1019e600fa7b05",
+      "statement": "ADR-021（2026-11）修正 5xx 日志 site 定位：Abort500C/AbortErrC/AbortCoded/AbortKeyed/AbortWithAppError 的 site 抓取从 skip=1（自指 errors 包行号）修正为 CallerSite(2)；共享错误助手 episodes.serverError（全模块共用的 EPS0037 500 兑底）以 CallerSite(2) 抓取真实调用点后经新构造器 Abort500SiteC 显式转递，使 5xx 日志 site 指向具体端点行。",
+      "evidence": [
+        {
+          "resource": "repo://internal/errors/apperror.go#L249-L267",
+          "version": "repo-lines-v1:sha256:8c33cd17866228da77612a4703a7fabdade3410a12d4a1c1cc2e65671524efce:eyJzZWxlY3RlZExpbmVDb3VudCI6MTksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjNjMzVlZmJkYTA0NWUxMTk0MjE2MTkxMjk5MDE0NWFjYWJjNjUxYWFkN2VkNjFmMzUxMGQwZTA4ODE1YTRmOTIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjZlYjcyMjZkZTU0MGNlYTEwZTkzZjNjYjdmN2E2NzA1OGYxYWYzMmY0ODkxNTNlM2QyNzUxYTcwNTMwOWRmYjMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUyZDFjN2JkYTU2M2QxMTgxMjc4YjdjNTM3Yjg5OGI5NGI5ZmUwOGE3MWUzMTg5ZjgxZjFkMjNlMDZhYTE5OTkifQ"
+        },
+        {
+          "resource": "repo://internal/handler/episodes.go#L1830-L1837",
+          "version": "repo-lines-v1:sha256:6ffc0c468841fbc8dae28260ee22be1ce5828577fc66f0b65af6a910d2fc20b7:eyJzZWxlY3RlZExpbmVDb3VudCI6OCwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiNDEyY2EzNDVjY2Y3NWJmOWMwODA2YmNlNjk1YmU4ZGU4MDhiNzk5ODQyNTFhN2E1NGQyMDJjZjYxMDFkZDQ1MSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNDEyY2EzNDVjY2Y3NWJmOWMwODA2YmNlNjk1YmU4ZGU4MDhiNzk5ODQyNTFhN2E1NGQyMDJjZjYxMDFkZDQ1MSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNzViMWRhOGZhYTYzNzdhNTE0YmZiZDU4YjA2YWQzY2U5MWNhNWQwNzM3MTFlNjhmNzQzYzJkMTg5NzdiOGI2NCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiNTc0ZDRmZTc5MjAwMWExYWU1NzQ1MTJiMTQ1MTcxMTIwMzIyNDI3ZTczOTM3NzI4ZjZiYzE0MzFiYzRmYjM3YSJ9"
+        }
+      ]
     }
   ],
   "verification": {
     "by": "openwiki/0.7.2",
-    "at": "2026-11-16T17:33:30.305Z"
+    "at": "2026-11-17T17:20:26.784Z"
   }
 }

@@ -6,6 +6,8 @@ tags: [testing, go-test, integration, mongodb, regression]
 sources:
   - id: openwiki-source-193053215eb2d471ac4f675e
     resource: repo://docs/contributing.md
+  - id: openwiki-source-05413cbb20b3f13e4a67bc5a
+    resource: repo://internal/errors/apperror_test.go
   - id: openwiki-source-605d1503b82e25824739c4d3
     resource: repo://internal/handler/episodes_test.go
   - id: openwiki-source-e6c7522152e60d391a17f718
@@ -18,8 +20,12 @@ sources:
     resource: repo://internal/middleware/csrf_test.go
   - id: openwiki-source-a5ee09c1401361b766b6b860
     resource: repo://internal/middleware/middleware_test.go
+  - id: openwiki-source-79b990e4802d50aa1790ca3a
+    resource: repo://internal/middleware/ratelimit_test.go
   - id: openwiki-source-fce8bcc8408620f767d87b7a
     resource: repo://internal/migrate/migrate_test.go
+  - id: openwiki-source-9c06fc5b6f6a9d028221d2f3
+    resource: repo://internal/repository/user_test.go
   - id: openwiki-source-68427c90d83d93d90b330034
     resource: repo://internal/server/auth_security_regression_test.go
   - id: openwiki-source-a8fb1ba11cf3dbe31498bcae
@@ -30,15 +36,15 @@ sources:
     resource: repo://internal/server/series_test.go
   - id: openwiki-source-012f2c78e3b1446dfc35803f
     resource: repo://Makefile
-generated: { by: "zcode", at: "2026-11-16T17:33:30.305Z" }
+generated: { by: "zcode", at: "2026-11-17T17:20:26.784Z" }
 verified:
   - by: openwiki/0.7.2
-    at: 2026-11-16T17:33:30.305Z
+    at: 2026-11-17T17:20:26.784Z
 ---
 
 # 测试策略
 
-仓库没有专门测试运行器或框架，只使用标准 `go test`。41 个 `_test.go` 文件中共有约 228 个测试函数。大多数行为要么通过小型 Gin 路由的聚焦单元测试验证，要么通过基于真实 MongoDB 装配真实应用的 HTTP 集成测试验证。
+仓库没有专门测试运行器或框架，只使用标准 `go test`。45 个 `_test.go` 文件中共有约 260 个测试函数。大多数行为要么通过小型 Gin 路由的聚焦单元测试验证，要么通过基于真实 MongoDB 装配真实应用的 HTTP 集成测试验证。
 
 ## 前置条件与命令
 
@@ -72,7 +78,7 @@ CI 只构建不测试：`.github/workflows/release.yml` 在每次推送时做 8 
 
 这些测试快速且确定；外部网络调用由注入函数替换（ipregion 另有 `NewDisabled()` 不外呼的用例）。
 
-`internal/repository/user_test.go` 是仓储级集成测试，由环境变量 `FDT_TEST_MONGO_URI` 门控——未设置时跳过（不像服务端集成测试那样失败）；覆盖 `createdAt` 零值兜底与显式值保留两条路径，并断言落库原始文档。
+`internal/repository/user_test.go` 是仓储级集成测试，由环境变量 `FDT_TEST_MONGO_URI` 门控——未设置时跳过（不像服务端集成测试那样失败）；覆盖 `createdAt` 零值兜底与显式值保留两条路径，并断言落库原始文档；`TestTryIncLoginAttemptsQuotaAndTOCTOU`（2026-11 ADR-022）覆盖配额前置占用的原子语义——配额内逐次放行、第 maxAttempts+1 次被拒、过期锁重启与并发下的预算恒定。
 
 ## 数据库测试
 
@@ -87,7 +93,7 @@ CI 只构建不测试：`.github/workflows/release.yml` 在每次推送时做 8 
 
 用户系统重构与安全加固（快照 3058134 之后）新增两个集成测试文件与一个迁移用例：
 
-- `internal/server/auth_security_regression_test.go`（ADR-019 回归闸门，2026-11 再扩充）：`TestDeletionRequestCancelPreservesCredentials`（注销申请/取消后 2FA 凭据与锁定字段不被覆写——定点写回归）、`TestNewDeviceLoginNoGate`（新设备登录不再被设备验证码拦截）、`TestEmailBoundLoginRateLimit`（凭证限流键绑定目标邮箱）、`TestDisable2FAWithoutStoredCredentials`（无凭据恢复通道）、`TestEmailOTPSecondFactor`（邮箱 OTP 第二因素发送与消费）、`TestEnable2FARequiresPasswordReauth`（`/2fa/enable` 缺 `currentPassword` 被拒）、`TestTwoFactorChallengeDoesNotResetLoginAttempts`（2FA 挑战阶段不清零失败计数，CWE-307）。
+- `internal/server/auth_security_regression_test.go`（ADR-019 回归闸门，2026-11 再扩充）：`TestDeletionRequestCancelPreservesCredentials`（注销申请/取消后 2FA 凭据与锁定字段不被覆写——定点写回归）、`TestNewDeviceLoginNoGate`（新设备登录不再被设备验证码拦截）、`TestEmailBoundLoginRateLimit`（凭证限流键绑定目标邮箱）、`TestDisable2FAWithoutStoredCredentials`（无凭据恢复通道）、`TestEmailOTPSecondFactor`（邮箱 OTP 第二因素发送与消费）、`TestEnable2FARequiresPasswordReauth`（`/2fa/enable` 缺 `currentPassword` 被拒）、`TestTwoFactorChallengeDoesNotResetLoginAttempts`（2FA 挑战阶段不清零失败计数，CWE-307；已随 ADR-022 前置占用语义同步调整断言）。
 - `internal/server/loginname_passkey_test.go`：`TestUsernameLoginAndUID`（UID 发号与折叠登录）、`TestLoginNameChangeFlow`（改名：密码再认证/冷却/保留期）、`TestForce2FASetupGate`（管理员未开 2FA 的 force2FASetup 门禁）、`TestUsernameCaseInsensitiveLogin`（大小写折叠登录）。
 - `internal/migrate/migrate_test.go` 补充 `TestMigrateLoginNameLowerBackfill`（折叠回填与大小写冲突改名）与 `TestMigrateEmailUniqueSparse`/`TestMigrateEmailUniqueSparseNoDropWhenSparse`（email 稀疏唯一迁移：drop 旧非 sparse 索引、清理空串/null、已 sparse 时幂等不 drop）。
 - 集成夹具 `testServerWithRepos` 现同时返回 `*repository.Repos`（供直接查库断言），并把改名冷却/保留期配置为生产默认值。
@@ -98,6 +104,13 @@ CI 只构建不测试：`.github/workflows/release.yml` 在每次推送时做 8 
 - `internal/middleware/ratelimit_test.go`：限流键 sha256 摘要（相同输入同桶、不同输入不同桶）、verify-email 固定 IP 同桶与 email 分桶回归。
 - `internal/middleware/refid_test.go` 与 `internal/middleware/bodyparse_test.go`：参考号中间件与请求体解析（含非对象 JSON → `SYS0002`）。
 - `internal/service/validate_password_test.go`：密码 72 字节边界（含多字节字符）表驱动用例；`internal/code/code_test.go`：`DeleteForUser` 只删未过期条目。
+
+ADR-021/022 安全修复（快照 0bfa8b2 之后，2026-11）新增的测试面：
+
+- `internal/handler/episodes_test.go`：`TestEpisodesCreateSingleRequiredFields`（title/episodeNumber 缺失 → 400 `EPS0038`，替代旧 500 catch-all）、`TestEpisodesCreatorSingleLinksGate`（创作者提交非空 `platformLinks` → 403 `EPS0039`，空对象/管理员不受限）。
+- `internal/middleware/ratelimit_test.go`：`TestRateLimitIdentifierKeyPreferredOverEmail`——identifier 与 email 同时携带时按 identifier 取键，与 email 键不共享桶。
+- `internal/repository/user_test.go`：`TestTryIncLoginAttemptsQuotaAndTOCTOU`（见上文仓储级测试）。
+- `internal/errors/apperror_test.go`：`TestCallerSiteSkip`/`TestCallerSiteSeesThroughWrapper`（site 抓取 skip 语义与穿透包装）与 `TestAbort500SiteC5xxLog`（`Abort500SiteC` 的 5xx 日志 site 为显式传入的真实调用点）。
 
 ## 夹具模式
 

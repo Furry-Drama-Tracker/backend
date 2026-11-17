@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "pageVersion": "sha256:a6feee8a076790eadedf88f36ca7d15b88bf5b589cfd5575666f95f8ed79d9ea",
+  "pageVersion": "sha256:a01157f5b067156e6924a7bee8fb2a7bfc8705f05c074fda587ac621656d79f7",
   "claims": [
     {
       "id": "claim_56a4f99a099548d1b930f956550caa7e",
@@ -100,15 +100,15 @@
     },
     {
       "id": "claim_6e5efc9dd7ff4c48bc5ea4392520f899",
-      "statement": "用户系统重构与安全加固新增两个端到端回归文件：auth_security_regression_test.go（注销定点写保留凭据、新设备不拦截、邮箱绑定限流键、2FA 无凭据恢复、邮箱 OTP 第二因素、enable 密码再认证、2FA 挑战不清计数）与 loginname_passkey_test.go（UID 发号与折叠登录、改名冷却/保留期流程、force2FASetup 门禁、大小写折叠登录）；migrate_test 补充 loginname_lower_backfill 与 email 稀疏迁移（含幂等不 drop）用例。",
+      "statement": "用户系统重构与安全加固新增两个端到端回归文件：auth_security_regression_test.go（注销定点写保留凭据、新设备不拦截、邮箱绑定限流键、2FA 无凭据恢复、邮箱 OTP 第二因素、enable 密码再认证、2FA 挑战不清计数——断言已随 ADR-022 前置占用语义调整）与 loginname_passkey_test.go（UID 发号与折叠登录、改名冷却/保留期流程、force2FASetup 门禁、大小写折叠登录）；migrate_test 补充 loginname_lower_backfill 与 email 稀疏迁移（含幂等不 drop）用例。",
       "evidence": [
         {
-          "resource": "repo://internal/migrate/migrate_test.go#L264-L308",
-          "version": "repo-lines-v1:sha256:9f7160019a7036a6ecf3510186fedcabd3ba254429e0cd7846527c39073a1d57:eyJzZWxlY3RlZExpbmVDb3VudCI6NDUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImQ0ZTFiNmMzYjM5YzdjYWU2MzRlZTk4NTY2YTMxOTQyMTY3NTNhNjNjZjQyMzliMTc4ZjRkNzhiNzM4MjI0YmUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImFhZTZkYjQ0MGNjY2E5OTRhYzEwODQwNDgyMmIzMDMwNjQyOTVhY2I2ZTUxZWEzYTM4YzA4MmJhODFkYTM5NDMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImYyOTY0MDc5YzNjNWM4MTUyMGVmMzNhMmI5ZDJlMTVhMWI4NGQ3MjgwZGI4NTkwZGNkNjU3NDdlM2UwMTJhNDAiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImYyOTY0MDc5YzNjNWM4MTUyMGVmMzNhMmI5ZDJlMTVhMWI4NGQ3MjgwZGI4NTkwZGNkNjU3NDdlM2UwMTJhNDAifQ"
+          "resource": "repo://internal/migrate/migrate_test.go#L266-L445",
+          "version": "repo-lines-v1:sha256:3da213f89aaf7d16522e41e50b16ae719161b787873417006112215d31100594:eyJzZWxlY3RlZExpbmVDb3VudCI6MTgwLCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiJkYmFiZGMwYTUzMTI2ZTA0NTljNWFlZGYyM2FiYTA5NzNiOThiZmYzZDg5Njk3Mzk5NTAxOTllY2RiM2RkZjFjIiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiI0MTJjYTM0NWNjZjc1YmY5YzA4MDZiY2U2OTViZThkZTgwOGI3OTk4NDI1MWE3YTU0ZDIwMmNmNjEwMWRkNDUxIiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiI3MDJlNDUxNzYyYzc0NmVlN2Y4YjA1NDgzYjNjZmM2YjAwYWZjN2ExOTM2NGVhZjJiODk3OTZlMmJjN2ZmNjdlIiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MCwiZm9sbG93aW5nQ29udGV4dEhhc2giOiJlM2IwYzQ0Mjk4ZmMxYzE0OWFmYmY0Yzg5OTZmYjkyNDI3YWU0MWU0NjQ5YjkzNGNhNDk1OTkxYjc4NTJiODU1In0"
         },
         {
-          "resource": "repo://internal/server/auth_security_regression_test.go#L109-L461",
-          "version": "repo-lines-v1:sha256:72d86772fa84054078664cf11a83903879b269078a8a87909286099179b3a164:eyJzZWxlY3RlZExpbmVDb3VudCI6MzUzLCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiIzMTA3OGY1YzE4NjZmNGE1N2FiNjU2ZDU1YzAyM2ViOGQ1ZmE1ZDFkMDRiZTNiNzAyYjgyMzgwOWM5YmE0YWY0IiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiI0MTJjYTM0NWNjZjc1YmY5YzA4MDZiY2U2OTViZThkZTgwOGI3OTk4NDI1MWE3YTU0ZDIwMmNmNjEwMWRkNDUxIiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiI2MDc1MGZhN2RmYTMxYjlhNGM3MDllMDc0ODM1YTg2MzMwZDljMzA2Mzc1M2RlZjNlYzIzMTUzMmVjYmY1N2NlIiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MCwiZm9sbG93aW5nQ29udGV4dEhhc2giOiJlM2IwYzQ0Mjk4ZmMxYzE0OWFmYmY0Yzg5OTZmYjkyNDI3YWU0MWU0NjQ5YjkzNGNhNDk1OTkxYjc4NTJiODU1In0"
+          "resource": "repo://internal/server/auth_security_regression_test.go#L109-L463",
+          "version": "repo-lines-v1:sha256:60cd14743c1d83204d449655c18d6d5a1dd12d93334516bed4082dfc834daa44:eyJzZWxlY3RlZExpbmVDb3VudCI6MzU1LCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiIzMTA3OGY1YzE4NjZmNGE1N2FiNjU2ZDU1YzAyM2ViOGQ1ZmE1ZDFkMDRiZTNiNzAyYjgyMzgwOWM5YmE0YWY0IiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiI0MTJjYTM0NWNjZjc1YmY5YzA4MDZiY2U2OTViZThkZTgwOGI3OTk4NDI1MWE3YTU0ZDIwMmNmNjEwMWRkNDUxIiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiI2MDc1MGZhN2RmYTMxYjlhNGM3MDllMDc0ODM1YTg2MzMwZDljMzA2Mzc1M2RlZjNlYzIzMTUzMmVjYmY1N2NlIiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MCwiZm9sbG93aW5nQ29udGV4dEhhc2giOiJlM2IwYzQ0Mjk4ZmMxYzE0OWFmYmY0Yzg5OTZmYjkyNDI3YWU0MWU0NjQ5YjkzNGNhNDk1OTkxYjc4NTJiODU1In0"
         },
         {
           "resource": "repo://internal/server/loginname_passkey_test.go#L12-L188",
@@ -129,10 +129,32 @@
           "version": "repo-lines-v1:sha256:dc6f648d6cb6a319a20926839f4defbbb1cda8a95e29154e2b7b5d765222c82e:eyJzZWxlY3RlZExpbmVDb3VudCI6NTIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjgyZTJjNWQ2ODc1MjljYTkyMTQ5YjM2ZDJkZWViOTI1ZGJmODExNmFlN2QzZDRhNWRlOTZkZjcwMTJkMWEyM2UiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjMzZTljYzQ5MGMxMDE3OTYwOGZiMGI1MmViMjZkMDM2NGRiYjM3Zjg0YzMxYjQ1MDhmMzZlNjg3Zjk4YjhiZWQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
         }
       ]
+    },
+    {
+      "id": "claim_272df5dbc48e406eb879f4752ff428ae",
+      "statement": "ADR-021/022 安全修复（2026-11，快照 0bfa8b2 之后）新增回归测试：episodes_test 的 TestEpisodesCreateSingleRequiredFields（必填缺失 → 400 EPS0038）与 TestEpisodesCreatorSingleLinksGate（创作者 platformLinks → 403 EPS0039）、ratelimit_test 的 TestRateLimitIdentifierKeyPreferredOverEmail（identifier 优先于 email 取键）、user_test 的 TestTryIncLoginAttemptsQuotaAndTOCTOU（配额前置占用原子语义）、apperror_test 的 TestCallerSiteSkip/TestCallerSiteSeesThroughWrapper/TestAbort500SiteC5xxLog（site 抓取与显式转递）。",
+      "evidence": [
+        {
+          "resource": "repo://internal/errors/apperror_test.go#L215-L258",
+          "version": "repo-lines-v1:sha256:969b1fad885addb1c6bc55f9ab374224e5a86a812f0c6b0c79a7e4a147663382:eyJzZWxlY3RlZExpbmVDb3VudCI6NDQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImUxMzczZmQ2OTAxY2EzMWIyZmI0OGUxMGViYWFiMDM2MzM0ZDJiNzgzMDdiNTg1Y2Q4N2VmNDRmNWMxMTRmNjAiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImM1YTlhYjFiZWIzNzcxOTBlYzdiNDZmMzRhODgwN2RjYTc4YTFmZjNkMzc0OTI5YTYyMTRiODhiZGMzOGNjMzciLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        },
+        {
+          "resource": "repo://internal/handler/episodes_test.go#L727-L837",
+          "version": "repo-lines-v1:sha256:8036ac673f477646d26e495b0da50c12a787b26527e8d7edb1b498dc8b11d525:eyJzZWxlY3RlZExpbmVDb3VudCI6MTExLCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiI5NWM3ZWZkYjg2OTBiYzI2OWE0ODVhMjcxNjBlZTJjNzZjMDgyMjZmOGZjYjA0MjVjMTYxZjE2ZDU5ZmQxOGZiIiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiI0MTJjYTM0NWNjZjc1YmY5YzA4MDZiY2U2OTViZThkZTgwOGI3OTk4NDI1MWE3YTU0ZDIwMmNmNjEwMWRkNDUxIiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiJiMzI4YThjNjU4NTQzMTFmYTg4MjhmMmIxMGExNjE0N2NhM2M4MmEwZWU3YmQ5ZDkxNWQxMDg2MzAzYWY3ZjEzIiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MCwiZm9sbG93aW5nQ29udGV4dEhhc2giOiJlM2IwYzQ0Mjk4ZmMxYzE0OWFmYmY0Yzg5OTZmYjkyNDI3YWU0MWU0NjQ5YjkzNGNhNDk1OTkxYjc4NTJiODU1In0"
+        },
+        {
+          "resource": "repo://internal/middleware/ratelimit_test.go#L304-L339",
+          "version": "repo-lines-v1:sha256:594adba455273b965c2cce1889995e8790cfee497c7a8cb7f6f6584ad308621e:eyJzZWxlY3RlZExpbmVDb3VudCI6MzYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImI3M2E5MzAxYjQ2NmI5ZThjZDczMDViNjM0ZGE3MDNmNzAzNGVmOTMxNWU2NGY3YzA5MTgyMDFkOWE1Mjg1YjIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAzNmFiYTIwODNjNTg5OTA0ZjM0OWRmNzhhZjBmOWQyNDhkNTE4NGQ0YTk0ZDMwNzIzOGRhM2U3YmMwMjQ4MjMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjVhMTFkOGFkOGI0OTI2ZTIzYzc4MDAxYjk2NDE5MWNmOTFlZTg1MDg5MGM4M2Q4NTY0NzNmMDE4NDg5MWQ4NGIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjAzZTc2M2Y2NmFlMWViYTVhNmYzNGQxYmIwNTg3NmNmYTJhYjUyYWM2OTMyZTVkMzMzMWUwZjlhYWE4OWYzYzkifQ"
+        },
+        {
+          "resource": "repo://internal/repository/user_test.go#L158-L243",
+          "version": "repo-lines-v1:sha256:4516125881651e3d0acdf1116b3f34d17efe1b8980678274b64c0dd4a0cd7679:eyJzZWxlY3RlZExpbmVDb3VudCI6ODYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImY3MDBiMWQ0NmNmNjAxNDBhN2U1Yzg4YmM5YzI2OGUzZjBmOWVlY2E3ZDJhMjY2MTc2ZDUxMzFiNzQ1ODU5N2QiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjdmYTJlNTBlZTc0Y2ExMDRkM2M1MTI2YTc2ZDQwMDMwNjY4MmE1ZjQ3N2Q1NDEzNzk4MmM2MjU0OTc4N2FiYjMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
     }
   ],
   "verification": {
     "by": "openwiki/0.7.2",
-    "at": "2026-11-16T17:33:30.305Z"
+    "at": "2026-11-17T17:20:26.784Z"
   }
 }

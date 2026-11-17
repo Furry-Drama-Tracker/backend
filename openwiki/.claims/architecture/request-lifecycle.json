@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "pageVersion": "sha256:9e4449273d3435e1707d913239b3d1afa257e359bff69ba997493eeca51bdeae",
+  "pageVersion": "sha256:6cdcf80a2e58d63eca08409838285d0f37081c9e6dcc1fedaac863de10bd8732",
   "claims": [
     {
       "id": "claim_ad8616456be14998a10dc7de860bbbf0",
@@ -132,15 +132,15 @@
     },
     {
       "id": "claim_6699f7baecf04f6693d0d10976052fdb",
-      "statement": "凭证/邮件类限流（auth/twoFactor/passwordReset/emailVerify 四个 spec）在请求体带 email 时改用 spec:sha256(邮箱小写) 计数（keyDigest 定长摘要防 CWE-770 键膨胀），无邮箱体的挂载回退原 spec:IP 键，/api/auth/verify-email 固定回退 IP key（email 与被保护资源无绑定，按 email 分桶会使爆破 spec 失效）；来源 IP 可经伪造代理标头轮换（CWE-348），按邮箱绑定后对同一账号的猜测无论换多少来源 IP 都共享同一计数桶。requestEmailChange 仍同时按 IP 与目标新邮箱限流。",
+      "statement": "凭证/邮件类限流（auth/twoFactor/passwordReset/emailVerify 四个 spec）按认证标识取键：emailFromBody 优先取请求体 identifier（login / login-2fa 的实际认证字段，email 仅旧客户端回退），无 identifier 时回退 email，命中后改用 spec:sha256(小写标识) 计数（keyDigest 定长摘要防 CWE-770 键膨胀）；无标识体的挂载回退原 spec:IP 键，/api/auth/verify-email 固定回退 IP key（email 与被保护资源无绑定，按 email 分桶会使爆破 spec 失效）；来源 IP 可经伪造代理标头轮换（CWE-348），按标识绑定后对同一账号的猜测无论换多少来源 IP 都共享同一计数桶。requestEmailChange 仍同时按 IP 与目标新邮箱限流。",
       "evidence": [
         {
-          "resource": "repo://internal/middleware/ratelimit.go#L100-L127",
-          "version": "repo-lines-v1:sha256:6b9f11788f54d13384c8b256bab8dfe0665a999a2f6f1c05cae8fa0b1483f3ce:eyJzZWxlY3RlZExpbmVDb3VudCI6MjgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjIyMjI2ZjQ1ODc1MjA4NjBkZTE1Zjc2NzExZGU5ZGE3NmNkN2NiNzBiZTgwZGEwZmZlMzI1MTZhYTIyMTU5NGQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImM5NDM0YWRkYjU3MjEyYzRlM2ViNzU1MzE4ZWFhN2RhMjQ0MzRjMTBlYmYzOWVkZTg4ODQ2MjM2MjJjYjRiZDYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImY4YWRlN2ZkOTExOTczOTQyYzY2NjQ3MjI5MDg3MTlkMWM0MzFiMmY5NjEwODFhYWYzNjllMmI5MGQ3MjRjNDEifQ"
+          "resource": "repo://internal/middleware/ratelimit.go#L103-L126",
+          "version": "repo-lines-v1:sha256:981d94aa69ac3385c43be03d6d31712eca7b934652de3e525f803f43a654aa45:eyJzZWxlY3RlZExpbmVDb3VudCI6MjQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjkwMTBkMDg0ZmU4MzEzMDhjY2U5ZmI2OGE4YTg1ZTFkNjljMDZjNmJhMzhjMDQ2NzZiMzMwOTZhN2MzNmZhMjgiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY0ZWZjNDk0MThkMjZkY2YxMjliMjJhNmFhMjExMDhjZWVjMzc2NzdhMzJkMDhlOWQ1ZmVlMzVkZGE2NmJiOWQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImEzZDRjNDg4ZDk5YThlNWRhYzliNTk0NmM3YWI4MzExNGExMDM0ZmE2OTdhOWRmMjIzNDYyMmFjZDY2YjU2MDMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjRlOTBhYTg0YTlmNDI0NjkxZmE4OGI3NTEyOGNjMGI1MWQ2ODliYTFmMzRlN2I2MzJlYmNlMjdkMGQ1NGY1YjgifQ"
         },
         {
-          "resource": "repo://internal/middleware/ratelimit.go#L167-L178",
-          "version": "repo-lines-v1:sha256:26128a4187345af0553688e4c5f19ad46f35c4492ba63d7b11fd0a93a5c62985:eyJzZWxlY3RlZExpbmVDb3VudCI6MTIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjdjYTdjNDQ3MWM2N2NmZGY5YTk5YTg5MjE0NDM1Y2I5MWFmNjEzZWIzYWM3ZDQyMzM0YjdmZjM5M2FiMzdlZjAiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImFjNGQxNzJmZmE4ZmRlZTMwNTczYThjMmMwNmIyYjI3Zjc2OWY3M2NhMWYzOThmOGZmMDFkYjk4YzViMjNkMjMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjAyMGQyODQ0NGQyZTYzZjZkZTg3ZjJlZTIyMzkyODJhMTdkMjlmNDk4MGEyMWUwNGZlNGY1NjBkZWZlZTk4OTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjgwZjAwNDYzNDVhMDkzODMzODhkMjIwYjNiYmJjY2Y0NjU2MjZhNzU0NzIwYmQ5ZDBkOTg2M2IxNDBjZTEwYTEifQ"
+          "resource": "repo://internal/middleware/ratelimit.go#L178-L196",
+          "version": "repo-lines-v1:sha256:a345619e8e7d862a79b72d198811027b7fa5a79758fca01bfa3faee1f5d61334:eyJzZWxlY3RlZExpbmVDb3VudCI6MTksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjNiZmIzZjYwYTRmNDQ5ZWU1MDczZWM4OTAyNTRjZTA1NDJlMWU4MGYyZTY4MTg2ODcwNDM5MmU2ZDFiNDAyZGQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjY5MzAyOTc1YTFlNDJmMmEwZjE5ODA1NmUyMDBjODhmZjhkY2Y5MGQ2NjYyZWQ1OWY5Yzc3YzQxY2RlNzFlMzciLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImM3YzE5NWVkMmYyMzIxYjlkOWM0OGNiMGJhZjNmMTIzMTU2NDdiYjQ1YjdjNDAyNTlkMGQ5ZjJlOTk0ODZmMDQifQ"
         }
       ]
     },
@@ -157,6 +157,6 @@
   ],
   "verification": {
     "by": "openwiki/0.7.2",
-    "at": "2026-11-16T17:33:30.305Z"
+    "at": "2026-11-17T17:20:26.784Z"
   }
 }

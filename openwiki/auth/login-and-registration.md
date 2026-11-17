@@ -22,10 +22,10 @@ sources:
     resource: repo://internal/service/password.go
   - id: openwiki-source-3f2309f0c3b4e4f8068472e9
     resource: repo://internal/service/register.go
-generated: { by: "zcode", at: "2026-11-16T17:33:30.305Z" }
+generated: { by: "zcode", at: "2026-11-17T17:20:26.784Z" }
 verified:
   - by: openwiki/0.7.2
-    at: 2026-11-16T17:33:30.305Z
+    at: 2026-11-17T17:20:26.784Z
 ---
 
 # 注册与登录流程
@@ -70,12 +70,13 @@ verified:
 2. **按标识符查找账号**——用户名折叠或邮箱；不存在时返回通用 400“用户名或密码错误”，不附带 `accountNotFound`，避免账号枚举。
 3. **锁定检查**——返回通用凭据错误而不是锁定专用消息，避免暴露锁定状态。
 4. **注销宽限期**——如果已过七天删除截止时间，调用 `PurgeUserData` 做级联物理清理，然后返回通用凭据错误。如果清理失败，流程继续，因此清理失败不会阻塞登录。
-5. **密码校验**——失败递增 `loginAttempts` 并返回通用 400。
-6. **重置失败计数**——2026-11 起清零点后移（CWE-307）：密码通过但停在 2FA 挑战阶段**不再清零**，否则“正确密码 + OTP 猜测”交替请求会让锁定永不触发。现在清零只发生在两处：密码通过且无第二因素待完成的邮箱未验证分支，以及完整认证成功之后。
-7. **邮箱验证**——未验证（且未跳过）时经 `Mint` 生成并发送验证码，结果为 `NeedVerification`。
-8. **演示/跳过自动验证**——开发环境中演示邮箱自动标记为已验证（`UpdateVerified` 定点更新，避免整文档替换清空 2FA 密文）。
-9. **2FA**——已启用时签发五分钟的 `2fa-challenge` 令牌并返回 `Need2FA`，响应附带 `twoFactorMethods` 列表（`totp` 恒有；`emailOtp` 仅邮箱已验证时可用）。
-10. **成功**——定点更新登录态字段（`UpdateDeviceInfoAndLogin`：设备信息、最后登录时间/IP/地域），签发会话，并在未识别设备时异步发送新设备提醒邮件。
+5. **失败配额前置占用**——`TryIncLoginAttempts` 在 bcrypt 比较之前原子占用一个名额：占不到（配额耗尽或已锁定）直接返回与密码错误不可区分的通用 400（`AUT0043`），不执行比较——既消除并发爆破窗口，也消除对已锁/超额账号每猜一次 C×250ms 的 bcrypt CPU 消耗（ADR-022，2026-11）。
+6. **密码校验**——失败仅返回通用 400（名额已在比较前占用）。
+7. **重置失败计数**——2026-11 起清零点后移（CWE-307）：密码通过但停在 2FA 挑战阶段**不再清零**，否则“正确密码 + OTP 猜测”交替请求会让锁定永不触发。现在清零只发生在两处：密码通过且无第二因素待完成的邮箱未验证分支，以及完整认证成功之后。
+8. **邮箱验证**——未验证（且未跳过）时经 `Mint` 生成并发送验证码，结果为 `NeedVerification`。
+9. **演示/跳过自动验证**——开发环境中演示邮箱自动标记为已验证（`UpdateVerified` 定点更新，避免整文档替换清空 2FA 密文）。
+10. **2FA**——已启用时签发五分钟的 `2fa-challenge` 令牌并返回 `Need2FA`，响应附带 `twoFactorMethods` 列表（`totp` 恒有；`emailOtp` 仅邮箱已验证时可用）。挑战签发分支按既有「签发前不清零」契约保留本次占用——正确密码反复只签发挑战不完成 2FA 同样会计入名额。
+11. **成功**——定点更新登录态字段（`UpdateDeviceInfoAndLogin`：设备信息、最后登录时间/IP/地域），签发会话，并在未识别设备时异步发送新设备提醒邮件。
 
 **新设备不再拦截登录**（2026-11 重构变更）：旧实现的“新设备 → 设备验证码邮件 → `verify-device`/`confirm-device-login` 确认链”已整体移除（两个路由也已删除）。现在新设备只在登录成功后收到一封提醒邮件（受 `emailNotificationPrefs.newDeviceLogin` 控制），是事后提醒而非屏障。“已知设备”由服务端签发的设备令牌判定（见下节）。
 
@@ -99,9 +100,9 @@ handler 把结果映射为响应（错误分支走带码信封 `{message, error,
 
 ## 账号锁定
 
-`users.loginAttempts` 与 `users.lockUntil` 实现锁定。默认五次尝试、30 分钟，可通过 `[security]` 配置。`repository.IsLocked` 把 `lockUntil`（Unix 毫秒）与当前时间比较。`IncLoginAttempts` 递增并设置锁定；如果已锁定，则重置为一次并清除锁定，这是防御分支。
+`users.loginAttempts` 与 `users.lockUntil` 实现锁定。默认五次尝试、30 分钟，可通过 `[security]` 配置。`repository.IsLocked` 把 `lockUntil`（Unix 毫秒）与当前时间比较。登录与 2FA 路径自 2026-11 ADR-022 起**不再走「读快照 → 校验 → 事后计数」**，改由 `TryIncLoginAttempts` 在校验前原子占用名额：单文档条件更新先重启过期锁，然后仅当未锁定且 `loginAttempts` 未达阈值（或字段缺失，兼容 Express 时期遗留文档）时 `$inc` 成功，本次占用达到阈值时同步上锁——过滤器即状态守卫 + 配额守卫，并发下恰好放行 `LoginMaxAttempts` 次，消除 TOCTOU 并发绕过；密码正确的成功路径随后的 `ResetLoginAttempts` 清掉占用（含达到阈值时的毫秒级瞬态锁）。旧的 `IncLoginAttempts` 仍保留，用于改密码路径。
 
-同一锁定也适用于 2FA 登录和邮箱变更请求（423）；管理员与普通用户共用同一个登录入口，因此也走这里的通用凭据错误，而不再有返回 423 的独立后台登录分支。修改密码时输入错误的当前密码同样会递增 `loginAttempts`，成功后才清零，因此反复猜当前密码也会触发锁定。
+同一锁定也适用于 2FA 登录（占用阶段 423）和邮箱变更请求（423）；管理员与普通用户共用同一个登录入口，因此也走这里的通用凭据错误，而不再有返回 423 的独立后台登录分支。修改密码时输入错误的当前密码同样会递增 `loginAttempts`，成功后才清零，因此反复猜当前密码也会触发锁定。
 
 ## 2FA 登录
 
@@ -110,7 +111,7 @@ handler 把结果映射为响应（错误分支走带码信封 `{message, error,
 - **`emailOtp`**——校验并一次性消费独立 `EmailOTPCodes` store 中的六位码（限五次尝试，码属他人按失败处理不留痕）。
 - **`totp`（默认）**——解密 secret 后接受有效 TOTP 或备份码。TOTP 命中的时间步通过 `users.twoFactorLastStep` 原子标记做一次性消费——同一步重复提交按校验失败处理并记录 `twofa_replay` 诊断事件（仅作用于本端点，“开启 2FA 用的码不能立刻用于登录”的体验不受影响）。使用过的备用码由 `auth.ConsumeBackupCode` 移除，剩余数组就地升级为哈希格式落库。
 
-任一方法失败都会递增尝试次数（`rejectTwoFactor`），达到阈值时返回 423。成功后登录态字段定点更新（`UpdateDeviceInfoAndLogin`，备份码消费单独定点落库），签发会话并按设备令牌判定发提醒邮件。
+失败名额在第二因素猜测前经 `TryIncLoginAttempts` 原子占用：占不到名额（配额耗尽或已锁定）在占用阶段即被 423 `DEV0016` 拒绝，不执行校验；任一方法校验失败仅返回 400 `DEV0017`——`rejectTwoFactor` 自 2026-11 ADR-022 起不再递增计数，重放路径同样计入已占名额。成功后登录态字段定点更新（`UpdateDeviceInfoAndLogin`，备份码消费单独定点落库），签发会话并按设备令牌判定发提醒邮件。
 
 ## Passkey 登录
 

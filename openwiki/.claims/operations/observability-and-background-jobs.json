@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "pageVersion": "sha256:7b9ca285f9ef58a334ad1397ef4b5fedd5db7ecefa0e6136b3c4e6efd72b7360",
+  "pageVersion": "sha256:c5067f25672aeae07279b4a55f5e072b37a6b91c22e139c9b850e471f5621462",
   "claims": [
     {
       "id": "claim_906974628b5a4b4091aae42fe2e0023d",
@@ -97,7 +97,7 @@
       "statement": "The API usage flush loop, email target-rate cleanup, verification-code cleanup loops, and translation batch worker start during middleware or handler construction, while cron, indexes, and migrations now also run at startup from the entrypoint.",
       "evidence": [
         {
-          "resource": "repo://cmd/server/main.go#L95-L111",
+          "resource": "repo://cmd/server/main.go#L111-L127",
           "version": "repo-lines-v1:sha256:c605d92d79de641f977621792cb9263807a1d74481bff841f6b828cea74b451a:eyJzZWxlY3RlZExpbmVDb3VudCI6MTcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImYzODkyZWFlMzEzYjk1ZWNmNDc2YTc5YzAyZWU5NGRmYWNmNjA0OTliZGI3NmFlM2FlNThkNDJhY2U0MzY5OWYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjY0MDUzYzM0MjRkNDFlODZiNGJmNDRmZmI1MzA1ZTA0MjBlOGJmMTFkNzgyZTBkOWVjN2U1NjExYzE1ZmI4YTciLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImIyZTJjZTFjOWQyYjgzOTRhNTkzY2E0YjI4ODA4MDBhMzVlN2Q0Yjg0MDcyMmI4MDFhM2I1NTZkMTNhMDZhZjIifQ"
         },
         {
@@ -149,10 +149,28 @@
           "version": "repo-lines-v1:sha256:e2a6dd0190c532530913ad3d4cd58c41d55452e57f4676a8e8a35a8ddbd9da68:eyJzZWxlY3RlZExpbmVDb3VudCI6NDgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjU5M2EwODhhZTQ2NjAxZGY0MmE4ZjYzZGUyZmE3OGY2YmNjYzZkYTMzZDI5OTA1YzRmMjRmMTA1NWM1NjJlZjMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjU4OWE0OGIwOTQxMWYwYjMwNTFkYjJiYTRlNGY4NWFjODNjOTAwODViNTUyZjFhY2RlY2FhNDE1YzA5NjdlMzIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImNmYjQ4MmVjZjc4MDQwNTk5ZjVlMDZkN2EyNThjM2M3ZTU1NjBiNDk4NmRhZTYwNDg3YWFmNmU5NjljZDViZDAiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImZiYThlOGY1MmEyMTEzZWI2OWZiYzQzZTBjNGMzYmNjNTM3ODMxZDQ5MmExNDdlZTRmZDhhMGJkZTE1MTNjMTAifQ"
         }
       ]
+    },
+    {
+      "id": "claim_3f632eac20ba49b98668393f7d682bfc",
+      "statement": "5xx log5xx 的 site 字段经 2026-11 ADR-021 修正后指向真实调用点：errors 包各构造器的 skip 自指（callerSite(1) 抓到 errors 自身行号）修正为导出的 CallerSite(2)，共享错误助手（如 episodes 全模块共用的 serverError / EPS0037 500 兑底）改以 Abort500SiteC 显式转递调用方行号——此前这类 5xx 日志 site 恒为 apperror.go 行号，现在形如 episodes.go:1072，可定位到具体端点行。",
+      "evidence": [
+        {
+          "resource": "repo://internal/errors/apperror.go#L125-L139",
+          "version": "repo-lines-v1:sha256:2f197c71f55ef78bcc99dd8c2d6b987caacdd23e928d8f4342a376460e084073:eyJzZWxlY3RlZExpbmVDb3VudCI6MTUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjEwMzIxOTdiMzU1NmUwOWEzYTYxZWY0ZTFmZDJhYWFmNmFiZWM1ZjcxMTcyM2Q2Yjk2ZmFkNzUwODZiOTJkMmUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjJhMjU2YzNkN2QxM2FhNzY3YjI0OGQ3NjAyMjcxOTlhZWVkZjI0OGExZGUxMDA0ODA1YjJiYThkYjViMGFkOGEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjkwNmZlZDVlY2VhZjBhZTRkNTc2NzBkOGUyOTA4NWNiM2ZmMmRjMWEyOWU0ZmNkZWI4MjkyN2IyNWI0ODY4NDAifQ"
+        },
+        {
+          "resource": "repo://internal/errors/apperror.go#L249-L267",
+          "version": "repo-lines-v1:sha256:8c33cd17866228da77612a4703a7fabdade3410a12d4a1c1cc2e65671524efce:eyJzZWxlY3RlZExpbmVDb3VudCI6MTksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjNjMzVlZmJkYTA0NWUxMTk0MjE2MTkxMjk5MDE0NWFjYWJjNjUxYWFkN2VkNjFmMzUxMGQwZTA4ODE1YTRmOTIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjZlYjcyMjZkZTU0MGNlYTEwZTkzZjNjYjdmN2E2NzA1OGYxYWYzMmY0ODkxNTNlM2QyNzUxYTcwNTMwOWRmYjMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUyZDFjN2JkYTU2M2QxMTgxMjc4YjdjNTM3Yjg5OGI5NGI5ZmUwOGE3MWUzMTg5ZjgxZjFkMjNlMDZhYTE5OTkifQ"
+        },
+        {
+          "resource": "repo://internal/handler/episodes.go#L1830-L1837",
+          "version": "repo-lines-v1:sha256:6ffc0c468841fbc8dae28260ee22be1ce5828577fc66f0b65af6a910d2fc20b7:eyJzZWxlY3RlZExpbmVDb3VudCI6OCwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiNDEyY2EzNDVjY2Y3NWJmOWMwODA2YmNlNjk1YmU4ZGU4MDhiNzk5ODQyNTFhN2E1NGQyMDJjZjYxMDFkZDQ1MSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNDEyY2EzNDVjY2Y3NWJmOWMwODA2YmNlNjk1YmU4ZGU4MDhiNzk5ODQyNTFhN2E1NGQyMDJjZjYxMDFkZDQ1MSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNzViMWRhOGZhYTYzNzdhNTE0YmZiZDU4YjA2YWQzY2U5MWNhNWQwNzM3MTFlNjhmNzQzYzJkMTg5NzdiOGI2NCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiNTc0ZDRmZTc5MjAwMWExYWU1NzQ1MTJiMTQ1MTcxMTIwMzIyNDI3ZTczOTM3NzI4ZjZiYzE0MzFiYzRmYjM3YSJ9"
+        }
+      ]
     }
   ],
   "verification": {
     "by": "openwiki/0.7.2",
-    "at": "2026-11-16T17:33:30.305Z"
+    "at": "2026-11-17T17:20:26.784Z"
   }
 }

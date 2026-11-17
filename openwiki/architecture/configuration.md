@@ -8,6 +8,8 @@ sources:
     resource: repo://cmd/server/main.go
   - id: openwiki-source-6e11d7a3d9cd222e5ed01aed
     resource: repo://deploy/furry-drama-be-neo.ini
+  - id: openwiki-source-db33e0b2a6bda7efb94d4efc
+    resource: repo://deploy/nginx.conf.example
   - id: openwiki-source-883d642125c25de6f4b25f17
     resource: repo://internal/auth/fieldcrypto.go
   - id: openwiki-source-a8910515ddd14810ad43f5c1
@@ -22,10 +24,10 @@ sources:
     resource: repo://internal/server/register_routes.go
   - id: openwiki-source-f7acf9d278285ec2e6b81113
     resource: repo://internal/service/auth_service.go
-generated: { by: "zcode", at: "2026-11-13T18:41:36.261Z" }
+generated: { by: "zcode", at: "2026-11-17T17:20:26.784Z" }
 verified:
   - by: openwiki/0.7.2
-    at: 2026-11-16T17:33:30.305Z
+    at: 2026-11-17T17:20:26.784Z
 ---
 
 # 配置与环境变量
@@ -90,7 +92,7 @@ ini 文件分为 `[server]`、`[database]`、`[jwt]`、`[email]`、`[vapid]`、`
 
 - `trust_proxy_headers`：是否信任反向代理标头；省略时沿用历史行为——生产（`!IsDev`）信任、开发不信任。
 - `proxy_ip_headers`：按序尝试的标头清单，缺省 `CF-Connecting-IP,X-Real-IP,X-Forwarded-For`（ESA/CF 边缘覆盖写入的 CF 头最优先；X-Real-IP 可能被中间层写成本地/节点 IP，仅作兜底）。
-- `trusted_proxies`：受信代理的 IP/CIDR 清单；不配 = gin 默认信任全部来源（与旧手写解析一致）。配置后（如 ESA → 本机反代拓扑填 `127.0.0.1,::1`），非受信来源直连伪造的代理标头会被整体忽略。
+- `trusted_proxies`：受信代理的 IP/CIDR 清单；不配 = gin 默认信任全部来源（与旧手写解析一致）。配置后（如 ESA → 本机反代拓扑填 `127.0.0.1,::1`），非受信来源直连伪造的代理标头会被整体忽略。**注意它只校验「直连对端」**（2026-11 明确）：socket/loopback 部署下对端恒为本机反代、永远「受信」，客户端经反代透传的伪造 `CF-Connecting-IP` 仍会被原样采信——必须同时在反代层覆盖写入代理标头（无 CDN 形态）或仅放行 CDN 回源网段（两种形态见 `deploy/nginx.conf.example`；ADR-022 配套加固）。
 - `proxy_trusted_platform`：单一无条件最高优先标头（gin TrustedPlatform），非空即信、不校验来源与格式，仅应在前置网关保证覆盖写入时启用；默认不启用。
 
 `[security]` 的用户名策略三键服务于改名/注册校验（`service/loginname.go`）：`username_blacklist` 是黑名单补充词表（逗号分隔，与内置词表合并做子串匹配，内置含 admin/root/system/api 等）；`login_name_cooldown_days` 是改名冷却天数（默认 7）；`login_name_reserve_days` 是旧名保留天数（默认 90，期间他人不可注册该名）。
@@ -142,6 +144,7 @@ ini 文件分为 `[server]`、`[database]`、`[jwt]`、`[email]`、`[vapid]`、`
 
 - `JWT_SECRET` 是示例或历史弱密钥（`change-me`、含 `example`、`secret`、`jwt-secret`、`changeme`、`password`、`furry-drama-tracker-secret-key-2024` 等）时，`Cfg.JWT.WeakSecret` 置位，`main` 打印 `[SECURITY WARN]` 并提示轮换前先设置 `ENCRYPTION_KEY=旧密钥` 以兼容既有 2FA/邮件加密数据。
 - 生产环境下 `allow_origins` 为空，或仍含 `localhost`/`127.0.0.1`/`example.com` 时，`Cfg.Server.InsecureOrigins` 置位，`main` 打印 `[SECURITY WARN]`。
+- **生产信任代理标头但 `trusted_proxies` 未配置时**（`!IsDev` 且信任开关生效且清单为空，2026-11 ADR-022 新增），`main` 打印 `[SECURITY WARN]`：trust-all 下任何能直连本进程的客户端都可轮换 `CF-Connecting-IP`/`X-Forwarded-For` 伪造客户端 IP——所有 IP 维度限流桶按请求轮换失效、审计/新设备邮件 IP 归因可被伪造；提示按拓扑配置 `trusted_proxies` 并在反代层覆盖写入代理标头（见 `deploy/nginx.conf.example`）。沿用弱密钥/占位 CORS 的告警模式，不阻止启动。
 - IP 地域解析开关会在启动时打印状态：开启时打 `[SECURITY WARN]` 并注明首选数据源（czdb 提示查询走本地库、未命中按配置兜底；aliyun 提示认证流程会把客户端 IP 发送至该 API，非必要保持关闭）；首选为 aliyun 但未配置 AppCode 时追加一条「aliyun 数据源不可用」告警。关闭时打印提示「LastLoginRegion 记为 未知」。
 - 迁移与索引创建失败只打印 `[WARN]` 并继续启动，首次部署或数据重复时应尽快人工处理后重启。
 - SMTP、VAPID 或上传目录未配置不会阻止进程启动，相关功能在运行时降级。

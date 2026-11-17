@@ -20,10 +20,10 @@ sources:
     resource: repo://internal/model/episode.go
   - id: openwiki-source-7dbb03889219204710573384
     resource: repo://internal/model/misc.go
-generated: { by: "zcode", at: "2026-11-16T17:33:30.305Z" }
+generated: { by: "zcode", at: "2026-11-17T17:20:26.784Z" }
 verified:
   - by: openwiki/0.7.2
-    at: 2026-11-16T17:33:30.305Z
+    at: 2026-11-17T17:20:26.784Z
 ---
 
 # 内容目录 API
@@ -65,6 +65,8 @@ verified:
 - `POST /episodes/:id/resubmit` 只对已拒绝剧集有效，会把审核字段重置为 pending。
 - `DELETE /episodes/:id` 不做物理删除，而是以原因 `deleted` 把文档移入剧集回收站；只有回收站彻底删除才会清理关联数据。创作者只能删除自己创建或被授权管理的剧集，管理角色不受此限。
 - 单集更新与删除同样校验归属：创作者只能操作其有权编辑的父剧集下的单集，越权返回 403。
+- `POST /episodes/:id/episodes`（创建单集）对必填字段做前置校验：`title` 为空（或非字符串）或 `episodeNumber` 字段缺失时，聚合为 400 `EPS0038`（mongoose 风格消息 ``Path `title` is required., …``；2026-11 之前该路径走 500 catch-all，ADR-021 修正）。
+- **创作者单集播放链接门禁**（2026-11，CWE-863）：单集集合没有审核字段（无 `pendingChanges` 等价物），创作者写入的 `platformLinks` 会绕过审核直接公开到已过审剧集的详情页并随追更通知/邮件广播。因此 `CreateSingle` 与 `UpdateSingle` 对 `role=creator` 且请求体携带非空 `platformLinks`（map 中任一非空字符串值）返回 403 `EPS0039`；空对象/缺省视为未提交，不影响清空语义；编号/标题/排期等常规字段与管理员操作不受限。
 - 创建与更新单集都接受 `episodeLabel` 并去除首尾空白后持久化，作为显示用序号；`episodeNumber` 仍是排序、`currentEpisodes` 计数与已看/新更新判断依据。
 - 创建与更新会校验资源地址：`coverImage` 必须是 `/uploads/` 或 `http(s)`，`platformLinks` 经过清洗，`qqGroupLink` 必须是 `http(s)`。
 

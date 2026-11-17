@@ -28,10 +28,10 @@ sources:
     resource: repo://internal/service/login.go
   - id: openwiki-source-012f2c78e3b1446dfc35803f
     resource: repo://Makefile
-generated: { by: "zcode", at: "2026-11-16T17:33:30.305Z" }
+generated: { by: "zcode", at: "2026-11-17T17:20:26.784Z" }
 verified:
   - by: openwiki/0.7.2
-    at: 2026-11-16T17:33:30.305Z
+    at: 2026-11-17T17:20:26.784Z
 ---
 
 # 快速开始
@@ -63,7 +63,7 @@ MONGO_URI=mongodb://127.0.0.1:27017/furry_drama_tracker
 NODE_ENV=development
 ```
 
-`.env` 会从工作目录自动加载。真实环境变量覆盖它，两者都覆盖 ini 文件。默认监听 `tcp:127.0.0.1:5000`（仅回环，要从外部访问需显式设为 `tcp:0.0.0.0:5000`）；Unix socket 使用 `--listen=unix:/run/furry-drama-be-neo.sock`，生产配置使用 `--config=/path/to/backend.ini`。
+`.env` 会从工作目录自动加载。真实环境变量覆盖它，两者都覆盖 ini 文件。默认监听 `tcp:127.0.0.1:5000`（仅回环；对外访问经反代并按 `deploy/nginx.conf.example` 覆盖写入代理标头，勿绑 `0.0.0.0` 直曝公网）；Unix socket 使用 `--listen=unix:/run/furry-drama-be-neo.sock`，生产配置使用 `--config=/path/to/backend.ini`。
 
 ## 验证
 
@@ -108,6 +108,7 @@ go vet ./...
 - 管理员与普通用户共用 `/api/auth/login`；登录标识符支持用户名（折叠小写）与邮箱；登录后由 `GET /api/admin/verify` 校验后台权限，没有独立的 `/api/admin/login`。
 - **角色化 2FA**：普通用户禁开 2FA，admin/superadmin 强制开启且不可自行关闭——未开启时非 GET 写操作被 force2FASetup 门禁拦截（403 + `force2FASetup`）；管理员丢失验证器用 `cmd/useradmin clear-2fa` 带外恢复。2026-11 起 `POST /api/2fa/enable` 额外要求请求体携带 `currentPassword`（密码再认证），并已纳入 2FA 限流桶。
 - **新设备不再拦截登录**（2026-11 重构）：登录成功后只发提醒邮件，"已知设备"由 `fdt-device` cookie ↔ 会话 `deviceTokenHash` 判定；User-Agent 仅作展示。
+- **登录/2FA 失败配额前置占用**（2026-11 ADR-022）：失败名额在密码/第二因素猜测前经 `TryIncLoginAttempts` 原子占用（并发猜测预算恒为锁定阈值，占不到名额直接拒绝且不执行 bcrypt）；正确密码签发 2FA 挑战也计入名额——反复只签发挑战不完成 2FA 会触发 30 分钟瞬态锁，正常单次登录成功即清除。凭证类限流键按请求体 `identifier` 绑定（login/login-2fa 的实际认证字段，email 仅旧客户端回退）。
 - **错误排障口径（2026-11 契约）**：所有 4xx/5xx 响应体为 `{message, error, ref, status}`——拿用户报的错误码（如 `USR0007`）grep 源码直达唯一调用点，拿 `ref`（或响应头 `X-Ref-ID`）grep 服务日志定位请求；message 恒为纯文案，生产 5xx 掩码「服务器内部错误」。详见[错误信封与错误码契约](api/error-envelope.md)。
 - **email 是可选字段**（ADR-020）：无邮箱用户（外部登录预留）的文档缺省该字段、API 输出 `""`；任何写路径不得写 `email:""`。
 - 非 GET 请求需要 CSRF，419 表示 access 令牌过期。

@@ -26,10 +26,10 @@ sources:
     resource: repo://internal/service/auth_service.go
   - id: openwiki-source-62a9837f2b45c92ae81ca775
     resource: repo://internal/upload/upload.go
-generated: { by: "zcode", at: "2026-11-16T17:33:30.305Z" }
+generated: { by: "zcode", at: "2026-11-17T17:20:26.784Z" }
 verified:
   - by: openwiki/0.7.2
-    at: 2026-11-16T17:33:30.305Z
+    at: 2026-11-17T17:20:26.784Z
 ---
 
 # 架构总览
@@ -68,12 +68,12 @@ middleware  handler  <-- HTTP 关注点
 `cmd/server/main.go` 只做这些事：
 
 1. 解析 `--config` 与 `--listen`。
-2. `config.Load`——缺少、过短或不合规的密钥会致命退出；示例/历史弱密钥与占位生产 CORS 源只打印 `[SECURITY WARN]`。
+2. `config.Load`——缺少、过短或不合规的密钥会致命退出；示例/历史弱密钥与占位生产 CORS 源只打印 `[SECURITY WARN]`。生产环境信任代理标头但 `trusted_proxies` 未配置时同样只打 `[SECURITY WARN]`（2026-11 ADR-022 新增：trust-all 下 IP 维度限流可被伪造标头轮换绕过、IP 归因可被伪造）。
 3. 打印 IP 地域解析开关状态：开启时打 `[SECURITY WARN]` 并注明首选数据源（aliyun 会把客户端 IP 发送至该 API；czdb 查询走本地库），首选为 aliyun 且未配置 AppCode 时追加不可用告警；关闭时提示 `LastLoginRegion` 记为「未知」。
 4. `repository.Connect`——用 15 秒上下文连接并 ping MongoDB。
 5. `repository.NewRepos`——针对命名集合构造全部 repository。
 6. `auth.NewSigner`——用配置的 secret 构造 JWT 签名器。
-7. 运行启动迁移（`migrate.Run`，五项幂等迁移）与索引创建；失败只打印 `[WARN]` 并继续，避免已有数据导致服务无法启动。
+7. 运行启动迁移（`migrate.Run`，六项幂等迁移）与索引创建；失败只打印 `[WARN]` 并继续，避免已有数据导致服务无法启动。
 8. 启动后台清理任务（会话、已读通知、到期注销账号）。
 9. 配置上传与图标目录，并创建两个目录。
 10. `server.NewApp(server.Deps{...})`——装配中间件与路由，并构造 `authlog.Recorder`（认证诊断事件双出口）注入鉴权链。

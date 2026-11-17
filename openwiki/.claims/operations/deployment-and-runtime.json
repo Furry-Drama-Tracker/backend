@@ -1,14 +1,14 @@
 {
   "schemaVersion": 1,
-  "pageVersion": "sha256:99149286126a4da74159638e6c73f42707289130031bcdd97c6ab77949efcaf5",
+  "pageVersion": "sha256:dc00237850465948e9602e07c5d0d69086c4abca2bf0a9e0484a2e5766ebe57e",
   "claims": [
     {
       "id": "claim_5048775d39784f869d86ba80c02f62d9",
-      "statement": "启动顺序：解析 flags → 加载配置并打弱密钥/占位 CORS 告警与 IP 地域开关状态（按首选数据源打 SECURITY WARN，aliyun 未配 AppCode 追加不可用告警）→ 连接并 ping MongoDB → 构造 Repos 与签名器 → 五项迁移与索引（告警不阻断）→ 启动清理 cron → 创建上传与图标目录 → 装配 Gin → 监听并等待 SIGTERM/SIGINT。",
+      "statement": "启动顺序：解析 flags → 加载配置并打弱密钥/占位 CORS 告警、生产 trust-all 代理标头告警（trusted_proxies 未配置时 SECURITY WARN，不阻断）与 IP 地域开关状态（按首选数据源打 SECURITY WARN，aliyun 未配 AppCode 追加不可用告警）→ 连接并 ping MongoDB → 构造 Repos 与签名器 → 六项迁移与索引（告警不阻断）→ 启动清理 cron → 创建上传与图标目录 → 装配 Gin → 监听并等待 SIGTERM/SIGINT。",
       "evidence": [
         {
-          "resource": "repo://cmd/server/main.go#L48-L123",
-          "version": "repo-lines-v1:sha256:93fe04cb315bf1481308972436ef3f597f55a037c90401793820901b9e93e33c:eyJzZWxlY3RlZExpbmVDb3VudCI6NzYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjMxNWQ2NGY5NzFiMjRmNzAxZDM0Yzc3ZjEyNWFkOTNkNzBiN2I0MGEwMmMwMjM2YjA0NTM5M2UyNGJmNmI1ZmQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImE1NzExYmE5OWI4MDUxMzZiNzYyODAzMDkzZmFhN2RiNWU0ZGYyOTcyNDg2ZDA5OTFjNThhZTFkMGIyMjc1YjAiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijk5N2FhOTZlM2Q5ZDhhNTVhNzI1ZGUyN2IxNGUzZjIxMzhiYTc2NTdhMDZmYzA4NmVhYTYwZTc1MzU2Njg0OGIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjJhZjYxN2Q4NzA2ZGM1MDgzYzBlMjEzMmYwZmJjNGRmYjIxMGU1Y2FlYWEyMGQ1NzA1YzViY2QwZWU5NTA2MGEifQ"
+          "resource": "repo://cmd/server/main.go#L48-L139",
+          "version": "repo-lines-v1:sha256:a742f8ba860aae2164bcce8683d52f5f556a7ef2b1d39206cffd4d2e576a0d08:eyJzZWxlY3RlZExpbmVDb3VudCI6OTIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjMxNWQ2NGY5NzFiMjRmNzAxZDM0Yzc3ZjEyNWFkOTNkNzBiN2I0MGEwMmMwMjM2YjA0NTM5M2UyNGJmNmI1ZmQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImE1NzExYmE5OWI4MDUxMzZiNzYyODAzMDkzZmFhN2RiNWU0ZGYyOTcyNDg2ZDA5OTFjNThhZTFkMGIyMjc1YjAiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijk5N2FhOTZlM2Q5ZDhhNTVhNzI1ZGUyN2IxNGUzZjIxMzhiYTc2NTdhMDZmYzA4NmVhYTYwZTc1MzU2Njg0OGIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjJhZjYxN2Q4NzA2ZGM1MDgzYzBlMjEzMmYwZmJjNGRmYjIxMGU1Y2FlYWEyMGQ1NzA1YzViY2QwZWU5NTA2MGEifQ"
         }
       ]
     },
@@ -17,7 +17,7 @@
       "statement": "Graceful shutdown uses a 10-second context, while the server enforces a 65-second read-header timeout, 30-second read and write timeouts, and a 5-second idle timeout.",
       "evidence": [
         {
-          "resource": "repo://cmd/server/main.go#L128-L161",
+          "resource": "repo://cmd/server/main.go#L144-L177",
           "version": "repo-lines-v1:sha256:bb6df499ed53ba733dde1544f7f826e32fb71a557a6559f13b51d4f4e4768f31:eyJzZWxlY3RlZExpbmVDb3VudCI6MzQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjNlNmM4ZmQxODA2ZDkxNDg3OWI1MTYzZGJjNGE4MzgzZDNmZWE2ODYyODg5NTZlNzUxMWI1ZTEzNWNjNmY3NjAiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImEyNzZkYTFkMmZlZTNiMTc4NGU0ZDBiYjU2YmI2YWFiYjU0M2MwZjZmYmRlMDY0M2E3NTMyYTQ0MTBhNmU0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjhjNTU1YzRkNzAyMmZmZTQyZjA1NjlkOTNkOWZkNDQ3Nzg0MmM4MjUxZGExYjY3NWIyMGE2ZDQ5Mjg0ODBhODUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImRlNTAzZmU0NTM3NTQwYzhiY2ZhYmRiZDY3NWY5YmRhZWFkMjViYjJkNDkxY2ViZTM2YzAwNjU2YjE0YTQwNGIifQ"
         }
       ]
@@ -27,7 +27,7 @@
       "statement": "Both the uploads directory and the icon directory are created at startup with MkdirAll as warnings on failure, and the icon directory is also created before SVG writes.",
       "evidence": [
         {
-          "resource": "repo://cmd/server/main.go#L111-L120",
+          "resource": "repo://cmd/server/main.go#L127-L136",
           "version": "repo-lines-v1:sha256:1b1c4d9afa7e03d538fab6d3bf49046c12ce8549a0c98ecf622a598949508293:eyJzZWxlY3RlZExpbmVDb3VudCI6MTAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY3Y2RhODJkYTYwNjIzOGUwNWU2MjM5OTU2OWM1ZWUwMzk5MzQxOTY0OGFlNWQ0M2EyYmY4Y2Q2MzQ3ZjgyNjMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijc0NTRiYzM1NTZmYzUxZTE4NmNlYzNkOWZjOWMwMDc1YzI3MmI4ODFmNjg2YThmODliNmEyMzNmZTdjZDllNTgiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjhhYWE2MzgyMGJiNzA5MWM2ODcwNjhlN2FjNmM4ZTFhZDQ2MWJmNTRmOTI4OGQ3MDg4MTBjZjMxYjFkZDFhOGUifQ"
         },
         {
@@ -41,7 +41,7 @@
       "statement": "The listener supports tcp host-port, Unix socket paths with stale-file removal and 0660 permissions, and Linux abstract Unix sockets.",
       "evidence": [
         {
-          "resource": "repo://cmd/server/main.go#L162-L191",
+          "resource": "repo://cmd/server/main.go#L178-L207",
           "version": "repo-lines-v1:sha256:13e7f8676d6276359104663fca4de89b7b4b43ec2a45af4bf536253e89f217a3:eyJzZWxlY3RlZExpbmVDb3VudCI6MzAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImJlYjhlM2U5NGE1N2NkYjA5NmYyMDQwYmUxMDQxOWI0ZmNhNTczYWE5ZTU1MzZlNjM2MGNhOTg5ODg4MzM5MTgiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjYyOTcwZTQxNWI2NjYyNmIzOWYwOThjMDZjZTE1YTBiZWFhOTZlN2NiZjZmNmQwZTFkYjNhNTA3Y2EwZjU2ODIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjoxLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEifQ"
         }
       ]
@@ -58,31 +58,31 @@
     },
     {
       "id": "claim_be4eb71e30b54598a9b8dc6666228d3e",
-      "statement": "The systemd unit runs as www-data, uses a Unix socket under RuntimeDirectory, restarts on failure, applies hardening directives, and allows 15 seconds for stop.",
+      "statement": "The systemd unit runs as www-data, uses a Unix socket under RuntimeDirectory, restarts on failure, applies hardening directives, and allows 15 seconds for stop; its TCP-fallback comment recommends tcp:127.0.0.1:5000 rather than 0.0.0.0 (2026-11 hardening).",
       "evidence": [
         {
-          "resource": "repo://deploy/furry-drama-be-neo.service#L1-L34",
-          "version": "repo-lines-v1:sha256:ffbf494aaf37d5315c5c5c8f9309b054b6126b2805deba7f952a5e2d2015a493:eyJzZWxlY3RlZExpbmVDb3VudCI6MzQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImFlNmM2M2NmZjMzYmNmYTNiNmEyZDZkMGM5ZGQxOTUyMWRlZGFhMzUxMTQ2YjFhNjQyZDJiZmM5Y2Y1YTFlMWYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImI5NzQ5YzMxYmI3ZGMzODEwMmQxZmZjZGE1MjZlNWU1ZTZmNjZjYjk1ZGMzZDE4NzI3YWE4NDM4ZWUxYTJiNWYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+          "resource": "repo://deploy/furry-drama-be-neo.service#L1-L35",
+          "version": "repo-lines-v1:sha256:b89ae8ce39059e2349bb11540caf04c927acb4bfc5e951a949f8b8c8e0a11eac:eyJzZWxlY3RlZExpbmVDb3VudCI6MzUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImFlNmM2M2NmZjMzYmNmYTNiNmEyZDZkMGM5ZGQxOTUyMWRlZGFhMzUxMTQ2YjFhNjQyZDJiZmM5Y2Y1YTFlMWYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImI5NzQ5YzMxYmI3ZGMzODEwMmQxZmZjZGE1MjZlNWU1ZTZmNjZjYjk1ZGMzZDE4NzI3YWE4NDM4ZWUxYTJiNWYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
         }
       ]
     },
     {
       "id": "claim_5c6ee09fda9a4135992cf932a5e4664f",
-      "statement": "The deploy run script execs the binary in the foreground with a configurable config path and listen address, despite describing a nohup alternative.",
+      "statement": "The deploy run script execs the binary in the foreground with a configurable config path and listen address (default tcp:127.0.0.1:5000, loopback only since 2026-11), despite describing a nohup alternative.",
       "evidence": [
         {
-          "resource": "repo://deploy/run.sh#L1-L19",
-          "version": "repo-lines-v1:sha256:6ca5804fef957b86f394dfe90f457eb7f8170c72e76417ebec8eead174d3a0ac:eyJzZWxlY3RlZExpbmVDb3VudCI6MTksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImE4MDc2ZDNkMjhkMjFlMDIwMTJiMjBlYWY3ZGJmNzU0MDlhNjI3NzEzNDQzOTAyNWYyODJlMzY4ZTMzMDVhYmYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjMxZTM4OTQxOTk3NmM2N2E4Y2NjMDgyOGEwMmUyZTNmZjU4ZDVkYTAwOTYwM2Y5MTBkNDY4NTg0YjY1YjlmMjMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+          "resource": "repo://deploy/run.sh#L1-L20",
+          "version": "repo-lines-v1:sha256:576a4114f260d0c1d072f9d1dcf8dd82df93e81d443f9cbb3342fe7c0e88ea83:eyJzZWxlY3RlZExpbmVDb3VudCI6MjAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImE4MDc2ZDNkMjhkMjFlMDIwMTJiMjBlYWY3ZGJmNzU0MDlhNjI3NzEzNDQzOTAyNWYyODJlMzY4ZTMzMDVhYmYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjMxZTM4OTQxOTk3NmM2N2E4Y2NjMDgyOGEwMmUyZTNmZjU4ZDVkYTAwOTYwM2Y5MTBkNDY4NTg0YjY1YjlmMjMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
         }
       ]
     },
     {
       "id": "claim_91461108de234f3f8010ac753a6beb3d",
-      "statement": "ini 模板共八段生产取向默认值：server（含代理标头四键注释块）、database、jwt、email、vapid、webauthn（Passkey rp_id/rp_name/origins，留空自动推导）、oauth（QQ 预留）与 security（登录锁定、用户名策略三键、ip_region_enabled=false 及 ADR-018 双数据源五键），并建议 chmod 600（含密钥）。",
+      "statement": "ini 模板共八段生产取向默认值：server（含代理标头四键注释块，trusted_proxies 注释注明只校验直连对端、须反代层覆盖写入标头或仅放行 CDN 回源网段）、database、jwt、email、vapid、webauthn（Passkey rp_id/rp_name/origins，留空自动推导）、oauth（QQ 预留）与 security（登录锁定、用户名策略三键、ip_region_enabled=false 及 ADR-018 双数据源五键），并建议 chmod 600（含密钥）。",
       "evidence": [
         {
-          "resource": "repo://deploy/furry-drama-be-neo.ini#L9-L114",
-          "version": "repo-lines-v1:sha256:950b7dd408eb2386ffaad0a0bf7193b544cb1c6947d6759dd4466f084cddfac1:eyJzZWxlY3RlZExpbmVDb3VudCI6MTA2LCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiIwMWJhNDcxOWM4MGI2ZmU5MTFiMDkxYTdjMDUxMjRiNjRlZWVjZTk2NGUwOWMwNThlZjhmOTgwNWRhY2E1NDZiIiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiJkNDQxMmYyYTE0NTU2ZjQ4YzUxMGE5M2FjN2Y0MjNjNjA2ODczMWY5ZjYwNTBkYjQxMmYxYjM4MjU5MDg4ZDIyIiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiI3OGU4MzkyOTdmY2U4YzcxNmYzNGRkMDgwNmI0YzUwM2NjMjNkMDNmOGM4NTZiZDcxMjEyNTFhODg0MjM5ZTZjIiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MCwiZm9sbG93aW5nQ29udGV4dEhhc2giOiJlM2IwYzQ0Mjk4ZmMxYzE0OWFmYmY0Yzg5OTZmYjkyNDI3YWU0MWU0NjQ5YjkzNGNhNDk1OTkxYjc4NTJiODU1In0"
+          "resource": "repo://deploy/furry-drama-be-neo.ini#L9-L118",
+          "version": "repo-lines-v1:sha256:cc083823e619134a3f29893526ab6012f138e2da6ca6dce65f01a67fb24d56bb:eyJzZWxlY3RlZExpbmVDb3VudCI6MTEwLCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiIwMWJhNDcxOWM4MGI2ZmU5MTFiMDkxYTdjMDUxMjRiNjRlZWVjZTk2NGUwOWMwNThlZjhmOTgwNWRhY2E1NDZiIiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiJkNDQxMmYyYTE0NTU2ZjQ4YzUxMGE5M2FjN2Y0MjNjNjA2ODczMWY5ZjYwNTBkYjQxMmYxYjM4MjU5MDg4ZDIyIiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiI3OGU4MzkyOTdmY2U4YzcxNmYzNGRkMDgwNmI0YzUwM2NjMjNkMDNmOGM4NTZiZDcxMjEyNTFhODg0MjM5ZTZjIiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MCwiZm9sbG93aW5nQ29udGV4dEhhc2giOiJlM2IwYzQ0Mjk4ZmMxYzE0OWFmYmY0Yzg5OTZmYjkyNDI3YWU0MWU0NjQ5YjkzNGNhNDk1OTkxYjc4NTJiODU1In0"
         }
       ]
     },
@@ -131,10 +131,20 @@
           "version": "repo-lines-v1:sha256:52e3fc9319576e5749ce8035f426f2aff0f1d5ffdb0a81c253c1c374abf3651d:eyJzZWxlY3RlZExpbmVDb3VudCI6MTMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjM3OTI4ZmZjMjkwNTMwNTJhYmE4ZmJhMTRmZTMyMzQxN2ExMjQ0NzY1MjkzNzc5ZDM0YjkyMDJlZmIwMjE3MmQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImY1YTYyMmM1NzE5OWVlNTExYzJiZGM5MjA3NzM1Zjk5YTc1MWUzZjYwYTQ0ZWNkODlmMDMzODA0ZDIyYTI4MDgiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjkwMGY5YTdiMzNmYTgyOTE5YWMyNWM5NzNkOWYzZjQ1M2FjYzA4MDk4YzJkNTE2N2UwZjIyODU2ZmVjNmI2ZjIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImNiYzMyYjdlYTg1ZWQ2MmY1MTFkZGViYTU1YmMyNmE5YjBhMDgxYzhkOGNhMDc3ZmYzZjk0MDVhMDY4ODUzNTgifQ"
         }
       ]
+    },
+    {
+      "id": "claim_87bb3cf9ad364395a4d613f66fcac17b",
+      "statement": "deploy/nginx.conf.example（2026-11 ADR-022 新增）给出两种反代加固形态：形态 A（经 CDN/ESA 回源）用 geo+防火墙把源站限制为只接受 CDN 回源网段，CF-Connecting-IP 由边缘覆盖写入且 nginx 原样转发（禁加覆盖）；形态 B（无 CDN，访客直连本机 nginx）用 $remote_addr 覆盖写入全部优先标头、客户端自带代理标头不外传；公共代理段含 SSE 关缓冲/长读超时/HTTP1.1 长连接与 client_max_body_size 10m，并给出配套 backend.ini 三键。",
+      "evidence": [
+        {
+          "resource": "repo://deploy/nginx.conf.example#L1-L75",
+          "version": "repo-lines-v1:sha256:991a5cfb427b7b6617dfe3bfccaf9de4dab06766b6f15188103640a54a48f809:eyJzZWxlY3RlZExpbmVDb3VudCI6NzUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY2OTNiZjc3MGM0MDFhNWMzYmU3MzRlMWUxOTg4Mjg4MmIzMjRhNjlhNGQxMzdmMTljYTljMjliNTZiODRkN2EiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImYwYjJjMmY1YTZkN2Y3ODZkNzE4ZmI4ODFkNWQ2ZmQwMTI3YWRmZjRiZmEyYTcwZmU3NGE1YzRmMDk0Y2Q1ZmEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
     }
   ],
   "verification": {
     "by": "openwiki/0.7.2",
-    "at": "2026-11-16T17:33:30.305Z"
+    "at": "2026-11-17T17:20:26.784Z"
   }
 }

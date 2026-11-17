@@ -38,15 +38,15 @@ sources:
     resource: repo://internal/service/passkey.go
   - id: openwiki-source-3f2309f0c3b4e4f8068472e9
     resource: repo://internal/service/register.go
-generated: { by: "zcode", at: "2026-11-16T17:33:30.305Z" }
+generated: { by: "zcode", at: "2026-11-17T17:20:26.784Z" }
 verified:
   - by: openwiki/0.7.2
-    at: 2026-11-16T17:33:30.305Z
+    at: 2026-11-17T17:20:26.784Z
 ---
 
 # 约定与有意保留的怪癖
 
-本项目刻意保留旧实现的行为。若干看起来像缺陷的地方其实是兼容契约。经验法则是：任何会改变 HTTP 响应、状态码、message key、限流 key 或存储格式的改动都是行为变更，需要明确决策。固定文案同样属于契约；最近新增的例子是集数称呼——站内通知、Push、邮件、RSS 与更新日历统一经 `episodeRefText`（`internal/handler/episodes.go`）输出，避免各处各自拼「第N集」。近期决策见 `docs/decisions.md`：ADR-013（客户端 IP 统一走 gin `c.ClientIP()`，代理标头信任策略可配置）、ADR-014（2FA 加固：enable 不降级 / 备份码哈希 / TOTP 一次性消费）、ADR-015（refresh 独立限流 + 并发宽限放宽到 2 分钟）、ADR-016（认证排障：会话墓碑 + authevents + cmd/diag）、ADR-017（IP 地域解析默认禁用）、ADR-018（IP 地域数据源切换纯真：云市场 API + czdb 离线库可切换/兜底）、ADR-019（认证链路安全加固：注销定点写 / 设备令牌 / 原子限流键 / 码位防覆盖 / 2FA 无凭据恢复）。用户系统重构（UID + 用户名折叠登录、角色化 2FA、Passkey、useradmin CLI）落地在 b8fc8b0。模块路径已迁移至 `github.com/Furry-Drama-Tracker/backend`，全部导入路径与文档同步更新。
+本项目刻意保留旧实现的行为。若干看起来像缺陷的地方其实是兼容契约。经验法则是：任何会改变 HTTP 响应、状态码、message key、限流 key 或存储格式的改动都是行为变更，需要明确决策。固定文案同样属于契约；最近新增的例子是集数称呼——站内通知、Push、邮件、RSS 与更新日历统一经 `episodeRefText`（`internal/handler/episodes.go`）输出，避免各处各自拼「第N集」。近期决策见 `docs/decisions.md`：ADR-013（客户端 IP 统一走 gin `c.ClientIP()`，代理标头信任策略可配置）、ADR-014（2FA 加固：enable 不降级 / 备份码哈希 / TOTP 一次性消费）、ADR-015（refresh 独立限流 + 并发宽限放宽到 2 分钟）、ADR-016（认证排障：会话墓碑 + authevents + cmd/diag）、ADR-017（IP 地域解析默认禁用）、ADR-018（IP 地域数据源切换纯真：云市场 API + czdb 离线库可切换/兜底）、ADR-019（认证链路安全加固：注销定点写 / 设备令牌 / 原子限流键 / 码位防覆盖 / 2FA 无凭据恢复）、ADR-020（`users.email` 成为可选字段，email_1 稀疏唯一迁移，任何写路径不得写 `email:""`）、ADR-021（CreateSingle 必填缺失 500→400 `EPS0038`；errors 包导出 `CallerSite`/新增 `Abort500SiteC` 并修正 skip 自指，5xx 日志 site 指向真实调用点）、ADR-022（OpenVuln 审计七项修复：登录/2FA 锁定预算前置占用 `TryIncLoginAttempts`、限流键绑定 `identifier`、创作者版本回滚强制回 pending、approve `expectedUpdatedAt` 内容绑定 409 `REV0007`、创作者单集 `platformLinks` 门禁 403 `EPS0039`、生产 trust-all 代理标头启动告警与 `deploy/nginx.conf.example` 部署加固）。用户系统重构（UID + 用户名折叠登录、角色化 2FA、Passkey、useradmin CLI）落地在 b8fc8b0。模块路径已迁移至 `github.com/Furry-Drama-Tracker/backend`，全部导入路径与文档同步更新。
 
 ## 编码规则
 
@@ -111,7 +111,12 @@ verified:
 |---|---|---|
 | 端点限流只匹配 `/api/<mount>` 与子路径 | 单前缀路由（v1 镜像已移除） | 其他前缀（包括 `/api/v1`）不会触发端点限流 |
 | 共享 spec 的路由共用限流器 | `RegisterRoutes` 按 spec 名/窗口/上限缓存 | 2FA 预算在 Mounts 六条路由间共享（2026-11 补入 `/2fa/enable`——它是植入持久凭据的端点，此前缺项导致实际只剩全局 300/min）；refresh 用独立 `RefreshSpec`（60/15min），见 ADR-015 |
-| 凭证/邮件类限流键绑定目标邮箱（请求体 email 小写后 sha256 摘要） | 来源 IP 可经伪造代理标头轮换，IP 键退化为无限流（ADR-019）；keyDigest 同时修复 CWE-770 键驻留体积随输入长度膨胀 | auth/twoFactor/passwordReset/emailVerify 四个 spec 在带 email 请求体时改用 `spec:sha256(邮箱)` 计数；无邮箱体端点回退 IP 键；`/api/auth/verify-email` 固定回退 IP key（email 与被保护资源无绑定，按 email 分桶会让爆破 spec 失效）；改 key 组成会重置既有计数 |
+| 凭证/邮件类限流键绑定认证标识（identifier 优先，回退 email，小写后 sha256 摘要） | 来源 IP 可经伪造代理标头轮换，IP 键退化为无限流（ADR-019）；identifier 优先因 login/login-2fa 的实际认证字段是 identifier——按 email 取键时攻击者可轮换随机 email 每请求各得一个新桶（ADR-022）；keyDigest 同时修复 CWE-770 键驻留体积随输入长度膨胀 | auth/twoFactor/passwordReset/emailVerify 四个 spec 在带标识请求体时改用 `spec:sha256(标识)` 计数；无标识体端点回退 IP 键；`/api/auth/verify-email` 固定回退 IP key（email 与被保护资源无绑定，按 email 分桶会让爆破 spec 失效）；改 key 组成会重置既有计数 |
+| 登录/2FA 失败配额前置占用（TryIncLoginAttempts），正确密码签发 2FA 挑战也计入名额 | 并发下「读快照→校验→事后计数」使猜测预算随并发数膨胀（TOCTOU）；「签发前不清零」契约延伸 | 连续 5 次只签发挑战不完成 2FA 触发 30 分钟瞬态锁；正常单次登录的成功路径经 `ResetLoginAttempts` 清除；2FA 失败响应由「第 5 次起 423」变为「名额占满时 423」，对外错误码 DEV0016/DEV0017 未变（ADR-022） |
+| 创作者版本回滚强制回 pending（剥审核态字段） | 快照逐字 `$set` 会把已拒绝下架的剧集翻回 approved 或复活 pendingChanges（CWE-863） | creator 回滚剥除 reviewNote/reviewedBy/reviewedAt/pendingChanges/hasPendingChanges/pendingChangeSummary 并置 `reviewStatus=pending`；admin/superadmin 回滚保持原语义（ADR-022） |
+| `PUT /review/approve/:id` 支持 `expectedUpdatedAt` 内容绑定（可选，缺省跳过） | 管理员查看后、审批前创作者改写正式字段或整体替换 pendingChanges 的 TOCTOU（CWE-367） | 提供且与当前 `updatedAt` 毫秒值不符 → 409 `REV0007` 强制重新查看；0/缺省向后兼容，前端接入后应必传（ADR-022） |
+| 创作者单集 `platformLinks` 门禁（403 `EPS0039`） | 单集集合无审核字段，创作者写入的链接会绕过审核直接公开并随追更通知/邮件广播（CWE-863） | `CreateSingle`/`UpdateSingle` 对 creator 且携带非空 platformLinks 拒绝；空对象/缺省不影响清空语义；编号/标题/排期与管理员操作不受限（ADR-022） |
+| `CreateSingle` 必填缺失返回 400 `EPS0038` | 与同文件 `Create`（EPS0020）契约对齐；历史为 500 catch-all（ADR-021） | `title` 为空或 `episodeNumber` 字段缺失时聚合 mongoose 风格消息；`episodeNumber` 仍只校验字段存在性 |
 | 非对象 JSON 请求体（数组/标量）→ 400 SYS0002 | 旧行为静默丢弃、handler 读零值后表现为误导性业务错误 | API 请求体必须是 JSON 对象；JSON 语法错误仍是 `BDP0003`（encoding/json 原文） |
 | 任何写路径不得写 `users.email:""` | email 是可选字段（ADR-020）：空串是"字段存在"，稀疏唯一索引 email_1 仍对其计唯一性 | 无邮箱 = 文档缺省该字段；存量空串/null 由 `email_unique_sparse_v1` 迁移清理；API 输出缺省为 `""` 由前端按空值展示 |
 | otpauth secret 展示格式是 RFC 4648 Base32，内部存储保持标准 base64 | otpauth:// 规范要求 Base32（无填充大写），既有密文是 base64 | `/2fa/enable` 同时返回 `secret`（base64，既有字段）与 `secretBase32`（工具识别用）；两格式勿混改 |

@@ -24,10 +24,10 @@ sources:
     resource: repo://internal/server/app.go
   - id: openwiki-source-ebbcecfb3e8c07ba5e940ccd
     resource: repo://internal/server/register_routes.go
-generated: { by: "zcode", at: "2026-11-16T17:33:30.305Z" }
+generated: { by: "zcode", at: "2026-11-17T17:20:26.784Z" }
 verified:
   - by: openwiki/0.7.2
-    at: 2026-11-16T17:33:30.305Z
+    at: 2026-11-17T17:20:26.784Z
 ---
 
 # 请求生命周期与中间件管线
@@ -151,7 +151,7 @@ panic 恢复用 `gin.CustomRecovery` 替换了 gin 默认的纯文本 500（后�
 
 限流器使用 `ulule/limiter` 与内存存储，因此计数是固定窗口且进程本地的。响应包含 draft-6 `RateLimit-*` 头，429 时包含 `Retry-After`。
 
-限流键在凭证/邮件类 spec 上绑定目标账号（ADR-019）：`auth`、`twoFactor`、`passwordReset`、`emailVerify` 四个 spec 在请求体带 `email` 时改用 `spec:sha256(邮箱小写)` 计数（`keyDigest` 把攻击者可控的键分量压缩为定长摘要——语义不变，但内存 store 中计数条目的驻留体积不再随请求体长度线性增长，修复 CWE-770 无上限资源分配）——来源 IP 可经伪造代理标头轮换（CWE-348），保留 IP 分量会让这些 spec 在 IP 轮换下退化为无限流；绑定邮箱后，对同一账号的猜测无论换多少来源 IP 都共享同一计数桶。请求体无 `email` 的挂载（`reset-password`、`change-password`、`2fa/*` 等无邮箱体端点）回退到原 `spec:IP` 键，与旧行为一致。**`/api/auth/verify-email` 是固定例外**：该端点按 code 解析验证条目，请求体 `email` 只是与被保护资源无绑定的可选匹配谓词——按 email 取键会让每次换随机 email 的猜测各得一个新桶，5/h spec 对爆破完全失效，因此该挂载固定回退 IP key（需配合正确的 `trusted_proxies` 配置）。`requestEmailChange` 仍同时按来源 IP 与目标新邮箱小写值限流，避免用不同邮箱刷验证邮件。Passkey 仪式请求体不含 email，天然走 IP 键（仪式本身有 ceremony 会话一次性约束）。
+限流键在凭证/邮件类 spec 上绑定目标账号（ADR-019）：`auth`、`twoFactor`、`passwordReset`、`emailVerify` 四个 spec 在请求体带认证标识时改用 `spec:sha256(标识小写)` 计数（`keyDigest` 把攻击者可控的键分量压缩为定长摘要——语义不变，但内存 store 中计数条目的驻留体积不再随请求体长度线性增长，修复 CWE-770 无上限资源分配）。**键取自 `emailFromBody`：优先请求体 `identifier` 字段，回退 `email`**（2026-11 ADR-022 修复）——login / login-2fa 的实际认证标识是 `identifier`（email 仅旧客户端回退），若按 email 取键，攻击者用 identifier 认证的同时轮换随机 email，每个猜测请求各得一个新桶，`AuthSpec`/`TwoFactorSpec` 的 5 次/15min 即告失效（实测 900× 放大）；passwordReset / emailVerify 等无 identifier 的端点行为不变。来源 IP 可经伪造代理标头轮换（CWE-348），保留 IP 分量会让这些 spec 在 IP 轮换下退化为无限流；绑定标识后，对同一账号的猜测无论换多少来源 IP 都共享同一计数桶。请求体无标识的挂载（`reset-password`、`change-password`、`2fa/*` 等无邮箱体端点）回退到原 `spec:IP` 键，与旧行为一致。**`/api/auth/verify-email` 是固定例外**：该端点按 code 解析验证条目，请求体 `email` 只是与被保护资源无绑定的可选匹配谓词——按 email 取键会让每次换随机 email 的猜测各得一个新桶，5/h spec 对爆破完全失效，因此该挂载固定回退 IP key（需配合正确的 `trusted_proxies` 配置）。`requestEmailChange` 仍同时按来源 IP 与目标新邮箱小写值限流，避免用不同邮箱刷验证邮件。Passkey 仪式请求体不含 email，天然走 IP 键（仪式本身有 ceremony 会话一次性约束）。
 
 429 命中时，响应体走带码信封（`RLM0001`，message 为 spec 的固定文案），并设置 draft-6 `RateLimit-*` 头与 `Retry-After`。中间件还会通过 `RateLimitOpts.Log` 输出一条认证诊断事件：`event=ratelimited`，带限流器名（spec 名写入 reason）、路径、IP 与 retry_after 秒数——在此之前日志里只有一个 429 状态码，无法区分是登录、refresh 还是全局限流命中。
 

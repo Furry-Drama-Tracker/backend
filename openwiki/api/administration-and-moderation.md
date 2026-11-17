@@ -5,7 +5,7 @@ description: 后台管理、剧集审核与回收站、举报、统计、分类�
 tags: [api, admin, moderation, review, audit, statistics]
 verified:
   - by: openwiki/0.7.2
-    at: 2026-11-16T17:33:30.305Z
+    at: 2026-11-17T17:20:26.784Z
 sources:
   - id: openwiki-source-85047375915a57a29b05d0cd
     resource: repo://cmd/useradmin/main.go
@@ -25,9 +25,11 @@ sources:
     resource: repo://internal/handler/review.go
   - id: openwiki-source-8bf4cd0f9bad70a28fad32ec
     resource: repo://internal/handler/stats.go
+  - id: openwiki-source-9492bfb29873d9e820f1f091
+    resource: repo://internal/handler/versions.go
   - id: openwiki-source-54e2988cad872a1deb6494f6
     resource: repo://internal/repository/episode_trash.go
-generated: { by: "zcode", at: "2026-11-16T17:33:30.305Z" }
+generated: { by: "zcode", at: "2026-11-17T17:20:26.784Z" }
 ---
 
 # 管理与审核 API
@@ -87,6 +89,8 @@ generated: { by: "zcode", at: "2026-11-16T17:33:30.305Z" }
 
 审核路由最终仅管理员可访问。通过和拒绝的语义取决于剧集是否已审核：
 
+`PUT /review/approve/:id` 的请求体除备注外还接受可选的 `expectedUpdatedAt`（管理员所查看内容的 `updatedAt` 毫秒时间戳，由审核队列/详情响应原样回传）：提供且与当前剧集不符时返回 409 `REV0007`「内容在送审后已变更，请重新查看再审批」，强制管理员重新查看后再审批；0/缺省跳过该校验（向后兼容，前端接入后应必传）。这封堵了「管理员查看之后、审批之前创作者改写正式字段或整体替换 pendingChanges」的 TOCTOU 窗口（CWE-367，2026-11）。`Reject` 的请求体同样会读取该字段但当前忽略。
+
 - **已审核剧集有待审核改动时通过**：把 `episode.PendingChanges` 应用到线上字段并清空待审核块。失效 `episode_<id>` 与所有 `episodes_` 前缀的缓存，并通知创作者。
 - **新提交的待审核剧集通过**：用单次原子更新把 `reviewStatus` 置为 `approved`，失效缓存并通知创作者。
 - **已审核剧集的待审核改动被拒绝**：丢弃 `pendingChanges`，线上内容不变，记录备注与审核人，并通知创作者。
@@ -142,7 +146,7 @@ HTTP 层只暴露列表、版本日志、恢复与彻底删除，四者均为管
 - 分页列出版本（`page` 默认 1，`limit` 默认 20，无上限钳制）；
 - 获取单个版本快照；
 - 对比两个版本，按固定 DTO 字段顺序遍历，客户端依赖该顺序；
-- 回滚到指定版本。
+- 回滚到指定版本。回滚语义按角色分流（2026-11，CWE-863）：创作者发起的回滚从版本快照的 `$set` 中剥除 `reviewNote`/`reviewedBy`/`reviewedAt`/`pendingChanges`/`hasPendingChanges`/`pendingChangeSummary` 六个审核态字段，并强制 `reviewStatus=pending` 重新送审——快照逐字写入会把已被拒绝下架的剧集直接翻回 `approved`（推翻管理员处置并伪造审核归属），或把历史 `pendingChanges` 复活进审核队列；admin/superadmin 回滚保持原语义（管理员操作本身即审核决定）。
 
 有一个固定怪癖：`limit` 为 0 时，列表响应的 `totalPages` 序列化为 `null` 而不是数字。
 
