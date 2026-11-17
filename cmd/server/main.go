@@ -64,6 +64,22 @@ func main() {
 	if cfg.Server.InsecureOrigins {
 		log.Printf("[SECURITY WARN] 生产环境 CORS 源仍包含 localhost/127.0.0.1/example.com 或为空，请尽快配置真实站点域名")
 	}
+	// 代理标头信任策略（ADR-013）：生产缺省信任代理标头且 trusted_proxies 未配置
+	// 时，gin 信任所有来源——任何能直连本进程的客户端都可轮换 CF-Connecting-IP /
+	// X-Forwarded-For 伪造客户端 IP：每个 IP 维度的限流桶（含全局 300/min）随请求
+	// 轮换失效，审计日志/LastLoginIP/新设备邮件的 IP 归因可被任意伪造。
+	// 注意 trusted_proxies 只校验"直连对端"是否受信：socket/loopback 部署下对端
+	// 恒为本机反代，防不住经反代透传的客户端伪造标头——必须在反代层覆盖写入
+	// 这些标头（见 deploy/nginx.conf.example 与 README 部署说明）。
+	if !cfg.IsDev {
+		trust := true
+		if cfg.Server.TrustProxyHeaders != nil {
+			trust = *cfg.Server.TrustProxyHeaders
+		}
+		if trust && len(cfg.Server.TrustedProxies) == 0 {
+			log.Printf("[SECURITY WARN] 生产环境正在信任代理标头识别客户端 IP，但 trusted_proxies 未配置（gin 信任所有来源）：IP 维度限流可被伪造标头轮换绕过、IP 归因可被伪造；请在反代层覆盖写入代理标头并按拓扑配置 trusted_proxies（见 deploy/nginx.conf.example）")
+		}
+	}
 	// IP 地域解析默认关闭（见 docs/decisions.md ADR-017）：
 	// 开启后登录/注册/设备确认会把客户端 IP 发给所选数据源
 	// （aliyun=阿里云云市场纯真 API / czdb=纯真离线库，见 ADR-018）。

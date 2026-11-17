@@ -1,0 +1,75 @@
+# =============================================================================
+# neo-server 反向代理加固示例（nginx）
+#
+# 目的：保证 Go 进程看到的代理标头（CF-Connecting-IP / X-Real-IP / X-Forwarded-For）
+# 一定来自可信网关，而不是客户端伪造。这是 IP 维度限流（登录/注册/验证码/全局限流）
+# 与审计归因（LastLoginIP、新设备提醒邮件、authevents）可信的前提。
+#
+# ⚠️ 仅在 Go 侧配置 trusted_proxies（如 127.0.0.1,::1）并不能封死伪造路径：
+#   socket/loopback 部署下 Go 的直连对端恒为本机反代，永远"受信"，客户端经
+#   反代透传的伪造 CF-Connecting-IP 仍会被原样采信（该头非 nginx 管理标头，
+#   proxy_pass 默认逐字透传）。必须同时做到以下两点之一：
+#
+#   形态 A（经 CDN/ESA 回源）：限制源站只接受 CDN 回源网段（下面 geo + allow），
+#     让 CF-Connecting-IP 只可能由 CDN 边缘覆盖写入；nginx 原样转发该头。
+#   形态 B（无 CDN，访客直连本机 nginx）：nginx 用 $remote_addr 覆盖写入全部
+#     优先标头，客户端自带的任何代理标头都不外传。
+#
+# 配套 Go 侧（backend.ini）：
+#   trust_proxy_headers = true
+#   trusted_proxies = 127.0.0.1, ::1        # 本机反代（形态 A 还需追加 CDN 回源网段，
+#                                           # 否则 X-Forwarded-For 回溯会停在 CDN 节点 IP）
+#   proxy_ip_headers = CF-Connecting-IP,X-Real-IP,X-Forwarded-For
+# =============================================================================
+
+# ---- 形态 A：经 ESA/CDN 回源时，仅允许 CDN 回源网段访问源站 ----
+# 把 <ESA回源网段> 替换为 CDN 控制台公布的回源 IP 段（可多条）；
+# 并在防火墙/安全组层面同样只放行这些网段到 80/443（双保险）。
+# geo $esa_origin {
+#     default        0;
+#     <ESA回源网段>  1;
+# }
+# server {
+#     listen 443 ssl http2;
+#     server_name example.com;
+#     # ssl_certificate     /etc/nginx/certs/example.com.pem;
+#     # ssl_certificate_key /etc/nginx/certs/example.com.key;
+#     if ($esa_origin = 0) { return 403; }
+#     include /etc/nginx/snippets/furry-drama-be-neo-proxy.conf;
+# }
+
+# ---- 形态 B：无 CDN，访客直连本机 nginx ----
+# server {
+#     listen 443 ssl http2;
+#     server_name example.com;
+#     # ssl_certificate     /etc/nginx/certs/example.com.pem;
+#     # ssl_certificate_key /etc/nginx/certs/example.com.key;
+#     include /etc/nginx/snippets/furry-drama-be-neo-proxy.conf;
+#     # 覆盖写入代理标头（形态 B 必加；形态 A 禁加——会覆盖掉 CDN 写入的真实
+#     # 访客 IP，使后端记录到的一律是 CDN 节点 IP）：
+#     # proxy_set_header CF-Connecting-IP $remote_addr;
+#     # proxy_set_header X-Real-IP       $remote_addr;
+# }
+
+# ---- 公共代理段（两个形态共用，去掉注释后另存为 snippets 文件） ----
+# location /api/ {
+#     proxy_pass http://unix:/run/furry-drama-be-neo.sock;
+#     # X-Forwarded-For 追加本机看到的对端：直连伪造链在 Go 侧从右往左回溯时
+#     # 会被 trusted_proxies 正确截断；经 CDN 时真实 IP 在 CF-Connecting-IP。
+#     proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+#     proxy_set_header X-Forwarded-Proto $scheme;
+#     proxy_set_header Host $host;
+#     # SSE（通知流）需要关闭缓冲并放长读超时；HTTP/1.1 保持长连接。
+#     proxy_http_version 1.1;
+#     proxy_set_header Connection "";
+#     proxy_buffering off;
+#     proxy_read_timeout 300s;
+#     # 图片上传上限（后端另有更严的类型/魔数校验）
+#     client_max_body_size 10m;
+# }
+# location /uploads/ {
+#     proxy_pass http://unix:/run/furry-drama-be-neo.sock;
+#     proxy_set_header Host $host;
+#     expires 30d;
+#     add_header Cache-Control "public, immutable";
+# }

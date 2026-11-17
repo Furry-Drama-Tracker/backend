@@ -406,6 +406,8 @@ func TestEnable2FARequiresPasswordReauth(t *testing.T) {
 // TestTwoFactorChallengeDoesNotResetLoginAttempts 密码正确但认证停在 2FA 挑战阶段时
 // 不得清零失败计数：否则"正确密码登录 + OTP 猜测"交替循环可让 login-2fa 的 5 次
 // 锁定永不触发（CWE-307）。清零点在 Login2FA 完整通过之后。
+// 名额前置占用（ADR-021）后，挑战签发会先占一个名额（计数 +1），但不重置——
+// 断言改为"计数不减、不清零"；完整通过第二因素后清零不变。
 func TestTwoFactorChallengeDoesNotResetLoginAttempts(t *testing.T) {
 	ts, repos := testServerWithRepos(t)
 	c := newClient(t, ts.URL)
@@ -437,13 +439,13 @@ func TestTwoFactorChallengeDoesNotResetLoginAttempts(t *testing.T) {
 		t.Fatalf("失败计数应为 2, got %d", got)
 	}
 
-	// 正确密码 → 2FA 挑战；计数必须保持不变。
+	// 正确密码 → 2FA 挑战；挑战签发占用一个名额（计数 +1）但不得清零。
 	out := login(testPassword)
 	if out["need2FA"] != true {
 		t.Fatalf("need2FA expected: %v", out)
 	}
-	if got := attempts(); got != 2 {
-		t.Fatalf("2FA 挑战阶段不得清零失败计数, got %d", got)
+	if got := attempts(); got < 2 {
+		t.Fatalf("2FA 挑战阶段不得清零失败计数（名额前置占用后应为 3）, got %d", got)
 	}
 
 	// 完整通过第二因素 → 清零。

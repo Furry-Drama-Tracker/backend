@@ -3,6 +3,7 @@ package repository_test
 import (
 	"context"
 	"os"
+	"sync"
 	"testing"
 	"time"
 
@@ -145,5 +146,98 @@ func TestUserRepoCreateKeepsExplicitCreatedAt(t *testing.T) {
 	stored := rawCreatedAt(t, raw)
 	if !stored.Equal(explicit) {
 		t.Fatalf("createdAt 落库值被改写：want %v, got %v", explicit, stored)
+	}
+}
+
+// TestTryIncLoginAttemptsQuotaAndTOCTOU 覆盖 TryIncLoginAttempts 的配额语义：
+//  1. 串行恰好放行 maxAttempts 次，之后拒绝且 lockUntil 落库；
+//  2. 遗留文档缺 loginAttempts 字段（$lt 数值比较不匹配缺失）同样可占名额；
+//  3. 过期锁先重置计数再占用；ResetLoginAttempts 清零后恢复可用；
+//  4. 并发下成功数恒等于 maxAttempts（钉住 TOCTOU 修复：读快照→事后计数的
+//     check-then-act 窗口曾使并发猜测预算膨胀到并发数）。
+func TestTryIncLoginAttemptsQuotaAndTOCTOU(t *testing.T) {
+	env, repo := newUserTestEnv(t)
+
+	mustRaw := func(t *testing.T, doc bson.M) primitive.ObjectID {
+		t.Helper()
+		id := primitive.NewObjectID()
+		doc["_id"] = id
+		if _, err := env.coll("users").InsertOne(env.ctx(), doc); err != nil {
+			t.Fatalf("insert raw: %v", err)
+		}
+		return id
+	}
+	readRaw := func(t *testing.T, id primitive.ObjectID) bson.M {
+		t.Helper()
+		var raw bson.M
+		if err := env.coll("users").FindOne(env.ctx(), bson.M{"_id": id}).Decode(&raw); err != nil {
+			t.Fatalf("read raw: %v", err)
+		}
+		return raw
+	}
+
+	// 1) 串行配额：恰好 5 次成功，第 6 次拒绝并上锁。
+	lockedID := mustRaw(t, bson.M{"accountID": "tryquota"})
+	for i := 0; i < 5; i++ {
+		if !repo.TryIncLoginAttempts(env.ctx(), lockedID) {
+			t.Fatalf("第 %d 次应占到名额", i+1)
+		}
+	}
+	if repo.TryIncLoginAttempts(env.ctx(), lockedID) {
+		t.Fatal("配额耗尽后应拒绝")
+	}
+	raw := readRaw(t, lockedID)
+	if lu, _ := raw["lockUntil"].(int64); lu <= time.Now().UnixMilli() {
+		t.Fatalf("配额耗尽应落 lockUntil, got %v", raw["lockUntil"])
+	}
+
+	// 2) 遗留文档：无 loginAttempts 字段也能占名额（$exists:false 分支）。
+	legacyID := mustRaw(t, bson.M{"accountID": "trylegacy"})
+	if !repo.TryIncLoginAttempts(env.ctx(), legacyID) {
+		t.Fatal("缺 loginAttempts 字段的遗留文档应可占名额")
+	}
+	if v, _ := readRaw(t, legacyID)["loginAttempts"].(int32); v != 1 {
+		t.Fatalf("占用后 loginAttempts 应为 1, got %v", readRaw(t, legacyID)["loginAttempts"])
+	}
+
+	// 3) 过期锁：先重置计数（$inc 后为 1）并清除锁；Reset 后恢复可用。
+	expiredID := mustRaw(t, bson.M{"accountID": "tryexpired",
+		"loginAttempts": int64(5), "lockUntil": time.Now().Add(-time.Minute).UnixMilli()})
+	if !repo.TryIncLoginAttempts(env.ctx(), expiredID) {
+		t.Fatal("过期锁应重置并放行")
+	}
+	raw = readRaw(t, expiredID)
+	if v, _ := raw["loginAttempts"].(int32); v != 1 {
+		t.Fatalf("过期锁重置后首次占用应为 1, got %v", raw["loginAttempts"])
+	}
+	if _, ok := raw["lockUntil"]; ok {
+		t.Fatalf("过期锁应被清除, got %v", raw["lockUntil"])
+	}
+	if err := repo.ResetLoginAttempts(env.ctx(), expiredID); err != nil {
+		t.Fatalf("reset: %v", err)
+	}
+
+	// 4) 并发：32 个 goroutine 同时占名额，成功数必须恒为 maxAttempts(5)。
+	concID := mustRaw(t, bson.M{"accountID": "tryconc"})
+	const goroutines = 32
+	results := make(chan bool, goroutines)
+	var wg sync.WaitGroup
+	for i := 0; i < goroutines; i++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			results <- repo.TryIncLoginAttempts(env.ctx(), concID)
+		}()
+	}
+	wg.Wait()
+	close(results)
+	successes := 0
+	for ok := range results {
+		if ok {
+			successes++
+		}
+	}
+	if successes != 5 {
+		t.Fatalf("并发占用成功数应恒为 maxAttempts(5)（TOCTOU 修复回归）, got %d", successes)
 	}
 }

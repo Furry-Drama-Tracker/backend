@@ -36,14 +36,14 @@
 | GET | `/auth/captcha` | 公开 | captcha 60/min | — | 200 `{parameters:{algorithm,cost,expiresAt,keyLength,keyPrefix,nonce,salt},signature}`（altcha 挑战） |
 | GET | `/auth/check-accountId?accountId=` | 公开 | 20/min | query accountId | 200 `{available:bool}` |
 | POST | `/auth/register` | 公开 | 3/h | `{accountId,username,email,password,deviceInfo?,altcha}`；accountId 3-20 `[a-zA-Z0-9_]`，密码≥8含字母数字 | 200 `{message,email,needVerification:true}`；400 各类校验文案 |
-| POST | `/auth/login` | 公开 | 5/15min | `{email,password,deviceInfo?,altcha}` | 200 用户对象 或 `{need2FA,email,twoFactorChallenge}`；403 `{needVerification}` / `{needDeviceVerify,deviceInfo}` |
+| POST | `/auth/login` | 公开 | 5/15min | `{identifier|email,password,deviceInfo?,altcha}`（identifier=用户名或邮箱，email 为旧客户端回退；限流桶按 identifier 绑定） | 200 用户对象 或 `{need2FA,email,twoFactorChallenge}`；403 `{needVerification}` / `{needDeviceVerify,deviceInfo}` |
 | POST | `/auth/logout` | 登录 | — | — | 200 `{message:"退出成功"}` |
 | POST | `/auth/refresh` | refresh cookie | 60/15min | 需 `refreshToken` cookie | 200 用户对象（轮换新 cookie）；401/409 |
 | GET | `/auth/me` | 登录 | — | — | 200 `{_id,accountId,username,email,isEmailVerified,role,avatar,emailNotificationPrefs,backgroundPrefs,personalWallpapers}` |
 | GET | `/auth/sse-ticket` | 登录 | — | — | 200 `{ticket}`（30s JWT，SSE 用） |
 | POST | `/auth/verify-device` | 公开 | 5/15min | `{token}`（device-verify JWT） | 200 `{verified:true,loginCode}`；400 各类 |
 | POST | `/auth/confirm-device-login` | 公开 | 5/15min | `{loginCode}`（6 位） | 200 用户对象 或 `{need2FA,email,twoFactorChallenge}`；400 |
-| POST | `/auth/login-2fa` | 公开 | 5/15min | `{email,twoFactorToken,twoFactorChallenge,deviceInfo?}` | 200 用户对象；400/403/423 |
+| POST | `/auth/login-2fa` | 公开 | 5/15min | `{identifier|email,twoFactorToken,twoFactorChallenge,deviceInfo?}`（限流桶按 identifier 绑定） | 200 用户对象；400/403/423（失败名额在猜测前占用，预算恒为锁定阈值） |
 | PUT | `/auth/change-password` | 登录 | 3/h | `{currentPassword,newPassword}` | 200 `{message:"密码修改成功"}`（吊销全部会话+清cookie） |
 | POST | `/auth/forgot-password` | 公开 | 3/h | `{email,altcha}` | 200 统一文案（不泄露账号存在性） |
 | POST | `/auth/reset-password` | 公开 | 3/h | `{token,newPassword}` | 200 `{message:"密码重置成功"}`；token 一次性（UsedToken） |
@@ -192,7 +192,7 @@
 |---|---|---|---|
 | GET | `/review/pending` | page/limit | 待审核剧集 + 已审核剧集的待审核修改 |
 | GET | `/review/all` | page/limit | 全部剧集 |
-| PUT | `/review/approve/:id` | — | 有 pendingChanges→应用并清空；新提交→原子置 approved；集数增加会广播 `new_episode` 通知+更新邮件（按剧集/集数/事件去重 1h） |
+| PUT | `/review/approve/:id` | `{note,expectedUpdatedAt?}`（expectedUpdatedAt=审核队列所见 updatedAt 毫秒值；提供且内容已被创作者改动 → 409 REV0007，需重新查看） | 有 pendingChanges→应用并清空；新提交→原子置 approved；集数增加会广播 `new_episode` 通知+更新邮件（按剧集/集数/事件去重 1h） |
 | PUT | `/review/reject/:id` | 备注可选 | 已审核剧集：丢弃 pendingChanges 线上不变；新提交：移入回收站（原因 `rejected`） |
 | PUT | `/review/assign-editor/:episodeId` | `{editorId}` | 分配剧集编辑者 |
 | PUT | `/review/remove-editor/:episodeId` | — | 移除编辑者 |

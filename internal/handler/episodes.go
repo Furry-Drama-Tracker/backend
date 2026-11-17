@@ -681,6 +681,7 @@ func (h *Episodes) SingleIncView(c *gin.Context) {
 // @Param id path string true "单集 ID"
 // @Param body body object true "单集可更新字段"
 // @Success 200 {object} map[string]any "单集对象"
+// @Failure 403 {object} errors.ErrorBody "无权限或单集播放链接需管理员审核设置"
 // @Router /episodes/single/{id} [put]
 func (h *Episodes) UpdateSingle(c *gin.Context) {
 	idStr := c.Param("id")
@@ -754,6 +755,12 @@ func (h *Episodes) UpdateSingle(c *gin.Context) {
 		parent, perr := h.Repos.Episodes.FindByID(ctx, oldSingle.EpisodeID)
 		if perr != nil || !canEdit(parent, user.ID) {
 			apperrors.AbortCoded(c, 403, "EPS0015", "You do not have permission to edit this episode", h.Config.IsDev)
+			return
+		}
+		// 同 CreateSingle：单集播放链接绕过审核直接公开（CWE-863），创作者
+		// 不得直接改写既有单集的 platformLinks（含预告视频链接）。
+		if singleLinksSubmitted(body["platformLinks"]) {
+			abortSingleLinksGate(c, h.Config.IsDev)
 			return
 		}
 	}
@@ -988,6 +995,28 @@ func (h *Episodes) Create(c *gin.Context) {
 	c.JSON(201, h.episodeJSON(e, nil))
 }
 
+// abortSingleLinksGate 渲染创作者单集播放链接门禁的统一 403（EPS0039）：
+// CreateSingle / UpdateSingle 两处共用（码即注册表——每个码唯一调用点，
+// 故收敛到本助手），文案一致。
+func abortSingleLinksGate(c *gin.Context, isDev bool) {
+	apperrors.AbortCoded(c, 403, "EPS0039", "单集播放链接需管理员审核设置，请提交后联系管理员处理", isDev)
+}
+
+// singleLinksSubmitted 判断请求体是否携带非空的单集播放链接（map 形式的
+// platformLinks，值均为字符串；空对象/缺省视为未提交，不影响清空语义）。
+func singleLinksSubmitted(v any) bool {
+	m, ok := v.(map[string]any)
+	if !ok {
+		return false
+	}
+	for k, val := range m {
+		if s, ok := val.(string); ok && k != "" && s != "" {
+			return true
+		}
+	}
+	return false
+}
+
 // CreateSingle POST /api/episodes/:id/episodes（creatorProtect）。
 // @Summary 为剧集添加单集
 // @Tags 剧集
@@ -995,6 +1024,7 @@ func (h *Episodes) Create(c *gin.Context) {
 // @Param id path string true "剧集 ID"
 // @Param body body object true "单集信息"
 // @Success 201 {object} map[string]any "单集对象"
+// @Failure 403 {object} errors.ErrorBody "无权限或单集播放链接需管理员审核设置"
 // @Router /episodes/{id}/episodes [post]
 func (h *Episodes) CreateSingle(c *gin.Context) {
 	idStr := c.Param("id")
@@ -1032,6 +1062,15 @@ func (h *Episodes) CreateSingle(c *gin.Context) {
 	}
 	if len(msgs) > 0 {
 		apperrors.AbortCoded(c, 400, "EPS0038", strings.Join(msgs, ", "), h.Config.IsDev)
+		return
+	}
+	// 单集无审核字段（没有 pendingChanges 等价物），创作者写入的 platformLinks
+	// 会绕过审核闸门直接公开到已过审剧集的详情页，并随追更通知/邮件广播
+	// （CWE-863，任意外部 URL 发布面）。与剧集级 platformLinks 必须走审核的
+	// 信任决策对齐：创作者不得直接设置单集播放链接；编号/标题/排期等常规
+	// 字段不受影响，管理员设置不受限。
+	if user.Role == "creator" && singleLinksSubmitted(body["platformLinks"]) {
+		abortSingleLinksGate(c, h.Config.IsDev)
 		return
 	}
 	singleLinks, msg := sanitizePlatformLinks(body["platformLinks"])

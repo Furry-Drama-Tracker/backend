@@ -1,12 +1,13 @@
 #!/bin/sh
 # neo-server 启动脚本（nohup 备选，未使用 systemd 时）。
 # 用法：sh deploy/run.sh [listen]
-# 默认 TCP :5000；可传 unix:/run/furry-drama-be-neo.sock。
+# 默认只监听回环（对外访问请用 nginx/caddy 反代，见 deploy/nginx.conf.example）；
+# 可传 unix:/run/furry-drama-be-neo.sock。
 set -e
 
 BIN="$(dirname "$0")/../bin/furry-drama-be-neo"
 CONFIG="${CONFIG:-/etc/furry-drama-tracker/backend.ini}"
-LISTEN="${1:-tcp:0.0.0.0:5000}"
+LISTEN="${1:-tcp:127.0.0.1:5000}"
 LOG="/var/log/furry-drama-be-neo.log"
 
 if [ ! -x "$BIN" ]; then

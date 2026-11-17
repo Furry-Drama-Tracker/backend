@@ -65,7 +65,7 @@
 1. **准备**：一台服务器（Linux / Windows 均可）+ 一个 MongoDB（本机安装，或用 [MongoDB Atlas](https://www.mongodb.com/atlas) 免费版）。网页界面在[前端仓库](https://github.com/furry09shou/furry-drama-tracker-frontend)，本仓库只有后端。
 2. **下载**：到 [Releases](https://github.com/Furry-Drama-Tracker/backend/releases/latest) 取对应系统的单文件程序（Linux / macOS 记得先 `chmod +x`）。
 3. **配置**：复制 [`.env.example`](.env.example) 为 `.env`，至少填 `MONGO_URI` 和至少 32 位的随机 `JWT_SECRET`（`openssl rand -hex 32`；Windows 用 `[guid]::NewGuid().ToString('N') + [guid]::NewGuid().ToString('N')`）。
-4. **启动**：运行程序，浏览器打开 <http://localhost:5000/api/health>，看到 `"status": "ok"` 就成功了。默认只监听 `127.0.0.1`，对外访问请用 Nginx / Caddy 反向代理并配 HTTPS。
+4. **启动**：运行程序，浏览器打开 <http://localhost:5000/api/health>，看到 `"status": "ok"` 就成功了。默认只监听 `127.0.0.1`，对外访问请用 Nginx / Caddy 反向代理并配 HTTPS。反代需**覆盖写入代理标头**（`CF-Connecting-IP` / `X-Real-IP` / `X-Forwarded-For`），否则客户端可伪造这些头绕过 IP 限流、伪造审计 IP——参考 [`deploy/nginx.conf.example`](deploy/nginx.conf.example)（经 CDN 回源的形态见该文件注释）。
 5. **建管理员**：`make seed`（或 `go run ./cmd/seed-admin`，需 Go；按报错填 `SUPERADMIN_*` 环境变量）。
 
 > 启动失败多半是 `JWT_SECRET` 太短或 MongoDB 没启动。完整步骤、systemd、备份与排错见 [docs/contributing.md](docs/contributing.md) 和 [`deploy/`](deploy/)。

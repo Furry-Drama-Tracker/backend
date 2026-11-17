@@ -292,6 +292,49 @@ func (r *UserRepo) IncLoginAttempts(ctx context.Context, id any) error {
 	return err
 }
 
+// TryIncLoginAttempts 在失败配额内原子占用一次尝试名额：仅当未锁定且
+// loginAttempts 未达阈值（或字段缺失，兼容 Express 时期遗留文档——$lt 数值
+// 比较不匹配缺失字段）时 $inc 成功并返回 true（本次占用达到阈值时同步上锁）；
+// 配额耗尽或已锁定时返回 false，调用方必须据此拒绝执行后续校验。
+// 把"读快照→检查→校验→事后计数"的 check-then-act 窗口收进单次条件更新，
+// 使并发请求的可用猜测预算恒为 maxAttempts（防 TOCTOU 并发绕过锁定预算；
+// 密码路径与 2FA 路径共用同一模式，二者作为一个修复单元落地）。
+func (r *UserRepo) TryIncLoginAttempts(ctx context.Context, id any) bool {
+	ctx, cancel := r.newCtx(ctx)
+	defer cancel()
+
+	now := time.Now()
+	notLocked := bson.M{"$not": bson.M{"$gt": now.UnixMilli()}}
+
+	// 1) 过期锁：重启计数（与 IncLoginAttempts 语义一致）。
+	if _, err := r.coll.UpdateOne(ctx,
+		bson.M{"_id": ToObjectID(id), "lockUntil": bson.M{"$gt": int64(0), "$lte": now.UnixMilli()}},
+		bson.M{"$set": bson.M{"loginAttempts": 0}, "$unset": bson.M{"lockUntil": ""}}); err != nil {
+		return false
+	}
+
+	// 2) 配额内原子递增：未锁定且未达阈值才匹配（过滤器即状态守卫 + 配额守卫，
+	// 单文档条件更新在 MongoDB 侧原子生效，并发下恰好放行 maxAttempts 次；
+	// $exists:false 分支兼容 Express 时期缺失字段的遗留文档）。
+	res, err := r.coll.UpdateOne(ctx,
+		bson.M{"_id": ToObjectID(id), "lockUntil": notLocked,
+			"$or": bson.A{
+				bson.M{"loginAttempts": bson.M{"$lt": r.maxAttempts}},
+				bson.M{"loginAttempts": bson.M{"$exists": false}},
+			}},
+		bson.M{"$inc": bson.M{"loginAttempts": 1}})
+	if err != nil || res.ModifiedCount == 0 {
+		return false
+	}
+
+	// 3) 本次占用达到阈值 → 上锁（密码正确的成功路径随后的 ResetLoginAttempts
+	// 会清掉这把毫秒级瞬态锁；失败路径保留，保证锁必然落库、计数不会卡死在阈值）。
+	_, _ = r.coll.UpdateOne(ctx,
+		bson.M{"_id": ToObjectID(id), "loginAttempts": bson.M{"$gte": r.maxAttempts}, "lockUntil": notLocked},
+		bson.M{"$set": bson.M{"lockUntil": now.Add(time.Duration(r.lockMinutes) * time.Minute).UnixMilli()}})
+	return true
+}
+
 // ResetLoginAttempts 清零登录失败次数并清除锁定。
 func (r *UserRepo) ResetLoginAttempts(ctx context.Context, id any) error {
 	ctx, cancel := r.newCtx(ctx)

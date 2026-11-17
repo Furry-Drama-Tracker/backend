@@ -62,7 +62,7 @@ func (s *AuthService) Login(c *gin.Context, in LoginInput) (*LoginResult, error)
 		return nil, errors.NewC("AUT0042", 400, "用户名或密码错误")
 	}
 	if repository.IsLocked(user) {
-		return nil, errors.NewC("AUT0043", 400, "用户名或密码错误")
+		return nil, loginLockedError()
 	}
 
 	// 注销宽限已过 → 物理删除全部关联数据后仍返回统一错误（不泄露）。
@@ -75,8 +75,19 @@ func (s *AuthService) Login(c *gin.Context, in LoginInput) (*LoginResult, error)
 		}
 	}
 
+	// 失败配额先行原子占用：占不到名额（配额耗尽或已锁定）直接拒绝，不执行
+	// bcrypt 比较（同时消除并发爆破窗口与对已锁/超额账号的无效 CPU 消耗——
+	// 后者即每爆一次 C×250ms 的 CPU-DoS 放大面）。名额在比较前占用，并发
+	// 请求的可用猜测预算恒为 LoginMaxAttempts，消除"读快照→比较→事后计数"
+	// 的 TOCTOU 窗口；密码正确的成功路径随后的 ResetLoginAttempts 会清掉
+	// 本次占用（含达到阈值时的毫秒级瞬态锁）。注意：2FA 挑战签发分支按
+	// 既有"签发前不清零"契约保留占用——正确密码的挑战签发同样计入名额
+	// （收紧而非放松锁定语义，属有意的 UX 取舍）。
+	if !s.Repos.Users.TryIncLoginAttempts(ctx, user.ID) {
+		return nil, loginLockedError()
+	}
+
 	if !auth.Compare(user.Password, in.Password) {
-		_ = s.Repos.Users.IncLoginAttempts(ctx, user.ID)
 		return nil, errors.NewC("AUT0045", 400, "用户名或密码错误")
 	}
 
@@ -151,6 +162,13 @@ func (s *AuthService) Login(c *gin.Context, in LoginInput) (*LoginResult, error)
 		go s.sendNewDeviceNotification(user, parsed, ip, region)
 	}
 	return &LoginResult{User: user}, nil
+}
+
+// loginLockedError 是登录锁定/配额耗尽的统一响应（AUT0043）：快照锁检查与
+// TryIncLoginAttempts 原子占名额两处共用（码即注册表——每个码唯一调用点，
+// 故收敛到本助手；对客户端消息不变，与密码错误不可区分）。
+func loginLockedError() error {
+	return errors.NewC("AUT0043", 400, "用户名或密码错误")
 }
 
 // isKnownDevice 以服务端签发的设备令牌（fdt-device cookie ↔ 会话 deviceTokenHash）

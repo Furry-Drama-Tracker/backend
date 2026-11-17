@@ -2056,6 +2056,10 @@ paths:
           schema:
             additionalProperties: true
             type: object
+        "403":
+          description: 无权限或单集播放链接需管理员审核设置
+          schema:
+            $ref: '#/definitions/errors.ErrorBody'
       security:
       - bearerAuth: []
       summary: 为剧集添加单集
@@ -2208,6 +2212,10 @@ paths:
           schema:
             additionalProperties: true
             type: object
+        "403":
+          description: 无权限或单集播放链接需管理员审核设置
+          schema:
+            $ref: '#/definitions/errors.ErrorBody'
       security:
       - bearerAuth: []
       summary: 更新单集
@@ -3732,7 +3740,7 @@ paths:
         name: id
         required: true
         type: string
-      - description: note
+      - description: note 与 expectedUpdatedAt（管理员所查看内容的 updatedAt 毫秒时间戳，用于审批内容绑定校验）
         in: body
         name: body
         required: true
@@ -3746,6 +3754,10 @@ paths:
             type: object
         "404":
           description: Episode not found
+          schema:
+            $ref: '#/definitions/errors.ErrorBody'
+        "409":
+          description: 内容在送审后已变更，请重新查看再审批
           schema:
             $ref: '#/definitions/errors.ErrorBody'
       security:

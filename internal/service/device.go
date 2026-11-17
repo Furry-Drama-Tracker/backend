@@ -43,6 +43,13 @@ func (s *AuthService) Login2FA(c *gin.Context, identifier, challenge, method, to
 		return nil, errors.NewC("DEV0008", 403, "请先验证邮箱后再登录")
 	}
 
+	// 失败配额先行原子占用：占不到名额（配额耗尽或已锁定）直接 423，不执行校验。
+	// 名额在猜测前占用，并发请求的猜测预算恒为 LoginMaxAttempts，
+	// 消除"读快照→猜测→事后计数"的 TOCTOU 爆破窗口（重放路径同样计入名额）。
+	if !s.Repos.Users.TryIncLoginAttempts(c.Request.Context(), user.ID) {
+		return nil, errors.NewC("DEV0016", 423, "账号已被锁定，请30分钟后再试")
+	}
+
 	totpOK := false
 	backupHit := false
 	var totpStep int64
@@ -52,7 +59,7 @@ func (s *AuthService) Login2FA(c *gin.Context, identifier, challenge, method, to
 	case "emailOtp":
 		// 邮箱 OTP 第二因素：一次性消费 + 尝试上限。
 		if !s.consumeEmailOTP(user.ID.Hex(), token) {
-			return nil, s.rejectTwoFactor(c.Request.Context(), user)
+			return nil, s.rejectTwoFactor()
 		}
 	default:
 		// TOTP / 备份码（默认路径，保持既有语义）。
@@ -64,7 +71,7 @@ func (s *AuthService) Login2FA(c *gin.Context, identifier, challenge, method, to
 			totpStep, totpOK = auth.VerifyTOTPStep(secret, token, time.Now())
 		}
 		if !totpOK && !backupHit {
-			return nil, s.rejectTwoFactor(c.Request.Context(), user)
+			return nil, s.rejectTwoFactor()
 		}
 		// TOTP 一次性消费：同一时间步只能被接受一次（防重放）。
 		if totpOK {
@@ -81,7 +88,7 @@ func (s *AuthService) Login2FA(c *gin.Context, identifier, challenge, method, to
 					Email:  user.Email,
 					Detail: "totp step already consumed",
 				})
-				return nil, s.rejectTwoFactor(c.Request.Context(), user)
+				return nil, s.rejectTwoFactor()
 			}
 			// 同步内存值（MarkTOTPStepUsed 已原子落库；登录态字段改走定点更新）。
 			user.TwoFactorLastStep = totpStep
@@ -188,13 +195,9 @@ func (s *AuthService) consumeEmailOTP(userID, otpCode string) bool {
 	return true
 }
 
-// rejectTwoFactor 处理 2FA 校验失败：累计失败次数，达到阈值时返回 423 锁定，
-// 否则返回 400 验证码无效（失败计数不清零，重放同样计入）。
-func (s *AuthService) rejectTwoFactor(ctx context.Context, user *model.User) error {
-	_ = s.Repos.Users.IncLoginAttempts(ctx, user.ID)
-	nextAttempts := user.LoginAttempts + 1
-	if repository.IsLocked(user) || nextAttempts >= s.Config.Security.LoginMaxAttempts {
-		return errors.NewC("DEV0016", 423, "账号已被锁定，请30分钟后再试")
-	}
+// rejectTwoFactor 处理 2FA 校验失败：失败名额已在猜测前经 TryIncLoginAttempts
+// 原子占用（含达到阈值时的上锁），此处仅返回校验失败（重放同样计入已占名额；
+// 名额耗尽/已锁定的请求在占用阶段即被 423 拒绝，不会走到这里）。
+func (s *AuthService) rejectTwoFactor() error {
 	return errors.NewC("DEV0017", 400, "验证码无效")
 }

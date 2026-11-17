@@ -3031,6 +3031,12 @@ const docTemplate = `{
                             "type": "object",
                             "additionalProperties": true
                         }
+                    },
+                    "403": {
+                        "description": "无权限或单集播放链接需管理员审核设置",
+                        "schema": {
+                            "$ref": "#/definitions/errors.ErrorBody"
+                        }
                     }
                 }
             },
@@ -3263,6 +3269,12 @@ const docTemplate = `{
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
+                        }
+                    },
+                    "403": {
+                        "description": "无权限或单集播放链接需管理员审核设置",
+                        "schema": {
+                            "$ref": "#/definitions/errors.ErrorBody"
                         }
                     }
                 }
@@ -5757,7 +5769,7 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "description": "note",
+                        "description": "note 与 expectedUpdatedAt（管理员所查看内容的 updatedAt 毫秒时间戳，用于审批内容绑定校验）",
                         "name": "body",
                         "in": "body",
                         "required": true,
@@ -5776,6 +5788,12 @@ const docTemplate = `{
                     },
                     "404": {
                         "description": "Episode not found",
+                        "schema": {
+                            "$ref": "#/definitions/errors.ErrorBody"
+                        }
+                    },
+                    "409": {
+                        "description": "内容在送审后已变更，请重新查看再审批",
                         "schema": {
                             "$ref": "#/definitions/errors.ErrorBody"
                         }

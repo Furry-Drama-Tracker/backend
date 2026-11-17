@@ -307,6 +307,19 @@ func (h *Versions) Rollback(c *gin.Context) {
 	rollbackData["updatedAt"] = time.Now().UTC().Truncate(time.Millisecond)
 	delete(rollbackData, "_id")
 	delete(rollbackData, "__v")
+	// 创作者回滚不得写审核态字段（CWE-863）：版本快照携带 reviewStatus /
+	// reviewedBy / pendingChanges 等管理员专有字段，逐字 $set 会把已被拒绝
+	// 下架的剧集直接翻回 approved（推翻管理员处置并伪造审核归属），或把
+	// 历史快照里的 pendingChanges 复活进审核队列。与 Update 的契约对齐：
+	// 创作者发起的任何内容变更都强制回到 pending 重审；admin/superadmin
+	// 回滚保持原语义（管理员操作本身即审核决定）。
+	if user.Role == "creator" {
+		for _, f := range []string{"reviewNote", "reviewedBy", "reviewedAt",
+			"pendingChanges", "hasPendingChanges", "pendingChangeSummary"} {
+			delete(rollbackData, f)
+		}
+		rollbackData["reviewStatus"] = "pending"
+	}
 	updated, err := h.Repos.Episodes.FindOneAndUpdate(ctx, episodeID, bson.M{"$set": rollbackData})
 	if err != nil {
 		if repository.IsNotFound(err) {

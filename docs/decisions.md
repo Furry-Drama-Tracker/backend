@@ -251,3 +251,25 @@
   - 「非法 id → 500」等其余 500 固定契约不动（这些路径 cause 非空，日志本就可读）；
   - 修正后 EPS0037 的 5xx 日志带真实 `site`（如 `episodes.go:1072`）与非空 `cause`，nil-err 调用点已清零；
   - 错误码注册表新增 EPS0038（工作树修改按 HEAD 扫描，需提交后重跑 `python3 docs/gen_errors_json.py` 刷新）。
+
+## ADR-022 认证锁定预算前置占用 + 审核闸门补洞（OpenVuln BUG-R2 第二批修复）
+
+- **决策**（六项；安全审计 BUG-R2-C1/C2 系列的修复落地）：
+  1. **登录/2FA 锁定预算改为"先占名额再校验"**：新增 `UserRepo.TryIncLoginAttempts`（单文档条件更新：未锁定且未达阈值才 `$inc` 并在占满时同步上锁），`Login`（bcrypt 比较前）与 `Login2FA`（第二因素猜测前）改为先占名额，占不到直接拒绝（AUT0043 / DEV0016 423），不再走"读快照 → IsLocked → 校验 → 事后 IncLoginAttempts"。原 check-then-act 窗口（CWE-367）使并发请求的猜测预算从 5 次膨胀到可达并发数（实测数百/30min 周期），并使密码路径附带 C×250ms 的 bcrypt CPU-DoS 放大面；
+  2. **凭证类限流 key 绑定 `identifier`**：`emailFromBody` 优先取请求体 `identifier`（login / login-2fa 的实际认证字段，email 仅旧客户端回退），无 `identifier` 时回退 `email`（passwordReset / emailVerify 等端点行为不变）。此前攻击者用 `identifier` 认证的同时轮换随机 `email`，每请求各得一个新桶，AuthSpec / TwoFactorSpec 的 5 次/15min 完全失效（实测 900× 放大）；反向地，5 个垃圾请求携带 `email=<受害者>` 即可再生式 429 锁死旧契约客户端的登录/2FA 完成；
+  3. **创作者版本回滚强制回 pending**：`versions.Rollback` 对 `role=creator` 从快照 `$set` 中剥除 `reviewNote/reviewedBy/reviewedAt/pendingChanges/hasPendingChanges/pendingChangeSummary` 并强制 `reviewStatus=pending`；admin/superadmin 回滚保持原语义。此前快照逐字 `$set` 可把管理员已拒绝下架的剧集直接翻回 `approved`（推翻处置 + 伪造历史审核归属），或复活/清空审核队列条目；
+  4. **审核 approve 绑定内容版本**：`PUT /review/approve/:id` 请求体新增可选 `expectedUpdatedAt`（管理员所见内容的 `updatedAt` 毫秒时间戳）；提供且与当前不符 → 409 REV0007，强制重新查看。0/缺省跳过校验（向后兼容；前端接入后应必传）。封堵"管理员查看后、审批前创作者改写正式字段或整体替换 pendingChanges"的 TOCTOU；
+  5. **创作者单集 platformLinks 门禁**：单集集合无审核字段（无 pendingChanges 等价物），创作者写入的播放链接会绕过审核直接公开到已过审剧集详情页并随追更通知/邮件广播。`CreateSingle` / `UpdateSingle` 对 `role=creator` 且请求体携带非空 `platformLinks` 返回 403 EPS0039；编号/标题/排期等常规字段与管理员操作不受限（与剧集级链接必须走审核的既有信任决策对齐）；
+  6. **生产 trust-all 代理标头启动告警**：`!IsDev` 且信任代理标头生效、`trusted_proxies` 未配置时，启动打 `[SECURITY WARN]`（沿用 WeakSecret/InsecureOrigins 告警模式，不阻止启动）。trust-all 下任何能直连本进程的客户端都可轮换 CF-Connecting-IP/XFF：所有 IP 维度限流桶按请求轮换失效、审计/新设备邮件 IP 归因可被伪造。配套部署加固：新增 `deploy/nginx.conf.example`（反代覆盖写入代理标头 / CDN 回源网段限制两种形态），`run.sh` 与 systemd 注释的 TCP 默认监听从 `0.0.0.0:5000` 收紧为 `127.0.0.1:5000`；ini 模板注明 trusted_proxies 防不住"经本机反代透传的伪造标头"。
+- **背景**：OpenVuln 审计（快照 0bfa8b2）确认上述缺陷可端到端利用/复现：2FA 锁定竞态（BUG-R2-C1-A1-H2）、密码登录锁定竞态（BUG-R2-C1-A4-H2）、限流 key 轮换绕过（BUG-R2-C1-A1-H1）、回滚推翻下架（BUG-R2-C2-A1-H1）、approve TOCTOU（BUG-R2-C2-A1-H2）、单集无审核发布（BUG-R2-C2-A1-H3）、IP 信任装配（BUG-R2-C1-A4-H1）。
+- **替代方案**：
+  - 锁定计数改 Redis/分布式锁：超出单实例语义（ADR-009），单文档条件更新已足够；
+  - 单集引入完整 pendingChanges 审核流：需要新集合字段 + 审核队列改造，超出最小修复；先按报告建议只封链接发布面（标题为纯文本、bluemonday 已剥 HTML），后续如需再演进；
+  - approve 改内容哈希/ETag 锁定：`updatedAt` 已是审核队列渲染并回传的字段，毫秒时间戳绑定即可满足，前端接入成本最低；
+  - trust-all 改为启动致命：会阻断未配置 trusted_proxies 的存量部署平滑升级，先告警（与弱密钥/CORS 占位同策略）。
+- **取舍 / 兼容性**：
+  - 占名额语义下，**正确密码签发 2FA 挑战也计入名额**（既有"签发前不清零"契约的延伸）；连续 5 次只签发挑战不完成 2FA 会触发 30min 瞬态锁（正常用户单次登录即被 Login2FA/Login 成功路径的 ResetLoginAttempts 清除，仅在反复弃登录时可见）；2FA 失败响应由"第 5 次起 423"变为"第 6 次起（名额占满时）423"——对外错误码 DEV0016/DEV0017、AUT0043/AUT0045 均未变；
+  - 限流 key 变化使既有按 email 预填的桶失配一次（新桶从满额开始）——攻击面修复优先，属预期；
+  - 创作者回滚现在会把已过审剧集打回 pending（管理员需重审）——这是"创作者发起的任何内容变更都回 pending"契约（Update 已如此）的补全，管理员回滚不受影响；
+  - `expectedUpdatedAt` 为新增可选字段：现有前端不传则行为与旧版一致（审核绑定暂不生效），属灰度兼容设计；
+  - EPS0039 / REV0007 为新增错误码（已入 `docs/errors.json` 注册表）。

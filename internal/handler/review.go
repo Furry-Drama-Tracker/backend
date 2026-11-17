@@ -164,9 +164,10 @@ func (h *Review) All(c *gin.Context) {
 // @Tags 审核
 // @Security bearerAuth
 // @Param id path string true "剧集 ID"
-// @Param body body object true "note"
+// @Param body body object true "note 与 expectedUpdatedAt（管理员所查看内容的 updatedAt 毫秒时间戳，用于审批内容绑定校验）"
 // @Success 200 {object} map[string]any "剧集对象"
 // @Failure 404 {object} errors.ErrorBody "Episode not found"
+// @Failure 409 {object} errors.ErrorBody "内容在送审后已变更，请重新查看再审批"
 // @Router /review/approve/{id} [put]
 func (h *Review) Approve(c *gin.Context) {
 	admin, _ := middleware.GetUser(c)
@@ -186,7 +187,18 @@ func (h *Review) Approve(c *gin.Context) {
 		serverError(c, err, h.Config.IsDev)
 		return
 	}
-	note := h.readReviewNote(c)
+	note, expectedUpdatedAt := h.readReviewNote(c)
+
+	// 审批内容绑定（CWE-367）：approve 必须作用于管理员实际查看过的内容。
+	// expectedUpdatedAt 为管理员所见的 updatedAt 毫秒时间戳（由审核队列/
+	// 详情响应原样回传）。创作者在管理员查看后、审批前改写内容——直接改
+	// pending 剧集正式字段，或整体替换 pendingChanges——都会推进
+	// updatedAt，命中前置校验 → 409，强制管理员重新查看后再审批。
+	// 0 = 调用方未提供（向后兼容），跳过绑定校验；前端接入后应必传。
+	if expectedUpdatedAt != 0 && episode.UpdatedAt.UnixMilli() != expectedUpdatedAt {
+		errors.AbortCoded(c, 409, "REV0007", "内容在送审后已变更，请重新查看再审批", h.Config.IsDev)
+		return
+	}
 
 	// 已审核剧集的待审核修改：将 pendingChanges 应用到正式字段。
 	if episode.HasPendingChanges && episode.PendingChanges != nil {
@@ -262,7 +274,7 @@ func (h *Review) Reject(c *gin.Context) {
 		serverError(c, err, h.Config.IsDev)
 		return
 	}
-	note := h.readReviewNote(c)
+	note, _ := h.readReviewNote(c)
 
 	// 已审核剧集的待审核修改被拒绝：清除 pendingChanges，原内容保持不变。
 	if episode.HasPendingChanges {
@@ -764,13 +776,16 @@ func episodeRefIDs(e *model.Episode) []primitive.ObjectID {
 	return ids
 }
 
-// readReviewNote 读取请求体 note（`note || ”` 宽松语义）。
-func (h *Review) readReviewNote(c *gin.Context) string {
+// readReviewNote 读取请求体 note 与 expectedUpdatedAt（`note || ”` 宽松语义；
+// expectedUpdatedAt = 管理员所见内容的 updatedAt 毫秒时间戳，0 = 未提供，
+// 跳过绑定校验以保持向后兼容——前端接入后应必传）。
+func (h *Review) readReviewNote(c *gin.Context) (string, int64) {
 	var req struct {
-		Note string `json:"note"`
+		Note              string `json:"note"`
+		ExpectedUpdatedAt int64  `json:"expectedUpdatedAt"`
 	}
 	_ = c.ShouldBindJSON(&req)
-	return req.Note
+	return req.Note, req.ExpectedUpdatedAt
 }
 
 // ---- pendingChanges 应用（按字段既有数据类型宽松转换）----

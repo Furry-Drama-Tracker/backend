@@ -767,3 +767,71 @@ func TestEpisodesCreateSingleRequiredFields(t *testing.T) {
 		t.Fatalf("missing episodeNumber: %d %v", resp.StatusCode, out)
 	}
 }
+
+// TestEpisodesCreatorSingleLinksGate 创作者单集播放链接门禁（EPS0039）：
+// 单集无审核字段，创作者写入的 platformLinks 会绕过审核直接公开到已过审
+// 剧集详情页并随追更通知广播（CWE-863），故携带非空 platformLinks 的创建/
+// 更新请求必须 403；常规字段与空对象清空语义不受影响；admin 不受限。
+func TestEpisodesCreatorSingleLinksGate(t *testing.T) {
+	repos, signer, ts := episodesTestApp(t)
+	creatorID := primitive.NewObjectID().Hex()
+	insertUser(t, repos, creatorID, "creator")
+	adminID := primitive.NewObjectID().Hex()
+	insertUser(t, repos, adminID, "admin")
+	creator := newEPClient(t, ts.URL, mustToken(t, signer, creatorID))
+	admin := newEPClient(t, ts.URL, mustToken(t, signer, adminID))
+
+	var created map[string]any
+	if resp := creator.json("POST", "/api/episodes", map[string]any{
+		"title": "门禁", "description": "d", "coverImage": "/uploads/c.png",
+	}, &created); resp.StatusCode != 201 {
+		t.Fatalf("creator create: %d", resp.StatusCode)
+	}
+	episodeID := created["_id"].(string)
+
+	var out map[string]any
+	// 创作者携带非空 platformLinks → 403 EPS0039。
+	resp := creator.json("POST", "/api/episodes/"+episodeID+"/episodes", map[string]any{
+		"episodeNumber": 1, "title": "第一集",
+		"platformLinks": map[string]any{"watch": "https://attacker.example/phish"},
+	}, &out)
+	if resp.StatusCode != 403 || out["error"] != "EPS0039" {
+		t.Fatalf("creator links create should 403 EPS0039: %d %v", resp.StatusCode, out)
+	}
+
+	// 不带 platformLinks 的常规字段照常创建。
+	resp = creator.json("POST", "/api/episodes/"+episodeID+"/episodes", map[string]any{
+		"episodeNumber": 1, "title": "第一集",
+	}, &out)
+	if resp.StatusCode != 201 {
+		t.Fatalf("creator normal create: %d %v", resp.StatusCode, out)
+	}
+	singleID := out["_id"].(string)
+
+	// 空对象视为未提交链接（不影响请求通过）。
+	resp = creator.json("PUT", "/api/episodes/single/"+singleID, map[string]any{
+		"episodeLabel": "特别篇", "platformLinks": map[string]any{},
+	}, &out)
+	if resp.StatusCode != 200 {
+		t.Fatalf("creator empty-links update should pass: %d %v", resp.StatusCode, out)
+	}
+
+	// 创作者改写既有单集链接 → 403。
+	resp = creator.json("PUT", "/api/episodes/single/"+singleID, map[string]any{
+		"platformLinks": map[string]any{"watch": "https://attacker.example/swap"},
+	}, &out)
+	if resp.StatusCode != 403 || out["error"] != "EPS0039" {
+		t.Fatalf("creator links update should 403 EPS0039: %d %v", resp.StatusCode, out)
+	}
+
+	// admin 不受限：可设置单集链接。
+	resp = admin.json("PUT", "/api/episodes/single/"+singleID, map[string]any{
+		"platformLinks": map[string]any{"watch": "https://official.example/watch"},
+	}, &out)
+	if resp.StatusCode != 200 {
+		t.Fatalf("admin links update should pass: %d %v", resp.StatusCode, out)
+	}
+	if links, _ := out["platformLinks"].(map[string]any); links["watch"] != "https://official.example/watch" {
+		t.Fatalf("admin links should persist: %v", out["platformLinks"])
+	}
+}

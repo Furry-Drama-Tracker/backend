@@ -296,6 +296,44 @@ func TestRateLimitEmailKeyDigestedStillPerAccount(t *testing.T) {
 	}
 }
 
+// TestRateLimitIdentifierKeyPreferredOverEmail 凭证类限流 key 绑定实际认证字段：
+// login / login-2fa 的认证标识是 identifier（email 仅旧客户端回退字段），若按
+// email 取 key，攻击者用 identifier 认证的同时轮换随机 email 即每请求各得一个
+// 新桶，TwoFactorSpec / AuthSpec 对第二因素与密码爆破完全失效（实测 900× 放大）。
+// 钉住：identifier 存在时优先于 email；无 identifier 回退 email（旧契约不变）。
+func TestRateLimitIdentifierKeyPreferredOverEmail(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	r := gin.New()
+	r.RemoteIPHeaders = []string{"CF-Connecting-IP", "X-Real-IP", "X-Forwarded-For"}
+	spec := ratelimit.TwoFactorSpec
+	r.POST("/api/auth/login-2fa", BodyParse(), RateLimit(spec, RateLimitOpts{IsDev: true}),
+		func(c *gin.Context) { c.JSON(200, gin.H{"ok": true}) })
+
+	post := func(identifier, email string) int {
+		body := `{"identifier":"` + identifier + `","email":"` + email + `"}`
+		req := httptest.NewRequest(http.MethodPost, "/api/auth/login-2fa", strings.NewReader(body))
+		req.Header.Set("Content-Type", "application/json")
+		req.RemoteAddr = "10.4.0.1:1234"
+		w := httptest.NewRecorder()
+		r.ServeHTTP(w, req)
+		return w.Code
+	}
+
+	// 同一 identifier + 每请求轮换随机 email：共享同一桶，超过上限即 429。
+	for i := 0; i < spec.Max; i++ {
+		if c := post("victim", "rotating-"+strconv.Itoa(i)); c != 200 {
+			t.Fatalf("第 %d 次应通过（轮换 email 不得产生新桶）: %d", i+1, c)
+		}
+	}
+	if c := post("victim", "rotating-more"); c != 429 {
+		t.Fatalf("identifier 同桶应 429, got %d", c)
+	}
+	// 无 identifier → 回退 email key（旧契约客户端独立桶）。
+	if c := post("", "victim@x.com"); c != 200 {
+		t.Fatalf("无 identifier 应回退 email 桶: %d", c)
+	}
+}
+
 // TestRateLimitTwoFactorSpecCoversEnable /2fa/enable 必须命中 2FA 限流器：
 // 该端点曾因 TwoFactorSpec.Mounts 缺项，限流中间件对非挂载路径 no-op，
 // 实际只剩全局 300/min（凭据写入端点的爆破/刷量约束形同虚设）。

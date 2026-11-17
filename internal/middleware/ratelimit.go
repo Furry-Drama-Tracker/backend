@@ -175,12 +175,19 @@ func newEmailFromBody(c *gin.Context) string {
 	return "unknown"
 }
 
-// emailFromBody 读取请求体中 email 字段（小写、去空白；缺省返回空串）。
+// emailFromBody 读取请求体中认证标识字段（小写、去空白；缺省返回空串）。
 // 供凭证/邮件类限流把 key 绑定到目标账号，避免伪造代理标头轮换 IP 绕过。
 func emailFromBody(c *gin.Context) string {
 	body := GetBody(c)
 	if body == nil {
 		return ""
+	}
+	// login / login-2fa 的认证标识是 identifier（email 仅是旧客户端回退字段）：
+	// key 必须绑定 handler 实际认证的字段。若按 email 取 key，攻击者在用
+	// identifier 认证的同时携带随机 email，每个猜测请求各得一个新桶，
+	// TwoFactorSpec / AuthSpec 对第二因素与密码爆破即告失效。
+	if v, ok := body["identifier"].(string); ok && strings.TrimSpace(v) != "" {
+		return strings.ToLower(strings.TrimSpace(v))
 	}
 	if v, ok := body["email"].(string); ok {
 		return strings.ToLower(strings.TrimSpace(v))
