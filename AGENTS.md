@@ -96,7 +96,7 @@ deploy/               systemd unit + ini 模板 + run.sh
 - **error**：`XXXYYYY`——X=3 字母模块前缀，Y=文件（或模块共享文件组）内顺序号。码即注册表：`grep -rn "USR0007" backend/` 直达唯一调用点。**新站点取号 = 同前缀仓库内当前最大序号 +1**（4 位数字，前缀不得复用于不同模块）。
 - **ref**：每请求一个 0-999999999 随十进制整数（`crypto/rand`，`middleware.RequestRef` 生成）；响应头 `X-Ref-ID` 同值；`RequestLogger`/5xx 日志行都带 `ref`。
 - **status**：HTTP 状态码整数，信封自描述（axios 侧 `err.response.status` 与之恒等）。
-- **message 恒为纯文案**：编号只经 `error`/`ref` JSON 字段传递，后端不拼进 message；出错编号展示与复制由前端从字段拼装（`frontend/src/utils/errorMeta.js`，格式 `USR0007-000123456`）。生产 5xx message 掩码「服务器内部错误」。
+- **message 恒为纯文案**：编号只经 `error`/`ref` JSON 字段传递，后端不拼进 message；出错编号展示与复制由前端从字段拼装（`frontend/src/utils/errorMeta.js`，格式 `<错误码>: <提示文案> (<参考号>)`，参考号补零 9 位、三位一组空格分隔，如 `USR0007: 该邮箱已注册 (000 123 456)`）。生产 5xx message 掩码「服务器内部错误」。
 - **日志**：5xx 渲染时额外打一行 ERROR（stdout slog）：`code`/`ref`/`path`/`site`（错误构造点 file:line，`runtime.Caller` 自动抓取）/`cause`；panic 恢复走 `SYS0500`（JSON 500 + stack 入日志）。排障：拿用户报的码 grep 源码定位站点，拿 ref grep 日志定位请求。
 - **构造器选型**：handler 直写用 `Abort500C/AbortErrC/AbortCoded`；middleware 固定契约响应用 `codedBody(c, status, code, gin.H{...})`；service 层用 `NewC/NewKeyC/NewExtraC/WrapC`。
 - **边缘预留（ESA）**：ESA 边缘错误响应固定信封（Schema `docs/esa-error.schema.json`，错误 ID 注册表 `docs/esa-errors.csv`——新 ID 取 CSV 内下一序号）：`{"message":"...","error":"ESAXXXX","ref":0,"esa_request_id":"<UUID>","esa_rule":<数字>,"status":451}`。`ref 恒为 0` 标记边缘响应——无服务端请求日志，按 ref grep 不到属预期；排障用 `esa_request_id`（ESA 控制台查边缘日志）与 `esa_rule`（命中的规则）。已登记：`ESA0001` 地区限制（451）。
