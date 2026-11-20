@@ -2,7 +2,7 @@
 
 本文件是**全部 `/api` 端点的纯文本参考**，与 `/api/docs`（swagger，机器可查）互补：这里可直接 grep、复制、离线读。所有端点只在 `/api` 下注册（v1 镜像已移除）。
 
-> **与 swagger 的关系**：`docs/swagger.json` 由 swaggo 注解生成，覆盖可能滞后（如 `/themes`、`/icons` 域尚未入库）。**本文以路由源码为准**（`internal/server/register_routes.go` + 各 handler 的 `Register()`）。改动端点时请同步更新本文与 swagger 注解。另：本文旧版记载的 `/users/background-upload`、`/users/background-prefs` 已下线，由 `/api/wallpapers/personal` 与 `PUT /api/themes/background-prefs` 接管。
+> **与 swagger 的关系**：`docs/swagger.json` 由 swaggo 注解生成，覆盖可能滞后（如 `/themes` 域尚未入库）。**本文以路由源码为准**（`internal/server/register_routes.go` + 各 handler 的 `Register()`）。改动端点时请同步更新本文与 swagger 注解。另：本文旧版记载的 `/users/background-upload`、`/users/background-prefs` 已下线，由 `/api/wallpapers/personal` 与 `PUT /api/themes/background-prefs` 接管。
 
 ## 认证与前置
 
@@ -359,17 +359,17 @@ Stats 域带 `middleware.Cache`（TTL 5min、上限 200 条，按完整 URI 缓�
 
 ## 主题 `/api/themes`（swagger 未收录，以源码为准）
 
-主题=壁纸和/或图标映射的外观包；`ThemeType()` 推导 `full/wallpaper/icons/legacy`。个人主题默认 `draft`，可提审 → 通过转系统主题 / 拒绝保持个人带备注；站点默认主题至多一个且可为空。
+主题=壁纸外观包（SVG 图标包功能已于 2026-11 移除，见 ADR-023）；`ThemeType()` 推导 `wallpaper/legacy`。个人主题默认 `draft`，可提审 → 通过转系统主题 / 拒绝保持个人带备注；站点默认主题至多一个且可为空。
 
 | 方法 | 路径 | 鉴权 | 请求要点 | 响应要点 |
 |---|---|---|---|---|
 | GET | `/themes/active` | 公开 | — | 启用的系统主题 |
 | GET | `/themes/list` | 公开 | — | 系统主题+本人主题 |
 | GET | `/themes/my` | 登录 | — | 我的主题 |
-| GET | `/themes/my/selection` | 登录 | — | 双槽选择（壁纸槽/图标槽独立）+ 未设置时回退站点默认 + 遗留单 `themeId` 迁移 |
-| PUT | `/themes/selection` | 登录 | `{wallpaperThemeId,iconsThemeId}` 或遗留 `{themeId}` | 修改壁纸槽会同步用户背景偏好 |
+| GET | `/themes/my/selection` | 登录 | — | 壁纸槽选择 + 未设置时回退站点默认 + 遗留单 `themeId` 迁移 |
+| PUT | `/themes/selection` | 登录 | `{wallpaperThemeId}` 或遗留 `{themeId}`（`iconsThemeId`/`applyIcons` 被忽略） | 修改壁纸槽会同步用户背景偏好 |
 | PUT | `/themes/background-prefs` | 登录 | `{enabled?,opacity(0-100),blur(0-20),image?}` | 更新背景偏好（原 `/users/background-prefs`） |
-| POST | `/themes/` | 登录 | `{name,description?,wallpaperUrl?,wallpaperThumb?,icons?,accentColor?,isSystem?(仅超管生效)}` | 创建，默认 draft；资源须 `/uploads/` 或 http(s)；图标键须匹配组件键正则、≤64 个；`misc.logo` 不可覆盖（仅注册带尾斜杠形式） |
+| POST | `/themes/` | 登录 | `{name,description?,wallpaperUrl?,wallpaperThumb?,accentColor?,isSystem?(仅超管生效)}` | 创建，默认 draft；壁纸须 `/uploads/` 或 http(s)（仅注册带尾斜杠形式） |
 | POST | `/themes/upload-wallpaper` | 登录（upload 20/h） | multipart `image`（≤8MB） | `{url}` |
 | PUT | `/themes/:id` | 登录（归属） | 同创建 | 更新 |
 | DELETE | `/themes/:id` | 登录（归属） | — | 删除（仅清理 `theme-wallpaper-` 前缀且未被引用的文件） |
@@ -378,15 +378,6 @@ Stats 域带 `middleware.Cache`（TTL 5min、上限 200 条，按完整 URI 缓�
 | POST | `/themes/:id/review` | 超管 | `{action:approve\|reject,note?}` | approve→转系统主题并启用；reject→保持个人+备注 |
 | POST | `/themes/:id/default` | 超管 | `{default:bool}` | 设/取消站点默认（须为启用的系统主题） |
 | PUT | `/themes/:id/admin` | 超管 | 主题字段 | 管理更新（个人转系统视为已通过） |
-
-## SVG 图标 `/api/icons`（swagger 未收录，以源码为准）
-
-| 方法 | 路径 | 鉴权 | 请求要点 | 响应要点 |
-|---|---|---|---|---|
-| GET | `/icons/list` | 公开 | — | 启用图标 + 组件键→URL 的扁平 `mappings` |
-| GET | `/icons/all` | 超管 | — | 全部 |
-| PUT | `/icons/:id` | 超管 | 名称/分类/描述/映射/启用（长度与键校验） | 更新 |
-| DELETE | `/icons/:id` | 超管 | — | 删除文档+文件 |
 
 ## 友情链接 `/api/friend-links`
 
@@ -438,7 +429,7 @@ Stats 域带 `middleware.Cache`（TTL 5min、上限 200 条，按完整 URI 缓�
 | POST `/wallpapers/system` | `image` | 8MB | `wallpaper-` |
 | POST `/themes/upload-wallpaper` | `image` | 8MB | `theme-wallpaper-` |
 
-已停用上传端点：`/icons/upload`（图标包）与 `/themes/upload-icon`（主题图标）路由未注册（主题只保留壁纸），端点对客户端表现为 404；恢复方式见 `internal/handler/icons.go`、`themes.go` 内注释。
+已移除上传端点：`/icons/upload`（图标包）与 `/themes/upload-icon`（主题图标）已随 SVG 图标功能删除（ADR-023），端点对客户端表现为 404。
 
 上传错误：内部标识 `LIMIT_FILE_SIZE`/`LIMIT_FILE_TYPE`/`BAD_MAGIC` 渲染为统一 400 信封，错误码分别为 `UPL0001`/`UPL0002`/`UPL0003`（未知上传错误 `UPL0004`）；各 handler 仍可返回自身域错误码（如 `USR0009`/`WAL0019`）。部分旧 handler 对类型不符刻意 500，属既有契约。`RemoveFile` 只接受上传目录下单层路径段（拒 `..`/分隔符）。
 
@@ -485,7 +476,7 @@ Stats 域带 `middleware.Cache`（TTL 5min、上限 200 条，按完整 URI 缓�
 **pushsubscriptions**：`userId` `endpoint` `keys{p256dh,auth}` `userAgent`（**无发送器，不会投递**）
 
 **creatorprofiles**：`creatorId` 多语言简介/头像/`socialLinks`/`qqGroupLink` `reviewStatus` `pendingChanges`
-**themes**：`name/description` `wallpaperUrl/wallpaperThumb` `icons{}`(≤64) `accentColor` `isSystem` `status[draft|pending|approved|rejected]` `enabled` `isDefault`
+**themes**：`name/description` `wallpaperUrl/wallpaperThumb` `accentColor` `isSystem` `status[draft|pending|approved|rejected]` `enabled` `isDefault`
 **auditlogs**：`userId/userName` `action` `target` `details` `ip` `userAgent` `createdAt`
 
 （完整字段见 `internal/model/` 的 struct）

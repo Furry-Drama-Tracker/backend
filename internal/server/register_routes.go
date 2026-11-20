@@ -172,12 +172,9 @@ func RegisterRoutes(d Deps, api *gin.RouterGroup, opts middleware.RateLimitOpts,
 	fl := handler.NewFriendLinks(d.Repos, d.Config, amw, rl, mail, svc.VerifyAltcha)
 	router.Mount(api, "/friend-links", fl.Register)
 
-	// ---- 主题 / 图标管理域 ----
+	// ---- 主题管理域 ----
 	th := handler.NewThemes(d.Repos, d.Config, amw, rl)
 	router.Mount(api, "/themes", th.Register)
-
-	ic := handler.NewIcons(d.Repos, d.Config, amw, rl)
-	router.Mount(api, "/icons", ic.Register)
 
 	// ---- 管理后台 + 审计日志域 ----
 	ad := handler.NewAdmin(d.Repos, d.Config, amw, rl, mail)

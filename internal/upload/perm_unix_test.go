@@ -44,17 +44,3 @@ func TestSaveImageNoExecBits(t *testing.T) {
 	}
 	assertNoExec(t, path.Join(Dir, strings.TrimPrefix(url, "/uploads/")))
 }
-
-func TestSaveSVGNoExecBits(t *testing.T) {
-	old := IconsDir
-	SetIconsDir(t.TempDir())
-	t.Cleanup(func() { IconsDir = old })
-
-	req := multipartRequest(t, "file", "icon.svg", "image/svg+xml",
-		[]byte(`<svg xmlns="http://www.w3.org/2000/svg"></svg>`))
-	url, err := SaveSVG(newGinContext(req), "file")
-	if err != nil {
-		t.Fatalf("SaveSVG: %v", err)
-	}
-	assertNoExec(t, path.Join(IconsDir, strings.TrimPrefix(url, "/uploads/icons/")))
-}

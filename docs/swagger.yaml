@@ -3143,102 +3143,6 @@ paths:
       summary: 记录观看历史
       tags:
       - 观看历史
-  /icons/{id}:
-    delete:
-      parameters:
-      - description: 图标 ID
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: message
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/errors.ErrorBody'
-      security:
-      - bearerAuth: []
-      summary: 删除图标
-      tags:
-      - 图标
-    put:
-      consumes:
-      - application/json
-      parameters:
-      - description: 图标 ID
-        in: path
-        name: id
-        required: true
-        type: string
-      - description: name/category/description/enabled/mappings（可选）
-        in: body
-        name: body
-        required: true
-        schema:
-          type: object
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: 图标对象
-          schema:
-            additionalProperties: true
-            type: object
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/errors.ErrorBody'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/errors.ErrorBody'
-      security:
-      - bearerAuth: []
-      summary: 更新图标
-      tags:
-      - 图标
-  /icons/all:
-    get:
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: 图标数组（含禁用）
-          schema:
-            items:
-              additionalProperties: true
-              type: object
-            type: array
-        "403":
-          description: Forbidden
-          schema:
-            $ref: '#/definitions/errors.ErrorBody'
-      security:
-      - bearerAuth: []
-      summary: 全部图标（管理端）
-      tags:
-      - 图标
-  /icons/list:
-    get:
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: icons/mappings
-          schema:
-            additionalProperties: true
-            type: object
-      summary: 获取启用图标与组件映射表
-      tags:
-      - 图标
   /notifications/{id}:
     delete:
       parameters:
@@ -4356,7 +4260,7 @@ paths:
       consumes:
       - application/json
       parameters:
-      - description: name/description/wallpaperUrl/wallpaperThumb/icons/accentColor/isSystem
+      - description: name/description/wallpaperUrl/wallpaperThumb/accentColor/isSystem
         in: body
         name: body
         required: true
@@ -4418,7 +4322,7 @@ paths:
         name: id
         required: true
         type: string
-      - description: name/description/wallpaperUrl/wallpaperThumb/icons/accentColor（可选）
+      - description: name/description/wallpaperUrl/wallpaperThumb/accentColor（可选）
         in: body
         name: body
         required: true
@@ -4696,7 +4600,7 @@ paths:
       - application/json
       responses:
         "200":
-          description: wallpaperTheme/iconsTheme/wallpaperIsDefault/iconsIsDefault
+          description: wallpaperTheme/wallpaperIsDefault
           schema:
             additionalProperties: true
             type: object
@@ -4714,7 +4618,7 @@ paths:
       consumes:
       - application/json
       parameters:
-      - description: wallpaperThemeId/iconsThemeId（空串清空；兼容 themeId/applyIcons/applyWallpaper）
+      - description: wallpaperThemeId（空串清空；兼容 themeId/applyWallpaper）
         in: body
         name: body
         required: true
@@ -4724,7 +4628,7 @@ paths:
       - application/json
       responses:
         "200":
-          description: wallpaperTheme/iconsTheme/backgroundPrefs/accentColor
+          description: wallpaperTheme/backgroundPrefs/accentColor
           schema:
             additionalProperties: true
             type: object
@@ -4742,7 +4646,7 @@ paths:
             $ref: '#/definitions/errors.ErrorBody'
       security:
       - bearerAuth: []
-      summary: 设置用户背景/图标两槽主题
+      summary: 设置用户背景槽主题
       tags:
       - 主题
   /themes/upload-wallpaper:

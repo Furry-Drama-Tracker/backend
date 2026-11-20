@@ -273,3 +273,20 @@
   - 创作者回滚现在会把已过审剧集打回 pending（管理员需重审）——这是"创作者发起的任何内容变更都回 pending"契约（Update 已如此）的补全，管理员回滚不受影响；
   - `expectedUpdatedAt` 为新增可选字段：现有前端不传则行为与旧版一致（审核绑定暂不生效），属灰度兼容设计；
   - EPS0039 / REV0007 为新增错误码（已入 `docs/errors.json` 注册表）。
+
+## ADR-023 SVG 图标包功能整体移除（前端图标收敛 Font Awesome）
+
+- **决策**：删除 `/api/icons` 图标管理子域与全部 SVG 图标链路（2026-11）：
+  - 整文件删除 `internal/handler/icons.go`、`internal/repository/icon.go`、`internal/upload/svg.go`（含 deny-list SVG 内容清洗；`POST /icons/upload` 此前已注释停用，本次物理删除）；
+  - 主题域收窄为壁纸单槽：移除 `Theme.Icons` 字段与 `sanitizeThemeIcons`/`themeProtectedIconKeys`/`themeIconsOr`，`ThemeType` 收敛为 `wallpaper|legacy`，删除 `Themes.UploadIcon` 与 `/upload-icon` 注册；`PUT /selection` 不再接受 `iconsThemeId`（静默忽略），`GET /my/selection` 不再输出 `iconsTheme`/`iconsIsDefault`；
+  - 用户侧 `themeIconsId`/`themeApplyIcons` 停写：`UpdateThemeSlots` 收敛为单壁纸槽（顺带 `$unset` 两个残留字段），`ClearThemeReferences` 对壁纸/旧字段命中即回收背景偏好，孤立的 `themeIconsId` 残留仅清字段、不动背景偏好；
+  - 配置与落盘：`IconsDir`（ini `icons_dir` / env `ICONS_DIR`）、`upload.SetIconsDir`、启动建 `uploads/icons` 目录全部移除。
+- **背景**：前端图标引擎已移除、组件图标写死 Font Awesome（`ThemeColorPicker` 只写 `wallpaperThemeId`），读取链路与上传端点均无消费方；deny-list SVG 清洗无成熟 Go 库可替换，同 origin 服务用户上传 SVG 的存储型 XSS 面随功能死亡一并消除（删除即最硬的防护）。
+- **替代方案**：
+  - 保留 `GET /icons/list|all` 读取链路兼容存量图标主题：前端已无图标引擎，无消费方，纯死代码；
+  - 数据迁移清洗存量 `themes.icons` 子文档与 `icons` 集合：字段已无读取方，存量数据无行为影响，不值得一次性迁移（`icons` 集合可择期手工 drop）。
+- **取舍 / 兼容性**：
+  - API 形状变化：主题 DTO 与选择接口不再输出 `icons`/`iconsTheme`/`iconsIsDefault`，`themeType` 不再出现 `full|icons`；当前前端仅消费壁纸槽，零改动；
+  - 旧客户端携带 `iconsThemeId`/`applyIcons` 请求键被静默忽略（不报错、不生效）；存量用户文档的 `themeIconsId` 残留被忽略，下一次主题选择变更时随 `UpdateThemeSlots` 清除；
+  - 错误码 ICN0001-0016、THM0015/0025/0076/0077 随代码删除成为空洞（取号规则不受影响：新码仍取当前最大序号 +1）；注册表按 HEAD 扫描，提交后需重跑 `python3 docs/gen_errors_json.py` 刷新；
+  - 磁盘 `uploads/icons/` 不再由服务端创建，存量图标文件失去服务端回收通道（Delete 端点已删），需要清盘时手工删除目录。

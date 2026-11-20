@@ -52,16 +52,15 @@ type User struct {
 	EmailNotificationPrefs EmailNotificationPrefs `bson:"emailNotificationPrefs" json:"emailNotificationPrefs"`
 	BackgroundPrefs        BackgroundPrefs        `bson:"backgroundPrefs" json:"backgroundPrefs"`
 	PersonalWallpapers     []Wallpaper            `bson:"personalWallpapers" json:"personalWallpapers"`
-	// ThemeID 是旧版单主题选择（遗留字段）：读取时按 ThemeApplyIcons /
-	// ThemeApplyWallpaper 拆分到背景/图标两槽；新写入统一落到两槽字段。
+	// ThemeID 是旧版单主题选择（遗留字段）：读取时按 ThemeApplyWallpaper
+	// 拆分到背景槽；新写入统一落到背景槽字段。
 	ThemeID primitive.ObjectID `bson:"themeId,omitempty" json:"themeId"`
-	// ThemeApplyIcons / ThemeApplyWallpaper 是旧版应用组合（遗留字段）。
-	ThemeApplyIcons     *bool `bson:"themeApplyIcons,omitempty" json:"themeApplyIcons"`
+	// ThemeApplyWallpaper 是旧版应用组合（遗留字段；themeApplyIcons 已随
+	// SVG 图标功能移除，存量文档中的该字段被忽略）。
 	ThemeApplyWallpaper *bool `bson:"themeApplyWallpaper,omitempty" json:"themeApplyWallpaper"`
-	// ThemeWallpaperID / ThemeIconsID 是背景/图标两槽的当前主题（自由组合，
-	// 支持主题A背景 + 主题B图标；零值表示该槽未设置，回退站点默认主题对应部分）。
+	// ThemeWallpaperID 是背景槽的当前主题（零值表示未设置，
+	// 回退站点默认主题的壁纸部分）。
 	ThemeWallpaperID primitive.ObjectID `bson:"themeWallpaperId,omitempty" json:"themeWallpaperId"`
-	ThemeIconsID     primitive.ObjectID `bson:"themeIconsId,omitempty" json:"themeIconsId"`
 	LoginAttempts          int                    `bson:"loginAttempts" json:"-"`
 	LockUntil              int64                  `bson:"lockUntil" json:"-"`
 	CreatedAt              time.Time              `bson:"createdAt" json:"createdAt"`

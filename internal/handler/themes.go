@@ -22,12 +22,12 @@ import (
 
 // 本文件实现 /api/themes 主题管理子域。
 //
-// 主题是「壁纸 + 图标」的组合外观包（仅壁纸 / 仅图标 / 全套），不含按钮调色。
+// 主题是壁纸外观包，不含按钮调色。SVG 图标包功能已于 2026-11 移除
+// （前端图标改用 Font Awesome）。
 //
 // 公开：GET /active（站点默认主题）、GET /list（可选系统主题）；
 // 登录用户：GET /my、GET /my/selection、PUT /selection、POST /、
-// PUT/DELETE /:id、POST /:id/submit（提交审核）、
-// POST /upload-wallpaper、POST /upload-icon（主题资源上传）；
+// PUT/DELETE /:id、POST /:id/submit（提交审核）、POST /upload-wallpaper；
 // 超管：GET /all、POST /:id/review（审核）、POST /:id/default（设默认）、
 // PUT /:id/admin（系统/个人切换、启用状态）。
 
@@ -47,9 +47,7 @@ func NewThemes(repos *repository.Repos, cfg *config.Config, amw *middleware.Auth
 
 // Register 挂载 /api/themes 全部端点。
 //
-// 主题图标上传已停用（主题只保留壁纸）：POST /upload-icon 的注册被注释掉，
-// 端点对客户端表现为不存在。壁纸上传（/upload-wallpaper）、主题选择与既有
-// 图标主题的读取都不受影响。恢复时取消下面那一行注释即可。
+// 主题图标上传（POST /upload-icon）已随 SVG 图标功能一并移除。
 func (h *Themes) Register(g *gin.RouterGroup) {
 	super := h.AuthMW.Protect(middleware.RoleSuperAdmin)
 	reqEmail := h.AuthMW.RequireEmailChanged()
@@ -61,7 +59,6 @@ func (h *Themes) Register(g *gin.RouterGroup) {
 	g.PUT("/background-prefs", h.AuthMW.Protect(), h.UpdateBackgroundPrefs)
 	g.POST("/", h.AuthMW.Protect(), reqEmail, h.Create)
 	g.POST("/upload-wallpaper", h.AuthMW.Protect(), reqEmail, h.RL(ratelimit.UploadSpec), h.UploadWallpaper)
-	// g.POST("/upload-icon", h.AuthMW.Protect(), reqEmail, h.RL(ratelimit.UploadSpec), h.UploadIcon)
 	g.PUT("/:id", h.AuthMW.Protect(), reqEmail, h.Update)
 	g.DELETE("/:id", h.AuthMW.Protect(), reqEmail, h.Delete)
 	g.POST("/:id/submit", h.AuthMW.Protect(), reqEmail, h.Submit)
@@ -69,14 +66,6 @@ func (h *Themes) Register(g *gin.RouterGroup) {
 	g.POST("/:id/review", super, reqEmail, h.Review)
 	g.POST("/:id/default", super, reqEmail, h.SetDefault)
 	g.PUT("/:id/admin", super, reqEmail, h.AdminUpdate)
-}
-
-// themeIconsOr 规范化 icons 为非 nil map。
-func themeIconsOr(m map[string]string) map[string]string {
-	if m == nil {
-		return map[string]string{}
-	}
-	return m
 }
 
 // themeJSON 组装主题响应对象（对齐项目 DTO 组装风格）。
@@ -91,7 +80,6 @@ func themeJSON(t *model.Theme) gin.H {
 		"description":    t.Description,
 		"wallpaperUrl":   t.WallpaperURL,
 		"wallpaperThumb": t.WallpaperThumb,
-		"icons":          themeIconsOr(t.Icons),
 		"accentColor":    t.AccentColor,
 		"themeType":      t.ThemeType(),
 		"isSystem":       t.IsSystem,
@@ -114,7 +102,6 @@ func themePublicJSON(t *model.Theme) gin.H {
 		"description":    t.Description,
 		"wallpaperUrl":   t.WallpaperURL,
 		"wallpaperThumb": t.WallpaperThumb,
-		"icons":          themeIconsOr(t.Icons),
 		"accentColor":    t.AccentColor,
 		"themeType":      t.ThemeType(),
 		"isSystem":       t.IsSystem,
@@ -162,48 +149,6 @@ func sanitizeThemeAccentColor(v any) (string, string) {
 
 // themeHexColorRe 合法主题色正则（#rrggbb）。
 var themeHexColorRe = regexp.MustCompile(`^#[0-9a-fA-F]{6}$`)
-
-// themeProtectedIconKeys 是不允许被主题覆盖的组件标识（站点身份类图标，
-// 如站点 Logo：主题是用户外观包，不应篡改站点品牌资产）。
-var themeProtectedIconKeys = map[string]bool{
-	"misc.logo": true,
-}
-
-// sanitizeThemeIcons 校验并规范化主题图标映射：
-//   - key 必须是合法组件标识（复用图标映射正则，如 nav.home），
-//     且不在 themeProtectedIconKeys 保护名单内（站点 Logo 等不可覆盖）；
-//   - value 必须是 /uploads/ 或 http(s) 资源地址；
-//   - 最多 64 个映射。
-func sanitizeThemeIcons(input map[string]any) (map[string]string, string) {
-	if input == nil {
-		return map[string]string{}, ""
-	}
-	if len(input) > 64 {
-		return nil, "主题图标数量不能超过 64 个"
-	}
-	out := make(map[string]string, len(input))
-	for k, v := range input {
-		if !iconMappingKeyRe.MatchString(k) {
-			return nil, "图标映射标识不合法: " + k
-		}
-		if themeProtectedIconKeys[k] {
-			return nil, "该图标不允许通过主题覆盖: " + k
-		}
-		s, ok := v.(string)
-		if !ok {
-			return nil, "图标地址必须为字符串: " + k
-		}
-		s = strings.TrimSpace(s)
-		if s == "" || len(s) > 500 {
-			return nil, "图标地址不合法: " + k
-		}
-		if !themeAssetURLAllowed(s) {
-			return nil, "图标地址不合法: " + k
-		}
-		out[k] = s
-	}
-	return out, ""
-}
 
 // isSuperUser 判断当前登录用户是否超管。
 func isSuperUser(c *gin.Context) bool {
@@ -311,84 +256,57 @@ func (h *Themes) resolveThemeSlot(ctx context.Context, c *gin.Context, user *mod
 }
 
 // MySelection GET /api/themes/my/selection：获取当前用户生效主题（用户选择 > 站点默认）。
-// 背景与图标为两个独立槽（支持主题A背景 + 主题B图标自由组合）：
-//   - wallpaperTheme / iconsTheme：两槽当前主题（无则为 null，回落站点默认主题）；
-//   - wallpaperIsDefault / iconsIsDefault：该槽是否为默认主题兜底（非用户主动选择）；
-//   - 兼容旧单主题字段：按 applyIcons/applyWallpaper 拆分到对应槽。
+//   - wallpaperTheme：壁纸槽当前主题（无则为 null，回落站点默认主题壁纸）；
+//   - wallpaperIsDefault：是否为默认主题兜底（非用户主动选择）；
+//   - 兼容旧单主题字段：旧 themeId 落到壁纸槽（applyWallpaper=false 时不落）。
 //
 // @Summary 获取当前用户生效主题
 // @Tags 主题
 // @Security bearerAuth
 // @Produce json
-// @Success 200 {object} map[string]any "wallpaperTheme/iconsTheme/wallpaperIsDefault/iconsIsDefault"
+// @Success 200 {object} map[string]any "wallpaperTheme/wallpaperIsDefault"
 // @Failure 401 {object} errors.ErrorBody
 // @Router /themes/my/selection [get]
 func (h *Themes) MySelection(c *gin.Context) {
 	user, _ := middleware.GetUser(c)
 	ctx := c.Request.Context()
 
-	// 旧单主题拆槽：applyIcons/applyWallpaper 决定旧主题落到哪个槽。
+	// 旧单主题拆槽：applyWallpaper=false 时旧主题不落到壁纸槽。
 	legacyWallpaper := user.ThemeID
-	legacyIcons := user.ThemeID
-	if !user.ThemeID.IsZero() {
-		if user.ThemeApplyWallpaper != nil && !*user.ThemeApplyWallpaper {
-			legacyWallpaper = primitive.NilObjectID
-		}
-		if user.ThemeApplyIcons != nil && !*user.ThemeApplyIcons {
-			legacyIcons = primitive.NilObjectID
-		}
+	if !user.ThemeID.IsZero() &&
+		user.ThemeApplyWallpaper != nil && !*user.ThemeApplyWallpaper {
+		legacyWallpaper = primitive.NilObjectID
 	}
 
 	wallpaperTheme, _, wpStale := h.resolveThemeSlot(ctx, c, user, user.ThemeWallpaperID, legacyWallpaper)
-	iconsTheme, _, icStale := h.resolveThemeSlot(ctx, c, user, user.ThemeIconsID, legacyIcons)
 
-	// 迁移到两槽模型：清失效引用，把旧单主题选择落到对应槽（保留有效选择）。
-	if wpStale || icStale || !user.ThemeID.IsZero() {
+	// 迁移到单槽模型：清失效引用，把旧单主题选择落到壁纸槽（保留有效选择）。
+	if wpStale || !user.ThemeID.IsZero() {
 		newWallpaper := user.ThemeWallpaperID
 		if wpStale {
 			newWallpaper = primitive.NilObjectID
 		} else if newWallpaper.IsZero() {
 			newWallpaper = legacyWallpaper
 		}
-		newIcons := user.ThemeIconsID
-		if icStale {
-			newIcons = primitive.NilObjectID
-		} else if newIcons.IsZero() {
-			newIcons = legacyIcons
-		}
-		_ = h.Repos.Users.UpdateThemeSlots(ctx, user.ID, newWallpaper, newIcons)
+		_ = h.Repos.Users.UpdateThemeSlots(ctx, user.ID, newWallpaper)
 	}
 
 	// 未设置的槽回落站点默认主题（生效但不视为用户主动选择，
 	// 前端据 isDefault 标记不高亮对应主题卡片）。
-	var dt *model.Theme
-	if wallpaperTheme == nil || iconsTheme == nil {
-		if d, derr := h.Repos.Themes.FindDefault(ctx); derr == nil {
-			dt = d
-		}
-	}
 	wpIsDefault := false
-	if wallpaperTheme == nil && dt != nil && dt.WallpaperURL != "" {
-		wallpaperTheme = dt
-		wpIsDefault = true
-	}
-	icIsDefault := false
-	if iconsTheme == nil && dt != nil && len(dt.Icons) > 0 {
-		iconsTheme = dt
-		icIsDefault = true
+	if wallpaperTheme == nil {
+		if dt, derr := h.Repos.Themes.FindDefault(ctx); derr == nil && dt.WallpaperURL != "" {
+			wallpaperTheme = dt
+			wpIsDefault = true
+		}
 	}
 
 	resp := gin.H{
 		"wallpaperTheme":     nil,
-		"iconsTheme":         nil,
 		"wallpaperIsDefault": wpIsDefault,
-		"iconsIsDefault":     icIsDefault,
 	}
 	if wallpaperTheme != nil {
 		resp["wallpaperTheme"] = themePublicJSON(wallpaperTheme)
-	}
-	if iconsTheme != nil {
-		resp["iconsTheme"] = themePublicJSON(iconsTheme)
 	}
 	c.JSON(200, resp)
 }
@@ -402,18 +320,18 @@ func bodyBool(body map[string]any, key string, def bool) bool {
 	return truthy(v)
 }
 
-// SetSelection PUT /api/themes/selection：设置用户背景/图标两槽主题（自由组合）。
-// 新 body：{ wallpaperThemeId, iconsThemeId }——空串表示清空该槽，键不存在表示
-// 该槽保持不变；兼容旧 body { themeId, applyIcons, applyWallpaper }（拆到对应槽）。
-// 壁纸槽变更时同步写入/清空用户背景偏好（多端生效）；响应含两槽主题与背景偏好，
+// SetSelection PUT /api/themes/selection：设置用户背景槽主题。
+// 新 body：{ wallpaperThemeId }——空串表示清空，键不存在表示保持不变；
+// 兼容旧 body { themeId, applyWallpaper }（applyIcons 已随图标功能移除，忽略）。
+// 壁纸槽变更时同步写入/清空用户背景偏好（多端生效）；响应含当前主题与背景偏好，
 // 以及被设置主题的主题色（有则前端应用、无则保持）。
-// @Summary 设置用户背景/图标两槽主题
+// @Summary 设置用户背景槽主题
 // @Tags 主题
 // @Security bearerAuth
 // @Accept json
 // @Produce json
-// @Param body body object true "wallpaperThemeId/iconsThemeId（空串清空；兼容 themeId/applyIcons/applyWallpaper）"
-// @Success 200 {object} map[string]any "wallpaperTheme/iconsTheme/backgroundPrefs/accentColor"
+// @Param body body object true "wallpaperThemeId（空串清空；兼容 themeId/applyWallpaper）"
+// @Success 200 {object} map[string]any "wallpaperTheme/backgroundPrefs/accentColor"
 // @Failure 400 {object} errors.ErrorBody
 // @Failure 403 {object} errors.ErrorBody "无权使用该主题"
 // @Failure 404 {object} errors.ErrorBody "主题不存在"
@@ -424,12 +342,12 @@ func (h *Themes) SetSelection(c *gin.Context) {
 	ctx := c.Request.Context()
 
 	// 计算目标槽值（零值 = 清空该槽）。
-	var wallpaperID, iconsID primitive.ObjectID
-	var setWallpaper, setIcons bool // 该槽是否在本次请求中被显式指定
-	var appliedAccent string        // 被设置主题的主题色（供前端应用）
+	var wallpaperID primitive.ObjectID
+	var setWallpaper bool    // 该槽是否在本次请求中被显式指定
+	var appliedAccent string // 被设置主题的主题色（供前端应用）
 
 	if rawID, ok := body["themeId"].(string); ok && strings.TrimSpace(rawID) != "" {
-		// 旧 body：单主题按应用组合拆槽。
+		// 旧 body：单主题拆槽（applyIcons 已移除，忽略）。
 		oid, err := primitive.ObjectIDFromHex(rawID)
 		if err != nil {
 			errors.AbortCoded(c, 400, "THM0004", "主题 ID 不合法", h.Config.IsDev)
@@ -451,16 +369,14 @@ func (h *Themes) SetSelection(c *gin.Context) {
 		if bodyBool(body, "applyWallpaper", true) {
 			wallpaperID, setWallpaper = oid, true
 		}
-		if bodyBool(body, "applyIcons", true) {
-			iconsID, setIcons = oid, true
-		}
 		appliedAccent = t.AccentColor
 	} else {
-		// 新 body：两槽各自设置/清空（键存在即视为显式指定）。
+		// 新 body：设置/清空壁纸槽（键存在即视为显式指定；
+		// 旧客户端可能仍携带 iconsThemeId 键，静默忽略）。
 		if raw, ok := body["wallpaperThemeId"].(string); ok {
 			setWallpaper = true
 			if strings.TrimSpace(raw) != "" {
-				oid, t, err := h.findValidatedTheme(c, raw, true)
+				oid, t, err := h.findValidatedTheme(c, raw)
 				if err != nil {
 					return
 				}
@@ -468,44 +384,22 @@ func (h *Themes) SetSelection(c *gin.Context) {
 				appliedAccent = t.AccentColor
 			}
 		}
-		if raw, ok := body["iconsThemeId"].(string); ok {
-			setIcons = true
-			if strings.TrimSpace(raw) != "" {
-				oid, t, err := h.findValidatedTheme(c, raw, false)
-				if err != nil {
-					return
-				}
-				iconsID = oid
-				if appliedAccent == "" {
-					appliedAccent = t.AccentColor
-				}
-			}
-		}
 	}
-	if !setWallpaper && !setIcons {
-		errors.AbortCoded(c, 400, "THM0008", "请求需包含 wallpaperThemeId / iconsThemeId（或旧版 themeId）", h.Config.IsDev)
+	if !setWallpaper {
+		errors.AbortCoded(c, 400, "THM0008", "请求需包含 wallpaperThemeId（或旧版 themeId）", h.Config.IsDev)
 		return
 	}
 
-	// 未指定的槽保持现值（两槽字段优先，旧单主题按应用组合拆槽兜底）。
-	curWallpaper := user.ThemeWallpaperID
-	curIcons := user.ThemeIconsID
-	if curWallpaper.IsZero() && !user.ThemeID.IsZero() &&
-		(user.ThemeApplyWallpaper == nil || *user.ThemeApplyWallpaper) {
-		curWallpaper = user.ThemeID
-	}
-	if curIcons.IsZero() && !user.ThemeID.IsZero() &&
-		(user.ThemeApplyIcons == nil || *user.ThemeApplyIcons) {
-		curIcons = user.ThemeID
-	}
+	// 未指定的槽保持现值（壁纸槽字段优先，旧单主题按应用组合兜底）。
 	if !setWallpaper {
-		wallpaperID = curWallpaper
-	}
-	if !setIcons {
-		iconsID = curIcons
+		wallpaperID = user.ThemeWallpaperID
+		if wallpaperID.IsZero() && !user.ThemeID.IsZero() &&
+			(user.ThemeApplyWallpaper == nil || *user.ThemeApplyWallpaper) {
+			wallpaperID = user.ThemeID
+		}
 	}
 
-	if err := h.Repos.Users.UpdateThemeSlots(ctx, user.ID, wallpaperID, iconsID); err != nil {
+	if err := h.Repos.Users.UpdateThemeSlots(ctx, user.ID, wallpaperID); err != nil {
 		errors.Abort500C(c, "THM0009", "设置主题失败", err, h.Config.IsDev)
 		return
 	}
@@ -531,15 +425,10 @@ func (h *Themes) SetSelection(c *gin.Context) {
 		}
 	}
 
-	resp := gin.H{"wallpaperTheme": nil, "iconsTheme": nil}
+	resp := gin.H{"wallpaperTheme": nil}
 	if !wallpaperID.IsZero() {
 		if t, err := h.Repos.Themes.FindByID(ctx, wallpaperID); err == nil {
 			resp["wallpaperTheme"] = themePublicJSON(t)
-		}
-	}
-	if !iconsID.IsZero() {
-		if t, err := h.Repos.Themes.FindByID(ctx, iconsID); err == nil {
-			resp["iconsTheme"] = themePublicJSON(t)
 		}
 	}
 	if bgPrefs != nil {
@@ -551,9 +440,9 @@ func (h *Themes) SetSelection(c *gin.Context) {
 	c.JSON(200, resp)
 }
 
-// findValidatedTheme 按 hex ID 查找主题并校验可用性与槽匹配内容
-// （壁纸槽需含壁纸 / 图标槽需含图标）。失败时已写入响应，调用方直接 return。
-func (h *Themes) findValidatedTheme(c *gin.Context, raw string, forWallpaper bool) (
+// findValidatedTheme 按 hex ID 查找主题并校验可用性（需含壁纸）。
+// 失败时已写入响应，调用方直接 return。
+func (h *Themes) findValidatedTheme(c *gin.Context, raw string) (
 	primitive.ObjectID, *model.Theme, error) {
 	oid, err := primitive.ObjectIDFromHex(strings.TrimSpace(raw))
 	if err != nil {
@@ -573,13 +462,9 @@ func (h *Themes) findValidatedTheme(c *gin.Context, raw string, forWallpaper boo
 		errors.AbortCoded(c, 403, "THM0013", "无权使用该主题", h.Config.IsDev)
 		return primitive.NilObjectID, nil, stderrors.New("forbidden")
 	}
-	if forWallpaper && t.WallpaperURL == "" {
+	if t.WallpaperURL == "" {
 		errors.AbortCoded(c, 400, "THM0014", "该主题不含壁纸，无法应用到背景", h.Config.IsDev)
 		return primitive.NilObjectID, nil, stderrors.New("no wallpaper")
-	}
-	if !forWallpaper && len(t.Icons) == 0 {
-		errors.AbortCoded(c, 400, "THM0015", "该主题不含图标，无法应用到图标", h.Config.IsDev)
-		return primitive.NilObjectID, nil, stderrors.New("no icons")
 	}
 	return oid, t, nil
 }
@@ -635,15 +520,15 @@ func (h *Themes) UpdateBackgroundPrefs(c *gin.Context) {
 	c.JSON(200, gin.H{"backgroundPrefs": u.BackgroundPrefs})
 }
 
-// Create POST /api/themes：创建主题（壁纸 + 图标组合包）。
+// Create POST /api/themes：创建主题（壁纸外观包）。
 // 普通用户创建个人主题（draft，仅自己可见）；超管可传 isSystem:true 直接创建
-// 启用的系统主题。主题必须包含壁纸或图标至少其一。
+// 启用的系统主题。主题必须包含壁纸。
 // @Summary 创建主题
 // @Tags 主题
 // @Security bearerAuth
 // @Accept json
 // @Produce json
-// @Param body body object true "name/description/wallpaperUrl/wallpaperThumb/icons/accentColor/isSystem"
+// @Param body body object true "name/description/wallpaperUrl/wallpaperThumb/accentColor/isSystem"
 // @Success 200 {object} map[string]any "主题对象"
 // @Failure 400 {object} errors.ErrorBody
 // @Router /themes [post]
@@ -669,19 +554,13 @@ func (h *Themes) Create(c *gin.Context) {
 		errors.AbortCoded(c, 400, "THM0024", errMsg, h.Config.IsDev)
 		return
 	}
-	iconsRaw, _ := body["icons"].(map[string]any)
-	icons, errMsg := sanitizeThemeIcons(iconsRaw)
-	if errMsg != "" {
-		errors.AbortCoded(c, 400, "THM0025", errMsg, h.Config.IsDev)
-		return
-	}
 	accentColor, errMsg := sanitizeThemeAccentColor(body["accentColor"])
 	if errMsg != "" {
 		errors.AbortCoded(c, 400, "THM0026", errMsg, h.Config.IsDev)
 		return
 	}
-	if wallpaperURL == "" && len(icons) == 0 {
-		errors.AbortCoded(c, 400, "THM0027", "主题需包含壁纸或图标至少其一", h.Config.IsDev)
+	if wallpaperURL == "" {
+		errors.AbortCoded(c, 400, "THM0027", "主题需包含壁纸", h.Config.IsDev)
 		return
 	}
 	user, _ := middleware.GetUser(c)
@@ -690,7 +569,6 @@ func (h *Themes) Create(c *gin.Context) {
 		Description:    description,
 		WallpaperURL:   wallpaperURL,
 		WallpaperThumb: wallpaperThumb,
-		Icons:          icons,
 		AccentColor:    accentColor,
 		Enabled:        true,
 	}
@@ -721,16 +599,16 @@ func canEditTheme(c *gin.Context, t *model.Theme) bool {
 	return !t.IsSystem && t.OwnerID != nil && *t.OwnerID == u.ID
 }
 
-// Update PUT /api/themes/:id：更新主题（名称/描述/壁纸/图标）。
+// Update PUT /api/themes/:id：更新主题（名称/描述/壁纸）。
 // 系统主题仅超管可改；个人主题仅 owner 可改。
-// 显式提交壁纸/图标字段时，最终内容必须仍包含壁纸或图标至少其一。
+// 显式提交壁纸字段时，最终内容必须仍包含壁纸。
 // @Summary 更新主题
 // @Tags 主题
 // @Security bearerAuth
 // @Accept json
 // @Produce json
 // @Param id path string true "主题 ID"
-// @Param body body object true "name/description/wallpaperUrl/wallpaperThumb/icons/accentColor（可选）"
+// @Param body body object true "name/description/wallpaperUrl/wallpaperThumb/accentColor（可选）"
 // @Success 200 {object} map[string]any "主题对象"
 // @Failure 400 {object} errors.ErrorBody
 // @Failure 403 {object} errors.ErrorBody
@@ -793,18 +671,6 @@ func (h *Themes) Update(c *gin.Context) {
 		}
 		set["wallpaperThumb"] = wallpaperThumb
 	}
-	finalIcons := t.Icons
-	if v, ok := body["icons"]; ok {
-		iconsRaw, _ := v.(map[string]any)
-		icons, errMsg := sanitizeThemeIcons(iconsRaw)
-		if errMsg != "" {
-			errors.AbortCoded(c, 400, "THM0037", errMsg, h.Config.IsDev)
-			return
-		}
-		set["icons"] = icons
-		finalIcons = icons
-		contentTouched = true
-	}
 	if v, ok := body["accentColor"]; ok {
 		accentColor, errMsg := sanitizeThemeAccentColor(v)
 		if errMsg != "" {
@@ -813,8 +679,8 @@ func (h *Themes) Update(c *gin.Context) {
 		}
 		set["accentColor"] = accentColor
 	}
-	if contentTouched && finalWallpaper == "" && len(finalIcons) == 0 {
-		errors.AbortCoded(c, 400, "THM0039", "主题需包含壁纸或图标至少其一", h.Config.IsDev)
+	if contentTouched && finalWallpaper == "" {
+		errors.AbortCoded(c, 400, "THM0039", "主题需包含壁纸", h.Config.IsDev)
 		return
 	}
 	updated, err := h.Repos.Themes.FindOneAndUpdate(c.Request.Context(), oid, bson.M{"$set": set})
@@ -882,17 +748,12 @@ func (h *Themes) Delete(c *gin.Context) {
 // removeUnreferencedThemeFiles 删除主题资源中已无引用的磁盘文件（fire-and-forget，
 // 失败仅记录日志不阻断删除）。仅处理本地 /uploads/ 前缀文件；外链（https://）不动。
 func (h *Themes) removeUnreferencedThemeFiles(ctx context.Context, t *model.Theme, id primitive.ObjectID) {
-	urls := make([]string, 0, 2+len(t.Icons))
+	urls := make([]string, 0, 2)
 	if u := strings.TrimSpace(t.WallpaperURL); u != "" {
 		urls = append(urls, u)
 	}
 	if u := strings.TrimSpace(t.WallpaperThumb); u != "" {
 		urls = append(urls, u)
-	}
-	for _, u := range t.Icons {
-		if u = strings.TrimSpace(u); u != "" {
-			urls = append(urls, u)
-		}
 	}
 	seen := make(map[string]bool, len(urls))
 	for _, url := range urls {
@@ -1239,23 +1100,6 @@ func (h *Themes) UploadWallpaper(c *gin.Context) {
 	url, err := upload.SaveImage(c, "image", "theme-wallpaper", 8<<20)
 	if err != nil {
 		abortThemeUploadError(c, h.Config, err, "上传主题壁纸失败")
-		return
-	}
-	c.JSON(200, gin.H{"url": url})
-}
-
-// UploadIcon POST /api/themes/upload-icon（登录用户 + ≤1MB SVG）。
-// 上传主题用图标，返回 {"url": "/uploads/icons/icon-xxx.svg"}。
-// （已停用）路由注册已注释，Swagger 注解一并摘除：swag 以行内 `// *@` 规则命中注解，
-// 注释不掉，只能删除。恢复时连同 g.POST("/upload-icon", ...) 一起还原注解（git 历史可查）。
-func (h *Themes) UploadIcon(c *gin.Context) {
-	url, err := upload.SaveSVG(c, "file")
-	if err != nil {
-		if err == upload.ErrNoFile {
-			errors.AbortCoded(c, 400, "THM0076", "请选择要上传的 SVG 图标", h.Config.IsDev)
-			return
-		}
-		errors.AbortCoded(c, 400, "THM0077", err.Error(), h.Config.IsDev)
 		return
 	}
 	c.JSON(200, gin.H{"url": url})

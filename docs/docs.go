@@ -4796,158 +4796,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/icons/all": {
-            "get": {
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "图标"
-                ],
-                "summary": "全部图标（管理端）",
-                "responses": {
-                    "200": {
-                        "description": "图标数组（含禁用）",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "type": "object",
-                                "additionalProperties": true
-                            }
-                        }
-                    },
-                    "403": {
-                        "description": "Forbidden",
-                        "schema": {
-                            "$ref": "#/definitions/errors.ErrorBody"
-                        }
-                    }
-                }
-            }
-        },
-        "/icons/list": {
-            "get": {
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "图标"
-                ],
-                "summary": "获取启用图标与组件映射表",
-                "responses": {
-                    "200": {
-                        "description": "icons/mappings",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                }
-            }
-        },
-        "/icons/{id}": {
-            "put": {
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ],
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "图标"
-                ],
-                "summary": "更新图标",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "图标 ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "name/category/description/enabled/mappings（可选）",
-                        "name": "body",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "type": "object"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "图标对象",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/errors.ErrorBody"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/errors.ErrorBody"
-                        }
-                    }
-                }
-            },
-            "delete": {
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "图标"
-                ],
-                "summary": "删除图标",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "图标 ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "message",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/errors.ErrorBody"
-                        }
-                    }
-                }
-            }
-        },
         "/notifications/clear-read": {
             "delete": {
                 "security": [
@@ -6762,7 +6610,7 @@ const docTemplate = `{
                 "summary": "创建主题",
                 "parameters": [
                     {
-                        "description": "name/description/wallpaperUrl/wallpaperThumb/icons/accentColor/isSystem",
+                        "description": "name/description/wallpaperUrl/wallpaperThumb/accentColor/isSystem",
                         "name": "body",
                         "in": "body",
                         "required": true,
@@ -6960,7 +6808,7 @@ const docTemplate = `{
                 "summary": "获取当前用户生效主题",
                 "responses": {
                     "200": {
-                        "description": "wallpaperTheme/iconsTheme/wallpaperIsDefault/iconsIsDefault",
+                        "description": "wallpaperTheme/wallpaperIsDefault",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
@@ -6991,10 +6839,10 @@ const docTemplate = `{
                 "tags": [
                     "主题"
                 ],
-                "summary": "设置用户背景/图标两槽主题",
+                "summary": "设置用户背景槽主题",
                 "parameters": [
                     {
-                        "description": "wallpaperThemeId/iconsThemeId（空串清空；兼容 themeId/applyIcons/applyWallpaper）",
+                        "description": "wallpaperThemeId（空串清空；兼容 themeId/applyWallpaper）",
                         "name": "body",
                         "in": "body",
                         "required": true,
@@ -7005,7 +6853,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "wallpaperTheme/iconsTheme/backgroundPrefs/accentColor",
+                        "description": "wallpaperTheme/backgroundPrefs/accentColor",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
@@ -7103,7 +6951,7 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "description": "name/description/wallpaperUrl/wallpaperThumb/icons/accentColor（可选）",
+                        "description": "name/description/wallpaperUrl/wallpaperThumb/accentColor（可选）",
                         "name": "body",
                         "in": "body",
                         "required": true,

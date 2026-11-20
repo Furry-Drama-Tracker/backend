@@ -116,9 +116,6 @@ func (r *ThemeRepo) Create(ctx context.Context, t *model.Theme) error {
 	if t.UpdatedAt.IsZero() {
 		t.UpdatedAt = now
 	}
-	if t.Icons == nil {
-		t.Icons = map[string]string{}
-	}
 	_, err := r.coll.InsertOne(ctx, t)
 	return err
 }

@@ -47,7 +47,6 @@ type Repos struct {
 	Wallpapers      *WallpaperRepo
 	FriendLinks     *FriendLinkRepo
 	Themes          *ThemeRepo
-	Icons           *IconRepo
 }
 
 // NewRepos 基于已连接的数据库构造 Repos。
@@ -91,7 +90,6 @@ func NewRepos(db *mongo.Database, loginMaxAttempts, loginLockMinutes int) *Repos
 		Wallpapers:      NewWallpaperRepo(db.Collection("systemwallpapers")),
 		FriendLinks:     NewFriendLinkRepo(db.Collection("friendlinks")),
 		Themes:          NewThemeRepo(db.Collection("themes")),
-		Icons:           NewIconRepo(db.Collection("icons")),
 	}
 }
 
