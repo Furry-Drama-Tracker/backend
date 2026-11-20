@@ -15,7 +15,9 @@ make run / test / vet / fmt / docs / clean
 make release GOOS=linux GOARCH=arm64   # 交叉编译：GOOS/GOARCH 经环境变量传给 go
 nmake /f Makefile.win              # Windows 等价（build/release/run/seed/test/vet/fmt/docs/clean）
 
-GitHub Actions: .github/workflows/release.yml — 每次推送构建 8 目标
+GitHub Actions: .github/workflows/release.yml — 每次推送先跑 test job 作为发布门禁
+（go vet + go test -count=1；集成测试的 mongod 由 service 容器 mongo:8 提供，独立
+neo_*_test 库、零环境变量依赖），通过后才构建 8 目标
 （linux/windows/darwin × 386/amd64/arm64，macOS 无 32 位；无 CGO，参数同 make release）。
 main 分支推送额外把产物覆盖发布到 tag=latest 的滚动 Release（含 checksums.txt）。
 Windows 产物自动链接已提交的 cmd/server/rsrc_windows_*.syso（图标+版本元数据）。
