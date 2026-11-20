@@ -3820,134 +3820,6 @@
       "line": 615
     },
     {
-      "code": "ICN0001",
-      "kind": "Abort500C",
-      "status": 500,
-      "message": "获取图标列表失败",
-      "file": "internal/handler/icons.go",
-      "line": 132
-    },
-    {
-      "code": "ICN0002",
-      "kind": "Abort500C",
-      "status": 500,
-      "message": "获取图标列表失败",
-      "file": "internal/handler/icons.go",
-      "line": 157
-    },
-    {
-      "code": "ICN0003",
-      "kind": "AbortCoded",
-      "status": 400,
-      "message": "请选择要上传的 SVG 图标",
-      "file": "internal/handler/icons.go",
-      "line": 175
-    },
-    {
-      "code": "ICN0004",
-      "kind": "AbortCoded",
-      "status": 400,
-      "message": "请选择要上传的 SVG 图标",
-      "file": "internal/handler/icons.go",
-      "line": 183
-    },
-    {
-      "code": "ICN0005",
-      "kind": "AbortCoded",
-      "status": 400,
-      "message": "单次最多上传 50 个图标",
-      "file": "internal/handler/icons.go",
-      "line": 187
-    },
-    {
-      "code": "ICN0006",
-      "kind": "AbortCoded",
-      "status": 400,
-      "message": "分类名不能超过 30 个字符",
-      "file": "internal/handler/icons.go",
-      "line": 195
-    },
-    {
-      "code": "ICN0007",
-      "kind": "AbortCoded",
-      "status": 400,
-      "message": "图标 ID 不合法",
-      "file": "internal/handler/icons.go",
-      "line": 238
-    },
-    {
-      "code": "ICN0008",
-      "kind": "AbortCoded",
-      "status": 400,
-      "message": "图标名称不能为空且不超过 50 个字符",
-      "file": "internal/handler/icons.go",
-      "line": 246
-    },
-    {
-      "code": "ICN0009",
-      "kind": "AbortCoded",
-      "status": 400,
-      "message": "分类名不能超过 30 个字符",
-      "file": "internal/handler/icons.go",
-      "line": 257
-    },
-    {
-      "code": "ICN0010",
-      "kind": "AbortCoded",
-      "status": 400,
-      "message": "描述不能超过 200 个字符",
-      "file": "internal/handler/icons.go",
-      "line": 265
-    },
-    {
-      "code": "ICN0011",
-      "kind": "AbortCoded",
-      "status": 400,
-      "message": "<dynamic>",
-      "file": "internal/handler/icons.go",
-      "line": 277
-    },
-    {
-      "code": "ICN0012",
-      "kind": "AbortCoded",
-      "status": 404,
-      "message": "图标不存在",
-      "file": "internal/handler/icons.go",
-      "line": 285
-    },
-    {
-      "code": "ICN0013",
-      "kind": "Abort500C",
-      "status": 500,
-      "message": "更新图标失败",
-      "file": "internal/handler/icons.go",
-      "line": 288
-    },
-    {
-      "code": "ICN0014",
-      "kind": "AbortCoded",
-      "status": 400,
-      "message": "图标 ID 不合法",
-      "file": "internal/handler/icons.go",
-      "line": 306
-    },
-    {
-      "code": "ICN0015",
-      "kind": "AbortCoded",
-      "status": 404,
-      "message": "图标不存在",
-      "file": "internal/handler/icons.go",
-      "line": 312
-    },
-    {
-      "code": "ICN0016",
-      "kind": "Abort500C",
-      "status": 500,
-      "message": "删除图标失败",
-      "file": "internal/handler/icons.go",
-      "line": 315
-    },
-    {
       "code": "NTF0001",
       "kind": "AbortCoded",
       "status": 401,
@@ -4899,7 +4771,7 @@
       "status": 500,
       "message": "获取默认主题失败",
       "file": "internal/handler/themes.go",
-      "line": 229
+      "line": 174
     },
     {
       "code": "THM0002",
@@ -4907,7 +4779,7 @@
       "status": 500,
       "message": "获取主题列表失败",
       "file": "internal/handler/themes.go",
-      "line": 244
+      "line": 189
     },
     {
       "code": "THM0003",
@@ -4915,7 +4787,7 @@
       "status": 500,
       "message": "获取个人主题失败",
       "file": "internal/handler/themes.go",
-      "line": 266
+      "line": 211
     },
     {
       "code": "THM0004",
@@ -4923,7 +4795,7 @@
       "status": 400,
       "message": "主题 ID 不合法",
       "file": "internal/handler/themes.go",
-      "line": 435
+      "line": 353
     },
     {
       "code": "THM0005",
@@ -4931,7 +4803,7 @@
       "status": 404,
       "message": "主题不存在",
       "file": "internal/handler/themes.go",
-      "line": 441
+      "line": 359
     },
     {
       "code": "THM0006",
@@ -4939,7 +4811,7 @@
       "status": 500,
       "message": "设置主题失败",
       "file": "internal/handler/themes.go",
-      "line": 444
+      "line": 362
     },
     {
       "code": "THM0007",
@@ -4947,15 +4819,15 @@
       "status": 403,
       "message": "无权使用该主题",
       "file": "internal/handler/themes.go",
-      "line": 448
+      "line": 366
     },
     {
       "code": "THM0008",
       "kind": "AbortCoded",
       "status": 400,
-      "message": "请求需包含 wallpaperThemeId / iconsThemeId（或旧版 themeId）",
+      "message": "请求需包含 wallpaperThemeId（或旧版 themeId）",
       "file": "internal/handler/themes.go",
-      "line": 486
+      "line": 389
     },
     {
       "code": "THM0009",
@@ -4963,7 +4835,7 @@
       "status": 500,
       "message": "设置主题失败",
       "file": "internal/handler/themes.go",
-      "line": 509
+      "line": 403
     },
     {
       "code": "THM0010",
@@ -4971,7 +4843,7 @@
       "status": 400,
       "message": "主题 ID 不合法",
       "file": "internal/handler/themes.go",
-      "line": 560
+      "line": 449
     },
     {
       "code": "THM0011",
@@ -4979,7 +4851,7 @@
       "status": 404,
       "message": "主题不存在",
       "file": "internal/handler/themes.go",
-      "line": 566
+      "line": 455
     },
     {
       "code": "THM0012",
@@ -4987,7 +4859,7 @@
       "status": 500,
       "message": "设置主题失败",
       "file": "internal/handler/themes.go",
-      "line": 569
+      "line": 458
     },
     {
       "code": "THM0013",
@@ -4995,7 +4867,7 @@
       "status": 403,
       "message": "无权使用该主题",
       "file": "internal/handler/themes.go",
-      "line": 573
+      "line": 462
     },
     {
       "code": "THM0014",
@@ -5003,15 +4875,7 @@
       "status": 400,
       "message": "该主题不含壁纸，无法应用到背景",
       "file": "internal/handler/themes.go",
-      "line": 577
-    },
-    {
-      "code": "THM0015",
-      "kind": "AbortCoded",
-      "status": 400,
-      "message": "该主题不含图标，无法应用到图标",
-      "file": "internal/handler/themes.go",
-      "line": 581
+      "line": 466
     },
     {
       "code": "THM0016",
@@ -5019,7 +4883,7 @@
       "status": 400,
       "message": "透明度需在 0-100 之间",
       "file": "internal/handler/themes.go",
-      "line": 605
+      "line": 490
     },
     {
       "code": "THM0017",
@@ -5027,7 +4891,7 @@
       "status": 400,
       "message": "模糊度需在 0-40 之间",
       "file": "internal/handler/themes.go",
-      "line": 613
+      "line": 498
     },
     {
       "code": "THM0018",
@@ -5035,7 +4899,7 @@
       "status": 400,
       "message": "请求需包含 opacity / blur / enabled 至少其一",
       "file": "internal/handler/themes.go",
-      "line": 623
+      "line": 508
     },
     {
       "code": "THM0019",
@@ -5043,7 +4907,7 @@
       "status": 500,
       "message": "保存背景设置失败",
       "file": "internal/handler/themes.go",
-      "line": 627
+      "line": 512
     },
     {
       "code": "THM0020",
@@ -5051,7 +4915,7 @@
       "status": 500,
       "message": "保存背景设置失败",
       "file": "internal/handler/themes.go",
-      "line": 632
+      "line": 517
     },
     {
       "code": "THM0021",
@@ -5059,7 +4923,7 @@
       "status": 400,
       "message": "主题名称不能为空且不超过 30 个字符",
       "file": "internal/handler/themes.go",
-      "line": 654
+      "line": 539
     },
     {
       "code": "THM0022",
@@ -5067,7 +4931,7 @@
       "status": 400,
       "message": "主题描述不能超过 200 个字符",
       "file": "internal/handler/themes.go",
-      "line": 659
+      "line": 544
     },
     {
       "code": "THM0023",
@@ -5075,7 +4939,7 @@
       "status": 400,
       "message": "<dynamic>",
       "file": "internal/handler/themes.go",
-      "line": 664
+      "line": 549
     },
     {
       "code": "THM0024",
@@ -5083,15 +4947,7 @@
       "status": 400,
       "message": "<dynamic>",
       "file": "internal/handler/themes.go",
-      "line": 669
-    },
-    {
-      "code": "THM0025",
-      "kind": "AbortCoded",
-      "status": 400,
-      "message": "<dynamic>",
-      "file": "internal/handler/themes.go",
-      "line": 675
+      "line": 554
     },
     {
       "code": "THM0026",
@@ -5099,15 +4955,15 @@
       "status": 400,
       "message": "<dynamic>",
       "file": "internal/handler/themes.go",
-      "line": 680
+      "line": 559
     },
     {
       "code": "THM0027",
       "kind": "AbortCoded",
       "status": 400,
-      "message": "主题需包含壁纸或图标至少其一",
+      "message": "主题需包含壁纸",
       "file": "internal/handler/themes.go",
-      "line": 684
+      "line": 563
     },
     {
       "code": "THM0028",
@@ -5115,7 +4971,7 @@
       "status": 500,
       "message": "创建主题失败",
       "file": "internal/handler/themes.go",
-      "line": 706
+      "line": 584
     },
     {
       "code": "THM0029",
@@ -5123,7 +4979,7 @@
       "status": 400,
       "message": "主题 ID 不合法",
       "file": "internal/handler/themes.go",
-      "line": 742
+      "line": 620
     },
     {
       "code": "THM0030",
@@ -5131,7 +4987,7 @@
       "status": 404,
       "message": "主题不存在",
       "file": "internal/handler/themes.go",
-      "line": 748
+      "line": 626
     },
     {
       "code": "THM0031",
@@ -5139,7 +4995,7 @@
       "status": 500,
       "message": "更新主题失败",
       "file": "internal/handler/themes.go",
-      "line": 751
+      "line": 629
     },
     {
       "code": "THM0032",
@@ -5147,7 +5003,7 @@
       "status": 403,
       "message": "无权编辑该主题",
       "file": "internal/handler/themes.go",
-      "line": 755
+      "line": 633
     },
     {
       "code": "THM0033",
@@ -5155,7 +5011,7 @@
       "status": 400,
       "message": "主题名称不能为空且不超过 30 个字符",
       "file": "internal/handler/themes.go",
-      "line": 764
+      "line": 642
     },
     {
       "code": "THM0034",
@@ -5163,7 +5019,7 @@
       "status": 400,
       "message": "主题描述不能超过 200 个字符",
       "file": "internal/handler/themes.go",
-      "line": 772
+      "line": 650
     },
     {
       "code": "THM0035",
@@ -5171,7 +5027,7 @@
       "status": 400,
       "message": "<dynamic>",
       "file": "internal/handler/themes.go",
-      "line": 781
+      "line": 659
     },
     {
       "code": "THM0036",
@@ -5179,15 +5035,7 @@
       "status": 400,
       "message": "<dynamic>",
       "file": "internal/handler/themes.go",
-      "line": 791
-    },
-    {
-      "code": "THM0037",
-      "kind": "AbortCoded",
-      "status": 400,
-      "message": "<dynamic>",
-      "file": "internal/handler/themes.go",
-      "line": 801
+      "line": 669
     },
     {
       "code": "THM0038",
@@ -5195,15 +5043,15 @@
       "status": 400,
       "message": "<dynamic>",
       "file": "internal/handler/themes.go",
-      "line": 811
+      "line": 677
     },
     {
       "code": "THM0039",
       "kind": "AbortCoded",
       "status": 400,
-      "message": "主题需包含壁纸或图标至少其一",
+      "message": "主题需包含壁纸",
       "file": "internal/handler/themes.go",
-      "line": 817
+      "line": 683
     },
     {
       "code": "THM0040",
@@ -5211,7 +5059,7 @@
       "status": 404,
       "message": "主题不存在",
       "file": "internal/handler/themes.go",
-      "line": 823
+      "line": 689
     },
     {
       "code": "THM0041",
@@ -5219,7 +5067,7 @@
       "status": 500,
       "message": "更新主题失败",
       "file": "internal/handler/themes.go",
-      "line": 826
+      "line": 692
     },
     {
       "code": "THM0042",
@@ -5227,7 +5075,7 @@
       "status": 400,
       "message": "主题 ID 不合法",
       "file": "internal/handler/themes.go",
-      "line": 846
+      "line": 712
     },
     {
       "code": "THM0043",
@@ -5235,7 +5083,7 @@
       "status": 404,
       "message": "主题不存在",
       "file": "internal/handler/themes.go",
-      "line": 852
+      "line": 718
     },
     {
       "code": "THM0044",
@@ -5243,7 +5091,7 @@
       "status": 500,
       "message": "删除主题失败",
       "file": "internal/handler/themes.go",
-      "line": 855
+      "line": 721
     },
     {
       "code": "THM0045",
@@ -5251,7 +5099,7 @@
       "status": 403,
       "message": "无权删除该主题",
       "file": "internal/handler/themes.go",
-      "line": 859
+      "line": 725
     },
     {
       "code": "THM0046",
@@ -5259,7 +5107,7 @@
       "status": 404,
       "message": "主题不存在",
       "file": "internal/handler/themes.go",
-      "line": 864
+      "line": 730
     },
     {
       "code": "THM0047",
@@ -5267,7 +5115,7 @@
       "status": 500,
       "message": "删除主题失败",
       "file": "internal/handler/themes.go",
-      "line": 867
+      "line": 733
     },
     {
       "code": "THM0048",
@@ -5275,7 +5123,7 @@
       "status": 400,
       "message": "主题 ID 不合法",
       "file": "internal/handler/themes.go",
-      "line": 923
+      "line": 784
     },
     {
       "code": "THM0049",
@@ -5283,7 +5131,7 @@
       "status": 404,
       "message": "主题不存在",
       "file": "internal/handler/themes.go",
-      "line": 929
+      "line": 790
     },
     {
       "code": "THM0050",
@@ -5291,7 +5139,7 @@
       "status": 500,
       "message": "提交审核失败",
       "file": "internal/handler/themes.go",
-      "line": 932
+      "line": 793
     },
     {
       "code": "THM0051",
@@ -5299,7 +5147,7 @@
       "status": 403,
       "message": "只能提交自己的个人主题",
       "file": "internal/handler/themes.go",
-      "line": 937
+      "line": 798
     },
     {
       "code": "THM0052",
@@ -5307,7 +5155,7 @@
       "status": 400,
       "message": "该主题已在审核中",
       "file": "internal/handler/themes.go",
-      "line": 941
+      "line": 802
     },
     {
       "code": "THM0053",
@@ -5315,7 +5163,7 @@
       "status": 400,
       "message": "该主题已是系统主题",
       "file": "internal/handler/themes.go",
-      "line": 945
+      "line": 806
     },
     {
       "code": "THM0054",
@@ -5323,7 +5171,7 @@
       "status": 500,
       "message": "提交审核失败",
       "file": "internal/handler/themes.go",
-      "line": 954
+      "line": 815
     },
     {
       "code": "THM0055",
@@ -5331,7 +5179,7 @@
       "status": 500,
       "message": "获取主题列表失败",
       "file": "internal/handler/themes.go",
-      "line": 971
+      "line": 832
     },
     {
       "code": "THM0056",
@@ -5339,7 +5187,7 @@
       "status": 400,
       "message": "主题 ID 不合法",
       "file": "internal/handler/themes.go",
-      "line": 998
+      "line": 859
     },
     {
       "code": "THM0057",
@@ -5347,7 +5195,7 @@
       "status": 400,
       "message": "审核备注不能超过 200 个字符",
       "file": "internal/handler/themes.go",
-      "line": 1005
+      "line": 866
     },
     {
       "code": "THM0058",
@@ -5355,7 +5203,7 @@
       "status": 400,
       "message": "系统主题无需审核",
       "file": "internal/handler/themes.go",
-      "line": 1016
+      "line": 877
     },
     {
       "code": "THM0059",
@@ -5363,7 +5211,7 @@
       "status": 400,
       "message": "action 必须为 approve 或 reject",
       "file": "internal/handler/themes.go",
-      "line": 1022
+      "line": 883
     },
     {
       "code": "THM0060",
@@ -5371,7 +5219,7 @@
       "status": 404,
       "message": "主题不存在",
       "file": "internal/handler/themes.go",
-      "line": 1028
+      "line": 889
     },
     {
       "code": "THM0061",
@@ -5379,7 +5227,7 @@
       "status": 500,
       "message": "审核失败",
       "file": "internal/handler/themes.go",
-      "line": 1031
+      "line": 892
     },
     {
       "code": "THM0062",
@@ -5387,7 +5235,7 @@
       "status": 400,
       "message": "主题 ID 不合法",
       "file": "internal/handler/themes.go",
-      "line": 1083
+      "line": 944
     },
     {
       "code": "THM0063",
@@ -5395,7 +5243,7 @@
       "status": 404,
       "message": "主题不存在",
       "file": "internal/handler/themes.go",
-      "line": 1089
+      "line": 950
     },
     {
       "code": "THM0064",
@@ -5403,7 +5251,7 @@
       "status": 500,
       "message": "设置默认主题失败",
       "file": "internal/handler/themes.go",
-      "line": 1092
+      "line": 953
     },
     {
       "code": "THM0065",
@@ -5411,7 +5259,7 @@
       "status": 400,
       "message": "只有系统主题可以取消默认",
       "file": "internal/handler/themes.go",
-      "line": 1103
+      "line": 964
     },
     {
       "code": "THM0066",
@@ -5419,7 +5267,7 @@
       "status": 500,
       "message": "取消默认主题失败",
       "file": "internal/handler/themes.go",
-      "line": 1111
+      "line": 972
     },
     {
       "code": "THM0067",
@@ -5427,7 +5275,7 @@
       "status": 400,
       "message": "只有启用的系统主题才能设为默认",
       "file": "internal/handler/themes.go",
-      "line": 1118
+      "line": 979
     },
     {
       "code": "THM0068",
@@ -5435,7 +5283,7 @@
       "status": 500,
       "message": "设置默认主题失败",
       "file": "internal/handler/themes.go",
-      "line": 1126
+      "line": 987
     },
     {
       "code": "THM0069",
@@ -5443,7 +5291,7 @@
       "status": 400,
       "message": "主题 ID 不合法",
       "file": "internal/handler/themes.go",
-      "line": 1150
+      "line": 1011
     },
     {
       "code": "THM0070",
@@ -5451,7 +5299,7 @@
       "status": 404,
       "message": "主题不存在",
       "file": "internal/handler/themes.go",
-      "line": 1156
+      "line": 1017
     },
     {
       "code": "THM0071",
@@ -5459,7 +5307,7 @@
       "status": 500,
       "message": "更新主题失败",
       "file": "internal/handler/themes.go",
-      "line": 1159
+      "line": 1020
     },
     {
       "code": "THM0072",
@@ -5467,7 +5315,7 @@
       "status": 400,
       "message": "该主题无创建者，无法转为个人主题",
       "file": "internal/handler/themes.go",
-      "line": 1173
+      "line": 1034
     },
     {
       "code": "THM0073",
@@ -5475,7 +5323,7 @@
       "status": 400,
       "message": "只有启用的系统主题才能设为默认",
       "file": "internal/handler/themes.go",
-      "line": 1198
+      "line": 1059
     },
     {
       "code": "THM0074",
@@ -5483,7 +5331,7 @@
       "status": 404,
       "message": "主题不存在",
       "file": "internal/handler/themes.go",
-      "line": 1209
+      "line": 1070
     },
     {
       "code": "THM0075",
@@ -5491,23 +5339,7 @@
       "status": 500,
       "message": "更新主题失败",
       "file": "internal/handler/themes.go",
-      "line": 1212
-    },
-    {
-      "code": "THM0076",
-      "kind": "AbortCoded",
-      "status": 400,
-      "message": "请选择要上传的 SVG 图标",
-      "file": "internal/handler/themes.go",
-      "line": 1255
-    },
-    {
-      "code": "THM0077",
-      "kind": "AbortCoded",
-      "status": 400,
-      "message": "<dynamic>",
-      "file": "internal/handler/themes.go",
-      "line": 1258
+      "line": 1073
     },
     {
       "code": "THM0078",
@@ -5515,7 +5347,7 @@
       "status": 400,
       "message": "请选择要上传的图片",
       "file": "internal/handler/themes.go",
-      "line": 1267
+      "line": 1111
     },
     {
       "code": "TRA0001",
