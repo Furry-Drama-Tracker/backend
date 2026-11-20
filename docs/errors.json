@@ -2112,7 +2112,7 @@
       "status": 500,
       "message": "服务器错误",
       "file": "internal/service/device.go",
-      "line": 80
+      "line": 84
     },
     {
       "code": "DEV0010",
@@ -2120,7 +2120,7 @@
       "status": 500,
       "message": "服务器错误",
       "file": "internal/service/device.go",
-      "line": 126
+      "line": 130
     },
     {
       "code": "DEV0011",
@@ -2128,7 +2128,7 @@
       "status": 400,
       "message": "缺少2FA挑战令牌，请重新登录",
       "file": "internal/service/device.go",
-      "line": 139
+      "line": 143
     },
     {
       "code": "DEV0012",
@@ -2136,7 +2136,7 @@
       "status": 400,
       "message": "2FA挑战令牌已过期或无效，请重新登录",
       "file": "internal/service/device.go",
-      "line": 143
+      "line": 147
     },
     {
       "code": "DEV0013",
@@ -2144,7 +2144,7 @@
       "status": 400,
       "message": "用户不存在",
       "file": "internal/service/device.go",
-      "line": 147
+      "line": 151
     },
     {
       "code": "DEV0014",
@@ -2152,7 +2152,7 @@
       "status": 400,
       "message": "该账号未启用两步验证",
       "file": "internal/service/device.go",
-      "line": 150
+      "line": 154
     },
     {
       "code": "DEV0015",
@@ -2160,7 +2160,7 @@
       "status": 400,
       "message": "该账号未绑定已验证的邮箱",
       "file": "internal/service/device.go",
-      "line": 153
+      "line": 157
     },
     {
       "code": "DEV0016",
@@ -2176,7 +2176,15 @@
       "status": 400,
       "message": "验证码无效",
       "file": "internal/service/device.go",
-      "line": 202
+      "line": 206
+    },
+    {
+      "code": "DEV0018",
+      "kind": "NewC",
+      "status": 500,
+      "message": "服务器错误",
+      "file": "internal/service/device.go",
+      "line": 70
     },
     {
       "code": "EML0001",
@@ -4667,7 +4675,7 @@
       "status": 500,
       "message": "服务器错误",
       "file": "internal/handler/twofactor.go",
-      "line": 64
+      "line": 70
     },
     {
       "code": "TFA0005",
@@ -4675,7 +4683,7 @@
       "status": 500,
       "message": "服务器错误",
       "file": "internal/handler/twofactor.go",
-      "line": 72
+      "line": 78
     },
     {
       "code": "TFA0006",
@@ -4683,7 +4691,7 @@
       "status": 403,
       "message": "普通用户不可开启两步验证",
       "file": "internal/handler/twofactor.go",
-      "line": 99
+      "line": 105
     },
     {
       "code": "TFA0007",
@@ -4691,7 +4699,7 @@
       "status": 400,
       "message": "2FA not set up",
       "file": "internal/handler/twofactor.go",
-      "line": 104
+      "line": 110
     },
     {
       "code": "TFA0008",
@@ -4699,7 +4707,7 @@
       "status": 400,
       "message": "Invalid verification code",
       "file": "internal/handler/twofactor.go",
-      "line": 109
+      "line": 119
     },
     {
       "code": "TFA0009",
@@ -4707,7 +4715,7 @@
       "status": 500,
       "message": "服务器错误",
       "file": "internal/handler/twofactor.go",
-      "line": 113
+      "line": 123
     },
     {
       "code": "TFA0010",
@@ -4715,7 +4723,7 @@
       "status": 403,
       "message": "管理员账号强制开启两步验证，不可自行关闭",
       "file": "internal/handler/twofactor.go",
-      "line": 137
+      "line": 147
     },
     {
       "code": "TFA0011",
@@ -4723,7 +4731,7 @@
       "status": 400,
       "message": "2FA not enabled",
       "file": "internal/handler/twofactor.go",
-      "line": 142
+      "line": 152
     },
     {
       "code": "TFA0012",
@@ -4731,7 +4739,7 @@
       "status": 500,
       "message": "服务器错误",
       "file": "internal/handler/twofactor.go",
-      "line": 154
+      "line": 168
     },
     {
       "code": "TFA0013",
@@ -4739,7 +4747,7 @@
       "status": 400,
       "message": "Invalid verification code",
       "file": "internal/handler/twofactor.go",
-      "line": 165
+      "line": 179
     },
     {
       "code": "TFA0014",
@@ -4747,7 +4755,7 @@
       "status": 500,
       "message": "服务器错误",
       "file": "internal/handler/twofactor.go",
-      "line": 169
+      "line": 183
     },
     {
       "code": "TFA0015",
@@ -4755,7 +4763,7 @@
       "status": 400,
       "message": "2FA not enabled for this account",
       "file": "internal/handler/twofactor.go",
-      "line": 192
+      "line": 206
     },
     {
       "code": "TFA0016",
@@ -4763,7 +4771,39 @@
       "status": 400,
       "message": "Invalid verification code",
       "file": "internal/handler/twofactor.go",
-      "line": 199
+      "line": 217
+    },
+    {
+      "code": "TFA0017",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "服务器错误",
+      "file": "internal/handler/twofactor.go",
+      "line": 65
+    },
+    {
+      "code": "TFA0018",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "服务器错误",
+      "file": "internal/handler/twofactor.go",
+      "line": 115
+    },
+    {
+      "code": "TFA0019",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "服务器错误",
+      "file": "internal/handler/twofactor.go",
+      "line": 158
+    },
+    {
+      "code": "TFA0020",
+      "kind": "Abort500C",
+      "status": 500,
+      "message": "服务器错误",
+      "file": "internal/handler/twofactor.go",
+      "line": 212
     },
     {
       "code": "THM0001",
