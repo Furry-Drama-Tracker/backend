@@ -7,10 +7,15 @@
 //     并为 creator/admin/superadmin 角色补建创作者主页
 //   - email_unique_sparse_v1：users.email_1 唯一索引 → unique+sparse（email 成为
 //     可选字段），并清理存量 email 空串/null
+//   - fieldcrypto_gcm_v1：存量 AES-CBC（enc:）字段重加密为 AES-GCM（enc2:），
+//     完成后运行时不再支持 CBC（ADR-025）
 package migrate
 
 import (
 	"context"
+	"crypto/aes"
+	"crypto/cipher"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"log/slog"
@@ -18,6 +23,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/Furry-Drama-Tracker/backend/internal/auth"
 	"github.com/Furry-Drama-Tracker/backend/internal/model"
 	"github.com/Furry-Drama-Tracker/backend/internal/repository"
 	"go.mongodb.org/mongo-driver/bson"
@@ -34,6 +40,7 @@ const (
 	keyUIDBackfillMigration    = "uid_backfill_v1"
 	keyLoginNameLowerMigration = "loginname_lower_backfill_v1"
 	keyEmailUniqueSparse       = "email_unique_sparse_v1"
+	keyFieldCryptoGCM          = "fieldcrypto_gcm_v1"
 )
 
 // nonWordRegex 对应 JS 的 /[^\w]/g（\w = [A-Za-z0-9_]）。
@@ -47,7 +54,8 @@ func generateAccountID(username string) string {
 
 // Run 执行全部启动迁移（幂等）。任一步失败即返回错误并停止后续迁移，
 // 由调用方（cmd/server 启动流程）决定是否中断进程。
-func Run(ctx context.Context, db *mongo.Database, repos *repository.Repos) error {
+// keyHex 为字段加密 key（auth.FieldKey 派生），供 fieldcrypto_gcm_v1 重加密使用。
+func Run(ctx context.Context, db *mongo.Database, repos *repository.Repos, keyHex string) error {
 	if err := migrateAccountID(ctx, repos); err != nil {
 		return fmt.Errorf("migrate accountId: %w", err)
 	}
@@ -66,7 +74,131 @@ func Run(ctx context.Context, db *mongo.Database, repos *repository.Repos) error
 	if err := migrateEmailUniqueSparse(ctx, db, repos); err != nil {
 		return fmt.Errorf("migrate email unique sparse: %w", err)
 	}
+	if err := migrateFieldCryptoGCM(ctx, db, repos, keyHex); err != nil {
+		return fmt.Errorf("migrate fieldcrypto gcm: %w", err)
+	}
 	return nil
+}
+
+// migrateFieldCryptoGCM 把存量 AES-CBC（enc:）字段一次性重加密为 AES-GCM（enc2:）。
+// 覆盖 users.twoFactorSecret 与 users.twoFactorBackupCodes 数组中的 enc: 条目。
+// 解密失败（key 不符/密文损坏）返回错误中断启动——这些凭据运行时已不可解
+// （fieldcrypto 不再支持 CBC），静默跳过只会把故障推迟到 2FA 使用时刻。
+// 幂等：enc2:/bc:/无前缀条目原样保留；崩溃后重跑只处理剩余 enc: 文档。
+func migrateFieldCryptoGCM(ctx context.Context, db *mongo.Database, repos *repository.Repos, keyHex string) error {
+	done, err := repos.Settings.GetFlag(ctx, keyFieldCryptoGCM)
+	if err != nil {
+		return err
+	}
+	if done {
+		return nil
+	}
+
+	type fcUser struct {
+		ID              primitive.ObjectID `bson:"_id"`
+		TwoFactorSecret string             `bson:"twoFactorSecret"`
+		BackupCodes     []string           `bson:"twoFactorBackupCodes"`
+	}
+	cur, err := db.Collection("users").Find(ctx, bson.M{"$or": bson.A{
+		bson.M{"twoFactorSecret": bson.M{"$regex": "^enc:"}},
+		bson.M{"twoFactorBackupCodes": bson.M{"$regex": "^enc:"}},
+	}})
+	if err != nil {
+		return err
+	}
+	defer cur.Close(ctx)
+
+	reencrypted := 0
+	for cur.Next(ctx) {
+		var u fcUser
+		if err := cur.Decode(&u); err != nil {
+			return err
+		}
+		set := bson.M{}
+		if strings.HasPrefix(u.TwoFactorSecret, "enc:") {
+			plain, err := decryptLegacyCBC(u.TwoFactorSecret, keyHex)
+			if err != nil {
+				return fmt.Errorf("user %s twoFactorSecret: %w", u.ID.Hex(), err)
+			}
+			enc, err := auth.EncryptField(plain, keyHex)
+			if err != nil {
+				return fmt.Errorf("user %s twoFactorSecret re-encrypt: %w", u.ID.Hex(), err)
+			}
+			set["twoFactorSecret"] = enc
+		}
+		codesChanged := false
+		for i, raw := range u.BackupCodes {
+			if !strings.HasPrefix(raw, "enc:") {
+				continue
+			}
+			plain, err := decryptLegacyCBC(raw, keyHex)
+			if err != nil {
+				return fmt.Errorf("user %s backupCodes[%d]: %w", u.ID.Hex(), i, err)
+			}
+			enc, err := auth.EncryptField(plain, keyHex)
+			if err != nil {
+				return fmt.Errorf("user %s backupCodes[%d] re-encrypt: %w", u.ID.Hex(), i, err)
+			}
+			if u.BackupCodes == nil {
+				u.BackupCodes = []string{}
+			}
+			u.BackupCodes[i] = enc
+			codesChanged = true
+		}
+		if codesChanged {
+			set["twoFactorBackupCodes"] = u.BackupCodes
+		}
+		if len(set) == 0 {
+			continue
+		}
+		if _, err := db.Collection("users").UpdateOne(ctx, bson.M{"_id": u.ID},
+			bson.M{"$set": set}); err != nil {
+			return err
+		}
+		reencrypted++
+	}
+	if err := cur.Err(); err != nil {
+		return err
+	}
+	if reencrypted > 0 {
+		slog.Info("[Migrate] fieldcrypto gcm re-encrypted", "users", reencrypted)
+	}
+	return repos.Settings.SetFlag(ctx, keyFieldCryptoGCM, bson.M{"done": true})
+}
+
+// decryptLegacyCBC 解密存量 "enc:<iv hex>:<ct hex>"（AES-256-CBC + PKCS7）。
+// 仅本迁移使用——fieldcrypto 运行时已不再支持 CBC。
+func decryptLegacyCBC(text, keyHex string) (string, error) {
+	key, err := hex.DecodeString(keyHex)
+	if err != nil || len(key) != 32 {
+		return "", errors.New("fieldcrypto legacy: key must be 32 bytes hex")
+	}
+	block, err := aes.NewCipher(key)
+	if err != nil {
+		return "", err
+	}
+	parts := strings.SplitN(strings.TrimPrefix(text, "enc:"), ":", 2)
+	if len(parts) != 2 {
+		return "", errors.New("fieldcrypto legacy: malformed payload")
+	}
+	iv, err1 := hex.DecodeString(parts[0])
+	ct, err2 := hex.DecodeString(parts[1])
+	if err1 != nil || err2 != nil || len(iv) != aes.BlockSize || len(ct) == 0 || len(ct)%aes.BlockSize != 0 {
+		return "", errors.New("fieldcrypto legacy: malformed payload")
+	}
+	plain := make([]byte, len(ct))
+	cipher.NewCBCDecrypter(block, iv).CryptBlocks(plain, ct)
+	if padLen := int(plain[len(plain)-1]); padLen == 0 || padLen > aes.BlockSize || padLen > len(plain) {
+		return "", errors.New("fieldcrypto legacy: invalid padding")
+	} else {
+		for _, b := range plain[len(plain)-padLen:] {
+			if int(b) != padLen {
+				return "", errors.New("fieldcrypto legacy: invalid padding byte")
+			}
+		}
+		plain = plain[:len(plain)-padLen]
+	}
+	return string(plain), nil
 }
 
 // migrateLoginNameLowerBackfill 为存量用户回填 accountIdLower（折叠小写）。
@@ -376,7 +508,7 @@ func migrateCreatorProfile(ctx context.Context, db *mongo.Database, repos *repos
 }
 
 // migrateEmailUniqueSparse 把 users.email_1 唯一索引迁移为 unique+sparse
-//（email 成为可选字段：缺 email 字段的用户文档不参与唯一性，无邮箱用户可共存）。
+// （email 成为可选字段：缺 email 字段的用户文档不参与唯一性，无邮箱用户可共存）。
 //
 //  1. email_1 已存在且不带 sparse → drop。同名索引改选项必须先删除；启动顺序
 //     migrate 先于 indexes.Ensure（cmd/server），删除后由 Ensure 按新 spec 重建。

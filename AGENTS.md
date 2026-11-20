@@ -120,7 +120,7 @@ deploy/               systemd unit + ini 模板 + run.sh
    - 2FA 挑战响应带 `twoFactorMethods`（totp/emailOtp；emailOtp 仅已验证邮箱）；`login-2fa` 带 `method` 字段；发码 `POST /auth/2fa/email-otp/send`（凭 challenge JWT）
    - Passkey（go-webauthn）：`/api/passkeys/*`（管理+注册）与 `/api/auth/passkey/*`（登录）；user handle=UID 大端 8 字节；**Passkey 单因素登录直接通过，跳过 2FA 挑战**；仪式会话存内存（单实例语义）
    - QQ 预留：`externalidentities` 集合 + `OAuthProvider` 接口；`/api/auth/qq/*` 未配置凭据时一律 501
-5. **字段加密（ADR-024）**：key=`sha256(ENCRYPTION_KEY 或 JWT_SECRET)`（二选一非拼接）；新数据 AES-256-GCM `enc2:<nonce hex>:<ct hex>`，**加解密 fail-closed**（失败返回错误，绝不透传明文）；存量 `enc:iv:ct` CBC 只读兼容，自动按前缀分派；解密错误向上传播（twofactor TFA0017-0020 / device DEV0018 如实 500，备份码解密失败按未命中处理）
+5. **字段加密（ADR-024/025）**：key=`sha256(ENCRYPTION_KEY 或 JWT_SECRET)`（二选一非拼接）；AES-256-GCM `enc2:<nonce hex>:<ct hex>`，**加解密 fail-closed**（失败返回错误，绝不透传明文）；CBC 已移除——存量 `enc:` 由启动迁移 `fieldcrypto_gcm_v1` 自动重加密（迁移跑在流量之前，解密失败中断启动），运行时遇 `enc:` 前缀即报错；解密错误向上传播（twofactor TFA0017-0020 / device DEV0018 如实 500，备份码解密失败按未命中处理）
 6. **单前缀路由**：所有领域端点只挂 `/api/<path>`；v1 镜像已移除，per-endpoint 限流只匹配 `/api/<mount>`；global 作用于全部 `/api/*`
 7. **`_id` 输出 hex 字符串**；`backgroundPrefs` 默认 `{image:'',enabled:false,opacity:30,blur:0}`
 8. 行为怪癖与有意偏离（XSS 处理、固定窗口限流等）集中在 `docs/decisions.md`——**改动任何行为前先读**；`go test ./...` 是行为回归闸门

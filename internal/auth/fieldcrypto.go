@@ -11,17 +11,17 @@ import (
 	"strings"
 )
 
-// fieldcrypto 实现字段级对称加密，格式契约（ADR-024）：
-//   - 新数据 AES-256-GCM（AEAD，带认证标签）：输出 "enc2:<nonce hex>:<ct hex>"（nonce 12 随机字节）
-//   - 存量数据 AES-256-CBC + PKCS7（只读兼容）：输出 "enc:<iv hex>:<ct hex>"，EncryptField 不再产出
+// fieldcrypto 实现字段级对称加密，格式契约（ADR-024/ADR-025）：
+//   - AES-256-GCM（AEAD，带认证标签）：输出 "enc2:<nonce hex>:<ct hex>"（nonce 12 随机字节）
 //   - key 派生固定：sha256(ENCRYPTION_KEY 或 JWT_SECRET) 的 hex 表示（见 FieldKey，勿改——改了旧数据将无法解密）
 //   - 加解密 fail-closed：任何失败返回 error，绝不静默透传密文/明文（旧版 EncryptField 在
 //     错误路径上原样返回明文，属 fail-open 设计缺陷，已修正）
-//   - 无前缀输入按明文透传（历史明文数据兜底）；空值原样返回；已带前缀的输入不重复加密
+//   - 无前缀输入按明文透传（历史明文数据兜底）；空值原样返回；已带 enc2: 前缀的输入不重复加密
+//   - 旧版 enc:（AES-CBC）格式已由启动迁移 fieldcrypto_gcm_v1 重加密为 enc2:，
+//     本包不再支持 CBC——解密遇到 enc: 前缀返回错误（迁移遗漏即启动失败暴露）
 //
-// 用途：twoFactorSecret / SiteContent email.pass。
+// 用途：twoFactorSecret / twoFactorBackupCodes。
 // 旧版 EncryptArray/DecryptArray 已删除：备份码消费（backupcode.go）自行按条目调用 DecryptField。
-// 存量 enc: 数据读取时自动走 CBC 解密；是否一次性重加密为 enc2 由后续迁移决定（不迁移不影响行为）。
 
 // FieldKey 派生 32 字节 AES key：sha256(encryptionKey 或 jwtSecret) 的 hex 表示。
 // key 派生固定为：优先 ENCRYPTION_KEY，缺省回退 JWT_SECRET，勿改。
@@ -35,9 +35,9 @@ func FieldKey(encryptionKey, jwtSecret string) string {
 }
 
 // EncryptField 用 AES-256-GCM 加密明文，输出 "enc2:<nonce hex>:<ct hex>"。
-// 空值或已带 enc:/enc2: 前缀的输入原样返回（幂等）。失败返回 error（fail-closed）。
+// 空值或已带 enc2: 前缀的输入原样返回（幂等）。失败返回 error（fail-closed）。
 func EncryptField(text, keyHex string) (string, error) {
-	if text == "" || strings.HasPrefix(text, "enc2:") || strings.HasPrefix(text, "enc:") {
+	if text == "" || strings.HasPrefix(text, "enc2:") {
 		return text, nil
 	}
 	key, err := decodeKey(keyHex)
@@ -56,8 +56,9 @@ func EncryptField(text, keyHex string) (string, error) {
 	return "enc2:" + hex.EncodeToString(nonce) + ":" + hex.EncodeToString(ct), nil
 }
 
-// DecryptField 解密密文，按前缀分派：enc2: → AES-GCM；enc: → AES-CBC + PKCS7（存量只读）；
-// 无前缀 → 明文透传（历史明文兜底）。任何解密失败（key 不符、密文损坏、格式非法）返回 error。
+// DecryptField 解密密文：enc2: → AES-GCM；无前缀 → 明文透传（历史明文兜底）；
+// enc: → 返回错误（存量 CBC 格式由启动迁移 fieldcrypto_gcm_v1 重加密，遇此前缀
+// 说明迁移未完成，fail-closed 暴露）。其他解密失败（key 不符、密文损坏）同样返回 error。
 func DecryptField(text, keyHex string) (string, error) {
 	switch {
 	case !strings.HasPrefix(text, "enc2:") && !strings.HasPrefix(text, "enc:"):
@@ -83,29 +84,8 @@ func DecryptField(text, keyHex string) (string, error) {
 			return "", errors.New("fieldcrypto: gcm open failed")
 		}
 		return string(plain), nil
-	default: // "enc:" 存量 CBC（只读）
-		key, err := decodeKey(keyHex)
-		if err != nil {
-			return "", err
-		}
-		block, err := aes.NewCipher(key)
-		if err != nil {
-			return "", err
-		}
-		iv, ct, err := splitPayload(text[4:])
-		if err != nil {
-			return "", err
-		}
-		if len(iv) != aes.BlockSize || len(ct) == 0 || len(ct)%aes.BlockSize != 0 {
-			return "", errors.New("fieldcrypto: malformed enc payload")
-		}
-		plain := make([]byte, len(ct))
-		cipher.NewCBCDecrypter(block, iv).CryptBlocks(plain, ct)
-		unpadded, err := pkcs7Unpad(plain, aes.BlockSize)
-		if err != nil {
-			return "", err
-		}
-		return string(unpadded), nil
+	default: // "enc:"：迁移 fieldcrypto_gcm_v1 未覆盖到的存量数据
+		return "", errors.New("fieldcrypto: legacy enc: format no longer supported (run migration fieldcrypto_gcm_v1)")
 	}
 }
 
@@ -131,7 +111,7 @@ func newGCM(key []byte) (cipher.AEAD, error) {
 	return gcm, nil
 }
 
-// splitPayload 拆分 "<iv/nonce hex>:<ct hex>" 载荷。
+// splitPayload 拆分 "<nonce hex>:<ct hex>" 载荷。
 func splitPayload(body string) ([]byte, []byte, error) {
 	parts := strings.SplitN(body, ":", 2)
 	if len(parts) != 2 {
@@ -143,21 +123,4 @@ func splitPayload(body string) ([]byte, []byte, error) {
 		return nil, nil, errors.New("fieldcrypto: malformed payload hex")
 	}
 	return a, b, nil
-}
-
-// pkcs7Unpad 去除 PKCS#7 填充（仅存量 enc: CBC 解密使用）。非法返回错误。
-func pkcs7Unpad(data []byte, blockSize int) ([]byte, error) {
-	if len(data) == 0 || len(data)%blockSize != 0 {
-		return nil, errors.New("invalid padding")
-	}
-	padLen := int(data[len(data)-1])
-	if padLen == 0 || padLen > blockSize || padLen > len(data) {
-		return nil, errors.New("invalid padding length")
-	}
-	for _, b := range data[len(data)-padLen:] {
-		if int(b) != padLen {
-			return nil, errors.New("invalid padding byte")
-		}
-	}
-	return data[:len(data)-padLen], nil
 }

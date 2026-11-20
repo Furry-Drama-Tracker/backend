@@ -31,7 +31,7 @@ type Theme struct {
 	// AccentColor 是主题可选强调色（#rrggbb；空串表示不改变用户主题色，
 	// 应用主题时「有则应用、无则保持用户当前主题色」）。
 	AccentColor string `bson:"accentColor" json:"accentColor"`
-	IsSystem bool   `bson:"isSystem" json:"isSystem"`
+	IsSystem    bool   `bson:"isSystem" json:"isSystem"`
 	// OwnerID 是个人主题的所属用户；系统主题为 nil。
 	OwnerID *primitive.ObjectID `bson:"ownerId" json:"ownerId"`
 	Status  string              `bson:"status" json:"status"`

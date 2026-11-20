@@ -56,7 +56,8 @@ func BackupCodeEqual(a, b string) bool {
 //     与 true；
 //   - 未命中：返回原数组与 false（调用方不应写回）。
 //
-// 兼容三种存储形态：哈希（bc:）、AES 密文（enc:/enc2:，旧数据）、明文（历史兜底）。
+// 兼容三种存储形态：哈希（bc:）、AES 密文（enc2:）、明文（历史兜底）。
+// 旧 enc:（CBC）条目已由启动迁移 fieldcrypto_gcm_v1 重加密（ADR-025）。
 // keyHex 仅在处理密文条目时使用，派生规则见 FieldKey。
 func ConsumeBackupCode(stored []string, code, keyHex string) ([]string, bool) {
 	if code == "" || len(stored) == 0 {

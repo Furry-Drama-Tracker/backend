@@ -2,10 +2,16 @@ package migrate
 
 import (
 	"context"
+	"crypto/aes"
+	"crypto/cipher"
+	"crypto/rand"
+	"encoding/hex"
 	"fmt"
+	"strings"
 	"testing"
 	"time"
 
+	"github.com/Furry-Drama-Tracker/backend/internal/auth"
 	"github.com/Furry-Drama-Tracker/backend/internal/indexes"
 	"github.com/Furry-Drama-Tracker/backend/internal/repository"
 	"go.mongodb.org/mongo-driver/bson"
@@ -15,6 +21,12 @@ import (
 )
 
 const testMongoURI = "mongodb://127.0.0.1:27017"
+
+// fieldcrypto_gcm_v1 测试用 key（32 字节 hex）。
+const (
+	testFieldKeyAB = "abababababababababababababababababababababababababababababababab"
+	testFieldKeyCD = "cdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd"
+)
 
 // testDB 连接本地 mongod 并创建/清理独立的测试库。
 func testDB(t *testing.T) (*mongo.Database, func()) {
@@ -149,7 +161,8 @@ func TestMigrateRunRoleAndCreatorProfile(t *testing.T) {
 	mustInsert(t, profiles, bson.M{"_id": oldProfileID, "adminId": oldCreator, "displayName": "Old"})
 
 	repos := repository.NewRepos(db, 5, 30)
-	if err := Run(ctx, db, repos); err != nil {
+	// 测试 key：32 字节 hex（值无关紧要，fieldcrypto_gcm_v1 在无 enc: 数据时为空跑）。
+	if err := Run(ctx, db, repos, "ababababababababababababababababababababababababababababababababab"); err != nil {
 		t.Fatalf("Run: %v", err)
 	}
 
@@ -236,7 +249,7 @@ func TestMigrateRunRoleAndCreatorProfile(t *testing.T) {
 	}
 
 	// 幂等：再次 Run 不报错、不产生重复主页
-	if err := Run(ctx, db, repos); err != nil {
+	if err := Run(ctx, db, repos, "abababababababababababababababababababababababababababababab"); err != nil {
 		t.Fatalf("Run (2nd): %v", err)
 	}
 	profCount, _ := profiles.CountDocuments(ctx, bson.M{})
@@ -408,7 +421,7 @@ func TestMigrateEmailUniqueSparse(t *testing.T) {
 }
 
 // TestMigrateEmailUniqueSparseNoDropWhenSparse 验证 email_1 已是 sparse 时迁移不 drop
-//（迁移后未调用 Ensure，索引必须仍在），且迁移前无索引/缺字段文档均无副作用。
+// （迁移后未调用 Ensure，索引必须仍在），且迁移前无索引/缺字段文档均无副作用。
 func TestMigrateEmailUniqueSparseNoDropWhenSparse(t *testing.T) {
 	db, cleanup := testDB(t)
 	defer cleanup()
@@ -441,5 +454,120 @@ func TestMigrateEmailUniqueSparseNoDropWhenSparse(t *testing.T) {
 	done, err := repos.Settings.GetFlag(ctx, keyEmailUniqueSparse)
 	if err != nil || !done {
 		t.Fatalf("migration flag: done=%v err=%v, want true", done, err)
+	}
+}
+
+// legacyCBCEncrypt 用旧版 CBC 算法构造 "enc:<iv hex>:<ct hex>" 测试夹具（PKCS7 填充）。
+func legacyCBCEncrypt(t *testing.T, keyHex, plain string) string {
+	t.Helper()
+	key, err := hex.DecodeString(keyHex)
+	if err != nil || len(key) != 32 {
+		t.Fatalf("bad test key: %v", err)
+	}
+	block, err := aes.NewCipher(key)
+	if err != nil {
+		t.Fatalf("NewCipher: %v", err)
+	}
+	iv := make([]byte, aes.BlockSize)
+	if _, err := rand.Read(iv); err != nil {
+		t.Fatalf("rand: %v", err)
+	}
+	padded := []byte(plain)
+	padLen := aes.BlockSize - len(padded)%aes.BlockSize
+	for i := 0; i < padLen; i++ {
+		padded = append(padded, byte(padLen))
+	}
+	ct := make([]byte, len(padded))
+	cipher.NewCBCEncrypter(block, iv).CryptBlocks(ct, padded)
+	return "enc:" + hex.EncodeToString(iv) + ":" + hex.EncodeToString(ct)
+}
+
+// TestMigrateFieldCryptoGCM 验证存量 enc:（CBC）一次性重加密为 enc2:（GCM）：
+// secret 与备份码数组条目均转换、enc2:/bc:/明文条目原样保留、幂等重跑、标记写入、
+// 解密坏数据时启动失败。
+func TestMigrateFieldCryptoGCM(t *testing.T) {
+	keyHex := testFieldKeyAB
+	db, cleanup := testDB(t)
+	defer cleanup()
+	ctx := context.Background()
+	repos := repository.NewRepos(db, 5, 30)
+	users := db.Collection("users")
+
+	secretPlain := "totp-secret-plain"
+	encSecret := legacyCBCEncrypt(t, keyHex, secretPlain)
+	keptGCM, err := auth.EncryptField("already-gcm", keyHex)
+	if err != nil {
+		t.Fatalf("EncryptField: %v", err)
+	}
+	uLegacy := primitive.NewObjectID()
+	uGCM := primitive.NewObjectID()
+	uPlain := primitive.NewObjectID()
+	mustInsert(t, users, bson.M{"_id": uLegacy,
+		"twoFactorSecret":      encSecret,
+		"twoFactorBackupCodes": []string{"bc:hashed", legacyCBCEncrypt(t, keyHex, "old1"), "old-plaintext"}})
+	mustInsert(t, users, bson.M{"_id": uGCM, "twoFactorSecret": keptGCM})
+	mustInsert(t, users, bson.M{"_id": uPlain, "twoFactorSecret": "legacy-plaintext"})
+
+	if err := migrateFieldCryptoGCM(ctx, db, repos, keyHex); err != nil {
+		t.Fatalf("migrateFieldCryptoGCM: %v", err)
+	}
+
+	var doc bson.M
+	if err := users.FindOne(ctx, bson.M{"_id": uLegacy}).Decode(&doc); err != nil {
+		t.Fatalf("find legacy user: %v", err)
+	}
+	gotSecret := doc["twoFactorSecret"].(string)
+	if !strings.HasPrefix(gotSecret, "enc2:") {
+		t.Fatalf("secret should be re-encrypted to enc2:, got %q", gotSecret[:8])
+	}
+	if plain, err := auth.DecryptField(gotSecret, keyHex); err != nil || plain != secretPlain {
+		t.Fatalf("re-encrypted secret should decrypt: got %q err %v", plain, err)
+	}
+	codes := doc["twoFactorBackupCodes"].(primitive.A)
+	if len(codes) != 3 {
+		t.Fatalf("backup codes length = %d, want 3", len(codes))
+	}
+	if codes[0] != "bc:hashed" {
+		t.Errorf("bc: entry must stay: got %v", codes[0])
+	}
+	if c1, ok := codes[1].(string); !ok || !strings.HasPrefix(c1, "enc2:") {
+		t.Errorf("enc: code should be re-encrypted, got %v", codes[1])
+	} else if plain, err := auth.DecryptField(c1, keyHex); err != nil || plain != "old1" {
+		t.Errorf("re-encrypted code should decrypt to old1: got %q err %v", plain, err)
+	}
+	if codes[2] != "old-plaintext" {
+		t.Errorf("plaintext entry must stay: got %v", codes[2])
+	}
+	// enc2:/明文用户不受影响。
+	var gcmDoc, plainDoc bson.M
+	if err := users.FindOne(ctx, bson.M{"_id": uGCM}).Decode(&gcmDoc); err != nil || gcmDoc["twoFactorSecret"] != keptGCM {
+		t.Errorf("enc2: user must be untouched: %v err %v", gcmDoc["twoFactorSecret"], err)
+	}
+	if err := users.FindOne(ctx, bson.M{"_id": uPlain}).Decode(&plainDoc); err != nil || plainDoc["twoFactorSecret"] != "legacy-plaintext" {
+		t.Errorf("plaintext user must be untouched: %v err %v", plainDoc["twoFactorSecret"], err)
+	}
+	// 幂等：重跑不再改动（flag 已置位）。
+	if err := migrateFieldCryptoGCM(ctx, db, repos, keyHex); err != nil {
+		t.Fatalf("second run: %v", err)
+	}
+	done, err := repos.Settings.GetFlag(ctx, keyFieldCryptoGCM)
+	if err != nil || !done {
+		t.Fatalf("migration flag: done=%v err=%v, want true", done, err)
+	}
+}
+
+// TestMigrateFieldCryptoGCMBadData 验证解密失败（key 不符的坏数据）时迁移报错——
+// 静默跳过会把故障推迟到 2FA 使用时刻，fail-closed 中断启动。
+func TestMigrateFieldCryptoGCMBadData(t *testing.T) {
+	keyHex := testFieldKeyCD
+	db, cleanup := testDB(t)
+	defer cleanup()
+	ctx := context.Background()
+	repos := repository.NewRepos(db, 5, 30)
+	// 用不同 key 构造的 enc: 数据 → 当前 key 解不开。
+	mustInsert(t, db.Collection("users"), bson.M{
+		"_id": primitive.NewObjectID(), "twoFactorSecret": legacyCBCEncrypt(t, testFieldKeyAB, "x")})
+	if err := migrateFieldCryptoGCM(ctx, db, repos, keyHex); err == nil {
+		t.Fatal("migration should fail on undecryptable data")
 	}
 }

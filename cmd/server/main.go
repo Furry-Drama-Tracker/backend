@@ -112,7 +112,7 @@ func main() {
 	startupCtx, startupCancel := context.WithTimeout(context.Background(), 60*time.Second)
 	// 迁移/索引失败不让已有服务无法启动：记录告警并继续。
 	// 首次部署或数据重复时应尽快人工处理后重启。
-	if err := migrate.Run(startupCtx, db, repos); err != nil {
+	if err := migrate.Run(startupCtx, db, repos, auth.FieldKey(cfg.JWT.EncryptionKey, cfg.JWT.Secret)); err != nil {
 		log.Printf("[WARN] 启动迁移失败（服务继续启动，请检查数据）: %v", err)
 	}
 	if err := indexes.Ensure(startupCtx, db); err != nil {

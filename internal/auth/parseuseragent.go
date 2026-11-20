@@ -3,7 +3,7 @@ package auth
 import (
 	"strings"
 
-	"github.com/mssola/useragent"
+	ua "github.com/mileusna/useragent"
 
 	"github.com/Furry-Drama-Tracker/backend/internal/model"
 )
@@ -18,50 +18,33 @@ type ParsedUA struct {
 	DeviceModel    string
 }
 
-// ParseUserAgent 解析 UA 字符串（基于 github.com/mssola/useragent，替代旧手写正则表）。
+// ParseUserAgent 解析 UA 字符串（基于 github.com/mileusna/useragent，ADR-025）。
 //
-// 口径说明（2026-11 换库，ADR-024）：
-//   - 设备类型：iPad / Mobile 二分，其余 desktop；
-//   - OS 名归一到既有口径（Mac OS X→macOS、iPhone OS→iOS）；
-//   - 旧版手写正则的特例（如 Safari 26→macOS 版本映射）不再保留——客户端上报的
-//     deviceInfo 优先级更高（BuildDeviceInfo），UA 解析仅作兜底，口径差异可接受；
-//   - DeviceModel 由 mssola 的 Model() 提取（移动端括号段机型），桌面端为空。
-func ParseUserAgent(ua string) ParsedUA {
+// 口径说明（2026-11，ADR-024 先换 mssola 后改 mileusna——mileusna 的 OS 常量
+// 与既有统计口径一致（macOS/iOS/Android/Windows），且 Device 字段直接给出
+// Android 机型 / iPhone / iPad，无需归一化映射）：
+//   - 设备类型：Tablet / Mobile 二分，其余 desktop；
+//   - 客户端上报的 deviceInfo 优先级更高（BuildDeviceInfo），UA 解析仅作兜底。
+func ParseUserAgent(uaStr string) ParsedUA {
 	r := ParsedUA{DeviceType: "desktop"}
-	if ua == "" {
+	if uaStr == "" {
 		return r
 	}
-	p := useragent.New(ua)
+	p := ua.Parse(uaStr)
 	switch {
-	case p.Platform() == "iPad" || strings.Contains(ua, "iPad"):
+	case p.Tablet:
 		r.DeviceType = "tablet"
-	case p.Mobile():
+	case p.Mobile:
 		r.DeviceType = "mobile"
 	}
-	r.Browser, r.BrowserVersion = p.Browser()
-	info := p.OSInfo()
-	r.OS = normalizeOSName(info.Name)
-	if v := info.Version; v != "" {
-		r.OSVersion = v
-	}
+	r.Browser = p.Name
+	r.BrowserVersion = p.Version
+	r.OS = p.OS
+	r.OSVersion = p.OSVersion
 	if r.DeviceType != "desktop" {
-		r.DeviceModel = trimModel(p.Model())
+		r.DeviceModel = trimModel(p.Device)
 	}
 	return r
-}
-
-// normalizeOSName 把 mssola 的 OS 名归一到既有统计口径。
-func normalizeOSName(name string) string {
-	switch strings.TrimSpace(name) {
-	case "Mac OS X":
-		return "macOS"
-	case "iPhone OS", "iPhone OSX":
-		return "iOS"
-	case "":
-		return ""
-	default:
-		return strings.TrimSpace(name)
-	}
 }
 
 // trimModel 机型截断到 50 rune（与旧解析一致），空串原样返回。

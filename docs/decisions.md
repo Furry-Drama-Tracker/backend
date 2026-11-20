@@ -307,3 +307,18 @@
   - enc: 只读兼容意味着 CBC 解密代码将随存量数据长期保留；是否一次性重加密由后续 migrate 决定；
   - UA 口径变化：旧版特例不再保留，桌面端 DeviceModel 为空、OSVersion 来自 mssola 的 OSInfo（如 Windows 10.0）——客户端上报优先，兜底差异仅影响未上报 deviceInfo 的登录；
   - 注销清理触发时刻从「启动相位」变为墙钟 6/12/18 点整（部署时区语义）；错误注册表按 HEAD 扫描，提交后需重跑 `python3 docs/gen_errors_json.py`。
+
+## ADR-025 UA 解析改用 mileusna + CBC 存量迁移完毕、fieldcrypto 移除 CBC
+
+- **决策**：
+  1. **UA 解析从 mssola/useragent（ADR-024 的过渡选择）改为 github.com/mileusna/useragent v1.3.5**：其 OS 常量与既有统计口径一致（macOS/iOS/Android/Windows 原生输出，无需归一化映射），Device 字段直接给出 Android 机型 / iPhone / iPad（mssola 靠 Model() 的部分由它覆盖）；`ParsedUA`/`BuildDeviceInfo` 契约不变；
+  2. **新增启动迁移 fieldcrypto_gcm_v1**：把 users.twoFactorSecret 与 twoFactorBackupCodes 数组中的存量 enc:（AES-CBC）条目一次性重加密为 enc2:（AES-GCM）。迁移跑在流量之前（cmd/server：migrate.Run → 启动服务），解密失败（key 不符/密文损坏）中断启动——静默跳过会把故障推迟到 2FA 使用时刻；幂等可重入（settings 标记控制，崩溃重跑只处理剩余 enc: 文档）；
+  3. **fieldcrypto 移除 CBC 兼容**：DecryptField 遇 enc: 前缀返回错误（迁移遗漏即 fail-closed 暴露），pkcs7Unpad 与 CBC 分支删除；EncryptField 的 enc: 前缀幂等豁免同步移除（enc: 开头的输入按普通明文加密）。迁移自带的 decryptLegacyCBC 仅存于 migrate 包——迁移代码需要永久理解旧格式，运行时代码不需要。
+- **背景**：ADR-024 曾以 mssola v1.0.0（上游 2018 年后无 tag）过渡并暂缓存量重加密；本次确认 mileusna 口径更贴合且版本维护更近，双前缀兼容的长期成本（CBC 代码永久保留在运行时）大于一次性迁移成本。
+- **替代方案**：
+  - 运行时保留 CBC 双前缀分派：迁移代码与运行时代码长期并存，维护面无谓扩大；
+  - sitecontents email.pass 一并迁移：全库无任何代码对它调用 EncryptField（fieldcrypto 旧注释中的 email.pass 用途系历史遗留，已修正）——无 enc: 数据可迁，不纳入。
+- **取舍 / 兼容性**：
+  - 部署顺序安全：新版二进制首次启动即执行迁移，迁移完成前不接流量，运行时无 CBC 不会读到旧格式；
+  - UA 口径：mileusna 的 OSVersion 为字符串、Windows 报 NT 版本号（Win11 显示 10.0）——客户端上报 deviceInfo 优先，兜底差异有限；
+  - 无新增错误码，errors 注册表不变。
