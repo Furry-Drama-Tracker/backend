@@ -2,37 +2,36 @@ package cron
 
 import (
 	"testing"
-	"time"
+
+	"github.com/robfig/cron/v3"
 )
 
-// TestNextHourlyDelay 验证对齐到下一个整点（cron '0 * * * *'）。
-func TestNextHourlyDelay(t *testing.T) {
-	now := time.Date(2026, 8, 8, 10, 30, 0, 0, time.UTC)
-	if d := nextHourlyDelay(now); d != 30*time.Minute {
-		t.Errorf("nextHourlyDelay(10:30) = %v, want 30m", d)
+// TestNewCronEntries 验证调度器注册了全部三个任务，且三个文档化 spec
+// （会话清理每小时 / 已读通知每天 03:00 / 注销清理每 6 小时整点）均可被
+// robfig 解析器接受——非法 spec 在 mustAdd 处 panic，这里防文档漂移。
+func TestNewCronEntries(t *testing.T) {
+	c := newCron(t.Context(), nil)
+	if n := len(c.Entries()); n != 3 {
+		t.Fatalf("entries = %d, want 3", n)
 	}
-	nowExact := time.Date(2026, 8, 8, 10, 0, 0, 0, time.UTC)
-	if d := nextHourlyDelay(nowExact); d != time.Hour {
-		t.Errorf("nextHourlyDelay(10:00) = %v, want 1h", d)
+	for _, spec := range []string{
+		"0 * * * *",
+		"0 3 * * *",
+		"0 6-18/6 * * *",
+	} {
+		if _, err := cron.ParseStandard(spec); err != nil {
+			t.Fatalf("documented spec %q should parse: %v", spec, err)
+		}
 	}
 }
 
-// TestNextDailyDelay 验证对齐到每天 hour 点整（cron '0 3 * * *'）。
-func TestNextDailyDelay(t *testing.T) {
-	loc := time.UTC
-	// 10:00 时当天的 03:00 已过 → 次日 03:00（17h）
-	now := time.Date(2026, 8, 8, 10, 0, 0, 0, loc)
-	if d := nextDailyDelay(now, 3); d != 17*time.Hour {
-		t.Errorf("nextDailyDelay(10:00, 3) = %v, want 17h", d)
-	}
-	// 01:00 → 当天 03:00（2h）
-	now2 := time.Date(2026, 8, 8, 1, 0, 0, 0, loc)
-	if d := nextDailyDelay(now2, 3); d != 2*time.Hour {
-		t.Errorf("nextDailyDelay(01:00, 3) = %v, want 2h", d)
-	}
-	// 正好 03:00 → 次日 03:00（24h）
-	now3 := time.Date(2026, 8, 8, 3, 0, 0, 0, loc)
-	if d := nextDailyDelay(now3, 3); d != 24*time.Hour {
-		t.Errorf("nextDailyDelay(03:00, 3) = %v, want 24h", d)
-	}
+// TestMustAddPanicsOnInvalidSpec 验证非法 spec 触发防御性 panic。
+func TestMustAddPanicsOnInvalidSpec(t *testing.T) {
+	defer func() {
+		if recover() == nil {
+			t.Fatal("mustAdd should panic on invalid spec")
+		}
+	}()
+	c := cron.New()
+	mustAdd(c, "not-a-spec", func() {})
 }

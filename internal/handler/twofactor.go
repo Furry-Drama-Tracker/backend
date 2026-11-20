@@ -59,8 +59,14 @@ func (h *Auth) Enable2FA(c *gin.Context) {
 	backup := auth.GenerateBackupCodes()
 	keyHex := h.twoFactorKeyHex()
 	// secret 需要可逆（要复算 TOTP），备份码只需单向验证 → 只存哈希。
+	// 加密 fail-closed（ADR-024）：失败返回错误，绝不静默存明文。
+	encSecret, err := auth.EncryptField(secret, keyHex)
+	if err != nil {
+		errors.Abort500C(c, "TFA0017", "服务器错误", err, h.Config.IsDev)
+		return
+	}
 	if err := h.Svc.Repos.Users.SetTwoFactorSetup(c.Request.Context(), user.ID,
-		auth.EncryptField(secret, keyHex), auth.HashBackupCodes(backup), false); err != nil {
+		encSecret, auth.HashBackupCodes(backup), false); err != nil {
 		errors.Abort500C(c, "TFA0004", "服务器错误", err, h.Config.IsDev)
 		return
 	}
@@ -104,7 +110,11 @@ func (h *Auth) VerifyEnable2FA(c *gin.Context) {
 		errors.AbortCoded(c, 400, "TFA0007", "2FA not set up", h.Config.IsDev)
 		return
 	}
-	secret := auth.DecryptField(u.TwoFactorSecret, h.twoFactorKeyHex())
+	secret, err := auth.DecryptField(u.TwoFactorSecret, h.twoFactorKeyHex())
+	if err != nil {
+		errors.Abort500C(c, "TFA0018", "服务器错误", err, h.Config.IsDev)
+		return
+	}
 	if !auth.VerifyTOTP(secret, req.Token) {
 		errors.AbortCoded(c, 400, "TFA0008", "Invalid verification code", h.Config.IsDev)
 		return
@@ -143,7 +153,11 @@ func (h *Auth) Disable2FA(c *gin.Context) {
 		return
 	}
 	keyHex := h.twoFactorKeyHex()
-	secret := auth.DecryptField(u.TwoFactorSecret, keyHex)
+	secret, err := auth.DecryptField(u.TwoFactorSecret, keyHex)
+	if err != nil {
+		errors.Abort500C(c, "TFA0019", "服务器错误", err, h.Config.IsDev)
+		return
+	}
 	// 配置完整性兜底（ADR-019）：密钥与备份码均已丢失（如历史版本对投影加载的
 	// user 做整文档 Save 把 twoFactorSecret 清空）时，2FA 已不存在任何可验证
 	// 凭据——继续要求验证码会把账户永久锁死（登录侧 Login2FA 对空 secret 同样
@@ -193,7 +207,11 @@ func (h *Auth) Verify2FA(c *gin.Context) {
 		return
 	}
 	keyHex := h.twoFactorKeyHex()
-	secret := auth.DecryptField(u.TwoFactorSecret, keyHex)
+	secret, err := auth.DecryptField(u.TwoFactorSecret, keyHex)
+	if err != nil {
+		errors.Abort500C(c, "TFA0020", "服务器错误", err, h.Config.IsDev)
+		return
+	}
 	remaining, backupHit := auth.ConsumeBackupCode(u.TwoFactorBackupCodes, req.Token, keyHex)
 	if !auth.VerifyTOTP(secret, req.Token) && !backupHit {
 		errors.AbortCoded(c, 400, "TFA0016", "Invalid verification code", h.Config.IsDev)

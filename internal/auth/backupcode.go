@@ -56,8 +56,8 @@ func BackupCodeEqual(a, b string) bool {
 //     与 true；
 //   - 未命中：返回原数组与 false（调用方不应写回）。
 //
-// 兼容三种存储形态：哈希（bc:）、AES 密文（enc:，旧数据）、明文（历史兜底）。
-// keyHex 仅在处理 enc: 条目时使用，派生规则见 FieldKey。
+// 兼容三种存储形态：哈希（bc:）、AES 密文（enc:/enc2:，旧数据）、明文（历史兜底）。
+// keyHex 仅在处理密文条目时使用，派生规则见 FieldKey。
 func ConsumeBackupCode(stored []string, code, keyHex string) ([]string, bool) {
 	if code == "" || len(stored) == 0 {
 		return stored, false
@@ -72,10 +72,10 @@ func ConsumeBackupCode(stored []string, code, keyHex string) ([]string, bool) {
 		if IsHashedBackupCode(raw) {
 			plain = raw
 		} else {
-			// 旧数据（AES 密文）或明文：解密是幂等的（非 enc: 原样返回），
-			// 统一走 DecryptField 后再比较。
-			legacy := DecryptField(raw, keyHex)
-			if legacy == "" {
+			// 旧数据（AES 密文）或明文：解密是幂等的（无前缀原样返回），
+			// 统一走 DecryptField 后再比较；解密失败（损坏/key 不符）视为未命中。
+			legacy, err := DecryptField(raw, keyHex)
+			if err != nil || legacy == "" {
 				continue
 			}
 			plain = HashBackupCode(legacy)
@@ -97,7 +97,7 @@ func ConsumeBackupCode(stored []string, code, keyHex string) ([]string, bool) {
 			out = append(out, raw)
 			continue
 		}
-		if legacy := DecryptField(raw, keyHex); legacy != "" {
+		if legacy, err := DecryptField(raw, keyHex); err == nil && legacy != "" {
 			out = append(out, HashBackupCode(legacy))
 		}
 	}

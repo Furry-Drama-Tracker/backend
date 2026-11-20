@@ -67,13 +67,20 @@ func TestConsumeBackupCodeHashed(t *testing.T) {
 	}
 }
 
-// TestConsumeBackupCodeLegacyUpgrade 验证旧格式（AES 密文）可匹配，
-// 且匹配后整个数组就地升级为哈希格式。
+// TestConsumeBackupCodeLegacyUpgrade 验证加密格式（enc2:，存量 enc: 走同一
+// DecryptField 路径）可匹配，且匹配后整个数组就地升级为哈希格式。
 func TestConsumeBackupCodeLegacyUpgrade(t *testing.T) {
-	stored := EncryptArray([]string{"l1", "l2", "l3"}, nodeVectorKeyHex)
+	stored := make([]string, 0, 3)
+	for _, code := range []string{"l1", "l2", "l3"} {
+		enc, err := EncryptField(code, nodeVectorKeyHex)
+		if err != nil {
+			t.Fatalf("EncryptField: %v", err)
+		}
+		stored = append(stored, enc)
+	}
 	for _, v := range stored {
-		if !strings.HasPrefix(v, "enc:") {
-			t.Fatalf("legacy fixture should be encrypted: %q", v)
+		if !strings.HasPrefix(v, "enc") {
+			t.Fatalf("fixture should be encrypted: %q", v)
 		}
 	}
 	remaining, ok := ConsumeBackupCode(stored, "l2", nodeVectorKeyHex)

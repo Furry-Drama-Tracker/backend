@@ -1,9 +1,9 @@
 package auth
 
 import (
-	"regexp"
-	"strconv"
 	"strings"
+
+	"github.com/mssola/useragent"
 
 	"github.com/Furry-Drama-Tracker/backend/internal/model"
 )
@@ -18,122 +18,59 @@ type ParsedUA struct {
 	DeviceModel    string
 }
 
-// 正则（UA 解析规则固定，勿随意改——影响设备信息统计口径）。
-var (
-	reMobile       = regexp.MustCompile(`(?i)Mobile|Android|iPhone`)
-	reTablet       = regexp.MustCompile(`(?i)iPad|Tablet`)
-	reEdge         = regexp.MustCompile(`(?i)Edg/(\d+)`)
-	reChrome       = regexp.MustCompile(`(?i)Chrome/(\d+)`)
-	reHasEdge      = regexp.MustCompile(`(?i)Edg`)
-	reFirefox      = regexp.MustCompile(`(?i)Firefox/(\d+)`)
-	reSafari       = regexp.MustCompile(`(?i)Safari/(\d+)`)
-	reHasChrome    = regexp.MustCompile(`(?i)Chrome`)
-	reIE           = regexp.MustCompile(`(?i)MSIE|Trident`)
-	reWinNT        = regexp.MustCompile(`(?i)Windows NT (\d+\.\d+)`)
-	reMacOS        = regexp.MustCompile(`(?i)Mac OS X (\d+[._\d]*)`)
-	reAndroid      = regexp.MustCompile(`(?i)Android (\d+\.?\d*)`)
-	reIPhoneOS     = regexp.MustCompile(`(?i)iPhone OS (\d+[_\d]*)`)
-	reIPadOS       = regexp.MustCompile(`(?i)(?:CPU|iPhone) OS (\d+[_\d]*)`)
-	reLinux        = regexp.MustCompile(`(?i)Linux`)
-	reVersion      = regexp.MustCompile(`(?i)Version/(\d+)(?:\.(\d+))?`)
-	reVersionFloat = regexp.MustCompile(`(?i)Version/(\d+[\.\d]*)`)
-	reNonWebKit    = regexp.MustCompile(`(?i)Chrome|Firefox|Edg|OPR`)
-	reBrowserKit   = regexp.MustCompile(`(?i)CriOS|FxiOS|EdgiOS|OPiOS`)
-	reParen        = regexp.MustCompile(`\(([^)]+)\)`)
-	reModelSkip    = regexp.MustCompile(`(?i)^(Mozilla|Compatible|Windows|Mac|Linux|Android|iPhone|iPad)`)
-)
-
-// ParseUserAgent 解析 UA 字符串（解析规则固定，勿随意改）。
+// ParseUserAgent 解析 UA 字符串（基于 github.com/mssola/useragent，替代旧手写正则表）。
+//
+// 口径说明（2026-11 换库，ADR-024）：
+//   - 设备类型：iPad / Mobile 二分，其余 desktop；
+//   - OS 名归一到既有口径（Mac OS X→macOS、iPhone OS→iOS）；
+//   - 旧版手写正则的特例（如 Safari 26→macOS 版本映射）不再保留——客户端上报的
+//     deviceInfo 优先级更高（BuildDeviceInfo），UA 解析仅作兜底，口径差异可接受；
+//   - DeviceModel 由 mssola 的 Model() 提取（移动端括号段机型），桌面端为空。
 func ParseUserAgent(ua string) ParsedUA {
 	r := ParsedUA{DeviceType: "desktop"}
 	if ua == "" {
 		return r
 	}
-	if reMobile.MatchString(ua) {
+	p := useragent.New(ua)
+	switch {
+	case p.Platform() == "iPad" || strings.Contains(ua, "iPad"):
+		r.DeviceType = "tablet"
+	case p.Mobile():
 		r.DeviceType = "mobile"
 	}
-	if reTablet.MatchString(ua) {
-		r.DeviceType = "tablet"
+	r.Browser, r.BrowserVersion = p.Browser()
+	info := p.OSInfo()
+	r.OS = normalizeOSName(info.Name)
+	if v := info.Version; v != "" {
+		r.OSVersion = v
 	}
-
-	if m := reEdge.FindStringSubmatch(ua); m != nil {
-		r.Browser = "Edge"
-		r.BrowserVersion = m[1]
-	} else if m := reChrome.FindStringSubmatch(ua); m != nil && !reHasEdge.MatchString(ua) {
-		r.Browser = "Chrome"
-		r.BrowserVersion = m[1]
-	} else if m := reFirefox.FindStringSubmatch(ua); m != nil {
-		r.Browser = "Firefox"
-		r.BrowserVersion = m[1]
-	} else if reSafari.MatchString(ua) && !reHasChrome.MatchString(ua) {
-		r.Browser = "Safari"
-		if m := reVersion.FindStringSubmatch(ua); m != nil {
-			r.BrowserVersion = m[1]
-		}
-	} else if reIE.MatchString(ua) {
-		r.Browser = "IE"
-	}
-
-	switch {
-	case reWinNT.MatchString(ua):
-		r.OS = "Windows"
-		r.OSVersion = reWinNT.FindStringSubmatch(ua)[1]
-	case reMacOS.MatchString(ua):
-		r.OS = "macOS"
-		r.OSVersion = strings.ReplaceAll(reMacOS.FindStringSubmatch(ua)[1], "_", ".")
-		if strings.HasPrefix(r.OSVersion, "10.15") && !reNonWebKit.MatchString(ua) {
-			if m := reVersion.FindStringSubmatch(ua); m != nil {
-				safariMajor, _ := strconv.Atoi(m[1])
-				safariMinor := m[2]
-				if safariMinor == "" {
-					safariMinor = "0"
-				}
-				if safariMajor >= 26 {
-					if safariMinor != "0" {
-						r.OSVersion = m[1] + "." + safariMinor
-					} else {
-						r.OSVersion = m[1]
-					}
-				} else if safariMajor >= 14 && safariMajor <= 18 {
-					r.OSVersion = strconv.Itoa(safariMajor-3) + "." + safariMinor
-				}
-			}
-		}
-	case reAndroid.MatchString(ua):
-		r.OS = "Android"
-		r.OSVersion = reAndroid.FindStringSubmatch(ua)[1]
-	case reIPhoneOS.MatchString(ua):
-		r.OS = "iOS"
-		r.OSVersion = strings.ReplaceAll(reIPhoneOS.FindStringSubmatch(ua)[1], "_", ".")
-		if !reBrowserKit.MatchString(ua) {
-			if m := reVersionFloat.FindStringSubmatch(ua); m != nil {
-				if major, err := strconv.Atoi(strings.Split(m[1], ".")[0]); err == nil && major >= 26 {
-					r.OSVersion = m[1]
-				}
-			}
-		}
-	case strings.Contains(ua, "iPad") && reIPadOS.MatchString(ua):
-		r.OS = "iPadOS"
-		r.OSVersion = strings.ReplaceAll(reIPadOS.FindStringSubmatch(ua)[1], "_", ".")
-		if !reBrowserKit.MatchString(ua) {
-			if m := reVersionFloat.FindStringSubmatch(ua); m != nil {
-				if major, err := strconv.Atoi(strings.Split(m[1], ".")[0]); err == nil && major >= 26 {
-					r.OSVersion = m[1]
-				}
-			}
-		}
-	case reLinux.MatchString(ua):
-		r.OS = "Linux"
-	}
-
-	if m := reParen.FindStringSubmatch(ua); m != nil && reMobile.MatchString(ua) {
-		parts := strings.Split(m[1], ";")
-		last := strings.TrimSpace(parts[len(parts)-1])
-		if last != "" && !reModelSkip.MatchString(last) {
-			r.DeviceModel = last
-		}
+	if r.DeviceType != "desktop" {
+		r.DeviceModel = trimModel(p.Model())
 	}
 	return r
+}
+
+// normalizeOSName 把 mssola 的 OS 名归一到既有统计口径。
+func normalizeOSName(name string) string {
+	switch strings.TrimSpace(name) {
+	case "Mac OS X":
+		return "macOS"
+	case "iPhone OS", "iPhone OSX":
+		return "iOS"
+	case "":
+		return ""
+	default:
+		return strings.TrimSpace(name)
+	}
+}
+
+// trimModel 机型截断到 50 rune（与旧解析一致），空串原样返回。
+func trimModel(s string) string {
+	s = strings.TrimSpace(s)
+	if len([]rune(s)) > 50 {
+		s = string([]rune(s)[:50])
+	}
+	return s
 }
 
 // BuildDeviceInfo 合并客户端上报 deviceInfo、UA 解析结果与 accept-language

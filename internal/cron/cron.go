@@ -1,13 +1,16 @@
 // Package cron 实现后台定时任务。
 //
-// 每个任务一个 goroutine，先用 time.Timer 对齐到首个执行点（整点 / 每天 03:00），
-// 之后由 time.Ticker 驱动周期性执行；传入的 ctx 取消时 goroutine 退出。
+// 调度基于 github.com/robfig/cron/v3（替代旧版 time.Timer/Ticker 手写对齐循环）：
+// 全部任务按墙钟时刻触发（cron spec），重启不漂移、对齐确定。
+// 传入的 ctx 取消时停止调度器并等待在跑任务收尾。
 package cron
 
 import (
 	"context"
 	"log/slog"
 	"time"
+
+	"github.com/robfig/cron/v3"
 
 	"github.com/Furry-Drama-Tracker/backend/internal/model"
 	"github.com/Furry-Drama-Tracker/backend/internal/repository"
@@ -23,68 +26,52 @@ const (
 
 // StartSessions 启动认证/用户域相关的后台定时任务（本阶段只含会话与已读通知清理）。
 //
-// 调度计划：
-//   - 会话清理：每小时整点（cron '0 * * * *'）把 lastActiveAt 超过 30 天的 active
+// 调度计划（墙钟对齐，本地时区）：
+//   - 会话清理：每小时整点（'0 * * * *'）把 lastActiveAt 超过 30 天的 active
 //     会话批量置为 inactive + logoutAt（SessionRepo.MarkInactiveOlderThan）。
-//   - 已读通知清理：每天 03:00（cron '0 3 * * *'）删除 isRead=true 且 createdAt
+//   - 已读通知清理：每天 03:00（'0 3 * * *'）删除 isRead=true 且 createdAt
 //     超过 30 天的通知（NotificationRepo.DeleteReadOlderThan）。
+//   - 注销宽限期账号物理删除：每 6 小时整点（'0 6-18/6 * * *'，即 6/12/18 点）删除
+//     deletionRequestedAt 超过 7 天宽限期的用户并清理关联数据。旧实现是"启动后延迟
+//     6 小时再每 6 小时"，换 robfig/cron 后对齐墙钟——只会在固定时刻触发，
+//     升级/重启瞬间不会批量删除（ADR-024）。
 //
 // TODO（依赖 Episode 等后续段仓储，M2 之后再启用，见 AGENTS.md）：
-//   - 账号删除：deletionRequestedAt 超过 7 天宽限期的用户物理删除并清理关联数据
-//     （每 6 小时执行）。
 //   - 自动完结：连载剧 currentEpisodes >= totalEpisodes 时置 status='completed' 并向
 //     追番用户发送站内通知 / Web Push / 邮件（每小时执行）。
 //
 // 调用方应在服务优雅关停时 cancel ctx；本函数立即返回，不阻塞。
 func StartSessions(ctx context.Context, repos *repository.Repos) {
-	now := time.Now()
-	go runAligned(ctx, nextHourlyDelay(now), time.Hour, func() {
+	c := newCron(ctx, repos)
+	c.Start()
+	go func() {
+		<-ctx.Done()
+		// Stop 等待在跑任务结束后才返回（返回值是完成通知 ctx，此处仅等待收尾）。
+		<-c.Stop().Done()
+	}()
+}
+
+// newCron 构造调度器并注册全部任务（单测校验条目数/spec 用）。
+func newCron(ctx context.Context, repos *repository.Repos) *cron.Cron {
+	// Recover：单次任务 panic 只记日志，不终止调度器。
+	c := cron.New(cron.WithChain(cron.Recover(cron.DefaultLogger)))
+	mustAdd(c, "0 * * * *", func() {
 		cleanupExpiredSessions(ctx, repos)
 	})
-	go runAligned(ctx, nextDailyDelay(now, 3), 24*time.Hour, func() {
+	mustAdd(c, "0 3 * * *", func() {
 		cleanupReadNotifications(ctx, repos)
 	})
-	// 注销宽限期到期账号物理删除：启动后延迟 6 小时执行第一次，
-	// 避免升级/重启瞬间批量删除历史申请，给运维留出核查窗口。
-	go runAligned(ctx, 6*time.Hour, 6*time.Hour, func() {
+	mustAdd(c, "0 6-18/6 * * *", func() {
 		cleanupDeletionRequests(ctx, repos)
 	})
+	return c
 }
 
-// runAligned 等待 first 后执行一次 job，随后每 interval 执行一次；ctx 取消即退出。
-func runAligned(ctx context.Context, first, interval time.Duration, job func()) {
-	timer := time.NewTimer(first)
-	select {
-	case <-ctx.Done():
-		timer.Stop()
-		return
-	case <-timer.C:
+// mustAdd 注册任务；spec 是编译期常量，出错说明代码写错了，直接 panic 暴露。
+func mustAdd(c *cron.Cron, spec string, fn func()) {
+	if _, err := c.AddFunc(spec, fn); err != nil {
+		panic("cron: invalid spec " + spec + ": " + err.Error())
 	}
-	ticker := time.NewTicker(interval)
-	defer ticker.Stop()
-	for {
-		job()
-		select {
-		case <-ctx.Done():
-			return
-		case <-ticker.C:
-		}
-	}
-}
-
-// nextHourlyDelay 返回从 now 到下一个整点的时长（即 cron '0 * * * *'）。
-func nextHourlyDelay(now time.Time) time.Duration {
-	next := now.Truncate(time.Hour).Add(time.Hour)
-	return next.Sub(now)
-}
-
-// nextDailyDelay 返回从 now 到下一个 hour 点整的时长（即 cron '0 3 * * *'）。
-func nextDailyDelay(now time.Time, hour int) time.Duration {
-	next := time.Date(now.Year(), now.Month(), now.Day(), hour, 0, 0, 0, now.Location())
-	if !next.After(now) {
-		next = next.Add(24 * time.Hour)
-	}
-	return next.Sub(now)
 }
 
 // cleanupExpiredSessions 会话清理任务体。

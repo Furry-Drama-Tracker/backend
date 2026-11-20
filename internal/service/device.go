@@ -64,7 +64,11 @@ func (s *AuthService) Login2FA(c *gin.Context, identifier, challenge, method, to
 	default:
 		// TOTP / 备份码（默认路径，保持既有语义）。
 		keyHex := auth.FieldKey(s.Config.JWT.EncryptionKey, s.Config.JWT.Secret)
-		secret := auth.DecryptField(user.TwoFactorSecret, keyHex)
+		secret, derr := auth.DecryptField(user.TwoFactorSecret, keyHex)
+		if derr != nil {
+			// 密钥不符/密文损坏属服务端配置或数据问题，如实 500（ADR-024 fail-closed）。
+			return nil, errors.NewC("DEV0018", 500, "服务器错误")
+		}
 		// 备份码匹配 + 消费：命中时返回已升级为哈希格式的剩余数组。
 		remaining, backupHit = auth.ConsumeBackupCode(user.TwoFactorBackupCodes, token, keyHex)
 		if secret != "" {

@@ -290,3 +290,20 @@
   - 旧客户端携带 `iconsThemeId`/`applyIcons` 请求键被静默忽略（不报错、不生效）；存量用户文档的 `themeIconsId` 残留被忽略，下一次主题选择变更时随 `UpdateThemeSlots` 清除；
   - 错误码 ICN0001-0016、THM0015/0025/0076/0077 随代码删除成为空洞（取号规则不受影响：新码仍取当前最大序号 +1）；注册表按 HEAD 扫描，提交后需重跑 `python3 docs/gen_errors_json.py` 刷新；
   - 磁盘 `uploads/icons/` 不再由服务端创建，存量图标文件失去服务端回收通道（Delete 端点已删），需要清盘时手工删除目录。
+
+## ADR-024 三处轮子换现成件：fieldcrypto AES-GCM、UA 解析 mssola、调度 robfig/cron
+
+- **决策**（轮子盘点后的三项替换）：
+  1. **fieldcrypto 改 AES-256-GCM + fail-closed**：新数据 `enc2:<nonce hex>:<ct hex>`（AEAD 带认证标签）；`EncryptField`/`DecryptField` 签名改为 `(string, error)`，失败返回错误——修复旧版 EncryptField 在 key/rand 错误路径上**静默返回明文落库**的 fail-open 设计缺陷；存量 `enc:` CBC+PKCS7 只读兼容（DecryptField 按前缀分派），无前缀明文透传兜底；死代码 EncryptArray/DecryptArray 删除；
+  2. **UA 解析换 github.com/mssola/useragent v1.0.0**（上游最新 tag 即 v1.0.0，v2 不存在）：`ParsedUA`/`BuildDeviceInfo` 契约不变，OS 名归一（Mac OS X→macOS、iPhone OS→iOS），DeviceModel 用其 Model() 提取；新增 parseuseragent_test.go（旧版 192 行无测试）；
+  3. **调度换 github.com/robfig/cron/v3**：三个任务改墙钟 cron spec（'0 * * * *' / '0 3 * * *' / '0 6-18/6 * * *'），注销清理从「启动后延迟 6 小时再每 6 小时」改为对齐墙钟 6/12/18 点整——只会在固定时刻触发，天然避免重启瞬间批量删除；Recover chain 保证单次任务 panic 不终止调度器；ctx 取消 → Stop 并等待在跑任务收尾。
+- **背景**：轮子盘点确认——旧 EncryptField 存在 fail-open（错误路径静默存明文，实际经 FieldKey 派生不可达但设计错误）；旧 UA 解析 192 行正则无测试且需持续追新 UA 特例；旧 cron 为手写 Timer 对齐循环。
+- **替代方案**：
+  - fieldcrypto 用 Tink：重依赖，stdlib GCM 已是「现成件」，无需引入；
+  - UA 换 mileusna/useragent（v1.3.5）或保留手写：mssola 与 mileusna 均多年未实质更新，且旧手写版的 Safari 26→macOS 版本映射等 2025 特例任何现成库都不跟踪——UA 解析在本项目只是兜底（前端 utils/deviceInfo.js 上报的 deviceInfo 优先），口径降级可接受，选 API 更干净且有 Model() 提取的 mssola；
+  - 存量 enc: 一次性重加密迁移：行为无差异（双前缀自动分派），暂缓，可择期补 migrate 条目。
+- **取舍 / 兼容性**：
+  - EncryptField/DecryptField 签名变化涉及 7 处调用点：twofactor 新增 TFA0017（setup 加密失败）/TFA0018-0020（三处解密失败）如实 500，device 新增 DEV0018，备份码解密失败按未命中处理（数据兼容路径，不加码）；
+  - enc: 只读兼容意味着 CBC 解密代码将随存量数据长期保留；是否一次性重加密由后续 migrate 决定；
+  - UA 口径变化：旧版特例不再保留，桌面端 DeviceModel 为空、OSVersion 来自 mssola 的 OSInfo（如 Windows 10.0）——客户端上报优先，兜底差异仅影响未上报 deviceInfo 的登录；
+  - 注销清理触发时刻从「启动相位」变为墙钟 6/12/18 点整（部署时区语义）；错误注册表按 HEAD 扫描，提交后需重跑 `python3 docs/gen_errors_json.py`。
