@@ -2,8 +2,11 @@ package handler
 
 import (
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -41,11 +44,18 @@ type Feedback struct {
 	AuthMW *middleware.Auth
 	RL     func(ratelimit.Spec) gin.HandlerFunc
 	Mail   *email.Client
+
+	// VerifyAltcha 校验 altcha payload（含 x-dev-token 开发口令绕过）。
+	// 由装配方注入 service.AuthService.VerifyAltcha。
+	VerifyAltcha func(payload, devToken string) bool
+
+	// dedup 同账号重复内容判重（进程内窗口）。
+	dedup *contentDedup
 }
 
 // NewFeedback 构造反馈 handler 容器。mail 为邮件客户端（可为 nil，跳过发信）。
-func NewFeedback(repos *repository.Repos, cfg *config.Config, amw *middleware.Auth, rl func(ratelimit.Spec) gin.HandlerFunc, mail *email.Client) *Feedback {
-	return &Feedback{Repos: repos, Config: cfg, AuthMW: amw, RL: rl, Mail: mail}
+func NewFeedback(repos *repository.Repos, cfg *config.Config, amw *middleware.Auth, rl func(ratelimit.Spec) gin.HandlerFunc, mail *email.Client, verifyAltcha func(payload, devToken string) bool) *Feedback {
+	return &Feedback{Repos: repos, Config: cfg, AuthMW: amw, RL: rl, Mail: mail, VerifyAltcha: verifyAltcha, dedup: newContentDedup(contentDedupWindow)}
 }
 
 // Register 挂载 /api/feedback 全部端点（不含 /api 前缀）。
@@ -90,6 +100,11 @@ func (h *Feedback) Create(c *gin.Context) {
 		errors.AbortCoded(c, 400, "FBK0003", "内容不能超过2000字", h.Config.IsDev)
 		return
 	}
+	// altcha 验证码（开发环境 x-dev-token 匹配可绕过，由 VerifyAltcha 内部处理）。
+	if h.VerifyAltcha == nil || !h.VerifyAltcha(asString(body["altcha"]), c.GetHeader("x-dev-token")) {
+		errors.AbortCoded(c, 400, "FBK0014", "验证码错误或已过期", h.Config.IsDev)
+		return
+	}
 	user, _ := middleware.GetUser(c)
 	username := user.Username
 	if username == "" {
@@ -107,6 +122,13 @@ func (h *Feedback) Create(c *gin.Context) {
 	}
 	if runes := []rune(f.Content); len(runes) > 2000 {
 		f.Content = string(runes[:2000])
+	}
+	// 同账号重复内容判重：窗口内相同内容直接拒绝（刷屏防护）。
+	// key = userID + ":" + sha256(content)，内容不落明文。
+	sum := sha256.Sum256([]byte(user.ID.Hex() + ":" + f.Content))
+	if !h.dedup.First(hex.EncodeToString(sum[:])) {
+		errors.AbortCoded(c, 409, "FBK0015", "请勿重复提交相同的内容", h.Config.IsDev)
+		return
 	}
 	if err := h.Repos.Feedbacks.FeedbackCreate(c.Request.Context(), f); err != nil {
 		errors.Abort500C(c, "FBK0004", "Server error", err, h.Config.IsDev)
@@ -344,4 +366,41 @@ func (h *Feedback) feedbackSiteURL() string {
 // parseIntQuery 解析整型查询参数（parseInt 语义，返回错误由调用方回退默认）。
 func parseIntQuery(s string) (int, error) {
 	return strconv.Atoi(s)
+}
+
+// contentDedupWindow 是同账号重复内容（反馈/举报）的判重窗口（固定契约）。
+const contentDedupWindow = 24 * time.Hour
+
+// contentDedup 同账号内容判重（进程内窗口，语义同 email.TargetRate：
+// 重启即清空，单实例部署模型）。
+type contentDedup struct {
+	mu     sync.Mutex
+	seen   map[string]time.Time
+	window time.Duration
+	ops    int
+}
+
+func newContentDedup(window time.Duration) *contentDedup {
+	return &contentDedup{seen: map[string]time.Time{}, window: window}
+}
+
+// First 判定 key 在窗口内是否首次出现：是则记录时间戳并返回 true；
+// 窗口内重复返回 false（不刷新时间戳）。每 256 次判定做一次过期清扫。
+func (d *contentDedup) First(key string) bool {
+	d.mu.Lock()
+	defer d.mu.Unlock()
+	now := time.Now()
+	if ts, ok := d.seen[key]; ok && now.Sub(ts) < d.window {
+		return false
+	}
+	d.seen[key] = now
+	d.ops++
+	if d.ops%256 == 0 {
+		for k, ts := range d.seen {
+			if now.Sub(ts) >= d.window {
+				delete(d.seen, k)
+			}
+		}
+	}
+	return true
 }

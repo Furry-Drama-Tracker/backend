@@ -1,6 +1,8 @@
 package handler
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
 	"strconv"
 	"time"
 
@@ -26,11 +28,18 @@ type Reports struct {
 	Config *config.Config
 	AuthMW *middleware.Auth
 	RL     func(ratelimit.Spec) gin.HandlerFunc
+
+	// VerifyAltcha 校验 altcha payload（含 x-dev-token 开发口令绕过）。
+	// 由装配方注入 service.AuthService.VerifyAltcha。
+	VerifyAltcha func(payload, devToken string) bool
+
+	// dedup 同账号重复内容判重（进程内窗口）。
+	dedup *contentDedup
 }
 
 // NewReports 构造举报 handler 容器。
-func NewReports(repos *repository.Repos, cfg *config.Config, amw *middleware.Auth, rl func(ratelimit.Spec) gin.HandlerFunc) *Reports {
-	return &Reports{Repos: repos, Config: cfg, AuthMW: amw, RL: rl}
+func NewReports(repos *repository.Repos, cfg *config.Config, amw *middleware.Auth, rl func(ratelimit.Spec) gin.HandlerFunc, verifyAltcha func(payload, devToken string) bool) *Reports {
+	return &Reports{Repos: repos, Config: cfg, AuthMW: amw, RL: rl, VerifyAltcha: verifyAltcha, dedup: newContentDedup(contentDedupWindow)}
 }
 
 // Register 挂载 /api/reports 全部端点（不含 /api 前缀）。
@@ -50,7 +59,7 @@ func (h *Reports) Register(g *gin.RouterGroup) {
 // @Accept json
 // @Param body body object true "targetType/targetId/reason/description"
 // @Success 201 {object} map[string]any "举报记录"
-// @Failure 400 {object} errors.ErrorBody "Invalid target type / Invalid reason / 描述不能超过2000个字符 / Already reported"
+// @Failure 400 {object} errors.ErrorBody "Invalid target type / Invalid reason / 描述不能超过2000个字符 / 验证码错误或已过期 / Already reported"
 // @Router /reports [post]
 func (h *Reports) Create(c *gin.Context) {
 	user, _ := middleware.GetUser(c)
@@ -59,6 +68,7 @@ func (h *Reports) Create(c *gin.Context) {
 		TargetID    string `json:"targetId"`
 		Reason      string `json:"reason"`
 		Description string `json:"description"`
+		Altcha      string `json:"altcha"`
 	}
 	_ = c.ShouldBindJSON(&req)
 	if req.TargetType != "episode" && req.TargetType != "creator" {
@@ -71,6 +81,11 @@ func (h *Reports) Create(c *gin.Context) {
 	}
 	if utf16Len(req.Description) > 2000 {
 		errors.AbortCoded(c, 400, "RPT0003", "描述不能超过2000个字符", h.Config.IsDev)
+		return
+	}
+	// altcha 验证码（开发环境 x-dev-token 匹配可绕过，由 VerifyAltcha 内部处理）。
+	if h.VerifyAltcha == nil || !h.VerifyAltcha(req.Altcha, c.GetHeader("x-dev-token")) {
+		errors.AbortCoded(c, 400, "RPT0007", "验证码错误或已过期", h.Config.IsDev)
 		return
 	}
 	// 固定契约：targetId 非法 hex → 500 Server error。
@@ -96,6 +111,14 @@ func (h *Reports) Create(c *gin.Context) {
 		Reason:      req.Reason,
 		Description: req.Description,
 		Status:      "pending",
+	}
+	// 同账号重复内容判重：窗口内相同 reason+description 直接拒绝（刷屏防护）。
+	// key 不含 targetId——覆盖"同一文本刷不同目标"；同目标重复已由上方
+	// pending 检查（RPT0004）拦下。
+	sum := sha256.Sum256([]byte(user.ID.Hex() + ":" + req.Reason + "\x00" + req.Description))
+	if !h.dedup.First(hex.EncodeToString(sum[:])) {
+		errors.AbortCoded(c, 409, "RPT0008", "请勿重复提交相同的内容", h.Config.IsDev)
+		return
 	}
 	doc, err := h.Repos.Reports.ReportsCreate(ctx, report)
 	if err != nil {

@@ -55,7 +55,7 @@ func episodesTestApp(t *testing.T) (*repository.Repos, *auth.Signer, *httptest.S
 	amw := middleware.NewAuth(repos, signer)
 	ep := handler.NewEpisodes(repos, cfg, amw, func(spec ratelimit.Spec) gin.HandlerFunc {
 		return middleware.RateLimit(spec, middleware.RateLimitOpts{IsDev: true, SkipRateLimit: true})
-	}, nil)
+	}, nil, func(payload, _ string) bool { return payload != "" })
 
 	// 清全局缓存，避免跨测试污染。
 	middleware.EpisodeCache.DeleteByPrefix("")
@@ -332,7 +332,7 @@ func TestEpisodesCreateSingleAndNotification(t *testing.T) {
 
 	var single map[string]any
 	resp = admin.json("POST", "/api/episodes/"+episodeID+"/episodes", map[string]any{
-		"episodeNumber": 1, "title": "第一集",
+		"episodeNumber": 1, "title": "第一集", "altcha": "test",
 	}, &single)
 	if resp.StatusCode != 201 {
 		t.Fatalf("create single: %d body=%v", resp.StatusCode, single)
@@ -383,7 +383,7 @@ func TestEpisodesUpdateSingleBecameAvailable(t *testing.T) {
 	// 创建预告集（isScheduled=true → isUpcoming=true，不计入 currentEpisodes）。
 	var single map[string]any
 	resp = admin.json("POST", "/api/episodes/"+episodeID+"/episodes", map[string]any{
-		"episodeNumber": 1, "title": "预告", "isScheduled": true,
+		"episodeNumber": 1, "title": "预告", "isScheduled": true, "altcha": "test",
 	}, &single)
 	if resp.StatusCode != 201 {
 		t.Fatalf("create scheduled: %d %v", resp.StatusCode, single)
@@ -403,7 +403,7 @@ func TestEpisodesUpdateSingleBecameAvailable(t *testing.T) {
 	}
 
 	// 转可观看：isScheduled=false → becameAvailable。
-	resp = admin.json("PUT", "/api/episodes/single/"+singleID, map[string]any{"isScheduled": false}, &single)
+	resp = admin.json("PUT", "/api/episodes/single/"+singleID, map[string]any{"isScheduled": false, "altcha": "test"}, &single)
 	if resp.StatusCode != 200 {
 		t.Fatalf("update single: %d %v", resp.StatusCode, single)
 	}
@@ -451,7 +451,7 @@ func TestEpisodesSingleEpisodeLabel(t *testing.T) {
 
 	var single map[string]any
 	resp = admin.json("POST", "/api/episodes/"+episodeID+"/episodes", map[string]any{
-		"episodeNumber": 1, "episodeLabel": " 1（上） ", "title": "第一集（上）",
+		"episodeNumber": 1, "episodeLabel": " 1（上） ", "title": "第一集（上）", "altcha": "test",
 	}, &single)
 	if resp.StatusCode != 201 || single["episodeLabel"] != "1（上）" || single["episodeLabelCustom"] != "1（上）" {
 		t.Fatalf("create single label: %d %v", resp.StatusCode, single)
@@ -479,13 +479,13 @@ func TestEpisodesSingleEpisodeLabel(t *testing.T) {
 		t.Fatalf("notification message: %q", notifs[0].Message)
 	}
 
-	resp = admin.json("PUT", "/api/episodes/single/"+singleID, map[string]any{"episodeLabel": "1（下）"}, &single)
+	resp = admin.json("PUT", "/api/episodes/single/"+singleID, map[string]any{"episodeLabel": "1（下）", "altcha": "test"}, &single)
 	if resp.StatusCode != 200 || single["episodeLabel"] != "1（下）" {
 		t.Fatalf("update label: %d %v", resp.StatusCode, single)
 	}
 	// 清空自定义值 → episodeLabel 回退为“第N集”（旧数据同理），
 	// episodeLabelCustom 为空串供表单回填。
-	resp = admin.json("PUT", "/api/episodes/single/"+singleID, map[string]any{"episodeLabel": ""}, &single)
+	resp = admin.json("PUT", "/api/episodes/single/"+singleID, map[string]any{"episodeLabel": "", "altcha": "test"}, &single)
 	if resp.StatusCode != 200 || single["episodeLabel"] != "第1集" || single["episodeLabelCustom"] != "" {
 		t.Fatalf("clear label: %d %v", resp.StatusCode, single)
 	}
@@ -493,7 +493,7 @@ func TestEpisodesSingleEpisodeLabel(t *testing.T) {
 	// 旧数据：文档中完全没有 episodeLabel 字段。
 	var legacy map[string]any
 	resp = admin.json("POST", "/api/episodes/"+episodeID+"/episodes", map[string]any{
-		"episodeNumber": 2, "title": "旧数据单集",
+		"episodeNumber": 2, "title": "旧数据单集", "altcha": "test",
 	}, &legacy)
 	if resp.StatusCode != 201 {
 		t.Fatalf("create legacy: %d %v", resp.StatusCode, legacy)
@@ -741,7 +741,7 @@ func TestEpisodesCreateSingleRequiredFields(t *testing.T) {
 
 	// 两个字段都缺 → 400，消息合并两个字段提示。
 	var out map[string]any
-	resp = admin.json("POST", "/api/episodes/"+episodeID+"/episodes", map[string]any{}, &out)
+	resp = admin.json("POST", "/api/episodes/"+episodeID+"/episodes", map[string]any{"altcha": "test"}, &out)
 	if resp.StatusCode != 400 {
 		t.Fatalf("missing both should 400: %d %v", resp.StatusCode, out)
 	}
@@ -755,14 +755,14 @@ func TestEpisodesCreateSingleRequiredFields(t *testing.T) {
 
 	// 只缺 title。
 	resp = admin.json("POST", "/api/episodes/"+episodeID+"/episodes",
-		map[string]any{"episodeNumber": 1}, &out)
+		map[string]any{"episodeNumber": 1, "altcha": "test"}, &out)
 	if resp.StatusCode != 400 || out["error"] != "EPS0038" {
 		t.Fatalf("missing title: %d %v", resp.StatusCode, out)
 	}
 
 	// 只缺 episodeNumber（episodeNumber 仅校验字段存在性，与旧行为一致）。
 	resp = admin.json("POST", "/api/episodes/"+episodeID+"/episodes",
-		map[string]any{"title": "第一集"}, &out)
+		map[string]any{"title": "第一集", "altcha": "test"}, &out)
 	if resp.StatusCode != 400 || out["error"] != "EPS0038" {
 		t.Fatalf("missing episodeNumber: %d %v", resp.StatusCode, out)
 	}
@@ -792,7 +792,7 @@ func TestEpisodesCreatorSingleLinksGate(t *testing.T) {
 	var out map[string]any
 	// 创作者携带非空 platformLinks → 403 EPS0039。
 	resp := creator.json("POST", "/api/episodes/"+episodeID+"/episodes", map[string]any{
-		"episodeNumber": 1, "title": "第一集",
+		"episodeNumber": 1, "title": "第一集", "altcha": "test",
 		"platformLinks": map[string]any{"watch": "https://attacker.example/phish"},
 	}, &out)
 	if resp.StatusCode != 403 || out["error"] != "EPS0039" {
@@ -801,7 +801,7 @@ func TestEpisodesCreatorSingleLinksGate(t *testing.T) {
 
 	// 不带 platformLinks 的常规字段照常创建。
 	resp = creator.json("POST", "/api/episodes/"+episodeID+"/episodes", map[string]any{
-		"episodeNumber": 1, "title": "第一集",
+		"episodeNumber": 1, "title": "第一集", "altcha": "test",
 	}, &out)
 	if resp.StatusCode != 201 {
 		t.Fatalf("creator normal create: %d %v", resp.StatusCode, out)
@@ -810,7 +810,7 @@ func TestEpisodesCreatorSingleLinksGate(t *testing.T) {
 
 	// 空对象视为未提交链接（不影响请求通过）。
 	resp = creator.json("PUT", "/api/episodes/single/"+singleID, map[string]any{
-		"episodeLabel": "特别篇", "platformLinks": map[string]any{},
+		"episodeLabel": "特别篇", "platformLinks": map[string]any{}, "altcha": "test",
 	}, &out)
 	if resp.StatusCode != 200 {
 		t.Fatalf("creator empty-links update should pass: %d %v", resp.StatusCode, out)
@@ -818,7 +818,7 @@ func TestEpisodesCreatorSingleLinksGate(t *testing.T) {
 
 	// 创作者改写既有单集链接 → 403。
 	resp = creator.json("PUT", "/api/episodes/single/"+singleID, map[string]any{
-		"platformLinks": map[string]any{"watch": "https://attacker.example/swap"},
+		"platformLinks": map[string]any{"watch": "https://attacker.example/swap"}, "altcha": "test",
 	}, &out)
 	if resp.StatusCode != 403 || out["error"] != "EPS0039" {
 		t.Fatalf("creator links update should 403 EPS0039: %d %v", resp.StatusCode, out)
@@ -826,7 +826,7 @@ func TestEpisodesCreatorSingleLinksGate(t *testing.T) {
 
 	// admin 不受限：可设置单集链接。
 	resp = admin.json("PUT", "/api/episodes/single/"+singleID, map[string]any{
-		"platformLinks": map[string]any{"watch": "https://official.example/watch"},
+		"platformLinks": map[string]any{"watch": "https://official.example/watch"}, "altcha": "test",
 	}, &out)
 	if resp.StatusCode != 200 {
 		t.Fatalf("admin links update should pass: %d %v", resp.StatusCode, out)

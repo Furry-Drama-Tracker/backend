@@ -138,7 +138,7 @@ func RegisterRoutes(d Deps, api *gin.RouterGroup, opts middleware.RateLimitOpts,
 	})
 
 	// ---- 内容域（挂载前缀为固定路由表，勿改）----
-	ep := handler.NewEpisodes(d.Repos, d.Config, amw, rl, mail)
+	ep := handler.NewEpisodes(d.Repos, d.Config, amw, rl, mail, svc.VerifyAltcha)
 	router.Mount(api, "/episodes", ep.Register)
 
 	se := handler.NewSeries(d.Repos, d.Config, amw, rl)
@@ -191,7 +191,7 @@ func RegisterRoutes(d Deps, api *gin.RouterGroup, opts middleware.RateLimitOpts,
 	st := handler.NewStats(d.Repos, d.Config, amw, rl)
 	router.Mount(api, "/stats", st.Register)
 
-	rp := handler.NewReports(d.Repos, d.Config, amw, rl)
+	rp := handler.NewReports(d.Repos, d.Config, amw, rl, svc.VerifyAltcha)
 	router.Mount(api, "/reports", rp.Register)
 
 	rv := handler.NewReview(d.Repos, d.Config, amw, rl, mail)
@@ -235,7 +235,7 @@ func RegisterRoutes(d Deps, api *gin.RouterGroup, opts middleware.RateLimitOpts,
 	sc := handler.NewSiteContents(d.Repos, d.Config, amw, rl, mail)
 	router.Mount(api, "/site-content", sc.Register)
 
-	fb := handler.NewFeedback(d.Repos, d.Config, amw, rl, mail)
+	fb := handler.NewFeedback(d.Repos, d.Config, amw, rl, mail, svc.VerifyAltcha)
 	router.Mount(api, "/feedback", fb.Register)
 
 	ac := handler.NewActivity(d.Repos, d.Config, amw, rl)

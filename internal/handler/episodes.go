@@ -42,6 +42,11 @@ type Episodes struct {
 	RL     func(ratelimit.Spec) gin.HandlerFunc
 	Mail   *email.Client
 
+	// VerifyAltcha 校验 altcha payload（含 x-dev-token 开发口令绕过）。
+	// 由装配方注入 service.AuthService.VerifyAltcha；触发追更邮件广播的
+	// creator 写路由（Update/UpdateSingle/CreateSingle）必须先过它。
+	VerifyAltcha func(payload, devToken string) bool
+
 	// viewLog 观看去重：key = "<episodeId>_<ip>" → 上次计数时间
 	// （10min 冷却，固定契约）。
 	viewMu  sync.Mutex
@@ -56,15 +61,16 @@ type Episodes struct {
 // NewEpisodes 构造剧集 handler 容器。mail 为邮件客户端（可为 nil，跳过发信）；
 // rl 为限流中间件工厂（挂 view 限流器）。
 func NewEpisodes(repos *repository.Repos, cfg *config.Config, amw *middleware.Auth,
-	rl func(ratelimit.Spec) gin.HandlerFunc, mail *email.Client) *Episodes {
+	rl func(ratelimit.Spec) gin.HandlerFunc, mail *email.Client, verifyAltcha func(payload, devToken string) bool) *Episodes {
 	return &Episodes{
-		Repos:    repos,
-		Config:   cfg,
-		AuthMW:   amw,
-		RL:       rl,
-		Mail:     mail,
-		viewLog:  map[string]time.Time{},
-		emailLog: map[string]time.Time{},
+		Repos:        repos,
+		Config:       cfg,
+		AuthMW:       amw,
+		RL:           rl,
+		Mail:         mail,
+		VerifyAltcha: verifyAltcha,
+		viewLog:      map[string]time.Time{},
+		emailLog:     map[string]time.Time{},
 	}
 }
 
@@ -693,6 +699,12 @@ func (h *Episodes) UpdateSingle(c *gin.Context) {
 	body := h.readJSONBody(c)
 	ctx := c.Request.Context()
 
+	// altcha 验证码（开发环境 x-dev-token 匹配可绕过）：本路由触发追更邮件广播。
+	if h.VerifyAltcha == nil || !h.VerifyAltcha(asString(body["altcha"]), c.GetHeader("x-dev-token")) {
+		apperrors.AbortCoded(c, 400, "EPS0040", "验证码错误或已过期", h.Config.IsDev)
+		return
+	}
+
 	updateData := bson.M{}
 	if v, ok := body["episodeNumber"]; ok {
 		updateData["episodeNumber"] = toInt(v)
@@ -1051,6 +1063,11 @@ func (h *Episodes) CreateSingle(c *gin.Context) {
 		}
 	}
 	body := h.readJSONBody(c)
+	// altcha 验证码（开发环境 x-dev-token 匹配可绕过）：本路由触发追更邮件广播。
+	if h.VerifyAltcha == nil || !h.VerifyAltcha(asString(body["altcha"]), c.GetHeader("x-dev-token")) {
+		apperrors.AbortCoded(c, 400, "EPS0041", "验证码错误或已过期", h.Config.IsDev)
+		return
+	}
 	// 必填字段校验（对齐 Create/EPS0020 固定契约）：缺失 → 400（历史为 500
 	// catch-all，2026-11 修正，见 docs/decisions.md ADR-021）。
 	var msgs []string
@@ -1210,6 +1227,12 @@ func (h *Episodes) Update(c *gin.Context) {
 	}
 	oldCurrentEpisodes := episode.CurrentEpisodes
 	body := h.readJSONBody(c)
+	// altcha 验证码（开发环境 x-dev-token 匹配可绕过）：本路由经
+	// notifyEpisodeNumberChange 触发追更邮件广播。
+	if h.VerifyAltcha == nil || !h.VerifyAltcha(asString(body["altcha"]), c.GetHeader("x-dev-token")) {
+		apperrors.AbortCoded(c, 400, "EPS0042", "验证码错误或已过期", h.Config.IsDev)
+		return
+	}
 	if v, ok := body["platformLinks"]; ok {
 		links, msg := sanitizePlatformLinks(v)
 		if msg != "" {
