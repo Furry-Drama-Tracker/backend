@@ -2200,7 +2200,7 @@
       "status": 400,
       "message": "请选择要上传的图片",
       "file": "internal/handler/episodes.go",
-      "line": 107
+      "line": 113
     },
     {
       "code": "EPS0002",
@@ -2208,7 +2208,7 @@
       "status": 400,
       "message": "文件大小不能超过5MB",
       "file": "internal/handler/episodes.go",
-      "line": 113
+      "line": 119
     },
     {
       "code": "EPS0003",
@@ -2216,7 +2216,7 @@
       "status": 400,
       "message": "仅支持图片文件 (jpg, jpeg, png, gif, webp)",
       "file": "internal/handler/episodes.go",
-      "line": 115
+      "line": 121
     },
     {
       "code": "EPS0004",
@@ -2224,7 +2224,7 @@
       "status": 400,
       "message": "文件内容与类型不匹配，仅支持图片文件",
       "file": "internal/handler/episodes.go",
-      "line": 117
+      "line": 123
     },
     {
       "code": "EPS0005",
@@ -2232,7 +2232,7 @@
       "status": 400,
       "message": "文件上传错误",
       "file": "internal/handler/episodes.go",
-      "line": 119
+      "line": 125
     },
     {
       "code": "EPS0006",
@@ -2240,7 +2240,7 @@
       "status": 400,
       "message": "<dynamic>",
       "file": "internal/handler/episodes.go",
-      "line": 127
+      "line": 133
     },
     {
       "code": "EPS0007",
@@ -2248,7 +2248,7 @@
       "status": 404,
       "message": "Episode not found",
       "file": "internal/handler/episodes.go",
-      "line": 552
+      "line": 558
     },
     {
       "code": "EPS0008",
@@ -2256,7 +2256,7 @@
       "status": 404,
       "message": "Episode not found",
       "file": "internal/handler/episodes.go",
-      "line": 565
+      "line": 571
     },
     {
       "code": "EPS0009",
@@ -2264,7 +2264,7 @@
       "status": 404,
       "message": "Episode not found",
       "file": "internal/handler/episodes.go",
-      "line": 613
+      "line": 619
     },
     {
       "code": "EPS0010",
@@ -2272,7 +2272,7 @@
       "status": 404,
       "message": "Episode not found",
       "file": "internal/handler/episodes.go",
-      "line": 620
+      "line": 626
     },
     {
       "code": "EPS0011",
@@ -2280,7 +2280,7 @@
       "status": 404,
       "message": "Episode not found",
       "file": "internal/handler/episodes.go",
-      "line": 642
+      "line": 648
     },
     {
       "code": "EPS0012",
@@ -2288,7 +2288,7 @@
       "status": 404,
       "message": "Single episode not found",
       "file": "internal/handler/episodes.go",
-      "line": 668
+      "line": 674
     },
     {
       "code": "EPS0013",
@@ -2296,7 +2296,7 @@
       "status": 400,
       "message": "<dynamic>",
       "file": "internal/handler/episodes.go",
-      "line": 718
+      "line": 730
     },
     {
       "code": "EPS0014",
@@ -2304,7 +2304,7 @@
       "status": 404,
       "message": "Single episode not found",
       "file": "internal/handler/episodes.go",
-      "line": 747
+      "line": 759
     },
     {
       "code": "EPS0015",
@@ -2312,7 +2312,7 @@
       "status": 403,
       "message": "You do not have permission to edit this episode",
       "file": "internal/handler/episodes.go",
-      "line": 757
+      "line": 769
     },
     {
       "code": "EPS0016",
@@ -2320,7 +2320,7 @@
       "status": 404,
       "message": "Single episode not found",
       "file": "internal/handler/episodes.go",
-      "line": 774
+      "line": 786
     },
     {
       "code": "EPS0017",
@@ -2328,7 +2328,7 @@
       "status": 404,
       "message": "Single episode not found",
       "file": "internal/handler/episodes.go",
-      "line": 877
+      "line": 889
     },
     {
       "code": "EPS0018",
@@ -2336,7 +2336,7 @@
       "status": 403,
       "message": "You do not have permission to delete this episode",
       "file": "internal/handler/episodes.go",
-      "line": 887
+      "line": 899
     },
     {
       "code": "EPS0019",
@@ -2344,7 +2344,7 @@
       "status": 404,
       "message": "Single episode not found",
       "file": "internal/handler/episodes.go",
-      "line": 893
+      "line": 905
     },
     {
       "code": "EPS0020",
@@ -2352,7 +2352,7 @@
       "status": 400,
       "message": "<dynamic>",
       "file": "internal/handler/episodes.go",
-      "line": 943
+      "line": 955
     },
     {
       "code": "EPS0021",
@@ -2360,7 +2360,7 @@
       "status": 400,
       "message": "封面地址必须为 /uploads/ 或 http(s) 地址",
       "file": "internal/handler/episodes.go",
-      "line": 948
+      "line": 960
     },
     {
       "code": "EPS0022",
@@ -2368,7 +2368,7 @@
       "status": 400,
       "message": "<dynamic>",
       "file": "internal/handler/episodes.go",
-      "line": 953
+      "line": 965
     },
     {
       "code": "EPS0023",
@@ -2376,7 +2376,7 @@
       "status": 400,
       "message": "QQ群链接必须为 http/https 地址",
       "file": "internal/handler/episodes.go",
-      "line": 958
+      "line": 970
     },
     {
       "code": "EPS0024",
@@ -2384,7 +2384,7 @@
       "status": 404,
       "message": "Episode not found",
       "file": "internal/handler/episodes.go",
-      "line": 1040
+      "line": 1052
     },
     {
       "code": "EPS0025",
@@ -2392,7 +2392,7 @@
       "status": 403,
       "message": "No permission to add episodes",
       "file": "internal/handler/episodes.go",
-      "line": 1049
+      "line": 1061
     },
     {
       "code": "EPS0026",
@@ -2400,7 +2400,7 @@
       "status": 400,
       "message": "<dynamic>",
       "file": "internal/handler/episodes.go",
-      "line": 1078
+      "line": 1095
     },
     {
       "code": "EPS0027",
@@ -2408,7 +2408,7 @@
       "status": 404,
       "message": "Episode not found",
       "file": "internal/handler/episodes.go",
-      "line": 1197
+      "line": 1214
     },
     {
       "code": "EPS0028",
@@ -2416,7 +2416,7 @@
       "status": 403,
       "message": "You do not have permission to edit this episode",
       "file": "internal/handler/episodes.go",
-      "line": 1207
+      "line": 1224
     },
     {
       "code": "EPS0029",
@@ -2424,7 +2424,7 @@
       "status": 400,
       "message": "<dynamic>",
       "file": "internal/handler/episodes.go",
-      "line": 1216
+      "line": 1239
     },
     {
       "code": "EPS0030",
@@ -2432,7 +2432,7 @@
       "status": 400,
       "message": "QQ群链接必须为 http/https 地址",
       "file": "internal/handler/episodes.go",
-      "line": 1224
+      "line": 1247
     },
     {
       "code": "EPS0031",
@@ -2440,7 +2440,7 @@
       "status": 400,
       "message": "封面地址必须为 /uploads/ 或 http(s) 地址",
       "file": "internal/handler/episodes.go",
-      "line": 1232
+      "line": 1255
     },
     {
       "code": "EPS0032",
@@ -2448,7 +2448,7 @@
       "status": 404,
       "message": "Episode not found",
       "file": "internal/handler/episodes.go",
-      "line": 1360
+      "line": 1383
     },
     {
       "code": "EPS0033",
@@ -2456,7 +2456,7 @@
       "status": 400,
       "message": "只有被拒绝的剧集才能重新提交审核",
       "file": "internal/handler/episodes.go",
-      "line": 1368
+      "line": 1391
     },
     {
       "code": "EPS0034",
@@ -2464,7 +2464,7 @@
       "status": 403,
       "message": "You do not have permission to resubmit this episode",
       "file": "internal/handler/episodes.go",
-      "line": 1373
+      "line": 1396
     },
     {
       "code": "EPS0035",
@@ -2472,7 +2472,7 @@
       "status": 404,
       "message": "Episode not found",
       "file": "internal/handler/episodes.go",
-      "line": 1411
+      "line": 1434
     },
     {
       "code": "EPS0036",
@@ -2480,7 +2480,7 @@
       "status": 403,
       "message": "You do not have permission to delete this episode",
       "file": "internal/handler/episodes.go",
-      "line": 1420
+      "line": 1443
     },
     {
       "code": "EPS0037",
@@ -2488,7 +2488,7 @@
       "status": 500,
       "message": "Server error",
       "file": "internal/handler/episodes.go",
-      "line": 1836
+      "line": 1859
     },
     {
       "code": "EPS0038",
@@ -2496,7 +2496,7 @@
       "status": 400,
       "message": "<dynamic>",
       "file": "internal/handler/episodes.go",
-      "line": 1064
+      "line": 1081
     },
     {
       "code": "EPS0039",
@@ -2504,7 +2504,31 @@
       "status": 403,
       "message": "单集播放链接需管理员审核设置，请提交后联系管理员处理",
       "file": "internal/handler/episodes.go",
-      "line": 1002
+      "line": 1014
+    },
+    {
+      "code": "EPS0040",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "验证码错误或已过期",
+      "file": "internal/handler/episodes.go",
+      "line": 704
+    },
+    {
+      "code": "EPS0041",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "验证码错误或已过期",
+      "file": "internal/handler/episodes.go",
+      "line": 1068
+    },
+    {
+      "code": "EPS0042",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "验证码错误或已过期",
+      "file": "internal/handler/episodes.go",
+      "line": 1233
     },
     {
       "code": "ESA0001",
@@ -2521,7 +2545,7 @@
       "status": 400,
       "message": "无效的反馈类型",
       "file": "internal/handler/feedback.go",
-      "line": 81
+      "line": 91
     },
     {
       "code": "FBK0002",
@@ -2529,7 +2553,7 @@
       "status": 400,
       "message": "内容不能为空",
       "file": "internal/handler/feedback.go",
-      "line": 86
+      "line": 96
     },
     {
       "code": "FBK0003",
@@ -2537,7 +2561,7 @@
       "status": 400,
       "message": "内容不能超过2000字",
       "file": "internal/handler/feedback.go",
-      "line": 90
+      "line": 100
     },
     {
       "code": "FBK0004",
@@ -2545,7 +2569,7 @@
       "status": 500,
       "message": "Server error",
       "file": "internal/handler/feedback.go",
-      "line": 112
+      "line": 134
     },
     {
       "code": "FBK0005",
@@ -2553,7 +2577,7 @@
       "status": 500,
       "message": "Server error",
       "file": "internal/handler/feedback.go",
-      "line": 133
+      "line": 155
     },
     {
       "code": "FBK0006",
@@ -2561,7 +2585,7 @@
       "status": 500,
       "message": "Server error",
       "file": "internal/handler/feedback.go",
-      "line": 139
+      "line": 161
     },
     {
       "code": "FBK0007",
@@ -2569,7 +2593,7 @@
       "status": 500,
       "message": "Server error",
       "file": "internal/handler/feedback.go",
-      "line": 173
+      "line": 195
     },
     {
       "code": "FBK0008",
@@ -2577,7 +2601,7 @@
       "status": 500,
       "message": "Server error",
       "file": "internal/handler/feedback.go",
-      "line": 179
+      "line": 201
     },
     {
       "code": "FBK0009",
@@ -2585,7 +2609,7 @@
       "status": 400,
       "message": "无效的状态值",
       "file": "internal/handler/feedback.go",
-      "line": 214
+      "line": 236
     },
     {
       "code": "FBK0010",
@@ -2593,7 +2617,7 @@
       "status": 500,
       "message": "Server error",
       "file": "internal/handler/feedback.go",
-      "line": 232
+      "line": 254
     },
     {
       "code": "FBK0011",
@@ -2601,7 +2625,7 @@
       "status": 404,
       "message": "Not found",
       "file": "internal/handler/feedback.go",
-      "line": 237
+      "line": 259
     },
     {
       "code": "FBK0012",
@@ -2609,7 +2633,7 @@
       "status": 500,
       "message": "Server error",
       "file": "internal/handler/feedback.go",
-      "line": 241
+      "line": 263
     },
     {
       "code": "FBK0013",
@@ -2617,7 +2641,23 @@
       "status": 500,
       "message": "Server error",
       "file": "internal/handler/feedback.go",
-      "line": 253
+      "line": 275
+    },
+    {
+      "code": "FBK0014",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "验证码错误或已过期",
+      "file": "internal/handler/feedback.go",
+      "line": 105
+    },
+    {
+      "code": "FBK0015",
+      "kind": "AbortCoded",
+      "status": 409,
+      "message": "请勿重复提交相同的内容",
+      "file": "internal/handler/feedback.go",
+      "line": 130
     },
     {
       "code": "FLK0001",
@@ -4129,7 +4169,7 @@
       "status": 400,
       "message": "Invalid target type",
       "file": "internal/handler/reports.go",
-      "line": 65
+      "line": 75
     },
     {
       "code": "RPT0002",
@@ -4137,7 +4177,7 @@
       "status": 400,
       "message": "Invalid reason",
       "file": "internal/handler/reports.go",
-      "line": 69
+      "line": 79
     },
     {
       "code": "RPT0003",
@@ -4145,7 +4185,7 @@
       "status": 400,
       "message": "描述不能超过2000个字符",
       "file": "internal/handler/reports.go",
-      "line": 73
+      "line": 83
     },
     {
       "code": "RPT0004",
@@ -4153,7 +4193,7 @@
       "status": 400,
       "message": "Already reported",
       "file": "internal/handler/reports.go",
-      "line": 89
+      "line": 104
     },
     {
       "code": "RPT0005",
@@ -4161,7 +4201,7 @@
       "status": 400,
       "message": "Invalid status",
       "file": "internal/handler/reports.go",
-      "line": 190
+      "line": 213
     },
     {
       "code": "RPT0006",
@@ -4169,7 +4209,23 @@
       "status": 404,
       "message": "Report not found",
       "file": "internal/handler/reports.go",
-      "line": 197
+      "line": 220
+    },
+    {
+      "code": "RPT0007",
+      "kind": "AbortCoded",
+      "status": 400,
+      "message": "验证码错误或已过期",
+      "file": "internal/handler/reports.go",
+      "line": 88
+    },
+    {
+      "code": "RPT0008",
+      "kind": "AbortCoded",
+      "status": 409,
+      "message": "请勿重复提交相同的内容",
+      "file": "internal/handler/reports.go",
+      "line": 120
     },
     {
       "code": "SER0001",
