@@ -34,9 +34,15 @@ func solveCaptcha(t *testing.T, c *client) string {
 	if resp := c.json("GET", "/api/auth/captcha", nil, &ch); resp.StatusCode != 200 || ch.Parameters.Salt == "" {
 		t.Fatalf("captcha: %d", resp.StatusCode)
 	}
+	// 按挑战 algorithm 分派 KDF（与 service 的 VerifyAltcha 同规则；
+	// ADR-026 起签发端为 Argon2id，SHA 分支仅为过渡期兼容保留）。
+	deriveKey := altchalib.DeriveKeySHA()
+	if ch.Parameters.Algorithm == "Argon2id" {
+		deriveKey = altchalib.DeriveKeyArgon2id()
+	}
 	sol, err := altchalib.SolveChallenge(altchalib.SolveChallengeOptions{
 		Challenge: ch,
-		DeriveKey: altchalib.DeriveKeySHA(),
+		DeriveKey: deriveKey,
 	})
 	if err != nil {
 		t.Fatalf("solve altcha: %v", err)
