@@ -103,6 +103,8 @@ func (s *AuthService) AltchaHMACSecret() string {
 
 // VerifyAltcha 校验 altcha payload（官方 altcha-lib-go）；DEV_API_TOKEN 配置且
 // x-dev-token 匹配时直接通过（固定行为）。
+// derive key 按挑战携带的 algorithm 分派：Argon2id（当前算法）走 argon2id KDF，
+// SHA 系列保留以兼容发布过渡期（≤5min）在途的旧 SHA-256 挑战。
 func (s *AuthService) VerifyAltcha(payload, devToken string) bool {
 	if s.Config.JWT.DevAPIToken != "" && devToken == s.Config.JWT.DevAPIToken {
 		return true
@@ -121,22 +123,41 @@ func (s *AuthService) VerifyAltcha(payload, devToken string) bool {
 	res, err := altchalib.VerifySolution(altchalib.VerifySolutionOptions{
 		Challenge:           p.Challenge,
 		Solution:            p.Solution,
-		DeriveKey:           altchalib.DeriveKeySHA(),
+		DeriveKey:           altchaDeriveKey(p.Challenge.Parameters.Algorithm),
 		HMACSignatureSecret: s.AltchaHMACSecret(),
 	})
 	return err == nil && res.Verified
 }
 
-// CreateCaptcha 生成 altcha 挑战（官方库；SHA-256, cost 10000, keyPrefix "00", 5min 过期）。
-// 挑战参数为固定契约，勿改（前端求解器按同参数求解）。
+// altchaDeriveKey 按挑战 algorithm 选择 KDF。未知算法落到 SHA 分支并因
+// "unsupported SHA algorithm" 校验失败（fail-closed）。
+func altchaDeriveKey(algorithm string) altchalib.DeriveKeyFunc {
+	if algorithm == "Argon2id" {
+		return altchalib.DeriveKeyArgon2id()
+	}
+	return altchalib.DeriveKeySHA()
+}
+
+// CreateCaptcha 生成 altcha 挑战（官方库；Argon2id, cost 1, memoryCost 16384 KiB,
+// parallelism 1, keyLength 32, 5min 过期）。
+//
+// 难度模型：keyPrefix 取 counter=0 派生键的前 16 字节（确定性 counter 模式），
+// 求解恰好等于 1 次 Argon2id 运算——内存困难（16 MiB）抵抗 GPU/ASIC 加速，
+// 且对老设备是可承受的最小工作量（无 WebCrypto 依赖，纯 WASM）。
+// memoryCost/parallelism 必须显式携带：Go 库缺省 64 MiB 与前端 widget 缺省
+// 16 MiB 不一致，缺字段会导致两端 KDF 参数错位、验证恒失败。
+// cost/memoryCost/parallelism 为固定契约，勿改（前端求解 worker 按同参数求解）。
 func (s *AuthService) CreateCaptcha() (altchalib.Challenge, error) {
 	expires := time.Now().Add(5 * time.Minute)
+	counter := 0
 	return altchalib.CreateChallenge(altchalib.CreateChallengeOptions{
-		Algorithm:           "SHA-256",
-		DeriveKey:           altchalib.DeriveKeySHA(),
-		Cost:                10000,
+		Algorithm:           "Argon2id",
+		DeriveKey:           altchalib.DeriveKeyArgon2id(),
+		Cost:                1,
+		MemoryCost:          16384,
+		Parallelism:         1,
 		KeyLength:           32,
-		KeyPrefix:           "00",
+		Counter:             &counter,
 		HMACSignatureSecret: s.AltchaHMACSecret(),
 		ExpiresAt:           &expires,
 	})

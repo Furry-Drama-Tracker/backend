@@ -322,3 +322,19 @@
   - 部署顺序安全：新版二进制首次启动即执行迁移，迁移完成前不接流量，运行时无 CBC 不会读到旧格式；
   - UA 口径：mileusna 的 OSVersion 为字符串、Windows 报 NT 版本号（Win11 显示 10.0）——客户端上报 deviceInfo 优先，兜底差异有限；
   - 无新增错误码，errors 注册表不变。
+
+## ADR-026 Altcha PoW 挑战算法从 SHA-256 切换 Argon2id（老设备兼容）
+
+- **决策**：`CreateCaptcha` 改签发 Argon2id 挑战（官方 altcha-lib-go `DeriveKeyArgon2id`：cost 1、memoryCost 16384 KiB、parallelism 1、keyLength 32）；难度由确定性 counter=0 模式承载——keyPrefix 取 counter=0 派生键的前 16 字节，求解恰好等于 1 次内存困难运算。`VerifyAltcha` 按挑战携带的 algorithm 分派 KDF（Argon2id → argon2id；SHA 系列保留，兼容发布过渡期 ≤5min 在途的旧挑战）。前端在 widget 初始化前注册 `altcha/workers/argon2id?worker`（`$altcha.algorithms.set('Argon2id', …)`——widget 主构建不含 Argon2id，键名与后端 algorithm 字符串精确匹配）。
+- **背景**：widget 的 SHA 求解依赖 `crypto.subtle`（WebCrypto），仅在 HTTPS 安全上下文可用——老设备/非 HTTPS 部署直接求解失败；Argon2id 求解走 widget 的 hash-wasm WASM，无 WebCrypto 依赖。同时 SHA-256 PoW 可被 GPU/ASIC 轻易并行加速，Argon2id 的内存困难性天然抵抗硬件加速。旧参数（SHA-256 cost 10000 + keyPrefix "00"，期望 256 次 × 1 万轮哈希）在老设备上耗时过长。
+- **替代方案**：
+  - 非确定性挑战（keyPrefix 固定 "00"，期望 256 次尝试）：Argon2id 下老设备需约 256 次 KDF，耗时分钟级；若压低 memoryCost（1MB 级）来换速度，内存困难性名存实亡；
+  - 保持 SHA-256 仅降 cost：WebCrypto 依赖仍在，治标不治本；
+  - memoryCost/parallelism 不显式下发（靠两端缺省值）：Go 库缺省 64 MiB 与 widget 缺省 16 MiB 不一致，字段缺失时两端 KDF 参数错位、验证恒失败——故必须显式携带（测试锁定 JSON 含 `"memoryCost":16384`/`"parallelism":1`）。
+- **取舍 / 兼容性**：
+  - 求解工作量从「≈256 × 10k SHA-256」变为「1 × Argon2id(16 MiB)」：桌面 ~50-150ms，老设备 ~0.3-1.5s；widget 对 Argon2 内存不足默认自动减半并发重试（retryOnOutOfMemoryError 缺省 true）；
+  - 服务端成本：签发与验证各 1 次 Argon2id（~20ms 级）。签发端已有 60/min/IP 限流、各验证端点独立限流，CPU 放大面可控；
+  - **部署顺序：先前端后后端**。前端先行：新前端保留 SHA worker（内置），旧后端的 SHA-256 挑战照常求解；后端先行：旧前端拿 Argon2id 挑战会抛 "Unsupported algorithm"，验证码不可用直至前端发布；
+  - 过渡期旧版签发的 SHA-256 挑战仍可验证（TestAltchaLegacySHAChallengeStillVerified）；未知算法因挑战 HMAC 签名失效 fail-closed（TestAltchaUnknownAlgorithmRejected）；
+  - 前端求解需 WASM 支持（Chrome 57+/Safari 11+/Firefox 52+，约 2017 起）；本次切换的目标正是绕开 SHA 路径的 crypto.subtle（HTTPS 限定）依赖，两语义不同、非替代关系；
+  - `GET /auth/captcha` 响应 parameters 新增 memoryCost/parallelism 字段，API.md 已同步。

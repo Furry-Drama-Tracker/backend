@@ -33,7 +33,7 @@
 
 | 方法 | 路径 | 鉴权 | 限流 | 请求要点 | 响应要点 |
 |---|---|---|---|---|---|
-| GET | `/auth/captcha` | 公开 | captcha 60/min | — | 200 `{parameters:{algorithm,cost,expiresAt,keyLength,keyPrefix,nonce,salt},signature}`（altcha 挑战） |
+| GET | `/auth/captcha` | 公开 | captcha 60/min | — | 200 `{parameters:{algorithm,cost,memoryCost,parallelism,expiresAt,keyLength,keyPrefix,nonce,salt},signature}`（altcha 挑战；algorithm=Argon2id，cost 1/memoryCost 16384/parallelism 1，见 ADR-026） |
 | GET | `/auth/check-accountId?accountId=` | 公开 | 20/min | query accountId | 200 `{available:bool}` |
 | POST | `/auth/register` | 公开 | 3/h | `{accountId,username,email,password,deviceInfo?,altcha}`；accountId 3-20 `[a-zA-Z0-9_]`，密码≥8含字母数字 | 200 `{message,email,needVerification:true}`；400 各类校验文案 |
 | POST | `/auth/login` | 公开 | 5/15min | `{identifier|email,password,deviceInfo?,altcha}`（identifier=用户名或邮箱，email 为旧客户端回退；限流桶按 identifier 绑定） | 200 用户对象 或 `{need2FA,email,twoFactorChallenge}`；403 `{needVerification}` / `{needDeviceVerify,deviceInfo}` |
